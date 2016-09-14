@@ -1,3 +1,5 @@
+.idea
+*.iml
 .hg
 .hgignore
 .hgtags

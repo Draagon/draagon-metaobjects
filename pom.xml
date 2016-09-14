@@ -17,6 +17,15 @@
     <url>http://www.draagon.com/products/metaobjects/</url>
     <description>MetaObjects for MetaData-driven development.  Parent POM.</description>
 
+    <modules>
+        <module>metaobjects-core</module>
+        <module>metaobjects-om</module>
+        <module>metaobjects-omdb</module>
+        <!-- module>metaobjects-spring</module>
+        <module>metaobjects-web</module -->
+        <!-- module>metaobjects-demo</module -->
+    </modules>
+
     <scm>
         <connection>scm:hg:https://code.google.com/p/draagon-metaobjects/</connection>
         <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects/</developerConnection>

@@ -516,7 +516,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                             superData = getMetaDataByName( types.baseClass, packageName + PKG_SEPARATOR + superStr );
                         }
                     } catch (MetaObjectNotFoundException e) {
-                        log.debug( "Could not find MetaClass [" + packageName + MetaObject.SEPARATOR + superStr + "], assuming fully qualified" );
+                        log.debug( "Could not find MetaClass [" + packageName + PKG_SEPARATOR + superStr + "], assuming fully qualified" );
                     }
 
                     // Try to find it by the provided name in the 'super' attribute
