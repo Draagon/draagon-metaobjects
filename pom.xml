@@ -23,7 +23,7 @@
         <module>metaobjects-omdb</module>
         <!-- module>metaobjects-spring</module>
         <module>metaobjects-web</module -->
-        <!-- module>metaobjects-demo</module -->
+        <module>metaobjects-demo</module>
     </modules>
 
     <scm>
