@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2012 Doug Mealing LLC.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+-->
+<metadata package="fishstore">
+    
+    <types>
+        <object><type name="managed" class="com.draagon.meta.object.managed.ManagedMetaObject"/></object>
+    </types>
+    
+    <!-- Base -->
+    <object name="Base" type="managed">   
+        <attr name="object">com.draagon.meta.demo.fishstore.Base</attr>      
+        <field name="id" type="long" isKey="true" auto="last" dbColumn="ID" />
+    </object>  
+        
+    <!-- Store -->
+    <object name="Store" super="Base" dbTable="STORE">    
+        <attr name="object">com.draagon.meta.demo.fishstore.Store</attr>      
+        <field name="name" type="string" len="50" dbColumn="NAME" />
+        <field name="maxTanks" type="int" dbColumn="MAX_TANKS" />
+    </object>  
+        
+    <!-- Tank -->
+    <object name="Tank" super="Base" dbTable="TANK">    
+        <attr name="object">com.draagon.meta.demo.fishstore.Tank</attr>      
+        <field name="num" type="int" dbColumn="NUM" />
+        <field name="maxFish" type="int" dbColumn="MAX_FISH" />
+    </object>
+    
+    <!-- Fish -->
+    <object name="Fish" super="Base" dbTable="TANK">    
+        <attr name="object">com.draagon.meta.demo.fishstore.Fish</attr>      
+        <field name="breed" type="string" len="100" dbColumn="BREED" />
+        <field name="length" type="int" dbColumn="LENGTH" />
+        <field name="weight" type="int" dbColumn="WEIGHT" />
+        <field name="agressionLevel" type="int" dbColumn="AGRESSION_LEVEL" />
+    </object>
+                
+</metadata>

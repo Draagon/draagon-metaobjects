@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "dtd/log4j.dtd">
+<!--
+Copyright (c) 2012 Doug Mealing LLC.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v10.html
+-->
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%x] %-5p [%C{1}.%M] - %m%n" />
+        </layout>
+    </appender>
+
+    <category name="com.draagon" additivity="false">
+        <priority value="info" />
+        <appender-ref ref="stdout" />
+    </category>
+
+    <category name="org.springframework" additivity="false">
+        <priority value="error" />
+        <appender-ref ref="stdout" />
+    </category>
+
+    <category name="java" additivity="false">
+        <priority value="warn" />
+        <appender-ref ref="stdout" />
+    </category>
+
+    <root>
+        <level value="warn" />
+        <appender-ref ref="stdout" />
+    </root>
+
+</log4j:configuration>

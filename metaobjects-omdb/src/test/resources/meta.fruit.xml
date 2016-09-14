@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<metadata package="produce">
+    
+    <types>
+        <object><type name="managed" class="com.draagon.meta.object.managed.ManagedMetaObject"/></object>
+    </types>
+
+    <!-- Id -->
+    <field name="id" type="long" isKey="true" dbColumn="id" auto="last" />
+    
+    <!-- Fruit -->
+    <object name="Fruit" type="managed" dbTable="FRUIT">
+    
+      <attr name="object">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
+      
+      <!-- Id -->
+      <field name="id" super="id"/>
+
+      <!-- Type -->
+      <field name="kind" type="int" dbColumn="kind" />
+            
+      <!-- Name -->
+      <field name="name" type="string" dbColumn="name">
+        <attr name="len">50</attr>
+      </field>
+      
+      <!-- Length -->
+      <field name="length" type="int" dbColumn="length"/>
+
+      <!-- Weight -->
+      <field name="weight" type="int" dbColumn="weight"/>
+     
+    </object>  
+
+    <!-- Apple -->
+    <object name="Apple" super="Fruit" dbTable="APPLE" dbView="APPLE_VIEW"
+        dbViewSQL="SELECT F.*, A.* FROM FRUIT F, APPLE A WHERE F.id=A.fruit_id AND F.kind=1">
+    
+      <attr name="object">com.draagon.meta.manager.db.test.fruit.Apple</attr>
+          
+      <attr name="dbInheritance" type="properties">
+        superClass=produce::Fruit
+	superJoiner=id
+	joiner=fruitId
+	discriminator=kind
+	discriminatorValue=1
+      </attr>
+    
+      <!-- Fruit Id -->
+      <field name="fruitId" type="long" dbColumn="FRUIT_ID" isKey="true" />
+
+      <!-- Orachard -->
+      <field name="orchard" type="string" dbColumn="orchard">
+        <attr name="len">80</attr>
+      </field>
+     
+      <!-- Worms -->
+      <field name="worms" type="short" dbColumn="worms"/>
+      
+    </object>  
+
+    <!-- Orange -->
+    <object name="Orange" super="Fruit" dbTable="ORANGE" dbView="ORANGE_VIEW"
+        dbViewSQL="SELECT F.*, O.* FROM FRUIT F, ORANGE O WHERE F.id=O.fruit_id AND F.kind=2">
+    
+      <attr name="object">com.draagon.meta.manager.db.test.fruit.Orange</attr>    
+            
+      <attr name="dbInheritance" type="properties">
+        superClass=produce::Fruit
+	superJoiner=id
+	joiner=fruitId
+	discriminator=kind
+	discriminatorValue=2
+      </attr>
+    
+      <!-- Fruit Id -->
+      <field name="fruitId" type="long" dbColumn="FRUIT_ID" isKey="true" />
+    
+      <!-- Picked Date -->
+      <field name="pickedDate" type="date" dbColumn="picked_dt"/>
+           
+    </object>
+    
+    <!-- Basket -->
+    <object name="Basket" type="managed" package="container" dbTable="BASKET">
+          
+      <!-- Id -->
+      <field name="id" type="long" dbColumn="id" auto="last">
+          <attr name="isKey">true</attr>
+      </field>      
+    
+      <!-- Number of apples -->
+      <field name="apples" type="int" dbColumn="apples"/>
+    
+      <!-- Number of oranges -->
+      <field name="oranges" type="int" dbColumn="oranges"/>
+           
+    </object>
+    
+    <!-- Basket -->
+    <object name="FullBasketView" super="container::Basket" dbView="FULL_BASKET_VIEW"
+        dbViewSQL="SELECT B.* FROM BASKET B WHERE b.apples+b.oranges > 10">
+           
+    </object>    
+ 
+</metadata>
