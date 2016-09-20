@@ -1,0 +1,106 @@
+package ${pkg}.model;
+
+import com.dragon.meta.object.value.ValueObject;
+import java.util.*;
+
+public abstract class ${object.'@name'} extends ValueObject {
+
+    public static final String O_NAME = "${object.'@name'}"; <%
+    if ( object.attribute(db.table) != null ) { %>
+        public static final String DB_TABLE = "${object.attribute(db.table)}";<% }
+    if ( object.attribute(db.view) != null ) { %>
+        public static final String DB_VIEW = "${object.attribute(db.view)}";<% } %>
+
+    <% object.fields.field.each{ %>
+        public static final String F_${it.'@name'.toUpperCase()} = "${it.'@name'}";<% } %>
+
+    <% object.fields.field.each{ f ->
+        f.views.view.each { v ->
+            String viewname = v.'@name'.substring(0,1).toUpperCase() + v.'@name'.substring( 1 );
+            %>
+            public static final String V_${f.'@name'.toUpperCase()}${v.'@name'.toUpperCase()} = "${f.'@name'}${viewname}";<% } } %>
+
+    <% object.fields.field.each{ f ->
+        String colName = f.attribute(db.col)
+        if ( colName == null ) colName = f.'@name'.toUpperCase();
+        %>
+        public static final String C_${f.'@name'.toUpperCase()} = "${colName}";<% } %>
+
+    <% object.fields.field.each{ f ->
+        if ( f.'@valid-values' == null ) return;
+        f.'@valid-values'.split(",").each { p ->
+            def nv = p.split(":")
+            if (nv[0] == "*") return; %>
+            public static final int ${f.'@name'.toUpperCase() +"_"+ nv[1].toUpperCase().replace( ' ', '_' )} = ${nv[0]};<% } } %>
+
+    <% object.fields.field.each{ %>
+        private ${it.'@type'} ${it.'@name'} = null;<% } %>
+
+    public ${object.attribute("name")}Abstract() {
+    }
+
+    /** Copy the same object into this one */
+    public void copyFrom( ${object.attribute("name")}Abstract o ) {
+        <% object.fields.field.each{ %>
+            this.${it.'@name'}=o.${it.'@name'};<% } %>
+    }
+
+    <% object.fields.field.each{ f ->
+        String name = f.'@name'.substring(0,1).toUpperCase() + f.'@name'.substring( 1 );
+        %>
+        public void set${name}( ${f.'@type'} ${f.'@name'} ) {
+            this.${f.'@name'} = ${f.'@name'};
+        }
+
+        public ${f.'@type'} get${name}() {
+            return ${f.'@name'};
+        }
+        <% f.views.view.each{ v ->
+            String viewname = v.'@name'.substring(0,1).toUpperCase() + v.'@name'.substring( 1 )
+            String viewtype = v.'@type'
+            %>
+            public String get${name}${viewname}() {
+                <%
+                if (viewtype == "date" || viewtype == "dateTime" ) {
+                    %>
+                    if ( ${f.'@name'} == null ) return "";
+                    java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("MM/dd/yyyy<%if (viewtype == "dateTime") { %> hh:mm:ss a<%}%>");
+                    return df.format( ${f.'@name'} );
+                    <% } else if (viewtype == "validValues" ) {
+                    if ( f.'@valid-values' == null || f.'@type' != "Integer" ) throw new IllegalArgumentException("validValues may not be used without the valid-values defined as int*string on: " + f.'@name');
+                    %>
+                    if ( ${f.'@name'} == null ) return "";
+                    switch( ${f.'@name'} ) {<%
+                    boolean found = false
+                    f.'@valid-values'.split(",").each { p ->
+                    def nv = p.split(":")
+                    if (nv[0] != "*") {
+                    %>
+                    case ${f.'@name'.toUpperCase() + "_" + (nv[1].toUpperCase()).replace( ' ', '_' )}: return "${nv[1]}";<%
+                    } else {
+                    found = true
+                    %>
+                    default: return "${nv[1]}";<%
+                    }
+                    } %>
+                    } <% if (!found) { %>
+                        return "";
+                        <% }
+                } else if (viewtype == "timezone" ) {
+                    %>
+                    if ( ${f.'@name'} == null ) return "";
+                    return ${f.'@name'};
+                    <% } else
+                    throw new IllegalArgumentException("Invalid View Type: " + viewtype + " on " +  viewname); %>
+            }
+            <%
+        } // End for loop over f.getViews
+    } // End for loop over object.getFields
+    %>
+
+    @Override
+    public String toString() {
+        return "${object.'@name'} ["<% object.fields.field.each{ %>
+            + "${it.'@name'}=" + ${it.'@name'} + "; "<% } %> + "]";
+    }
+}

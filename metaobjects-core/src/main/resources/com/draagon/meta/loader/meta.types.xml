@@ -23,6 +23,7 @@
     <type name="string"      class="com.draagon.meta.field.StringField" />
     <type name="date"        class="com.draagon.meta.field.DateField" />
     <type name="object"      class="com.draagon.meta.field.ObjectField" />
+    <type name="objectArray" class="com.draagon.meta.field.ObjectArrayField" />
   </field>
 
   <validator class="com.draagon.meta.validator.MetaValidator">

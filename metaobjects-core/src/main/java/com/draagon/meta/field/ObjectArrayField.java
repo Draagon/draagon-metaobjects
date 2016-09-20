@@ -6,20 +6,21 @@
  */
 package com.draagon.meta.field;
 
-import com.draagon.meta.*;
-import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 
+import java.util.List;
+
 /**
- * A Object Field.
+ * A Object Array Field.
  *
- * @version 2.0
+ * @version 1.0
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ObjectField extends MetaField {
+public class ObjectArrayField extends MetaField {
     //private static Log log = LogFactory.getLog( ObjectField.class );
 
     /**
@@ -27,7 +28,7 @@ public class ObjectField extends MetaField {
      */
     public final static String ATTR_OBJECT_REF = "objectRef";
 
-    public ObjectField(String name) {
+    public ObjectArrayField(String name) {
         super(name);
     }
 
@@ -35,14 +36,14 @@ public class ObjectField extends MetaField {
      * Returns the type of value
      */
     public int getType() {
-        return OBJECT;
+        return OBJECT_ARRAY;
     }
 
     /**
      * Gets the type of value object class returned
      */
     public Class<?> getValueClass() {
-        return Object.class;
+        return List.class;
     }
 
     /**

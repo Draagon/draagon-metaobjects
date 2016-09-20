@@ -30,15 +30,23 @@ http://www.eclipse.org/legal/epl-v10.html
         <attr name="object">com.draagon.meta.demo.fishstore.Tank</attr>      
         <field name="num" type="int" dbColumn="NUM" />
         <field name="maxFish" type="int" dbColumn="MAX_FISH" />
+        <field name="fishes" type="objectArray" objectRef="fishstore::Fish" />
     </object>
-    
+
+    <!-- Breed -->
+    <object name="Breed" super="Base" dbTable="TANK">
+        <attr name="object">com.draagon.meta.demo.fishstore.Breed</attr>
+        <field name="name" type="string" len="100" dbColumn="NAME" />
+        <field name="agressionLevel" type="int" dbColumn="AGRESSION_LEVEL" />
+    </object>
+
     <!-- Fish -->
     <object name="Fish" super="Base" dbTable="TANK">    
         <attr name="object">com.draagon.meta.demo.fishstore.Fish</attr>      
-        <field name="breed" type="string" len="100" dbColumn="BREED" />
+        <field name="breedName" type="string" len="100" dbColumn="BREED_NAME" />
+        <field name="breed" type="object" objectRef="fishstore::Breed" dbColumn="BREED_ID" />
         <field name="length" type="int" dbColumn="LENGTH" />
         <field name="weight" type="int" dbColumn="WEIGHT" />
-        <field name="agressionLevel" type="int" dbColumn="AGRESSION_LEVEL" />
     </object>
                 
 </metadata>

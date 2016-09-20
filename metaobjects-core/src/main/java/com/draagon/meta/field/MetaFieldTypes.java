@@ -30,4 +30,6 @@ public interface MetaFieldTypes
     public final static int CLOB     = 11;
     public final static int BLOB     = 12;
     public final static int XML      = 13;
+
+    public final static int OBJECT_ARRAY    = 14;
 }
