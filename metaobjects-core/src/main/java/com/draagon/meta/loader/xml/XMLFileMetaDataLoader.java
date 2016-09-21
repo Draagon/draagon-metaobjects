@@ -8,7 +8,7 @@ package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.StringField;
-import com.draagon.meta.object.value.ValueObject;
+import com.draagon.meta.object.value.ValueMetaObject;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.view.MetaView;
@@ -560,7 +560,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         }
                         // Default to ValueObject if no type is defined for a MetaObject
                         else if ( types.baseClass.isAssignableFrom( MetaObject.class )) {
-                            c = ValueObject.class;
+                            c = ValueMetaObject.class;
                         }
                         // Default to StringField if no type is defined for a MetaField
                         else if ( types.baseClass.isAssignableFrom( MetaField.class )) {
