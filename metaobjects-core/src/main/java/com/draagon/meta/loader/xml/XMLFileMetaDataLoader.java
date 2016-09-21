@@ -7,6 +7,8 @@
 package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.field.StringField;
+import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.view.MetaView;
@@ -143,8 +145,8 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             //try {
                 loadFromFile(source);
             //} catch (MetaException e) {
-                //log.error("Initialization of MetaClassLoader [" + source + "] failed: " + e.getMessage());
-                //throw new IllegalStateException("Initialization of MetaClassLoader [" + source + "] failed: " + e.getMessage(), e);
+                //log.error("Initialization of MetaDataLoader [" + source + "] failed: " + e.getMessage());
+                //throw new IllegalStateException("Initialization of MetaDataLoader [" + source + "] failed: " + e.getMessage(), e);
             //}
         }
     }
@@ -221,7 +223,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             loadAllTypes(el);
             
         } catch (SAXException e) {
-            throw new MetaException("Parse error loading MetaClasses: " + e.getMessage(), e);
+            throw new MetaException("Parse error loading MetaData: " + e.getMessage(), e);
         }
     }
 
@@ -443,14 +445,14 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     }
                 }
             } catch (SAXException e) {
-                throw new MetaException("Parse error loading MetaClasses: " + e.getMessage(), e);
+                throw new MetaException("Parse error loading MetaData: " + e.getMessage(), e);
             }
 
             // Parse the metadata elements
             parseMetaData( defaultPackageName, this, itemdocElement, true );
         } 
         catch (SAXException e) {
-            throw new MetaException("Parse error loading MetaClasses: " + e.getMessage(), e);
+            throw new MetaException("Parse error loading MetaData: " + e.getMessage(), e);
         }
     }
     
@@ -458,19 +460,21 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         
         // Iterate through all elements
         for ( Element el : getElements( element )) {
-            
+
+            String nodeName = el.getNodeName();
+
             // Get the MetaDataTypes map for this element
-            MetaDataTypes types = typesMap.get( el.getNodeName() );
+            MetaDataTypes types = typesMap.get( nodeName );
             if ( types == null ) {
                 // TODO:  What is the best behavior here?
-                log.warn( "Ignoring '" + el.getNodeName() + "' element found on parent: " + parent );
+                log.warn( "Ignoring '" + nodeName + "' element found on parent: " + parent );
                 continue;
             }
                         
             // Get the item name
             String name = el.getAttribute(ATTR_NAME);
             if (name == null || name.equals("")) {
-                throw new MetaException("MetaClass had no name specfied in XML");
+                throw new MetaException("MetaData [" + nodeName + "] had no name specfied in XML");
             }
 
             // Get the packaging name
@@ -516,7 +520,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                             superData = getMetaDataByName( types.baseClass, packageName + PKG_SEPARATOR + superStr );
                         }
                     } catch (MetaObjectNotFoundException e) {
-                        log.debug( "Could not find MetaClass [" + packageName + PKG_SEPARATOR + superStr + "], assuming fully qualified" );
+                        log.debug( "Could not find MetaData [" + packageName + PKG_SEPARATOR + superStr + "], assuming fully qualified" );
                     }
 
                     // Try to find it by the provided name in the 'super' attribute
@@ -524,8 +528,8 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         try {
                             superData = getMetaDataByName( types.baseClass, superStr );
                         } catch (MetaObjectNotFoundException e) {
-                            log.error("Invalid MetaClass [" + md + "], the SuperClass [" + superStr + "] does not exist");
-                            throw new MetaException("Invalid MetaClass [" + md + "], the SuperClass [" + superStr + "] does not exist");
+                            log.error("Invalid MetaData [" + nodeName + "][" + md + "], the SuperClass [" + superStr + "] does not exist");
+                            throw new MetaException("Invalid MetaData [" + nodeName + "][" + md + "], the SuperClass [" + superStr + "] does not exist");
                         }
                     }
                 }
@@ -533,7 +537,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 else {
                     String s = el.getAttribute(ATTR_SUPER);
                     if ( s == null || s.isEmpty() ) {
-                        log.warn( "Attribute 'super' defined on metadata '" + name + "' under parent [" + parent + "], but should not be as metadata with that name already existed" );
+                        log.warn( "Attribute 'super' defined on MetaData [" + nodeName + "][" + name + "] under parent [" + parent + "], but should not be as metadata with that name already existed" );
                     }
                 }
 
@@ -553,16 +557,24 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         // Default to StringAttribute if no type is defined for a MetaAttribute
                         else if ( types.baseClass.isAssignableFrom( MetaAttribute.class )) {
                             c = StringAttribute.class;
-                        } 
+                        }
+                        // Default to ValueObject if no type is defined for a MetaObject
+                        else if ( types.baseClass.isAssignableFrom( MetaObject.class )) {
+                            c = ValueObject.class;
+                        }
+                        // Default to StringField if no type is defined for a MetaField
+                        else if ( types.baseClass.isAssignableFrom( MetaField.class )) {
+                            c = StringField.class;
+                        }
                         // Otherwise throw an error
                         else {
-                            throw new MetaException("MetaClass [" + name + "] has no type defined");
+                            throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined");
                         }
                     } 
                     else {
                         c = (Class<? extends MetaData>) types.get(typeName);
                         if (c == null) {
-                            throw new MetaException("MetaClass type [" + typeName + "] was not recognized");
+                            throw new MetaException("MetaData [" + nodeName + "] had type [" + typeName + "], but it was not recognized");
                         }
                     }
 
@@ -572,18 +584,17 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     
                     // Create the object
                     md = (MetaData) c.getConstructor(String.class).newInstance( fullname );
-                    //mc = (MetaClass) c.newInstance();
-                } 
+                }
                 catch (MetaException e) {
                     throw e;
                 } 
                 catch (Exception e) {
-                    log.error("Invalid MetaClass [" + c.getName() + "]: " + e.getMessage());
-                    throw new MetaException("Invalid MetaClass [" + c.getName() + "]", e);
+                    log.error("Invalid MetaData [" + nodeName + "][" + c.getName() + "]: " + e.getMessage());
+                    throw new MetaException("Invalid MetaData [" + nodeName + "][" + c.getName() + "]", e);
                 }
 
                 // Set the name and package name
-                //mc.setName( packageName + MetaClass.SEPARATOR + name );
+                //mc.setName( packageName + MetaData.SEPARATOR + name );
                 //mc.setPackage( packageName );
 
                 // Set the super data class if one exists
@@ -601,7 +612,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             // Parse the fields
             //parseFields(md, el);
 
-            // Add the MetaClass to the loader
+            // Add the MetaData to the loader
             // NOTE:  Add it first to ensure the correct parent is set
             if (isNew) {
                 parent.addChild(md);
