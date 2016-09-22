@@ -141,7 +141,7 @@ public abstract class MetaObject extends MetaData {
      * Return the MetaField count
      */
     public Collection<MetaField> getMetaFields() {
-        return getChildren(MetaField.class);
+        return getChildren(MetaField.class, true);
     }
 
     /**

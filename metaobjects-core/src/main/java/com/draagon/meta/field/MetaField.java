@@ -210,7 +210,7 @@ public abstract class MetaField extends MetaData
 
   public Collection<MetaView> getViews()
   {
-    return getChildren( MetaView.class );
+    return getChildren( MetaView.class, true );
   }
 
   public MetaView getDefaultView()
@@ -272,7 +272,7 @@ public abstract class MetaField extends MetaData
 
   public Collection<?> getValidators()
   {
-    return getChildren( MetaValidator.class );
+    return getChildren( MetaValidator.class, true );
   }
 
   /**

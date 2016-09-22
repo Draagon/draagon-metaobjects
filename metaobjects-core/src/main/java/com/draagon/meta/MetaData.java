@@ -118,8 +118,16 @@ public abstract class MetaData implements Cloneable, Serializable {
      */
     public Object getAttribute(String name)
             throws MetaAttributeNotFoundException {
+        return getAttribute(name,true);
+    }
+
+    /**
+     * Retrieves an attribute value of the MetaData
+     */
+    public Object getAttribute(String name, boolean includeParentData)
+            throws MetaAttributeNotFoundException {
         try {
-            MetaAttribute ma = (MetaAttribute) getChild(name, MetaAttribute.class);
+            MetaAttribute ma = (MetaAttribute) getChild(name, MetaAttribute.class, includeParentData);
             return ma.getValue();
         } catch (MetaDataNotFoundException e) {
             throw new MetaAttributeNotFoundException( "MetaAtribute [" + name + "] not found in [" + toInternalString() + "]", name );
@@ -130,8 +138,15 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Retrieves all attribute names
      */
     public boolean hasAttribute(String name) {
+        return hasAttribute(name,true);
+    }
+
+    /**
+     * Retrieves all attribute names
+     */
+    public boolean hasAttribute(String name, boolean includeParentData) {
         try {
-            if (getChild(name, MetaAttribute.class, false) != null) {
+            if (getChild(name, MetaAttribute.class, includeParentData, false) != null) {
                 return true;
             }
         } catch (MetaDataNotFoundException e) {
@@ -140,12 +155,20 @@ public abstract class MetaData implements Cloneable, Serializable {
         return false;
     }
 
+
     /**
      * Retrieves all attribute names
      */
     public Collection<MetaAttribute> getAttributes() {
+        return getAttributes(true);
+    }
+
+    /**
+     * Retrieves all attribute names
+     */
+    public Collection<MetaAttribute> getAttributes( boolean includeParentData ) {
         Collection<MetaAttribute> attrs = new ArrayList<MetaAttribute>();
-        for (MetaData md : getChildren(MetaAttribute.class)) {
+        for (MetaData md : getChildren(MetaAttribute.class,includeParentData)) {
             attrs.add((MetaAttribute) md);
         }
         return attrs;
@@ -233,13 +256,13 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Returns all MetaData children
      */
     protected Collection<MetaData> getChildren() {
-        return getChildren(null);
+        return getChildren(null, true);
     }
 
     /**
      * Returns all MetaData children which implement the specified class
      */
-    protected <T extends MetaData> Collection<T> getChildren(Class<T> c) {
+    protected <T extends MetaData> Collection<T> getChildren(Class<T> c, boolean includeParentData ) {
         
         // Get all the local children
         ArrayList<T> al = new ArrayList<T>();
@@ -250,28 +273,33 @@ public abstract class MetaData implements Cloneable, Serializable {
         }
 
         // Add the super class's children
-        if (getSuperData() != null) {
-            for (MetaData d : getSuperData().getChildren(c)) {
-                
-                // We know it exists in the super class, so get it correctly, which adds
-                // it to this class except for MetaAttributs
-                // if ( tmp instanceof MetaAttribute ) d = tmp;
-                // else d = getChild( tmp.getName(), tmp.getMetaDataClass() );
+        if (getSuperData() != null && includeParentData) {
+            for (MetaData d : getSuperData().getChildren(c, true)) {
 
-                boolean found = false;
+                // Filter out Attributes that are prefixed with _ as they do not get inherited
+                String n = d.getName();
+                if (!( d instanceof MetaAttribute && n != null && n.startsWith("_") )) {
 
-                // Only add the field if it's not found in the super class
-                for (MetaData sd : al) {
-                    if (sd.getName().equals(d.getName())) {
-                        found = true;
+                    // We know it exists in the super class, so get it correctly, which adds
+                    // it to this class except for MetaAttributs
+                    // if ( tmp instanceof MetaAttribute ) d = tmp;
+                    // else d = getChild( tmp.getName(), tmp.getMetaDataClass() );
+
+                    boolean found = false;
+
+                    // Only add the field if it's not found in the super class
+                    for (MetaData sd : al) {
+                        if (sd.getName().equals(n)) {
+                            found = true;
+                        }
                     }
-                }
-                
-                if (!found) {
-                    //if (!( d instanceof MetaAttribute ))
-                    //  d = getChild( d.getName(), d.getMetaDataClass() );
 
-                    al.add( (T) d); //wrapMetaData( d ));
+                    if (!found) {
+                        //if (!( d instanceof MetaAttribute ))
+                        //  d = getChild( d.getName(), d.getMetaDataClass() );
+
+                        al.add((T) d); //wrapMetaData( d ));
+                    }
                 }
             }
         }
@@ -283,7 +311,7 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Returns the first child record
      */
     protected <T extends MetaData> T getFirstChild(Class<T> c) {
-        Iterator<T> i = getChildren(c).iterator();
+        Iterator<T> i = getChildren(c, true).iterator();
         if (!i.hasNext()) {
             return null;
         }
@@ -297,14 +325,21 @@ public abstract class MetaData implements Cloneable, Serializable {
      * first child.
      */
     public final <T extends MetaData> T getChild(String name, Class<T> c) throws MetaDataNotFoundException {
-        return getChild(name, c, true);
+        return getChild(name, c, true, true);
     }
 
-    protected final <T extends MetaData> T getChild(String name, Class<T> c, boolean shouldThrow) throws MetaDataNotFoundException {
-        return (T) getChildOfType( name, c, shouldThrow );
+    /**
+     * Returns a child by the specified name of the specified class
+     */
+    public final <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData) throws MetaDataNotFoundException {
+        return getChild(name, c, includeParentData, true);
     }
 
-    protected final MetaData getChildOfType(String name, Class<? extends MetaData> c, boolean shouldThrow) throws MetaDataNotFoundException {
+    protected final <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
+        return (T) getChildOfType( name, c, includeParentData, shouldThrow );
+    }
+
+    protected final MetaData getChildOfType(String name, Class<? extends MetaData> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
         
         for (MetaData d : children) {
             if ((name == null || d.getName().equals(name))
@@ -314,22 +349,30 @@ public abstract class MetaData implements Cloneable, Serializable {
         }
 
         // See if it exists in the parent class
-        if (getSuperData() != null) {
+        if (getSuperData() != null && includeParentData) {
             try {
-                MetaData md = getSuperData().getChild(name, c, shouldThrow);
+                MetaData md = getSuperData().getChild(name, c, true, shouldThrow);
+                if ( md == null ) return null;
 
-                // If the MetaData is not an attribute, then clone, clear,
-                //  and set the super data
-                /*if ( !( md instanceof MetaAttribute ))
-                 {
-                    MetaData add = (MetaData) md.clone();
-                    add.clearChildren();
-                    add.setSuperData( md );
-                    addChild( add, false );
-                    return add;
-                 }*/
-                
-                return md; //wrapMetaData( md );
+                // Filter out Attributes that are prefixed with _ as they do not get inherited
+                String n = md.getName();
+                if (!( md instanceof MetaAttribute && n != null && n.startsWith("_") )) {
+
+                    // If the MetaData is not an attribute, then clone, clear,
+                    //  and set the super data
+                    /*if ( !( md instanceof MetaAttribute ))
+                     {
+                        MetaData add = (MetaData) md.clone();
+                        add.clearChildren();
+                        add.setSuperData( md );
+                        addChild( add, false );
+                        return add;
+                     }*/
+
+                    return md; //wrapMetaData( md );
+                }// else {
+                //    System.out.println( "ATTR: " + md.toString() );
+                //}
             } 
             catch (MetaDataNotFoundException ex) {
             }
