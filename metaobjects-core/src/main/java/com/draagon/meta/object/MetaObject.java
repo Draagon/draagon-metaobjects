@@ -25,12 +25,6 @@ public abstract class MetaObject extends MetaData {
      * Object class name attribute
      */
     public final static String ATTR_OBJECT = "object";
-    
-    /**
-     * Separator for package and class names
-     * @deprecated Use MetaDataLoader.PKG_SEPARATOR
-     */
-    public final static String SEPARATOR = MetaDataLoader.PKG_SEPARATOR;
 
     /**
      * Constructs the MetaObject
@@ -70,35 +64,6 @@ public abstract class MetaObject extends MetaData {
      {
      mPackage = packageName;
      }*/
-    /**
-     * Retrieve the MetaObject package
-     */
-    public String getPackage() {
-        String name = getName();
-        if (name == null) {
-            return null;
-        }
-        int i = name.lastIndexOf(SEPARATOR);
-        if (i >= 0) {
-            return name.substring(0, i);
-        }
-        return "";
-    }
-
-    /**
-     * Retrieve the MetaObject package
-     */
-    public String getShortName() {
-        String name = getName();
-        if (name == null) {
-            return null;
-        }
-        int i = name.lastIndexOf(SEPARATOR);
-        if (i >= 0) {
-            return name.substring(i + SEPARATOR.length());
-        }
-        return name;
-    }
 
     /**
      * Returns the MetaObjectLoader

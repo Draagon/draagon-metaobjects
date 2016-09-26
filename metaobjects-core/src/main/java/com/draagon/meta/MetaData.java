@@ -9,6 +9,7 @@ package com.draagon.meta;
 import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.view.MetaView;
 import java.io.Serializable;
@@ -18,6 +19,12 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class MetaData implements Cloneable, Serializable {
+
+    /**
+     * Separator for package and class names
+     * @deprecated Use MetaDataLoader.PKG_SEPARATOR
+     */
+    public final static String SEPARATOR = MetaDataLoader.PKG_SEPARATOR;
 
     private final Map<Object, Object> cacheValues = Collections.synchronizedMap(new WeakHashMap<Object, Object>());
     private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<MetaData>();
@@ -43,6 +50,38 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Returns the Name of this piece of MetaData
      */
     public String getName() {
+        return name;
+    }
+
+    /**
+     * Retrieve the MetaObject package
+     */
+    public String getPackage() {
+        // TODO:  Add caching
+        String name = getName();
+        if (name == null) {
+            return null;
+        }
+        int i = name.lastIndexOf(SEPARATOR);
+        if (i >= 0) {
+            return name.substring(0, i);
+        }
+        return "";
+    }
+
+    /**
+     * Retrieve the MetaObject package
+     */
+    public String getShortName() {
+        // TODO:  Add caching
+        String name = getName();
+        if (name == null) {
+            return null;
+        }
+        int i = name.lastIndexOf(SEPARATOR);
+        if (i >= 0) {
+            return name.substring(i + SEPARATOR.length());
+        }
         return name;
     }
 
