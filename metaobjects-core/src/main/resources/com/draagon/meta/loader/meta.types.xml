@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <types>
   
-  <attr class="com.draagon.meta.attr.MetaAttribute">    
-    <type name="string"      class="com.draagon.meta.attr.StringAttribute" />
+  <attr class="com.draagon.meta.attr.MetaAttribute">
+    <type name="string"      class="com.draagon.meta.attr.StringAttribute" default="true"/>
     <type name="properties"  class="com.draagon.meta.attr.PropertiesAttribute" />
     <type name="class"       class="com.draagon.meta.attr.ClassAttribute" />
   </attr>
 
   <object class="com.draagon.meta.object.MetaObject">
+    <type name="value"       class="com.draagon.meta.object.value.ValueMetaObject"  default="true"/>
     <type name="pojo"        class="com.draagon.meta.object.pojo.PojoMetaObject" />
-    <type name="value"       class="com.draagon.meta.object.value.ValueMetaObject" />
   </object>
 
   <field class="com.draagon.meta.field.MetaField">
@@ -20,14 +20,14 @@
     <type name="long"        class="com.draagon.meta.field.LongField" />
     <type name="float"       class="com.draagon.meta.field.FloatField" />
     <type name="double"      class="com.draagon.meta.field.DoubleField" />
-    <type name="string"      class="com.draagon.meta.field.StringField" />
+    <type name="string"      class="com.draagon.meta.field.StringField" default="true"/>
     <type name="date"        class="com.draagon.meta.field.DateField" />
     <type name="object"      class="com.draagon.meta.field.ObjectField" />
     <type name="objectArray" class="com.draagon.meta.field.ObjectArrayField" />
   </field>
 
   <validator class="com.draagon.meta.validator.MetaValidator">
-    <type name="required"    class="com.draagon.meta.validator.RequiredValidator" />
+    <type name="required"    class="com.draagon.meta.validator.RequiredValidator" default="true"/>
     <type name="mask"        class="com.draagon.meta.validator.MaskValidator" />
     <type name="numeric"     class="com.draagon.meta.validator.NumericValidator" />
     <type name="length"      class="com.draagon.meta.validator.LengthValidator" />

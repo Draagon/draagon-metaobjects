@@ -7,18 +7,13 @@
 package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.field.StringField;
-import com.draagon.meta.object.value.ValueMetaObject;
-import com.draagon.meta.validator.MetaValidator;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.*;
-import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-//import com.draagon.util.InitializationException;
 import com.draagon.util.xml.XMLFileReader;
+import com.draagon.meta.attr.StringAttribute;
+//import com.draagon.meta.field.StringField;
+//import com.draagon.meta.object.value.ValueMetaObject;
 
 import java.util.Hashtable;
 import java.util.ArrayList;
@@ -28,21 +23,13 @@ import java.util.List;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.naming.OperationNotSupportedException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 //import org.xml.sax.InputSource;
 //import org.xml.sax.ErrorHandler;
@@ -72,17 +59,24 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         
         public final Class<? extends MetaData> baseClass;
         private final Map<String,Class<? extends MetaData>> classes = new HashMap<String,Class<? extends MetaData>>();
+        private String defaultType = null;
         
         public MetaDataTypes( Class<? extends MetaData> baseClass ) {
             this.baseClass = baseClass;
         }
         
-        public void put( String name, Class<? extends MetaData> clazz ) {
+        public void put( String name, Class<? extends MetaData> clazz, boolean def ) {
             classes.put( name, clazz );
+            if ( def ) defaultType = name;
         }
         
         public Class<? extends MetaData> get( String name ) {
             return classes.get( name );
+        }
+
+        public Class<? extends MetaData> getDefaultType() {
+            if ( defaultType == null ) return null;
+            return get( defaultType );
         }
     }
     
@@ -316,6 +310,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 
                 String name = typeEl.getAttribute(ATTR_NAME);
                 String tclass = typeEl.getAttribute("class");
+                String def = typeEl.getAttribute("default");
 
                 if (name.length() == 0) {
                     throw new MetaException("Type of section [" + section + "] has no 'name' attribute specified");
@@ -325,7 +320,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                     // Add the type class with the specified name
-                    typesMap.put(name, tcl);
+                    typesMap.put(name, tcl, "true".equals( def ));
                 } 
                 catch (ClassNotFoundException e) {
                     throw new MetaException("Type of section [" + section + "] with name [" + name + "] has invalid class: " + e.getMessage());
@@ -554,8 +549,14 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         if (superData != null) {
                             c = superData.getClass();
                         }
+                        else {
+                            c = types.getDefaultType();
+                            if ( c == null ) {
+                                throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined and baseClass [" + types.baseClass.getName() + "] had no default specified");
+                            }
+                        }
                         // Default to StringAttribute if no type is defined for a MetaAttribute
-                        else if ( types.baseClass.isAssignableFrom( MetaAttribute.class )) {
+                        /*else if ( types.baseClass.isAssignableFrom( MetaAttribute.class )) {
                             c = StringAttribute.class;
                         }
                         // Default to ValueObject if no type is defined for a MetaObject
@@ -568,8 +569,8 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         }
                         // Otherwise throw an error
                         else {
-                            throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined");
-                        }
+                            throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined on baseClass [" + types.baseClass.getName() + "]");
+                        }*/
                     } 
                     else {
                         c = (Class<? extends MetaData>) types.get(typeName);
