@@ -531,7 +531,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 // Check to make sure people arent' defining attributes when it shouldn't
                 else {
                     String s = el.getAttribute(ATTR_SUPER);
-                    if ( s == null || s.isEmpty() ) {
+                    if ( s != null && !s.isEmpty() ) {
                         log.warn( "Attribute 'super' defined on MetaData [" + nodeName + "][" + name + "] under parent [" + parent + "], but should not be as metadata with that name already existed" );
                     }
                 }
