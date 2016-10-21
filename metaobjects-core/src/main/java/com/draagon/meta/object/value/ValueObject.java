@@ -121,8 +121,10 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         Value v = (Value) getObjectAttributeValue(name);                      
 
         // TODO: Can we optimize this? -Doug
-        // Convert to the proper object type
+
+        // TODO:  Implement this behavior as a
         if ( hasMetaField(name)) {
+            // Convert to the proper object type
             attr = Converter.toType(getMetaField(name).getType(), attr);
         }
 

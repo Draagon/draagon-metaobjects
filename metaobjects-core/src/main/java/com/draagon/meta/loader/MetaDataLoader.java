@@ -118,11 +118,13 @@ public abstract class MetaDataLoader extends MetaData {
 
     /**
      * Retrieves the MetaClass with the specified name
+     * IMPORTANT:  This traverses ALL classloaders, use getMetaDataByName if you know the metadataloader to use
      */
     public static  <T extends MetaData> T findMetaDataByName( Class<T> c, String name ) throws MetaDataNotFoundException {
         
         for (MetaDataLoader l : getClassLoaders()) {
-            return l.getMetaDataByName( c, name );
+            T d = l.getMetaDataByName( c, name );
+            if ( d != null ) return d;
         }
 
         throw new MetaDataNotFoundException("MetaClass with name [" + name + "] not found", name);
