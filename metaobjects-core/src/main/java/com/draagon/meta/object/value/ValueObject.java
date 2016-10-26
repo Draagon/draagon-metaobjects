@@ -6,24 +6,19 @@
  */
 package com.draagon.meta.object.value;
 
+import com.draagon.meta.MetaDataException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.*;
-//import com.draagon.meta.manager.*;
+import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.util.Converter;
 
 import java.io.Serializable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+//import com.draagon.meta.manager.*;
 
 public class ValueObject implements Map<String, Object>, Serializable, MetaObjectAware {
 
@@ -52,7 +47,8 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     
     //private String mId = null;
     private final Map<String, Value> mAttributes = new ConcurrentHashMap<String, Value>();
-    
+    private final Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
+
     // The MetaObject is transient, but the loader name, package name, and class name are needed
     private transient MetaObject mMetaObject = null;
     private String mLoaderName = null;
@@ -67,36 +63,56 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     public void setMetaData(MetaObject mc) {
         mMetaObject = mc;
 
+        // Set these to handle serialization and re-attaching
         if (mc.getClassLoader() != null) {
             mLoaderName = mc.getClassLoader().getName();
         }
-
         mObjectName = mc.getName();
     }
 
+    private boolean metaObjectForNameFailed = false;
+
     @Override
     public synchronized MetaObject getMetaData() {
-        
-        if (mMetaObject == null && mObjectName == null) {
+
+        // If we have the meta object, then return it
+        if ( mMetaObject != null ) return mMetaObject;
+
+        // If we don't have the object, but we already tried looking it up before, return null
+        if (mMetaObject == null && metaObjectForNameFailed ) {
             return null;
         }
-        // throw new RuntimeException( "MetaObject is not linked to a MetaObject" );
 
-        if (mMetaObject == null) {
+        // If the object name is set, this could be serialization, so try to reattach the MetaObject
+        if ( mObjectName != null ) {
             try {
                 if (mLoaderName != null) {
                     MetaDataLoader mcl = MetaDataLoader.getClassLoader(mLoaderName);
                     if (mcl != null) {
-                        mMetaObject = mcl.getMetaDataByName( MetaObject.class, mObjectName);
+                        mMetaObject = mcl.getMetaDataByName(MetaObject.class, mObjectName);
+                    } else {
+                        mMetaObject = mcl.findMetaDataByName(MetaObject.class, mObjectName);
                     }
                 }
 
-                mMetaObject = MetaObject.forName(mObjectName);
-            } catch (MetaObjectNotFoundException e) {
+            } catch (MetaDataNotFoundException e) {
+                metaObjectForNameFailed = true;
                 throw new RuntimeException("Could not re-attach MetaObject: " + e.getMessage(), e);
             }
         }
+        // Otherwise, try to find the MetaObject by looking it up in the static MetaDataLoader method
+        else {
+            try {
+                // If we find the MetaObject, then attach to this ValueObject
+                MetaObject mo = MetaObject.forName(mObjectName);
+                setMetaData( mo );
 
+            } catch( MetaDataNotFoundException e ) {
+                metaObjectForNameFailed = true;
+            }
+        }
+
+        // The setMetaData call above would set this, but it's a bit sloppy (dtm)
         return mMetaObject;
     }
 
@@ -131,7 +147,35 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         // Set the value
         v.setValue(attr);
     }
-    
+
+    /**
+     * Checks is a property of this object is true based on a value of "true".  Null is false.
+     * @param name Name of the property
+     * @return Whether the property has a value of "true"
+     */
+    public boolean isObjectPropertyTrue( String name ) {
+        String s = mProperties.get( name );
+        if ( s != null && s.equalsIgnoreCase( "true" )) return true;
+        return false;
+    }
+
+    /**
+     * Get a property associated with this object.  Properties are used for special operations, not to define fields
+     */
+    public String getObjectProperty( String name ) {
+        return mProperties.get( name );
+    }
+
+    /**
+     * Sets a property to be associated with this object.  Properties are used for special operations, not to define fields
+     */
+    public void setObjectProperty( String name, String key ) {
+        mProperties.put( name, key );
+    }
+
+    /**
+     * Return the MetaField if this ValueObject has an associated MetaObject
+     */
     protected MetaField getMetaField( String name ) {
         return MetaObject.forObject(this).getMetaField(name);
     }
@@ -139,11 +183,19 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     public Collection<MetaField> getMetaFields() {
         return MetaObject.forObject(this).getMetaFields();
     }
-    
+
     public boolean hasMetaField( String name ) {
         return MetaObject.forObject(this).hasMetaField(name);
     }
-            
+
+    public boolean hasObjectAttribute( String name ) {
+        return mAttributes.containsKey( name );
+    }
+
+    public Collection<String> getObjectAttributes() {
+        return mAttributes.keySet();
+    }
+
     /**
      * Retrieves an attribute of the MetaObject
      */
