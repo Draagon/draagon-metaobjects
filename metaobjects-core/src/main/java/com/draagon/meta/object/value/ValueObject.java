@@ -557,7 +557,6 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         StringBuilder b = new StringBuilder();
 
         try {
-            MetaObject mc = getMetaData();
 
             b.append("[");
             //String ref = getObjectRef();
@@ -567,22 +566,22 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
             //{
             //b.append( "{NEW}" );
             //b.append( '@' );
-            b.append(mc.getName());
+            b.append( getObjectName() );
             //}
             b.append("]");
 
             boolean first = true;
             b.append('{');
-            for (MetaField f : mc.getMetaFields()) {
+            for (String name : getObjectFieldNames() ) {
                 if (first) {
                     first = false;
                 } else {
                     b.append(',');
                 }
 
-                b.append(f.getName());
+                b.append(name);
                 b.append(':');
-                b.append(f.getString(this));
+                b.append(getString(name));
             }
             b.append('}');
         } catch (MetaDataException e) {
