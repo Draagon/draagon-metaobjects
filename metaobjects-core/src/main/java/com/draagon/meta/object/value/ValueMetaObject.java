@@ -119,7 +119,7 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
             
             ValueObject mo = (ValueObject) obj;
 
-            if (mo.getMetaObjectName() == null) {
+            if (mo.getObjectName() == null) {
                 //log.warn("MetaObject with no MetaClassName: [" + obj.getClass() + "]");
                 
                 // See if we can match by the object produced
@@ -127,7 +127,7 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
             }
 
             // TODO: WARNING:  This doesn't match up class loaders!
-            if (mo.getMetaObjectName().equals(getName())) {
+            if (mo.getObjectName().equals(getName())) {
                 return true;
             }
         }
@@ -277,7 +277,7 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
         if (hasSetterMethod(f, obj.getClass())) {
             super.setValue(f, obj, value);
         } else {
-            ((ValueObject) obj).setObjectAttribute(f.getName(), value);
+            ((ValueObject) obj).setObjectAttribute(f.getName(), value, f.getType());
         }
     }
 }

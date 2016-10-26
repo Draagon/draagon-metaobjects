@@ -9,6 +9,7 @@ package com.draagon.meta.object.value;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
+import com.draagon.meta.field.MetaFieldTypes;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
@@ -18,13 +19,19 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-//import com.draagon.meta.manager.*;
-
+/**
+ * Generic Map of fields and values that can be associated with a MetaObject. The values are retrieved
+ * as "attributes".  You can also associate "properties" to the object that can be used for special behaviors
+ * when persisting or transforming objects.
+ */
 public class ValueObject implements Map<String, Object>, Serializable, MetaObjectAware {
 
     private static final long serialVersionUID = 6888178049723946186L;
 
-    //private static Log log = LogFactory.getLog( MetaObject.class );
+    /** Holds a Value for the ValueObject.  
+     * Used to know if null was explicitly set or the Value didn't exist.  Can also be enhanced to support the last 
+     * time a value was created, updated, read, deleted, etc.
+     */
     public class Value implements Serializable {
 
         private static final long serialVersionUID = 746942287755477951L;
@@ -45,23 +52,89 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         }
     }
     
-    //private String mId = null;
     private final Map<String, Value> mAttributes = new ConcurrentHashMap<String, Value>();
     private final Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
 
-    // The MetaObject is transient, but the loader name, package name, and class name are needed
+    private boolean allowExtensions = false;
+
+    // The MetaObject is transient, but the loader name, and object name are needed
     private transient MetaObject mMetaObject = null;
+    private transient List<String> metaFieldNamesCache = null;
+    private transient boolean metaObjectForNameFailed = false;
+    private boolean hasMetaData = false;
     private String mLoaderName = null;
-    //private String mPackageName = null;
     private String mObjectName = null;
 
+    /**
+     * Create a generic value object that supports extensions by default
+     */
     public ValueObject() {
+        allowExtensions = true;
+    }
 
+    /**
+     * Create a generic value object associated to the MetaObject
+     * @param mo MetaObject to associated
+     */
+    public ValueObject( MetaObject mo ) {
+        this( mo, false );
+    }
+
+    /**
+     * Create a value object associated to the MetaObject and set flag on extensions
+     * @param mo MetaObject to associated
+     * @param allowExtensions Whether to allow extensions
+     */
+    public ValueObject( MetaObject mo, boolean allowExtensions ) {
+        setMetaData( mo );
+        this.allowExtensions = allowExtensions;
+    }
+
+    /**
+     * A generic value object with the specified name
+     * @param name Name of the object
+     */
+    public ValueObject( String name ) {
+        // TODO:  Do we force a MetaObject attached in the future to have the same name...?
+        mObjectName = name;
+        allowExtensions = true;
+    }
+
+    /**
+     * Return the name of the object
+     * @return the object name
+     */
+    public String getObjectName() {
+        return mObjectName;
+    }
+
+    /**
+     * Set whether to allow extensions (only works when no metadata is attached
+     */
+    public void allowExtensions( boolean allowExtensions ) {
+        if ( !hasMetaDataAttached() ) throw new RuntimeException( "Cannot turn off extensions for ValueObject [" + mObjectName + "] as not MetaObject is attached");
+        this.allowExtensions = allowExtensions;
+    }
+
+    /**
+     * Whether this value object supports extensions
+     * @return true if extensions are supported
+     */
+    public boolean allowsExtensions() {
+        return allowExtensions;
     }
     
     @Override
     public void setMetaData(MetaObject mc) {
+
         mMetaObject = mc;
+
+        // Flag that we have metadata set
+        hasMetaData = true;
+        // Clear flag on metadata failures now that we are setting it
+        metaObjectForNameFailed = false;
+        // Clear the meta field names cache
+        metaFieldNamesCache = null;
 
         // Set these to handle serialization and re-attaching
         if (mc.getClassLoader() != null) {
@@ -70,8 +143,20 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         mObjectName = mc.getName();
     }
 
-    private boolean metaObjectForNameFailed = false;
+    /**
+     * Returns whether the ValueObject has MetaData attached to it
+     * @return true if attached, false if not
+     */
+    public boolean hasMetaDataAttached() {
+        try {
+            return (getMetaData() != null);
+        } catch( MetaDataNotFoundException e ) {}
+        return false;
+    }
 
+    /**
+     * Return the MetaObject associated with this ValueObject
+     */
     @Override
     public synchronized MetaObject getMetaData() {
 
@@ -84,7 +169,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         }
 
         // If the object name is set, this could be serialization, so try to reattach the MetaObject
-        if ( mObjectName != null ) {
+        if ( mObjectName != null  ) {
             try {
                 if (mLoaderName != null) {
                     MetaDataLoader mcl = MetaDataLoader.getClassLoader(mLoaderName);
@@ -116,36 +201,30 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         return mMetaObject;
     }
 
-    public String getMetaDataLoaderName() {
-        return mLoaderName;
-    }
-
-    //public String getMetaPackageName()
-    //{
-    //      return mPackageName;
+    //public String getMetaDataLoaderName() {
+    //    return mLoaderName;
     //}
     
-    public String getMetaObjectName() {
-        return mObjectName;
-    }
+    //public String getMetaObjectName() {
+    //    return mObjectName;
+    //}
 
     /**
      * Sets an attribute of the MetaObject
      */
-    public void setObjectAttribute(String name, Object attr) {
+    public void setObjectAttribute(String name, Object value, int type ) {
         
         Value v = (Value) getObjectAttributeValue(name);                      
 
-        // TODO: Can we optimize this? -Doug
-
-        // TODO:  Implement this behavior as a
-        if ( hasMetaField(name)) {
-            // Convert to the proper object type
-            attr = Converter.toType(getMetaField(name).getType(), attr);
+        // Convert to the proper object type
+        if (hasMetaDataAttached() && getMetaData().hasMetaField(name)) {
+            value = Converter.toType(getMetaData().getMetaField(name).getType(), value);
+        } else {
+            value = Converter.toType(type, value);
         }
 
         // Set the value
-        v.setValue(attr);
+        v.setValue(value);
     }
 
     /**
@@ -174,24 +253,81 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     }
 
     /**
-     * Return the MetaField if this ValueObject has an associated MetaObject
+     * Return the MetaField named, if this ValueObject has an associated MetaObject
      */
-    protected MetaField getMetaField( String name ) {
-        return MetaObject.forObject(this).getMetaField(name);
+    /* protected MetaField getMetaField( String name ) {
+        if ( !hasMetaDataAttached()) return null;
+        return getMetaData().getMetaField(name);
+    }*/
+
+    /**
+     * Returns the MetaFields based on the associated MetaObject
+     * @return List of MetaFields or null if no MetaObject attached
+     */
+    /* public Collection<MetaField> getMetaFields() {
+        if ( !hasMetaDataAttached()) return null;
+        return getMetaData().getMetaFields();
+    }*/
+
+    /**
+     * Returns the MetaFields based on the associated MetaObject
+     * @return List of MetaFields or null if no MetaObject attached
+     */
+    protected List<String> getMetaFieldNames() {
+        if ( metaFieldNamesCache != null ) return metaFieldNamesCache;
+        metaFieldNamesCache = new ArrayList<String>();
+        if ( hasMetaDataAttached() ) {
+            for (MetaField f : getMetaData().getMetaFields()) {
+                metaFieldNamesCache.add(f.getShortName());
+            }
+        }
+        return metaFieldNamesCache;
     }
 
-    public Collection<MetaField> getMetaFields() {
-        return MetaObject.forObject(this).getMetaFields();
+    /**
+     * Return all field names associated with this object.  Handles all MetaFields on the associated MetaObject
+     * if one exists.  Also handles adding any extended fields
+     *
+     * @return All field names
+     */
+    public Collection<String> getObjectFieldNames() {
+
+        // For the clear cut cases, return the arrays
+        if ( hasMetaDataAttached() && allowExtensions ) return getMetaFieldNames();
+        else if ( !hasMetaDataAttached() ) return mAttributes.keySet();
+
+        // For the mixed case of metadata + extensions, add the extended names
+        ArrayList<String> names = new ArrayList<String>();
+        if ( hasMetaDataAttached() ) names.addAll( getMetaFieldNames() );
+        for ( String name : mAttributes.keySet() ) {
+            if ( !names.contains( name )) names.add( name );
+        }
+        return names;
     }
 
-    public boolean hasMetaField( String name ) {
-        return MetaObject.forObject(this).hasMetaField(name);
-    }
+    /**
+     * Returns whether the specified MetaField exists on the MetaObject attached
+     * @param name Name of the MetaField
+     * @return true if exists, false if not or no MetaObject is attached
+     */
+    //public boolean hasMetaField( String name ) {
+    //    if ( !hasMetaDataAttached()) return false;
+    //    return getMetaData().hasMetaField(name);
+    //}
 
+    /**
+     * Returns whether the attribute is associated with this ValueObject (ignoring the MetaObject)
+     * @param name Name of the attribute/value
+     * @return True if it exists on this ValueObject
+     */
     public boolean hasObjectAttribute( String name ) {
         return mAttributes.containsKey( name );
     }
 
+    /**
+     * Returns the names of all attribute values associated with this ValueObject (ignoring the MetaObject)
+     * @return Collection of attribute value names
+     */
     public Collection<String> getObjectAttributes() {
         return mAttributes.keySet();
     }
@@ -210,6 +346,9 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
      */
     protected Value getObjectAttributeValue(String name) //throws ValueException
     {
+        // Force an exception if extensions are not allowed and the MetaField didn't exist
+        if ( !allowExtensions ) getMetaData().getMetaField( name );
+
         synchronized (mAttributes) {
             Value v = (Value) mAttributes.get(name);
             if (v == null) {
@@ -273,67 +412,73 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     // SETTER VALUES
     public void setBoolean(String name, Boolean value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.BOOLEAN);
         //getMetaField( name ).setBoolean( this, value );
     }
 
     public void setByte(String name, Byte value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.BYTE);
         //getMetaField( name ).setByte( this, value );
     }
 
     public void setShort(String name, Short value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.SHORT);
         //getMetaField( name ).setShort( this, value );
     }
 
     public void setInt(String name, Integer value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.INT);
         //getMetaField( name ).setInt( this, value );
     }
 
     public void setInteger(String name, Integer value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.INT);
         //setInt( name, value );
     }
 
     public void setLong(String name, Long value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.LONG);
         //getMetaField( name ).setLong( this, value );
     }
 
     public void setFloat(String name, Float value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.FLOAT);
         //getMetaField( name ).setFloat( this, value );
     }
 
     public void setDouble(String name, Double value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.DOUBLE);
         //getMetaField( name ).setDouble( this, value );
     }
 
     public void setString(String name, String value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.STRING);
         //getMetaField( name ).setString( this, value );
     }
 
     public void setDate(String name, Date value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        setObjectAttribute(name, value, MetaFieldTypes.DATE);
         //getMetaField( name ).setDate( this, value );
     }
 
     public void setObject(String name, Object value) //throws MetaException
     {
-        setObjectAttribute(name, value);
+        // Use the MetaField specific type when setting as an object
+        int type = MetaFieldTypes.OBJECT;
+        if ( hasMetaDataAttached() && getMetaData().hasMetaField( name )) {
+            type = getMetaData().getMetaField( name ).getType();
+        }
+
+        setObjectAttribute(name, value, MetaFieldTypes.OBJECT);
         //getMetaField( name ).setObject( this, value );
     }
 
@@ -341,12 +486,14 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     // GETTER VALUES
     public Boolean getBoolean(String name) //throws MetaException
     {
-        return getMetaField(name).getBoolean(this);
+        return Converter.toBoolean(getObjectAttribute(name));
+        //return getMetaField(name).getBoolean(this);
     }
 
     public Byte getByte(String name) //throws MetaException
     {
-        return getMetaField(name).getByte(this);
+        return Converter.toByte(getObjectAttribute(name));
+        //return getMetaField(name).getByte(this);
     }
 
     public Short getShort(String name) //throws MetaException
@@ -449,56 +596,57 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     // MAP METHODS
     @Override
     public void clear() {
-        for (MetaField mf : getMetaFields()) {
-            mf.setString(this, null);
-        }
+        mAttributes.clear();
+        //for (String name : getObjectFieldNames()) {
+        //    setObject(name, null);
+        //}
     }
 
     @Override
     public boolean containsKey(Object key) {
-        return hasMetaField(String.valueOf(key));
+        return getObjectFieldNames().contains(key);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        for (MetaField mf : getMetaFields()) {
-            if (value == null && mf.getObject(this) == null) {
+
+        for( String name : getObjectFieldNames() ) {
+            if (value == null && getObject(name) == null) {
                 return true;
             }
-            if (value != null && value.equals(mf.getObject(this))) {
+            if (value != null && value.equals(getObject(name))) {
                 return true;
             }
         }
         return false;
     }
 
+
     /**
      * Creates a Map.Entry for a specific MetaField and Object
      */
-    public class MetaObjectEntry implements Map.Entry<String, Object> {
+    public class AttributeEntry implements Map.Entry<String, Object> {
 
-        private MetaField mf = null;
-        private Object o = null;
+        private String attr = null;
 
-        public MetaObjectEntry(MetaField mf, Object o) {
-            this.o = o;
-            this.mf = mf;
+        public AttributeEntry(String attr) {
+            this.attr = attr;
         }
 
         @Override
         public String getKey() {
-            return mf.getName();
+            return attr;
         }
 
         @Override
         public Object getValue() {
-            return mf.getObject(o);
+            return getObject(attr);
         }
 
         @Override
         public Object setValue(Object value) {
-            Object old = mf.getObject(o);
-            mf.setObject(o, value);
+            Object old = getObject(attr);
+            setObject(attr,value);
             return old;
         }
     }
@@ -507,43 +655,36 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     public Set<java.util.Map.Entry<String, Object>> entrySet() {
 
         Set<java.util.Map.Entry<String, Object>> s = new HashSet<java.util.Map.Entry<String, Object>>();
-        for (MetaField mf : getMetaFields()) {
-            s.add(new MetaObjectEntry(mf, this));
+        for (String name : getObjectFieldNames()) {
+            s.add(new AttributeEntry(name));
         }
         return s;
     }
 
     @Override
     public Object get(Object key) {
-        MetaField mf = getMetaField(String.valueOf(key));
-        if (mf == null) {
-            return null;
-        }
-        return mf.getObject(this);
+        return getObject(String.valueOf(key));
     }
 
     @Override
     public boolean isEmpty() {
-        return getMetaFields().size() == 0;
+        if ( getObjectFieldNames().size() == 0 ) return true;
+        for ( String key : mAttributes.keySet() ) {
+            if ( mAttributes.get(key).getValue() != null ) return false;
+        }
+        return true;
     }
 
     @Override
     public Set<String> keySet() {
-        Set<String> s = new HashSet<String>();
-        for (MetaField mf : getMetaFields()) {
-            s.add(mf.getName());
-        }
-        return s;
+        return new HashSet<String>( getObjectFieldNames() );
     }
 
     @Override
     public Object put(String key, Object value) {
-        MetaField mf = getMetaField(String.valueOf(key));
-        if (mf == null) {
-            return null;
-        }
-        mf.setObject(this, value);
-        return mf.getObject(this);
+        Object old = getObject( key );
+        setObject( key, value );
+        return old;
     }
 
     @Override
@@ -555,25 +696,19 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
 
     @Override
     public Object remove(Object key) {
-        MetaField mf = getMetaField(String.valueOf(key));
-        if (mf == null) {
-            return null;
-        }
-        Object o = mf.getObject(key);
-        mf.setObject(this, null);
-        return o;
+        return mAttributes.remove(key);
     }
 
     @Override
     public int size() {
-        return getMetaFields().size();
+        return getObjectFieldNames().size();
     }
 
     @Override
     public Collection<Object> values() {
         Collection<Object> s = new ArrayList<Object>();
-        for (MetaField mf : getMetaFields()) {
-            s.add(mf.getObject(this));
+        for (String name : getObjectFieldNames()) {
+            s.add(getObject(name));
         }
         return s;
     }
