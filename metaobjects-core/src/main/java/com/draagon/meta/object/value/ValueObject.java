@@ -336,15 +336,20 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
      * Retrieves an attribute of the MetaObject
      */
     public Object getObjectAttribute(String name) {
-        Value v = (Value) getObjectAttributeValue(name);
-        return v.getValue();
+        Value v = mAttributes.get(name);
+        if ( v != null ) {
+            return v.getValue();
+        }
+        else {
+            return null;
+        }
     }
 
     /**
      * Returns the Value object which contains the actual value and information
      * about when it was created and when it was last modified.
      */
-    protected Value getObjectAttributeValue(String name) //throws ValueException
+    protected Value getObjectAttributeValue(String name ) //throws ValueException
     {
         // Force an exception if extensions are not allowed and the MetaField didn't exist
         if ( !allowExtensions ) getMetaData().getMetaField( name );
