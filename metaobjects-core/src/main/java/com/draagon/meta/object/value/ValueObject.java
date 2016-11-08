@@ -380,7 +380,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     // PRIMITIVE SETTER VALUES
     public void setBoolean(String name, boolean value) //throws ValueException
     {
-        setBoolean(name, value );
+        setBoolean(name, new Boolean( value ));
     }
 
     public void setByte(String name, byte value) //throws MetaException
