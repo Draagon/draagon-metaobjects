@@ -348,7 +348,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             String line;
             while( (line = in.readLine()) != null ) {
                 if (!line.trim().isEmpty()) {
-                    loadFromXMLFile( line.trim() );
+                    loadFromFile( line.trim() );
                 }
             }
 
