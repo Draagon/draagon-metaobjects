@@ -115,6 +115,18 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         return typesRef;
     }
 
+    /** Initialize with the metadata source being set */
+    public void init( String source ) {
+        setSource( source );
+        init();
+    }
+
+    /** Initialize with the metadata sources being set */
+    public void init( List<String> sources ) {
+        setSources( sources );
+        init();
+    }
+
     @Override
     public void init() {
 
