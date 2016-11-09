@@ -118,7 +118,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     @Override
     public void init() {
 
-        if (getSources() == null) {
+        if ( sources == null || sources.isEmpty() ) {
             throw new IllegalStateException("No Metadata Sources defined");
         }
 
@@ -136,13 +136,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         // Load all the Meta sources
         for (Iterator<String> i = sources.iterator(); i.hasNext();) {
             String source = i.next();
-
-            //try {
-                loadFromFile(source);
-            //} catch (MetaException e) {
-                //log.error("Initialization of MetaDataLoader [" + source + "] failed: " + e.getMessage());
-                //throw new IllegalStateException("Initialization of MetaDataLoader [" + source + "] failed: " + e.getMessage(), e);
-            //}
+            loadFromFile(source);
         }
     }
 
@@ -331,15 +325,61 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         //}
     }
 
+    public void loadFromFile(String file) throws MetaException {
+
+        if ( file.endsWith( ".xml" )) {
+            loadFromXMLFile( file );
+        } else if ( file.endsWith( ".bundle" )){
+            loadFromBundleFile( file );
+        } else {
+            log.error( "Unknown metadata file type [" + file + "], so ignoring..." );
+        }
+    }
+
     /**
      * Loads all the classes specified in the Filename
      */
-    public void loadFromFile(String file) throws MetaException {
+    protected void loadFromBundleFile(String file) throws MetaException {
+
+        try {
+            LineNumberReader in = new LineNumberReader( new InputStreamReader(getInputStream(file)));
+
+            // Read each line in the file, and attempt to load it (including bundles)
+            String line;
+            while( (line = in.readLine()) != null ) {
+                if (!line.trim().isEmpty()) {
+                    loadFromXMLFile( line.trim() );
+                }
+            }
+
+            // Close the bundle
+            in.close();
+        } catch( IOException e ) {
+            throw new MetaException( "Error reading metadata bundle [" + file + "]: " + e.getMessage(), e );
+        }
+    }
+
+    /**
+     * Loads all the classes specified in the Filename
+     */
+    protected void loadFromXMLFile(String file) throws MetaException {
         
         // LOAD THE XML FILE
         if (file == null) {
             throw new MetaException("The Meta XML file was not specified");
         }
+
+        try {
+            InputStream is = getInputStream(file);
+            loadFromStream(is);
+        } 
+        catch (MetaException e) {
+            throw new MetaException("The Meta XML file [" + file + "] could not be loaded: " + e.getMessage(), e);
+        }
+    }
+
+    /** Get the InputStream for the file */
+    protected InputStream getInputStream( String file ) {
 
         InputStream is = null;
 
@@ -348,30 +388,21 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             try {
                 is = new FileInputStream(f);
             } catch (Exception e) {
-                log.error("Can not read Meta XML file [" + file + "]: " + e.getMessage());
-                throw new MetaException("Can not read Meta XML file [" + file + "]", e);
+                log.error("Can not read Metadata file [" + file + "]: " + e.getMessage());
+                throw new MetaException("Can not read Metadata file [" + file + "]: " + e.getMessage(), e);
             }
-        } 
+        }
         else {
             is = getClass().getClassLoader().getResourceAsStream(file);
             if (is == null) {
-                log.error("Meta XML file [" + file + "] does not exist");
-                throw new MetaException("The Meta XML item file [" + file + "] was not found");
+                log.error("Metadata file [" + file + "] was not found");
+                throw new MetaException("The Metadata file [" + file + "] was not found");
             }
         }
 
-        try {
-            loadFromStream(is);
-        } 
-        catch (MetaException e) {
-            //log.error("Meta XML file [" + file + "]: " + e.getMessage());
-            throw new MetaException("The Meta XML file [" + file + "] could not be loaded: " + e.getMessage(), e);
-        } 
-        //catch (MetaDataException e) {
-        //    log.error("Meta XML file [" + file + "]: " + e.getMessage());
-        //    throw new MetaException("The Meta XML file [ " + file + "] could not be loaded: " + e.getMessage(), e);
-        //}
+        return is;
     }
+
 
     /**
      * Loads all the classes specified in the Filename
