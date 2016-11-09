@@ -7,6 +7,7 @@
 package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.*;
 import com.draagon.meta.loader.MetaDataLoader;
@@ -623,7 +624,6 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             if ( md instanceof MetaAttribute ) {
                 parseMetaAttributeValue( (MetaAttribute) md, el );
             }
-            
             // otherwide, parse as normal recursively
             else {
                 // Parse any extra attributes
@@ -631,10 +631,22 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 
                 // Parse the sub elements
                 parseMetaData( packageName, md, el, false );
+
+                // If it's a MetaField, set the defaultValue too
+                if ( md instanceof MetaField) {
+                    setDefaultValue( (MetaField) md );
+                }
             }
         }
     }
-    
+
+    /** Set the default value on the MetaField */
+    protected void setDefaultValue(MetaField md) {
+        if ( md.hasAttribute( MetaField.ATTR_DEF_VAL )) {
+            md.setDefaultValue( String.valueOf( md.getAttribute( MetaField.ATTR_DEF_VAL )));
+        }
+    }
+
     /**
      * Parses actual element attributes and adds them as StringAttributes
      */

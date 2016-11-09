@@ -40,6 +40,7 @@ public abstract class MetaField extends MetaData
     public final static String ATTR_LEN           = "len";
     public final static String ATTR_VALIDATION    = "validation";
     public final static String ATTR_DEFAULT_VIEW  = "defaultView";
+    public final static String ATTR_DEF_VAL  = "defVal";
 
     //private int mType = 0;
     private Object mDefaultValue = null;
@@ -49,6 +50,7 @@ public abstract class MetaField extends MetaData
         super( name );
         addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
         addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
+        addAttributeDef( new AttributeDef( ATTR_DEF_VAL, String.class, false, "Default value for the MetaField" ));
     }
     
     /**
