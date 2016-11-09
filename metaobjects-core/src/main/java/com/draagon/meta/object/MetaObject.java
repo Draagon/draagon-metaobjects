@@ -15,6 +15,9 @@ import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -266,30 +269,41 @@ public abstract class MetaObject extends MetaData {
         try {
             oc = getObjectClass();
             if (oc == null) {
-                throw new MetaDataException("Not Object Class was found");
+                throw new MetaDataException("No Object Class was found on MetaObject [" + getName() + "]");
             }
         } catch (ClassNotFoundException e) {
-            throw new MetaDataException("Could find Object Class for MetaObject [" + toString() + "]", e);
+            throw new MetaDataException("Could find Object Class for MetaObject [" + getName() + "]: " + e.getMessage(), e);
         }
 
         try {
             if (oc.isInterface()) {
-                throw new IllegalArgumentException("Can not instantiate an Interface for MetaObject [" + toString() + "]");
+                throw new IllegalArgumentException("Can not instantiate an Interface for MetaObject [" + getName() + "]");
             }
 
-            Object o = oc.newInstance();
+            Object o = null;
 
-            // Attach the MetaObject
-            attachMetaObject(o);
+            try {
+                // Construct the object and pass the MetaObject into the constructor
+                Constructor c = oc.getConstructor( MetaObject.class );
+                o = c.newInstance(this);
+            }
+            catch (NoSuchMethodException e) {
+                // Construct with no arguments && attach the metaobject
+                o = oc.newInstance();
+                attachMetaObject(o);
+            }
+            catch (InvocationTargetException e) {
+                throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+            }
 
             // Set the Default Values
             setDefaultValues(o);
 
             return o;
         } catch (InstantiationException e) {
-            throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + toString() + "]", e);
+            throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Illegal Access Exception instantiating a new Object for MetaObject [" + toString() + "]", e);
+            throw new RuntimeException("Illegal Access Exception instantiating a new Object for MetaObject [" + getName() + "]: " + e.getMessage(), e);
         }
     }
 
