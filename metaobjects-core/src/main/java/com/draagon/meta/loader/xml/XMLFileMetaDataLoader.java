@@ -6,35 +6,29 @@
  */
 package com.draagon.meta.loader.xml;
 
+import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.*;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.util.xml.XMLFileReader;
 import com.draagon.meta.attr.StringAttribute;
-//import com.draagon.meta.field.StringField;
-//import com.draagon.meta.object.value.ValueMetaObject;
-
-import java.util.Hashtable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.object.MetaObjectNotFoundException;
+import com.draagon.util.xml.XMLFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.w3c.dom.CharacterData;
 import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+//import com.draagon.meta.field.StringField;
+//import com.draagon.meta.object.value.ValueMetaObject;
 //import org.xml.sax.InputSource;
 //import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
 
 /**
  * Meta Class loader for XML files
@@ -84,6 +78,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     private String typesRef = null;
     private boolean typesLoaded = false;
     private final ConcurrentHashMap<String, MetaDataTypes> typesMap = new ConcurrentHashMap<String,MetaDataTypes>();
+    private String sourceDir = null;
     private final List<String> sources = new ArrayList<String>();
 
     public XMLFileMetaDataLoader() {
@@ -93,6 +88,15 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         // TODO:  Read all XML files in the path
         //this.sources = sources;
     }*/
+
+    public void setSourceDir( String dir ) {
+        sourceDir = dir;
+        if ( !sourceDir.endsWith( "/" )) sourceDir += "/";
+    }
+
+    public String getSourceDir() {
+        return sourceDir;
+    }
     
     public void setSource( String source ) {
         this.sources.add( source );
@@ -164,7 +168,10 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
         InputStream is = null;
 
-        File f = new File(file);
+        // See if the filename exists
+        String fn = (sourceDir==null) ? file : sourceDir + file;
+        File f = new File(fn);
+
         if (f.exists()) {
             try {
                 is = new FileInputStream(f);
@@ -395,7 +402,10 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
         InputStream is = null;
 
-        File f = new File(file);
+        // See if the filename exists
+        String fn = (sourceDir==null) ? file : sourceDir + file;
+        File f = new File(fn);
+
         if (f.exists()) {
             try {
                 is = new FileInputStream(f);
