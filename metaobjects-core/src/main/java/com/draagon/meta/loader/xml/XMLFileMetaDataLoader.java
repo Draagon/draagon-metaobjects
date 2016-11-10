@@ -366,7 +366,8 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             // Read each line in the file, and attempt to load it (including bundles)
             String line;
             while( (line = in.readLine()) != null ) {
-                if (!line.trim().isEmpty()) {
+                if (!line.trim().isEmpty()
+                        && !line.trim().startsWith("#")) {
                     loadFromFile( line.trim() );
                 }
             }
