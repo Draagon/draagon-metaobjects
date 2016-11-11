@@ -15,7 +15,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ByteField extends MetaField {
+public class ByteField extends MetaField<Byte> {
     //private static Log log = LogFactory.getLog( ByteField.class );
 
     public ByteField(String name) {

@@ -15,7 +15,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class IntegerField extends MetaField {
+public class IntegerField extends MetaField<Integer> {
     //private static Log log = LogFactory.getLog( IntegerField.class );
 
     public IntegerField(String name) {

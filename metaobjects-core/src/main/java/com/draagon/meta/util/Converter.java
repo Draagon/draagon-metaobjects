@@ -1,6 +1,8 @@
 package com.draagon.meta.util;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.draagon.meta.field.MetaFieldTypes;
 
@@ -16,24 +18,100 @@ public final class Converter
 	 */
 	private Converter()
 	{
-	} // Converter
-	
+	}
+
+	/** Converts the object to the specified MetaFieldType */
 	public static Object toType( int type, Object val ) {
 		
 		switch( type ) {
-		case MetaFieldTypes.BOOLEAN: return toBoolean( val );
-		case MetaFieldTypes.BYTE: return toByte( val );
-		case MetaFieldTypes.SHORT: return toShort( val );
-		case MetaFieldTypes.INT: return toInt( val );
-		case MetaFieldTypes.LONG: return toLong( val );
-		case MetaFieldTypes.FLOAT: return toFloat( val );
-		case MetaFieldTypes.DOUBLE: return toDouble( val );
-		case MetaFieldTypes.STRING: return toString( val );
-		case MetaFieldTypes.DATE: return toDate( val );
-		case MetaFieldTypes.OBJECT: return val;		
+			case MetaFieldTypes.BOOLEAN: return toBoolean( val );
+			case MetaFieldTypes.BYTE: return toByte( val );
+			case MetaFieldTypes.SHORT: return toShort( val );
+			case MetaFieldTypes.INT: return toInt( val );
+			case MetaFieldTypes.LONG: return toLong( val );
+			case MetaFieldTypes.FLOAT: return toFloat( val );
+			case MetaFieldTypes.DOUBLE: return toDouble( val );
+			case MetaFieldTypes.STRING: return toString( val );
+			case MetaFieldTypes.DATE: return toDate( val );
+			case MetaFieldTypes.OBJECT: return toObject( val );
+
+			case MetaFieldTypes.BOOLEAN_ARRAY: return unsupported(type,val);//toBooleanArray( val );
+			case MetaFieldTypes.BYTE_ARRAY: return unsupported(type,val);//toByteArray( val );
+			case MetaFieldTypes.SHORT_ARRAY: return unsupported(type,val);//toShortArray( val );
+			case MetaFieldTypes.INT_ARRAY: return unsupported(type,val);//toIntArray( val );
+			case MetaFieldTypes.LONG_ARRAY: return unsupported(type,val);//toLongArray( val );
+			case MetaFieldTypes.FLOAT_ARRAY: return unsupported(type,val);//toFloatArray( val );
+			case MetaFieldTypes.DOUBLE_ARRAY: return unsupported(type,val);//toDoubleArray( val );
+			case MetaFieldTypes.STRING_ARRAY: return toStringArray( val );
+			case MetaFieldTypes.DATE_ARRAY: return unsupported(type,val);//toDateArray( val );
+			case MetaFieldTypes.OBJECT_ARRAY: return toObjectArray( val );
+
+			case MetaFieldTypes.CLOB: return unsupported(type,val);//toClob( val );
+			case MetaFieldTypes.BLOB: return unsupported(type,val);//toBlob( val );
+			case MetaFieldTypes.XML: return unsupported(type,val);//toXml( val );
+			case MetaFieldTypes.JSON: return unsupported(type,val);//toJson( val );
+			case MetaFieldTypes.HTML5: return unsupported(type,val);//toHtml5( val );
+
+			case MetaFieldTypes.CUSTOM: throw new IllegalStateException( "Cannot convert to a custom type, value passed: [" + val + "]" );
+
+			default: throw new IllegalStateException( "Unknown type (" + type + "), cannot convert object [" + val + "]" );
 		}
-		
-		return val;
+	}
+
+	/** Convert to an Object, if a list returns null if empty, or object if length of 1, otherwise an exception */
+	public static List<String> toStringArray( Object val ) {
+
+		if ( val == null ) {
+			return null;
+		}
+		else if (val instanceof List) {
+			return (List) val;
+		}
+		else if ( val instanceof String ) {
+			List<String> list = new ArrayList<>();
+			for( String s : ((String) val).split(",")) {
+				list.add( s );
+			}
+			return list;
+		}
+		else {
+			List<String> l = new ArrayList();
+			l.add( toString( val ));
+			return l;
+		}
+	}
+
+	/** Convert to an Object, if a list returns null if empty, or object if length of 1, otherwise an exception */
+	public static List toObjectArray( Object val ) {
+		if ( val == null ) {
+			return null;
+		}
+		else if (val instanceof List) {
+			return (List) val;
+		}
+		else {
+			List l = new ArrayList();
+			l.add( val );
+			return l;
+		}
+	}
+
+	protected static Object unsupported( int type, Object val ) {
+		if ( val == null ) return null;
+		throw new UnsupportedOperationException( "Cannot currently support converting an Object ["+val+"] to type ("+type+")" );
+	}
+
+	/** Convert to an Object, if a list returns null if empty, or object if length of 1, otherwise an exception */
+	public static Object toObject( Object val ) {
+		if (val instanceof List) {
+			List l = (List) val;
+			if ( l.size() == 0 ) return null;
+			else if ( l.size() == 1 ) return l.get(0);
+			else throw new IllegalStateException( "Cannot convert List to to Object as it contains more than 1 value" );
+		}
+		else {
+			return val;
+		}
 	}
 	
 	/**

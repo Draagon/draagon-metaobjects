@@ -19,7 +19,7 @@ import com.draagon.meta.object.MetaObjectNotFoundException;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ObjectField extends MetaField {
+public class ObjectField extends MetaField<Object> {
     //private static Log log = LogFactory.getLog( ObjectField.class );
 
     /**
@@ -48,25 +48,31 @@ public class ObjectField extends MetaField {
     /**
      * Return the specified MetaObject
      */
-    public MetaObject getMetaObject() //throws MetaFieldNotFoundException
+    public MetaObject getObjectRef() //throws MetaFieldNotFoundException
     {
-        final String KEY = "getMetaObject()";
+        return getObjectRef(this);
+    }
 
-        MetaObject o = (MetaObject) getCacheValue(KEY);
+    /** Gets the MetaObject referenced by this field */
+    static MetaObject getObjectRef( MetaField f ) {
+
+        final String KEY = "getObjectRef()";
+
+        MetaObject o = (MetaObject) f.getCacheValue(KEY);
 
         if (o == null) {
 
-            Object a = getAttribute( ATTR_OBJECT_REF );
+            Object a = f.getAttribute( ATTR_OBJECT_REF );
             if ( a != null ) {
                 String name = a.toString();
 
                 try {
                     o = MetaDataLoader.findMetaDataByName( MetaObject.class, name);
                 } catch (MetaDataNotFoundException e) {
-                    throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaField [" + toString() + "] does not exist", name);
+                    throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaField [" + f.toString() + "] does not exist", name);
                 }
 
-                setCacheValue(KEY, o);
+                f.setCacheValue(KEY, o);
             }
         }
 

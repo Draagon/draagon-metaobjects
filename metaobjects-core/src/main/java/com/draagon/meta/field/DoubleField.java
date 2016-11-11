@@ -16,7 +16,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class DoubleField extends MetaField
+public class DoubleField extends MetaField<Double>
 {
     public DoubleField( String name ) {
         super(name);

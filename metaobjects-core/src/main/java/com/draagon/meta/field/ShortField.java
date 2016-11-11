@@ -15,7 +15,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ShortField extends MetaField {
+public class ShortField extends MetaField<Short> {
     //private static Log log = LogFactory.getLog( ShortField.class );
 
     public ShortField(String name) {

@@ -32,25 +32,24 @@ import java.util.List;
  * @version 2.0
  * @author Doug Mealing
  */
-public abstract class MetaField extends MetaData
-  implements MetaFieldTypes
+public abstract class MetaField<T> extends MetaData implements MetaFieldTypes
 {
     //private static Log log = LogFactory.getLog( MetaField.class );
 
-    public final static String ATTR_LEN           = "len";
-    public final static String ATTR_VALIDATION    = "validation";
-    public final static String ATTR_DEFAULT_VIEW  = "defaultView";
-    public final static String ATTR_DEF_VAL  = "defVal";
+    public final static String ATTR_LEN             = "len";
+    public final static String ATTR_VALIDATION      = "validation";
+    public final static String ATTR_DEFAULT_VIEW    = "defaultView";
+    public final static String ATTR_DEFAULT_VALUE   = "defaultValue";
 
     //private int mType = 0;
-    private Object mDefaultValue = null;
+    private T mDefaultValue = null;
     private int mLength = -1;
 
     public MetaField( String name ) {
         super( name );
         addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
         addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
-        addAttributeDef( new AttributeDef( ATTR_DEF_VAL, String.class, false, "Default value for the MetaField" ));
+        addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
     }
     
     /**
@@ -98,34 +97,53 @@ public abstract class MetaField extends MetaData
     public void setDefaultValue( Object defVal )
       //throws MetaException
     {
-      if ( !getValueClass().isInstance( defVal ))
-      {
-        String def = defVal.toString();
+        if (!getValueClass().isInstance(defVal)) {
 
-        // Massage data if needed
-        switch( getType() )
-        {
-          case BOOLEAN: defVal = Boolean.valueOf( def ); break;
-          case BYTE:    defVal = Byte.valueOf( def ); break;
-          case SHORT:   defVal = Short.valueOf( def ); break;
-          case INT:     defVal = Integer.valueOf( def ); break;
-          case LONG:    defVal = Long.valueOf( def ); break;
-          case FLOAT:   defVal = Float.valueOf( def ); break;
-          case DOUBLE:  defVal = Double.valueOf( def ); break;
-          case STRING:  defVal = def; break;
-          case DATE:    defVal = new Date( Long.parseLong( def )); break;
-          //default:
-          //  throw new MetaException( "Default value [" + defVal + "] is not a supported value class" );
+            // Convert as needed
+            defVal = (T) Converter.toType(getType(), defVal);
+            String def = defVal.toString();
+
+            // Massage data if needed
+           /* switch (getType()) {
+                case BOOLEAN:
+                    defVal = Boolean.valueOf(def);
+                    break;
+                case BYTE:
+                    defVal = Byte.valueOf(def);
+                    break;
+                case SHORT:
+                    defVal = Short.valueOf(def);
+                    break;
+                case INT:
+                    defVal = Integer.valueOf(def);
+                    break;
+                case LONG:
+                    defVal = Long.valueOf(def);
+                    break;
+                case FLOAT:
+                    defVal = Float.valueOf(def);
+                    break;
+                case DOUBLE:
+                    defVal = Double.valueOf(def);
+                    break;
+                case STRING:
+                    defVal = def;
+                    break;
+                case DATE:
+                    defVal = new Date(Long.parseLong(def));
+                    break;
+                //default:
+                //  throw new MetaException( "Default value [" + defVal + "] is not a supported value class" );
+            }*/
         }
-      }
 
-      mDefaultValue = defVal;
+        mDefaultValue = (T) defVal;
     }
 
     /**
      * Gets the default field value
      */
-    public Object getDefaultValue()
+    public T getDefaultValue()
     {
       return mDefaultValue;
     }

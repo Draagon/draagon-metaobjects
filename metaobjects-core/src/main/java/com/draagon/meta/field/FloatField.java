@@ -15,7 +15,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class FloatField extends MetaField {
+public class FloatField extends MetaField<Float> {
     //private static Log log = LogFactory.getLog( FloatField.class );
 
     public FloatField(String name) {

@@ -17,7 +17,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class BooleanField extends MetaField {
+public class BooleanField extends MetaField<Boolean> {
     //private static Log log = LogFactory.getLog( BooleanField.class );
 
     public BooleanField(String name) {

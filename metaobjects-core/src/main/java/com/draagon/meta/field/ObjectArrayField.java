@@ -20,13 +20,13 @@ import java.util.List;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ObjectArrayField extends MetaField {
+public class ObjectArrayField extends ArrayField<List<Object>> {
     //private static Log log = LogFactory.getLog( ObjectField.class );
 
     /**
      * MetaObject name attribute
      */
-    public final static String ATTR_OBJECT_REF = "objectRef";
+    public final static String ATTR_OBJECT_REF = ObjectField.ATTR_OBJECT_REF;
 
     public ObjectArrayField(String name) {
         super(name);
@@ -46,31 +46,17 @@ public class ObjectArrayField extends MetaField {
         return List.class;
     }
 
+    /** Return the Class type for items in the array */
+    @Override
+    public Class getItemClass() {
+        return Object.class;
+    }
+
     /**
      * Return the specified MetaObject
      */
-    public MetaObject getMetaObject() //throws MetaFieldNotFoundException
+    public MetaObject getObjectRef() //throws MetaFieldNotFoundException
     {
-        final String KEY = "getMetaObject()";
-
-        MetaObject o = (MetaObject) getCacheValue(KEY);
-
-        if (o == null) {
-
-            Object a = getAttribute( ATTR_OBJECT_REF );
-            if ( a != null ) {
-                String name = a.toString();
-
-                try {
-                    o = MetaDataLoader.findMetaDataByName( MetaObject.class, name);
-                } catch (MetaDataNotFoundException e) {
-                    throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaField [" + toString() + "] does not exist", name);
-                }
-
-                setCacheValue(KEY, o);
-            }
-        }
-
-        return o;
+        return ObjectField.getObjectRef(this);
     }
 }

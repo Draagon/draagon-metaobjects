@@ -17,7 +17,7 @@ import java.util.Date;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class DateField extends MetaField {
+public class DateField extends MetaField<Date> {
     
     //private static Log log = LogFactory.getLog( DateField.class );
     public DateField( String name ) {

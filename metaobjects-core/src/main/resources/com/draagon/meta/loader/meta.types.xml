@@ -2,35 +2,52 @@
 <types>
   
   <attr class="com.draagon.meta.attr.MetaAttribute">
-    <type name="string"      class="com.draagon.meta.attr.StringAttribute" default="true"/>
-    <type name="properties"  class="com.draagon.meta.attr.PropertiesAttribute" />
-    <type name="class"       class="com.draagon.meta.attr.ClassAttribute" />
+    <type name="string"       class="com.draagon.meta.attr.StringAttribute" default="true"/>
+    <type name="properties"   class="com.draagon.meta.attr.PropertiesAttribute" />
+    <type name="class"        class="com.draagon.meta.attr.ClassAttribute" />
   </attr>
 
   <object class="com.draagon.meta.object.MetaObject">
-    <type name="value"       class="com.draagon.meta.object.value.ValueMetaObject"  default="true"/>
-    <type name="pojo"        class="com.draagon.meta.object.pojo.PojoMetaObject" />
+    <type name="value"        class="com.draagon.meta.object.value.ValueMetaObject"  default="true"/>
+    <type name="pojo"         class="com.draagon.meta.object.pojo.PojoMetaObject" />
   </object>
 
   <field class="com.draagon.meta.field.MetaField">
-    <type name="boolean"     class="com.draagon.meta.field.BooleanField" />
-    <type name="byte"        class="com.draagon.meta.field.ByteField" />
-    <type name="short"       class="com.draagon.meta.field.ShortField" />
-    <type name="int"         class="com.draagon.meta.field.IntegerField" />
-    <type name="long"        class="com.draagon.meta.field.LongField" />
-    <type name="float"       class="com.draagon.meta.field.FloatField" />
-    <type name="double"      class="com.draagon.meta.field.DoubleField" />
-    <type name="string"      class="com.draagon.meta.field.StringField" default="true"/>
-    <type name="date"        class="com.draagon.meta.field.DateField" />
-    <type name="object"      class="com.draagon.meta.field.ObjectField" />
-    <type name="objectArray" class="com.draagon.meta.field.ObjectArrayField" />
+    <type name="boolean"      class="com.draagon.meta.field.BooleanField" />
+    <type name="byte"         class="com.draagon.meta.field.ByteField" />
+    <type name="short"        class="com.draagon.meta.field.ShortField" />
+    <type name="int"          class="com.draagon.meta.field.IntegerField" />
+    <type name="long"         class="com.draagon.meta.field.LongField" />
+    <type name="float"        class="com.draagon.meta.field.FloatField" />
+    <type name="double"       class="com.draagon.meta.field.DoubleField" />
+    <type name="string"       class="com.draagon.meta.field.StringField" default="true"/>
+    <type name="date"         class="com.draagon.meta.field.DateField" />
+
+    <!-- type name="booleanArray" class="com.draagon.meta.field.BooleanArrayField" />
+    <type name="byteArray"    class="com.draagon.meta.field.ByteArrayField" />
+    <type name="intArray"     class="com.draagon.meta.field.IntegerArrayField" />
+    <type name="longArray"    class="com.draagon.meta.field.LongArrayField" />
+    <type name="floatArray"   class="com.draagon.meta.field.FloatArrayField" />
+    <type name="doubleArray"  class="com.draagon.meta.field.DoubleArrayField" / -->
+    <type name="stringArray"  class="com.draagon.meta.field.StringArrayField"/>
+    <!-- type name="dateArray"    class="com.draagon.meta.field.DateArrayField" /-->
+
+    <type name="object"       class="com.draagon.meta.field.ObjectField" />
+    <type name="objectArray"  class="com.draagon.meta.field.ObjectArrayField" />
+
+    <!-- type name="clob"         class="com.draagon.meta.field.ClobField" />
+    <type name="blob"         class="com.draagon.meta.field.BlobField" />
+    <type name="xml"          class="com.draagon.meta.field.XmlField" />
+    <type name="json"         class="com.draagon.meta.field.JsonField" />
+    <type name="html5"        class="com.draagon.meta.field.Html5Field" /-->
+
   </field>
 
   <validator class="com.draagon.meta.validator.MetaValidator">
-    <type name="required"    class="com.draagon.meta.validator.RequiredValidator" default="true"/>
-    <type name="mask"        class="com.draagon.meta.validator.MaskValidator" />
-    <type name="numeric"     class="com.draagon.meta.validator.NumericValidator" />
-    <type name="length"      class="com.draagon.meta.validator.LengthValidator" />
+    <type name="required"     class="com.draagon.meta.validator.RequiredValidator" default="true"/>
+    <type name="mask"         class="com.draagon.meta.validator.RegexValidator" />
+    <type name="numeric"      class="com.draagon.meta.validator.NumericValidator" />
+    <type name="length"       class="com.draagon.meta.validator.LengthValidator" />
   </validator>
   
 </types>

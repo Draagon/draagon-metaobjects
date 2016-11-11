@@ -15,14 +15,14 @@ import com.draagon.meta.*;
 import org.apache.commons.validator.GenericValidator;
 
 @SuppressWarnings("serial")
-public class MaskValidator extends MetaValidator
+public class RegexValidator extends MetaValidator
 {
-  //private static Log log = LogFactory.getLog( MaskValidator.class );
+  //private static Log log = LogFactory.getLog( RegexValidator.class );
 
   /** Mask attribute */
   public final static String ATTR_MASK = "mask";
 
-  public MaskValidator(String name ) {
+  public RegexValidator(String name ) {
     super(name);
     addAttributeDef( new AttributeDef( ATTR_MASK, String.class, true, "Validation mask" ));
   }
