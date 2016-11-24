@@ -4,12 +4,12 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
     <artifactId>metaobjects-demo</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>MetaObjects Fishstore Demo</name>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-omdb</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
+            <version>4.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
