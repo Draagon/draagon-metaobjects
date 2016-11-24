@@ -10,22 +10,21 @@
  */
 package com.draagon.meta.manager.db.test;
 
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.ObjectManagerDB;
 import com.draagon.meta.manager.db.driver.DerbyDriver;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLNonTransientConnectionException;
-import java.sql.Statement;
-import java.util.logging.Logger;
-import javax.sql.DataSource;
+import com.draagon.meta.manager.db.validator.MetaClassDBValidatorService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.util.logging.Logger;
 
 /**
  *
@@ -35,12 +34,21 @@ public class AbstractOMDBTest {
     
     protected static ObjectManagerDB omdb = null;
     protected static String dbFile = null;
+    protected static MetaDataLoader loader = null;
+
     protected ObjectConnection oc = null;
     
     @BeforeClass
     public static void setupDB() throws Exception {
                 
         if ( dbFile == null ) {
+
+            // Initialize the loader
+            XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test-db" );
+            xl.setSource( "meta.fruit.xml" );
+            xl.init();
+
+            loader = xl;
             
             dbFile = "omb-testing-"+System.currentTimeMillis();
             
@@ -99,6 +107,12 @@ public class AbstractOMDBTest {
             omdb.setDatabaseDriver( new DerbyDriver() );
             omdb.setDataSource( ds );
             omdb.init();
+
+            // Create the Tables
+            MetaClassDBValidatorService vs = new MetaClassDBValidatorService();
+            vs.setObjectManager( omdb );
+            vs.setAutoCreate( true );
+            vs.init();
         }        
     }
     
@@ -139,6 +153,8 @@ public class AbstractOMDBTest {
             DriverManager.getConnection("jdbc:derby:memory:"+dbFile+";drop=true");
         } catch( SQLNonTransientConnectionException ex ) {}
         System.out.println( "DB Destroyed!" );
+
+        loader.destroy();
     }
 
     @Before

@@ -127,8 +127,8 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
     public void setMetaData(MetaObject mc) {
         mMetaObject = mc;
 
-        if (mc.getClassLoader() != null) {
-            mLoaderName = mc.getClassLoader().getName();
+        if (mc.getLoader() != null) {
+            mLoaderName = mc.getLoader().getName();
         }
 
         mObjectName = mc.getName();
@@ -145,7 +145,7 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
         if (mMetaObject == null) {
             try {
                 if (mLoaderName != null) {
-                    MetaDataLoader mcl = MetaDataLoader.getClassLoader(mLoaderName);
+                    MetaDataLoader mcl = MetaDataLoader.getDataLoader(mLoaderName);
                     if (mcl != null) {
                         mMetaObject = mcl.getMetaDataByName( MetaObject.class, mObjectName);
                     }

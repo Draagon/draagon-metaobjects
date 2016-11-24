@@ -33,6 +33,7 @@ public abstract class MetaData implements Cloneable, Serializable {
 
     private MetaData superData = null;
     private WeakReference<MetaData> parentRef = null;
+    private MetaDataLoader loader = null;
 
     /**
      * Constructs the MetaData
@@ -42,6 +43,25 @@ public abstract class MetaData implements Cloneable, Serializable {
     }
     
     public abstract Class<? extends MetaData> getMetaDataClass();
+
+    /**
+     * Iterates up the Super Data until it finds the MetaDataLoader
+     */
+    public synchronized MetaDataLoader getLoader() {
+
+        if (loader == null) {
+            MetaData d = this;
+            while (d != null) {
+                if (d instanceof MetaDataLoader) {
+                    loader = (MetaDataLoader) d;
+                    break;
+                }
+                d = d.getParent();
+            }
+        }
+
+        return loader;
+    }
 
     ////////////////////////////////////////////////////
     // SETTER / GETTER METHODS

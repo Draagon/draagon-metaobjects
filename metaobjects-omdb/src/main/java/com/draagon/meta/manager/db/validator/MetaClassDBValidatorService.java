@@ -1,28 +1,18 @@
 package com.draagon.meta.manager.db.validator;
 
+import com.draagon.meta.MetaException;
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.manager.ObjectConnection;
+import com.draagon.meta.manager.db.*;
+import com.draagon.meta.manager.db.defs.*;
+import com.draagon.meta.object.MetaObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.MetaException;
-import com.draagon.meta.manager.db.MappingHandler;
-import com.draagon.meta.manager.ObjectConnection;
-import com.draagon.meta.manager.db.ObjectMapping;
-import com.draagon.meta.manager.db.DatabaseDriver;
-import com.draagon.meta.manager.db.ObjectManagerDB;
-import com.draagon.meta.manager.db.ObjectMappingDB;
-import com.draagon.meta.manager.db.defs.BaseDef;
-import com.draagon.meta.manager.db.defs.ColumnDef;
-import com.draagon.meta.manager.db.defs.ForeignKeyDef;
-import com.draagon.meta.manager.db.defs.IndexDef;
-import com.draagon.meta.manager.db.defs.TableDef;
-import com.draagon.meta.manager.db.defs.ViewDef;
 
 public class MetaClassDBValidatorService
 {
@@ -75,7 +65,7 @@ public class MetaClassDBValidatorService
       DatabaseDriver dd = getObjectManager().getDatabaseDriver();
       
       // Validate all Writeable (TABLE) MetaClasses
-      for( MetaDataLoader loader : MetaDataLoader.getClassLoaders() )
+      for( MetaDataLoader loader : MetaDataLoader.getDataLoaders() )
       {
     	// Verify the Mutable Mappings
         for( MetaObject mc : loader.getMetaObjects() )            

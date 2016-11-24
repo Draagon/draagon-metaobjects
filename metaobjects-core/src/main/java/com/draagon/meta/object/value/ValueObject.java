@@ -125,9 +125,9 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     }
     
     @Override
-    public void setMetaData(MetaObject mc) {
+    public void setMetaData(MetaObject mo) {
 
-        mMetaObject = mc;
+        mMetaObject = mo;
 
         // Flag that we have metadata set
         hasMetaData = true;
@@ -137,10 +137,10 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         metaFieldNamesCache = null;
 
         // Set these to handle serialization and re-attaching
-        if (mc.getClassLoader() != null) {
-            mLoaderName = mc.getClassLoader().getName();
+        if (mo.getLoader() != null) {
+            mLoaderName = mo.getLoader().getName();
         }
-        mObjectName = mc.getName();
+        mObjectName = mo.getName();
     }
 
     /**
@@ -172,11 +172,11 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         if ( mObjectName != null  ) {
             try {
                 if (mLoaderName != null) {
-                    MetaDataLoader mcl = MetaDataLoader.getClassLoader(mLoaderName);
+                    MetaDataLoader mcl = MetaDataLoader.getDataLoader(mLoaderName);
                     if (mcl != null) {
                         mMetaObject = mcl.getMetaDataByName(MetaObject.class, mObjectName);
                     } else {
-                        mMetaObject = mcl.findMetaDataByName(MetaObject.class, mObjectName);
+                        mMetaObject = MetaDataLoader.findMetaDataByName(MetaObject.class, mObjectName);
                     }
                 }
 

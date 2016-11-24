@@ -16,9 +16,11 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.Apple;
 import com.draagon.meta.test.Orange;
-import static org.junit.Assert.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -98,5 +100,10 @@ public class XMLMetaDataLoaderTest {
         assertEquals( "id", basket.getLong("id"), mo.getMetaField("id").getLong( basket ));
         assertEquals( "oranges", basket.getInt("oranges"), mo.getMetaField("oranges").getInt( basket ));
         assertEquals( "apples", basket.getInt("apples"), mo.getMetaField("apples").getInt( basket ));
+    }
+
+    @After
+    public void destroyLoader() throws Exception {
+        loader.destroy();
     }
 }

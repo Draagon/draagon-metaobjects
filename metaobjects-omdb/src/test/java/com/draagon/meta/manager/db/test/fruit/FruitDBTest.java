@@ -10,18 +10,16 @@
  */
 package com.draagon.meta.manager.db.test.fruit;
 
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
 import com.draagon.meta.manager.QueryOptions;
 import com.draagon.meta.manager.db.test.AbstractOMDBTest;
-import com.draagon.meta.manager.db.validator.MetaClassDBValidatorService;
 import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.managed.ManagedObject;
+import org.junit.Test;
+
 import java.util.Collection;
 import java.util.Date;
-import org.junit.Before;
-import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -29,28 +27,7 @@ import static org.junit.Assert.*;
  * @author dmealing
  */
 public class FruitDBTest extends AbstractOMDBTest {
-    
-    private MetaDataLoader loader = null;
-    
-    @Before
-    public void initLoader() throws Exception {
-                
-        // Initialize the loader
-        XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader();        
-        xl.setSource( "meta.fruit.xml" );        
-        xl.init();
-        
-        this.loader = xl;
-        
-        // Create the Tables
-        synchronized( omdb ) {
-            MetaClassDBValidatorService vs = new MetaClassDBValidatorService();
-            vs.setObjectManager( omdb );
-            vs.setAutoCreate( true );
-            vs.init();
-        }
-    }
-    
+
     @Test
     public void testApple() throws Exception {
         

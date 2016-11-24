@@ -18,7 +18,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 
 public abstract class MetaObject extends MetaData {
@@ -45,7 +44,7 @@ public abstract class MetaObject extends MetaData {
     }
 
     /**
-     * Returns the MetaObject for the specified Meta Class name
+     * Returns the MetaObject for the specified Meta Object name
      */
     public static MetaObject forName(String name) //throws MetaObjectNotFoundException
     {
@@ -71,38 +70,27 @@ public abstract class MetaObject extends MetaData {
     /**
      * Returns the MetaObjectLoader
      */
-    public MetaDataLoader getClassLoader() {
+    // Replaced by MetaData.getLoader()
+    /*public MetaDataLoader getClassLoader() {
         return (MetaDataLoader) getParent();
-    }
+    }*/
 
     /**
      * Sets the Super Class
      */
-    public void setSuperClass(MetaObject superClass) {
-        setSuperData(superClass);
+    public void setSuperObject(MetaObject superObject) {
+        setSuperData(superObject);
 
         // for each field, create a new one and attach the super field
     }
 
     /**
-     * Gets the Super Class
+     * Gets the Super Object
      */
-    public MetaObject getSuperClass() {
+    public MetaObject getSuperObject() {
         return (MetaObject) getSuperData();
     }
 
-    /**
-     * Retrieve the name of the MetaObject
-     */
-    /*public String getFullName()
-     {
-     if ( getPackage() != null && getPackage().length() > 0 )
-     {
-     return getPackage() + SEPARATOR + getName();
-     }
-     else
-     return getName();
-     }*/
     ////////////////////////////////////////////////////
     // FIELD METHODS
     /**
@@ -152,9 +140,9 @@ public abstract class MetaObject extends MetaData {
             try {
                 f = (MetaField) getChild(name, MetaField.class);
             } catch (MetaDataNotFoundException e) {
-                if (getSuperClass() != null) {
+                if (getSuperObject() != null) {
                     try {
-                        f = getSuperClass().getMetaField(name);
+                        f = getSuperObject().getMetaField(name);
                     } catch (MetaFieldNotFoundException ex) {
                     }
                 }

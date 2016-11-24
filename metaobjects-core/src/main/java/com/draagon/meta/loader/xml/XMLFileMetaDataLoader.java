@@ -82,6 +82,11 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     private final List<String> sources = new ArrayList<String>();
 
     public XMLFileMetaDataLoader() {
+        this( "xml-" + System.currentTimeMillis() );
+    }
+
+    public XMLFileMetaDataLoader( String name ) {
+        super( name );
     }
 
     /*public void setSourcePaths(List<String> sourcePaths) {
@@ -765,7 +770,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             // get the item name
             String name = itemElement.getAttribute(ATTR_NAME);
             if (name == null || name.equals("")) {
-                throw new MetaException("MetaClass had no name specfied in XML");
+                throw new MetaException("MetaObject had no name specfied in XML");
             }
 
             String packageName = itemElement.getAttribute("package");
@@ -773,7 +778,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 packageName = defaultPackageName;
             }
 
-            // Load or get the MetaClass
+            // Load or get the MetaObject
             MetaObject mc = null;
             boolean isNewClass = false;
 
@@ -801,15 +806,15 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                             superClass = getMetaData(packageName + MetaObject.SEPARATOR + superStr);
                         }
                     } catch (MetaObjectNotFoundException e) {
-                        log.debug("Could not find MetaClass [" + packageName + MetaObject.SEPARATOR + superStr + "], assuming fully qualified");
+                        log.debug("Could not find MetaObject [" + packageName + MetaObject.SEPARATOR + superStr + "], assuming fully qualified");
                     }
 
                     if (superClass == null) {
                         try {
                             superClass = getMetaData(superStr);
                         } catch (MetaObjectNotFoundException e) {
-                            log.error("Invalid MetaClass [" + mc + "], the SuperClass [" + superStr + "] does not exist");
-                            throw new MetaException("Invalid MetaClass [" + mc + "], the SuperClass [" + superStr + "] does not exist");
+                            log.error("Invalid MetaObject [" + mc + "], the SuperClass [" + superStr + "] does not exist");
+                            throw new MetaException("Invalid MetaObject [" + mc + "], the SuperClass [" + superStr + "] does not exist");
                         }
                     }
                 }
@@ -823,31 +828,31 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     if (typeName.equals("")) {
                         if (superClass != null) {
                             c = superClass.getClass();
-                        } else //c = BeanMetaClass.class;
+                        } else //c = BeanMetaObject.class;
                         {
-                            throw new MetaException("MetaClass [" + name + "] has no type defined");
+                            throw new MetaException("MetaObject [" + name + "] has no type defined");
                         }
                     } else {
                         c = (Class<?>) mClassTypes.get(typeName);
                         if (c == null) {
-                            throw new MetaException("MetaClass type [" + typeName + "] was not recognized");
+                            throw new MetaException("MetaObject type [" + typeName + "] was not recognized");
                         }
                     }
 
                     mc = (MetaObject) c.getConstructor(String.class).newInstance(packageName + MetaObject.SEPARATOR + name);
-                    //mc = (MetaClass) c.newInstance();
+                    //mc = (MetaObject) c.newInstance();
                 } catch (MetaException e) {
                     throw e;
                 } catch (Exception e) {
-                    log.error("Invalid MetaClass [" + c.getName() + "]: " + e.getMessage());
-                    throw new MetaException("Invalid MetaClass [" + c.getName() + "]", e);
+                    log.error("Invalid MetaObject [" + c.getName() + "]: " + e.getMessage());
+                    throw new MetaException("Invalid MetaObject [" + c.getName() + "]", e);
                 }
 
                 // Set the name and package name
-                //mc.setName( packageName + MetaClass.SEPARATOR + name );
+                //mc.setName( packageName + MetaObject.SEPARATOR + name );
                 //mc.setPackage( packageName );
 
-                mc.setSuperClass(superClass);
+                mc.setSuperObject(superClass);
             }
 
             // Parse and set the Attributes
@@ -873,9 +878,9 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 }
             }
 
-            // Add the MetaClass to the loader
+            // Add the MetaObject to the loader
             if (isNewClass) {
-                addMetaClass(mc);
+                addMetaObject(mc);
             }
         }
     }
@@ -890,7 +895,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
             // Get the field name
             if (name == null || name.equals("")) {
-                throw new MetaException("Field in MetaClass [" + mc + "] had no name");
+                throw new MetaException("Field in MetaObject [" + mc + "] had no name");
             }
 
             MetaField field = null;
@@ -913,20 +918,20 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
             // If there is no type or validator, then throw an exception
             if (classType == null && field == null) {
-                throw new MetaException("MetaField [" + name + "] of MetaClass [" + mc + "] had no type");
+                throw new MetaException("MetaField [" + name + "] of MetaObject [" + mc + "] had no type");
             }
 
             // If the field exists and is of the same class, then wrap it
             if (field != null
                     && (field.getClass() == classType || classType == null)) {
-                if (field.getDeclaringMetaClass() != mc) {
+                if (field.getDeclaringMetaObject() != mc) {
                     field = (MetaField) field.wrap();
                     isNewField = true;
                 }
             } // Otherwise, create a new field
             else {
                 if (field != null) {
-                    throw new MetaException("MetaField [" + name + "] of MetaClass [" + mc + "] is already defined as type [" + field.getClass() + "]");
+                    throw new MetaException("MetaField [" + name + "] of MetaObject [" + mc + "] is already defined as type [" + field.getClass() + "]");
                 }
 
                 try {

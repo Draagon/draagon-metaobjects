@@ -11,34 +11,33 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.MetaObjectNotFoundException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
+
+//import com.draagon.meta.object.MetaObjectNotFoundException;
 //import java.util.Iterator;
 
+/**
+ * Abstract MetaDataLoader with common functions for all MetaDataLoaders
+ */
 public abstract class MetaDataLoader extends MetaData {
 
     private final static Log log = LogFactory.getLog(MetaDataLoader.class);
     
     public final static String PKG_SEPARATOR = "::";
-    
-    private final static List<MetaDataLoader> metaClassLoaders = new CopyOnWriteArrayList<MetaDataLoader>();
+
+    private final static Map<String,MetaDataLoader> metaDataLoaders = Collections.synchronizedMap(new WeakHashMap<String,MetaDataLoader>());
     private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
 
-    public MetaDataLoader() {
-        super(null);
+    public MetaDataLoader( String name ) {
+        super(name);
         registerLoader(this);
     }
 
     public void init() {
-        log.info("Loading the [" + getClass().getSimpleName() + "] MetaClassLoader");
+        log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
     }
 
     /**
@@ -49,30 +48,30 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Retrieves the MetaClassLoader with the specified Name
+     * Retrieves the MetaDataLoader with the specified Name
      */
-    public static Collection<MetaDataLoader> getClassLoaders() {
-        return metaClassLoaders;
+    public static Collection<MetaDataLoader> getDataLoaders() {
+        return metaDataLoaders.values();
     }
 
     /**
-     * Retrieves the MetaClassLoader with the specified Name
+     * Retrieves the MetaDataLoader with the specified Name
      */
-    public static MetaDataLoader getClassLoader(String name) {
-        for (MetaDataLoader mcl : getClassLoaders()) {
-            if (name.equals(mcl.getName())) {
-                return mcl;
-            }
+    public static MetaDataLoader getDataLoader(String loaderName) {
+
+        MetaDataLoader l = metaDataLoaders.get(loaderName);
+        if (l == null) {
+            throw new MetaDataLoaderNotFoundException("No MetaDataLoader exists with name [" + loaderName + "]" );
         }
 
-        return null;
+        return l;
     }
 
     /**
-     * Retrieves the MetaClassLoader for the specified Object
+     * Retrieves the MetaDataLoader for the specified Object
      */
-    public static MetaDataLoader findClassLoader(Object obj) {
-        for (MetaDataLoader l : getClassLoaders()) {
+    public static MetaDataLoader findLoader(Object obj) {
+        for (MetaDataLoader l : getDataLoaders()) {
             if (l.handles(obj)) {
                 return l;
             }
@@ -82,7 +81,7 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Whether the MetaClassLoader handles the object specified
+     * Whether the MetaDataLoader handles the object specified
      */
     protected boolean handles(Object obj) {
         if (getMetaObjectFor(obj) != null) {
@@ -92,7 +91,7 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Retrieves the MetaClass for the specified Object
+     * Retrieves the MetaObject for the specified Object
      */
     public static MetaObject findMetaObject( Object obj ) throws MetaDataNotFoundException {
         
@@ -102,9 +101,9 @@ public abstract class MetaDataLoader extends MetaData {
             if ( mo != null ) return mo;
         }
 
-        MetaDataLoader l = findClassLoader(obj);
+        MetaDataLoader l = findLoader(obj);
         if (l == null) {
-            throw new MetaObjectNotFoundException("No MetaClass exists for object of class [" + obj.getClass().getName() + "]", obj );
+            throw new MetaObjectNotFoundException("No MetaDataLoader exists for object of class [" + obj.getClass().getName() + "]", obj );
         }
 
         MetaObject mo = l.getMetaObjectFor( obj );
@@ -117,17 +116,17 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Retrieves the MetaClass with the specified name
+     * Retrieves the MetaObject with the specified name
      * IMPORTANT:  This traverses ALL classloaders, use getMetaDataByName if you know the metadataloader to use
      */
     public static  <T extends MetaData> T findMetaDataByName( Class<T> c, String name ) throws MetaDataNotFoundException {
         
-        for (MetaDataLoader l : getClassLoaders()) {
+        for (MetaDataLoader l : getDataLoaders()) {
             T d = l.getMetaDataByName( c, name );
             if ( d != null ) return d;
         }
 
-        throw new MetaDataNotFoundException("MetaClass with name [" + name + "] not found", name);
+        throw new MetaDataNotFoundException("MetaData of type ["+c.getName()+"] and name [" + name + "] not found", name);
     }
 
     /**
@@ -150,7 +149,7 @@ public abstract class MetaDataLoader extends MetaData {
     }
     
     /**
-     * Gets the MetaClass of the specified Object
+     * Gets the MetaObject of the specified Object
      */
     public MetaObject getMetaObjectFor(Object obj) {
         for (MetaObject mc : getMetaData( MetaObject.class )) {
@@ -187,7 +186,7 @@ public abstract class MetaDataLoader extends MetaData {
             }
 
             if (mc == null) {
-                throw new MetaDataNotFoundException( "MetaData with name [" + metaDataName + "] not found in MetaClassLoader [" + toString() + "]", metaDataName );
+                throw new MetaDataNotFoundException( "MetaData with name [" + metaDataName + "] not found in MetaDataLoader [" + toString() + "]", metaDataName );
             }
         }
 
@@ -196,38 +195,42 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Adds the MetaClass
+     * Adds the MetaData
      */
     public void addMetaData(MetaData mc) {
         addChild(mc);
     }
 
     /**
-     * Removes the MetaClass
+     * Removes the MetaData
      */
-    public void removeMetaData( Class<MetaData> c, String className) throws MetaDataNotFoundException {
-        deleteChild(getMetaDataByName( c, className));
+    public void removeMetaData( Class<MetaData> c, String name) throws MetaDataNotFoundException {
+        deleteChild(getMetaDataByName( c, name));
     }
 
     /**
-     * Registers a new MetaClassLoader
+     * Registers a new MetaDataLoader
      */
     protected static void registerLoader(MetaDataLoader loader) {
-        metaClassLoaders.add(loader);
+        if ( metaDataLoaders.containsKey( loader.getName() )) {
+            throw new IllegalStateException( "A MetaDataLoader with name [" + loader.getName() + "] is already loaded" );
+        }
+        metaDataLoaders.put( loader.getName(), loader);
     }
 
     /**
-     * Registers a new MetaClassLoader
+     * Registers a new MetaDataLoader
      */
     protected static void unregisterLoader(MetaDataLoader mcl) {
-        metaClassLoaders.remove(mcl);
+        metaDataLoaders.remove(mcl.getName());
     }
 
     /**
-     * Unloads the MetaClassLoader
+     * Unloads the MetaDataLoader
      */
     public void destroy() {
-        log.info("Destroying the [" + getClass().getSimpleName() + "] MetaClassLoader");
+
+        log.info("Destroying the [" + getName() + "] MetaDataLoader");
 
         // Remove all classes
         clearChildren();
@@ -240,9 +243,9 @@ public abstract class MetaDataLoader extends MetaData {
     // MISC METHODS
     public String toString() {
         if (getParent() == null) {
-            return "MetaClassLoader[" + getName() + "]";
+            return "MetaDataLoader[" + getName() + "]";
         } else {
-            return "MetaClassLoader[" + getName() + "@" + getParent().toString() + "]";
+            return "MetaDataLoader[" + getName() + "@" + getParent().toString() + "]";
         }
     }
 }
