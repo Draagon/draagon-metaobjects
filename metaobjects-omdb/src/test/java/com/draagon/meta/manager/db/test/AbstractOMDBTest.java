@@ -10,6 +10,10 @@
  */
 package com.draagon.meta.manager.db.test;
 
+<<<<<<< HEAD
+=======
+import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
+>>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.ObjectManagerDB;
 import com.draagon.meta.manager.db.driver.DerbyDriver;
@@ -41,6 +45,11 @@ public class AbstractOMDBTest {
     public static void setupDB() throws Exception {
                 
         if ( dbFile == null ) {
+<<<<<<< HEAD
+=======
+
+            XMLFileMetaDataLoader loader = new XMLFileMetaDataLoader( "derby-test" );
+>>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
             
             dbFile = "omb-testing-"+System.currentTimeMillis();
             
@@ -95,7 +104,11 @@ public class AbstractOMDBTest {
             };
             
             // Initialize the object manager
+<<<<<<< HEAD
             omdb = new ObjectManagerDB();
+=======
+            omdb = new ObjectManagerDB( loader );
+>>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
             omdb.setDatabaseDriver( new DerbyDriver() );
             omdb.setDataSource( ds );
             omdb.init();
