@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<metadata package="produce::v1::container">
+
+
+    <!-- Basket -->
+    <object name="Basket" type="value">
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Number of apples -->
+        <field name="numApples" type="int"/>
+
+        <!-- Number of oranges -->
+        <field name="numOranges" type="int"/>
+
+        <!-- Apples -->
+        <field name="apples" type="objectArray" objectRef="..::fruit::Apple"/>
+
+        <!-- Oranges -->
+        <field name="numOranges" type="objectArray" objectRef="..::fruit::Orange"/>
+
+    </object>
+
+    <!-- Add an overlay for the basket for all fruit -->
+    <object package="..::fruit" name="Fruit">
+        <field name="inBasket" type="boolean"/>
+    </object>
+
+</metadata>

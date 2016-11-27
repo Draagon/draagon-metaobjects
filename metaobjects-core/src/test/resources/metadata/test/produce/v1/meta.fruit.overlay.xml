@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!-- Sample Overlay Example -->
+<metadata package="produce::v1">
+
+    <!-- Custom Extension -->
+    <object package="::ext" name="ProduceExt">
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Foo Double -->
+        <field name="foo" type="double"/>
+
+    </object>
+
+    <!-- Overlay just for Apple -->
+    <object package="::fruit" name="Apple">
+
+        <!-- Special Overlay -->
+        <field name="specialOverlay" type="string"/>
+
+    </object>
+
+    <!-- Overlay for a container -->
+    <object package="::container" name="Basket">
+
+        <!-- Special Overlay -->
+        <field name="specialOverlay" type="string"/>
+
+        <!-- Special Extension -->
+        <field name="specialExt" type="object" objectRef="..::ext::ProduceExt"/>
+
+    </object>
+
+</metadata>

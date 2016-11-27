@@ -6,10 +6,8 @@
  */
 package com.draagon.meta.field;
 
-import com.draagon.meta.MetaDataNotFoundException;
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
+import com.draagon.meta.util.MetaDataUtil;
 
 import java.util.List;
 
@@ -57,6 +55,6 @@ public class ObjectArrayField extends ArrayField<List<Object>> {
      */
     public MetaObject getObjectRef() //throws MetaFieldNotFoundException
     {
-        return ObjectField.getObjectRef(this);
+        return MetaDataUtil.getObjectRef(this);
     }
 }

@@ -14,6 +14,7 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObjectNotFoundException;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.util.xml.XMLFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +25,8 @@ import org.xml.sax.SAXException;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 //import com.draagon.meta.field.StringField;
 //import com.draagon.meta.object.value.ValueMetaObject;
@@ -534,8 +537,12 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
             // Get the packaging name
             String packageName = el.getAttribute("package");
-            if (packageName == null || packageName.trim().length() == 0) {
+            if (packageName == null || packageName.trim().isEmpty()) {
+                // If not found, then use the default
                 packageName = defaultPackageName;
+            } else {
+                // Convert any relative paths to the full package path
+                packageName = expandPackageForPath( defaultPackageName, packageName );
             }
 
             // Load or get the MetaData
@@ -581,7 +588,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     // Try to find it by the provided name in the 'super' attribute
                     if (superData == null) {
                         try {
-                            superData = getMetaDataByName( types.baseClass, superStr );
+                            superData = getMetaDataByName( types.baseClass, MetaDataUtil.expandPackageForMetaDataRef( packageName, superStr ));
                         } catch (MetaObjectNotFoundException e) {
                             log.error("Invalid MetaData [" + nodeName + "][" + md + "], the SuperClass [" + superStr + "] does not exist");
                             throw new MetaException("Invalid MetaData [" + nodeName + "][" + md + "], the SuperClass [" + superStr + "] does not exist");

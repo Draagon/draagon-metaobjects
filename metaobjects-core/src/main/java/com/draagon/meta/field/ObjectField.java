@@ -6,11 +6,8 @@
  */
 package com.draagon.meta.field;
 
-import com.draagon.meta.*;
-import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
+import com.draagon.meta.util.MetaDataUtil;
 
 /**
  * A Object Field.
@@ -50,32 +47,7 @@ public class ObjectField extends MetaField<Object> {
      */
     public MetaObject getObjectRef() //throws MetaFieldNotFoundException
     {
-        return getObjectRef(this);
+        return MetaDataUtil.getObjectRef(this);
     }
 
-    /** Gets the MetaObject referenced by this field */
-    static MetaObject getObjectRef( MetaField f ) {
-
-        final String KEY = "getObjectRef()";
-
-        MetaObject o = (MetaObject) f.getCacheValue(KEY);
-
-        if (o == null) {
-
-            Object a = f.getAttribute( ATTR_OBJECT_REF );
-            if ( a != null ) {
-                String name = a.toString();
-
-                try {
-                    o = MetaDataLoader.findMetaDataByName( MetaObject.class, name);
-                } catch (MetaDataNotFoundException e) {
-                    throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaField [" + f.toString() + "] does not exist", name);
-                }
-
-                f.setCacheValue(KEY, o);
-            }
-        }
-
-        return o;
-    }
 }

@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
-<metadata package="produce">
-
-    <!-- Id -->
-    <field name="id" type="long" isKey="true"/>
+<metadata package="produce::v1::fruit">
     
     <!-- Fruit -->
     <object name="Fruit" type="pojo">
@@ -11,12 +8,10 @@
       <attr name="object">com.draagon.meta.test.Fruit</attr>
       
       <!-- Id -->
-      <field name="id" super="id"/>
+      <field name="id" super="..::common::id"/>
       
       <!-- Name -->
-      <field name="name" type="string">
-        <attr name="len">50</attr>
-      </field>
+      <field name="name" super="..::common::name"/>
       
       <!-- Length -->
       <field name="length" type="int"/>
@@ -45,30 +40,9 @@
     <object name="Orange" super="Fruit">
     
       <attr name="object">com.draagon.meta.test.Orange</attr>
-      
-      <!-- Id -->
-      <field name="id">
-          <attr name="isKey">false</attr>
-      </field>      
-    
+
       <!-- Picked Date -->
       <field name="pickedDate" type="date"/>
-           
-    </object>
-    
-    <!-- Basket -->
-    <object name="Basket" type="value" package="container">
-          
-      <!-- Id -->
-      <field name="id" type="long">
-          <attr name="isKey">true</attr>
-      </field>      
-    
-      <!-- Number of apples -->
-      <field name="apples" type="int"/>
-    
-      <!-- Number of oranges -->
-      <field name="oranges" type="int"/>
            
     </object>
  

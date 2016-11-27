@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<metadata package="produce::v1::common">
+
+    <!-- Id -->
+    <field name="id" type="long" isKey="true"/>
+
+    <!-- Name -->
+    <field name="name" type="string">
+        <validator name="required" type="required"/>
+        <attr name="len">50</attr>
+    </field>
+
+</metadata>
