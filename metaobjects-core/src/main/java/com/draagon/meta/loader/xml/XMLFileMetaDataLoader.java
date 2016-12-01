@@ -28,17 +28,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
-//import com.draagon.meta.field.StringField;
-//import com.draagon.meta.object.value.ValueMetaObject;
-//import org.xml.sax.InputSource;
-//import org.xml.sax.ErrorHandler;
 
 /**
  * Meta Class loader for XML files
  */
 public class XMLFileMetaDataLoader extends MetaDataLoader {
 
-    private static final long serialVersionUID = 6952160679341572048L;
     private static Log log = LogFactory.getLog(XMLFileMetaDataLoader.class);
     
     public final static String ATTR_NAME = "name";
@@ -82,7 +77,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     private boolean typesLoaded = false;
     private final ConcurrentHashMap<String, MetaDataTypes> typesMap = new ConcurrentHashMap<String,MetaDataTypes>();
     private String sourceDir = null;
-    private final List<String> sources = new ArrayList<String>();
+    private final List<MetaDataSources> sources = new ArrayList<MetaDataSources>();
 
     public XMLFileMetaDataLoader() {
         this( "xml-" + System.currentTimeMillis() );
@@ -106,17 +101,17 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         return sourceDir;
     }
     
-    public void setSource( String source ) {
-        this.sources.add( source );
+    public void addSources( MetaDataSources sources ) {
+        this.sources.add( sources );
     }
     
-    public void setSources(List<String> sources) {
-        this.sources.addAll( sources );
-    }
+    //public void setSources(List<MetaDataSources> sources) {
+    //    this.sources.addAll( sources );
+    //}
 
-    public List<String> getSources() {
+    /*public List<MetaDataInputSource> getSources() {
         return sources;
-    }
+    }*/
 
     public void setTypesRef(String types) {
         if ( types.isEmpty() ) types = null;
@@ -128,16 +123,22 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     }
 
     /** Initialize with the metadata source being set */
-    public void init( String source ) {
-        setSource( source );
+    public void init( MetaDataSources sources ) {
+        addSources( sources );
         init();
     }
 
+    /** Initialize with the metadata source being set */
+    public void init( MetaDataSources sources, boolean shouldRegister ) {
+        addSources( sources );
+        init();
+        if ( shouldRegister ) register();
+    }
     /** Initialize with the metadata sources being set */
-    public void init( List<String> sources ) {
+    /*public void init( List<MetaDataInputSource> sources ) {
         setSources( sources );
         init();
-    }
+    }*/
 
     @Override
     public void init() {
@@ -158,9 +159,10 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         }
 
         // Load all the Meta sources
-        for (Iterator<String> i = sources.iterator(); i.hasNext();) {
-            String source = i.next();
-            loadFromFile(source);
+        for (MetaDataSources s : sources ) {
+            for ( String data : s.getSourceData() ) {
+                loadFromStream( new ByteArrayInputStream( data.getBytes() ));
+            }
         }
     }
 
@@ -168,6 +170,13 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
      * Loads the specified resource
      */
     public void loadTypesFromFile(String file) {
+        loadTypesFromFile( this.getClass().getClassLoader(), file );
+    }
+
+    /**
+     * Loads the specified resource
+     */
+    public void loadTypesFromFile( ClassLoader cl, String file) {
         
         // LOAD THE TYPES XML FILE
         if (file == null) {
@@ -188,7 +197,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 throw new MetaException("Can not read Types XML file [" + file + "]: " + e.getMessage(), e);
             }
         } else {
-            is = getClass().getClassLoader().getResourceAsStream(file);
+            is = cl.getResourceAsStream(file);
             if (is == null) {
                 log.error("Types XML file [" + file + "] does not exist");
                 throw new MetaException("The Types XML item file [" + file + "] was not found");
@@ -352,21 +361,21 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         //}
     }
 
-    public void loadFromFile(String file) throws MetaException {
+    /*public void loadFromFile(MetaDataInputSource source) throws MetaException {
 
-        if ( file.endsWith( ".xml" )) {
-            loadFromXMLFile( file );
+        if ( source.getName().endsWith( ".xml" )) {
+            loadFromXMLFile( source.getClass().getCl );
         } else if ( file.endsWith( ".bundle" )){
             loadFromBundleFile( file );
         } else {
             log.error( "Unknown metadata file type [" + file + "], so ignoring..." );
         }
-    }
+    }*/
 
     /**
      * Loads all the classes specified in the Filename
      */
-    protected void loadFromBundleFile(String file) throws MetaException {
+    /*protected void loadFromBundleFile(String file) throws MetaException {
 
         try {
             LineNumberReader in = new LineNumberReader( new InputStreamReader(getInputStream(file)));
@@ -385,12 +394,12 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         } catch( IOException e ) {
             throw new MetaException( "Error reading metadata bundle [" + file + "]: " + e.getMessage(), e );
         }
-    }
+    }*/
 
     /**
      * Loads all the classes specified in the Filename
      */
-    protected void loadFromXMLFile(String file) throws MetaException {
+    /*protected void loadFromXMLFile(String file) throws MetaException {
         
         // LOAD THE XML FILE
         if (file == null) {
@@ -404,10 +413,10 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         catch (MetaException e) {
             throw new MetaException("The Meta XML file [" + file + "] could not be loaded: " + e.getMessage(), e);
         }
-    }
+    }*/
 
     /** Get the InputStream for the file */
-    protected InputStream getInputStream( String file ) {
+    /* protected InputStream getInputStream( String file ) {
 
         InputStream is = null;
 
@@ -432,8 +441,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         }
 
         return is;
-    }
-
+    }*/
 
     /**
      * Loads all the classes specified in the Filename

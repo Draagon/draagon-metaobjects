@@ -11,6 +11,7 @@
 package com.draagon.meta.manager.db.test;
 
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.xml.LocalMetaDataSources;
 import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.ObjectManagerDB;
@@ -45,8 +46,7 @@ public class AbstractOMDBTest {
 
             // Initialize the loader
             XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test-db" );
-            xl.setSource( "meta.fruit.xml" );
-            xl.init();
+            xl.init(new LocalMetaDataSources( "meta.fruit.xml" ), true);
 
             loader = xl;
             

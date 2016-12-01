@@ -2,6 +2,7 @@ package com.draagon.meta.manager.db.validator;
 
 import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.*;
 import com.draagon.meta.manager.db.defs.*;
@@ -65,7 +66,7 @@ public class MetaClassDBValidatorService
       DatabaseDriver dd = getObjectManager().getDatabaseDriver();
       
       // Validate all Writeable (TABLE) MetaClasses
-      for( MetaDataLoader loader : MetaDataLoader.getDataLoaders() )
+      for( MetaDataLoader loader : MetaDataRegistry.getDataLoaders() )
       {
     	// Verify the Mutable Mappings
         for( MetaObject mc : loader.getMetaObjects() )            

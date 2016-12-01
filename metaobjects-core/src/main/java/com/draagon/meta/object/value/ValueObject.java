@@ -11,6 +11,7 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldTypes;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.util.Converter;
@@ -172,11 +173,11 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         if ( mObjectName != null  ) {
             try {
                 if (mLoaderName != null) {
-                    MetaDataLoader mcl = MetaDataLoader.getDataLoader(mLoaderName);
+                    MetaDataLoader mcl = MetaDataRegistry.getDataLoader(mLoaderName);
                     if (mcl != null) {
                         mMetaObject = mcl.getMetaDataByName(MetaObject.class, mObjectName);
                     } else {
-                        mMetaObject = MetaDataLoader.findMetaDataByName(MetaObject.class, mObjectName);
+                        mMetaObject = MetaDataRegistry.findMetaDataByName(MetaObject.class, mObjectName);
                     }
                 }
 

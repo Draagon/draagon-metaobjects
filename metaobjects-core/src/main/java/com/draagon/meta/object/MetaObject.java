@@ -15,6 +15,7 @@ import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +49,7 @@ public abstract class MetaObject extends MetaData {
      */
     public static MetaObject forName(String name) //throws MetaObjectNotFoundException
     {
-        return MetaDataLoader.findMetaDataByName( MetaObject.class, name);
+        return MetaDataRegistry.findMetaDataByName( MetaObject.class, name);
     }
 
     /**
@@ -56,7 +57,7 @@ public abstract class MetaObject extends MetaData {
      */
     public static MetaObject forObject(Object o) //throws MetaObjectNotFoundException
     {
-        return MetaDataLoader.findMetaObject( o );
+        return MetaDataRegistry.findMetaObject( o );
     }
     /**
      * Sets the Package for the MetaObject

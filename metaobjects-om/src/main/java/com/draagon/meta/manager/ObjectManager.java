@@ -9,18 +9,15 @@ package com.draagon.meta.manager;
 
 //import com.draagon.meta.manager.db.ObjectMapping;
 //import com.draagon.meta.manager.db.MappingHandler;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
-import com.draagon.meta.*;
-import com.draagon.meta.manager.exp.Expression;
-import com.draagon.meta.manager.exp.ExpressionGroup;
-import com.draagon.meta.manager.exp.ExpressionOperator;
-import com.draagon.meta.manager.exp.Range;
-import com.draagon.meta.manager.exp.SortOrder;
 
+import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaException;
+import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.manager.exp.*;
+import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.MetaObjectNotFoundException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -131,7 +128,7 @@ public abstract class ObjectManager
 	 */
 	public ObjectRef getObjectRef( Object obj )
 	{
-		MetaObject mc = MetaDataLoader.findMetaObject( obj );
+		MetaObject mc = MetaDataRegistry.findMetaObject( obj );
 
 		Collection<MetaField> keys = getPrimaryKeys( mc );
 		if ( keys.size() == 0 )
@@ -819,7 +816,7 @@ public abstract class ObjectManager
 		// Check each object for validity
 		for( Object o : objs )
 		{
-			MetaObject mc = MetaDataLoader.findMetaObject( o );
+			MetaObject mc = MetaDataRegistry.findMetaObject( o );
 
 			if ( getExpressionResult( mc, exp, o ))
 			{
@@ -880,7 +877,7 @@ public abstract class ObjectManager
 	 */
 	public MetaObject getMetaObjectFor( Object o ) throws MetaObjectNotFoundException
 	{
-		MetaObject mc = MetaDataLoader.findMetaObject( o );
+		MetaObject mc = MetaDataRegistry.findMetaObject( o );
 		if ( mc == null )
 			throw new MetaObjectNotFoundException( "No MetaClass exists for object [" + o + "]", o );
 

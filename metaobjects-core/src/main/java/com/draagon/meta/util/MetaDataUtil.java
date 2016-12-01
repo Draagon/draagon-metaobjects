@@ -9,6 +9,7 @@ package com.draagon.meta.util;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 
@@ -83,8 +84,8 @@ public class MetaDataUtil {
    * @param o
    * @return
    */
-  public static MetaObject findMetaClass(Object o) {
-    return MetaDataLoader.findMetaObject( o );
+  public static MetaObject findMetaObject(Object o) {
+    return MetaDataRegistry.findMetaObject( o );
   }
 
   /*public static String getMetaFieldLabel(HttpServletRequest request, MetaField mf) {
@@ -141,7 +142,7 @@ public class MetaDataUtil {
           String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a.toString());
 
           try {
-            o = MetaDataLoader.findMetaDataByName(MetaObject.class, name);
+            o = d.getLoader().getMetaDataByName(MetaObject.class, name);
           } catch (MetaDataNotFoundException e) {
             throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaData [" + d + "] does not exist", name);
           }

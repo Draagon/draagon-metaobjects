@@ -9,12 +9,12 @@ package com.draagon.meta.loader;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 //import com.draagon.meta.object.MetaObjectNotFoundException;
 //import java.util.Iterator;
@@ -28,16 +28,27 @@ public abstract class MetaDataLoader extends MetaData {
     
     public final static String PKG_SEPARATOR = "::";
 
-    private final static Map<String,MetaDataLoader> metaDataLoaders = Collections.synchronizedMap(new WeakHashMap<String,MetaDataLoader>());
-    private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
+    private boolean isRegistered = false;
+
+    //private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
+
+    public MetaDataLoader() {
+        super( "loader-" + System.currentTimeMillis());
+        //registerLoader(this);
+    }
 
     public MetaDataLoader( String name ) {
         super(name);
-        registerLoader(this);
+        //registerLoader(this);
     }
 
     public void init() {
         log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
+    }
+
+    public void register() {
+        MetaDataRegistry.registerLoader( this );
+        isRegistered = true;
     }
 
     /**
@@ -48,39 +59,6 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Retrieves the MetaDataLoader with the specified Name
-     */
-    public static Collection<MetaDataLoader> getDataLoaders() {
-        return metaDataLoaders.values();
-    }
-
-    /**
-     * Retrieves the MetaDataLoader with the specified Name
-     */
-    public static MetaDataLoader getDataLoader(String loaderName) {
-
-        MetaDataLoader l = metaDataLoaders.get(loaderName);
-        if (l == null) {
-            throw new MetaDataLoaderNotFoundException("No MetaDataLoader exists with name [" + loaderName + "]" );
-        }
-
-        return l;
-    }
-
-    /**
-     * Retrieves the MetaDataLoader for the specified Object
-     */
-    public static MetaDataLoader findLoader(Object obj) {
-        for (MetaDataLoader l : getDataLoaders()) {
-            if (l.handles(obj)) {
-                return l;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Whether the MetaDataLoader handles the object specified
      */
     protected boolean handles(Object obj) {
@@ -88,45 +66,6 @@ public abstract class MetaDataLoader extends MetaData {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Retrieves the MetaObject for the specified Object
-     */
-    public static MetaObject findMetaObject( Object obj ) throws MetaDataNotFoundException {
-        
-        // This is a High-Performance addition for MetaObjects
-        if (obj instanceof MetaObjectAware) {
-            MetaObject mo = ((MetaObjectAware) obj).getMetaData();
-            if ( mo != null ) return mo;
-        }
-
-        MetaDataLoader l = findLoader(obj);
-        if (l == null) {
-            throw new MetaObjectNotFoundException("No MetaDataLoader exists for object of class [" + obj.getClass().getName() + "]", obj );
-        }
-
-        MetaObject mo = l.getMetaObjectFor( obj );
-        
-        if (obj instanceof MetaObjectAware) {
-            ((MetaObjectAware) obj).setMetaData( mo );
-        }
-        
-        return mo;
-    }
-
-    /**
-     * Retrieves the MetaObject with the specified name
-     * IMPORTANT:  This traverses ALL classloaders, use getMetaDataByName if you know the metadataloader to use
-     */
-    public static  <T extends MetaData> T findMetaDataByName( Class<T> c, String name ) throws MetaDataNotFoundException {
-        
-        for (MetaDataLoader l : getDataLoaders()) {
-            T d = l.getMetaDataByName( c, name );
-            if ( d != null ) return d;
-        }
-
-        throw new MetaDataNotFoundException("MetaData of type ["+c.getName()+"] and name [" + name + "] not found", name);
     }
 
     /**
@@ -165,12 +104,14 @@ public abstract class MetaDataLoader extends MetaData {
      * Gets the MetaData with the specified Class type and name
      */
     public <T extends MetaData> T getMetaDataByName( Class<T> c, String metaDataName) throws MetaDataNotFoundException {
-        
-        MetaData mc = metaDataCache.get(metaDataName);
-        if (mc == null) {
-            synchronized (metaDataCache) {
 
-                mc = metaDataCache.get(metaDataName);
+        String KEY = "QuickCache-"+metaDataName;
+
+        MetaData mc = (MetaData) getCacheValue(KEY);
+        if (mc == null) {
+            synchronized( this ) {
+
+                mc = (MetaData) getCacheValue(KEY);
                 if (mc == null) {
                     for (MetaData mc2 : getMetaData( c )) {
                         if (mc2.getName().equals(metaDataName)) {
@@ -180,7 +121,7 @@ public abstract class MetaDataLoader extends MetaData {
                     }
 
                     if (mc != null) {
-                        metaDataCache.put(metaDataName, mc);
+                        setCacheValue(KEY, mc);
                     }
                 }
             }
@@ -209,23 +150,6 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
-     * Registers a new MetaDataLoader
-     */
-    protected static void registerLoader(MetaDataLoader loader) {
-        if ( metaDataLoaders.containsKey( loader.getName() )) {
-            throw new IllegalStateException( "A MetaDataLoader with name [" + loader.getName() + "] is already loaded" );
-        }
-        metaDataLoaders.put( loader.getName(), loader);
-    }
-
-    /**
-     * Registers a new MetaDataLoader
-     */
-    protected static void unregisterLoader(MetaDataLoader mcl) {
-        metaDataLoaders.remove(mcl.getName());
-    }
-
-    /**
      * Unloads the MetaDataLoader
      */
     public void destroy() {
@@ -236,7 +160,9 @@ public abstract class MetaDataLoader extends MetaData {
         clearChildren();
 
         // Unregister the class loader
-        unregisterLoader(this);
+        if ( isRegistered ) {
+            MetaDataRegistry.unregisterLoader(this);
+        }
     }
 
     ////////////////////////////////////////////////////

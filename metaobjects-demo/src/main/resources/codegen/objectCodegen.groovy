@@ -1,5 +1,5 @@
-import groovy.text.GStringTemplateEngine
-import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
+import com.draagon.meta.loader.xml.LocalMetaDataSources
+import com.draagon.meta.loader.xml.XMLFileMetaDataLoader
 
 String template = project.properties['template']
 String input = project.properties['input']
@@ -17,8 +17,7 @@ if ( !fout.exists() ) fout.mkdirs();
 
 // Load the metadata
 xl = new XMLFileMetaDataLoader();
-xl.setSource( input );
-xl.init();
+xl.init( new LocalMetaDataSources( input ), true);
 
 // Iterate the objects
 xl.getMetaObjects().each {

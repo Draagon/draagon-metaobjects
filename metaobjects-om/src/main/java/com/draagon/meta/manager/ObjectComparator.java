@@ -7,16 +7,16 @@
 
 package com.draagon.meta.manager;
 
+import com.draagon.meta.MetaException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.*;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.exp.SortOrder;
-
-import java.util.*;
-
+import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Comparator;
+import java.util.Date;
 
 public class ObjectComparator implements Comparator<Object>
 {
@@ -47,8 +47,8 @@ public class ObjectComparator implements Comparator<Object>
 
     if ( sort == null ) return 0;
 
-    MetaObject ma = MetaDataLoader.findMetaObject( a );
-    MetaObject mb = MetaDataLoader.findMetaObject( b );
+    MetaObject ma = MetaDataRegistry.findMetaObject( a );
+    MetaObject mb = MetaDataRegistry.findMetaObject( b );
 
     if ( !ma.equals( mb ))
       throw new MetaException( "Objects are not of the same MetaClass: [" + ma + "] != [" + mb + "]" );

@@ -13,6 +13,7 @@ package com.draagon.meta.loader.xml;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.Apple;
@@ -35,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 public class XMLMetaDataLoaderTest {
     
     private MetaDataLoader loader = null;
-    
+
     @Before
     public void initLoader() throws Exception {
                 
@@ -44,9 +45,9 @@ public class XMLMetaDataLoaderTest {
         List<String> list = new ArrayList<String>();
         list.add( "metadata/test/produce/v1/produce-v1.bundle" );
         list.add( "metadata/test/produce/v1/meta.fruit.overlay.xml" );
-        xl.setSources(list);
-        xl.init();
-        
+        xl.init(new LocalMetaDataSources(list));
+        xl.register();
+
         this.loader = xl;
     }
     
@@ -59,7 +60,7 @@ public class XMLMetaDataLoaderTest {
         Apple apple2 = new Apple();
         
         MetaObject mo = loader.getMetaObjectFor( apple );
-        assertEquals( mo.getName(), MetaDataLoader.findMetaObject( apple2 ).getName() );
+        assertEquals( mo.getName(), MetaDataRegistry.findMetaObject( apple2 ).getName() );
         
         apple.setName( "granny" );
         apple2.setName( "macintosh" );

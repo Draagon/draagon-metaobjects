@@ -7,10 +7,10 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.object.MetaObject;
 
 public abstract class MetaValidator extends MetaData
 {
@@ -45,7 +45,7 @@ public abstract class MetaValidator extends MetaData
    */
   public MetaField getMetaField( Object obj )
   {
-    MetaObject mc = MetaDataLoader.findMetaObject( obj );
+    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     return mc.getMetaField( getParent().getName() );
   }
 

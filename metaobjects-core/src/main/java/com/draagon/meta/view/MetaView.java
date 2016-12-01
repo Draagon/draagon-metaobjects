@@ -6,15 +6,15 @@
  */
 package com.draagon.meta.view;
 
-import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.validator.MetaValidator;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
-import java.util.ArrayList;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.validator.MetaValidator;
+
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -76,7 +76,7 @@ public abstract class MetaView extends MetaData
    */
   public MetaField getMetaField( Object obj )
   {
-    MetaObject mc = MetaDataLoader.findMetaObject( obj );
+    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     return mc.getMetaField( getParent().getName() );
   }
 
@@ -86,7 +86,7 @@ public abstract class MetaView extends MetaData
   public String getDisplayString( Object obj )
     //throws MetaException
   {
-    MetaObject mc = MetaDataLoader.findMetaObject( obj );
+    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     MetaField mf = mc.getMetaField( getParent().getName() );
     return "" + mf.getString( obj );
   }

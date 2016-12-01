@@ -7,34 +7,31 @@
 
 package com.draagon.meta.manager.xml;
 
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.manager.StateAwareMetaObject;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
-import com.draagon.meta.*;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.*;
 import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.manager.exp.Range;
 import com.draagon.meta.manager.exp.SortOrder;
+import com.draagon.meta.object.MetaObject;
 import com.draagon.util.xml.XMLFileReader;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.io.*;
-import java.util.*;
-
-// import javax.servlet.*;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
+// import javax.servlet.*;
 //import org.xml.sax.InputSource;
 //import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
 //import org.xml.sax.SAXParseException;
 //import org.xml.sax.SAXNotRecognizedException;
 //import org.xml.sax.SAXNotSupportedException;
@@ -293,7 +290,7 @@ public class ObjectManagerXML extends ObjectManager
 
         Object o = getObjectByRef( c, ref );
 
-        for( MetaField mf : getReadableFields( MetaDataLoader.findMetaObject( obj )))
+        for( MetaField mf : getReadableFields( MetaDataRegistry.findMetaObject( obj )))
         {
           if ( !isPrimaryKey( mf ))
             mf.setObject( obj, mf.getObject( o ));
@@ -306,7 +303,7 @@ public class ObjectManagerXML extends ObjectManager
   public void createObject( ObjectConnection c, Object obj )
     throws MetaException
     {
-        MetaObject mc = MetaDataLoader.findMetaObject( obj );
+        MetaObject mc = MetaDataRegistry.findMetaObject( obj );
         List<Object> list = getObjectsFromTable( c, mc );
 
         if ( !isCreateableClass( mc ))
@@ -325,7 +322,7 @@ public class ObjectManagerXML extends ObjectManager
   public void updateObject( ObjectConnection c, Object obj )
     throws MetaException
   {
-    MetaObject mc = MetaDataLoader.findMetaObject( obj );
+    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     List<Object> list = getObjectsFromTable( c, mc );
 
     int i = list.indexOf( obj );
@@ -348,7 +345,7 @@ public class ObjectManagerXML extends ObjectManager
   public void deleteObject( ObjectConnection c, Object obj )
     throws MetaException
   {
-    MetaObject mc = MetaDataLoader.findMetaObject( obj );
+    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     List<Object> list = getObjectsFromTable( c, mc );
 
     int i = list.indexOf( obj );

@@ -6,25 +6,21 @@
  */
 package com.draagon.meta.object.managed;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.*;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.ObjectManager;
-//import com.draagon.meta.manager.*;
+import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.MetaObjectAware;
+import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.Converter;
 
 import java.io.Serializable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+//import com.draagon.meta.manager.*;
 
 public class ManagedObject implements Map<String, Object>, Serializable, MetaObjectAware {
 
@@ -145,7 +141,7 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
         if (mMetaObject == null) {
             try {
                 if (mLoaderName != null) {
-                    MetaDataLoader mcl = MetaDataLoader.getDataLoader(mLoaderName);
+                    MetaDataLoader mcl = MetaDataRegistry.getDataLoader(mLoaderName);
                     if (mcl != null) {
                         mMetaObject = mcl.getMetaDataByName( MetaObject.class, mObjectName);
                     }
