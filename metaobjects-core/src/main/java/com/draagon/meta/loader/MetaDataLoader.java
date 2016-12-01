@@ -42,8 +42,9 @@ public abstract class MetaDataLoader extends MetaData {
         //registerLoader(this);
     }
 
-    public void init() {
+    public MetaDataLoader init() {
         log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
+        return this;
     }
 
     public void register() {
@@ -133,6 +134,20 @@ public abstract class MetaDataLoader extends MetaData {
 
 
         return (T) mc;
+    }
+
+    /**
+     * Lookup the specified class by name
+     * @param className
+     * @return
+     */
+    public Class<?> loadClass(String className ) throws ClassNotFoundException {
+
+        try {
+            return getClass().getClassLoader().loadClass( className );
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException("Specified Java Class [" + className + "] was not found: " + e.getMessage(), e);
+        }
     }
 
     /**

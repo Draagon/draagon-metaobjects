@@ -123,16 +123,16 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     }
 
     /** Initialize with the metadata source being set */
-    public void init( MetaDataSources sources ) {
+    public MetaDataLoader init( MetaDataSources sources ) {
         addSources( sources );
-        init();
+        return init();
     }
 
     /** Initialize with the metadata source being set */
-    public void init( MetaDataSources sources, boolean shouldRegister ) {
+    public MetaDataLoader init( MetaDataSources sources, boolean shouldRegister ) {
         addSources( sources );
-        init();
         if ( shouldRegister ) register();
+        return init();
     }
     /** Initialize with the metadata sources being set */
     /*public void init( List<MetaDataInputSource> sources ) {
@@ -141,7 +141,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     }*/
 
     @Override
-    public void init() {
+    public MetaDataLoader init() {
 
         if ( sources == null || sources.isEmpty() ) {
             throw new IllegalStateException("No Metadata Sources defined");
@@ -164,6 +164,27 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 loadFromStream( new ByteArrayInputStream( data.getBytes() ));
             }
         }
+
+        return this;
+    }
+
+    /**
+     * Lookup the specified class by name, include the classloaders provided by the metadata sources
+     * NOTE:  This was done to handle OSGi and other complex ClassLoader scenarios
+     */
+    @Override
+    public Class<?> loadClass( String className ) throws ClassNotFoundException {
+
+        for (MetaDataSources s : sources ) {
+            try {
+                return s.getClass().getClassLoader().loadClass(className);
+            } catch( ClassNotFoundException e ) {
+                // Do nothing
+            }
+        }
+
+        // Use the default class loader
+        return super.loadClass( className );
     }
 
     /**

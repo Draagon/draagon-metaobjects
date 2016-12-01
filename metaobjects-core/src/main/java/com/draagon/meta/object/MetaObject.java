@@ -185,7 +185,8 @@ public abstract class MetaObject extends MetaData {
             try {
                 return Class.forName(ostr);
             } catch (ClassNotFoundException e) {
-                throw new ClassNotFoundException("Specified Object Class [" + ostr + "] was not found", e);
+                return getLoader().loadClass( ostr );
+                //throw new ClassNotFoundException("Specified Object Class [" + ostr + "] was not found", e);
             }
         } 
         else {
@@ -253,15 +254,23 @@ public abstract class MetaObject extends MetaData {
      */
     public Object newInstance() //throws MetaException
     {
-        Class<?> oc = null;
+        final String KEY = "ObjectClass";
 
-        try {
-            oc = getObjectClass();
-            if (oc == null) {
-                throw new MetaDataException("No Object Class was found on MetaObject [" + getName() + "]");
+        // See if we have this cached already
+        Class<?> oc = (Class<?>) getCacheValue( KEY );
+        if ( oc == null ) {
+
+            try {
+                oc = getObjectClass();
+                if (oc == null) {
+                    throw new MetaDataException("No Object Class was found on MetaObject [" + getName() + "]");
+                }
+            } catch (ClassNotFoundException e) {
+                throw new MetaDataException("Could find Object Class for MetaObject [" + getName() + "]: " + e.getMessage(), e);
             }
-        } catch (ClassNotFoundException e) {
-            throw new MetaDataException("Could find Object Class for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+
+            // Store the resulting Class in the cache
+            setCacheValue( KEY, oc );
         }
 
         try {

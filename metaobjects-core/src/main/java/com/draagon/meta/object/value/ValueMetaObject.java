@@ -11,11 +11,16 @@ import com.draagon.meta.field.*;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.util.Converter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.lang.reflect.Method;
 
 @SuppressWarnings("serial")
 public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObject 
 {
+    private final static Log log = LogFactory.getLog(ValueMetaObject.class);
+
     public final static String CACHE_PARAM_HAS_GETTER_METHOD = "hasGetterMethod";
     public final static String CACHE_PARAM_HAS_SETTER_METHOD = "hasSetterMethod";
 
@@ -102,6 +107,7 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
         try { 
             return super.getObjectClass();
         } catch( ClassNotFoundException e ) {
+            log.warn( "Could not find Java class for MetaObject [" + getName() + "], returning generic ValueObject instead" );
             return ValueObject.class;
         }
     }
