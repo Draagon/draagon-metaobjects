@@ -107,7 +107,10 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
         try { 
             return super.getObjectClass();
         } catch( ClassNotFoundException e ) {
-            log.warn( "Could not find Java class for MetaObject [" + getName() + "], returning generic ValueObject instead" );
+            if (hasAttribute(ATTR_OBJECT)) {
+                throw e;
+            }
+            //log.warn( "Could not find Java class for MetaObject [" + getName() + "], returning generic ValueObject instead" );
             return ValueObject.class;
         }
     }
