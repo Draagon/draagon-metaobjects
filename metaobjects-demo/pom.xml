@@ -31,7 +31,8 @@
                         <configuration>
                             <properties>
                                 <template>${project.basedir}/src/main/resources/codegen/objectCodegen.gtm</template>
-                                <input>${project.basedir}/src/main/resources/metadata/fishstore-metadata.xml</input>
+                                <sourceDir>${project.basedir}/src/main/resources/</sourceDir>
+                                <input>metadata/fishstore-metadata.xml</input>
                                 <output>${project.build.sourceDirectory}/com/draagon/meta/demo/fishstore/model/</output>
                                 <!-- prefix></prefix -->
                                 <suffix>.java</suffix>

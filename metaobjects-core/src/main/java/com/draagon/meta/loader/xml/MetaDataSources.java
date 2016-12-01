@@ -97,16 +97,27 @@ public abstract class MetaDataSources {
 
         InputStream is = null;
 
-        // See if the filename exists
-        String fn = (sourceDir==null) ? file : sourceDir + file;
-        File f = new File(fn);
+        if ( sourceDir != null ) {
 
-        if (f.exists()) {
-            try {
-                is = new FileInputStream(f);
-            } catch (Exception e) {
-                log.error("Can not read Metadata file [" + file + "]: " + e.getMessage());
-                throw new MetaException("Can not read Metadata file [" + file + "]: " + e.getMessage(), e);
+            // Append the source directory if needed
+            String s = sourceDir;
+            if ( !s.isEmpty() && !s.endsWith( "/" )) s = s + "/";
+
+            // See if the filename exists
+            String fn = s + file;
+            File f = new File(fn);
+
+            if (f.exists()) {
+                try {
+                    is = new FileInputStream(f);
+                } catch (Exception e) {
+                    log.error("Can not read Metadata file [" + file + "]: " + e.getMessage());
+                    throw new MetaException("Can not read Metadata file [" + file + "]: " + e.getMessage(), e);
+                }
+            }
+            else {
+                log.error("Metadata file [" + fn + "] did not exist" );
+                throw new MetaException( "Metadata file [" + fn + "] did not exist" );
             }
         }
         else {

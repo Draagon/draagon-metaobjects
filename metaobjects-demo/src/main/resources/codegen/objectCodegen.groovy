@@ -2,6 +2,7 @@ import com.draagon.meta.loader.xml.LocalMetaDataSources
 import com.draagon.meta.loader.xml.XMLFileMetaDataLoader
 
 String template = project.properties['template']
+String sourceDir = project.properties['sourceDir']
 String input = project.properties['input']
 String output = project.properties['output']
 String prefix = project.properties['prefix']
@@ -17,7 +18,7 @@ if ( !fout.exists() ) fout.mkdirs();
 
 // Load the metadata
 xl = new XMLFileMetaDataLoader();
-xl.init( new LocalMetaDataSources( input ), true);
+xl.init( new LocalMetaDataSources( sourceDir, input ), true);
 
 // Iterate the objects
 xl.getMetaObjects().each {
