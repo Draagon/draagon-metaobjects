@@ -218,8 +218,12 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         Value v = (Value) getObjectAttributeValue(name);                      
 
         // Convert to the proper object type
-        if (hasMetaDataAttached() && getMetaData().hasMetaField(name)) {
-            value = Converter.toType(getMetaData().getMetaField(name).getType(), value);
+        if (hasMetaDataAttached()) {
+            try {
+                value = Converter.toType(getMetaData().getMetaField(name).getType(), value);
+            }catch( MetaDataNotFoundException e ) {
+                value = Converter.toType(type, value);
+            }
         } else {
             value = Converter.toType(type, value);
         }
