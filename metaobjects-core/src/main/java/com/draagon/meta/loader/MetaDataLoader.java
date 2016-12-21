@@ -29,6 +29,8 @@ public abstract class MetaDataLoader extends MetaData {
     public final static String PKG_SEPARATOR = "::";
 
     private boolean isRegistered = false;
+    private boolean isInitialized = false;
+    private boolean isDestroyed = false;
 
     //private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
 
@@ -42,14 +44,29 @@ public abstract class MetaDataLoader extends MetaData {
         //registerLoader(this);
     }
 
+    protected void checkState() {
+        if ( !isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was not initialized" );
+        if ( isDestroyed ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] is destroyed" );
+    }
+
     public MetaDataLoader init() {
+        if ( isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was already initialized" );
         log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
+        isInitialized = true;
         return this;
+    }
+
+    public boolean isInitialized() {
+        return isInitialized;
     }
 
     public void register() {
         MetaDataRegistry.registerLoader( this );
         isRegistered = true;
+    }
+
+    public boolean isRegistered() {
+        return isRegistered;
     }
 
     /**
@@ -63,6 +80,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Whether the MetaDataLoader handles the object specified
      */
     protected boolean handles(Object obj) {
+        checkState();
         if (getMetaObjectFor(obj) != null) {
             return true;
         }
@@ -73,6 +91,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Retrieves a collection of all Meta Classes
      */
     public <T extends MetaData> List<T> getMetaData( Class<T> c ) {
+        checkState();
         Collection<T> children = getChildren(c,true);
         ArrayList<T> classes = new ArrayList<T>(children.size());
         for (MetaData md : children) {
@@ -85,6 +104,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Retrieves a collection of all Meta Classes
      */
     public List<MetaObject> getMetaObjects() {
+        checkState();
         return getMetaData( MetaObject.class );
     }
     
@@ -92,6 +112,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Gets the MetaObject of the specified Object
      */
     public MetaObject getMetaObjectFor(Object obj) {
+        checkState();
         for (MetaObject mc : getMetaData( MetaObject.class )) {
             if (mc.produces(obj)) {
                 return mc;
@@ -106,7 +127,9 @@ public abstract class MetaDataLoader extends MetaData {
      */
     public <T extends MetaData> T getMetaDataByName( Class<T> c, String metaDataName) throws MetaDataNotFoundException {
 
-        String KEY = "QuickCache-"+metaDataName;
+        checkState();
+
+        String KEY = "QuickCache-"+c.getName()+"-"+metaDataName;
 
         MetaData mc = (MetaData) getCacheValue(KEY);
         if (mc == null) {
@@ -142,7 +165,7 @@ public abstract class MetaDataLoader extends MetaData {
      * @return
      */
     public Class<?> loadClass(String className ) throws ClassNotFoundException {
-
+        checkState();
         try {
             return getClass().getClassLoader().loadClass( className );
         } catch (ClassNotFoundException e) {
@@ -154,6 +177,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Adds the MetaData
      */
     public void addMetaData(MetaData mc) {
+        checkState();
         addChild(mc);
     }
 
@@ -161,6 +185,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Removes the MetaData
      */
     public void removeMetaData( Class<MetaData> c, String name) throws MetaDataNotFoundException {
+        checkState();
         deleteChild(getMetaDataByName( c, name));
     }
 
@@ -169,15 +194,23 @@ public abstract class MetaDataLoader extends MetaData {
      */
     public void destroy() {
 
+        if ( isDestroyed ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was already destroyed!" );
+
         log.info("Destroying the [" + getName() + "] MetaDataLoader");
 
         // Remove all classes
         clearChildren();
 
+        isDestroyed = true;
+
         // Unregister the class loader
         if ( isRegistered ) {
             MetaDataRegistry.unregisterLoader(this);
         }
+    }
+
+    public boolean isDestroyed() {
+        return isDestroyed;
     }
 
     ////////////////////////////////////////////////////
