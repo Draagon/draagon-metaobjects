@@ -111,23 +111,29 @@ public abstract class MetaDataSources {
                 try {
                     is = new FileInputStream(f);
                 } catch (Exception e) {
-                    log.error("Can not read Metadata file [" + file + "]: " + e.getMessage());
-                    throw new MetaException("Can not read Metadata file [" + file + "]: " + e.getMessage(), e);
+                    log.error("Can not read Metadata file [" + fn + "]: " + e.getMessage());
+                    throw new MetaException("Can not read Metadata file [" + fn + "]: " + e.getMessage(), e);
                 }
             }
-            else {
-                log.error("Metadata file [" + fn + "] did not exist" );
-                throw new MetaException( "Metadata file [" + fn + "] did not exist" );
-            }
         }
-        else {
-            is = getClass().getClassLoader().getResourceAsStream(file);
-            if (is == null) {
+
+        // Try to load as a resource instead
+        if ( is == null ) {
+            is = getInputStreamAsResource( file );
+        }
+
+        return is;
+    }
+
+    protected InputStream getInputStreamAsResource( String file ) {
+        InputStream is = getClass().getClassLoader().getResourceAsStream(file);
+        if (is == null) {
+            is = ClassLoader.getSystemClassLoader().getResourceAsStream(file);
+            if ( is == null ) {
                 log.error("Metadata file [" + file + "] was not found");
                 throw new MetaException("The Metadata file [" + file + "] was not found");
             }
         }
-
         return is;
     }
 
