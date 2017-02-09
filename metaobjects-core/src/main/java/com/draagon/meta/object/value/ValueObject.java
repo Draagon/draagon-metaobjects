@@ -17,15 +17,15 @@ import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.util.Converter;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+//import java.util.*;
+//import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generic Map of fields and values that can be associated with a MetaObject. The values are retrieved
  * as "attributes".  You can also associate "properties" to the object that can be used for special behaviors
  * when persisting or transforming objects.
  */
-public class ValueObject implements Map<String, Object>, Serializable, MetaObjectAware {
+public class ValueObject implements java.util.Map<String, Object>, Serializable, MetaObjectAware {
 
     private static final long serialVersionUID = 6888178049723946186L;
 
@@ -53,14 +53,14 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         }
     }
     
-    private final Map<String, Value> mAttributes = new ConcurrentHashMap<String, Value>();
-    private final Map<String, String> mProperties = new ConcurrentHashMap<String, String>();
+    private final java.util.Map<String, Value> mAttributes = new java.util.concurrent.ConcurrentHashMap<String, Value>();
+    private final java.util.Map<String, String> mProperties = new java.util.concurrent.ConcurrentHashMap<String, String>();
 
     private boolean allowExtensions = false;
 
     // The MetaObject is transient, but the loader name, and object name are needed
     private transient MetaObject mMetaObject = null;
-    private transient List<String> metaFieldNamesCache = null;
+    private transient java.util.List<String> metaFieldNamesCache = null;
     private transient boolean metaObjectForNameFailed = false;
     private boolean hasMetaData = false;
     private String mLoaderName = null;
@@ -278,9 +278,9 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
      * Returns the MetaFields based on the associated MetaObject
      * @return List of MetaFields or null if no MetaObject attached
      */
-    protected List<String> getMetaFieldNames() {
+    protected java.util.List<String> getMetaFieldNames() {
         if ( metaFieldNamesCache != null ) return metaFieldNamesCache;
-        metaFieldNamesCache = new ArrayList<String>();
+        metaFieldNamesCache = new java.util.ArrayList<String>();
         if ( hasMetaDataAttached() ) {
             for (MetaField f : getMetaData().getMetaFields()) {
                 metaFieldNamesCache.add(f.getShortName());
@@ -295,14 +295,14 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
      *
      * @return All field names
      */
-    public Collection<String> getObjectFieldNames() {
+    public java.util.Collection<String> getObjectFieldNames() {
 
         // For the clear cut cases, return the arrays
         if ( hasMetaDataAttached() && allowExtensions ) return getMetaFieldNames();
         else if ( !hasMetaDataAttached() ) return mAttributes.keySet();
 
         // For the mixed case of metadata + extensions, add the extended names
-        ArrayList<String> names = new ArrayList<String>();
+        java.util.ArrayList<String> names = new java.util.ArrayList<String>();
         if ( hasMetaDataAttached() ) names.addAll( getMetaFieldNames() );
         for ( String name : mAttributes.keySet() ) {
             if ( !names.contains( name )) names.add( name );
@@ -333,7 +333,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
      * Returns the names of all attribute values associated with this ValueObject (ignoring the MetaObject)
      * @return Collection of attribute value names
      */
-    public Collection<String> getObjectAttributes() {
+    public java.util.Collection<String> getObjectAttributes() {
         return mAttributes.keySet();
     }
 
@@ -474,7 +474,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         //getMetaField( name ).setString( this, value );
     }
 
-    public void setDate(String name, Date value) //throws MetaException
+    public void setDate(String name, java.util.Date value) //throws MetaException
     {
         setObjectAttribute(name, value, MetaFieldTypes.DATE);
         //getMetaField( name ).setDate( this, value );
@@ -548,7 +548,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
         //return getMetaField( name ).getString( this );
     }
 
-    public Date getDate(String name) //throws MetaException
+    public java.util.Date getDate(String name) //throws MetaException
     {
         return Converter.toDate(getObjectAttribute(name));
         //return getMetaField( name ).getDate( this );
@@ -634,7 +634,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     /**
      * Creates a Map.Entry for a specific MetaField and Object
      */
-    public class AttributeEntry implements Map.Entry<String, Object> {
+    public class AttributeEntry implements java.util.Map.Entry<String, Object> {
 
         private String attr = null;
 
@@ -661,9 +661,9 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     }
 
     @Override
-    public Set<java.util.Map.Entry<String, Object>> entrySet() {
+    public java.util.Set<java.util.Map.Entry<String, Object>> entrySet() {
 
-        Set<java.util.Map.Entry<String, Object>> s = new HashSet<java.util.Map.Entry<String, Object>>();
+        java.util.Set<java.util.Map.Entry<String, Object>> s = new java.util.HashSet<java.util.Map.Entry<String, Object>>();
         for (String name : getObjectFieldNames()) {
             s.add(new AttributeEntry(name));
         }
@@ -685,8 +685,8 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     }
 
     @Override
-    public Set<String> keySet() {
-        return new HashSet<String>( getObjectFieldNames() );
+    public java.util.Set<String> keySet() {
+        return new java.util.HashSet<String>( getObjectFieldNames() );
     }
 
     @Override
@@ -697,7 +697,7 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends Object> m) {
+    public void putAll(java.util.Map<? extends String, ? extends Object> m) {
         for (String key : m.keySet()) {
             put(key, m.get(key));
         }
@@ -714,8 +714,8 @@ public class ValueObject implements Map<String, Object>, Serializable, MetaObjec
     }
 
     @Override
-    public Collection<Object> values() {
-        Collection<Object> s = new ArrayList<Object>();
+    public java.util.Collection<Object> values() {
+        java.util.Collection<Object> s = new java.util.ArrayList<Object>();
         for (String name : getObjectFieldNames()) {
             s.add(getObject(name));
         }
