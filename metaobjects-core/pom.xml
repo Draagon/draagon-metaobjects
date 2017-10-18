@@ -10,7 +10,7 @@
   
     <groupId>com.draagon</groupId>
     <artifactId>metaobjects-core</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <name>MetaObjects Core</name>
     <url>http://www.draagon.com/products/metaobjects/</url>
