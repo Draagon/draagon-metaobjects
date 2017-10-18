@@ -16,7 +16,7 @@ import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.manager.exp.Range;
 import com.draagon.meta.manager.exp.SortOrder;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.util.xml.XMLFileReader;
+import com.draagon.meta.util.xml.XMLFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;

@@ -15,7 +15,7 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.MetaDataUtil;
-import com.draagon.util.xml.XMLFileReader;
+import com.draagon.meta.util.xml.XMLFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.CharacterData;

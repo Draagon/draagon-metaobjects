@@ -36,9 +36,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
-            <artifactId>draagon-utilities</artifactId>
-            <version>3.5.2</version>
+            <groupId>org.bluestemsoftware.open.maven.tparty</groupId>
+            <artifactId>xerces-impl</artifactId>
+            <version>2.9.0</version>
             <type>jar</type>
         </dependency>
     </dependencies>
