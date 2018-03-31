@@ -298,7 +298,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     public java.util.Collection<String> getObjectFieldNames() {
 
         // For the clear cut cases, return the arrays
-        if ( hasMetaDataAttached() && allowExtensions ) return getMetaFieldNames();
+        if ( hasMetaDataAttached() && !allowExtensions ) return getMetaFieldNames();
         else if ( !hasMetaDataAttached() ) return mAttributes.keySet();
 
         // For the mixed case of metadata + extensions, add the extended names

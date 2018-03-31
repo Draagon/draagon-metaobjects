@@ -21,9 +21,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 public abstract class MetaObject extends MetaData {
 
-    //private static Log log = LogFactory.getLog(MetaObject.class);
+    private static Logger log = Logger.getLogger(MetaObject.class);
     /**
      * Object class name attribute
      */
@@ -178,6 +180,7 @@ public abstract class MetaObject extends MetaData {
             try {
                 ostr = (String) getAttribute(ATTR_OBJECT);
                 ostr = ostr.trim();
+                log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));
             } catch (MetaAttributeNotFoundException e) {
                 throw new RuntimeException("Attribute was found but could not get it on MetaObject [" + this + "] and attribute [" + ATTR_OBJECT + "]");
             }
@@ -185,6 +188,7 @@ public abstract class MetaObject extends MetaData {
             try {
                 return Class.forName(ostr);
             } catch (ClassNotFoundException e) {
+                log.warn(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
                 return getLoader().loadClass( ostr );
                 //throw new ClassNotFoundException("Specified Object Class [" + ostr + "] was not found", e);
             }
@@ -266,7 +270,7 @@ public abstract class MetaObject extends MetaData {
                     throw new MetaDataException("No Object Class was found on MetaObject [" + getName() + "]");
                 }
             } catch (ClassNotFoundException e) {
-                throw new MetaDataException("Could find Object Class for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+                throw new MetaDataException("Could not find Object Class for MetaObject [" + getName() + "]: " + e.getMessage(), e);
             }
 
             // Store the resulting Class in the cache
@@ -275,7 +279,7 @@ public abstract class MetaObject extends MetaData {
 
         try {
             if (oc.isInterface()) {
-                throw new IllegalArgumentException("Can not instantiate an Interface for MetaObject [" + getName() + "]");
+                throw new IllegalArgumentException("Could not instantiate an Interface for MetaObject [" + getName() + "]");
             }
 
             Object o = null;

@@ -28,6 +28,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  *
@@ -132,6 +133,36 @@ public class XMLMetaDataLoaderTest {
         assertEquals( "Extension Object name == ProduceExt", "produce::v1::ext::ProduceExt", extMo.getName() );
     }
 
+    @Test(expected=com.draagon.meta.field.MetaFieldNotFoundException.class)
+    public void testAllowExtensionsPreventArbitraryField() throws Exception {
+
+        MetaObject mo = MetaObject.forName("produce::v1::container::Basket");
+        ValueObject basket = (ValueObject) mo.newInstance();
+        assertFalse("allowsExtensions==false", basket.allowsExtensions());
+        assertEquals( "produce::v1::container::Basket", mo.getName() );
+
+        assertEquals("has seven fields", 7, basket.getObjectFieldNames().size());
+
+        basket.setString("newField", "newValue"); // Should throw exception
+
+    }
+
+    @Test
+    public void testAllowExtensionsAllowArbitraryField() throws Exception {
+
+        MetaObject mo = MetaObject.forName("produce::v1::container::Basket");
+        ValueObject basket = (ValueObject) mo.newInstance();
+        basket.allowExtensions(true);
+        assertTrue("allowsExtensions==true", basket.allowsExtensions());
+        assertEquals( "produce::v1::container::Basket", mo.getName() );
+
+        assertEquals("has seven fields", 7, basket.getObjectFieldNames().size());
+
+        basket.setString("newField", "newValue");
+
+        assertTrue("must contain 'newField'", basket.getObjectFieldNames().contains("newField"));
+        assertEquals("has eight fields", 8, basket.getObjectFieldNames().size());
+    }
 
     @After
     public void destroyLoader() throws Exception {
