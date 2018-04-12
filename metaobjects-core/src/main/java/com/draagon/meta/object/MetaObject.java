@@ -180,7 +180,7 @@ public abstract class MetaObject extends MetaData {
             try {
                 ostr = (String) getAttribute(ATTR_OBJECT);
                 ostr = ostr.trim();
-                log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));
+                if ( log.isTraceEnabled() ) log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));
             } catch (MetaAttributeNotFoundException e) {
                 throw new RuntimeException("Attribute was found but could not get it on MetaObject [" + this + "] and attribute [" + ATTR_OBJECT + "]");
             }
