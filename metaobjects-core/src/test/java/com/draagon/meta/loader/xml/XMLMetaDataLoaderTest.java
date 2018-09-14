@@ -34,24 +34,8 @@ import static org.junit.Assert.assertFalse;
  *
  * @author dmealing
  */
-public class XMLMetaDataLoaderTest {
-    
-    private MetaDataLoader loader = null;
+public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
 
-    @Before
-    public void initLoader() throws Exception {
-                
-        // Initialize the loader
-        XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test" );
-        List<String> list = new ArrayList<String>();
-        list.add( "metadata/test/produce/v1/produce-v1.bundle" );
-        list.add( "metadata/test/produce/v1/meta.fruit.overlay.xml" );
-        xl.init(new LocalMetaDataSources(list));
-        xl.register();
-
-        this.loader = xl;
-    }
-    
     @Test
     public void testApple() throws Exception {
         

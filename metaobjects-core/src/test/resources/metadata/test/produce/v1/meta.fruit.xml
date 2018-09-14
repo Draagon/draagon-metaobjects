@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <metadata package="produce::v1::fruit">
-    
+
     <!-- Fruit -->
     <object name="Fruit" type="pojo">
     
@@ -36,6 +36,13 @@
       
     </object>  
 
+    <!-- Macintosh -->
+    <object name="Macintosh" super="Apple">
+
+        <attr name="object">com.draagon.meta.test.Macintosh</attr>
+
+    </object>
+
     <!-- Orange -->
     <object name="Orange" super="Fruit">
     
@@ -45,5 +52,5 @@
       <field name="pickedDate" type="date"/>
            
     </object>
- 
+
 </metadata>

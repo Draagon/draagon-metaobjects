@@ -167,6 +167,64 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
+     * Gets the MetaData with the specified name in parent hierarchy.
+     * <p>
+     * Only uses direct 'super' relationship, not 'inherits'
+     */
+    protected <T extends MetaData> List<T> getMetaDataBySuper(String metaDataName, List<MetaObject> objects) throws MetaDataNotFoundException {
+        checkState();
+        String KEY = "QuickCacheDerived-" + metaDataName;
+        List<T> result = (List<T>) getCacheValue(KEY);
+        if (result == null) {
+            synchronized (this) {
+                result = (List<T>) getCacheValue(KEY);
+                if (result == null) {
+                    result = new ArrayList<>();
+
+                    for (MetaObject mo : objects) {
+                        if (null != mo.getSuperObject()) {
+                            if (mo.getSuperObject().getName().equals(metaDataName)) {
+                                result.add((T) mo);
+                                result.addAll((Collection<T>) getMetaDataBySuper(mo.getName(), objects));
+                            }
+                        }
+                    }
+                    setCacheValue(KEY, result);  // Build the sub-trees as we go
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets the MetaData with the specified name in parent hierarchy.
+     * <p>
+     * Only uses direct 'super' relationship, not 'inherits'
+     */
+    public <T extends MetaData> List<T> getMetaDataBySuper(String metaDataName) throws MetaDataNotFoundException {
+
+        checkState();
+
+        String KEY = "QuickCacheDerived-" + metaDataName;
+        List<T> result;
+        result = (List<T>) getCacheValue(KEY);
+        if (result == null) {
+            synchronized (this) {
+                result = (List<T>) getCacheValue(KEY);
+                if (result == null) {
+                    List<MetaObject> objects = getMetaObjects();
+                    // Delegate to a second level, so we don't have to keep retrieving the list of all MetaObjects
+                    result = getMetaDataBySuper(metaDataName, objects);
+                    // rely on delegate function to set the cache
+                }
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
      * Lookup the specified class by name
      * @param className
      * @return
