@@ -70,7 +70,8 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
      * Create a generic value object that supports extensions by default
      */
     public ValueObject() {
-        allowExtensions = true;
+        this.allowExtensions = true;
+        this.mObjectName = "default-ctor";
     }
 
     /**
