@@ -27,7 +27,7 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
 
 
     @Test
-    public void testSuperList() {
+    public void testSuperListFruit() {
         List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Fruit");
 
         logger.info("Parent -> Child");
@@ -37,5 +37,18 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
         }
 
         assertEquals("children", 3, result.size());
+    }
+
+    @Test
+    public void testSuperListVegetable() {
+        List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Vegetable");
+
+        logger.info("Parent -> Child");
+        for(MetaObject mo : result){
+            logger.info(String.format("[%s]->[%s]",
+                    ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
+        }
+
+        assertEquals("children", 1, result.size());
     }
 }

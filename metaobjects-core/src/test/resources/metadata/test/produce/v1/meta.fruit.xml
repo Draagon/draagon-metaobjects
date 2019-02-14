@@ -19,7 +19,26 @@
       <!-- Weight -->
       <field name="weight" type="int"/>
      
-    </object>  
+    </object>
+
+    <!-- Fruit -->
+    <object name="Vegetable" type="pojo">
+
+        <attr name="object">com.draagon.meta.test.Vegetable</attr>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
+
+    </object>
 
     <!-- Apple -->
     <object name="Apple" super="Fruit">
@@ -37,9 +56,16 @@
     </object>  
 
     <!-- Macintosh -->
-    <object name="Macintosh" super="Apple">
+    <object name="Macintosh" super="Apple" inherits="Vegetable">
 
         <attr name="object">com.draagon.meta.test.Macintosh</attr>
+
+    </object>
+
+    <!-- Macintosh -->
+    <object name="Tomato" super="Vegetable" inherits="Fruit">
+
+        <attr name="object">com.draagon.meta.test.Tomato</attr>
 
     </object>
 
