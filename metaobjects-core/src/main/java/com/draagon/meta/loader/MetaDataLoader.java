@@ -91,8 +91,15 @@ public abstract class MetaDataLoader extends MetaData {
      * Retrieves a collection of all Meta Classes
      */
     public <T extends MetaData> List<T> getMetaData( Class<T> c ) {
+        return getMetaData(c, true);
+    }
+
+    /**
+     * Retrieves a collection of all Meta Classes
+     */
+    public <T extends MetaData> List<T> getMetaData( Class<T> c, boolean includeParentData ) {
         checkState();
-        Collection<T> children = getChildren(c,true);
+        Collection<T> children = getChildren(c,includeParentData);
         ArrayList<T> classes = new ArrayList<T>(children.size());
         for (MetaData md : children) {
             classes.add((T) md);
