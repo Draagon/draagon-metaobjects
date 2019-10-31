@@ -55,6 +55,7 @@ public class XMLFileReader
             return plugin.loadFromStream( is );
         }
         catch( IOException e ) {
+            log.debug( "Error attempting to use plugin [" + className + "]: " + e.getMessage() );
             throw e;
         }
         catch( Throwable e ) {

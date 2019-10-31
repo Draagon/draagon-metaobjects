@@ -40,6 +40,7 @@ public class JAXPXMLPlugin implements XMLPlugin
         }
         catch( IOException e )
         {
+            log.error( "Unable to parse XML inputstream: " + e.getMessage() , e );
             throw e; //new MetaException( "IO Error parsing Meta XML: " + e.getMessage(), e );
         }
         catch( Exception e )
