@@ -1,2 +1,2 @@
 # draagon-metaobjects
-MetaObjects is for Meta-Modelling and MetaData-driven development
+MetaObjects is a toolkit for Model-driven development
