@@ -5,3 +5,5 @@ derby.log
 .hgignore
 .hgtags
 target
+out
+.DS_Store
