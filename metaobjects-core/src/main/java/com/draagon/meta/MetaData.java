@@ -43,29 +43,6 @@ public abstract class MetaData implements Cloneable, Serializable {
     
     public abstract Class<? extends MetaData> getMetaDataClass();
 
-<<<<<<< HEAD
-=======
-    /**
-     * Iterates up the Super Data until it finds the MetaDataLoader
-     */
-    public synchronized MetaDataLoader getLoader() {
-
-        if (loader == null) {
-            MetaData d = this;
-            while (d != null) {
-                if (d instanceof MetaDataLoader) {
-                    loader = (MetaDataLoader) d;
-                    break;
-                }
-                d = d.getSuperData();
-            }
-        }
-
-        return loader;
-    }
-
-
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
     ////////////////////////////////////////////////////
     // SETTER / GETTER METHODS
     

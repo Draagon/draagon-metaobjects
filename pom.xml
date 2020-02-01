@@ -19,19 +19,11 @@
 
     <modules>
         <module>metaobjects-core</module>
-<<<<<<< HEAD
         <module>metaobjects-om</module>
         <module>metaobjects-omdb</module>
         <!-- module>metaobjects-spring</module>
         <module>metaobjects-web</module -->
         <module>metaobjects-demo</module>
-=======
-        <!--module>metaobjects-om</module>
-        <module>metaobjects-omdb</module>
-        <module>metaobjects-spring</module>
-        <module>metaobjects-web</module>
-        <module>metaobjects-demo</module -->
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
     </modules>
 
     <scm>

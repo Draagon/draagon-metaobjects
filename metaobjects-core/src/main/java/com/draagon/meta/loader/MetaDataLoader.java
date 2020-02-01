@@ -10,21 +10,14 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
-<<<<<<< HEAD
 import com.draagon.meta.object.MetaObjectNotFoundException;
-=======
-
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-<<<<<<< HEAD
 import java.util.concurrent.CopyOnWriteArrayList;
-=======
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -220,11 +213,7 @@ public abstract class MetaDataLoader extends MetaData {
      * Registers a new MetaClassLoader
      */
     protected static void registerLoader(MetaDataLoader loader) {
-<<<<<<< HEAD
         metaClassLoaders.add(loader);
-=======
-        metaDataLoaders.put(loader.getName(), loader);
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
     }
 
     /**

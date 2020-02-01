@@ -36,11 +36,7 @@ public class FruitDBTest extends AbstractOMDBTest {
     public void initLoader() throws Exception {
                 
         // Initialize the loader
-<<<<<<< HEAD
         XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader();        
-=======
-        XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "fruit-test" );
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
         xl.setSource( "meta.fruit.xml" );        
         xl.init();
         
@@ -59,11 +55,7 @@ public class FruitDBTest extends AbstractOMDBTest {
     public void testApple() throws Exception {
         
         Apple apple = new Apple();
-<<<<<<< HEAD
         MetaObject mo = MetaObject.forObject( apple );
-=======
-        MetaObject mo = MetaObject.forObject( "fruit-test", apple );
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
         
         assertEquals( "produce::Apple", mo.getName() );
         
@@ -106,11 +98,7 @@ public class FruitDBTest extends AbstractOMDBTest {
     @Test
     public void testBasket() throws Exception {
         
-<<<<<<< HEAD
         MetaObject mo = MetaObject.forName( "container::Basket" );        
-=======
-        MetaObject mo = MetaObject.forName( "fruit-test", "container::Basket" );
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
         assertEquals( "container::Basket", mo.getName() );
         
         ManagedObject vo = (ManagedObject) mo.newInstance();
@@ -126,11 +114,7 @@ public class FruitDBTest extends AbstractOMDBTest {
         assertFalse( "isEmpty", data.isEmpty() );
         assertEquals( new Integer( 12 ), ((ManagedObject) data.iterator().next()).getInt("oranges"));
         
-<<<<<<< HEAD
         MetaObject mo2 = MetaObject.forName( "produce::FullBasketView" );
-=======
-        MetaObject mo2 = MetaObject.forName( "fruit-test", "produce::FullBasketView" );
->>>>>>> 3dd7119... Revert "Fixes based on recent changes around MetaDataLoader"
         data = omdb.getObjects(oc, mo2);
         assertFalse( "isEmpty", data.isEmpty() );
         
