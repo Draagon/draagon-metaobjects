@@ -57,6 +57,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     private final java.util.Map<String, String> mProperties = new java.util.concurrent.ConcurrentHashMap<String, String>();
 
     private boolean allowExtensions = false;
+    private boolean enforceStrictness = false;
 
     // The MetaObject is transient, but the loader name, and object name are needed
     private transient MetaObject mMetaObject = null;
@@ -203,19 +204,32 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
         return mMetaObject;
     }
 
-    //public String getMetaDataLoaderName() {
-    //    return mLoaderName;
-    //}
-    
-    //public String getMetaObjectName() {
-    //    return mObjectName;
-    //}
+    /**
+     * Check to see if the field is valid and if metadata exists, but only if extensions are allowed
+     * @param name Field name to check
+     */
+    protected boolean isValidFieldName(String name) {
+        if ( allowExtensions ) return true;
+        if ( !hasMetaDataAttached()) {
+            throw new IllegalArgumentException( "There is no MetaObject attached to this ValueObject and it is not extendable, so it field ["+name+"] cannot be read or written to");
+        } else if ( !getMetaData().hasMetaField( name )) {
+            if ( enforceStrictness ) {
+                throw new IllegalArgumentException( "No field with name ["+name+"] exists on MetaObject, and this is ValueObject is set to strictly enforce that it must: " + getMetaData() );
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Sets an attribute of the MetaObject
      */
     public void setObjectAttribute(String name, Object value, int type ) {
-        
+
+        // Do not store invalid field values
+        if (!isValidFieldName( name )) return;
+
         Value v = (Value) getObjectAttributeValue(name);                      
 
         // Convert to the proper object type
@@ -223,7 +237,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
             try {
                 value = Converter.toType(getMetaData().getMetaField(name).getType(), value);
             }catch( MetaDataNotFoundException e ) {
-                if (!allowsExtensions()) throw new IllegalArgumentException( "No field with name["+name+"] exists on MetaObject: " + getMetaData() );
+                //if (!allowExtensions) throw new IllegalArgumentException( "No field with name["+name+"] exists on MetaObject: " + getMetaData() );
                 value = Converter.toType(type, value);
             }
         } else {
@@ -258,23 +272,6 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     public void setObjectProperty( String name, String key ) {
         mProperties.put( name, key );
     }
-
-    /**
-     * Return the MetaField named, if this ValueObject has an associated MetaObject
-     */
-    /* protected MetaField getMetaField( String name ) {
-        if ( !hasMetaDataAttached()) return null;
-        return getMetaData().getMetaField(name);
-    }*/
-
-    /**
-     * Returns the MetaFields based on the associated MetaObject
-     * @return List of MetaFields or null if no MetaObject attached
-     */
-    /* public Collection<MetaField> getMetaFields() {
-        if ( !hasMetaDataAttached()) return null;
-        return getMetaData().getMetaFields();
-    }*/
 
     /**
      * Returns the MetaFields based on the associated MetaObject
@@ -313,16 +310,6 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     }
 
     /**
-     * Returns whether the specified MetaField exists on the MetaObject attached
-     * @param name Name of the MetaField
-     * @return true if exists, false if not or no MetaObject is attached
-     */
-    //public boolean hasMetaField( String name ) {
-    //    if ( !hasMetaDataAttached()) return false;
-    //    return getMetaData().hasMetaField(name);
-    //}
-
-    /**
      * Returns whether the attribute is associated with this ValueObject (ignoring the MetaObject)
      * @param name Name of the attribute/value
      * @return True if it exists on this ValueObject
@@ -343,6 +330,9 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
      * Retrieves an attribute of the MetaObject
      */
     public Object getObjectAttribute(String name) {
+
+        if (!isValidFieldName( name )) return null;
+
         Value v = mAttributes.get(name);
         if ( v != null ) {
             return v.getValue();
@@ -358,8 +348,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
      */
     protected Value getObjectAttributeValue(String name ) //throws ValueException
     {
-        // Force an exception if extensions are not allowed and the MetaField didn't exist
-        if ( !allowExtensions ) getMetaData().getMetaField( name );
+        if (!isValidFieldName( name )) return null;
 
         synchronized (mAttributes) {
             Value v = (Value) mAttributes.get(name);
@@ -371,54 +360,43 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
         }
     }
 
-    /*public Object getObjectValue( String name )
-     throws MetaException
-     {
-        return getMetaField( name ).getValue( this );
-     }
-
-     public void setObjectValue( String name, Object value )
-     throws MetaException
-     {
-        getMetaField( name ).setValue( this, value );
-     }*/
     
     //////////////////////////////////////////////////////////////
     // PRIMITIVE SETTER VALUES
-    public void setBoolean(String name, boolean value) //throws ValueException
+    /*public void setBoolean(String name, boolean value) //throws ValueException
     {
-        setBoolean(name, new Boolean( value ));
+        setBoolean(name, value );
     }
 
     public void setByte(String name, byte value) //throws MetaException
     {
-        setByte(name, new Byte(value));
+        setByte(name, value);
     }
 
     public void setShort(String name, short value) //throws MetaException
     {
-        setShort(name, new Short(value));
+        setShort(name, value);
     }
 
     public void setInt(String name, int value) //throws MetaException
     {
-        setInt(name, new Integer(value));
+        setInt(name, value);
     }
 
     public void setLong(String name, long value) //throws MetaException
     {
-        setLong(name, new Long(value));
+        setLong(name, value);
     }
 
     public void setFloat(String name, float value) //throws MetaException
     {
-        setFloat(name, new Float(value));
+        setFloat(name, value);
     }
 
     public void setDouble(String name, double value) //throws MetaException
     {
-        setDouble(name, new Double(value));
-    }
+        setDouble(name, value);
+    }*/
 
     //////////////////////////////////////////////////////////////
     // SETTER VALUES
