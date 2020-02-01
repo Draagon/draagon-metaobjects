@@ -70,8 +70,8 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
      * Create a generic value object that supports extensions by default
      */
     public ValueObject() {
-        this.allowExtensions = true;
-        this.mObjectName = "default-ctor";
+        //this.allowExtensions = true;
+        //this.mObjectName = "default-ctor";
     }
 
     /**
@@ -223,6 +223,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
             try {
                 value = Converter.toType(getMetaData().getMetaField(name).getType(), value);
             }catch( MetaDataNotFoundException e ) {
+                if (!allowsExtensions()) throw new IllegalArgumentException( "No field with name["+name+"] exists on MetaObject: " + getMetaData() );
                 value = Converter.toType(type, value);
             }
         } else {
