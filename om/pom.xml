@@ -16,23 +16,11 @@
     <url>https://github.com/Draagon/draagon-metaobjects</url>
     <description>MetaObjects for Model-driven development - ObjectManager</description>
 
-    <scm>
-        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</connection>
-        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</developerConnection>
-        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=om</url>
-    </scm>  
-
     <dependencies>
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>6.0</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
             

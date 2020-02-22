@@ -16,7 +16,6 @@
     <url>https://github.com/Draagon/draagon-metaobjects</url>
     <description>MetaObjects for Model-driven development - ObjectManager Relational Databases</description>
 
-        
     <dependencies>
         <dependency>
             <groupId>com.draagon</groupId>
@@ -26,13 +25,13 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>6.0</version>
+            <version>${javaee.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.9.1.0</version>
+            <version>${derby.version}</version>
             <scope>test</scope>            
         </dependency>              
     </dependencies>

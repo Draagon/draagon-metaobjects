@@ -15,20 +15,6 @@
     <url>https://github.com/Draagon/draagon-metaobjects</url>
     <description>MetaObjects for Model-driven development - Core Libraries</description>
 
-    <scm>
-        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.core/</connection>
-        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.core/</developerConnection>
-        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=core</url>
-      <tag>HEAD</tag>
-    </scm>
-
-    <properties>
-        <xerces.version>2.12.0</xerces.version>
-
-        <draagon.cache.version>3.9.0</draagon.cache.version>
-        <xml.apis.version>1.4.01</xml.apis.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>commons-validator</groupId>
