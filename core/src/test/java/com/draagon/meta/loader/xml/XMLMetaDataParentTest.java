@@ -12,7 +12,10 @@ package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
 import java.util.List;
@@ -24,21 +27,21 @@ import static org.junit.Assert.assertEquals;
  * @author dmealing
  */
 public class XMLMetaDataParentTest extends XMLMetaDataLoaderTestBase{
-    static final Logger logger = Logger.getLogger(XMLMetaDataParentTest.class);
+    static final Log log = LogFactory.getLog(XMLMetaDataParentTest.class);
 
 
     private void testObjectFieldCount(String objectName, boolean includeParentData, int expectedCount) {
         List<MetaObject> result = loader.getMetaData(MetaObject.class, includeParentData);
 
-        logger.info("Parent -> Child");
+        log.info("Parent -> Child");
         int fields = 0;
         for(MetaObject mo : result){
-            logger.info(String.format("[%s]->[%s]",
+            log.info(String.format("[%s]->[%s]",
                     ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
             if(mo.getName().equals(objectName)) {
                 fields = mo.getMetaFields(includeParentData).size();
                 for(MetaField f : mo.getMetaFields(includeParentData)) {
-                    logger.info(String.format("field [%s]", f.getName()));
+                    log.info(String.format("field [%s]", f.getName()));
                 }
             }
         }

@@ -5,16 +5,16 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
     <artifactId>metaobjects-om</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
-    <name>MetaObjects OM</name>
-    <url>http://www.draagon.com/products/metaobjects/</url>
-    <description>MetaObjects for MetaData-driven development.  Core ObjectManager libraries.</description>
+    <name>MetaObjects :: OM</name>
+    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <description>MetaObjects for Model-driven development - ObjectManager</description>
 
     <scm>
         <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</connection>

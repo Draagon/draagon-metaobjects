@@ -8,14 +8,25 @@
         <version>3.9.0</version>
     </parent>
   
-    <groupId>com.draagon</groupId>
     <artifactId>metaobjects</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>MetaObjects Parent</name>
-    <url>http://www.draagon.com/products/metaobjects/</url>
-    <description>MetaObjects for MetaData-driven development.  Parent POM.</description>
+    <name>MetaObjects</name>
+    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <description>MetaObjects for Model-driven development</description>
+
+    <scm>
+        <connection>scm:git:git://github.com/Draagon/draagon-metaobjects.git</connection>
+        <developerConnection>scm:git:git@github.com:Draagon/draagon-metaobjects.git</developerConnection>
+        <url>https://github.com/Draagon/draagonmetaobjects</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <organization>
+        <name>Doug Mealing LLC</name>
+        <url>http://www.draagon.com/</url>
+    </organization>
 
     <modules>
         <module>core</module>
@@ -24,17 +35,6 @@
         <!-- module>web</module -->
         <module>demo</module>
     </modules>
-
-    <scm>
-        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects/</connection>
-        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects/</developerConnection>
-        <url>https://code.google.com/p/draagon-metaobjects/source/browse/</url>
-    </scm>
-    
-    <organization>
-        <name>Doug Mealing LLC</name>
-        <url>http://www.draagon.com/</url>
-    </organization>
 
     <developers>
         <developer>
@@ -60,6 +60,9 @@
     </licenses>
 
     <properties>
+
+        <!-- Maven Properties -->
+
         <java.version>1.8</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -67,6 +70,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss.SSSZ</maven.build.timestamp.format>
+
+        <!-- Apache Commons Properties -->
+
+        <commons.validator.version>1.3.1</commons.validator.version>
+
+        <!-- Draagon Properties -->
+
+        <draagon.cache.version>3.9.0</draagon.cache.version>
 
         <!--
             Maven Plugins (https://maven.apache.org/plugins/)
@@ -115,39 +126,32 @@
 
     </properties>
 
-    <!--repositories>
-        <repository>
-            <id>cengage-public</id>
-            <url>https://artifactory.cengage.info/artifactory/cengage-central-maven</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories-->
-
     <dependencies>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
+            <version>${commons.logging.version}</version>
         </dependency>
     </dependencies>
 	
     <build>
+
         <extensions>
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
@@ -246,34 +250,4 @@
 
     </build>
 
-                        
-    <profiles>
-        <!--profile>
-            <id>sign</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile -->
-    </profiles>
 </project>

@@ -21,11 +21,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public abstract class MetaObject extends MetaData {
 
-    private static Logger log = Logger.getLogger(MetaObject.class);
+    private static Log log = LogFactory.getLog(MetaObject.class);
     /**
      * Object class name attribute
      */

@@ -4,16 +4,16 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
     <artifactId>metaobjects-demo</artifactId>
     <packaging>war</packaging>
 
-    <name>MetaObjects Demo</name>
-    <url>http://www.draagon.com/products/metaobjects/</url>
-    <description>MetaObjects Fishstore Demo App showing MetaData-driven development.</description>
+    <name>MetaObjects :: Demo</name>
+    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <description>MetaObjects Fishstore Demo App showing Model-driven development.</description>
 
     <build>
         <plugins>

@@ -5,22 +5,17 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
     <artifactId>metaobjects-omdb</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
-    <name>MetaObjects OMDB</name>
-    <url>http://www.draagon.com/products/metaobjects/</url>
-    <description>Relational Database ObjectManager libraries for MetaData-driven development.</description>
+    <name>MetaObjects :: OMDB</name>
+    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <description>MetaObjects for Model-driven development - ObjectManager Relational Databases</description>
 
-    <scm>
-        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.omdb/</connection>
-        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.omdb/</developerConnection>
-        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=omdb</url>
-    </scm>  
         
     <dependencies>
         <dependency>

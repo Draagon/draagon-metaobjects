@@ -11,7 +11,8 @@
 package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.object.MetaObject;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
 import java.util.List;
@@ -23,16 +24,16 @@ import static org.junit.Assert.assertEquals;
  * @author dmealing
  */
 public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
-    static final Logger logger = Logger.getLogger(XMLMetaDataSuperTest.class);
+    static final Log log = LogFactory.getLog(XMLMetaDataSuperTest.class);
 
 
     @Test
     public void testSuperListFruit() {
         List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Fruit");
 
-        logger.info("Parent -> Child");
+        log.info("Parent -> Child");
         for(MetaObject mo : result){
-            logger.info(String.format("[%s]->[%s]",
+            log.info(String.format("[%s]->[%s]",
                     ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
         }
 
@@ -43,9 +44,9 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
     public void testSuperListVegetable() {
         List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Vegetable");
 
-        logger.info("Parent -> Child");
+        log.info("Parent -> Child");
         for(MetaObject mo : result){
-            logger.info(String.format("[%s]->[%s]",
+            log.info(String.format("[%s]->[%s]",
                     ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
         }
 
