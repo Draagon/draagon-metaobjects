@@ -9,7 +9,7 @@
     </parent>
   
     <groupId>com.draagon</groupId>
-    <artifactId>metaobjects-parent</artifactId>
+    <artifactId>metaobjects</artifactId>
     <version>4.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -18,12 +18,11 @@
     <description>MetaObjects for MetaData-driven development.  Parent POM.</description>
 
     <modules>
-        <module>metaobjects-core</module>
-        <module>metaobjects-om</module>
-        <module>metaobjects-omdb</module>
-        <!-- module>metaobjects-spring</module>
-        <module>metaobjects-web</module -->
-        <module>metaobjects-demo</module>
+        <module>core</module>
+        <module>om</module>
+        <module>omdb</module>
+        <!-- module>web</module -->
+        <module>demo</module>
     </modules>
 
     <scm>

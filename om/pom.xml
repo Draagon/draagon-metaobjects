@@ -4,28 +4,28 @@
 
     <parent>
         <groupId>com.draagon</groupId>
-        <artifactId>metaobjects-parent</artifactId>
+        <artifactId>metaobjects</artifactId>
         <version>4.2.0-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
-    <artifactId>metaobjects-spring</artifactId>
+    <artifactId>metaobjects-om</artifactId>
     <packaging>jar</packaging>
 
-    <name>MetaObjects Spring</name>
+    <name>MetaObjects OM</name>
     <url>http://www.draagon.com/products/metaobjects/</url>
-    <description>Spring related libraries for MetaData-driven development.</description>
+    <description>MetaObjects for MetaData-driven development.  Core ObjectManager libraries.</description>
 
     <scm>
-        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.spring/</connection>
-        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.spring/</developerConnection>
-        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=spring</url>
+        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</connection>
+        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</developerConnection>
+        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=om</url>
     </scm>  
-        
+
     <dependencies>
         <dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-om</artifactId>
+            <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -34,12 +34,6 @@
             <version>6.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.9.1.0</version>
-            <scope>test</scope>            
-        </dependency>              
     </dependencies>
-
+            
 </project>

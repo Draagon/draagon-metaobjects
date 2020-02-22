@@ -3,7 +3,7 @@
 
     <parent>
         <groupId>com.draagon</groupId>
-        <artifactId>metaobjects-parent</artifactId>
+        <artifactId>metaobjects</artifactId>
         <version>4.2.0-SNAPSHOT</version>
     </parent>
   

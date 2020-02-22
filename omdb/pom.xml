@@ -4,28 +4,28 @@
 
     <parent>
         <groupId>com.draagon</groupId>
-        <artifactId>metaobjects-parent</artifactId>
+        <artifactId>metaobjects</artifactId>
         <version>4.2.0-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
-    <artifactId>metaobjects-om</artifactId>
+    <artifactId>metaobjects-omdb</artifactId>
     <packaging>jar</packaging>
 
-    <name>MetaObjects OM</name>
+    <name>MetaObjects OMDB</name>
     <url>http://www.draagon.com/products/metaobjects/</url>
-    <description>MetaObjects for MetaData-driven development.  Core ObjectManager libraries.</description>
+    <description>Relational Database ObjectManager libraries for MetaData-driven development.</description>
 
     <scm>
-        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</connection>
-        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.om/</developerConnection>
-        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=om</url>
+        <connection>scm:hg:https://code.google.com/p/draagon-metaobjects.omdb/</connection>
+        <developerConnection>scm:hg:https://code.google.com/p/draagon-metaobjects.omdb/</developerConnection>
+        <url>https://code.google.com/p/draagon-metaobjects/source/browse?repo=omdb</url>
     </scm>  
-
+        
     <dependencies>
         <dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-core</artifactId>
+            <artifactId>metaobjects-om</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -34,6 +34,12 @@
             <version>6.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.9.1.0</version>
+            <scope>test</scope>            
+        </dependency>              
     </dependencies>
-            
+
 </project>
