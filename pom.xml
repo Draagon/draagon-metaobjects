@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -9,7 +8,7 @@
     </parent>
   
     <artifactId>metaobjects</artifactId>
-    <version>4.2.2-SNAPSHOT</version>
+    <version>4.2.2</version>
     <packaging>pom</packaging>
 
     <name>MetaObjects</name>
@@ -20,7 +19,7 @@
         <connection>scm:git:git://github.com/Draagon/draagon-metaobjects.git</connection>
         <developerConnection>scm:git:git@github.com:Draagon/draagon-metaobjects.git</developerConnection>
         <url>https://github.com/Draagon/draagonmetaobjects</url>
-        <tag>HEAD</tag>
+        <tag>metaobjects-4.2.2</tag>
     </scm>
 
     <organization>
@@ -132,10 +131,10 @@
         <osgi.export>{local-packages};-split-package:=error</osgi.export>
         <osgi.import>*</osgi.import>
         <osgi.private>{local-packages}</osgi.private>
-        <osgi.embed/>
+        <osgi.embed />
         <osgi.embed.dir>lib</osgi.embed.dir>
-        <osgi.activator/>
-        <osgi.dynamic/>
+        <osgi.activator />
+        <osgi.dynamic />
 
     </properties>
 
