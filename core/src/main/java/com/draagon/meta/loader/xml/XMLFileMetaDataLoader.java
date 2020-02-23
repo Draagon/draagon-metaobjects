@@ -409,9 +409,12 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         ////////////////////////////////////////////////////////
         // LOAD DEFAULT TYPES
 
-        // If no types found, then load the default types
+        // If no types found, then load the default types, if it exists
         if (!typesLoaded) {
-            loadTypesFromFile(getDefaultMetaDataTypes());
+            String types = getDefaultMetaDataTypes();
+            if ( types != null ) {
+                loadTypesFromFile(getDefaultMetaDataTypes());
+            }
         }
 
         //////////////////////////////////////////////////////
