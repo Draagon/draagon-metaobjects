@@ -87,10 +87,9 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         super( name );
     }
 
-    /*public void setSourcePaths(List<String> sourcePaths) {
-        // TODO:  Read all XML files in the path
-        //this.sources = sources;
-    }*/
+    public String getDefaultMetaDataTypes() {
+        return "com/draagon/meta/loader/meta.types.xml";
+    }
 
     public void setSourceDir( String dir ) {
         sourceDir = dir;
@@ -412,7 +411,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
         // If no types found, then load the default types
         if (!typesLoaded) {
-            loadTypesFromFile("com/draagon/meta/loader/meta.types.xml");
+            loadTypesFromFile(getDefaultMetaDataTypes());
         }
 
         //////////////////////////////////////////////////////
