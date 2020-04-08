@@ -10,11 +10,14 @@ package com.draagon.meta.util.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.w3c.dom.Document;
+
+import javax.xml.crypto.dsig.XMLObject;
 
 /**
  * Meta Class loader for XML files
@@ -69,14 +72,21 @@ public class XMLFileReader
     private static XMLPlugin getPlugin( String className )
     {
         try {
-            Class c = Class.forName( className );
-            return (XMLPlugin) c.newInstance();
+            Class<?> c = (Class<?>) Class.forName( className );
+            if( XMLPlugin.class.isAssignableFrom( c )) {
+                for (Constructor<?> cc : c.getDeclaredConstructors()) {
+                    if (cc.getParameterCount() == 0) {
+                        return (XMLPlugin) cc.newInstance();
+                    }
+                }
+            }
         }
         catch( Throwable e ) {
             //ystem.out.println( "ERROR: Cannot load [" + className + "]: " + e.getMessage() );
-            log.debug( "Unable to load XML Plugin [" + className + "]: " + e.getMessage() );
-            return null;
+            if ( log.isDebugEnabled() ) log.debug( "Unable to load XML Plugin [" + className + "]: " + e.getMessage() );
         }
+
+        return null;
     }
 }
 

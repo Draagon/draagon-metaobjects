@@ -18,9 +18,7 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.Apple;
 import com.draagon.meta.test.Orange;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,25 +33,37 @@ import static org.junit.Assert.assertTrue;
  */
 public class XMLMetaDataLoaderTestBase {
 
+    protected static MetaDataLoader loaderStatic = null;
+
     protected MetaDataLoader loader = null;
+
+    @BeforeClass
+    public synchronized static void initLoaderStatic() {
+
+        if ( loaderStatic == null ) {
+            // Initialize the loader
+            XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader("test");
+            List<String> list = new ArrayList<String>();
+            list.add("metadata/test/produce/v1/produce-v1.bundle");
+            list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
+            xl.init(new LocalMetaDataSources(list));
+            xl.register();
+
+            loaderStatic = xl;
+        }
+    }
 
     @Before
     public void initLoader() throws Exception {
-
-
-        // Initialize the loader
-        XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test" );
-        List<String> list = new ArrayList<String>();
-        list.add( "metadata/test/produce/v1/produce-v1.bundle" );
-        list.add( "metadata/test/produce/v1/meta.fruit.overlay.xml" );
-        xl.init(new LocalMetaDataSources(list));
-        xl.register();
-
-        this.loader = xl;
+        this.loader = loaderStatic;
     }
 
     @After
     public void destroyLoader() throws Exception {
-        loader.destroy();
+        this.loader = null;
+    }
+
+    @AfterClass
+    public static void destroyLoaderStatic() throws Exception {
     }
 }

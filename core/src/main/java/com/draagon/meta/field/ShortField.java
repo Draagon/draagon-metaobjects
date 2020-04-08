@@ -18,8 +18,8 @@ import com.draagon.meta.*;
 public class ShortField extends MetaField<Short> {
     //private static Log log = LogFactory.getLog( ShortField.class );
 
-    public ShortField(String name) {
-        super(name);
+    public ShortField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

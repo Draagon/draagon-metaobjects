@@ -1,10 +1,11 @@
 package com.draagon.meta.util;
 
+import com.draagon.meta.field.MetaFieldTypes;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import com.draagon.meta.field.MetaFieldTypes;
 
 /**
  * Util class to convert from one data type to another
@@ -35,22 +36,23 @@ public final class Converter
 			case MetaFieldTypes.DATE: return toDate( val );
 			case MetaFieldTypes.OBJECT: return toObject( val );
 
-			case MetaFieldTypes.BOOLEAN_ARRAY: return unsupported(type,val);//toBooleanArray( val );
-			case MetaFieldTypes.BYTE_ARRAY: return unsupported(type,val);//toByteArray( val );
-			case MetaFieldTypes.SHORT_ARRAY: return unsupported(type,val);//toShortArray( val );
-			case MetaFieldTypes.INT_ARRAY: return unsupported(type,val);//toIntArray( val );
-			case MetaFieldTypes.LONG_ARRAY: return unsupported(type,val);//toLongArray( val );
-			case MetaFieldTypes.FLOAT_ARRAY: return unsupported(type,val);//toFloatArray( val );
-			case MetaFieldTypes.DOUBLE_ARRAY: return unsupported(type,val);//toDoubleArray( val );
-			case MetaFieldTypes.STRING_ARRAY: return toStringArray( val );
-			case MetaFieldTypes.DATE_ARRAY: return unsupported(type,val);//toDateArray( val );
-			case MetaFieldTypes.OBJECT_ARRAY: return toObjectArray( val );
+			case MetaFieldTypes.BOOLEAN_ARRAY: //return toBooleanArray( val );
+			case MetaFieldTypes.BYTE_ARRAY://return toByteArray( val );
+			case MetaFieldTypes.SHORT_ARRAY: //return toShortArray( val );
+			case MetaFieldTypes.INT_ARRAY: //return toIntArray( val );
+			case MetaFieldTypes.LONG_ARRAY: //return toLongArray( val );
+			case MetaFieldTypes.FLOAT_ARRAY: //return toFloatArray( val );
+			case MetaFieldTypes.DOUBLE_ARRAY: //return toDoubleArray( val );
+			case MetaFieldTypes.DATE_ARRAY: //toDateArray( val );
+			case MetaFieldTypes.CLOB: //return toClob( val );
+			case MetaFieldTypes.BLOB: //return toBlob( val );
+			case MetaFieldTypes.XML: //return toXml( val );
+			case MetaFieldTypes.JSON: //return toJson( val );
+			case MetaFieldTypes.HTML5: //return toHtml5( val );
+				return unsupported(type,val);
 
-			case MetaFieldTypes.CLOB: return unsupported(type,val);//toClob( val );
-			case MetaFieldTypes.BLOB: return unsupported(type,val);//toBlob( val );
-			case MetaFieldTypes.XML: return unsupported(type,val);//toXml( val );
-			case MetaFieldTypes.JSON: return unsupported(type,val);//toJson( val );
-			case MetaFieldTypes.HTML5: return unsupported(type,val);//toHtml5( val );
+			case MetaFieldTypes.STRING_ARRAY: return toStringArray( val );
+			case MetaFieldTypes.OBJECT_ARRAY: return toObjectArray( val );
 
 			case MetaFieldTypes.CUSTOM: throw new IllegalStateException( "Cannot convert to a custom type, value passed: [" + val + "]" );
 
@@ -64,33 +66,31 @@ public final class Converter
 		if ( val == null ) {
 			return null;
 		}
-		else if (val instanceof List) {
-			return (List) val;
+		else if (val instanceof List<?>) {
+			return (List<String>) val;
 		}
 		else if ( val instanceof String ) {
 			List<String> list = new ArrayList<>();
-			for( String s : ((String) val).split(",")) {
-				list.add( s );
-			}
+			Collections.addAll(list, ((String) val).split(","));
 			return list;
 		}
 		else {
-			List<String> l = new ArrayList();
+			List<String> l = new ArrayList<String>();
 			l.add( toString( val ));
 			return l;
 		}
 	}
 
 	/** Convert to an Object, if a list returns null if empty, or object if length of 1, otherwise an exception */
-	public static List toObjectArray( Object val ) {
+	public static List<Object> toObjectArray( Object val ) {
 		if ( val == null ) {
 			return null;
 		}
-		else if (val instanceof List) {
-			return (List) val;
+		else if (val instanceof List<?>) {
+			return (List<Object>) val;
 		}
 		else {
-			List l = new ArrayList();
+			List<Object> l = new ArrayList<Object>();
 			l.add( val );
 			return l;
 		}
@@ -104,7 +104,7 @@ public final class Converter
 	/** Convert to an Object, if a list returns null if empty, or object if length of 1, otherwise an exception */
 	public static Object toObject( Object val ) {
 		if (val instanceof List) {
-			List l = (List) val;
+			List<?> l = (List<?>) val;
 			if ( l.size() == 0 ) return null;
 			else if ( l.size() == 1 ) return l.get(0);
 			else throw new IllegalStateException( "Cannot convert List to to Object as it contains more than 1 value" );
@@ -128,37 +128,35 @@ public final class Converter
 	        return (Boolean) val;
 	      }
 	      else if ( val instanceof Byte ) {
-	        if ( ((Byte) val ).byteValue() != 0 ) return new Boolean( true );
+			return (Byte) val != 0;
 	      }
 	      else if ( val instanceof Short ) {
-	        if ( ((Short) val ).shortValue() != 0 ) return new Boolean( true );
+			return (Short) val != 0;
 	      }
 	      else if ( val instanceof Integer ) {
-	        if ( ((Integer) val ).intValue() != 0 ) return new Boolean( true );
+			return (Integer) val != 0;
 	      }
 	      else if ( val instanceof Long ) {
-	        if ( ((Long) val ).longValue() != 0 ) return new Boolean( true );
+			return (Long) val != 0;
 	      }
 	      else if ( val instanceof Float ) {
-	        if ( ((Float) val ).floatValue() != 0 ) return new Boolean( true );
+			return (Float) val != 0;
 	      }
 	      else if ( val instanceof Double ) {
-	        if ( ((Double) val ).doubleValue() != 0 ) return new Boolean( true );
+			return (Double) val != 0;
 	      }
-	      else if ( val instanceof String ) {
-	        if ( val.toString().length() > 0 && ( val.toString().charAt( 0 ) == 't'
-	            || val.toString().charAt( 0 ) == 'T' )) return new Boolean( true );
-	      }
+	      //else if ( val instanceof String ) {
+	      //  if ( val.toString().length() > 0 && ( val.toString().charAt( 0 ) == 't'
+	      //      || val.toString().charAt( 0 ) == 'T' )) return true;
+	      //}
 	      else if ( val instanceof Date ) {
-	              if ( ((Date) val ).getTime() == 0 ) return new Boolean( false );
-	              else return new Boolean( true );
+			return ((Date) val).getTime() != 0;
 	      }
-	      else if ( val instanceof Object ) {
-	        if ( val.toString().length() > 0 && ( val.toString().charAt( 0 ) == 't'
-	            || val.toString().charAt( 0 ) == 'T' )) return new Boolean( true );
+	      else {
+			return val.toString().length() > 0 && (val.toString().charAt(0) == 't'
+					|| val.toString().charAt(0) == 'T');
 	      }
 
-	      return new Boolean( false );
 	} // toDouble
 	
 	/**
@@ -172,37 +170,37 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	      if ( ((Boolean) val ).booleanValue() ) return new Double( 1.0 );
+	      if ((Boolean) val) return 1.0;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return new Double( (double) ((Byte) val ).byteValue() );
+	      return (double) (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return new Double( (double) ((Short) val ).shortValue() );
+	      return (double) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return new Double( (double) ((Integer) val ).intValue() );
+	      return (double) (Integer) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return new Double( (double) ((Long) val ).longValue() );
+	      return (double) (Long) val;
 	    }
 	    else if ( val instanceof Float ) {
-	      return new Double( (double) ((Float) val ).floatValue() );
+	      return (double) (Float) val;
 	    }
 	    else if ( val instanceof Double ) {
 	      return (Double) val;
 	    }
 	    else if ( val instanceof String ) {
-	      try { return new Double( Double.parseDouble( (String) val )); } catch( Exception e ) {}
+	      try { return Double.parseDouble((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
-	      return new Double( (double) ((Date) val ).getTime() );
+	      return (double) ((Date) val).getTime();
 	    }
-	    else if ( val instanceof Object ) {
-	      try { return new Double( Double.parseDouble( val.toString() )); } catch( Exception e ) {}
+	    else {
+	      try { return Double.parseDouble(val.toString()); } catch( Exception ignored) {}
 	    }
 	
-	    return new Double( 0.0 );
+	    return 0.0;
 	} // toDouble
 	
 	/**
@@ -216,37 +214,37 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	      if ( ((Boolean) val ).booleanValue() ) return new Float( 1 );
+	      if ((Boolean) val) return 1f;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return new Float( (float) ((Byte) val ).byteValue() );
+	      return (float) (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return new Float( (float) ((Short) val ).shortValue() );
+	      return (float) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return new Float( (float) ((Integer) val ).intValue() );
+	      return (float) (Integer) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return new Float( (float) ((Long) val ).longValue() );
+	      return (float) (Long) val;
 	    }
 	    else if ( val instanceof Float ) {
 	      return (Float) val;
 	    }
 	    else if ( val instanceof Double ) {
-	      return new Float( (float) ((Double) val ).doubleValue() );
+	      return (float) ((Double) val).doubleValue();
 	    }
 	    else if ( val instanceof String ) {
-	      try { return new Float( Float.parseFloat( (String) val )); } catch( Exception e ) {}
+	      try { return Float.parseFloat((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
-	      return new Float( (float) ((Date) val ).getTime() );
+	      return (float) ((Date) val).getTime();
 	    }
-	    else if ( val instanceof Object ) {
-	      try { return new Float( Float.parseFloat( val.toString() )); } catch( Exception e ) {}
+	    else {
+	      try { return Float.parseFloat(val.toString()); } catch( Exception ignored) {}
 	    }
 	
-	    return new Float( 0 );
+	    return (float) 0;
 	} // toFloat
 	
 	/**
@@ -260,37 +258,37 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	      if ( ((Boolean) val ).booleanValue() ) return new Long( 1 );
+	      if ((Boolean) val) return 1L;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return new Long( (long) ((Byte) val ).byteValue() );
+	      return (long) (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return new Long( (long) ((Short) val ).shortValue() );
+	      return (long) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return new Long( (long) ((Integer) val ).intValue() );
+	      return (long) (Integer) val;
 	    }
 	    else if ( val instanceof Long ) {
 	      return (Long) val;
 	    }
 	    else if ( val instanceof Float ) {
-	      return new Long( (long) ((Float) val ).floatValue() );
+	      return (long) ((Float) val).floatValue();
 	    }
 	    else if ( val instanceof Double ) {
-	      return new Long( (long) ((Double) val ).doubleValue() );
+	      return (long) ((Double) val).doubleValue();
 	    }
 	    else if ( val instanceof String ) {
-	      try { return new Long( Long.parseLong( (String) val )); } catch( Exception e ) {}
+	      try { return Long.parseLong((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
-	      return new Long( ((Date) val ).getTime() );
+	      return ((Date) val).getTime();
 	    }
-	    else if ( val instanceof Object ) {
-	      try { return new Long( Long.parseLong( val.toString() )); } catch( Exception e ) {}
+	    else {
+	      try { return Long.parseLong(val.toString()); } catch( Exception ignored) {}
 	    }
 	
-	    return new Long( 0 );
+	    return 0L;
 	} // toLong
 	
 	/**
@@ -304,37 +302,37 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	      if ( ((Boolean) val ).booleanValue() ) return new Integer( 1 );
+	      if ((Boolean) val) return 1;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return new Integer( (int) ((Byte) val ).byteValue() );
+	      return (int) (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return new Integer( (int) ((Short) val ).shortValue() );
+	      return (int) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
 	      return (Integer) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return new Integer( (int) ((Long) val ).longValue() );
+	      return (int) ((Long) val).longValue();
 	    }
 	    else if ( val instanceof Float ) {
-	      return new Integer( (int) ((Float) val ).floatValue() );
+	      return (int) ((Float) val).floatValue();
 	    }
 	    else if ( val instanceof Double ) {
-	      return new Integer( (int) ((Double) val ).doubleValue() );
+	      return (int) ((Double) val).doubleValue();
 	    }
 	    else if ( val instanceof String ) {
-	      try { return new Integer( Integer.parseInt( (String) val )); } catch( Exception e ) {}
+	      try { return Integer.parseInt((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
-	      return new Integer( (int) ((Date) val ).getTime() );
+	      return (int) ((Date) val).getTime();
 	    }
-	    else if ( val instanceof Object ) {
-	      try { return new Integer( Integer.parseInt( val.toString() )); } catch( Exception e ) {}
+	    else {
+	      try { return Integer.parseInt(val.toString()); } catch( Exception ignored) {}
 	    }
 	
-	    return new Integer( 0 );
+	    return 0;
 	} // toInt
 	
 	/**
@@ -348,37 +346,37 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	      if ( ((Boolean) val ).booleanValue() ) return new Short( (short)1 );
+	      if ((Boolean) val) return (short) 1;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return new Short( (short) ((Byte) val ).shortValue() );
+	      return (short) (byte) val;
 	    }
 	    else if ( val instanceof Short ) {
 	      return (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return new Short( (short) ((Integer) val ).intValue() );
+	      return (short) ((Integer) val).intValue();
 	    }
 	    else if ( val instanceof Long ) {
-	      return new Short( (short) ((Long) val ).longValue() );
+	      return (short) ((Long) val).longValue();
 	    }
 	    else if ( val instanceof Float ) {
-	      return new Short( (short) ((Float) val ).floatValue() );
+	      return (short) ((Float) val).floatValue();
 	    }
 	    else if ( val instanceof Double ) {
-	      return new Short( (short) ((Double) val ).doubleValue() );
+	      return (short) ((Double) val).doubleValue();
 	    }
 	    else if ( val instanceof String ) {
-	      try { return new Short( Short.parseShort( (String) val )); } catch( Exception e ) {}
+	      try { return Short.parseShort((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
-	      return new Short( (short) ((Date) val ).getTime() );
+	      return (short) ((Date) val).getTime();
 	    }
-	    else if ( val instanceof Object ) {
-	      try { return new Short( Short.parseShort( val.toString() )); } catch( Exception e ) {}
+	    else {
+	      try { return Short.parseShort(val.toString()); } catch( Exception ignored) {}
 	    }
 	
-	    return new Short( (short)0 );
+	    return (short) 0;
 	} // toShort
 	
 	/**
@@ -392,37 +390,37 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	      if ( ((Boolean) val ).booleanValue() ) return new Byte( (byte)1 );
+	      if ((Boolean) val) return (byte) 1;
 	    }
 	    else if ( val instanceof Byte ) {
 	      return (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return new Byte( (byte) ((Integer) val ).intValue() );
+	      return (byte) ((Short) val).intValue();
 	    }
 	    else if ( val instanceof Integer ) {
-	      return new Byte( (byte) ((Integer) val ).intValue() );
+	      return (byte) ((Integer) val).intValue();
 	    }
 	    else if ( val instanceof Long ) {
-	      return new Byte( (byte) ((Long) val ).longValue() );
+	      return (byte) ((Long) val).longValue();
 	    }
 	    else if ( val instanceof Float ) {
-	      return new Byte( (byte) ((Float) val ).floatValue() );
+	      return (byte) ((Float) val).floatValue();
 	    }
 	    else if ( val instanceof Double ) {
-	      return new Byte( (byte) ((Double) val ).doubleValue() );
+	      return (byte) ((Double) val).doubleValue();
 	    }
 	    else if ( val instanceof String ) {
-	      try { return new Byte( Byte.parseByte( (String) val )); } catch( Exception e ) {}
+	      try { return Byte.parseByte((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
-	      return new Byte( (byte) ((Date) val ).getTime() );
+	      return (byte) ((Date) val).getTime();
 	    }
-	    else if ( val instanceof Object ) {
-	      try { return new Byte( Byte.parseByte( val.toString() )); } catch( Exception e ) {}
+	    else {
+	      try { return Byte.parseByte(val.toString()); } catch( Exception ignored) {}
 	    }
 	
-	    return new Byte( (byte)0 );
+	    return (byte) 0;
 	} // toByte
 	
 	/**
@@ -453,20 +451,20 @@ public final class Converter
 	    if ( val == null ) return null;
 	
 	    if ( val instanceof Boolean ) {
-	        if ( ((Boolean) val ).booleanValue() ) return new Date();
+	        if ((Boolean) val) return new Date();
 	        else return new Date( 0 );
 	      }
 	      else if ( val instanceof Byte ) {
-	        return new Date( (long) ((Byte) val ).byteValue() );
+	        return new Date( (long) (Byte) val);
 	      }
 	      else if ( val instanceof Short ) {
-	        return new Date( (long) ((Short) val ).shortValue() );
+	        return new Date( (long) (Short) val);
 	      }
 	      else if ( val instanceof Integer ) {
-	        return new Date( (long) ((Integer) val ).intValue() );
+	        return new Date( (long) (Integer) val);
 	      }
 	      else if ( val instanceof Long ) {
-	        return new Date( (long) ((Long) val ).longValue() );
+	        return new Date( (long) val);
 	      }
 	      else if ( val instanceof Float ) {
 	        return new Date( (long) ((Float) val ).floatValue() );
@@ -475,7 +473,7 @@ public final class Converter
 	        return new Date( (long) ((Double) val ).doubleValue() );
 	      }
 	      else if ( val instanceof String ) {
-	        try { return new Date( Long.parseLong( (String) val )); } catch( Exception e ) {}
+	        try { return new Date( Long.parseLong( (String) val )); } catch( Exception ignored) {}
 	      }
 	      else if ( val instanceof Date ) {
 	        return (Date) val;

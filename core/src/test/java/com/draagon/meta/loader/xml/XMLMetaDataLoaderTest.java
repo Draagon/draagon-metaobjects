@@ -148,8 +148,8 @@ public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
         assertEquals("has eight fields", 8, basket.getObjectFieldNames().size());
     }*/
 
-    @After
-    public void destroyLoader() throws Exception {
-        loader.destroy();
-    }
+    //@After
+    //public void destroyLoader() throws Exception {
+    //    loader.destroy();
+    //}
 }

@@ -24,8 +24,8 @@ public class ObjectField extends MetaField<Object> {
      */
     public final static String ATTR_OBJECT_REF = "objectRef";
 
-    public ObjectField(String name) {
-        super(name);
+    public ObjectField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

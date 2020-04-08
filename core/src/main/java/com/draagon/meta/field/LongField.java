@@ -18,8 +18,8 @@ import com.draagon.meta.*;
 public class LongField extends MetaField<Long> {
     //private static Log log = LogFactory.getLog( LongField.class );
 
-    public LongField(String name) {
-        super(name);
+    public LongField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

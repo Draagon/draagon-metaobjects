@@ -22,8 +22,8 @@ public class RequiredValidator extends MetaValidator
 {
   //private static Log log = LogFactory.getLog( RequiredValidator.class );
 
-  public RequiredValidator(String name ) {
-    super(name);
+  public RequiredValidator(String type, String subtype, String name ) {
+    super( type, subtype, name );
   }
 
   /**

@@ -20,8 +20,8 @@ import java.util.Date;
 public class DateField extends MetaField<Date> {
     
     //private static Log log = LogFactory.getLog( DateField.class );
-    public DateField( String name ) {
-        super(name);
+    public DateField( String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

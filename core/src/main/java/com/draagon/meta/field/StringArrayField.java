@@ -17,8 +17,8 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class StringArrayField extends ArrayField<List<String>> {
 
-    public StringArrayField(String name) {
-        super(name);
+    public StringArrayField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

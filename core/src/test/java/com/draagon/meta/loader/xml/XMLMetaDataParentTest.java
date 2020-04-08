@@ -33,15 +33,16 @@ public class XMLMetaDataParentTest extends XMLMetaDataLoaderTestBase{
     private void testObjectFieldCount(String objectName, boolean includeParentData, int expectedCount) {
         List<MetaObject> result = loader.getMetaData(MetaObject.class, includeParentData);
 
-        log.info("Parent -> Child");
         int fields = 0;
         for(MetaObject mo : result){
-            log.info(String.format("[%s]->[%s]",
-                    ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
+            if ( log.isDebugEnabled() ) {
+                log.info(String.format("[%s]->[%s]",
+                        ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
+            }
             if(mo.getName().equals(objectName)) {
                 fields = mo.getMetaFields(includeParentData).size();
                 for(MetaField f : mo.getMetaFields(includeParentData)) {
-                    log.info(String.format("field [%s]", f.getName()));
+                    if ( log.isDebugEnabled()) log.debug(String.format("field [%s]", f.getName()));
                 }
             }
         }

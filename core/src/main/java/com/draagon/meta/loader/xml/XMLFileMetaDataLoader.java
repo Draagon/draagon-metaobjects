@@ -53,7 +53,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         public final Class<? extends MetaData> baseClass;
         private final Map<String,Class<? extends MetaData>> classes = new HashMap<String,Class<? extends MetaData>>();
         private String defaultType = null;
-        
+
         public MetaDataTypes( Class<? extends MetaData> baseClass ) {
             this.baseClass = baseClass;
         }
@@ -67,9 +67,13 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             return classes.get( name );
         }
 
-        public Class<? extends MetaData> getDefaultType() {
+        public Class<? extends MetaData> getDefaultTypeClass() {
             if ( defaultType == null ) return null;
             return get( defaultType );
+        }
+
+        public String getDefaultType() {
+            return defaultType;
         }
     }
     
@@ -84,7 +88,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
     }
 
     public XMLFileMetaDataLoader( String name ) {
-        super( name );
+        super( "xml", name );
     }
 
     public String getDefaultMetaDataTypes() {
@@ -564,13 +568,15 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 try {
                     // Attempt to load the referenced class
                     if (typeName == null ) {
-                        
+
                         // Use the Super class type if no type is defined and a super class exists
                         if (superData != null) {
                             c = superData.getClass();
+                            typeName = superData.getMetaDataSubType();
                         }
                         else {
-                            c = types.getDefaultType();
+                            typeName = types.getDefaultType();
+                            c = types.getDefaultTypeClass();
                             if ( c == null ) {
                                 throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined and baseClass [" + types.baseClass.getName() + "] had no default specified");
                             }
@@ -604,7 +610,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     if ( isRoot ) fullname = packageName + PKG_SEPARATOR + fullname;
                     
                     // Create the object
-                    md = (MetaData) c.getConstructor(String.class).newInstance( fullname );
+                    md = (MetaData) c.getConstructor(String.class, String.class, String.class).newInstance( nodeName, typeName, fullname );
                 }
                 catch (MetaException e) {
                     throw e;
@@ -679,7 +685,11 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
            if ( !reservedAttributes.contains( attrName )) {  
                
                String value = n.getNodeValue();
-               md.addAttribute( new StringAttribute(attrName, value ));
+
+               // TODO:  This should be replaced by the ruleset for handling attributes in the future
+               StringAttribute sa = new StringAttribute( "attribute", "string", attrName );
+               sa.setValue( value );
+               md.addAttribute(sa);
            }
         }
     }

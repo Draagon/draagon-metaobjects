@@ -10,7 +10,7 @@ package com.draagon.meta.attr;
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class ClassAttribute extends MetaAttribute<Class> {
+public class ClassAttribute extends MetaAttribute<Class<?>> {
     //private static Log log = LogFactory.getLog( ClassAttribute.class );
 
     private Class<?> mClass = null;
@@ -18,15 +18,24 @@ public class ClassAttribute extends MetaAttribute<Class> {
     /**
      * Constructs the MetaClass
      */
-    public ClassAttribute(String name) {
-        super(name);
+    public ClassAttribute(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
+
+    //@Override
+    //public Class<?> getMetaDataClass() {
+    //    return ClassAttribute.class;
+    //}
 
     /**
      * Sets the value of the MetaAttribute
      */
+    public void setValue(Class<?> value) {
+        mClass = (Class<?>) value;
+    }
+
     @Override
-    public void setValue(Class value) {
+    public void setValue(Object value) {
         mClass = (Class<?>) value;
     }
 

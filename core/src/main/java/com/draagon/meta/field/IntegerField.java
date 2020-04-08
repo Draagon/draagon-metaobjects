@@ -18,8 +18,8 @@ import com.draagon.meta.*;
 public class IntegerField extends MetaField<Integer> {
     //private static Log log = LogFactory.getLog( IntegerField.class );
 
-    public IntegerField(String name) {
-        super(name);
+    public IntegerField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

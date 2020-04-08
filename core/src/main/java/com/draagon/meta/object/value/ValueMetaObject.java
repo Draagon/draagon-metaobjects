@@ -8,7 +8,6 @@ package com.draagon.meta.object.value;
 
 import com.draagon.meta.MetaException;
 import com.draagon.meta.field.*;
-import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.util.Converter;
 import org.apache.commons.logging.Log;
@@ -27,11 +26,11 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
     /**
      * Constructs the MetaClassObject for MetaObjects
      */
-    public ValueMetaObject(String name) {
-        super(name);
+    public ValueMetaObject(String type, String subtype, String name) {
+        super(type,subtype, name);
     }
 
-    public static MetaObject createFromTemplate(String name, String template) {
+    /*public static MetaObject createFromTemplate(String name, String template) {
         // Let's create one from scratch
         ValueMetaObject mc = new ValueMetaObject(name);
         //mc.setName( name );
@@ -98,7 +97,7 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
         }
 
         return mc;
-    }
+    }*/
 
     /**
      * Retrieves the object class of an object

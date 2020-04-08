@@ -131,8 +131,8 @@ public class XMLMetaDataLoaderTest2 {
     }
 
 
-    @After
-    public void destroyLoader() throws Exception {
-        loader.destroy();
-    }
+    //@After
+    //public void destroyLoader() throws Exception {
+    //    loader.destroy();
+    //}
 }

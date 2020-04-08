@@ -18,20 +18,29 @@ public class StringAttribute extends MetaAttribute<String> {
     /**
      * Constructs the MetaClass
      */
-    public StringAttribute(String name) {
-        super(name);
+    public StringAttribute(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
-    public StringAttribute(String name, String value) {
+    //@Override
+    //public Class getMetaDataClass() {
+    //    return StringAttribute.class;
+    //}
+
+    /*public StringAttribute(String name, String value) {
         super(name);
         setValue(value);
-    }
+    }*/
 
     /**
      * Sets the value of the MetaAttribute
      */
-    @Override
     public void setValue(String value) {
+        mString = value.toString();
+    }
+
+    @Override
+    public void setValue(Object value) {
         mString = value.toString();
     }
 

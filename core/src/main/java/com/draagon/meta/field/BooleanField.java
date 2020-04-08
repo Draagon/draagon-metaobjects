@@ -20,8 +20,8 @@ import com.draagon.meta.*;
 public class BooleanField extends MetaField<Boolean> {
     //private static Log log = LogFactory.getLog( BooleanField.class );
 
-    public BooleanField(String name) {
-        super(name);
+    public BooleanField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

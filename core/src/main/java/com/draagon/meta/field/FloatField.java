@@ -18,8 +18,8 @@ import com.draagon.meta.*;
 public class FloatField extends MetaField<Float> {
     //private static Log log = LogFactory.getLog( FloatField.class );
 
-    public FloatField(String name) {
-        super(name);
+    public FloatField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

@@ -18,8 +18,8 @@ import com.draagon.meta.*;
 @SuppressWarnings("serial")
 public class DoubleField extends MetaField<Double>
 {
-    public DoubleField( String name ) {
-        super(name);
+    public DoubleField( String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
     
   //private static Log log = LogFactory.getLog( DoubleField.class );

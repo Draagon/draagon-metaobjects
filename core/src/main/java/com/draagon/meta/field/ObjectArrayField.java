@@ -26,8 +26,8 @@ public class ObjectArrayField extends ArrayField<List<Object>> {
      */
     public final static String ATTR_OBJECT_REF = ObjectField.ATTR_OBJECT_REF;
 
-    public ObjectArrayField(String name) {
-        super(name);
+    public ObjectArrayField(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**

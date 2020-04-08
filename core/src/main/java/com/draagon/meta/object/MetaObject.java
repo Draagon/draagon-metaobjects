@@ -35,8 +35,8 @@ public abstract class MetaObject extends MetaData {
     /**
      * Constructs the MetaObject
      */
-    public MetaObject(String name) {
-        super(name);
+    public MetaObject(String type, String subtype, String name ) {
+        super( type, subtype, name );
         addAttributeDef(new AttributeDef(ATTR_OBJECT, String.class, true, "The object class to instantiate"));
     }
 
@@ -189,7 +189,7 @@ public abstract class MetaObject extends MetaData {
             try {
                 return Class.forName(ostr);
             } catch (ClassNotFoundException e) {
-                log.warn(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
+                if ( log.isDebugEnabled()) log.debug(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
                 return getLoader().loadClass( ostr );
                 //throw new ClassNotFoundException("Specified Object Class [" + ostr + "] was not found", e);
             }
@@ -292,8 +292,20 @@ public abstract class MetaObject extends MetaData {
             }
             catch (NoSuchMethodException e) {
                 // Construct with no arguments && attach the metaobject
-                o = oc.newInstance();
-                attachMetaObject(o);
+                for( Constructor<?> c : oc.getDeclaredConstructors() ) {
+                    if ( c.getParameterCount() == 0 ) {
+                        try {
+                            o = (oc.getDeclaredConstructors()[0]).newInstance();
+                        } catch (InvocationTargetException ex) {
+                            throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+                        }
+                        attachMetaObject(o);
+                        break;
+                    }
+                }
+                //o = (oc.getDeclaredConstructors()[0]).newInstance();
+                //attachMetaObject(o);
+                if ( o == null ) throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: No empty constructor existed" );
             }
             catch (InvocationTargetException e) {
                 throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);

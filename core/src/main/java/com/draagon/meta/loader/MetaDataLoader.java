@@ -34,13 +34,13 @@ public abstract class MetaDataLoader extends MetaData {
 
     //private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
 
-    public MetaDataLoader() {
-        super( "loader-" + System.currentTimeMillis());
+    public MetaDataLoader( String subtype ) {
+        super( "loader", subtype, "loader-" + System.currentTimeMillis());
         //registerLoader(this);
     }
 
-    public MetaDataLoader( String name ) {
-        super(name);
+    public MetaDataLoader( String subtype, String name ) {
+        super( "loader", subtype, name );
         //registerLoader(this);
     }
 
@@ -282,9 +282,9 @@ public abstract class MetaDataLoader extends MetaData {
     // MISC METHODS
     public String toString() {
         if (getParent() == null) {
-            return "MetaDataLoader[" + getName() + "]";
+            return "MetaDataLoader[" + getMetaDataSubType() + ":" + getName() + "]";
         } else {
-            return "MetaDataLoader[" + getName() + "@" + getParent().toString() + "]";
+            return "MetaDataLoader[" + getMetaDataSubType() + ":" + getName() + "@" + getParent().toString() + "]";
         }
     }
 }

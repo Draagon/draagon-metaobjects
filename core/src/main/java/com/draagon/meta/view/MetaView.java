@@ -28,9 +28,8 @@ public abstract class MetaView extends MetaData
 
   public final static String ATTR_VALIDATION = "validation";
 
-  public MetaView( String name )
-  {
-      super( name );
+  public MetaView( String type, String subtype, String name ) {
+      super( type, subtype, name );
       addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
   }
 

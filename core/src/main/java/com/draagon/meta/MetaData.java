@@ -18,13 +18,13 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class MetaData implements Cloneable, Serializable {
+public class MetaData implements Cloneable, Serializable {
 
     /**
      * Separator for package and class names
      * @deprecated Use MetaDataLoader.PKG_SEPARATOR
      */
-    public final static String SEPARATOR = MetaDataLoader.PKG_SEPARATOR;
+    public final static String SEPARATOR = "::";
 
     private final Map<Object, Object> cacheValues = Collections.synchronizedMap(new WeakHashMap<Object, Object>());
     private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<MetaData>();
@@ -35,14 +35,29 @@ public abstract class MetaData implements Cloneable, Serializable {
     private WeakReference<MetaData> parentRef = null;
     private MetaDataLoader loader = null;
 
+    private final String metaDataType;
+    private final String metaDataSubType;
+
     /**
      * Constructs the MetaData
      */
-    public MetaData( String name ) {
+    public MetaData(String metaDataType, String metaDataSubType, String name ) {
+        if ( metaDataType == null ) throw new NullPointerException( "MetaData Type cannot be null" );
+        if ( metaDataSubType == null ) throw new NullPointerException( "MetaData SubType cannot be null" );
+        if ( name == null ) throw new NullPointerException( "MetaData Name cannot be null" );
+
+        this.metaDataType = metaDataType;
+        this.metaDataSubType = metaDataSubType;
         this.name = name;
     }
-    
-    public abstract Class<? extends MetaData> getMetaDataClass();
+
+    /**
+     * Get the Base Class for the MetaData
+     * @return Class The Java class for the metadata
+     */
+    public Class<? extends MetaData> getMetaDataClass() {
+        return MetaData.class;
+    }
 
     /**
      * Iterates up the Super Data until it finds the MetaDataLoader
@@ -69,6 +84,14 @@ public abstract class MetaData implements Cloneable, Serializable {
     /**
      * Returns the Name of this piece of MetaData
      */
+    public String getMetaDataType() {
+        return metaDataType;
+    }
+
+    public String getMetaDataSubType() {
+        return metaDataSubType;
+    }
+
     public String getName() {
         return name;
     }
@@ -109,7 +132,7 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Sets the parent of the attribute
      */
     protected void attachParent(MetaData parent) {
-        parentRef = new WeakReference<MetaData>(parent);
+        parentRef = new WeakReference<>(parent);
     }
 
     /**
@@ -143,7 +166,7 @@ public abstract class MetaData implements Cloneable, Serializable {
     /**
      * Sets an attribute of the MetaClass
      */
-    public void addAttribute(MetaAttribute attr) {
+    public void addAttribute(MetaAttribute<?> attr) {
         addChild(attr);
     }
 
@@ -162,9 +185,9 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Sets an attribute value of the MetaData
      */
     public void setAttribute(String name, Object value) {
-        MetaAttribute ma = null;
+        MetaAttribute<?> ma = null;
         try {
-            ma = (MetaAttribute) getChild(name, MetaAttribute.class);
+            ma = (MetaAttribute<?>) getChild(name, MetaAttribute.class);
         } catch (MetaDataNotFoundException e) {
             throw new MetaAttributeNotFoundException("MetaAttribute [" + name + "] was not found in [" + toInternalString() + "]", name);
         }
@@ -186,7 +209,7 @@ public abstract class MetaData implements Cloneable, Serializable {
     public Object getAttribute(String name, boolean includeParentData)
             throws MetaAttributeNotFoundException {
         try {
-            MetaAttribute ma = (MetaAttribute) getChild(name, MetaAttribute.class, includeParentData);
+            MetaAttribute<?> ma = (MetaAttribute<?>) getChild(name, MetaAttribute.class, includeParentData);
             return ma.getValue();
         } catch (MetaDataNotFoundException e) {
             throw new MetaAttributeNotFoundException( "MetaAtribute [" + name + "] not found in [" + toInternalString() + "]", name );
@@ -208,7 +231,7 @@ public abstract class MetaData implements Cloneable, Serializable {
             if (getChild(name, MetaAttribute.class, includeParentData, false) != null) {
                 return true;
             }
-        } catch (MetaDataNotFoundException e) {
+        } catch (MetaDataNotFoundException ignored) {
         }
         
         return false;
@@ -218,17 +241,17 @@ public abstract class MetaData implements Cloneable, Serializable {
     /**
      * Retrieves all attribute names
      */
-    public Collection<MetaAttribute> getAttributes() {
+    public Collection<MetaAttribute<?>> getAttributes() {
         return getAttributes(true);
     }
 
     /**
      * Retrieves all attribute names
      */
-    public Collection<MetaAttribute> getAttributes( boolean includeParentData ) {
-        Collection<MetaAttribute> attrs = new ArrayList<MetaAttribute>();
+    public Collection<MetaAttribute<?>> getAttributes( boolean includeParentData ) {
+        Collection<MetaAttribute<?>> attrs = new ArrayList<>();
         for (MetaData md : getChildren(MetaAttribute.class,includeParentData)) {
-            attrs.add((MetaAttribute) md);
+            attrs.add((MetaAttribute<?>) md);
         }
         return attrs;
     }
@@ -280,7 +303,7 @@ public abstract class MetaData implements Cloneable, Serializable {
                         throw new InvalidMetaDataException("MetaData [" + data.toInternalString() + "] with name [" + data.getName() + "] already exists in [" + toInternalString() + "] as [" + d + "]");
                     }
                 }
-            } catch (MetaDataNotFoundException e) {
+            } catch (MetaDataNotFoundException ignored) {
             }
         }
         
@@ -327,7 +350,7 @@ public abstract class MetaData implements Cloneable, Serializable {
         ArrayList<T> al = new ArrayList<T>();
         for (MetaData d : children) {
             if (c == null || c.isInstance(d)) {
-                al.add( (T) d);
+                al.add((T) d);
             }
         }
 
@@ -350,6 +373,7 @@ public abstract class MetaData implements Cloneable, Serializable {
                     for (MetaData sd : al) {
                         if (sd.getName().equals(n)) {
                             found = true;
+                            break;
                         }
                     }
 
@@ -455,11 +479,7 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Clears all children of the specified type
      */
     protected void clearChildren(Class<? extends MetaData> c) {
-        for (MetaData d : children) {
-            if (c == null || c.isInstance(d)) {
-                children.remove(d);
-            }
-        }
+        children.removeIf(d -> c == null || c.isInstance(d));
     }
 
     ////////////////////////////////////////////////////
@@ -505,7 +525,7 @@ public abstract class MetaData implements Cloneable, Serializable {
                     if (!ao.getType().isInstance(obj)) {
                         throw new InvalidMetaDataException("Attribute [" + ao.getName() + "] was not an instance of class [" + ao.getType() + "]");
                     }
-                } catch (MetaAttributeNotFoundException e) {
+                } catch (MetaAttributeNotFoundException ignored) {
                 }
             }
         }
@@ -516,7 +536,7 @@ public abstract class MetaData implements Cloneable, Serializable {
         }
     }
     
-    public MetaData wrap() {
+    public MetaData wrap()  {
         MetaData d = (MetaData) clone();
         d.clearChildren();
         d.setSuperData(this);
@@ -528,23 +548,29 @@ public abstract class MetaData implements Cloneable, Serializable {
      */
     @Override
     public Object clone() {
-        
-        MetaData v;
+
         try {
-            Constructor<? extends MetaData> c = (Constructor<? extends MetaData>) this.getClass().getConstructor(String.class);
-            v = c.newInstance(name);
-        } catch (Exception e) {
+            MetaData v = (MetaData) super.clone();
+
+            try {
+                Constructor<? extends MetaData> c = (Constructor<? extends MetaData>) this.getClass().getConstructor(String.class,String.class,String.class);
+                v = c.newInstance(metaDataType, metaDataSubType, name);
+            } catch (Exception e) {
+                throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
+            }
+
+            v.parentRef = parentRef;
+
+            for (MetaData md : getChildren()) {
+                v.addChild((MetaData) md.clone());
+                //v.mChildren = (ArrayList) mChildren.clone();
+            }
+
+            return v;
+        }
+        catch( CloneNotSupportedException e ) {
             throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
         }
-        
-        v.parentRef = parentRef;
-        
-        for (MetaData md : getChildren()) {
-            v.addChild((MetaData) md.clone());
-            //v.mChildren = (ArrayList) mChildren.clone();
-        }
-        
-        return v;
     }
 
     /**
@@ -562,20 +588,26 @@ public abstract class MetaData implements Cloneable, Serializable {
         return cacheValues.get(key);
     }
 
-    /**
-     * Returns a string representation of the MetaData
-     */
-    private String toInternalString() {
+    protected String getToStringPrefix() {
+
         String name = getClass().getName();
         int i = name.lastIndexOf('.');
         if (i >= 0) {
             name = name.substring(i + 1);
         }
-        
+
+        return name + "[" + getMetaDataType() +":" + getMetaDataSubType() + "]";
+    }
+
+    /**
+     * Returns a string representation of the MetaData
+     */
+    private String toInternalString() {
+
         if (getParent() == null) {
-            return name + "{" + getName() + "}";
+            return getToStringPrefix() + "{" + getName() + "}";
         } else {
-            return name + "{" + getName() + "}@" + getParent().toInternalString();
+            return getToStringPrefix() + "{" + getName() + "}@" + getParent().toInternalString();
         }
     }
 
@@ -583,16 +615,11 @@ public abstract class MetaData implements Cloneable, Serializable {
      * Returns a string representation of the MetaData
      */
     public String toString() {
-        String name = getClass().getName();
-        int i = name.lastIndexOf('.');
-        if (i >= 0) {
-            name = name.substring(i + 1);
-        }
-        
+
         if (getParent() == null) {
-            return name + "{" + getName() + "}";
+            return getToStringPrefix() + "{" + getName() + "}";
         } else {
-            return name + "{" + getName() + "}@" + getParent().toString();
+            return getToStringPrefix() + "{" + getName() + "}@" + getParent().toString();
         }
     }
 }

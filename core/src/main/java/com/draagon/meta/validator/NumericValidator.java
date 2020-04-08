@@ -19,8 +19,8 @@ public class NumericValidator extends MetaValidator
 {
   //private static Log log = LogFactory.getLog( NumericValidator.class );
 
-  public NumericValidator(String name ) {
-    super(name);
+  public NumericValidator(String type, String subtype, String name ) {
+    super( type, subtype, name );
   }
 
   /**

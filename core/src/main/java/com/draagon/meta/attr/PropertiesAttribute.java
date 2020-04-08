@@ -10,24 +10,34 @@ public class PropertiesAttribute extends MetaAttribute<Properties> {
     private static final long serialVersionUID = -1385348596313826808L;
     private Properties props = new Properties();
 
-    public PropertiesAttribute(String name) {
-        super(name);
+    public PropertiesAttribute(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
-    public PropertiesAttribute(String name, Properties p) {
+    //@Override
+    //public Class getMetaDataClass() {
+    //    return PropertiesAttribute.class;
+    //}
+
+    /*public PropertiesAttribute(String name, Properties p) {
         super(name);
         props = p;
-    }
+    }*/
 
     @Override
     public Properties getValue() {
         return props;
     }
 
-    @Override
     public void setValue(Properties value) throws InvalidAttributeValueException {
         props = value;
     }
+
+    @Override
+    public void setValue(Object value) {
+        props = (Properties) value;
+    }
+
 
     @Override
     public Object clone() {

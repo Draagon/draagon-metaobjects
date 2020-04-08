@@ -9,8 +9,8 @@ public abstract class ArrayField<T> extends MetaField<T> {
 
     public final static String ATTR_ITEM_NAME   = "itemName";
 
-    public ArrayField(String name) {
-        super(name);
+    public ArrayField(String type, String subtype, String name ) {
+        super( type, subtype, name );
         addAttributeDef( new AttributeDef( ATTR_ITEM_NAME, String.class, false, "Name for the items in the array, default is \"item\"" ));
     }
 

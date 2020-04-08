@@ -22,8 +22,8 @@ public class RegexValidator extends MetaValidator
   /** Mask attribute */
   public final static String ATTR_MASK = "mask";
 
-  public RegexValidator(String name ) {
-    super(name);
+  public RegexValidator(String type, String subtype, String name ) {
+    super( type, subtype, name );
     addAttributeDef( new AttributeDef( ATTR_MASK, String.class, true, "Validation mask" ));
   }
 

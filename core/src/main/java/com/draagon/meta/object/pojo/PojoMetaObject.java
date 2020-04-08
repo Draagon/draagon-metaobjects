@@ -24,8 +24,8 @@ public class PojoMetaObject extends MetaObject {
     /**
      * Constructs a bean MetaClass
      */
-    public PojoMetaObject(String name) {
-        super(name);
+    public PojoMetaObject(String type, String subtype, String name) {
+        super(type, subtype, name);
         //mGetMethods = new WeakHashMap<MetaField,Method>();
         //mSetMethods = new WeakHashMap<MetaField,Method>();
     }

@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.draagon.meta.util.Converter;
-import java.util.List;
 
 /**
  * A MetaField represents a field of an object and is contained within a MetaClass.
@@ -45,8 +44,8 @@ public abstract class MetaField<T> extends MetaData implements MetaFieldTypes
     private T mDefaultValue = null;
     private int mLength = -1;
 
-    public MetaField( String name ) {
-        super( name );
+    public MetaField( String type, String subtype, String name ) {
+        super( type, subtype, name );
         addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
         addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
         addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
@@ -56,7 +55,7 @@ public abstract class MetaField<T> extends MetaData implements MetaFieldTypes
      * Gets the primary MetaData class
      */
     @Override
-    public final Class<MetaField> getMetaDataClass() {
+    public final Class<? extends MetaData> getMetaDataClass() {
       return MetaField.class;
     }
 

@@ -31,10 +31,13 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
     public void testSuperListFruit() {
         List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Fruit");
 
-        log.info("Parent -> Child");
         for(MetaObject mo : result){
-            log.info(String.format("[%s]->[%s]",
-                    ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
+            if ( log.isDebugEnabled()) {
+                log.debug(String.format("[%s]->[%s]",
+                        ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
+            }
+
+            log.info( mo.toString() );
         }
 
         assertEquals("children", 3, result.size());
@@ -44,10 +47,11 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
     public void testSuperListVegetable() {
         List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Vegetable");
 
-        log.info("Parent -> Child");
         for(MetaObject mo : result){
-            log.info(String.format("[%s]->[%s]",
+            if ( log.isDebugEnabled()) {
+                log.debug(String.format("[%s]->[%s]",
                     ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
+            }
         }
 
         assertEquals("children", 1, result.size());

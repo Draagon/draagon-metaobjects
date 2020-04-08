@@ -18,21 +18,22 @@ public abstract class MetaAttribute<T> extends MetaData {
     /**
      * Constructs the MetaClass
      */
-    public MetaAttribute(String name) {
-        super(name);
+    public MetaAttribute(String type, String subtype, String name ) {
+        super( type, subtype, name );
     }
 
     /**
      * Gets the primary MetaData class
      */
-    public final Class<MetaAttribute> getMetaDataClass() {
+    @Override
+    public Class<? extends MetaData> getMetaDataClass() {
         return MetaAttribute.class;
     }
 
     /**
      * Sets the value of the MetaAttribute
      */
-    public abstract void setValue(T value);
+    public abstract void setValue(Object value);
 
     /**
      * Returns the value of the MetaAttribute

@@ -16,9 +16,8 @@ public abstract class MetaValidator extends MetaData
 {
   //private static Log log = LogFactory.getLog( MetaValidator.class );
 
-  public MetaValidator( String name )
-  {
-      super(name);
+  public MetaValidator( String type, String subtype, String name ) {
+    super( type, subtype, name );
   }
 
   /**

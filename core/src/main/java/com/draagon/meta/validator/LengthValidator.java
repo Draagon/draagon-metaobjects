@@ -20,8 +20,8 @@ public class LengthValidator extends MetaValidator
   /** Maximum length attribute */
   public final static String ATTR_MAX = "max";
 
-  public LengthValidator( String name ) {
-    super(name);
+  public LengthValidator(String type, String subtype, String name ) {
+    super( type, subtype, name );
     addAttributeDef( new AttributeDef( ATTR_MIN, String.class, false, "Minimum length (0 default)" ));
     addAttributeDef( new AttributeDef( ATTR_MAX, String.class, false, "Maximum length (field length default)" ));
   }
