@@ -36,25 +36,25 @@ public final class Converter
 			case MetaFieldTypes.DATE: return toDate( val );
 			case MetaFieldTypes.OBJECT: return toObject( val );
 
-			case MetaFieldTypes.BOOLEAN_ARRAY: //return toBooleanArray( val );
-			case MetaFieldTypes.BYTE_ARRAY://return toByteArray( val );
-			case MetaFieldTypes.SHORT_ARRAY: //return toShortArray( val );
-			case MetaFieldTypes.INT_ARRAY: //return toIntArray( val );
-			case MetaFieldTypes.LONG_ARRAY: //return toLongArray( val );
-			case MetaFieldTypes.FLOAT_ARRAY: //return toFloatArray( val );
-			case MetaFieldTypes.DOUBLE_ARRAY: //return toDoubleArray( val );
-			case MetaFieldTypes.DATE_ARRAY: //toDateArray( val );
-			case MetaFieldTypes.CLOB: //return toClob( val );
-			case MetaFieldTypes.BLOB: //return toBlob( val );
-			case MetaFieldTypes.XML: //return toXml( val );
-			case MetaFieldTypes.JSON: //return toJson( val );
-			case MetaFieldTypes.HTML5: //return toHtml5( val );
-				return unsupported(type,val);
+			//case MetaFieldTypes.BOOLEAN_ARRAY: //return toBooleanArray( val );
+			//case MetaFieldTypes.BYTE_ARRAY://return toByteArray( val );
+			//case MetaFieldTypes.SHORT_ARRAY: //return toShortArray( val );
+			//case MetaFieldTypes.INT_ARRAY: //return toIntArray( val );
+			//case MetaFieldTypes.LONG_ARRAY: //return toLongArray( val );
+			//case MetaFieldTypes.FLOAT_ARRAY: //return toFloatArray( val );
+			//case MetaFieldTypes.DOUBLE_ARRAY: //return toDoubleArray( val );
+			//case MetaFieldTypes.DATE_ARRAY: //toDateArray( val );
+			//case MetaFieldTypes.CLOB: //return toClob( val );
+			//case MetaFieldTypes.BLOB: //return toBlob( val );
+			//case MetaFieldTypes.XML: //return toXml( val );
+			//case MetaFieldTypes.JSON: //return toJson( val );
+			//case MetaFieldTypes.HTML5: //return toHtml5( val );
+			//	return unsupported(type,val);
 
 			case MetaFieldTypes.STRING_ARRAY: return toStringArray( val );
 			case MetaFieldTypes.OBJECT_ARRAY: return toObjectArray( val );
 
-			case MetaFieldTypes.CUSTOM: throw new IllegalStateException( "Cannot convert to a custom type, value passed: [" + val + "]" );
+			//case MetaFieldTypes.CUSTOM: throw new IllegalStateException( "Cannot convert to a custom type, value passed: [" + val + "]" );
 
 			default: throw new IllegalStateException( "Unknown type (" + type + "), cannot convert object [" + val + "]" );
 		}

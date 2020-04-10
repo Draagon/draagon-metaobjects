@@ -14,12 +14,10 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class FloatField extends MetaField<Float> {
-    //private static Log log = LogFactory.getLog( FloatField.class );
 
-    public FloatField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public FloatField( String name ) {
+        super( SUBTYPE_FLOAT, name );
     }
 
     /**

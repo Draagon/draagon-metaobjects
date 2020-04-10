@@ -6,7 +6,6 @@
  */
 package com.draagon.meta.validator;
 
-import com.draagon.meta.attr.AttributeDef;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -17,13 +16,14 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
-@SuppressWarnings("serial")
 public class RequiredValidator extends MetaValidator
 {
   //private static Log log = LogFactory.getLog( RequiredValidator.class );
 
-  public RequiredValidator(String type, String subtype, String name ) {
-    super( type, subtype, name );
+  public final static String SUBTYPE_REQUIRED = "required";
+
+  public RequiredValidator( String name ) {
+    super( SUBTYPE_REQUIRED, name );
   }
 
   /**

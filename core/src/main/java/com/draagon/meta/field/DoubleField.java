@@ -15,28 +15,27 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class DoubleField extends MetaField<Double>
 {
-    public DoubleField( String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public DoubleField( String name ) {
+        super( SUBTYPE_DOUBLE, name );
     }
     
-  //private static Log log = LogFactory.getLog( DoubleField.class );
+    //private static Log log = LogFactory.getLog( DoubleField.class );
 
-  /**
-   * Returns the type of value
-   */
-  public int getType()
-  {
+    /**
+     * Returns the type of value
+     */
+    public int getType()
+    {
     return DOUBLE;
-  }
+    }
 
-  /**
-   * Gets the type of value object class returned
-   */
-  public Class<?> getValueClass()
-  {
+    /**
+     * Gets the type of value object class returned
+     */
+    public Class<?> getValueClass()
+    {
     return Double.class;
-  }
+    }
 }

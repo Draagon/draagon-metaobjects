@@ -14,12 +14,11 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class StringField extends MetaField<String> {
     //private static Log log = LogFactory.getLog( StringField.class );
 
-    public StringField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public StringField( String name ) {
+        super( SUBTYPE_STRING, name );
     }
 
     /**

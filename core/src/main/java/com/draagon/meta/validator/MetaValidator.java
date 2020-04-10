@@ -16,8 +16,10 @@ public abstract class MetaValidator extends MetaData
 {
   //private static Log log = LogFactory.getLog( MetaValidator.class );
 
-  public MetaValidator( String type, String subtype, String name ) {
-    super( type, subtype, name );
+  public final static String TYPE_VALIDATOR = "validator";
+
+  public MetaValidator( String subtype, String name ) {
+    super(TYPE_VALIDATOR, subtype, name );
   }
 
   /**
@@ -84,7 +86,7 @@ public abstract class MetaValidator extends MetaData
     try {
       msg = (String) getAttribute( "msg" );
     }
-    catch( MetaAttributeNotFoundException e ) {}
+    catch( MetaAttributeNotFoundException ignoreException ) {}
     return msg;
   }
 }

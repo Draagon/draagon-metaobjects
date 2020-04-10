@@ -14,12 +14,10 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class IntegerField extends MetaField<Integer> {
-    //private static Log log = LogFactory.getLog( IntegerField.class );
 
-    public IntegerField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public IntegerField( String name ) {
+        super( SUBTYPE_INT, name );
     }
 
     /**

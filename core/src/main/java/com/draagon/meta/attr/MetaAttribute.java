@@ -15,11 +15,13 @@ public abstract class MetaAttribute<T> extends MetaData {
     
     //private static Log log = LogFactory.getLog( MetaAttribute.class );
 
+    public final static String TYPE_ATTR = "attr";
+
     /**
      * Constructs the MetaClass
      */
-    public MetaAttribute(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public MetaAttribute(String subtype, String name ) {
+        super( TYPE_ATTR, subtype, name );
     }
 
     /**

@@ -15,10 +15,11 @@ import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
 
-@SuppressWarnings("serial")
-public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObject 
+public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObject
 {
     private final static Log log = LogFactory.getLog(ValueMetaObject.class);
+
+    public final static String SUBTYPE_VALUE = "value";
 
     public final static String CACHE_PARAM_HAS_GETTER_METHOD = "hasGetterMethod";
     public final static String CACHE_PARAM_HAS_SETTER_METHOD = "hasSetterMethod";
@@ -26,8 +27,8 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
     /**
      * Constructs the MetaClassObject for MetaObjects
      */
-    public ValueMetaObject(String type, String subtype, String name) {
-        super(type,subtype, name);
+    public ValueMetaObject( String name ) {
+        super( SUBTYPE_VALUE, name);
     }
 
     /*public static MetaObject createFromTemplate(String name, String template) {

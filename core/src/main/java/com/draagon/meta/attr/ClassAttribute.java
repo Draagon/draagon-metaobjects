@@ -15,17 +15,14 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
 
     private Class<?> mClass = null;
 
+    public final static String SUBTYPE_CLASS = "class";
+
     /**
      * Constructs the MetaClass
      */
-    public ClassAttribute(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public ClassAttribute(String name ) {
+        super( SUBTYPE_CLASS, name );
     }
-
-    //@Override
-    //public Class<?> getMetaDataClass() {
-    //    return ClassAttribute.class;
-    //}
 
     /**
      * Sets the value of the MetaAttribute

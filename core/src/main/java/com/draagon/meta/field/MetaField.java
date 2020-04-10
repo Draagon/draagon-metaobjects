@@ -7,7 +7,6 @@
 
 package com.draagon.meta.field;
 
-import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.validator.MetaValidator;
@@ -31,9 +30,11 @@ import com.draagon.meta.util.Converter;
  * @version 2.0
  * @author Doug Mealing
  */
-public abstract class MetaField<T> extends MetaData implements MetaFieldTypes
+public abstract class MetaField<T> extends MetaData implements MetaFieldTypes, MetaFieldSubTypes
 {
     //private static Log log = LogFactory.getLog( MetaField.class );
+
+    public final static String TYPE_FIELD = "field";
 
     public final static String ATTR_LEN             = "len";
     public final static String ATTR_VALIDATION      = "validation";
@@ -44,11 +45,11 @@ public abstract class MetaField<T> extends MetaData implements MetaFieldTypes
     private T mDefaultValue = null;
     private int mLength = -1;
 
-    public MetaField( String type, String subtype, String name ) {
-        super( type, subtype, name );
-        addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
-        addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
-        addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
+    public MetaField( String subtype, String name ) {
+        super( TYPE_FIELD, subtype, name );
+        //addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
+        //addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
+        //addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
     }
     
     /**
@@ -68,11 +69,6 @@ public abstract class MetaField<T> extends MetaData implements MetaFieldTypes
     {
       return (MetaObject) getParent();
     }
-
-    /*protected MetaClass getMetaClass()
-    {
-      return (MetaClass) getParent();
-    }*/
 
     /**
      * Sets the Super Field

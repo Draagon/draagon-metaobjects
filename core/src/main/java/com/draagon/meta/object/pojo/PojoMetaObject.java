@@ -14,6 +14,8 @@ import java.lang.reflect.*;
 @SuppressWarnings("serial")
 public class PojoMetaObject extends MetaObject {
 
+    public final static String SUBTYPE_POJO = "pojo";
+
     public final static String CACHE_PARAM_GETTER_METHOD = "getterMethod";
     public final static String CACHE_PARAM_SETTER_METHOD = "setterMethod";
 
@@ -24,8 +26,17 @@ public class PojoMetaObject extends MetaObject {
     /**
      * Constructs a bean MetaClass
      */
-    public PojoMetaObject(String type, String subtype, String name) {
-        super(type, subtype, name);
+    public PojoMetaObject( String name ) {
+        super( SUBTYPE_POJO, name );
+        //mGetMethods = new WeakHashMap<MetaField,Method>();
+        //mSetMethods = new WeakHashMap<MetaField,Method>();
+    }
+
+    /**
+     * Constructs a bean MetaClass
+     */
+    public PojoMetaObject( String subType, String name ) {
+        super( subType, name );
         //mGetMethods = new WeakHashMap<MetaField,Method>();
         //mSetMethods = new WeakHashMap<MetaField,Method>();
     }

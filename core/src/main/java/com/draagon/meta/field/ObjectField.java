@@ -15,17 +15,16 @@ import com.draagon.meta.util.MetaDataUtil;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class ObjectField extends MetaField<Object> {
     //private static Log log = LogFactory.getLog( ObjectField.class );
 
     /**
      * MetaObject name attribute
      */
-    public final static String ATTR_OBJECT_REF = "objectRef";
+    //public final static String ATTR_OBJECT_REF = "objectRef";
 
-    public ObjectField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public ObjectField( String name ) {
+        super( SUBTYPE_OBJECT, name );
     }
 
     /**
@@ -49,5 +48,4 @@ public class ObjectField extends MetaField<Object> {
     {
         return MetaDataUtil.getObjectRef(this);
     }
-
 }

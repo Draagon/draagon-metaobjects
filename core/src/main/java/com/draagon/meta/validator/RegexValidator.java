@@ -6,7 +6,7 @@
  */
 package com.draagon.meta.validator;
 
-import com.draagon.meta.attr.AttributeDef;
+//import com.draagon.meta.attr.AttributeDef;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -14,17 +14,17 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
-@SuppressWarnings("serial")
 public class RegexValidator extends MetaValidator
 {
   //private static Log log = LogFactory.getLog( RegexValidator.class );
 
+  public final static String SUBTYPE_REGEX = "regex";
+
   /** Mask attribute */
   public final static String ATTR_MASK = "mask";
 
-  public RegexValidator(String type, String subtype, String name ) {
-    super( type, subtype, name );
-    addAttributeDef( new AttributeDef( ATTR_MASK, String.class, true, "Validation mask" ));
+  public RegexValidator( String name ) {
+    super( SUBTYPE_REGEX, name );
   }
 
   /**

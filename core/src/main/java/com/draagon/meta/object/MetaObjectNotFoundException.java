@@ -10,7 +10,6 @@ package com.draagon.meta.object;
 
 import com.draagon.meta.MetaDataNotFoundException;
 
-@SuppressWarnings("serial")
 public class MetaObjectNotFoundException extends MetaDataNotFoundException
 {
   public MetaObjectNotFoundException( String msg, String name )
@@ -22,15 +21,5 @@ public class MetaObjectNotFoundException extends MetaDataNotFoundException
   {
     super( msg, o.getClass().toString() );
   }
-  
-  //public MetaObjectNotFoundException( String msg, Throwable cause )
-  //{
-  //  super( msg, cause );
-  //}
-
-  //public MetaObjectNotFoundException()
-  //{
-  //  super( "MetaObject Not Found Exception" );
-  //}
 }
 

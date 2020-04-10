@@ -15,22 +15,14 @@ public class StringAttribute extends MetaAttribute<String> {
 
     private String mString = null;
 
+    public final static String SUBTYPE_STRING = "string";
+
     /**
      * Constructs the MetaClass
      */
-    public StringAttribute(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public StringAttribute(String name ) {
+        super( SUBTYPE_STRING, name );
     }
-
-    //@Override
-    //public Class getMetaDataClass() {
-    //    return StringAttribute.class;
-    //}
-
-    /*public StringAttribute(String name, String value) {
-        super(name);
-        setValue(value);
-    }*/
 
     /**
      * Sets the value of the MetaAttribute

@@ -14,12 +14,10 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class LongField extends MetaField<Long> {
-    //private static Log log = LogFactory.getLog( LongField.class );
 
-    public LongField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public LongField( String name ) {
+        super( SUBTYPE_LONG, name );
     }
 
     /**

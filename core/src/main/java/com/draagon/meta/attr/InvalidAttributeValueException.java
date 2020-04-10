@@ -9,7 +9,6 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.MetaDataException;
 
-@SuppressWarnings("serial")
 public class InvalidAttributeValueException extends MetaDataException
 {
   public InvalidAttributeValueException( String msg )

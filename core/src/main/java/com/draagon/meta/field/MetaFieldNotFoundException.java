@@ -16,15 +16,5 @@ public class MetaFieldNotFoundException extends MetaDataNotFoundException
   {
     super( msg, name );
   }
-
-  //public MetaFieldNotFoundException( String msg, Throwable cause )
-  //{
-  //  super( msg, cause );
-  //}
-
-  //public MetaFieldNotFoundException()
-  //{
-  //  super( "MetaField Not Found Exception" );
-  //}
 }
 

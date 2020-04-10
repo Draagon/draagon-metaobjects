@@ -7,7 +7,6 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
-import com.draagon.meta.attr.AttributeDef;
 import org.apache.commons.validator.GenericValidator;
 
 @SuppressWarnings("serial")
@@ -15,15 +14,17 @@ public class LengthValidator extends MetaValidator
 {
   //private static Log log = LogFactory.getLog( LengthValidator.class );
 
+  public final static String SUBTYPE_LENGTH = "length";
+
   /** Minimum length attribute */
   public final static String ATTR_MIN = "min";
   /** Maximum length attribute */
   public final static String ATTR_MAX = "max";
 
-  public LengthValidator(String type, String subtype, String name ) {
-    super( type, subtype, name );
-    addAttributeDef( new AttributeDef( ATTR_MIN, String.class, false, "Minimum length (0 default)" ));
-    addAttributeDef( new AttributeDef( ATTR_MAX, String.class, false, "Maximum length (field length default)" ));
+  public LengthValidator( String name ) {
+    super( SUBTYPE_LENGTH, name );
+    //addAttributeDef( new AttributeDef( ATTR_MIN, String.class, false, "Minimum length (0 default)" ));
+    //addAttributeDef( new AttributeDef( ATTR_MAX, String.class, false, "Maximum length (field length default)" ));
   }
 
   /**

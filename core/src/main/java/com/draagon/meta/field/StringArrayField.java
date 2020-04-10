@@ -14,11 +14,10 @@ import java.util.List;
  * @version 1.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class StringArrayField extends ArrayField<List<String>> {
 
-    public StringArrayField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public StringArrayField( String name ) {
+        super( SUBTYPE_STRING_ARRAY, name );
     }
 
     /**

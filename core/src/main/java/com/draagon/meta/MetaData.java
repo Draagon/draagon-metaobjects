@@ -6,7 +6,6 @@
  */
 package com.draagon.meta;
 
-import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
@@ -28,7 +27,7 @@ public class MetaData implements Cloneable, Serializable {
 
     private final Map<Object, Object> cacheValues = Collections.synchronizedMap(new WeakHashMap<Object, Object>());
     private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<MetaData>();
-    private final CopyOnWriteArrayList<AttributeDef> attributeDefs = new CopyOnWriteArrayList<AttributeDef>();
+    //private final CopyOnWriteArrayList<AttributeDef> attributeDefs = new CopyOnWriteArrayList<AttributeDef>();
     private final String name;
 
     private MetaData superData = null;
@@ -488,16 +487,16 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Returns a list of expected attributes
      */
-    public List<AttributeDef> getAttributeDefs() {
-        return attributeDefs;
-    }
+    //public List<AttributeDef> getAttributeDefs() {
+    //    return attributeDefs;
+    //}
 
     /**
      * Add the specified attribute definitions
      */
-    public void addAttributeDef( AttributeDef def ) {
-        attributeDefs.addIfAbsent( def );
-    }
+    //public void addAttributeDef( AttributeDef def ) {
+    //    attributeDefs.addIfAbsent( def );
+    //}
     
     /**
      * Validates the state of the data in the MetaData object
@@ -509,7 +508,7 @@ public class MetaData implements Cloneable, Serializable {
         }
 
         // Validate the Attribute options
-        for (AttributeDef ao : getAttributeDefs()) {
+        /*for (AttributeDef ao : getAttributeDefs()) {
             
             boolean has = hasAttribute(ao.getName());
 
@@ -528,7 +527,7 @@ public class MetaData implements Cloneable, Serializable {
                 } catch (MetaAttributeNotFoundException ignored) {
                 }
             }
-        }
+        }*/
 
         // Validate the children
         for (MetaData d : getChildren()) {
@@ -553,8 +552,19 @@ public class MetaData implements Cloneable, Serializable {
             MetaData v = (MetaData) super.clone();
 
             try {
-                Constructor<? extends MetaData> c = (Constructor<? extends MetaData>) this.getClass().getConstructor(String.class,String.class,String.class);
-                v = c.newInstance(metaDataType, metaDataSubType, name);
+                try {
+                    v = (MetaData) this.getClass().getConstructor(String.class, String.class, String.class).newInstance(metaDataType, metaDataSubType, name);
+                } catch( NoSuchMethodException e ) {}
+                try {
+                    if ( v == null ) v = (MetaData) this.getClass().getConstructor(String.class, String.class).newInstance(metaDataSubType, name);
+                } catch( NoSuchMethodException e ) {}
+                try {
+                    v = (MetaData) this.getClass().getConstructor(String.class).newInstance(name);
+                } catch( NoSuchMethodException e ) {}
+                try {
+                    v = (MetaData) this.getClass().getConstructor().newInstance();
+                } catch( NoSuchMethodException e ) {}
+
             } catch (Exception e) {
                 throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
             }

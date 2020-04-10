@@ -17,17 +17,16 @@ import java.util.List;
  * @version 1.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class ObjectArrayField extends ArrayField<List<Object>> {
     //private static Log log = LogFactory.getLog( ObjectField.class );
 
     /**
      * MetaObject name attribute
      */
-    public final static String ATTR_OBJECT_REF = ObjectField.ATTR_OBJECT_REF;
+    //public final static String ATTR_OBJECT_REF = ObjectField.ATTR_OBJECT_REF;
 
-    public ObjectArrayField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public ObjectArrayField(String name ) {
+        super( SUBTYPE_OBJECT_ARRAY, name );
     }
 
     /**

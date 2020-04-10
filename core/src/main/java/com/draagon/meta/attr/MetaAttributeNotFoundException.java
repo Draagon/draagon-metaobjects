@@ -16,15 +16,5 @@ public class MetaAttributeNotFoundException extends MetaDataNotFoundException
   {
     super( msg, name );
   }
-
-  //public MetaAttributeNotFoundException( String msg, Throwable cause )
-  //{
-  //  super( msg, cause );
-  //}
-
-  //public MetaAttributeNotFoundException()
-  //{
-  //  super( "MetaView Not Found Exception" );
-  //}
 }
 

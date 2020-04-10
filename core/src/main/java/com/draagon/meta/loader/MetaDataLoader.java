@@ -25,7 +25,9 @@ import java.util.List;
 public abstract class MetaDataLoader extends MetaData {
 
     private final static Log log = LogFactory.getLog(MetaDataLoader.class);
-    
+
+    public final static String TYPE_LOADER = "loader";
+
     public final static String PKG_SEPARATOR = "::";
 
     private boolean isRegistered = false;
@@ -35,12 +37,12 @@ public abstract class MetaDataLoader extends MetaData {
     //private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
 
     public MetaDataLoader( String subtype ) {
-        super( "loader", subtype, "loader-" + System.currentTimeMillis());
+        this( subtype, "loader-" + System.currentTimeMillis());
         //registerLoader(this);
     }
 
     public MetaDataLoader( String subtype, String name ) {
-        super( "loader", subtype, name );
+        super( TYPE_LOADER, subtype, name );
         //registerLoader(this);
     }
 

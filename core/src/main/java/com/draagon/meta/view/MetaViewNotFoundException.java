@@ -9,22 +9,11 @@ package com.draagon.meta.view;
 
 import com.draagon.meta.MetaDataNotFoundException;
 
-@SuppressWarnings("serial")
 public class MetaViewNotFoundException extends MetaDataNotFoundException
 {
   public MetaViewNotFoundException( String msg, String name )
   {
     super( msg, name );
   }
-
-  /*public MetaViewNotFoundException( String msg, Throwable cause )
-  {
-    super( msg, cause );
-  }
-
-  public MetaViewNotFoundException()
-  {
-    super( "MetaView Not Found Exception" );
-  }*/
 }
 

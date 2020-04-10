@@ -6,7 +6,6 @@
  */
 package com.draagon.meta.validator;
 
-import com.draagon.meta.attr.AttributeDef;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -14,13 +13,14 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
-@SuppressWarnings("serial")
 public class NumericValidator extends MetaValidator
 {
   //private static Log log = LogFactory.getLog( NumericValidator.class );
 
-  public NumericValidator(String type, String subtype, String name ) {
-    super( type, subtype, name );
+  public final static String SUBTYPE_NUMERIC = "numeric";
+
+  public NumericValidator(String name ) {
+    super( SUBTYPE_NUMERIC, name );
   }
 
   /**

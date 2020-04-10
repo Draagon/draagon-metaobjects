@@ -7,6 +7,7 @@
 package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
@@ -23,6 +24,7 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -608,9 +610,42 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     // Figure out the full name for the element, needs package prefix if root
                     String fullname = name;
                     if ( isRoot ) fullname = packageName + PKG_SEPARATOR + fullname;
-                    
+
                     // Create the object
-                    md = (MetaData) c.getConstructor(String.class, String.class, String.class).newInstance( nodeName, typeName, fullname );
+
+                    // Try for type, subtype, name string parameters first
+                    try {
+                        md = (MetaData) c.getDeclaredConstructor( String.class, String.class, String.class ).newInstance( nodeName, typeName, fullname );
+                    } catch( NoSuchMethodException ex ) {}
+
+                    // Try for subtype, name string parameters second
+                    try {
+                        if ( md == null ) md = (MetaData) c.getDeclaredConstructor( String.class, String.class ).newInstance( typeName, fullname );
+                    } catch( NoSuchMethodException ex ) {}
+
+                    // Try just the name string parameter third
+                    try {
+                        if ( md == null ) md = (MetaData) c.getDeclaredConstructor( String.class ).newInstance( fullname );
+                    } catch( NoSuchMethodException ex ) {}
+
+                    // Try for now parameters last
+                    try {
+                        if ( md == null ) md = (MetaData) c.getDeclaredConstructor().newInstance();
+                    } catch( NoSuchMethodException ex ) {}
+
+                    if ( md == null )
+                        throw new MetaDataException("No valid constructor was found for MetaData class [" + c.getName() + "]");
+
+                    if ( !md.getMetaDataType().equals( nodeName ))
+                        throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getMetaDataType() + "]: " + md );
+
+                    if ( !md.getMetaDataSubType().equals( typeName ))
+                        throw new MetaDataException( "Expected MetaData subType ["+typeName+"], but MetaData instantiated was of subType [" + md.getMetaDataSubType() + "]: " + md );
+
+                    if ( !md.getName().equals( fullname ))
+                        throw new MetaDataException( "Expected MetaData name ["+fullname+"], but MetaData instantiated was of name [" + md.getName() + "]: " + md );
+
+                    //md = (MetaData) c.getConstructor(String.class, String.class, String.class).newInstance( nodeName, typeName, fullname );
                 }
                 catch (MetaException e) {
                     throw e;
@@ -687,7 +722,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                String value = n.getNodeValue();
 
                // TODO:  This should be replaced by the ruleset for handling attributes in the future
-               StringAttribute sa = new StringAttribute( "attribute", "string", attrName );
+               StringAttribute sa = new StringAttribute( attrName );
                sa.setValue( value );
                md.addAttribute(sa);
            }

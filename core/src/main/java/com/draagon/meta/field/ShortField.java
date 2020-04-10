@@ -14,12 +14,11 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class ShortField extends MetaField<Short> {
     //private static Log log = LogFactory.getLog( ShortField.class );
 
-    public ShortField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public ShortField( String name ) {
+        super( SUBTYPE_SHORT, name );
     }
 
     /**

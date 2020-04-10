@@ -10,7 +10,6 @@ package com.draagon.meta.object;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
-import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
@@ -27,6 +26,9 @@ import org.apache.commons.logging.LogFactory;
 public abstract class MetaObject extends MetaData {
 
     private static Log log = LogFactory.getLog(MetaObject.class);
+
+    public final static String TYPE_OBJECT = "object";
+
     /**
      * Object class name attribute
      */
@@ -35,9 +37,10 @@ public abstract class MetaObject extends MetaData {
     /**
      * Constructs the MetaObject
      */
-    public MetaObject(String type, String subtype, String name ) {
-        super( type, subtype, name );
-        addAttributeDef(new AttributeDef(ATTR_OBJECT, String.class, true, "The object class to instantiate"));
+    public MetaObject(String subtype, String name ) {
+        super( TYPE_OBJECT, subtype, name );
+        //if ( !type.equals(TYPE_OBJECT)) throw new IllegalArgumentException("MetaObjects can only support type=\""+TYPE_OBJECT+"\" ["+type+"]");
+        //addAttributeDef(new AttributeDef(ATTR_OBJECT, String.class, true, "The object class to instantiate"));
     }
 
     /**

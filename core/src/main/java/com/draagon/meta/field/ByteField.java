@@ -18,8 +18,8 @@ import com.draagon.meta.*;
 public class ByteField extends MetaField<Byte> {
     //private static Log log = LogFactory.getLog( ByteField.class );
 
-    public ByteField(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public ByteField( String name ) {
+        super( SUBTYPE_BYTE, name );
     }
 
     /**

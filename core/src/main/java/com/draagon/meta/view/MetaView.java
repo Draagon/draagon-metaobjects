@@ -8,7 +8,6 @@ package com.draagon.meta.view;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
-import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -26,11 +25,13 @@ public abstract class MetaView extends MetaData
   public final static int EDIT = 1;
   public final static int HIDE = 2;
 
+  public final static String TYPE_VIEW = "view";
+
   public final static String ATTR_VALIDATION = "validation";
 
-  public MetaView( String type, String subtype, String name ) {
-      super( type, subtype, name );
-      addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
+  public MetaView(  String subtype, String name ) {
+    super( TYPE_VIEW, subtype, name );
+    //addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
   }
 
   /**
@@ -40,11 +41,6 @@ public abstract class MetaView extends MetaData
   {
     return MetaView.class;
   }
-
-  //public void attachMetaField( MetaField field )
-  //{
-  //  attachParent( field );
-  //}
 
   public MetaField getDeclaringMetaField()
   {

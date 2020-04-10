@@ -7,22 +7,13 @@ import java.util.Properties;
 
 public class PropertiesAttribute extends MetaAttribute<Properties> {
 
-    private static final long serialVersionUID = -1385348596313826808L;
     private Properties props = new Properties();
 
-    public PropertiesAttribute(String type, String subtype, String name ) {
-        super( type, subtype, name );
+    public final static String SUBTYPE_PROPERTIES = "properties";
+
+    public PropertiesAttribute(String name ) {
+        super( SUBTYPE_PROPERTIES, name );
     }
-
-    //@Override
-    //public Class getMetaDataClass() {
-    //    return PropertiesAttribute.class;
-    //}
-
-    /*public PropertiesAttribute(String name, Properties p) {
-        super(name);
-        props = p;
-    }*/
 
     @Override
     public Properties getValue() {
