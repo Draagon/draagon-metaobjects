@@ -6,6 +6,8 @@
  */
 package com.draagon.meta.attr;
 
+import com.draagon.meta.DataTypes;
+
 /**
  * An attribute of a MetaClass, MetaField, or MetaView
  */
@@ -13,55 +15,44 @@ package com.draagon.meta.attr;
 public class ClassAttribute extends MetaAttribute<Class<?>> {
     //private static Log log = LogFactory.getLog( ClassAttribute.class );
 
-    private Class<?> mClass = null;
-
     public final static String SUBTYPE_CLASS = "class";
 
     /**
      * Constructs the MetaClass
      */
     public ClassAttribute(String name ) {
-        super( SUBTYPE_CLASS, name );
-    }
-
-    /**
-     * Sets the value of the MetaAttribute
-     */
-    public void setValue(Class<?> value) {
-        mClass = (Class<?>) value;
+        super( SUBTYPE_CLASS, name, DataTypes.CUSTOM);
     }
 
     @Override
-    public void setValue(Object value) {
-        mClass = (Class<?>) value;
-    }
-
-    /**
-     * Returns the value of the MetaAttribute
-     */
-    @Override
-    public Class<?> getValue() {
-        return mClass;
+    public void setValueAsObject(Object value) {
+        if ( value == null ) {
+            setValue( null );
+        } else if ( value instanceof String ) {
+            setValueAsString( (String) value );
+        }
+        else if ( value instanceof Class ) {
+            setValue( (Class<?>) value );
+        }
+        throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
     }
 
     @Override
     public void setValueAsString(String value) {
         try {
-            mClass = Class.forName(value);
+            if ( value == null ) {
+                setValue( null );
+            } else {
+                setValue(Class.forName(value));
+            }
         } catch (ClassNotFoundException e) {
-            throw new InvalidAttributeValueException("Invalid Class Name [" + value + "]");
+            throw new InvalidAttributeValueException("Invalid Class Name [" + value + "] for ClassAttribute");
         }
     }
 
     @Override
     public String getValueAsString() {
-        return mClass.getName();
-    }
-
-    @Override
-    public Object clone() {
-        ClassAttribute ca = (ClassAttribute) super.clone();
-        ca.mClass = mClass;
-        return ca;
+        if ( getValue() == null ) return null;
+        return getValue().getName();
     }
 }

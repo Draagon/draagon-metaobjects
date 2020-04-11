@@ -6,37 +6,28 @@
  */
 package com.draagon.meta.validator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.draagon.meta.*;
-
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
 
 import org.apache.commons.validator.GenericValidator;
 
-public class RequiredValidator extends MetaValidator
-{
-  //private static Log log = LogFactory.getLog( RequiredValidator.class );
+public class RequiredValidator extends MetaValidator {
 
-  public final static String SUBTYPE_REQUIRED = "required";
+    public final static String SUBTYPE_REQUIRED = "required";
 
-  public RequiredValidator( String name ) {
-    super( SUBTYPE_REQUIRED, name );
-  }
-
-  /**
-   * Validates the value of the field in the specified object
-   */
-  public void validate( Object object, Object value )
-    //throws MetaException
-  {
-    String msg = getMessage( "A value is required" );
-    String val = (value==null)?null:value.toString();
-
-    if ( GenericValidator.isBlankOrNull( val )) {
-      throw new InvalidValueException( msg );
+    public RequiredValidator(String name) {
+        super(SUBTYPE_REQUIRED, name);
     }
-  }
+
+    /**
+     * Validates the value of the field in the specified object
+     */
+    public void validate(Object object, Object value) {
+
+        String msg = getMessage("A value is required");
+        String val = (value == null) ? null : value.toString();
+
+        if (GenericValidator.isBlankOrNull(val)) {
+            throw new InvalidValueException(msg);
+        }
+    }
 }

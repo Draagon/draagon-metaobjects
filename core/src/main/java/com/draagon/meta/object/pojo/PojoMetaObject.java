@@ -19,17 +19,11 @@ public class PojoMetaObject extends MetaObject {
     public final static String CACHE_PARAM_GETTER_METHOD = "getterMethod";
     public final static String CACHE_PARAM_SETTER_METHOD = "setterMethod";
 
-    //private static Log log = LogFactory.getLog( BeanMetaClass.class );
-    //private WeakHashMap<MetaField,Method> mGetMethods = null;
-    //private WeakHashMap<MetaField,Method> mSetMethods = null;
-    
     /**
      * Constructs a bean MetaClass
      */
     public PojoMetaObject( String name ) {
         super( SUBTYPE_POJO, name );
-        //mGetMethods = new WeakHashMap<MetaField,Method>();
-        //mSetMethods = new WeakHashMap<MetaField,Method>();
     }
 
     /**
@@ -37,22 +31,23 @@ public class PojoMetaObject extends MetaObject {
      */
     public PojoMetaObject( String subType, String name ) {
         super( subType, name );
-        //mGetMethods = new WeakHashMap<MetaField,Method>();
-        //mSetMethods = new WeakHashMap<MetaField,Method>();
+    }
+
+    protected void uppercase( StringBuilder b, String name ) {
+        int c = name.charAt(0);
+        if (c >= 'a' && c <= 'z') {
+            c = c - ('a' - 'A');
+        }
+        b.append((char) c);
+        b.append(name.substring(1));
     }
 
     protected String getGetterName(MetaField f) {
         // Create the getter name
-        StringBuilder methname = new StringBuilder();
-        methname.append("get");
-        int c = f.getName().charAt(0);
-        if (c >= 'a' && c <= 'z') {
-            c = c - ('a' - 'A');
-        }
-        methname.append((char) c);
-        methname.append(f.getName().substring(1));
-
-        return methname.toString();
+        StringBuilder m = new StringBuilder();
+        m.append("get");
+        uppercase( m, f.getName() );
+        return m.toString();
     }
 
     /**
@@ -62,10 +57,8 @@ public class PojoMetaObject extends MetaObject {
     {
         synchronized (f) {
             Method method = (Method) f.getCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName());
-            //synchronized( mGetMethods ) {
-            //  method = (Method) mGetMethods.get( f );
-            //}
             if (method == null) {
+
                 String name = getGetterName(f);
 
                 try {
@@ -74,9 +67,6 @@ public class PojoMetaObject extends MetaObject {
                     throw new NoSuchMethodError("No getter exists named [" + name + "] on object [" + objClass.getName() + "]");
                 }
 
-                //synchronized( mGetMethods ) {
-                //  mGetMethods.put( f, method );
-                //}
                 f.setCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName(), method);
             }
 
@@ -85,17 +75,11 @@ public class PojoMetaObject extends MetaObject {
     }
 
     protected String getSetterName(MetaField f) {
-        // Create the setter name
-        StringBuffer methname = new StringBuffer();
-        methname.append("set");
-        int c = f.getName().charAt(0);
-        if (c >= 'a' && c <= 'z') {
-            c = c - ('a' - 'A');
-        }
-        methname.append((char) c);
-        methname.append(f.getName().substring(1));
-
-        return methname.toString();
+        // Create the getter name
+        StringBuilder b = new StringBuilder();
+        b.append("set");
+        uppercase( b, f.getName() );
+        return b.toString();
     }
 
     /**
@@ -105,11 +89,8 @@ public class PojoMetaObject extends MetaObject {
     {
         synchronized (f) {
             Method method = (Method) f.getCacheValue(CACHE_PARAM_SETTER_METHOD + "." + objClass.getName());
-            //synchronized( mSetMethods ) {
-            //  method = (Method) mSetMethods.get( f );
-            //}
-
             if (method == null) {
+
                 String name = getSetterName(f);
                 Method[] methods = objClass.getMethods();
 
@@ -128,10 +109,6 @@ public class PojoMetaObject extends MetaObject {
                 }
 
                 f.setCacheValue(CACHE_PARAM_SETTER_METHOD + "." + objClass.getName(), method);
-
-                //synchronized( mSetMethods ) {
-                //  mSetMethods.put( f, method );
-                //}
             }
 
             return method;
@@ -142,11 +119,10 @@ public class PojoMetaObject extends MetaObject {
      * Sets the object attribute represented by this MetaField
      */
     @Override
-    public void setValue(MetaField f, Object obj, Object val) //throws MetaException
-    {
-        if (obj == null) {
+    public void setValue(MetaField f, Object obj, Object val)  {
+
+        if (obj == null)
             throw new IllegalArgumentException("Cannot set value on a null Object for field [" + f + "]");
-        }
 
         Method method = retrieveSetterMethod(f, obj.getClass());
 
@@ -157,7 +133,7 @@ public class PojoMetaObject extends MetaObject {
         }
 
         Object[] arglist = new Object[1];
-        arglist[ 0] = val;
+        arglist[0] = val;
         try {
             method.invoke(obj, arglist);
         } catch (InvocationTargetException e) {
@@ -171,11 +147,10 @@ public class PojoMetaObject extends MetaObject {
      * Gets the object attribute represented by this MetaField
      */
     @Override
-    public Object getValue(MetaField f, Object obj) //throws MetaException
-    {
-        if (obj == null) {
+    public Object getValue(MetaField f, Object obj)  {
+
+        if (obj == null)
             throw new IllegalArgumentException("Null object found, Object expected for field [" + f + "]");
-        }
 
         Method method = retrieveGetterMethod(f, obj.getClass());
 

@@ -8,19 +8,20 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 
+import java.util.List;
+
 /**
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class StringAttribute extends MetaAttribute<String> {
-    //private static Log log = LogFactory.getLog( StringAttribute.class );
+public class StringArrayAttribute extends MetaAttribute<List<String>> {
 
-    public final static String SUBTYPE_STRING = "string";
+    public final static String SUBTYPE_STRING_ARRAY = "stringArray";
 
     /**
-     * Constructs the String MetaAttribute
+     * Constructs the String Array MetaAttribute
      */
-    public StringAttribute(String name ) {
-        super( SUBTYPE_STRING, name, DataTypes.STRING);
+    public StringArrayAttribute(String name ) {
+        super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY);
     }
 }

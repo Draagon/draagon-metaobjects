@@ -27,11 +27,10 @@ public abstract class MetaObject extends MetaData {
 
     private static Log log = LogFactory.getLog(MetaObject.class);
 
+    /** Object TYPE */
     public final static String TYPE_OBJECT = "object";
 
-    /**
-     * Object class name attribute
-     */
+    /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
 
     /**
@@ -52,43 +51,27 @@ public abstract class MetaObject extends MetaData {
 
     /**
      * Returns the MetaObject for the specified Meta Object name
+     *
+     * @deprecated Use MetaDataRegistry.findMetaObjectByName(), if enabled in MetaDataLoader
      */
-    public static MetaObject forName(String name) //throws MetaObjectNotFoundException
-    {
+    public static MetaObject forName(String name) {
         return MetaDataRegistry.findMetaDataByName( MetaObject.class, name);
     }
 
     /**
      * Returns the MetaObject for the specified Object
+     *
+     * @deprecated Use MetaDataRegistry.findMetaObject(), if registry enabled in MetaDataLoader
      */
-    public static MetaObject forObject(Object o) //throws MetaObjectNotFoundException
-    {
+    public static MetaObject forObject(Object o) {
         return MetaDataRegistry.findMetaObject( o );
     }
-    /**
-     * Sets the Package for the MetaObject
-     */
-    /*public void setPackage( String packageName )
-     //throws MetaException
-     {
-     mPackage = packageName;
-     }*/
-
-    /**
-     * Returns the MetaObjectLoader
-     */
-    // Replaced by MetaData.getLoader()
-    /*public MetaDataLoader getClassLoader() {
-        return (MetaDataLoader) getParent();
-    }*/
 
     /**
      * Sets the Super Class
      */
     public void setSuperObject(MetaObject superObject) {
         setSuperData(superObject);
-
-        // for each field, create a new one and attach the super field
     }
 
     /**
@@ -117,8 +100,7 @@ public abstract class MetaObject extends MetaData {
     /**
      * Add a field to the MetaObject
      */
-    public void addMetaField(MetaField f) //throws InvalidMetaDataException
-    {
+    public void addMetaField(MetaField f) {
         addChild(f);
     }
 
@@ -137,15 +119,15 @@ public abstract class MetaObject extends MetaData {
     /**
      * Return the specified MetaField of the MetaObject
      */
-    public MetaField getMetaField(String name) //throws MetaFieldNotFoundException
-    {
+    public MetaField<?> getMetaField(String name) {
+
         final String KEY = "getMetaField(" + name + ")";
 
-        MetaField f = (MetaField) getCacheValue(KEY);
+        MetaField<?> f = (MetaField<?>) getCacheValue(KEY);
 
         if (f == null) {
             try {
-                f = (MetaField) getChild(name, MetaField.class);
+                f = (MetaField<?>) getChild(name, MetaField.class);
             } catch (MetaDataNotFoundException e) {
                 if (getSuperObject() != null) {
                     try {
@@ -172,6 +154,7 @@ public abstract class MetaObject extends MetaData {
         return false;
     }
 
+
     ////////////////////////////////////////////////////
     // OBJECT METHODS
     /**
@@ -179,56 +162,48 @@ public abstract class MetaObject extends MetaData {
      */
     protected Class<?> getObjectClass() throws ClassNotFoundException {
 
+        Class<?> c;
+
         if (hasAttribute(ATTR_OBJECT)) {
+
             String ostr = null;
             try {
-                ostr = (String) getAttribute(ATTR_OBJECT);
+                ostr = getAttribute(ATTR_OBJECT).getValueAsString();
                 ostr = ostr.trim();
-                if ( log.isTraceEnabled() ) log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));
-            } catch (MetaAttributeNotFoundException e) {
+                if (log.isTraceEnabled())
+                    log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));
+            }
+            catch (MetaAttributeNotFoundException e) {
                 throw new RuntimeException("Attribute was found but could not get it on MetaObject [" + this + "] and attribute [" + ATTR_OBJECT + "]");
             }
 
             try {
-                return Class.forName(ostr);
-            } catch (ClassNotFoundException e) {
-                if ( log.isDebugEnabled()) log.debug(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
-                return getLoader().loadClass( ostr );
-                //throw new ClassNotFoundException("Specified Object Class [" + ostr + "] was not found", e);
+                c = Class.forName(ostr);
             }
-        } 
+            catch (ClassNotFoundException e) {
+                if (log.isDebugEnabled())
+                    log.debug(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
+                c = getLoader().loadClass(ostr);
+            }
+        }
         else {
             String ostr = getName().replaceAll(MetaDataLoader.PKG_SEPARATOR, ".");
 
             try {
-                return Class.forName(ostr);
-            } catch (ClassNotFoundException e) {
+                c = Class.forName(ostr);
+            }
+            catch (ClassNotFoundException e) {
                 throw new ClassNotFoundException("Derived Object Class [" + ostr + "] was not found");
             }
         }
 
-        //return null;
+        return c;
     }
 
     /**
      * Whether the MetaObject produces the object specified
      */
-    public abstract boolean produces(Object obj);/* {
-        try {
-            Class<?> cl = getObjectClass();
-            if (cl == null) {
-                return false;
-            }
-
-            boolean rc = obj.getClass().equals( cl );
-            if (rc) {
-                return true;
-            }
-        } catch (ClassNotFoundException e) {
-        };
-
-        return false;
-    }*/
+    public abstract boolean produces(Object obj);
 
     /**
      * Attaches a MetaObject to an Object
@@ -246,22 +221,18 @@ public abstract class MetaObject extends MetaData {
      *
      * @param o Object to set the default values on
      */
-    public void setDefaultValues(Object o) //throws MetaException
-    {
-        // Set the default values
-        for (MetaField f : getMetaFields()) {
-            Object val = f.getDefaultValue();
-            if (val != null) {
-                f.setObject(o, val);
-            }
-        }
+    public void setDefaultValues(Object o) {
+
+        getMetaFields().stream()
+                .filter( f -> f.getDefaultValue()!=null)
+                .forEach( f -> f.setObject( o, f.getDefaultValue() ));
     }
 
     /**
      * Return a new MetaObject instance from the MetaObject
      */
-    public Object newInstance() //throws MetaException
-    {
+    public Object newInstance()  {
+
         final String KEY = "ObjectClass";
 
         // See if we have this cached already
@@ -327,29 +298,22 @@ public abstract class MetaObject extends MetaData {
 
     ////////////////////////////////////////////////////
     // ABSTRACT METHODS
+
     /**
      * Retrieves the value from the object
      */
-    public abstract Object getValue(MetaField f, Object obj); //throws MetaException;
+    public abstract Object getValue(MetaField f, Object obj);
 
     /**
      * Sets the value on the object
      */
-    public abstract void setValue(MetaField f, Object obj, Object val); //throws MetaException;
+    public abstract void setValue(MetaField f, Object obj, Object val);
 
     ////////////////////////////////////////////////////
     // MISC METHODS
+
     public Object clone() {
         MetaObject mc = (MetaObject) super.clone();
-        //mc.mPackage = mPackage;
         return mc;
     }
-
-    /* public String getDirtyFieldName() {
-     return dirtyFieldName;
-     }
-
-     public void setDirtyFieldName(String dirtyFieldName) {
-     this.dirtyFieldName = dirtyFieldName;
-     }*/
 }

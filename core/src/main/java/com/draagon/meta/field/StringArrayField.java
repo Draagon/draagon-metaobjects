@@ -6,6 +6,8 @@
  */
 package com.draagon.meta.field;
 
+import com.draagon.meta.DataTypes;
+
 import java.util.List;
 
 /**
@@ -16,29 +18,9 @@ import java.util.List;
  */
 public class StringArrayField extends ArrayField<List<String>> {
 
+    public final static String SUBTYPE_STRING_ARRAY = "stringArray";
+
     public StringArrayField( String name ) {
-        super( SUBTYPE_STRING_ARRAY, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    @Override
-    public int getType() {
-        return STRING_ARRAY;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    @Override
-    public Class<?> getValueClass() {
-        return List.class;
-    }
-
-    /** Get the Class for the items in the array */
-    @Override
-    public Class getItemClass() {
-        return String.class;
+        super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY );
     }
 }

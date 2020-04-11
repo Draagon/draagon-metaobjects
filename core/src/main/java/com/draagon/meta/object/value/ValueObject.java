@@ -6,15 +6,16 @@
  */
 package com.draagon.meta.object.value;
 
+import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.MetaFieldTypes;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.util.Converter;
+import com.draagon.meta.util.DataConverter;
 
 import java.io.Serializable;
 //import java.util.*;
@@ -225,7 +226,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     /**
      * Sets an attribute of the MetaObject
      */
-    public void setObjectAttribute(String name, Object value, int type ) {
+    public void setObjectAttribute(String name, Object value, DataTypes type ) {
 
         // Do not store invalid field values
         if (!isValidFieldName( name )) return;
@@ -235,13 +236,13 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
         // Convert to the proper object type
         if (hasMetaDataAttached()) {
             try {
-                value = Converter.toType(getMetaData().getMetaField(name).getType(), value);
+                value = DataConverter.toType(getMetaData().getMetaField(name).getDataType(), value);
             }catch( MetaDataNotFoundException e ) {
                 //if (!allowExtensions) throw new IllegalArgumentException( "No field with name["+name+"] exists on MetaObject: " + getMetaData() );
-                value = Converter.toType(type, value);
+                value = DataConverter.toType(type, value);
             }
         } else {
-            value = Converter.toType(type, value);
+            value = DataConverter.toType(type, value);
         }
 
         // Set the value
@@ -402,73 +403,73 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     // SETTER VALUES
     public void setBoolean(String name, Boolean value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.BOOLEAN);
+        setObjectAttribute(name, value, DataTypes.BOOLEAN);
         //getMetaField( name ).setBoolean( this, value );
     }
 
     public void setByte(String name, Byte value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.BYTE);
+        setObjectAttribute(name, value, DataTypes.BYTE);
         //getMetaField( name ).setByte( this, value );
     }
 
     public void setShort(String name, Short value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.SHORT);
+        setObjectAttribute(name, value, DataTypes.SHORT);
         //getMetaField( name ).setShort( this, value );
     }
 
     public void setInt(String name, Integer value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.INT);
+        setObjectAttribute(name, value, DataTypes.INT);
         //getMetaField( name ).setInt( this, value );
     }
 
     public void setInteger(String name, Integer value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.INT);
+        setObjectAttribute(name, value, DataTypes.INT);
         //setInt( name, value );
     }
 
     public void setLong(String name, Long value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.LONG);
+        setObjectAttribute(name, value, DataTypes.LONG);
         //getMetaField( name ).setLong( this, value );
     }
 
     public void setFloat(String name, Float value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.FLOAT);
+        setObjectAttribute(name, value, DataTypes.FLOAT);
         //getMetaField( name ).setFloat( this, value );
     }
 
     public void setDouble(String name, Double value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.DOUBLE);
+        setObjectAttribute(name, value, DataTypes.DOUBLE);
         //getMetaField( name ).setDouble( this, value );
     }
 
     public void setString(String name, String value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.STRING);
+        setObjectAttribute(name, value, DataTypes.STRING);
         //getMetaField( name ).setString( this, value );
     }
 
     public void setDate(String name, java.util.Date value) //throws MetaException
     {
-        setObjectAttribute(name, value, MetaFieldTypes.DATE);
+        setObjectAttribute(name, value, DataTypes.DATE);
         //getMetaField( name ).setDate( this, value );
     }
 
     public void setObject(String name, Object value) //throws MetaException
     {
         // Use the MetaField specific type when setting as an object
-        int type = MetaFieldTypes.OBJECT;
+        DataTypes type = DataTypes.OBJECT;
         if ( hasMetaDataAttached() && getMetaData().hasMetaField( name )) {
-            type = getMetaData().getMetaField( name ).getType();
+            type = getMetaData().getMetaField( name ).getDataType();
         }
 
-        setObjectAttribute(name, value, MetaFieldTypes.OBJECT);
+        setObjectAttribute(name, value, type);
         //getMetaField( name ).setObject( this, value );
     }
 

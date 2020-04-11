@@ -16,21 +16,9 @@ import com.draagon.meta.*;
  */
 public class FloatField extends MetaField<Float> {
 
+    public final static String SUBTYPE_FLOAT    = "float";
+
     public FloatField( String name ) {
-        super( SUBTYPE_FLOAT, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return FLOAT;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Float.class;
+        super( SUBTYPE_FLOAT, name, DataTypes.FLOAT );
     }
 }

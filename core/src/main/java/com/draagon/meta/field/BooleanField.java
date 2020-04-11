@@ -18,23 +18,10 @@ import com.draagon.meta.*;
  */
 @SuppressWarnings("serial")
 public class BooleanField extends MetaField<Boolean> {
-    //private static Log log = LogFactory.getLog( BooleanField.class );
+
+    public final static String SUBTYPE_BOOLEAN = "boolean";
 
     public BooleanField(String name ) {
-        super( SUBTYPE_BOOLEAN, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return BOOLEAN;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Boolean.class;
+        super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN );
     }
 }

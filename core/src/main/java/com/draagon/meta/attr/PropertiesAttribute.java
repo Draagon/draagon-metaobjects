@@ -1,5 +1,7 @@
 package com.draagon.meta.attr;
 
+import com.draagon.meta.DataTypes;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
@@ -7,40 +9,31 @@ import java.util.Properties;
 
 public class PropertiesAttribute extends MetaAttribute<Properties> {
 
-    private Properties props = new Properties();
-
     public final static String SUBTYPE_PROPERTIES = "properties";
 
     public PropertiesAttribute(String name ) {
-        super( SUBTYPE_PROPERTIES, name );
+        super( SUBTYPE_PROPERTIES, name, DataTypes.CUSTOM);
     }
 
     @Override
-    public Properties getValue() {
-        return props;
-    }
-
-    public void setValue(Properties value) throws InvalidAttributeValueException {
-        props = value;
-    }
-
-    @Override
-    public void setValue(Object value) {
-        props = (Properties) value;
-    }
-
-
-    @Override
-    public Object clone() {
-        PropertiesAttribute pa = (PropertiesAttribute) super.clone();
-        pa.props = props;
-        return pa;
+    public void setValueAsObject(Object value) {
+        if ( value == null ) {
+            setValue( null );
+        } else if ( value instanceof String ) {
+            setValueAsString( (String) value );
+        }
+        else if ( value instanceof Properties ) {
+            super.setValue((Properties) value);
+        }
+        throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
     }
 
     @Override
     public void setValueAsString(String value) {
         try {
-            props.load(new StringReader(value.toString()));
+            Properties p = new Properties();
+            p.load(new StringReader(value.toString()));
+            setValue( p );
         } catch (IOException e) {
             throw new InvalidAttributeValueException("Could not load properties [" + value + "]: " + e.getMessage(), e);
         }
@@ -48,6 +41,6 @@ public class PropertiesAttribute extends MetaAttribute<Properties> {
 
     @Override
     public String getValueAsString() {
-        return props.toString();
+        return getValue().toString();
     }
 }

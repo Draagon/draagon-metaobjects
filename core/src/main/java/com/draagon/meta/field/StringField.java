@@ -15,23 +15,10 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 public class StringField extends MetaField<String> {
-    //private static Log log = LogFactory.getLog( StringField.class );
+
+    public final static String SUBTYPE_STRING   = "string";
 
     public StringField( String name ) {
-        super( SUBTYPE_STRING, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return STRING;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return String.class;
+        super( SUBTYPE_STRING, name, DataTypes.STRING );
     }
 }

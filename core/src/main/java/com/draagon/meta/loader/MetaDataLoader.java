@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-//import com.draagon.meta.object.MetaObjectNotFoundException;
-//import java.util.Iterator;
-
 /**
  * Abstract MetaDataLoader with common functions for all MetaDataLoaders
  */
@@ -28,22 +25,16 @@ public abstract class MetaDataLoader extends MetaData {
 
     public final static String TYPE_LOADER = "loader";
 
-    public final static String PKG_SEPARATOR = "::";
-
     private boolean isRegistered = false;
     private boolean isInitialized = false;
     private boolean isDestroyed = false;
 
-    //private final Map<String, MetaData> metaDataCache = Collections.synchronizedMap(new WeakHashMap<String, MetaData>());
-
     public MetaDataLoader( String subtype ) {
-        this( subtype, "loader-" + System.currentTimeMillis());
-        //registerLoader(this);
+        this( subtype, TYPE_LOADER + "-" + System.currentTimeMillis());
     }
 
     public MetaDataLoader( String subtype, String name ) {
         super( TYPE_LOADER, subtype, name );
-        //registerLoader(this);
     }
 
     protected void checkState() {
@@ -62,11 +53,17 @@ public abstract class MetaDataLoader extends MetaData {
         return isInitialized;
     }
 
+    /**
+     * Register this MetaDataLoader with the MetaDataRegistry
+     */
     public void register() {
         MetaDataRegistry.registerLoader( this );
         isRegistered = true;
     }
 
+    /**
+     * Returns whether the MetaDataLoader in the MetaDataRegistry
+     */
     public boolean isRegistered() {
         return isRegistered;
     }
@@ -174,7 +171,9 @@ public abstract class MetaDataLoader extends MetaData {
      * Only uses direct 'super' relationship, not 'inherits'
      */
     protected <T extends MetaData> List<T> getMetaDataBySuper(String metaDataName, List<MetaObject> objects) throws MetaDataNotFoundException {
+
         checkState();
+
         String KEY = "QuickCacheDerived-" + metaDataName;
         List<T> result = (List<T>) getCacheValue(KEY);
         if (result == null) {
@@ -232,6 +231,7 @@ public abstract class MetaDataLoader extends MetaData {
      * @return
      */
     public Class<?> loadClass(String className ) throws ClassNotFoundException {
+
         checkState();
         try {
             return getClass().getClassLoader().loadClass( className );
@@ -242,6 +242,7 @@ public abstract class MetaDataLoader extends MetaData {
 
     /**
      * Adds the MetaData
+     * @deprecated Use MetaData.addChild
      */
     public void addMetaData(MetaData mc) {
         checkState();
@@ -249,7 +250,17 @@ public abstract class MetaDataLoader extends MetaData {
     }
 
     /**
+     * Adds the child MetaData
+     */
+    @Override
+    public void addChild(MetaData mc) {
+        checkState();
+        super.addChild(mc);
+    }
+
+    /**
      * Removes the MetaData
+     * @deprecated Use MetaData.deleteChild()
      */
     public void removeMetaData( Class<MetaData> c, String name) throws MetaDataNotFoundException {
         checkState();
@@ -282,11 +293,12 @@ public abstract class MetaDataLoader extends MetaData {
 
     ////////////////////////////////////////////////////
     // MISC METHODS
+
     public String toString() {
         if (getParent() == null) {
-            return "MetaDataLoader[" + getMetaDataSubType() + ":" + getName() + "]";
+            return "MetaDataLoader[" + getSubType() + ":" + getName() + "]";
         } else {
-            return "MetaDataLoader[" + getMetaDataSubType() + ":" + getName() + "@" + getParent().toString() + "]";
+            return "MetaDataLoader[" + getSubType() + ":" + getName() + "@" + getParent().toString() + "]";
         }
     }
 }

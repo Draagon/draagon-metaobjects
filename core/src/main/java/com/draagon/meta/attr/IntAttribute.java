@@ -12,15 +12,16 @@ import com.draagon.meta.DataTypes;
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class StringAttribute extends MetaAttribute<String> {
+public class IntAttribute extends MetaAttribute<String> {
     //private static Log log = LogFactory.getLog( StringAttribute.class );
 
-    public final static String SUBTYPE_STRING = "string";
+    public final static String SUBTYPE_INT = "int";
 
     /**
-     * Constructs the String MetaAttribute
+     * Constructs the Integer MetaAttribute
      */
-    public StringAttribute(String name ) {
-        super( SUBTYPE_STRING, name, DataTypes.STRING);
+    public IntAttribute(String name ) {
+        super( SUBTYPE_INT, name, DataTypes.INT);
     }
+
 }

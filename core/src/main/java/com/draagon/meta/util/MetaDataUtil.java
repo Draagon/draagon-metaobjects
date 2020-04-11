@@ -136,10 +136,10 @@ public class MetaDataUtil {
 
       if (o == null) {
 
-        Object a = d.getAttribute(ATTR_OBJECT_REF);
+        String a = d.getAttribute(ATTR_OBJECT_REF).getValueAsString();
         if (a != null) {
 
-          String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a.toString());
+          String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a );
 
           try {
             o = d.getLoader().getMetaDataByName(MetaObject.class, name);

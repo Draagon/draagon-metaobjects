@@ -12,10 +12,6 @@ import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.validator.MetaValidator;
-
-import java.util.Collection;
-import java.util.Iterator;
 
 public abstract class MetaView extends MetaData
 {
@@ -69,7 +65,7 @@ public abstract class MetaView extends MetaData
    * @param obj
    * @return
    */
-  public MetaField getMetaField( Object obj )
+  public MetaField<?> getMetaField( Object obj )
   {
     MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     return mc.getMetaField( getParent().getName() );
@@ -78,9 +74,8 @@ public abstract class MetaView extends MetaData
   /**
    * Retrieves the display string of the field for a simple display
    */
-  public String getDisplayString( Object obj )
-    //throws MetaException
-  {
+  public String getDisplayString( Object obj ) {
+
     MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     MetaField mf = mc.getMetaField( getParent().getName() );
     return "" + mf.getString( obj );
@@ -94,16 +89,10 @@ public abstract class MetaView extends MetaData
   {
     // Run any defined validators
     try {
-      String list = (String) getAttribute( ATTR_VALIDATION );
+      String list = getAttribute( ATTR_VALIDATION ).getValueAsString();
 
-      Collection<MetaValidator> val_list = getMetaField( obj ).getValidatorList( list );
-
-      for( Iterator<MetaValidator> i = val_list.iterator(); i.hasNext(); )
-      {
-        MetaValidator v = (MetaValidator) i.next();
-        v.validate( obj, val );
-      }
+      getMetaField( obj ).getValidatorList( list ).forEach( v->v.validate( obj, val ));
     }
-    catch( MetaAttributeNotFoundException e ) {}
+    catch( MetaAttributeNotFoundException ignored ) {}
   }
 }

@@ -18,23 +18,10 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class DateField extends MetaField<Date> {
-    
-    //private static Log log = LogFactory.getLog( DateField.class );
+
+    public final static String SUBTYPE_DATE     = "date";
+
     public DateField( String name ) {
-        super( SUBTYPE_DATE, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return DATE;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Date.class;
+        super( SUBTYPE_DATE, name, DataTypes.DATE );
     }
 }

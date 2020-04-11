@@ -6,6 +6,7 @@
  */
 package com.draagon.meta.field;
 
+import com.draagon.meta.DataTypes;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 
@@ -16,36 +17,17 @@ import com.draagon.meta.util.MetaDataUtil;
  * @author Doug Mealing
  */
 public class ObjectField extends MetaField<Object> {
-    //private static Log log = LogFactory.getLog( ObjectField.class );
 
-    /**
-     * MetaObject name attribute
-     */
-    //public final static String ATTR_OBJECT_REF = "objectRef";
+    public final static String SUBTYPE_OBJECT       = "object";
 
     public ObjectField( String name ) {
-        super( SUBTYPE_OBJECT, name );
+        super( SUBTYPE_OBJECT, name, DataTypes.OBJECT );
     }
 
     /**
-     * Returns the type of value
+     * Return the referenced MetaObject
      */
-    public int getType() {
-        return OBJECT;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Object.class;
-    }
-
-    /**
-     * Return the specified MetaObject
-     */
-    public MetaObject getObjectRef() //throws MetaFieldNotFoundException
-    {
+    public MetaObject getObjectRef() {
         return MetaDataUtil.getObjectRef(this);
     }
 }

@@ -16,21 +16,9 @@ import com.draagon.meta.*;
  */
 public class LongField extends MetaField<Long> {
 
+    public final static String SUBTYPE_LONG = "long";
+
     public LongField( String name ) {
-        super( SUBTYPE_LONG, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return LONG;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Long.class;
+        super( SUBTYPE_LONG, name, DataTypes.LONG );
     }
 }

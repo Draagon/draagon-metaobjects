@@ -16,21 +16,9 @@ import com.draagon.meta.*;
  */
 public class IntegerField extends MetaField<Integer> {
 
+    public final static String SUBTYPE_INT = "int";
+
     public IntegerField( String name ) {
-        super( SUBTYPE_INT, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return INT;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Integer.class;
+        super( SUBTYPE_INT, name, DataTypes.INT );
     }
 }

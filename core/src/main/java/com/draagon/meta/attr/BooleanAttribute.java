@@ -12,15 +12,16 @@ import com.draagon.meta.DataTypes;
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class StringAttribute extends MetaAttribute<String> {
+public class BooleanAttribute extends MetaAttribute<Boolean> {
     //private static Log log = LogFactory.getLog( StringAttribute.class );
 
-    public final static String SUBTYPE_STRING = "string";
+    public final static String SUBTYPE_BOOLEAN = "boolean";
 
     /**
-     * Constructs the String MetaAttribute
+     * Constructs the Boolean MetaAttribute
      */
-    public StringAttribute(String name ) {
-        super( SUBTYPE_STRING, name, DataTypes.STRING);
+    public BooleanAttribute(String name ) {
+        super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN);
     }
+
 }

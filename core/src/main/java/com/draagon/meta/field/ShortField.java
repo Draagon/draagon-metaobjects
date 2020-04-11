@@ -15,23 +15,10 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 public class ShortField extends MetaField<Short> {
-    //private static Log log = LogFactory.getLog( ShortField.class );
+
+    public final static String SUBTYPE_SHORT    = "short";
 
     public ShortField( String name ) {
-        super( SUBTYPE_SHORT, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return SHORT;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Short.class;
+        super( SUBTYPE_SHORT, name, DataTypes.SHORT );
     }
 }

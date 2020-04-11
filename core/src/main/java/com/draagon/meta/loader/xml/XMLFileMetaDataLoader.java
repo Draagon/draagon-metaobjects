@@ -24,7 +24,6 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -236,7 +235,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
             loadTypesFromStream(is);
         } catch (MetaException e) {
             log.error("Meta Types XML [" + file + "]: " + e.getMessage());
-            throw new MetaException("The Types XML file [ " + file + "] could not be loaded: " + e.getMessage(), e);
+            throw new MetaException("The Types XML file [" + file + "] could not be loaded: " + e.getMessage(), e);
         }
 
         typesLoaded = true;
@@ -330,7 +329,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 // Get the base class for the given element
                 String clazz = e.getAttribute( "class" );
                 if ( clazz == null || clazz.isEmpty() ) {
-                    throw new MetaException( "Element section [" + name + "] has no 'class' attribute specified");
+                    throw new MetaException( "MetaData Type [" + name + "] has no 'class' attribute specified");
                 }
                 
                 try {
@@ -341,7 +340,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     typesMap.put( name, mdts );
                 }
                 catch( ClassNotFoundException ex ) {
-                    throw new MetaException( "Element section [" + name + "] has an invalid 'class' attribute: " + ex.getMessage(), ex );
+                    throw new MetaException( "MetaData Type [" + name + "] has an invalid 'class' attribute: " + ex.getMessage(), ex );
                 }
             }
             
@@ -382,7 +381,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     typesMap.put(name, tcl, "true".equals( def ));
                 } 
                 catch (ClassNotFoundException e) {
-                    throw new MetaException("Type of section [" + section + "] with name [" + name + "] has invalid class: " + e.getMessage());
+                    throw new MetaException("MetaData Type [" + section + "] with name [" + name + "] has invalid class: " + e.getMessage());
                     //log.warn( "Type of section [" + section + "] with name [" + name + "] has unknown class: " + e.getMessage() );
                 }
             }
@@ -574,7 +573,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         // Use the Super class type if no type is defined and a super class exists
                         if (superData != null) {
                             c = superData.getClass();
-                            typeName = superData.getMetaDataSubType();
+                            typeName = superData.getSubType();
                         }
                         else {
                             typeName = types.getDefaultType();
@@ -636,11 +635,11 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     if ( md == null )
                         throw new MetaDataException("No valid constructor was found for MetaData class [" + c.getName() + "]");
 
-                    if ( !md.getMetaDataType().equals( nodeName ))
-                        throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getMetaDataType() + "]: " + md );
+                    if ( !md.getType().equals( nodeName ))
+                        throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getType() + "]: " + md );
 
-                    if ( !md.getMetaDataSubType().equals( typeName ))
-                        throw new MetaDataException( "Expected MetaData subType ["+typeName+"], but MetaData instantiated was of subType [" + md.getMetaDataSubType() + "]: " + md );
+                    if ( !md.getSubType().equals( typeName ))
+                        throw new MetaDataException( "Expected MetaData subType ["+typeName+"], but MetaData instantiated was of subType [" + md.getSubType() + "]: " + md );
 
                     if ( !md.getName().equals( fullname ))
                         throw new MetaDataException( "Expected MetaData name ["+fullname+"], but MetaData instantiated was of name [" + md.getName() + "]: " + md );
@@ -702,8 +701,8 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
     /** Set the default value on the MetaField */
     protected void setDefaultValue(MetaField md) {
-        if ( md.hasAttribute( MetaField.ATTR_DEFAULT_VALUE )) {
-            md.setDefaultValue( String.valueOf( md.getAttribute( MetaField.ATTR_DEFAULT_VALUE )));
+        if (md.hasAttribute(MetaField.ATTR_DEFAULT_VALUE)) {
+            md.setDefaultValue( md.getAttribute(MetaField.ATTR_DEFAULT_VALUE).getValueAsString() );
         }
     }
 
@@ -748,12 +747,13 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
         // If a valid node exists, then get the data
         if (nv != null) {
             switch (nv.getNodeType()) {
+
                 // If CDATA just set the whole thing
                 case Node.CDATA_SECTION_NODE:
                     attr.setValueAsString(((CharacterData) nv).getData());
                     break;
 
-                // If an Element just pass it in for parsing
+                // If an Element just pass it in for parsing (for when a field can process XML elements)
                 case Node.ELEMENT_NODE:
                     attr.setValue(nv);
                     break;

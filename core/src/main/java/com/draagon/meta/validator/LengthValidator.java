@@ -7,46 +7,65 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
+import com.draagon.meta.field.MetaField;
 import org.apache.commons.validator.GenericValidator;
 
 @SuppressWarnings("serial")
-public class LengthValidator extends MetaValidator
-{
-  //private static Log log = LogFactory.getLog( LengthValidator.class );
+public class LengthValidator extends MetaValidator {
 
-  public final static String SUBTYPE_LENGTH = "length";
+    public final static String SUBTYPE_LENGTH = "length";
 
-  /** Minimum length attribute */
-  public final static String ATTR_MIN = "min";
-  /** Maximum length attribute */
-  public final static String ATTR_MAX = "max";
+    /**
+     * Minimum length attribute
+     */
+    public final static String ATTR_MIN = "min";
+    /**
+     * Maximum length attribute
+     */
+    public final static String ATTR_MAX = "max";
 
-  public LengthValidator( String name ) {
-    super( SUBTYPE_LENGTH, name );
-    //addAttributeDef( new AttributeDef( ATTR_MIN, String.class, false, "Minimum length (0 default)" ));
-    //addAttributeDef( new AttributeDef( ATTR_MAX, String.class, false, "Maximum length (field length default)" ));
-  }
-
-  /**
-   * Validates the value of the field in the specified object
-   */
-  public void validate( Object object, Object value )
-    //throws MetaException
-  {
-    int min = 0;
-    int max = getMetaField( object ).getLength();
-
-    if ( hasAttribute( ATTR_MIN ))
-      min = Integer.parseInt( (String) getAttribute( ATTR_MIN ));
-    if ( hasAttribute( ATTR_MAX ))
-      max = Integer.parseInt( (String) getAttribute( ATTR_MAX ));
-
-    String msg = getMessage( "A valid length between " + min + " and " + max + " must be entered" );
-    String val = (value==null)?null:value.toString();
-
-    if ( !GenericValidator.isBlankOrNull( val )
-      && ( val.length() < min || val.length() > max )) {
-      throw new InvalidValueException( msg );
+    public LengthValidator(String name) {
+        super(SUBTYPE_LENGTH, name);
+        //addAttributeDef( new AttributeDef( ATTR_MIN, String.class, false, "Minimum length (0 default)" ));
+        //addAttributeDef( new AttributeDef( ATTR_MAX, String.class, false, "Maximum length (field length default)" ));
     }
-  }
+
+    /**
+     * Validates the value of the field in the specified object
+     */
+    public void validate(Object object, Object value) {
+
+        int min = hasAttribute(ATTR_MIN)
+                ? Integer.parseInt(getAttribute(ATTR_MIN).getValueAsString())
+                : 0;
+
+        int max = hasAttribute(ATTR_MAX)
+                ? Integer.parseInt(getAttribute(ATTR_MAX).getValueAsString())
+                : getDefaultMax( getMetaField( object ));
+
+        String msg = getMessage("A valid length between " + min + " and " + max + " must be entered");
+        String val = (value == null) ? null : value.toString();
+
+        if (!GenericValidator.isBlankOrNull(val)
+                && (val.length() < min || val.length() > max)) {
+            throw new InvalidValueException(msg);
+        }
+    }
+
+    /** Get the default max string size based on the MetaField DataType */
+    protected int getDefaultMax( MetaField f ) {
+        switch( f.getDataType() )
+        {
+            case BOOLEAN: return 1;
+            case BYTE: return 4;
+            case SHORT: return 6;
+            case INT: return 10;
+            case LONG: return 15;
+            case FLOAT: return 12;
+            case DOUBLE: return 16;
+            case STRING: return 100;
+            case DATE: return 15;
+            default:  return 1000000;
+        }
+    }
 }

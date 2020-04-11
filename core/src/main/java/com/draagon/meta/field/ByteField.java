@@ -16,23 +16,10 @@ import com.draagon.meta.*;
  */
 @SuppressWarnings("serial")
 public class ByteField extends MetaField<Byte> {
-    //private static Log log = LogFactory.getLog( ByteField.class );
 
-    public ByteField( String name ) {
-        super( SUBTYPE_BYTE, name );
-    }
+    public final static String SUBTYPE_BYTE = "byte";
 
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return BYTE;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return Byte.class;
+    public ByteField(String name) {
+        super(SUBTYPE_BYTE, name, DataTypes.BYTE);
     }
 }

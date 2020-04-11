@@ -13,31 +13,26 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
-public class NumericValidator extends MetaValidator
-{
-  //private static Log log = LogFactory.getLog( NumericValidator.class );
+public class NumericValidator extends MetaValidator {
+    public final static String SUBTYPE_NUMERIC = "numeric";
 
-  public final static String SUBTYPE_NUMERIC = "numeric";
-
-  public NumericValidator(String name ) {
-    super( SUBTYPE_NUMERIC, name );
-  }
-
-  /**
-   * Validates the value of the field in the specified object
-   */
-  public void validate( Object object, Object value )
-    //throws MetaException
-  {
-    String val = (value==null)?null:value.toString();
-
-    if ( !GenericValidator.isBlankOrNull( val )) {
-
-      for( int i = 0; i < val.length(); i++ )
-      {
-        if ( val.charAt( i ) < '0' || val.charAt( i ) > '9' )
-          throw new InvalidValueException( getMessage( "The value is not a valid number" ));
-      }
+    public NumericValidator(String name) {
+        super(SUBTYPE_NUMERIC, name);
     }
-  }
+
+    /**
+     * Validates the value of the field in the specified object
+     */
+    public void validate(Object object, Object value) {
+
+        String val = (value == null) ? null : value.toString();
+
+        if (!GenericValidator.isBlankOrNull(val)) {
+
+            for (int i = 0; i < val.length(); i++) {
+                if (val.charAt(i) < '0' || val.charAt(i) > '9')
+                    throw new InvalidValueException(getMessage("The value is not a valid number"));
+            }
+        }
+    }
 }

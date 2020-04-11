@@ -9,13 +9,13 @@ package com.draagon.meta.object.value;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.field.*;
 import com.draagon.meta.object.pojo.PojoMetaObject;
-import com.draagon.meta.util.Converter;
+import com.draagon.meta.util.DataConverter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
 
-public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObject
+public class ValueMetaObject extends PojoMetaObject
 {
     private final static Log log = LogFactory.getLog(ValueMetaObject.class);
 
@@ -30,75 +30,6 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
     public ValueMetaObject( String name ) {
         super( SUBTYPE_VALUE, name);
     }
-
-    /*public static MetaObject createFromTemplate(String name, String template) {
-        // Let's create one from scratch
-        ValueMetaObject mc = new ValueMetaObject(name);
-        //mc.setName( name );
-
-        if (template.length() == 0) {
-            template = null;
-        }
-
-        while (template != null) {
-            String param = null;
-
-            int i = template.indexOf(',');
-            if (i >= 0) {
-                param = template.substring(0, i).trim();
-                template = template.substring(i + 1).trim();
-                if (template.length() == 0) {
-                    template = null;
-                }
-            } else {
-                param = template.trim();
-                template = null;
-            }
-
-            i = param.indexOf(':');
-            if (i <= 0) {
-                throw new IllegalArgumentException("Malformed template field parameter [" + param + "]");
-            }
-
-            String field = param.substring(0, i).trim();
-            String type = param.substring(i + 1).trim();
-
-            if (field.length() == 0) {
-                throw new IllegalArgumentException("Malformed template field name parameter [" + param + "]");
-            }
-
-            if (type.length() == 0) {
-                throw new IllegalArgumentException("Malformed template field type parameter [" + param + "]");
-            }
-
-            MetaField mf = null;
-            if (type.equals("int")) {
-                mf = new IntegerField(field);
-            } else if (type.equals("long")) {
-                mf = new LongField(field);
-            } else if (type.equals("short")) {
-                mf = new ShortField(field);
-            } else if (type.equals("byte")) {
-                mf = new ByteField(field);
-            } else if (type.equals("boolean")) {
-                mf = new BooleanField(field);
-            } else if (type.equals("float")) {
-                mf = new FloatField(field);
-            } else if (type.equals("double")) {
-                mf = new DoubleField(field);
-            } else if (type.equals("date")) {
-                mf = new DateField(field);
-            } else {
-                mf = new StringField(field);
-            }
-
-            //mf.setName(field);
-
-            mc.addMetaField(mf);
-        }
-
-        return mc;
-    }*/
 
     /**
      * Retrieves the object class of an object
@@ -146,56 +77,26 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
 
     ////////////////////////////////////////////////////
     // PERSISTENCE METHODS
-    /**
-     * Attaches a Object Manager to the object
-     */
-    /*public void attachManager( ObjectManager mm, Object obj )
-     {
-     try { getMetaObject( obj ).attachObjectManager( mm ); }
-     catch( MetaException e ) { log.error( e.getMessage(), e ); }
-     }*/
-    /**
-     * Gets the Object Manager for the object
-     */
-    /*public ObjectManager getManager( Object obj )
-     {
-     try { return getMetaObject( obj ).getObjectManager(); }
-     catch( MetaException e ) { log.error( e.getMessage(), e ); }
-     return null;
-     }*/
-    private ValueObject getMetaObject(Object o)
-            throws MetaException {
+
+    private ValueObject getMetaObject(Object o) {
+
         if (o == null) {
-            throw new MetaException("Null value found, MetaObject expected");
+            throw new MetaException("ValueObject expected, but was bnull");
         }
 
         if (!(o instanceof ValueObject)) {
-            throw new MetaException("MetaObject expected, not [" + o.getClass().getName() + "]");
+            throw new MetaException("ValueObject expected, not [" + o.getClass().getName() + "]");
         }
 
         return (ValueObject) o;
     }
 
-    /**
-     * Retrieve the id of the object
-     */
-    //public String getId( Object obj )
-    //  throws MetaException
-    //{
-    //  return getMetaObject( obj ).getObjectId();
-    //}
-    /**
-     * Retrieve the id of the object
-     */
-    //public void setId( Object obj, String id )
-    //  throws MetaException
-    //{
-    //  getMetaObject( obj ).setObjectId( id );
-    //}
+
     ////////////////////////////////////////////////////
     // PERSISTENCE METHODS
-    private ValueObject.Value getAttributeValue(MetaField f, Object obj)
-            throws MetaException {
+
+    private ValueObject.Value getAttributeValue(MetaField f, Object obj)  {
+
         if (!(obj instanceof ValueObject)) {
             throw new MetaException("MetaObject expected, not [" + obj.getClass().getName() + "]");
         }
@@ -259,7 +160,7 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
     public Object getValue(MetaField f, Object obj) //throws MetaException
     {
         if (!(obj instanceof ValueObject)) {
-            throw new IllegalArgumentException("MetaObject expected, Invalid object of class [" + obj.getClass().getName() + "]");
+            throw new IllegalArgumentException("ValueObject expected, Invalid object of class [" + obj.getClass().getName() + "]");
         }
 
         if (hasGetterMethod(f, obj.getClass())) {
@@ -275,18 +176,18 @@ public class ValueMetaObject extends PojoMetaObject //implements StatefulMetaObj
     public void setValue(MetaField f, Object obj, Object value) //throws MetaException
     {
         if (!(obj instanceof ValueObject)) {
-            throw new IllegalArgumentException("MetaObject expected, Invalid object of class [" + obj.getClass().getName() + "]");
+            throw new IllegalArgumentException("ValueObject expected, Invalid object of class [" + obj.getClass().getName() + "]");
         }
 
         // Convert the value to the appropriate type
         if (value != null && f.getValueClass() != value.getClass()) {
-            value = Converter.toType(f.getType(), value);
+            value = DataConverter.toType(f.getDataType(), value);
         }
 
         if (hasSetterMethod(f, obj.getClass())) {
             super.setValue(f, obj, value);
         } else {
-            ((ValueObject) obj).setObjectAttribute(f.getName(), value, f.getType());
+            ((ValueObject) obj).setObjectAttribute(f.getName(), value, f.getDataType());
         }
     }
 }

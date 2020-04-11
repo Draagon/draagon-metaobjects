@@ -17,25 +17,9 @@ import com.draagon.meta.*;
  */
 public class DoubleField extends MetaField<Double>
 {
+    public final static String SUBTYPE_DOUBLE   = "double";
+
     public DoubleField( String name ) {
-        super( SUBTYPE_DOUBLE, name );
-    }
-    
-    //private static Log log = LogFactory.getLog( DoubleField.class );
-
-    /**
-     * Returns the type of value
-     */
-    public int getType()
-    {
-    return DOUBLE;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass()
-    {
-    return Double.class;
+        super( SUBTYPE_DOUBLE, name, DataTypes.DOUBLE );
     }
 }

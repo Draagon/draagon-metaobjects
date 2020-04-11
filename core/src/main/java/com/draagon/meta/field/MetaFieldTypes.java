@@ -14,7 +14,7 @@ package com.draagon.meta.field;
  * @version 2.0
  * @author Doug Mealing
  *
- * @deprecated Use MetaField subTypes
+ * @deprecated Use DataTypes enum instead
  */
 public interface MetaFieldTypes
 {
@@ -41,11 +41,11 @@ public interface MetaFieldTypes
     public final static int OBJECT          = 20;
     public final static int OBJECT_ARRAY    = 21;
 
-    //public final static int CLOB     = 30;
-    //public final static int BLOB     = 31;
-    //public final static int XML      = 32;
-    //public final static int JSON     = 33;
-    //public final static int HTML5    = 34;
+    public final static int CLOB     = 30;
+    public final static int BLOB     = 31;
+    public final static int XML      = 32;
+    public final static int JSON     = 33;
+    public final static int HTML5    = 34;
 
-    //public final static int CUSTOM   = 99;
+    public final static int CUSTOM   = 99;
 }

@@ -3,12 +3,15 @@
   
   <attr class="com.draagon.meta.attr.MetaAttribute">
     <type name="string"       class="com.draagon.meta.attr.StringAttribute" default="true"/>
+    <type name="stringArray"  class="com.draagon.meta.attr.StringArrayAttribute"/>
     <type name="properties"   class="com.draagon.meta.attr.PropertiesAttribute" />
     <type name="class"        class="com.draagon.meta.attr.ClassAttribute" />
+    <type name="boolean"      class="com.draagon.meta.attr.BooleanAttribute" />
+    <type name="int"          class="com.draagon.meta.attr.IntAttribute" />
   </attr>
 
   <object class="com.draagon.meta.object.MetaObject">
-    <type name="value"        class="com.draagon.meta.object.value.ValueMetaObject"  default="true"/>
+    <type name="value"        class="com.draagon.meta.object.value.ValueMetaObject" default="true"/>
     <type name="pojo"         class="com.draagon.meta.object.pojo.PojoMetaObject" />
   </object>
 
@@ -45,9 +48,9 @@
 
   <validator class="com.draagon.meta.validator.MetaValidator">
     <type name="required"     class="com.draagon.meta.validator.RequiredValidator" default="true"/>
-    <type name="mask"         class="com.draagon.meta.validator.RegexValidator" />
+    <type name="regex"        class="com.draagon.meta.validator.RegexValidator" />
     <type name="numeric"      class="com.draagon.meta.validator.NumericValidator" />
     <type name="length"       class="com.draagon.meta.validator.LengthValidator" />
   </validator>
-  
+
 </types>

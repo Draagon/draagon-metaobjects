@@ -6,54 +6,30 @@
  */
 package com.draagon.meta.field;
 
+import com.draagon.meta.DataTypes;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 
 import java.util.List;
 
 /**
- * A Object Array Field.
+ * An Object Array Field.
  *
  * @version 1.0
  * @author Doug Mealing
  */
 public class ObjectArrayField extends ArrayField<List<Object>> {
-    //private static Log log = LogFactory.getLog( ObjectField.class );
 
-    /**
-     * MetaObject name attribute
-     */
-    //public final static String ATTR_OBJECT_REF = ObjectField.ATTR_OBJECT_REF;
+    public final static String SUBTYPE_OBJECT_ARRAY = "objectArray";
 
     public ObjectArrayField(String name ) {
-        super( SUBTYPE_OBJECT_ARRAY, name );
-    }
-
-    /**
-     * Returns the type of value
-     */
-    public int getType() {
-        return OBJECT_ARRAY;
-    }
-
-    /**
-     * Gets the type of value object class returned
-     */
-    public Class<?> getValueClass() {
-        return List.class;
-    }
-
-    /** Return the Class type for items in the array */
-    @Override
-    public Class getItemClass() {
-        return Object.class;
+        super( SUBTYPE_OBJECT_ARRAY, name, DataTypes.OBJECT_ARRAY );
     }
 
     /**
      * Return the specified MetaObject
      */
-    public MetaObject getObjectRef() //throws MetaFieldNotFoundException
-    {
+    public MetaObject getObjectRef() {
         return MetaDataUtil.getObjectRef(this);
     }
 }
