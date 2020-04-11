@@ -164,11 +164,11 @@ public abstract class MetaObject extends MetaData {
 
         Class<?> c;
 
-        if (hasAttribute(ATTR_OBJECT)) {
+        if (hasAttr(ATTR_OBJECT)) {
 
             String ostr = null;
             try {
-                ostr = getAttribute(ATTR_OBJECT).getValueAsString();
+                ostr = getAttr(ATTR_OBJECT).getValueAsString();
                 ostr = ostr.trim();
                 if (log.isTraceEnabled())
                     log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));

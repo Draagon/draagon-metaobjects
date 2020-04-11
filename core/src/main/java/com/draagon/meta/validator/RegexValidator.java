@@ -32,7 +32,7 @@ public class RegexValidator extends MetaValidator {
     public void validate(Object object, Object value)
     //throws MetaException
     {
-        String mask = getAttribute(ATTR_MASK).getValueAsString();
+        String mask = getAttr(ATTR_MASK).getValueAsString();
         String msg = getMessage("Invalid value format");
 
         String val = (value == null) ? null : value.toString();

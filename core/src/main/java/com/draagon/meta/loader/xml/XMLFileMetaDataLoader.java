@@ -701,8 +701,8 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
 
     /** Set the default value on the MetaField */
     protected void setDefaultValue(MetaField md) {
-        if (md.hasAttribute(MetaField.ATTR_DEFAULT_VALUE)) {
-            md.setDefaultValue( md.getAttribute(MetaField.ATTR_DEFAULT_VALUE).getValueAsString() );
+        if (md.hasAttr(MetaField.ATTR_DEFAULT_VALUE)) {
+            md.setDefaultValue( md.getAttr(MetaField.ATTR_DEFAULT_VALUE).getValueAsString() );
         }
     }
 

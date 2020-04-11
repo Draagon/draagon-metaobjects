@@ -38,7 +38,7 @@ public class ValueMetaObject extends PojoMetaObject
         try { 
             return super.getObjectClass();
         } catch( ClassNotFoundException e ) {
-            if (hasAttribute(ATTR_OBJECT)) {
+            if (hasAttr(ATTR_OBJECT)) {
                 throw e;
             }
             //log.warn( "Could not find Java class for MetaObject [" + getName() + "], returning generic ValueObject instead" );

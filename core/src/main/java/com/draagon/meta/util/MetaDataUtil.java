@@ -27,12 +27,13 @@ public class MetaDataUtil {
   public final static String SEP = MetaDataLoader.PKG_SEPARATOR;
 
   /**
-   * Returns the MetaClass for the class name string specified
-   * @param metaClassName MetaClass name
+   * Returns the MetaObject for the class name string specified
+   * @param name MetaObject name
    * @return MetaClass representing the name specified
+   * @deprecated Use MetaDataRegistry.findMetaObject( name )
    */
-  public static MetaObject forName( String metaClassName ) {
-      return MetaObject.forName( metaClassName );
+  public static MetaObject forName( String name ) {
+      return MetaDataRegistry.findMetaObject( name );
   }
 
   /**
@@ -136,7 +137,7 @@ public class MetaDataUtil {
 
       if (o == null) {
 
-        String a = d.getAttribute(ATTR_OBJECT_REF).getValueAsString();
+        String a = d.getAttr(ATTR_OBJECT_REF).getValueAsString();
         if (a != null) {
 
           String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a );

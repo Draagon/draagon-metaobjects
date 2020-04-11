@@ -215,17 +215,34 @@ public class MetaData implements Cloneable, Serializable {
 
     ////////////////////////////////////////////////////
     // ATTRIBUTE METHODS
+
+    /**
+     * Sets an attribute of the MetaClass
+     * @deprecated Use addAttr(attr)
+     */
+    public void addAttribute(MetaAttribute attr) {
+        addAttr(attr);
+    }
+
+    /**
+     * Sets an attribute of the MetaClass
+     * @deprecated Use deleteAttr(attr)
+     */
+    public void deleteAttribute(String name) throws MetaAttributeNotFoundException {
+        deleteAttr(name);
+    }
+
     /**
      * Sets an attribute of the MetaClass
      */
-    public void addAttribute(MetaAttribute attr) {
+    public void addAttr(MetaAttribute attr) {
         addChild(attr);
     }
 
     /**
      * Sets an attribute of the MetaClass
      */
-    public void deleteAttribute(String name) throws MetaAttributeNotFoundException {
+    public void deleteAttr(String name) throws MetaAttributeNotFoundException {
         try {
             deleteChild(name, MetaAttribute.class);
         } catch (MetaException e) {
@@ -251,15 +268,31 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Retrieves an attribute value of the MetaData
+     * @deprecated Use getAttr(name).getValueAsString()
      */
-    public MetaAttribute getAttribute(String name) throws MetaAttributeNotFoundException {
-        return getAttribute(name,true);
+    public String getAttribute(String name) throws MetaAttributeNotFoundException {
+        return getAttr(name,true).getValueAsString();
+    }
+
+    /**
+     * Retrieves an attribute value of the MetaData
+     * @deprecated Use getAttr(name, includeParentData).getValueAsString()
+     */
+    public Object getAttribute(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
+        return getAttr(name,true).getValueAsString();
     }
 
     /**
      * Retrieves an attribute value of the MetaData
      */
-    public MetaAttribute getAttribute(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
+    public MetaAttribute getAttr(String name) throws MetaAttributeNotFoundException {
+        return getAttr(name,true);
+    }
+
+    /**
+     * Retrieves an attribute value of the MetaData
+     */
+    public MetaAttribute getAttr(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
         try {
             return (MetaAttribute) getChild( name, MetaAttribute.class, includeParentData);
         } catch (MetaDataNotFoundException e) {
@@ -269,15 +302,31 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Retrieves all attribute names
+     * @deprecated Use hasAttr(name)
      */
     public boolean hasAttribute(String name) {
-        return hasAttribute(name,true);
+        return hasAttr(name,true);
+    }
+
+    /**
+     * Retrieves all attribute names
+     * @deprecated Use hasAttr(name,includeParentData)
+     */
+    public boolean hasAttribute(String name, boolean includeParentData) {
+        return hasAttr( name, includeParentData );
     }
 
     /**
      * Retrieves all attribute names
      */
-    public boolean hasAttribute(String name, boolean includeParentData) {
+    public boolean hasAttr(String name) {
+        return hasAttr(name,true);
+    }
+
+    /**
+     * Retrieves all attribute names
+     */
+    public boolean hasAttr(String name, boolean includeParentData) {
         try {
             if (getChild(name, MetaAttribute.class, includeParentData, false) != null) {
                 return true;
@@ -286,19 +335,33 @@ public class MetaData implements Cloneable, Serializable {
         
         return false;
     }
-
+    /**
+     * Retrieves all attribute names
+     * @deprecated Use getAttrs()
+     */
+    public Collection<MetaAttribute> getAttributes() {
+        return getAttrs(true);
+    }
 
     /**
      * Retrieves all attribute names
+     * @deprecated Use getAttrs(includeParentData)
      */
-    public Collection<MetaAttribute> getAttributes() {
-        return getAttributes(true);
+    public Collection<MetaAttribute> getAttributes( boolean includeParentData ) {
+        return getAttrs( includeParentData );
     }
 
     /**
      * Retrieves all attribute names
      */
-    public Collection<MetaAttribute> getAttributes( boolean includeParentData ) {
+    public Collection<MetaAttribute> getAttrs() {
+        return getAttrs(true);
+    }
+
+    /**
+     * Retrieves all attribute names
+     */
+    public Collection<MetaAttribute> getAttrs( boolean includeParentData ) {
 
         return getChildren(MetaAttribute.class, includeParentData).stream()
                 .map(MetaAttribute.class::cast)

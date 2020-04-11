@@ -52,7 +52,7 @@ public class XMLMetaDataLoaderTest2 {
     @Test
     public void testApple() throws Exception {
         
-        MetaObject ao = MetaObject.forName( "produce::v1::fruit::Apple" );
+        MetaObject ao = MetaDataRegistry.findMetaDataByName( MetaObject.class,"produce::v1::fruit::Apple" );
         Apple apple = (Apple) ao.newInstance();
         
         Apple apple2 = new Apple();
@@ -75,7 +75,7 @@ public class XMLMetaDataLoaderTest2 {
         
         assertEquals( "id field", id, apple.getId() );
         
-        assertEquals( "id field isKey=true", "true", idField.getAttribute( "isKey" ).toString() );
+        assertEquals( "id field isKey=true", "true", idField.getAttr( "isKey" ).toString() );
     }
 
     @Test
@@ -83,23 +83,23 @@ public class XMLMetaDataLoaderTest2 {
         
         Orange orange = new Orange();
         
-        MetaObject mo = MetaObject.forObject( orange );
+        MetaObject mo = MetaDataRegistry.findMetaObject( orange );
         assertEquals( "produce::v1::fruit::Orange", mo.getName() );
 
         MetaField idField = mo.getMetaField( "id" );
         
-        assertEquals( "id field isKey=true", "true", idField.getAttribute( "isKey" ).toString() );
+        assertEquals( "id field isKey=true", "true", idField.getAttr( "isKey" ).getValueAsString() );
     }
 
     @Test
     public void testBasket() throws Exception {
         
-        MetaObject mo = MetaObject.forName( "produce::v1::container::Basket" );
+        MetaObject mo = MetaDataRegistry.findMetaDataByName( MetaObject.class, "produce::v1::container::Basket" );
         ValueObject basket = (ValueObject) mo.newInstance();
         
         MetaField idField = mo.getMetaField( "id" );
         
-        assertEquals( "id field isKey=false", "true", idField.getAttribute( "isKey" ).toString() );
+        assertEquals( "id field isKey=false", "true", idField.getAttr( "isKey" ).getValueAsString() );
         
         basket.setLong( "id", 1L );
         basket.setInt( "numOranges", 3 );
@@ -115,7 +115,7 @@ public class XMLMetaDataLoaderTest2 {
     @Test
     public void testExtensions() throws Exception {
 
-        MetaObject mo = MetaObject.forName( "produce::v1::container::Basket" );
+        MetaObject mo = MetaDataRegistry.findMetaDataByName( MetaObject.class, "produce::v1::container::Basket" );
         ValueObject basket = (ValueObject) mo.newInstance();
 
         MetaField overlayField = mo.getMetaField( "specialOverlay" );

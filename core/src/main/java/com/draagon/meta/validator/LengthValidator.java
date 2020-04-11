@@ -35,12 +35,12 @@ public class LengthValidator extends MetaValidator {
      */
     public void validate(Object object, Object value) {
 
-        int min = hasAttribute(ATTR_MIN)
-                ? Integer.parseInt(getAttribute(ATTR_MIN).getValueAsString())
+        int min = hasAttr(ATTR_MIN)
+                ? Integer.parseInt(getAttr(ATTR_MIN).getValueAsString())
                 : 0;
 
-        int max = hasAttribute(ATTR_MAX)
-                ? Integer.parseInt(getAttribute(ATTR_MAX).getValueAsString())
+        int max = hasAttr(ATTR_MAX)
+                ? Integer.parseInt(getAttr(ATTR_MAX).getValueAsString())
                 : getDefaultMax( getMetaField( object ));
 
         String msg = getMessage("A valid length between " + min + " and " + max + " must be entered");

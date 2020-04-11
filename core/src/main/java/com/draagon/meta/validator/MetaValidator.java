@@ -79,7 +79,7 @@ public abstract class MetaValidator extends MetaData {
     public String getMessage(String defMsg) {
         String msg = defMsg;
         try {
-            msg = getAttribute(ATTR_MSG).getValueAsString();
+            msg = getAttr(ATTR_MSG).getValueAsString();
         } catch (MetaAttributeNotFoundException ignoreException) {
         }
         return msg;

@@ -89,7 +89,7 @@ public abstract class MetaView extends MetaData
   {
     // Run any defined validators
     try {
-      String list = getAttribute( ATTR_VALIDATION ).getValueAsString();
+      String list = getAttr( ATTR_VALIDATION ).getValueAsString();
 
       getMetaField( obj ).getValidatorList( list ).forEach( v->v.validate( obj, val ));
     }

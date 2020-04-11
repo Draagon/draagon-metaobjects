@@ -198,8 +198,8 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
     }
 
     public MetaView getDefaultView() {
-        if (hasAttribute(ATTR_DEFAULT_VIEW))
-            return getView(getAttribute(ATTR_DEFAULT_VIEW).getValueAsString());
+        if (hasAttr(ATTR_DEFAULT_VIEW))
+            return getView(getAttr(ATTR_DEFAULT_VIEW).getValueAsString());
         else
             return getFirstChild(MetaView.class);
     }
@@ -217,8 +217,8 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
 
     protected void performValidation(Object obj, Object val)  {
         // Run any defined validators
-        if (hasAttribute(ATTR_VALIDATION)) {
-            getValidatorList(getAttribute(ATTR_VALIDATION).getValueAsString()).forEach(v -> v.validate(obj, val));
+        if (hasAttr(ATTR_VALIDATION)) {
+            getValidatorList(getAttr(ATTR_VALIDATION).getValueAsString()).forEach(v -> v.validate(obj, val));
         }
     }
 
