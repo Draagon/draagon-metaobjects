@@ -57,7 +57,7 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Returns the Type of this piece of MetaData
      */
-    public String getType() {
+    public String getTypeName() {
         return type;
     }
 
@@ -71,7 +71,7 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Returns the SubType of this piece of MetaData
      */
-    public String getSubType() {
+    public String getSubTypeName() {
         return subType;
     }
 
@@ -123,7 +123,7 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Get the Base Class for the MetaData
      * @return Class The Java class for the metadata
-     * @deprecated Use getType and getSubType for querying child records
+     * @deprecated Use getTypeName and getSubTypeName for querying child records
      */
     public Class<? extends MetaData> getMetaDataClass() {
         return MetaData.class;
@@ -279,7 +279,7 @@ public class MetaData implements Cloneable, Serializable {
      * @deprecated Use getAttr(name, includeParentData).getValueAsString()
      */
     public Object getAttribute(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
-        return getAttr(name,true).getValueAsString();
+        return getAttr(name,includeParentData).getValueAsString();
     }
 
     /**
@@ -435,7 +435,7 @@ public class MetaData implements Cloneable, Serializable {
         
         if (checkExists) {
             try {
-                MetaData d = getChildOfType( data.getType(), data.getName() );
+                MetaData d = getChildOfType( data.getTypeName(), data.getName() );
                 if (d.getParent() == this) {
                     if (deleteOnAdd( d )) {
                         deleteChild(d);
@@ -777,7 +777,7 @@ public class MetaData implements Cloneable, Serializable {
             name = name.substring(i + 1);
         }
 
-        return name + "[" + getType() +":" + getSubType() + "]";
+        return name + "[" + getTypeName() +":" + getSubTypeName() + "]";
     }
 
     /**

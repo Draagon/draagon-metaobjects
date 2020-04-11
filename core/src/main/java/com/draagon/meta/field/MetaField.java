@@ -42,18 +42,40 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
     public final static String ATTR_DEFAULT_VIEW = "defaultView";
     public final static String ATTR_DEFAULT_VALUE = "defaultValue";
 
-    //private int mType = 0;
     private T defaultValue = null;
     private int length = -1;
 
     private DataTypes dataType;
 
+    /**
+     * Legacy constructor used in unit tests
+     * @param name Name of the metafield
+     * @deprecated Use MetaField( subtype, name, dataType )
+     */
+    public MetaField( String name ) {
+        this( "deprecated", name, DataTypes.STRING );
+    }
+
+    /**
+     * Construct a MetaField
+     * @param subtype SubType name for the MetaField
+     * @param name Name of the MetaField
+     * @param dataType The DataTypes enum used for values
+     */
     public MetaField(String subtype, String name, DataTypes dataType) {
         super(TYPE_FIELD, subtype, name);
         this.dataType = dataType;
         //addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
         //addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
         //addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
+    }
+
+    /**
+     * Return the older MetaFieldTypes values
+     * @deprecated Use getDataType() and the DataTypes Enum
+     */
+    public int getType() {
+        return dataType.getId();
     }
 
     /**

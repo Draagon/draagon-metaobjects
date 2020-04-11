@@ -573,7 +573,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                         // Use the Super class type if no type is defined and a super class exists
                         if (superData != null) {
                             c = superData.getClass();
-                            typeName = superData.getSubType();
+                            typeName = superData.getSubTypeName();
                         }
                         else {
                             typeName = types.getDefaultType();
@@ -635,11 +635,11 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     if ( md == null )
                         throw new MetaDataException("No valid constructor was found for MetaData class [" + c.getName() + "]");
 
-                    if ( !md.getType().equals( nodeName ))
-                        throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getType() + "]: " + md );
+                    if ( !md.getTypeName().equals( nodeName ))
+                        throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md );
 
-                    if ( !md.getSubType().equals( typeName ))
-                        throw new MetaDataException( "Expected MetaData subType ["+typeName+"], but MetaData instantiated was of subType [" + md.getSubType() + "]: " + md );
+                    if ( !md.getSubTypeName().equals( typeName ))
+                        throw new MetaDataException( "Expected MetaData subType ["+typeName+"], but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md );
 
                     if ( !md.getName().equals( fullname ))
                         throw new MetaDataException( "Expected MetaData name ["+fullname+"], but MetaData instantiated was of name [" + md.getName() + "]: " + md );

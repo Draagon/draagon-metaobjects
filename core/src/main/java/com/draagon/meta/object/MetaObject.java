@@ -7,6 +7,7 @@
  */
 package com.draagon.meta.object;
 
+import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
@@ -32,6 +33,15 @@ public abstract class MetaObject extends MetaData {
 
     /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
+
+    /**
+     * Legacy constructor used in unit tests
+     * @param name Name of the MetaObject
+     * @deprecated Use MetaObject( subtype, name )
+     */
+    public MetaObject( String name ) {
+        this( "deprecated", name );
+    }
 
     /**
      * Constructs the MetaObject
