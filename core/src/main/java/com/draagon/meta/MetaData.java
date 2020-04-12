@@ -30,11 +30,14 @@ public class MetaData implements Cloneable, Serializable {
     public final static String SEPARATOR = PKG_SEPARATOR;
 
     private final Map<Object, Object> cacheValues = Collections.synchronizedMap(new WeakHashMap<Object, Object>());
-    private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<MetaData>();
+    private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<>();
 
     private final String type;
     private final String subType;
     private final String name;
+
+    private final String shortName;
+    private final String pkg;
 
     private MetaData superData = null;
     private WeakReference<MetaData> parentRef = null;
@@ -52,6 +55,16 @@ public class MetaData implements Cloneable, Serializable {
         this.type = type;
         this.subType = subType;
         this.name = name;
+
+        // Cache the shortName and packageName
+        int i = name.lastIndexOf(PKG_SEPARATOR);
+        if (i >= 0) {
+            shortName = name.substring(i + PKG_SEPARATOR.length());
+            pkg = name.substring(0, i);
+        } else {
+            shortName = name;
+            pkg = null;
+        }
     }
 
     /**
@@ -132,16 +145,18 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Iterates up the Super Data until it finds the MetaDataLoader
      */
-    public synchronized MetaDataLoader getLoader() {
+    public MetaDataLoader getLoader() {
 
         if (loader == null) {
-            MetaData d = this;
-            while (d != null) {
-                if (d instanceof MetaDataLoader) {
-                    loader = (MetaDataLoader) d;
-                    break;
+            synchronized (this) {
+                MetaData d = this;
+                while (d != null) {
+                    if (d instanceof MetaDataLoader) {
+                        loader = (MetaDataLoader) d;
+                        break;
+                    }
+                    d = d.getParent();
                 }
-                d = d.getParent();
             }
         }
 
@@ -152,32 +167,14 @@ public class MetaData implements Cloneable, Serializable {
      * Retrieve the MetaObject package
      */
     public String getPackage() {
-        // TODO:  Add caching
-        String name = getName();
-        if (name == null) {
-            return null;
-        }
-        int i = name.lastIndexOf(SEPARATOR);
-        if (i >= 0) {
-            return name.substring(0, i);
-        }
-        return "";
+        return pkg;
     }
 
     /**
      * Retrieve the MetaObject package
      */
     public String getShortName() {
-        // TODO:  Add caching
-        String name = getName();
-        if (name == null) {
-            return null;
-        }
-        int i = name.lastIndexOf(SEPARATOR);
-        if (i >= 0) {
-            return name.substring(i + SEPARATOR.length());
-        }
-        return name;
+        return shortName;
     }
 
     /**
@@ -497,12 +494,7 @@ public class MetaData implements Cloneable, Serializable {
      * Returns all MetaData children which implement the specified class
      */
     protected Collection<MetaData> getChildrenOfType( String type, boolean includeParentData ) {
-
-        List<MetaData> al = children.stream()
-                .filter( d -> type == null || d.isType( type ))
-                .collect(Collectors.toList());
-
-        return addChildren( al, MetaData.class, includeParentData );
+        return addChildren( type, MetaData.class, includeParentData );
     }
 
     /**
@@ -510,48 +502,61 @@ public class MetaData implements Cloneable, Serializable {
      */
     protected <T extends MetaData> Collection<T> getChildren(Class<T> c, boolean includeParentData ) {
 
-        // Get all the local children
-        List<T> al = new ArrayList<T>();
-        children.forEach( d -> {
-            if (c == null || c.isInstance(d)) al.add((T) d );
-        });
-
-        return addChildren( al, c, includeParentData );
+        return addChildren(null, c, includeParentData );
     }
 
+    /** Retrieve the first matching child metadata */
+    private <T extends MetaData> T firstChild( String type, Class<T> c, boolean includeParentData ) {
 
-    protected <T extends MetaData> Collection<T> addChildren( List<T> al, Class<T> c, boolean includeParentData ) {
+        Map<String,T> map = new HashMap<>();
+        addChildren( map, type, c, includeParentData, false, true );
+        return map.values().iterator().next();
+    }
 
-        // Add the super class's children
-        if (getSuperData() != null && includeParentData) {
+    /** Retrieve all matching child metadata */
+    private <T extends MetaData> Collection<T> addChildren( String type, Class<T> c, boolean includeParentData ) {
 
-            for (MetaData d : getSuperData().getChildren(c, true)) {
+        Map<String,T> map = new HashMap<>();
+        addChildren( map, type, c, includeParentData, false, false );
+        return map.values();
+    }
 
-                // Filter out Attributes that are prefixed with _ as they do not get inherited
-                if (!filterWhenParentData( d )) {
+    /** Add all the matching children to the map */
+    private <T extends MetaData> void addChildren( Map<String,T> map, String type, Class<T> c, boolean includeParentData, boolean isParent, boolean firstOnly ) {
 
-                    String n = d.getName();
+        // Get all the local children
+        children.forEach( d -> {
 
-                    boolean found = false;
+            // If only getting the first one, then exit
+            if ( firstOnly && map.size() > 0 ) return;
 
-                    // Only add the field if it's not found in the super class
-                    for (MetaData sd : al) {
-                        if (sd.getName().equals(n)) {
-                            found = true;
-                            break;
-                        }
-                    }
+            // TODO: Use Stream and filters
+            // Filter on the search criteria
+            if ((type == null && c == null )
+                    || ( type != null && d.isType(type) && ( c==null || c.isInstance(d)))
+                    || ( type == null && c.isInstance(d))) {
 
-                    if (!found) {
-                        al.add((T) d);
-                    }
+                // TODO:  Make the key part of the MetaData class
+                String key = new StringBuilder( d.getTypeName())
+                        .append(':').append( d.getSubTypeName() )
+                        .append(':').append( d.getName() ).toString();
+
+                // TODO: Add part of stream filters
+                // If this is a parent, then filter; only add if it didn't already exist
+                if ( (!isParent || !filterWhenParentData( d ))
+                        && !map.containsKey( key )) {
+
+                    map.put( key, (T) d);
                 }
             }
+        });
+
+        // Recursively add the super metadata's children
+        if (getSuperData() != null && includeParentData) {
+            getSuperData().addChildren( map, type, c, true, true, firstOnly );
         }
-        
-        return al;
     }
-    
+
     /**
      * Returns the first child record
      */
