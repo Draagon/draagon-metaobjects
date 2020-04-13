@@ -7,6 +7,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.IntAttribute;
 
 /**
  * A Short Field.
@@ -20,5 +21,19 @@ public class ShortField extends MetaField<Short> {
 
     public ShortField( String name ) {
         super( SUBTYPE_SHORT, name, DataTypes.SHORT );
+    }
+
+    /**
+     * Manually Create a ByteField
+     * @param name Name of the field
+     * @param defaultValue Default value for the field
+     * @return New ByteField
+     */
+    public static ShortField create( String name, Integer defaultValue ) {
+        ShortField f = new ShortField( name );
+        if ( defaultValue != null ) {
+            f.addMetaAttr(IntAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
+        }
+        return f;
     }
 }

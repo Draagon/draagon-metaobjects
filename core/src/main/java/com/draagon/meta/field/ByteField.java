@@ -7,6 +7,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.IntAttribute;
 
 /**
  * A Byte Field.
@@ -21,5 +22,19 @@ public class ByteField extends MetaField<Byte> {
 
     public ByteField(String name) {
         super(SUBTYPE_BYTE, name, DataTypes.BYTE);
+    }
+
+    /**
+     * Manually Create a ByteField
+     * @param name Name of the field
+     * @param defaultValue Default value for the field
+     * @return New ByteField
+     */
+    public static ByteField create( String name, Integer defaultValue ) {
+        ByteField f = new ByteField( name );
+        if ( defaultValue != null ) {
+            f.addMetaAttr(IntAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
+        }
+        return f;
     }
 }

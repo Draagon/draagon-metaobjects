@@ -22,4 +22,14 @@ public class DoubleField extends MetaField<Double>
     public DoubleField( String name ) {
         super( SUBTYPE_DOUBLE, name, DataTypes.DOUBLE );
     }
+
+    /**
+     * Manually Create a DoubleField
+     * @param name Name of the field
+     * @return New DoubleField
+     */
+    public static DoubleField create( String name ) {
+        DoubleField f = new DoubleField( name );
+        return f;
+    }
 }

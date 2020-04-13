@@ -6,14 +6,14 @@
  */
 package com.draagon.meta.attr;
 
-import com.draagon.meta.DataTypes;
-import com.draagon.meta.MetaData;
+import com.draagon.meta.*;
+import com.draagon.meta.field.MetaField;
 import com.draagon.meta.util.DataConverter;
 
 /**
  * An attribute of a MetaClass, MetaField, or MetaView
  */
-public class MetaAttribute<T extends Object> extends MetaData {
+public class MetaAttribute<T> extends MetaData<MetaAttribute> {
     
     //private static Log log = LogFactory.getLog( MetaAttribute.class );
 
@@ -32,11 +32,28 @@ public class MetaAttribute<T extends Object> extends MetaData {
     }
 
     /**
-     * Gets the primary MetaData class
+     * Gets the primary MetaAttribute class
      */
     @Override
     public Class<? extends MetaData> getMetaDataClass() {
         return MetaAttribute.class;
+    }
+
+    /**
+     * Sets an attribute of the MetaClass
+     */
+    public MetaAttribute addMetaAttr(MetaAttribute attr) {
+        return addChild(attr);
+    }
+
+    /** Add Child to the Field */
+    public MetaAttribute addChild(MetaData data) throws InvalidMetaDataException {
+        return super.addChild( data );
+    }
+
+    /** Wrap the MetaAttribute */
+    public MetaAttribute wrap() {
+        return super.wrap();
     }
 
     /**

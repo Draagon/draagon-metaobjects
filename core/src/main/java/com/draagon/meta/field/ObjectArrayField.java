@@ -27,6 +27,16 @@ public class ObjectArrayField extends ArrayField<List<Object>> {
     }
 
     /**
+     * Manually Create an Object Filed
+     * @param name Name of the field
+     * @return New ObjectField
+     */
+    public static ObjectArrayField create( String name ) {
+        ObjectArrayField f = new ObjectArrayField( name );
+        return f;
+    }
+
+    /**
      * Return the specified MetaObject
      */
     public MetaObject getObjectRef() {

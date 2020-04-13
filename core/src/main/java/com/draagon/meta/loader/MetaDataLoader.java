@@ -6,8 +6,10 @@
  */
 package com.draagon.meta.loader;
 
+import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,29 +21,56 @@ import java.util.List;
 /**
  * Abstract MetaDataLoader with common functions for all MetaDataLoaders
  */
-public abstract class MetaDataLoader extends MetaData {
+public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
 
     private final static Log log = LogFactory.getLog(MetaDataLoader.class);
 
     public final static String TYPE_LOADER = "loader";
 
+    public final static String SUBTYPE_MANUAL = "manual";
+
     private boolean isRegistered = false;
     private boolean isInitialized = false;
     private boolean isDestroyed = false;
 
+    /**
+     * Constructs a new MetaDataLoader
+     * @param subtype The subType for the metadata loader
+     */
     public MetaDataLoader( String subtype ) {
         this( subtype, TYPE_LOADER + "-" + System.currentTimeMillis());
     }
 
+    /**
+     * Constructs a new MetaDataLoader
+     * @param subtype The subtype of the metadata loader
+     * @param name The name of the metadata loader
+     */
     public MetaDataLoader( String subtype, String name ) {
         super( TYPE_LOADER, subtype, name );
     }
 
+    /**
+     * Manually construct a MetaDataLoader.  Usually used for unit testing.
+     * @param name The name of the Manually create MetaDataLoader
+     * @return The created MetaDataLoader
+     */
+    public static MetaDataLoader createManual( String name ) {
+        return new MetaDataLoader( "manual", name ) {};
+    }
+
+    /**
+     * Check the state of the MetaDataLoader to ensure it is initialized and not destroyed();
+     */
     protected void checkState() {
         if ( !isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was not initialized" );
         if ( isDestroyed ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] is destroyed" );
     }
 
+    /**
+     * Initialize the MetaDataLoader.  It will prevent a second init call.
+     * @return This MetaDataLoader
+     */
     public MetaDataLoader init() {
         if ( isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was already initialized" );
         log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
@@ -49,6 +78,10 @@ public abstract class MetaDataLoader extends MetaData {
         return this;
     }
 
+    /**
+     * Returns if the MetaDataLoader is initialized
+     * @return True if initialized
+     */
     public boolean isInitialized() {
         return isInitialized;
     }
@@ -56,9 +89,10 @@ public abstract class MetaDataLoader extends MetaData {
     /**
      * Register this MetaDataLoader with the MetaDataRegistry
      */
-    public void register() {
+    public MetaDataLoader register() {
         MetaDataRegistry.registerLoader( this );
         isRegistered = true;
+        return this;
     }
 
     /**
@@ -75,6 +109,18 @@ public abstract class MetaDataLoader extends MetaData {
         return MetaDataLoader.class;
     }
 
+    /** Wrap the MetaDataLoader */
+    public MetaDataLoader wrap() {
+        throw new IllegalStateException( "You cannot wrap a MetaDataLoader!" );
+    }
+
+    /**
+     * Sets an attribute on the MetaClass
+     */
+    public MetaDataLoader addMetaAttr(MetaAttribute attr) {
+        return addChild(attr);
+    }
+
     /**
      * Whether the MetaDataLoader handles the object specified
      */
@@ -89,6 +135,21 @@ public abstract class MetaDataLoader extends MetaData {
     /**
      * Retrieves a collection of all Meta Classes
      */
+    public List<MetaData> getMetaDataOfType( String type ) {
+        return getMetaDataOfType(type, true);
+    }
+
+    /**
+     * Retrieves a collection of all Meta Classes
+     */
+    public List<MetaData> getMetaDataOfType( String type, boolean includeParentData ) {
+        checkState();
+        return getChildrenOfType(type,includeParentData);
+    }
+
+    /**
+     * Retrieves a collection of all Meta Classes
+     */
     public <T extends MetaData> List<T> getMetaData( Class<T> c ) {
         return getMetaData(c, true);
     }
@@ -98,12 +159,7 @@ public abstract class MetaDataLoader extends MetaData {
      */
     public <T extends MetaData> List<T> getMetaData( Class<T> c, boolean includeParentData ) {
         checkState();
-        Collection<T> children = getChildren(c,includeParentData);
-        ArrayList<T> classes = new ArrayList<T>(children.size());
-        for (MetaData md : children) {
-            classes.add((T) md);
-        }
-        return classes;
+        return getChildren(c,includeParentData);
     }
 
     /**
@@ -113,7 +169,15 @@ public abstract class MetaDataLoader extends MetaData {
         checkState();
         return getMetaData( MetaObject.class );
     }
-    
+
+    /**
+     * Retrieves a collection of all Meta Classes
+     */
+    public MetaObject getMetaObject( String name ) {
+        checkState();
+        return (MetaObject) getChildOfType( MetaObject.TYPE_OBJECT, name );
+    }
+
     /**
      * Gets the MetaObject of the specified Object
      */
@@ -253,9 +317,9 @@ public abstract class MetaDataLoader extends MetaData {
      * Adds the child MetaData
      */
     @Override
-    public void addChild(MetaData mc) {
+    public MetaDataLoader addChild(MetaData mc) {
         checkState();
-        super.addChild(mc);
+        return super.addChild(mc);
     }
 
     /**

@@ -7,6 +7,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.StringAttribute;
 
 /**
  * A String Field.
@@ -20,5 +21,19 @@ public class StringField extends MetaField<String> {
 
     public StringField( String name ) {
         super( SUBTYPE_STRING, name, DataTypes.STRING );
+    }
+
+    /**
+     * Manually Create a StringField
+     * @param name Name of the field
+     * @param defaultValue Default value for the field
+     * @return New StringField
+     */
+    public static StringField create( String name, String defaultValue ) {
+        StringField f = new StringField( name );
+        if ( defaultValue != null ) {
+            f.addMetaAttr(StringAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
+        }
+        return f;
     }
 }

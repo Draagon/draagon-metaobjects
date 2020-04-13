@@ -7,6 +7,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.StringAttribute;
 
 import java.util.Date;
 
@@ -23,5 +24,15 @@ public class DateField extends MetaField<Date> {
 
     public DateField( String name ) {
         super( SUBTYPE_DATE, name, DataTypes.DATE );
+    }
+
+    /**
+     * Manually Create a Date Filed
+     * @param name Name of the field
+     * @return New DateField
+     */
+    public static DateField create( String name ) {
+        DateField f = new DateField( name );
+        return f;
     }
 }

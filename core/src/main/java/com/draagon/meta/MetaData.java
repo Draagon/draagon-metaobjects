@@ -17,9 +17,8 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
-public class MetaData implements Cloneable, Serializable {
+public class MetaData<N extends MetaData> implements Cloneable, Serializable {
 
     public final static String PKG_SEPARATOR = "::";
 
@@ -63,7 +62,7 @@ public class MetaData implements Cloneable, Serializable {
             pkg = name.substring(0, i);
         } else {
             shortName = name;
-            pkg = null;
+            pkg = "";
         }
     }
 
@@ -210,15 +209,23 @@ public class MetaData implements Cloneable, Serializable {
         return superData;
     }
 
+    /**
+     * Returns whether this MetaData has a Super MetaData
+     * @return SuperData exists
+     */
+    public boolean hasSuperData() {
+        return superData != null;
+    }
+
     ////////////////////////////////////////////////////
     // ATTRIBUTE METHODS
 
     /**
      * Sets an attribute of the MetaClass
-     * @deprecated Use addAttr(attr)
+     * @deprecated Use addMetaAttr(attr)
      */
     public void addAttribute(MetaAttribute attr) {
-        addAttr(attr);
+        addMetaAttr(attr);
     }
 
     /**
@@ -232,8 +239,8 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Sets an attribute of the MetaClass
      */
-    public void addAttr(MetaAttribute attr) {
-        addChild(attr);
+    public N addMetaAttr(MetaAttribute attr) {
+        return addChild(attr);
     }
 
     /**
@@ -268,7 +275,7 @@ public class MetaData implements Cloneable, Serializable {
      * @deprecated Use getAttr(name).getValueAsString()
      */
     public String getAttribute(String name) throws MetaAttributeNotFoundException {
-        return getAttr(name,true).getValueAsString();
+        return getMetaAttr(name,true).getValueAsString();
     }
 
     /**
@@ -276,20 +283,20 @@ public class MetaData implements Cloneable, Serializable {
      * @deprecated Use getAttr(name, includeParentData).getValueAsString()
      */
     public Object getAttribute(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
-        return getAttr(name,includeParentData).getValueAsString();
+        return getMetaAttr(name,includeParentData).getValueAsString();
     }
 
     /**
      * Retrieves an attribute value of the MetaData
      */
-    public MetaAttribute getAttr(String name) throws MetaAttributeNotFoundException {
-        return getAttr(name,true);
+    public MetaAttribute getMetaAttr(String name) throws MetaAttributeNotFoundException {
+        return getMetaAttr(name,true);
     }
 
     /**
      * Retrieves an attribute value of the MetaData
      */
-    public MetaAttribute getAttr(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
+    public MetaAttribute getMetaAttr(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
         try {
             return (MetaAttribute) getChild( name, MetaAttribute.class, includeParentData);
         } catch (MetaDataNotFoundException e) {
@@ -334,35 +341,35 @@ public class MetaData implements Cloneable, Serializable {
     }
     /**
      * Retrieves all attribute names
-     * @deprecated Use getAttrs()
+     * @deprecated Use getMetaAttrs()
      */
-    public Collection<MetaAttribute> getAttributes() {
-        return getAttrs(true);
+    public List<MetaAttribute> getAttributes() {
+        return getMetaAttrs(true);
     }
 
     /**
      * Retrieves all attribute names
-     * @deprecated Use getAttrs(includeParentData)
+     * @deprecated Use getMetaAttrs(includeParentData)
      */
-    public Collection<MetaAttribute> getAttributes( boolean includeParentData ) {
-        return getAttrs( includeParentData );
-    }
-
-    /**
-     * Retrieves all attribute names
-     */
-    public Collection<MetaAttribute> getAttrs() {
-        return getAttrs(true);
+    public List<MetaAttribute> getAttributes( boolean includeParentData ) {
+        return getMetaAttrs( includeParentData );
     }
 
     /**
      * Retrieves all attribute names
      */
-    public Collection<MetaAttribute> getAttrs( boolean includeParentData ) {
+    public List<MetaAttribute> getMetaAttrs() {
+        return getMetaAttrs(true);
+    }
 
-        return getChildren(MetaAttribute.class, includeParentData).stream()
-                .map(MetaAttribute.class::cast)
-                .collect(Collectors.toList());
+    /**
+     * Retrieves all attribute names
+     */
+    public List<MetaAttribute> getMetaAttrs( boolean includeParentData ) {
+
+        return getChildren(MetaAttribute.class, includeParentData); //.stream()
+                //.map(MetaAttribute.class::cast)
+                //.collect(Collectors.toList());
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -416,20 +423,35 @@ public class MetaData implements Cloneable, Serializable {
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
      */
-    public void addChild(MetaData data) throws InvalidMetaDataException {
+    public N addChild(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
+        return (N) this;
+    }
+
+    /**
+     * Check whether this MetaData is a valid Child to add
+     * @param data MetaData to add as a Child
+     */
+    protected void checkValidChild( MetaData data ) {
+
+        if (data == null) {
+            throw new IllegalArgumentException("Cannot add null MetaData");
+        }
+
+        // Don't let the same
+        if ( this.getTypeName().equals( data.getTypeName())) {
+            throw new MetaDataException("You cannot add the same MetaData type to another; this [" + toString() + "], added metadata[" + data.toString() + "]");
+        }
     }
 
     /**
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
      */
-    public void addChild(MetaData data, boolean checkExists)  throws InvalidMetaDataException {
-        
-        if (data == null) {
-            throw new IllegalArgumentException("Cannot add null MetaData");
-        }
-        
+    protected void addChild(MetaData data, boolean checkExists)  throws InvalidMetaDataException {
+
+        checkValidChild( data );
+
         if (checkExists) {
             try {
                 MetaData d = getChildOfType( data.getTypeName(), data.getName() );
@@ -446,6 +468,7 @@ public class MetaData implements Cloneable, Serializable {
         
         data.attachParent(this);
         children.add(data);
+        flushCaches();
     }
 
     /**
@@ -455,6 +478,7 @@ public class MetaData implements Cloneable, Serializable {
         MetaData d = getChildOfType(type, name);
         if (d.getParent() == this) {
             children.remove(d);
+            flushCaches();
         } else {
             throw new MetaDataNotFoundException("You cannot delete MetaData with type [" + type +"] and name [" + name + "] from SuperData of [" + toInternalString() + "]", name );
         }
@@ -467,6 +491,7 @@ public class MetaData implements Cloneable, Serializable {
         MetaData d = getChild(name, c);
         if (d.getParent() == this) {
             children.remove(d);
+            flushCaches();
         } else {
             throw new MetaDataNotFoundException("You cannot delete MetaData with name [" + name + "] from a SuperData of [" + toInternalString() + "]", name );
         }
@@ -481,26 +506,27 @@ public class MetaData implements Cloneable, Serializable {
         }
         
         children.remove(data);
+        flushCaches();
     }
     
     /**
      * Returns all MetaData children
      */
-    protected Collection<MetaData> getChildren() {
+    protected List<MetaData> getChildren() {
         return getChildren(null, true);
     }
 
     /**
      * Returns all MetaData children which implement the specified class
      */
-    protected Collection<MetaData> getChildrenOfType( String type, boolean includeParentData ) {
+    protected List<MetaData> getChildrenOfType( String type, boolean includeParentData ) {
         return addChildren( type, MetaData.class, includeParentData );
     }
 
     /**
      * Returns all MetaData children which implement the specified class
      */
-    protected <T extends MetaData> Collection<T> getChildren(Class<T> c, boolean includeParentData ) {
+    protected <T extends MetaData> List<T> getChildren(Class<T> c, boolean includeParentData ) {
 
         return addChildren(null, c, includeParentData );
     }
@@ -508,27 +534,29 @@ public class MetaData implements Cloneable, Serializable {
     /** Retrieve the first matching child metadata */
     private <T extends MetaData> T firstChild( String type, Class<T> c, boolean includeParentData ) {
 
-        Map<String,T> map = new HashMap<>();
-        addChildren( map, type, c, includeParentData, false, true );
-        return map.values().iterator().next();
+        List<String> keys = new ArrayList<>();
+        List<T> items = new ArrayList<>();
+        addChildren( keys, items, type, c, includeParentData, false, true );
+        return items.iterator().next();
     }
 
     /** Retrieve all matching child metadata */
-    private <T extends MetaData> Collection<T> addChildren( String type, Class<T> c, boolean includeParentData ) {
+    private <T extends MetaData> List<T> addChildren( String type, Class<T> c, boolean includeParentData ) {
 
-        Map<String,T> map = new HashMap<>();
-        addChildren( map, type, c, includeParentData, false, false );
-        return map.values();
+        List<String> keys = new ArrayList<>();
+        List<T> items = new ArrayList<>();
+        addChildren( keys, items, type, c, includeParentData, false, false );
+        return items;
     }
 
     /** Add all the matching children to the map */
-    private <T extends MetaData> void addChildren( Map<String,T> map, String type, Class<T> c, boolean includeParentData, boolean isParent, boolean firstOnly ) {
+    private <T extends MetaData> void addChildren( List<String> keys, List<T> items, String type, Class<T> c, boolean includeParentData, boolean isParent, boolean firstOnly ) {
 
         // Get all the local children
         children.forEach( d -> {
 
             // If only getting the first one, then exit
-            if ( firstOnly && map.size() > 0 ) return;
+            if ( firstOnly && items.size() > 0 ) return;
 
             // TODO: Use Stream and filters
             // Filter on the search criteria
@@ -538,22 +566,23 @@ public class MetaData implements Cloneable, Serializable {
 
                 // TODO:  Make the key part of the MetaData class
                 String key = new StringBuilder( d.getTypeName())
-                        .append(':').append( d.getSubTypeName() )
-                        .append(':').append( d.getName() ).toString();
+                        //.append('-').append( d.getSubTypeName() )
+                        .append('-').append( d.getName() ).toString();
 
                 // TODO: Add part of stream filters
                 // If this is a parent, then filter; only add if it didn't already exist
                 if ( (!isParent || !filterWhenParentData( d ))
-                        && !map.containsKey( key )) {
+                        && !keys.contains( key )) {
 
-                    map.put( key, (T) d);
+                    keys.add( key );
+                    items.add( (T) d);
                 }
             }
         });
 
         // Recursively add the super metadata's children
         if (getSuperData() != null && includeParentData) {
-            getSuperData().addChildren( map, type, c, true, true, firstOnly );
+            getSuperData().addChildren( keys, items, type, c, true, true, firstOnly );
         }
     }
 
@@ -639,7 +668,7 @@ public class MetaData implements Cloneable, Serializable {
         if (getSuperData() != null && includeParentData) {
 
             try {
-                T md = getSuperData().getChildOfTypeOrClass( type, name, c, true, shouldThrow);
+                T md = (T) getSuperData().getChildOfTypeOrClass( type, name, c, true, shouldThrow);
 
                 // Filter out Attributes that are prefixed with _ as they do not get inherited
                 if (md != null && !filterWhenParentData(md)) return md;
@@ -658,21 +687,26 @@ public class MetaData implements Cloneable, Serializable {
      * Clears all children
      */
     protected void clearChildren() {
-        children.clear();
+        if ( !children.isEmpty() ) {
+            children.clear();
+            flushCaches();
+        }
     }
 
     /**
      * Clears all children of the specified type
      */
     protected void clearChildrenOfType( String type ) {
-        children.removeIf(d -> type == null || d.isType( type ));
+        if ( children.removeIf(d -> type == null || d.isType( type )))
+            flushCaches();
     }
 
     /**
      * Clears all children of the specified MetaData class
      */
     protected void clearChildren(Class<? extends MetaData> c) {
-        children.removeIf(d -> c == null || c.isInstance(d));
+        if (children.removeIf(d -> c == null || c.isInstance(d)))
+            flushCaches();
     }
 
     ////////////////////////////////////////////////////
@@ -711,8 +745,8 @@ public class MetaData implements Cloneable, Serializable {
      * Wrap the MetaData.  Used with overlays
      * @return The wrapped MetaData
      */
-    public MetaData wrap()  {
-        MetaData d = (MetaData) clone();
+    public N wrap()  {
+        N d = (N) clone();
         d.clearChildren();
         d.setSuperData(this);
         return d;
@@ -757,6 +791,18 @@ public class MetaData implements Cloneable, Serializable {
         catch( CloneNotSupportedException e ) {
             throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * This is called when the MetaData is modified
+     */
+    protected void flushCaches() {
+
+        // Clear the local cache
+        cacheValues.clear();
+
+        // Clear the super data caches
+        if ( getSuperData() != null ) getSuperData().flushCaches();
     }
 
     /**

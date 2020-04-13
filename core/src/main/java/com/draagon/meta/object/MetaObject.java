@@ -7,10 +7,7 @@
  */
 package com.draagon.meta.object;
 
-import com.draagon.meta.DataTypes;
-import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
@@ -21,10 +18,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+import com.draagon.meta.validator.MetaValidator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public abstract class MetaObject extends MetaData {
+public abstract class MetaObject extends MetaData<MetaObject> {
 
     private static Log log = LogFactory.getLog(MetaObject.class);
 
@@ -59,6 +57,16 @@ public abstract class MetaObject extends MetaData {
         return MetaObject.class;
     }
 
+    /** Add Child to the MetaObject */
+    public MetaObject addChild(MetaData data) throws InvalidMetaDataException {
+        return super.addChild( data );
+    }
+
+    /** Wrap the MetaObject */
+    public MetaObject wrap() {
+        return super.wrap();
+    }
+
     /**
      * Returns the MetaObject for the specified Meta Object name
      *
@@ -80,8 +88,9 @@ public abstract class MetaObject extends MetaData {
     /**
      * Sets the Super Class
      */
-    public void setSuperObject(MetaObject superObject) {
+    public MetaObject setSuperObject(MetaObject superObject) {
         setSuperData(superObject);
+        return this;
     }
 
     /**
@@ -110,8 +119,9 @@ public abstract class MetaObject extends MetaData {
     /**
      * Add a field to the MetaObject
      */
-    public void addMetaField(MetaField f) {
+    public MetaObject addMetaField(MetaField f) {
         addChild(f);
+        return this;
     }
 
     /**
@@ -129,15 +139,15 @@ public abstract class MetaObject extends MetaData {
     /**
      * Return the specified MetaField of the MetaObject
      */
-    public MetaField<?> getMetaField(String name) {
+    public MetaField getMetaField(String name) {
 
         final String KEY = "getMetaField(" + name + ")";
 
-        MetaField<?> f = (MetaField<?>) getCacheValue(KEY);
+        MetaField f = (MetaField) getCacheValue(KEY);
 
         if (f == null) {
             try {
-                f = (MetaField<?>) getChild(name, MetaField.class);
+                f = (MetaField) getChild(name, MetaField.class);
             } catch (MetaDataNotFoundException e) {
                 if (getSuperObject() != null) {
                     try {
@@ -178,7 +188,7 @@ public abstract class MetaObject extends MetaData {
 
             String ostr = null;
             try {
-                ostr = getAttr(ATTR_OBJECT).getValueAsString();
+                ostr = getMetaAttr(ATTR_OBJECT).getValueAsString();
                 ostr = ostr.trim();
                 if (log.isTraceEnabled())
                     log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));

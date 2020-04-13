@@ -15,6 +15,15 @@ public class PropertiesAttribute extends MetaAttribute<Properties> {
         super( SUBTYPE_PROPERTIES, name, DataTypes.CUSTOM);
     }
 
+    /**
+     * Manually create a Properties MetaAttribute with a value
+     */
+    public static PropertiesAttribute create(String name, Properties value ) {
+        PropertiesAttribute a = new PropertiesAttribute( name );
+        a.setValue( value );
+        return a;
+    }
+
     @Override
     public void setValueAsObject(Object value) {
         if ( value == null ) {

@@ -21,4 +21,14 @@ public class FloatField extends MetaField<Float> {
     public FloatField( String name ) {
         super( SUBTYPE_FLOAT, name, DataTypes.FLOAT );
     }
+
+    /**
+     * Manually Create a FloatField
+     * @param name Name of the field
+     * @return New FloatField
+     */
+    public static FloatField create( String name ) {
+        FloatField f = new FloatField( name );
+        return f;
+    }
 }

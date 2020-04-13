@@ -24,4 +24,14 @@ public class StringArrayAttribute extends MetaAttribute<List<String>> {
     public StringArrayAttribute(String name ) {
         super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY);
     }
+
+
+    /**
+     * Manually create a StringArray MetaAttribute with a value
+     */
+    public static StringArrayAttribute create(String name, String value ) {
+        StringArrayAttribute a = new StringArrayAttribute( name );
+        a.setValueAsString( value );
+        return a;
+    }
 }

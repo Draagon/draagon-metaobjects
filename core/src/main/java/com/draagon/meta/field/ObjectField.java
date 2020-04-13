@@ -25,6 +25,16 @@ public class ObjectField extends MetaField<Object> {
     }
 
     /**
+     * Manually Create an Object Filed
+     * @param name Name of the field
+     * @return New ObjectField
+     */
+    public static ObjectField create( String name ) {
+        ObjectField f = new ObjectField( name );
+        return f;
+    }
+
+    /**
      * Return the referenced MetaObject
      */
     public MetaObject getObjectRef() {

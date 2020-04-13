@@ -12,7 +12,7 @@ import com.draagon.meta.DataTypes;
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class IntAttribute extends MetaAttribute<String> {
+public class IntAttribute extends MetaAttribute<Integer> {
     //private static Log log = LogFactory.getLog( StringAttribute.class );
 
     public final static String SUBTYPE_INT = "int";
@@ -24,4 +24,12 @@ public class IntAttribute extends MetaAttribute<String> {
         super( SUBTYPE_INT, name, DataTypes.INT);
     }
 
+    /**
+     * Manually create an Integer MetaAttribute with a value
+     */
+    public static IntAttribute create(String name, Integer value ) {
+        IntAttribute a = new IntAttribute( name );
+        a.setValue( value );
+        return a;
+    }
 }

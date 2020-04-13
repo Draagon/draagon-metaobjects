@@ -7,6 +7,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.attr.StringArrayAttribute;
 
 import java.util.List;
 
@@ -22,5 +23,19 @@ public class StringArrayField extends ArrayField<List<String>> {
 
     public StringArrayField( String name ) {
         super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY );
+    }
+
+    /**
+     * Manually Create a StringArrayField
+     * @param name Name of the field
+     * @param defaultValue Default value for the field
+     * @return New StringArrayField
+     */
+    public static StringArrayField create( String name, String defaultValue ) {
+        StringArrayField f = new StringArrayField( name );
+        if ( defaultValue != null ) {
+            f.addMetaAttr(StringArrayAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
+        }
+        return f;
     }
 }

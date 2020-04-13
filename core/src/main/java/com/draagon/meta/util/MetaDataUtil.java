@@ -137,7 +137,7 @@ public class MetaDataUtil {
 
       if (o == null) {
 
-        String a = d.getAttr(ATTR_OBJECT_REF).getValueAsString();
+        String a = d.getMetaAttr(ATTR_OBJECT_REF).getValueAsString();
         if (a != null) {
 
           String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a );

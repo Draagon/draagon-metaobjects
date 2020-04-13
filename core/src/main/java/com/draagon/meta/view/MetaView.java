@@ -6,14 +6,17 @@
  */
 package com.draagon.meta.view;
 
+import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.validator.MetaValidator;
 
-public abstract class MetaView extends MetaData
+public abstract class MetaView extends MetaData<MetaView>
 {
   //private static Log log = LogFactory.getLog( MetaView.class );
 
@@ -33,9 +36,25 @@ public abstract class MetaView extends MetaData
   /**
    * Gets the primary MetaData class
    */
-  public final Class<MetaView> getMetaDataClass()
-  {
+  public final Class<MetaView> getMetaDataClass()  {
     return MetaView.class;
+  }
+
+  /** Add Child to the MetaView */
+  public MetaView addChild(MetaData data) throws InvalidMetaDataException {
+    return super.addChild( data );
+  }
+
+  /** Wrap the MetaView */
+  public MetaView wrap() {
+    return super.wrap();
+  }
+
+  /**
+   * Sets an attribute of the MetaClass
+   */
+  public MetaView addMetaAttr(MetaAttribute attr) {
+    return addChild(attr);
   }
 
   public MetaField getDeclaringMetaField()
@@ -89,7 +108,7 @@ public abstract class MetaView extends MetaData
   {
     // Run any defined validators
     try {
-      String list = getAttr( ATTR_VALIDATION ).getValueAsString();
+      String list = getMetaAttr( ATTR_VALIDATION ).getValueAsString();
 
       getMetaField( obj ).getValidatorList( list ).forEach( v->v.validate( obj, val ));
     }

@@ -24,6 +24,24 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
         super( SUBTYPE_CLASS, name, DataTypes.CUSTOM);
     }
 
+    /**
+     * Manually create a Class MetaAttribute with a Class<?> value
+     */
+    public static ClassAttribute create(String name, Class<?> value ) {
+        ClassAttribute a = new ClassAttribute( name );
+        a.setValue( value );
+        return a;
+    }
+
+    /**
+     * Manually create a Class MetaAttribute with a String classname value
+     */
+    public static ClassAttribute create(String name, String value ) {
+        ClassAttribute a = new ClassAttribute( name );
+        a.setValueAsString( value );
+        return a;
+    }
+
     @Override
     public void setValueAsObject(Object value) {
         if ( value == null ) {

@@ -23,4 +23,13 @@ public class StringAttribute extends MetaAttribute<String> {
     public StringAttribute(String name ) {
         super( SUBTYPE_STRING, name, DataTypes.STRING);
     }
+
+    /**
+     * Manually create a String MetaAttribute with a value
+     */
+    public static StringAttribute create(String name, String value ) {
+        StringAttribute a = new StringAttribute( name );
+        a.setValue( value );
+        return a;
+    }
 }

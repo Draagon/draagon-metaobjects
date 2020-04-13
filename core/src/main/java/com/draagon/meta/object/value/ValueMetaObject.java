@@ -32,6 +32,15 @@ public class ValueMetaObject extends PojoMetaObject
     }
 
     /**
+     * Manually create a ValueMetaObject with the specified name
+     * @param name Name for the ValueMetaObject
+     * @return Created ValueObject
+     */
+    public static ValueMetaObject create( String name ) {
+        return new ValueMetaObject( name );
+    }
+
+    /**
      * Retrieves the object class of an object
      */
     protected Class<?> getObjectClass() throws ClassNotFoundException {

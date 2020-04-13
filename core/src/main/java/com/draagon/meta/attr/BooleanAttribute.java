@@ -24,4 +24,12 @@ public class BooleanAttribute extends MetaAttribute<Boolean> {
         super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN);
     }
 
+    /**
+     * Manually create a Boolean MetaAttribute with a value
+     */
+    public static BooleanAttribute create(String name, Boolean value ) {
+        BooleanAttribute a = new BooleanAttribute( name );
+        a.setValue( value );
+        return a;
+    }
 }

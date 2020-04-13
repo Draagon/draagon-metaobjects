@@ -692,19 +692,19 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 parseMetaData( packageName, md, el, false );
 
                 // If it's a MetaField, set the defaultValue too
-                if ( md instanceof MetaField) {
-                    setDefaultValue( (MetaField) md );
-                }
+                //if ( md instanceof MetaField) {
+                //    setDefaultValue( (MetaField) md );
+                //}
             }
         }
     }
 
     /** Set the default value on the MetaField */
-    protected void setDefaultValue(MetaField md) {
-        if (md.hasAttr(MetaField.ATTR_DEFAULT_VALUE)) {
-            md.setDefaultValue( md.getAttr(MetaField.ATTR_DEFAULT_VALUE).getValueAsString() );
-        }
-    }
+    //protected void setDefaultValue(MetaField md) {
+    //    if (md.hasAttr(MetaField.ATTR_DEFAULT_VALUE)) {
+    //        md.setDefaultValue( md.getMetaAttr(MetaField.ATTR_DEFAULT_VALUE).getValueAsString() );
+    //    }
+    //}
 
     /**
      * Parses actual element attributes and adds them as StringAttributes

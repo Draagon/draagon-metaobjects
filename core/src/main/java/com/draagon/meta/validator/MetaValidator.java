@@ -6,7 +6,9 @@
  */
 package com.draagon.meta.validator;
 
+import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -14,7 +16,7 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 
-public abstract class MetaValidator extends MetaData {
+public abstract class MetaValidator extends MetaData<MetaValidator> {
 
     public final static String TYPE_VALIDATOR = "validator";
 
@@ -29,6 +31,23 @@ public abstract class MetaValidator extends MetaData {
      */
     public final Class<MetaValidator> getMetaDataClass() {
         return MetaValidator.class;
+    }
+
+    /** Add Child to the MetaValidator */
+    public MetaValidator addChild(MetaData data) throws InvalidMetaDataException {
+        return super.addChild( data );
+    }
+
+    /** Wrap the MetaValidator */
+    public MetaValidator wrap() {
+        return super.wrap();
+    }
+
+    /**
+     * Sets an attribute of the MetaClass
+     */
+    public MetaValidator addMetaAttr(MetaAttribute attr) {
+        return addChild(attr);
     }
 
     /**
@@ -79,7 +98,7 @@ public abstract class MetaValidator extends MetaData {
     public String getMessage(String defMsg) {
         String msg = defMsg;
         try {
-            msg = getAttr(ATTR_MSG).getValueAsString();
+            msg = getMetaAttr(ATTR_MSG).getValueAsString();
         } catch (MetaAttributeNotFoundException ignoreException) {
         }
         return msg;

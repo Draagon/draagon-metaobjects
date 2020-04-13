@@ -7,13 +7,11 @@
 
 package com.draagon.meta.field;
 
-import com.draagon.meta.DataTypes;
-import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.*;
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
-import com.draagon.meta.ValueException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.view.MetaViewNotFoundException;
 import com.draagon.meta.object.MetaObject;
@@ -32,7 +30,7 @@ import java.util.List;
  * @author Doug Mealing
  * @version 2.0
  */
-public abstract class MetaField<T extends Object> extends MetaData implements MetaFieldTypes {
+public abstract class MetaField<T extends Object> extends MetaData<MetaField> implements MetaFieldTypes {
     //private static Log log = LogFactory.getLog( MetaField.class );
 
     public final static String TYPE_FIELD = "field";
@@ -43,6 +41,8 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
     public final static String ATTR_DEFAULT_VALUE = "defaultValue";
 
     private T defaultValue = null;
+    private boolean lookedForDefault = false;
+
     private int length = -1;
 
     private DataTypes dataType;
@@ -111,9 +111,18 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
     }
 
     /**
+     * Sets an attribute of the MetaClass
+     */
+    public MetaField addMetaAttr(MetaAttribute attr) {
+        return addChild(attr);
+    }
+
+    /**
      * Sets the default field value
+     * @deprecated Add a child MetaAttribute with DEFAULT_VALUE
      */
     public void setDefaultValue(T defVal) {
+
         defaultValue = defVal;
 
         if (!getValueClass().isInstance(defVal)) {
@@ -125,10 +134,33 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
         defaultValue = (T) defVal;
     }
 
+    /** Flush the caches and set local flags to false */
+    @Override
+    protected void flushCaches() {
+        lookedForDefault = false;
+        super.flushCaches();
+    }
+
     /**
      * Gets the default field value
      */
     public T getDefaultValue() {
+
+        if ( defaultValue == null && !lookedForDefault ) {
+
+            if (hasAttr(MetaField.ATTR_DEFAULT_VALUE)) {
+                Object o = getMetaAttr(MetaField.ATTR_DEFAULT_VALUE).getValue();
+                if (!getValueClass().isInstance(o)) {
+                    // Convert as needed
+                    defaultValue = (T) DataConverter.toType(getDataType(), o);
+                } else {
+                    defaultValue = (T) o;
+                }
+
+                lookedForDefault = true;
+            }
+        }
+
         return defaultValue;
     }
 
@@ -144,6 +176,16 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
      */
     public Class<?> getValueClass() {
         return dataType.getValueClass();
+    }
+
+    /** Add Child to the Field */
+    public MetaField addChild(MetaData data) throws InvalidMetaDataException {
+        return super.addChild( data );
+    }
+
+    /** Wrap the MetaField */
+    public MetaField wrap() {
+        return super.wrap();
     }
 
     /**
@@ -221,7 +263,7 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
 
     public MetaView getDefaultView() {
         if (hasAttr(ATTR_DEFAULT_VIEW))
-            return getView(getAttr(ATTR_DEFAULT_VIEW).getValueAsString());
+            return getView(getMetaAttr(ATTR_DEFAULT_VIEW).getValueAsString());
         else
             return getFirstChild(MetaView.class);
     }
@@ -240,7 +282,7 @@ public abstract class MetaField<T extends Object> extends MetaData implements Me
     protected void performValidation(Object obj, Object val)  {
         // Run any defined validators
         if (hasAttr(ATTR_VALIDATION)) {
-            getValidatorList(getAttr(ATTR_VALIDATION).getValueAsString()).forEach(v -> v.validate(obj, val));
+            getValidatorList(getMetaAttr(ATTR_VALIDATION).getValueAsString()).forEach(v -> v.validate(obj, val));
         }
     }
 

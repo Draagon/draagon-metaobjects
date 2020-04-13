@@ -7,6 +7,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.BooleanAttribute;
 
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
@@ -23,5 +24,20 @@ public class BooleanField extends MetaField<Boolean> {
 
     public BooleanField(String name ) {
         super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN );
+    }
+
+
+    /**
+     * Manually Create a Boolean Filed
+     * @param name Name of the field
+     * @param defaultValue Default value for the field
+     * @return New BooleanField
+     */
+    public static BooleanField create( String name, Boolean defaultValue ) {
+        BooleanField f = new BooleanField( name );
+        if ( defaultValue != null ) {
+            f.addMetaAttr(BooleanAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
+        }
+        return f;
     }
 }
