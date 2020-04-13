@@ -9,26 +9,26 @@ package com.draagon.meta.attr;
 import com.draagon.meta.DataTypes;
 
 /**
- * An Integer Attribute
+ * A Long Attribute
  */
 @SuppressWarnings("serial")
-public class IntAttribute extends MetaAttribute<Integer> {
+public class LongAttribute extends MetaAttribute<Long> {
     //private static Log log = LogFactory.getLog( StringAttribute.class );
 
-    public final static String SUBTYPE_INT = "int";
+    public final static String SUBTYPE_LONG = "long";
 
     /**
      * Constructs the Integer MetaAttribute
      */
-    public IntAttribute(String name ) {
-        super( SUBTYPE_INT, name, DataTypes.INT);
+    public LongAttribute(String name ) {
+        super( SUBTYPE_LONG, name, DataTypes.LONG);
     }
 
     /**
      * Manually create an Integer MetaAttribute with a value
      */
-    public static IntAttribute create(String name, Integer value ) {
-        IntAttribute a = new IntAttribute( name );
+    public static LongAttribute create(String name, Long value ) {
+        LongAttribute a = new LongAttribute( name );
         a.setValue( value );
         return a;
     }

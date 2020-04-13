@@ -9,7 +9,7 @@ package com.draagon.meta.attr;
 import com.draagon.meta.DataTypes;
 
 /**
- * An attribute of a MetaClass, MetaField, or MetaView
+ * A String Attribute
  */
 @SuppressWarnings("serial")
 public class StringAttribute extends MetaAttribute<String> {

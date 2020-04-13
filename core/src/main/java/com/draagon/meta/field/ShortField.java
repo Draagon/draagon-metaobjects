@@ -15,6 +15,7 @@ import com.draagon.meta.attr.IntAttribute;
  * @version 2.0
  * @author Doug Mealing
  */
+@SuppressWarnings("serial")
 public class ShortField extends MetaField<Short> {
 
     public final static String SUBTYPE_SHORT    = "short";

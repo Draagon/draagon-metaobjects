@@ -22,6 +22,7 @@ import com.draagon.meta.validator.MetaValidator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+@SuppressWarnings("serial")
 public abstract class MetaObject extends MetaData<MetaObject> {
 
     private static Log log = LogFactory.getLog(MetaObject.class);

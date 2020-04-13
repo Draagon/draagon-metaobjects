@@ -5,6 +5,7 @@ import com.draagon.meta.DataTypes;
 /**
  * Created by dmealing on 11/10/2016.
  */
+@SuppressWarnings("serial")
 public abstract class ArrayField<T> extends MetaField<T> {
 
     public final static String ATTR_ITEM_NAME   = "itemName";

@@ -15,6 +15,10 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
+/**
+ * Regular expression validator, that ensures a field value matches the specific expression mask
+ */
+@SuppressWarnings("serial")
 public class RegexValidator extends MetaValidator {
 
     public final static String SUBTYPE_REGEX = "regex";

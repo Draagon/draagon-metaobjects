@@ -10,6 +10,10 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
+/**
+ * A Reguired validator that ensures a field has a value and is not null
+ */
+@SuppressWarnings("serial")
 public class RequiredValidator extends MetaValidator {
 
     public final static String SUBTYPE_REQUIRED = "required";

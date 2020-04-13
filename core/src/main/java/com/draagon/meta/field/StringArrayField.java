@@ -17,6 +17,7 @@ import java.util.List;
  * @version 1.0
  * @author Doug Mealing
  */
+@SuppressWarnings("serial")
 public class StringArrayField extends ArrayField<List<String>> {
 
     public final static String SUBTYPE_STRING_ARRAY = "stringArray";

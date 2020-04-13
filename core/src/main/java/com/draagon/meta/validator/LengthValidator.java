@@ -10,6 +10,10 @@ import com.draagon.meta.*;
 import com.draagon.meta.field.MetaField;
 import org.apache.commons.validator.GenericValidator;
 
+// TODO:  Make this work for numeric fields and even Date fields, or create new validator types
+/**
+ * A length validator, that ensures the string representation of a field value is of the min or max length
+ */
 @SuppressWarnings("serial")
 public class LengthValidator extends MetaValidator {
 

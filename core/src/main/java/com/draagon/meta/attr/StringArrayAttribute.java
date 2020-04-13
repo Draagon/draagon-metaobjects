@@ -11,7 +11,7 @@ import com.draagon.meta.DataTypes;
 import java.util.List;
 
 /**
- * An attribute of a MetaClass, MetaField, or MetaView
+ * A String Array Attribute
  */
 @SuppressWarnings("serial")
 public class StringArrayAttribute extends MetaAttribute<List<String>> {

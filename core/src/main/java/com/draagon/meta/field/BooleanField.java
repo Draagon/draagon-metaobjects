@@ -26,7 +26,6 @@ public class BooleanField extends MetaField<Boolean> {
         super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN );
     }
 
-
     /**
      * Manually Create a Boolean Filed
      * @param name Name of the field

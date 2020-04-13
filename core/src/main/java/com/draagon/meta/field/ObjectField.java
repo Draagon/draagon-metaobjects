@@ -16,6 +16,7 @@ import com.draagon.meta.util.MetaDataUtil;
  * @version 2.0
  * @author Doug Mealing
  */
+@SuppressWarnings("serial")
 public class ObjectField extends MetaField<Object> {
 
     public final static String SUBTYPE_OBJECT       = "object";

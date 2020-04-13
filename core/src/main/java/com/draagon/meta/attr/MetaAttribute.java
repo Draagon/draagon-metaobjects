@@ -13,7 +13,8 @@ import com.draagon.meta.util.DataConverter;
 /**
  * An attribute of a MetaClass, MetaField, or MetaView
  */
-public class MetaAttribute<T> extends MetaData<MetaAttribute> {
+@SuppressWarnings("serial")
+public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTypeAware<T> {
     
     //private static Log log = LogFactory.getLog( MetaAttribute.class );
 
@@ -42,18 +43,30 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> {
     /**
      * Sets an attribute of the MetaClass
      */
+    @Override
     public MetaAttribute addMetaAttr(MetaAttribute attr) {
         return addChild(attr);
     }
 
     /** Add Child to the Field */
+    @Override
     public MetaAttribute addChild(MetaData data) throws InvalidMetaDataException {
         return super.addChild( data );
     }
 
     /** Wrap the MetaAttribute */
+    @Override
     public MetaAttribute wrap() {
         return super.wrap();
+    }
+
+    /**
+     * Returns the DataType for the value
+     * @return DataTypes enum
+     */
+    @Override
+    public DataTypes getDataType() {
+        return dataType;
     }
 
     /**
@@ -64,26 +77,10 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> {
     }
 
     /**
-     * Sets the Value with an Object
-     * @param value Object value to set
-     */
-    public void setValueAsObject(Object value) {
-        this.value = (T) DataConverter.toType( dataType, value );
-    }
-
-    /**
      * Returns the value of the MetaAttribute
      */
     public T getValue() {
         return value;
-    }
-
-    /**
-     * Returns the DataType for the value
-     * @return DataTypes enum
-     */
-    public DataTypes getDataType() {
-        return dataType;
     }
 
     /**
@@ -103,9 +100,18 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> {
     }
 
     /**
+     * Sets the Value with an Object
+     * @param value Object value to set
+     */
+    public void setValueAsObject(Object value) {
+        this.value = (T) DataConverter.toType( dataType, value );
+    }
+
+    /**
      * Clone the MetaAttribute
      * @return MetaAttribute clone
      */
+    @Override
     public Object clone() {
         MetaAttribute<T> a = (MetaAttribute<T>) super.clone();
         a.value = value;

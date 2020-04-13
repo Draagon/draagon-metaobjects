@@ -30,12 +30,13 @@ import java.util.List;
  * @author Doug Mealing
  * @version 2.0
  */
-public abstract class MetaField<T extends Object> extends MetaData<MetaField> implements MetaFieldTypes {
+@SuppressWarnings("serial")
+public abstract class MetaField<T extends Object> extends MetaData<MetaField>  implements DataTypeAware<T>, MetaFieldTypes {
     //private static Log log = LogFactory.getLog( MetaField.class );
 
     public final static String TYPE_FIELD = "field";
 
-    public final static String ATTR_LEN = "len";
+    //public final static String ATTR_LEN = "length";
     public final static String ATTR_VALIDATION = "validation";
     public final static String ATTR_DEFAULT_VIEW = "defaultView";
     public final static String ATTR_DEFAULT_VALUE = "defaultValue";
@@ -75,7 +76,7 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField> im
      * @deprecated Use getDataType() and the DataTypes Enum
      */
     public int getType() {
-        return dataType.getId();
+        return getDataType().getId();
     }
 
     /**
@@ -167,6 +168,7 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField> im
     /**
      * Returns the type of value
      */
+    @Override
     public DataTypes getDataType() {
         return dataType;
     }
@@ -175,15 +177,17 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField> im
      * Gets the type of value object class returned
      */
     public Class<?> getValueClass() {
-        return dataType.getValueClass();
+        return getDataType().getValueClass();
     }
 
     /** Add Child to the Field */
+    @Override
     public MetaField addChild(MetaData data) throws InvalidMetaDataException {
         return super.addChild( data );
     }
 
     /** Wrap the MetaField */
+    @Override
     public MetaField wrap() {
         return super.wrap();
     }
@@ -347,237 +351,100 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField> im
     ////////////////////////////////////////////////////
     // OBJECT SETTER METHODS
 
-    public void setBoolean(Object obj, Boolean boolval)
-    //throws MetaException
-    {
-        Object bv = boolval;
-
-        if (boolval != null) {
-            bv = DataConverter.toType(getDataType(), boolval);
-        }
-
-        setObjectAttribute(obj, bv);
+    public void setBoolean(Object obj, Boolean value){
+        setObject(obj, value );
     }
 
-    public void setByte(Object obj, Byte byteval)
-    //throws MetaException
-    {
-        Object bv = byteval;
-
-        if (byteval != null) {
-            bv = DataConverter.toType(getDataType(), byteval);
-        }
-
-        setObjectAttribute(obj, bv);
+    public void setByte(Object obj, Byte value){
+        setObject(obj, value );
     }
 
-    public void setShort(Object obj, Short shortval)
-    //throws MetaException
-    {
-        Object sv = shortval;
-
-        if (shortval != null) {
-            sv = DataConverter.toType(getDataType(), shortval);
-        }
-
-        setObjectAttribute(obj, sv);
+    public void setShort(Object obj, Short value){
+        setObject(obj, value );
     }
 
-    public void setInt(Object obj, Integer intval)
-    //throws MetaException
-    {
-        Object iv = intval;
-
-        if (intval != null) {
-            iv = DataConverter.toType(getDataType(), intval);
-        }
-
-        setObjectAttribute(obj, iv);
+    public void setInt(Object obj, Integer value){
+        setObject(obj, value );
     }
 
-    public void setLong(Object obj, Long longval)
-    //throws MetaException
-    {
-        Object lv = longval;
-
-        if (longval != null) {
-            lv = DataConverter.toType(getDataType(), longval);
-        }
-
-        setObjectAttribute(obj, lv);
+    public void setLong(Object obj, Long value){
+        setObject(obj, value );
     }
 
-    public void setFloat(Object obj, Float floatval)
-    //throws MetaException
-    {
-        Object fv = floatval;
-
-        if (floatval != null) {
-            fv = DataConverter.toType(getDataType(), floatval);
-        }
-
-        setObjectAttribute(obj, fv);
+    public void setFloat(Object obj, Float value ){
+        setObject(obj, value );
     }
 
-    public void setDouble(Object obj, Double doubval)
-    //throws MetaException
-    {
-        Object dv = doubval;
-
-        if (doubval != null) {
-            dv = DataConverter.toType(getDataType(), doubval);
-        }
-
-        setObjectAttribute(obj, dv);
+    public void setDouble(Object obj, Double value){
+        setObject(obj, value );
     }
 
-    public void setString(Object obj, String strval)
-    //throws MetaException
-    {
-        Object s = strval;
-
-        DataTypes dt = getDataType();
-
-        // If an empty string, convert to a null if numeric or a date
-        if (strval != null && strval.trim().isEmpty() && (dt.isNumeric() || dt.isDate()))
-            strval = null;
-
-        // Handle the values
-        if (strval != null) {
-            s = DataConverter.toType(getDataType(), strval);
-        }
-
-        setObjectAttribute(obj, s);
+    public void setString(Object obj, String value) {
+        setObject(obj, value );
     }
 
-    public void setDate(Object obj, Date dateval)
-    //throws MetaException
-    {
-        Object lv = dateval;
-
-        if (dateval != null) {
-            lv = DataConverter.toType(getDataType(), dateval);
-        }
-
-        setObjectAttribute(obj, lv);
+    public void setDate(Object obj, Date value) {
+        setObject(obj, value );
     }
 
-    public void setObject(Object obj, Object objval)
-    //throws MetaException
-    {
-        Object o = objval;
-
-        if (objval != null) {
-            o = DataConverter.toType(getDataType(), objval);
-        }
-
-        setObjectAttribute(obj, o);
+    public void setObject(Object obj, Object value) {
+        setObjectAttribute(obj, DataConverter.toType(getDataType(), (value != null) ? value : null ));
     }
 
 
     ////////////////////////////////////////////////////
     // OBJECT GETTER METHODS
 
-
-    public Boolean getBoolean(Object obj)
-    //throws MetaException
-    {
+    public Boolean getBoolean(Object obj) {
         return DataConverter.toBoolean(getObjectAttribute(obj));
     }
 
-    public Byte getByte(Object obj)
-    //throws MetaException
-    {
+    public Byte getByte(Object obj) {
         return DataConverter.toByte(getObjectAttribute(obj));
     }
 
-    public Short getShort(Object obj)
-    //throws MetaException
-    {
+    public Short getShort(Object obj) {
         return DataConverter.toShort(getObjectAttribute(obj));
     }
 
-    public Integer getInt(Object obj)
-    //throws MetaException
-    {
+    public Integer getInt(Object obj) {
         return DataConverter.toInt(getObjectAttribute(obj));
     }
 
-    public Long getLong(Object obj)
-    //throws MetaException
-    {
+    public Long getLong(Object obj) {
         return DataConverter.toLong(getObjectAttribute(obj));
     }
 
-    public Float getFloat(Object obj)
-    //throws MetaException
-    {
+    public Float getFloat(Object obj) {
         return DataConverter.toFloat(getObjectAttribute(obj));
     }
 
-    public Double getDouble(Object obj)
-    //throws MetaException
-    {
+    public Double getDouble(Object obj) {
         return DataConverter.toDouble(getObjectAttribute(obj));
     }
 
-    public String getString(Object obj)
-    //throws MetaException
-    {
+    public String getString(Object obj) {
         return DataConverter.toString(getObjectAttribute(obj));
     }
 
-    public Date getDate(Object obj)
-    //throws MetaException
-    {
+    public Date getDate(Object obj) {
         return DataConverter.toDate(getObjectAttribute(obj));
     }
 
-    public Object getObject(Object obj)
-    //throws MetaException
-    {
+    public Object getObject(Object obj) {
         return getObjectAttribute(obj);
     }
 
     ////////////////////////////////////////////////////
     // MISC METHODS
 
-    // WARNING:  Where should this really go?
-  /*public int getLength()
-  {
-    if ( this.length >= 0 ) return this.length;
-
-    int len = 0;
-
-    if ( getSuperField() != null )
-        len = getSuperField().getLength();
-
-    try {
-        len = Integer.parseInt( (String) getAttribute( ATTR_LEN ));
-    } catch( Exception e ) {}
-
-    if ( len <= 0 )
-      switch( getDataType() )
-      {
-        case BOOLEAN: len = 1; break;
-        case BYTE: len = 4; break;
-        case SHORT: len = 6; break;
-        case INT: len = 10; break;
-        case LONG: len = 15; break;
-        case FLOAT: len = 12; break;
-        case DOUBLE: len = 16; break;
-        case STRING: len = 50; break;
-        case DATE: len = 15; break;
-        default:  len = 10; break;
-      }
-
-    this.length = length;
-    return this.length;
-  }*/
-
+    /** Clone the MetaField */
+    @Override
     public Object clone() {
         MetaField mf = (MetaField) super.clone();
         mf.defaultValue = defaultValue;
+        mf.lookedForDefault = lookedForDefault;
+        mf.length = length;
         return mf;
     }
 }

@@ -13,6 +13,10 @@ import com.draagon.meta.*;
 
 import org.apache.commons.validator.GenericValidator;
 
+/**
+ * Numeric Validator that ensures a value is a number
+ */
+@SuppressWarnings("serial")
 public class NumericValidator extends MetaValidator {
     public final static String SUBTYPE_NUMERIC = "numeric";
 

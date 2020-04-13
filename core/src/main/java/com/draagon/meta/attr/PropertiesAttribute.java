@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
-
+/**
+ * A Properties Attribute
+ */
+@SuppressWarnings("serial")
 public class PropertiesAttribute extends MetaAttribute<Properties> {
 
     public final static String SUBTYPE_PROPERTIES = "properties";

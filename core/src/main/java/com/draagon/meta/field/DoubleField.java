@@ -15,6 +15,7 @@ import com.draagon.meta.*;
  * @version 2.0
  * @author Doug Mealing
  */
+@SuppressWarnings("serial")
 public class DoubleField extends MetaField<Double>
 {
     public final static String SUBTYPE_DOUBLE   = "double";

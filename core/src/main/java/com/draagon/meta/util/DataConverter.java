@@ -1,6 +1,8 @@
 package com.draagon.meta.util;
 
 import com.draagon.meta.DataTypes;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,12 +16,10 @@ import java.util.List;
  */
 public final class DataConverter
 {
-	/**
-	 * Private constructor
-	 */
-	private DataConverter()
-	{
-	}
+	private static Log log = LogFactory.getLog( DataConverter.class );
+
+	/** Private constructor */
+	private DataConverter() {}
 
 	/** Converts the object to the specified MetaFieldType */
 	public static Object toType( DataTypes dataType, Object val ) {
@@ -66,7 +66,9 @@ public final class DataConverter
 		}
 		else if ( val instanceof String ) {
 			List<String> list = new ArrayList<>();
-			Collections.addAll(list, ((String) val).split(","));
+			if ( !((String) val).isEmpty()) {
+				Collections.addAll(list, ((String) val).split(","));
+			}
 			return list;
 		}
 		else {
@@ -118,6 +120,8 @@ public final class DataConverter
 	public static Boolean toBoolean( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	        return (Boolean) val;
@@ -163,6 +167,8 @@ public final class DataConverter
 	public static Double toDouble( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return 1.0;
@@ -207,6 +213,8 @@ public final class DataConverter
 	public static Float toFloat( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return 1f;
@@ -251,6 +259,8 @@ public final class DataConverter
 	public static Long toLong( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return 1L;
@@ -295,6 +305,8 @@ public final class DataConverter
 	public static Integer toInt( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return 1;
@@ -339,6 +351,8 @@ public final class DataConverter
 	public static Short toShort( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return (short) 1;
@@ -383,6 +397,8 @@ public final class DataConverter
 	public static Byte toByte( Object val )
 	{
 	    if ( val == null ) return null;
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
 	
 	    if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return (byte) 1;
@@ -444,7 +460,9 @@ public final class DataConverter
 	public static Date toDate( Object val )
 	{
 	    if ( val == null ) return null;
-	
+
+		if ( val instanceof String && ((String) val).isEmpty()) return null;
+
 	    if ( val instanceof Boolean ) {
 	        if ((Boolean) val) return new Date();
 	        else return new Date( 0 );
@@ -468,13 +486,17 @@ public final class DataConverter
 	        return new Date( (long) ((Double) val ).doubleValue() );
 	      }
 	      else if ( val instanceof String ) {
-	        try { return new Date( Long.parseLong( (String) val )); } catch( Exception ignored) {}
+	      	// TODO:  Implement date format support
+			try {
+				return new Date(Long.parseLong((String) val));
+			} catch (NumberFormatException e ) {
+				log.error( "Unable to parse Date, expected long value: " + val );
+			}
 	      }
 	      else if ( val instanceof Date ) {
 	        return (Date) val;
 	      }
-
-	          // Catch anything else
+	      // Catch anything else
 	      try { return new Date( Long.parseLong( val.toString() )); }
 	      catch( Exception e ) { return new Date( 0 ); }
 	} // toDate

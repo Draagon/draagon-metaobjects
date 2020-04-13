@@ -16,6 +16,10 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 
+/**
+ * MetaValidator that performs validations on a MetaField
+ */
+@SuppressWarnings("serial")
 public abstract class MetaValidator extends MetaData<MetaValidator> {
 
     public final static String TYPE_VALIDATOR = "validator";
