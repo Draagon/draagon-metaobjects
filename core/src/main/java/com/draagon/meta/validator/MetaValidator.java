@@ -12,9 +12,6 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 
 /**
  * MetaValidator that performs validations on a MetaField
@@ -43,8 +40,8 @@ public abstract class MetaValidator extends MetaData<MetaValidator> {
     }
 
     /** Wrap the MetaValidator */
-    public MetaValidator wrap() {
-        return super.wrap();
+    public MetaValidator overload() {
+        return super.overload();
     }
 
     /**

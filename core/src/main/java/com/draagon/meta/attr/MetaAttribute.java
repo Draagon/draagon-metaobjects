@@ -7,7 +7,6 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.*;
-import com.draagon.meta.field.MetaField;
 import com.draagon.meta.util.DataConverter;
 
 /**
@@ -56,8 +55,8 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
 
     /** Wrap the MetaAttribute */
     @Override
-    public MetaAttribute wrap() {
-        return super.wrap();
+    public MetaAttribute overload() {
+        return super.overload();
     }
 
     /**

@@ -320,16 +320,16 @@ public final class DataConverter
 	      return (int) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return (Integer) val;
+	      return (int) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return (int) ((Long) val).longValue();
+	      return (int) val;
 	    }
 	    else if ( val instanceof Float ) {
-	      return (int) ((Float) val).floatValue();
+	      return (int) val;
 	    }
 	    else if ( val instanceof Double ) {
-	      return (int) ((Double) val).doubleValue();
+	      return (int) val;
 	    }
 	    else if ( val instanceof String ) {
 	      try { return Integer.parseInt((String) val); } catch( Exception ignored) {}

@@ -30,11 +30,11 @@ public class MetaDataLoaderTest {
         loader = MetaDataLoader.createManual( "test1" )
                 .init()
                 .register()
-                .addChild( StringAttribute.create( "hello", "world" ))
+                .addMetaAttr( StringAttribute.create( "hello", "world" ))
                 .addChild( ValueMetaObject.create( "foo")
                         .addMetaField( IntegerField.create( "bar", 5 )
-                                .addChild( IntAttribute.create("length", 10))
-                                .addChild( StringAttribute.create("abc", "def"))))
+                                .addMetaAttr( IntAttribute.create("length", 10))
+                                .addMetaAttr( StringAttribute.create("abc", "def"))))
                 .getLoader();
     }
 
@@ -89,14 +89,21 @@ public class MetaDataLoaderTest {
     @Test
     public void testModelOverlay() {
 
+        // foo
+        //     .bar
+        //        .length = 10
+        // foo-baby (parent->foo)
+        //     .bar (parent->foo.bar)
+        //         .length = 11
+
         MetaObject mo = loader.getMetaObject( "foo" );
-        MetaObject baby = ValueMetaObject.create("foo-baby")
-                .setSuperObject( mo );
+        MetaObject baby = ValueMetaObject.create("foo-baby").setSuperObject( mo );
 
         // Create an overlay for bar and length
-        baby.addMetaField(  mo.getMetaField( "bar" )
-                .wrap()
-                .addChild( IntAttribute.create( "length", 11 ))
+        baby.addMetaField(
+                mo.getMetaField( "bar" )
+                .overload() // overload or extend
+                .addMetaAttr( IntAttribute.create( "length", 11 ))
                 .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
 
         ValueObject bo = (ValueObject) baby.newInstance();
@@ -112,14 +119,22 @@ public class MetaDataLoaderTest {
     @Test
     public void testModelOverlay2() {
 
+        // foo
+        //     .bar
+        //        .length = 10
+        // foo-baby (parent->foo)
+        //     .bar (parent->foo.bar)
+        //         .length = 11
+
         MetaObject mo = loader.getMetaObject( "foo" );
         MetaObject baby = ValueMetaObject.create("foo-baby")
                 .setSuperObject( mo );
 
         // Create an overlay for bar and length
-        baby.addMetaField( baby.getMetaField( "bar" )
-                .wrap()
-                .addChild( IntAttribute.create( "length", 11 ))
+        baby.addMetaField(
+                mo.getMetaField( "bar" )
+                .overload()
+                .addMetaAttr( IntAttribute.create( "length", 11 ))
                 .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
 
         ValueObject bo = (ValueObject) baby.newInstance();
@@ -138,9 +153,8 @@ public class MetaDataLoaderTest {
         MetaObject mo = loader.getMetaObject( "foo" );
 
         Exception ex = null;
-        try {
-            mo.addMetaField(mo.getMetaField("bar").wrap());
-        } catch( Exception e ) {ex=e;}
+        try { mo.addMetaField(mo.getMetaField("bar").overload()); }
+        catch( Exception e ) {ex=e;}
 
         assertEquals( "Exception on wrap existing field", true, ex.getClass().isAssignableFrom(InvalidMetaDataException.class ));
     }
@@ -151,10 +165,7 @@ public class MetaDataLoaderTest {
         MetaObject mo = loader.getMetaObject( "foo" );
 
         Exception ex = null;
-        try {
-            mo.addMetaField( StringField.create("bar", "error"));
-        } catch( Exception e ) {ex=e;}
-
+        try { mo.addMetaField( StringField.create("bar", "error")); } catch( Exception e ) {ex=e;}
         assertEquals( "Exception on add existing field", true, ex.getClass().isAssignableFrom(InvalidMetaDataException.class ));
     }
 
@@ -166,22 +177,13 @@ public class MetaDataLoaderTest {
         MetaAttribute defVal = bar.getMetaAttr( MetaField.ATTR_DEFAULT_VALUE );
 
         Exception ex = null;
-        try {
-            foo.addChild( ValueMetaObject.create("foo2"));
-        } catch( Exception e ) {ex=e;}
-
+        try { foo.addChild( ValueMetaObject.create("foo2")); }  catch( Exception e ) {ex=e;}
         assertEquals( "Exception on add MetaObject to MetaObject", true, ex.getClass().isAssignableFrom(InvalidMetaDataException.class ));
 
-        try {
-            bar.addChild( StringField.create("bar2", "error"));
-        } catch( Exception e ) {ex=e;}
-
+        try { bar.addChild( StringField.create("bar2", "error")); } catch( Exception e ) {ex=e;}
         assertEquals( "Exception on add MetaField to MetaField", true, ex.getClass().isAssignableFrom(InvalidMetaDataException.class ));
 
-        try {
-            defVal.addChild( StringAttribute.create("bad", "attr"));
-        } catch( Exception e ) {ex=e;}
-
+        try { defVal.addChild( StringAttribute.create("bad", "attr")); } catch( Exception e ) {ex=e;}
         assertEquals( "Exception on add MetaAttribute to MetaAttribute", true, ex.getClass().isAssignableFrom(InvalidMetaDataException.class ));
     }
 }

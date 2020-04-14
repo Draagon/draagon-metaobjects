@@ -18,7 +18,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
-import com.draagon.meta.validator.MetaValidator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -64,8 +63,8 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     }
 
     /** Wrap the MetaObject */
-    public MetaObject wrap() {
-        return super.wrap();
+    public MetaObject overload() {
+        return super.overload();
     }
 
     /**

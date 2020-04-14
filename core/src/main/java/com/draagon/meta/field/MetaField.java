@@ -15,7 +15,6 @@ import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.view.MetaViewNotFoundException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -188,8 +187,8 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
 
     /** Wrap the MetaField */
     @Override
-    public MetaField wrap() {
-        return super.wrap();
+    public MetaField overload() {
+        return super.overload();
     }
 
     /**

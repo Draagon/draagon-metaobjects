@@ -110,7 +110,7 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     }
 
     /** Wrap the MetaDataLoader */
-    public MetaDataLoader wrap() {
+    public MetaDataLoader overload() {
         throw new IllegalStateException( "You cannot wrap a MetaDataLoader!" );
     }
 

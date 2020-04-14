@@ -41,6 +41,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     public class Value implements Serializable {
 
         private static final long serialVersionUID = 746942287755477951L;
+
         private ValueObject parent = null;
         private Object value = null;
         private DataTypes dataType = null;
@@ -71,7 +72,6 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     // The MetaObject is transient, but the loader name, and object name are needed
     private transient MetaObject metaObject = null;
     private transient List<String> metaFieldNamesCache = null;
-    private transient Set<String> ignoredFieldSets = new HashSet<>();
     private transient boolean metaObjectForNameFailed = false;
     private boolean hasMetaData = false;
     private String loaderName = null;
@@ -220,20 +220,39 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     protected boolean isValidFieldName(String name) {
 
         if ( allowExtensions ) return true;
+
         if ( !hasMetaDataAttached()) {
             throw new IllegalArgumentException( "There is no MetaObject attached to this ValueObject and it is not extendable, so it field ["+name+"] cannot be read or written to");
-        } else if ( !getMetaData().hasMetaField( name )) {
+        }
+        else if ( !getMetaData().hasMetaField( name )) {
             if ( enforceStrictness ) {
                 throw new IllegalArgumentException( "No field with name ["+name+"] exists on MetaObject, and this is ValueObject is set to strictly enforce that it must: " + getMetaData() );
             } else {
-                if ( !ignoredFieldSets.contains( name )) {
-                    ignoredFieldSets.add( name );
-                    log.warn( "No field with name ["+name+"] exists on MetaObject ["+getMetaData()+"], ignored field get/set history: " + ignoredFieldSets );
+                Set<String> ignoreSet = getIgnoreSet( getMetaData() );
+                if ( !ignoreSet.contains( name )) {
+                    ignoreSet.add( name );
+                    log.warn( "No field with name ["+name+"] exists on MetaObject ["+getMetaData()+"], ignored field get/set history: " + ignoreSet );
                 }
                 return false;
             }
         }
         return true;
+    }
+
+    /** Get the ignore sets for the specified MetaObject */
+    private static Set<String> getIgnoreSet( MetaObject o ) {
+
+        final String KEY = "ValueObject-getIgnoreSet";
+        Set<String> set = null;
+
+        synchronized ( o ) {
+            set = (Set<String>) o.getCacheValue(KEY);
+            if (set == null) {
+                set = new HashSet<>();
+                o.setCacheValue(o, set);
+            }
+        }
+        return set;
     }
 
     /**
@@ -512,17 +531,8 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
     /////////////////////////////////////////////////////////////////////////////////////
     // MISC
 
-    /** Compare one value to another */
-    private boolean compareValue( Object o1, Object o2 ) {
-        if (( o1 == null && o2 == null )
-            || ( o1.equals( o2 ))) {
-            return true;
-        }
-        return false;
-    }
-
     /**
-     * Determines if this object is equal to the passed in object.
+     * Determines if this object is equivalent to the passed in object.
      * If both objects are not associated to a MetaObject, it just
      * compares the attribute key values for equality.  If MetaObjects
      * are attached then it compares each value for all MetaFields.
@@ -581,6 +591,15 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
         return true;
     }
 
+    /** Compare one value to another */
+    private boolean compareValue( Object o1, Object o2 ) {
+        if (( o1 == null && o2 == null )
+                || ( o1.equals( o2 ))) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         
@@ -588,17 +607,7 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
 
         try {
 
-            b.append("[");
-            //String ref = getObjectRef();
-            //if ( ref != null )
-            //	b.append( ref );
-            //else
-            //{
-            //b.append( "{NEW}" );
-            //b.append( '@' );
-            b.append( getObjectName() );
-            //}
-            b.append("]");
+            b.append("[").append( getObjectName() ).append("]");
 
             boolean first = true;
             b.append('{');

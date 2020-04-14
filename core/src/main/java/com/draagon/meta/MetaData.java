@@ -39,6 +39,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     private final String pkg;
 
     private MetaData superData = null;
+    // TODO:  Is this meant to be a weak reference for MetaDataLoader only...?
     private WeakReference<MetaData> parentRef = null;
     private MetaDataLoader loader = null;
 
@@ -742,10 +743,10 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     }
 
     /**
-     * Wrap the MetaData.  Used with overlays
+     * Overload the MetaData.  Used with overlays
      * @return The wrapped MetaData
      */
-    public N wrap()  {
+    public N overload()  {
         N d = (N) clone();
         d.clearChildren();
         d.setSuperData(this);
@@ -758,39 +759,50 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     @Override
     public Object clone() {
 
-        try {
-            MetaData v = (MetaData) super.clone();
+        MetaData v = newInstanceFromClass( getClass(), type, subType, name );
 
-            try {
-                try {
-                    v = (MetaData) this.getClass().getConstructor(String.class, String.class, String.class).newInstance(type, subType, name);
-                } catch( NoSuchMethodException e ) {}
-                try {
-                    if ( v == null ) v = (MetaData) this.getClass().getConstructor(String.class, String.class).newInstance(subType, name);
-                } catch( NoSuchMethodException e ) {}
-                try {
-                    v = (MetaData) this.getClass().getConstructor(String.class).newInstance(name);
-                } catch( NoSuchMethodException e ) {}
-                try {
-                    v = (MetaData) this.getClass().getConstructor().newInstance();
-                } catch( NoSuchMethodException e ) {}
+        v.superData = superData;
+        v.parentRef = parentRef;
+        v.loader = loader;
 
-            } catch (Exception e) {
-                throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
-            }
-
-            v.parentRef = parentRef;
-
-            for (MetaData md : getChildren()) {
-                v.addChild((MetaData) md.clone());
-                //v.mChildren = (ArrayList) mChildren.clone();
-            }
-
-            return v;
+        for (MetaData md : getChildren()) {
+            v.addChild((MetaData) md.clone());
         }
-        catch( CloneNotSupportedException e ) {
+
+        return v;
+    }
+
+    /**
+     * Create a newInstance of the specified MetaData class given the specified type, subType, and name
+     * @return The newly created MetaData instance
+     */
+    protected MetaData newInstanceFromClass( Class<? extends MetaData> c, String type, String subType, String name) {
+
+        MetaData v;
+
+        try {
+            try {
+                v = c.getConstructor(String.class, String.class, String.class).newInstance(type, subType, name);
+            } catch (NoSuchMethodException e) {
+                try {
+                    v = c.getConstructor(String.class, String.class).newInstance(subType, name);
+                } catch (NoSuchMethodException e2) {
+                    try {
+                        v = c.getConstructor(String.class).newInstance(name);
+                    } catch (NoSuchMethodException e3) {
+                        try {
+                            v = c.getConstructor().newInstance();
+                        } catch (NoSuchMethodException e4) {
+                            throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "], no valid constructor was found" );
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
             throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
         }
+
+        return v;
     }
 
     /**

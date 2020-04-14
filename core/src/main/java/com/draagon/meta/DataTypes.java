@@ -141,6 +141,7 @@ public enum DataTypes {
             // If we are comparing arrays
             if ( t.isArray()
                     && List.class.isAssignableFrom( c )
+                        && !t.isObjectArray()
                         && t.getArrayItemClass().equals( c.getComponentType())) {
                 return t;
             }
@@ -154,6 +155,15 @@ public enum DataTypes {
         }
 
         // Return this as the default
-        return OBJECT;
+        if ( List.class.isAssignableFrom( c )) return OBJECT_ARRAY;
+        else return OBJECT;
     }
+
+    /**
+     * Matches for equivalency for downcasting from d1 to d2 lossless
+     */
+    // TODO:  Finish this
+    //public boolean equivalentTo( DataTypes d1, DataTypes d2 ) {
+    //    if ( d1.isBoolean && d2.isBoolean )
+    //}
 }

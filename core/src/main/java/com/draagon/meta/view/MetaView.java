@@ -14,7 +14,6 @@ import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.validator.MetaValidator;
 
 public abstract class MetaView extends MetaData<MetaView>
 {
@@ -46,8 +45,8 @@ public abstract class MetaView extends MetaData<MetaView>
   }
 
   /** Wrap the MetaView */
-  public MetaView wrap() {
-    return super.wrap();
+  public MetaView overload() {
+    return super.overload();
   }
 
   /**

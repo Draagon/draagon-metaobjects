@@ -12,7 +12,6 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.MetaDataUtil;
@@ -515,7 +514,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     
                     // If it's not a child from the same parent, we need to wrap it
                     if ( md.getParent() != parent ) {
-                        md = md.wrap();
+                        md = md.overload();
                         isNew = true;
                     }
                 }
@@ -565,7 +564,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                 String typeName = el.getAttribute(ATTR_TYPE);
                 if ( typeName.isEmpty() ) typeName = null;
 
-                Class<?> c = null;
+                Class<? extends MetaData> c = null;
                 try {
                     // Attempt to load the referenced class
                     if (typeName == null ) {
@@ -582,22 +581,6 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                                 throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined and baseClass [" + types.baseClass.getName() + "] had no default specified");
                             }
                         }
-                        // Default to StringAttribute if no type is defined for a MetaAttribute
-                        /*else if ( types.baseClass.isAssignableFrom( MetaAttribute.class )) {
-                            c = StringAttribute.class;
-                        }
-                        // Default to ValueObject if no type is defined for a MetaObject
-                        else if ( types.baseClass.isAssignableFrom( MetaObject.class )) {
-                            c = ValueMetaObject.class;
-                        }
-                        // Default to StringField if no type is defined for a MetaField
-                        else if ( types.baseClass.isAssignableFrom( MetaField.class )) {
-                            c = StringField.class;
-                        }
-                        // Otherwise throw an error
-                        else {
-                            throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no type defined on baseClass [" + types.baseClass.getName() + "]");
-                        }*/
                     } 
                     else {
                         c = (Class<? extends MetaData>) types.get(typeName);
@@ -611,29 +594,7 @@ public class XMLFileMetaDataLoader extends MetaDataLoader {
                     if ( isRoot ) fullname = packageName + PKG_SEPARATOR + fullname;
 
                     // Create the object
-
-                    // Try for type, subtype, name string parameters first
-                    try {
-                        md = (MetaData) c.getDeclaredConstructor( String.class, String.class, String.class ).newInstance( nodeName, typeName, fullname );
-                    } catch( NoSuchMethodException ex ) {}
-
-                    // Try for subtype, name string parameters second
-                    try {
-                        if ( md == null ) md = (MetaData) c.getDeclaredConstructor( String.class, String.class ).newInstance( typeName, fullname );
-                    } catch( NoSuchMethodException ex ) {}
-
-                    // Try just the name string parameter third
-                    try {
-                        if ( md == null ) md = (MetaData) c.getDeclaredConstructor( String.class ).newInstance( fullname );
-                    } catch( NoSuchMethodException ex ) {}
-
-                    // Try for now parameters last
-                    try {
-                        if ( md == null ) md = (MetaData) c.getDeclaredConstructor().newInstance();
-                    } catch( NoSuchMethodException ex ) {}
-
-                    if ( md == null )
-                        throw new MetaDataException("No valid constructor was found for MetaData class [" + c.getName() + "]");
+                    md = newInstanceFromClass( c, nodeName, typeName, fullname );
 
                     if ( !md.getTypeName().equals( nodeName ))
                         throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md );

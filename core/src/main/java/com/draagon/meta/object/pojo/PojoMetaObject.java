@@ -43,6 +43,8 @@ public class PojoMetaObject extends MetaObject {
      */
     protected void uppercase( StringBuilder b, String name ) {
 
+        //TODO:  USe Char and to.UpperCase()
+
         int c = name.charAt(0);
         if (c >= 'a' && c <= 'z') {
             c = c - ('a' - 'A');
