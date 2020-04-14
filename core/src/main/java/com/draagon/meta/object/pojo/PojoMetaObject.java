@@ -11,6 +11,9 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import java.lang.reflect.*;
 
+/**
+ * MetaObject that supports POJO objects
+ */
 @SuppressWarnings("serial")
 public class PojoMetaObject extends MetaObject {
 
@@ -33,7 +36,13 @@ public class PojoMetaObject extends MetaObject {
         super( subType, name );
     }
 
+    /**
+     * Uppercase the first character of the field name
+     * @param b StringBuilder to use for upper case output
+     * @param name Name of the field
+     */
     protected void uppercase( StringBuilder b, String name ) {
+
         int c = name.charAt(0);
         if (c >= 'a' && c <= 'z') {
             c = c - ('a' - 'A');
@@ -42,7 +51,13 @@ public class PojoMetaObject extends MetaObject {
         b.append(name.substring(1));
     }
 
+    /**
+     * Get the getter method name for the object for this MetaField
+     * @param f MetaField to get the getter for
+     * @return Name of getter method
+     */
     protected String getGetterName(MetaField f) {
+
         // Create the getter name
         StringBuilder m = new StringBuilder();
         m.append("get");
@@ -62,7 +77,7 @@ public class PojoMetaObject extends MetaObject {
                 String name = getGetterName(f);
 
                 try {
-                    method = objClass.getMethod(name, new Class[0]);
+                    method = objClass.getMethod(name); //, new Class[0]);
                 } catch (NoSuchMethodException e) {
                     throw new NoSuchMethodError("No getter exists named [" + name + "] on object [" + objClass.getName() + "]");
                 }
@@ -74,7 +89,13 @@ public class PojoMetaObject extends MetaObject {
         }
     }
 
+    /**
+     * Get the setter method on the object for this MetaField
+     * @param f MetaField to get the setter for
+     * @return Setter method name
+     */
     protected String getSetterName(MetaField f) {
+
         // Create the getter name
         StringBuilder b = new StringBuilder();
         b.append("set");
@@ -92,13 +113,12 @@ public class PojoMetaObject extends MetaObject {
             if (method == null) {
 
                 String name = getSetterName(f);
-                Method[] methods = objClass.getMethods();
 
-                for (int i = 0; i < methods.length; i++) {
-                    if (methods[ i].getName().equals(name)
-                            && methods[ i].getParameterTypes().length == 1
-                            && methods[ i].getParameterTypes()[ 0] == f.getValueClass()) {
-                        method = methods[ i];
+                for( Method m : objClass.getMethods() ) {
+                    if (m.getName().equals(name)
+                            && m.getParameterTypes().length == 1
+                            && m.getParameterTypes()[ 0] == f.getValueClass()) {
+                        method = m;
                         break;
                     }
                 }
@@ -155,7 +175,7 @@ public class PojoMetaObject extends MetaObject {
         Method method = retrieveGetterMethod(f, obj.getClass());
 
         try {
-            return method.invoke(obj, new Object[0]);
+            return method.invoke(obj); //, new Object[0]);
         } catch (InvocationTargetException e) {
             throw new RuntimeException("Invocation Target Exception setting field [" + f + "] on object [" + obj.getClass() + "]: " + e.getMessage(), e);
         } catch (IllegalAccessException e) {
@@ -169,18 +189,10 @@ public class PojoMetaObject extends MetaObject {
     @Override
     public boolean produces(Object obj) {
         try {
-            Class<?> cl = getObjectClass();
-            if (cl == null) {
-                return false;
-            }
-
-            boolean rc = obj.getClass().equals( cl );
-            if (rc) {
-                return true;
-            }
-        } catch (ClassNotFoundException e) {
-        };
-
-        return false;
+            return obj.getClass().equals( getObjectClass() );
+        }
+        catch (ClassNotFoundException e) {
+            return false;
+        }
     }    
 }
