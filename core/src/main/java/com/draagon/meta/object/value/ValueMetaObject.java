@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class ValueMetaObject extends PojoMetaObject
 {
@@ -43,6 +44,7 @@ public class ValueMetaObject extends PojoMetaObject
     /**
      * Retrieves the object class of an object
      */
+    @Override
     protected Class<?> getObjectClass() throws ClassNotFoundException {
         try { 
             return super.getObjectClass();
@@ -58,6 +60,7 @@ public class ValueMetaObject extends PojoMetaObject
     /**
      * Whether the MetaClass handles the object specified
      */
+    @Override
     public boolean produces(Object obj) {
         
         if (obj == null) {
@@ -104,14 +107,14 @@ public class ValueMetaObject extends PojoMetaObject
     ////////////////////////////////////////////////////
     // PERSISTENCE METHODS
 
-    private ValueObject.Value getAttributeValue(MetaField f, Object obj)  {
+    /*private ValueObject.Value getAttributeValue(MetaField f, Object obj)  {
 
         if (!(obj instanceof ValueObject)) {
             throw new MetaException("MetaObject expected, not [" + obj.getClass().getName() + "]");
         }
 
         return ((ValueObject) obj).getObjectAttributeValue(f.getName());
-    }
+    }*/
 
     protected boolean hasGetterMethod(MetaField f, Class<?> objClass) {
 
@@ -166,6 +169,7 @@ public class ValueMetaObject extends PojoMetaObject
     /**
      * Gets the object attribute represented by this MetaField
      */
+    @Override
     public Object getValue(MetaField f, Object obj) //throws MetaException
     {
         if (!(obj instanceof ValueObject)) {
@@ -182,21 +186,23 @@ public class ValueMetaObject extends PojoMetaObject
     /**
      * Sets the object attribute represented by this MetaField
      */
+    @Override
     public void setValue(MetaField f, Object obj, Object value) //throws MetaException
     {
         if (!(obj instanceof ValueObject)) {
             throw new IllegalArgumentException("ValueObject expected, Invalid object of class [" + obj.getClass().getName() + "]");
         }
 
-        // Convert the value to the appropriate type
-        if (value != null && f.getValueClass() != value.getClass()) {
-            value = DataConverter.toType(f.getDataType(), value);
-        }
+        // Convert the value to the appropriate data type for this field
+        value = DataConverter.toType(f.getDataType(), value);
 
+        // Call the setter method if it exists
         if (hasSetterMethod(f, obj.getClass())) {
             super.setValue(f, obj, value);
-        } else {
-            ((ValueObject) obj).setObjectAttribute(f.getName(), value, f.getDataType());
+        }
+        // Otherwise set the value directly
+        else {
+            ((ValueObject) obj).setObjectAttribute( f.getName(), value );
         }
     }
 }

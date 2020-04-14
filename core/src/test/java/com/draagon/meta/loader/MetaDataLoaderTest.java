@@ -17,10 +17,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
-public class MetaDatatLoaderTest {
+public class MetaDataLoaderTest {
 
-    static final Log log = LogFactory.getLog(MetaDatatLoaderTest.class);
+    static final Log log = LogFactory.getLog(MetaDataLoaderTest.class);
 
     protected MetaDataLoader loader = null;
 
@@ -50,7 +51,7 @@ public class MetaDatatLoaderTest {
 
         assertEquals("1 foo object", 1, loader.getMetaDataOfType(MetaObject.TYPE_OBJECT).size());
 
-        MetaObject mo = (MetaObject) loader.getMetaObject(  "foo" );
+        MetaObject mo = loader.getMetaObject(  "foo" );
         MetaObject mo2 = loader.getChild( "foo", MetaObject.class );
 
         assertEquals( "find foo", mo, mo2 );
@@ -62,6 +63,27 @@ public class MetaDatatLoaderTest {
         log.info( "MetaObject: " + o );
 
         assertEquals( "foo.bar=5", 5, (int) o.getInt( "bar" ));
+    }
+
+    @Test
+    public void testValueObject() {
+
+        MetaObject mo = loader.getMetaObject(  "foo" );
+
+        ValueObject o = (ValueObject) mo.newInstance();
+        ValueObject o2 = (ValueObject) mo.newInstance();
+
+        assertEquals( "o == o2", o, o2 );
+
+        o.setInt( "bar", 6 );
+        assertNotSame( "o == o2", o, o2 );
+
+        o.setString( "bar", "5" );
+        assertEquals( "o == o2", o, o2 );
+
+        // This setter will get ignored and a warning will be logged
+        o.setString( "bad", "what!" );
+        assertEquals( "o == o2", o, o2 );
     }
 
     @Test

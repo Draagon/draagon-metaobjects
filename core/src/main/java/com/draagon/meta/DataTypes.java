@@ -1,5 +1,6 @@
 package com.draagon.meta;
 
+import java.lang.reflect.Array;
 import java.util.Date;
 import java.util.List;
 
@@ -128,5 +129,31 @@ public enum DataTypes {
     }
     public Class<?> getArrayItemClass() {
         return itemClass;
+    }
+
+    public static DataTypes forValueClass( Class<?> c ) {
+
+        if ( c == null ) throw new IllegalArgumentException( "Cannot retrieve DataTypes for null Class" );
+
+        // Iterate through the enum
+        for ( DataTypes t : DataTypes.values() ) {
+
+            // If we are comparing arrays
+            if ( t.isArray()
+                    && List.class.isAssignableFrom( c )
+                        && t.getArrayItemClass().equals( c.getComponentType())) {
+                return t;
+            }
+
+            // If we are comparing non-arrays
+            else if ( !List.class.isAssignableFrom( c ) &&
+                    !t.isObject() && !t.isCustom()
+                    && t.getValueClass().equals( c )) {
+                return t;
+            }
+        }
+
+        // Return this as the default
+        return OBJECT;
     }
 }

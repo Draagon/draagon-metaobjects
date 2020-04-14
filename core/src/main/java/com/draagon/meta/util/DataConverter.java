@@ -23,6 +23,8 @@ public final class DataConverter
 
 	/** Converts the object to the specified MetaFieldType */
 	public static Object toType( DataTypes dataType, Object val ) {
+
+		if ( val == null ) return null;
 		
 		switch( dataType ) {
 			case BOOLEAN: return toBoolean( val );
@@ -396,15 +398,18 @@ public final class DataConverter
 	 */
 	public static Byte toByte( Object val )
 	{
-	    if ( val == null ) return null;
-
-		if ( val instanceof String && ((String) val).isEmpty()) return null;
-	
-	    if ( val instanceof Boolean ) {
+	    if ( val == null ) {
+	    	return null;
+		}
+		else if ( val instanceof Byte ) {
+			return (Byte) val;
+		}
+		else if ( val instanceof String ) {
+			if (((String) val).isEmpty()) return null;
+			try { return Byte.parseByte((String) val); } catch( Exception ignored) {}
+		}
+	    else if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return (byte) 1;
-	    }
-	    else if ( val instanceof Byte ) {
-	      return (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
 	      return (byte) ((Short) val).intValue();
@@ -420,9 +425,6 @@ public final class DataConverter
 	    }
 	    else if ( val instanceof Double ) {
 	      return (byte) ((Double) val).doubleValue();
-	    }
-	    else if ( val instanceof String ) {
-	      try { return Byte.parseByte((String) val); } catch( Exception ignored) {}
 	    }
 	    else if ( val instanceof Date ) {
 	      return (byte) ((Date) val).getTime();
@@ -442,13 +444,13 @@ public final class DataConverter
 	 */
 	public static String toString( Object val )
 	{
-	    if ( val == null ) return null;
-	
-	    if ( val instanceof Date ) {
-	        return "" + ((Date) val ).getTime();
-	      }
-
-	      return val.toString();
+	    if ( val == null ) {
+	    	return null;
+		} else if ( val instanceof Date ) {
+	        return String.valueOf(((Date) val ).getTime());
+	    } else {
+			return val.toString();
+		}
 	} // toString
 	
 	/**
@@ -459,46 +461,46 @@ public final class DataConverter
 	 */
 	public static Date toDate( Object val )
 	{
-	    if ( val == null ) return null;
-
-		if ( val instanceof String && ((String) val).isEmpty()) return null;
-
-	    if ( val instanceof Boolean ) {
-	        if ((Boolean) val) return new Date();
-	        else return new Date( 0 );
-	      }
-	      else if ( val instanceof Byte ) {
-	        return new Date( (long) (Byte) val);
-	      }
-	      else if ( val instanceof Short ) {
-	        return new Date( (long) (Short) val);
-	      }
-	      else if ( val instanceof Integer ) {
-	        return new Date( (long) (Integer) val);
-	      }
-	      else if ( val instanceof Long ) {
-	        return new Date( (long) val);
-	      }
-	      else if ( val instanceof Float ) {
-	        return new Date( (long) ((Float) val ).floatValue() );
-	      }
-	      else if ( val instanceof Double ) {
-	        return new Date( (long) ((Double) val ).doubleValue() );
-	      }
-	      else if ( val instanceof String ) {
-	      	// TODO:  Implement date format support
+	    if ( val == null ) {
+	    	return null;
+		}
+		else if ( val instanceof Date ) {
+			return (Date) val;
+	    }
+		else if ( val instanceof String ) {
+			if (((String)val).isEmpty()) return null;
 			try {
 				return new Date(Long.parseLong((String) val));
 			} catch (NumberFormatException e ) {
 				log.error( "Unable to parse Date, expected long value: " + val );
 			}
-	      }
-	      else if ( val instanceof Date ) {
-	        return (Date) val;
-	      }
-	      // Catch anything else
-	      try { return new Date( Long.parseLong( val.toString() )); }
-	      catch( Exception e ) { return new Date( 0 ); }
+		}
+	    else if ( val instanceof Boolean ) {
+	        if ((Boolean) val) return new Date();
+	        else return new Date( 0 );
+	    }
+	    else if ( val instanceof Byte ) {
+	        return new Date( (long) (Byte) val);
+	    }
+	    else if ( val instanceof Short ) {
+	        return new Date( (long) (Short) val);
+	    }
+	    else if ( val instanceof Integer ) {
+	        return new Date( (long) (Integer) val);
+	    }
+	    else if ( val instanceof Long ) {
+	        return new Date( (long) val);
+	    }
+	    else if ( val instanceof Float ) {
+	        return new Date( (long) ((Float) val ).floatValue() );
+	    }
+	    else if ( val instanceof Double ) {
+	        return new Date( (long) ((Double) val ).doubleValue() );
+	    }
+
+	    // Catch anything else
+		try { return new Date( Long.parseLong( val.toString() )); }
+		catch( Exception e ) { return new Date( 0 ); }
 	} // toDate
 	
 } // Converter
