@@ -1,6 +1,4 @@
-package com.draagon.meta.loader.xml;
-
-import com.draagon.meta.loader.file.MetaDataSources;
+package com.draagon.meta.loader.file;
 
 import java.util.List;
 
@@ -8,10 +6,8 @@ import java.util.List;
  * Handles loading
  *
  * Created by dmealing on 11/30/16.
- *
- * @deprecated Use com.draagon.meta.loader.file.LocalMetaDataSources
  */
-public class LocalMetaDataSources extends com.draagon.meta.loader.xml.MetaDataSources {
+public class LocalMetaDataSources extends MetaDataSources {
 
     public LocalMetaDataSources(String file ) {
         read( file );
