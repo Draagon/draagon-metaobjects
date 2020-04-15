@@ -64,6 +64,7 @@ public final class DataConverter
 			return null;
 		}
 		else if (val instanceof List<?>) {
+			// TODO: Fix this to map to an actual object array
 			return (List<String>) val;
 		}
 		else if ( val instanceof String ) {
@@ -86,6 +87,7 @@ public final class DataConverter
 			return null;
 		}
 		else if (val instanceof List<?>) {
+			// TODO: Fix this to map to an actual object array
 			return (List<Object>) val;
 		}
 		else {
@@ -146,10 +148,6 @@ public final class DataConverter
 	      else if ( val instanceof Double ) {
 			return (Double) val != 0;
 	      }
-	      //else if ( val instanceof String ) {
-	      //  if ( val.toString().length() > 0 && ( val.toString().charAt( 0 ) == 't'
-	      //      || val.toString().charAt( 0 ) == 'T' )) return true;
-	      //}
 	      else if ( val instanceof Date ) {
 			return ((Date) val).getTime() != 0;
 	      }
@@ -214,39 +212,39 @@ public final class DataConverter
 	 */
 	public static Float toFloat( Object val )
 	{
-	    if ( val == null ) return null;
-
-		if ( val instanceof String && ((String) val).isEmpty()) return null;
-	
-	    if ( val instanceof Boolean ) {
-	      if ((Boolean) val) return 1f;
+	    if ( val == null ) {
+	    	return null;
+		}
+		else if ( val instanceof String ) {
+			if (((String) val).isEmpty()) return null;
+			else return Float.parseFloat((String) val);
+		}
+	    else if ( val instanceof Boolean ) {
+	      	if ((Boolean) val) return 1f;
 	    }
 	    else if ( val instanceof Byte ) {
 	      return (float) (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return (float) (Short) val;
+	      	return (float) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return (float) (Integer) val;
+	      	return (float) (Integer) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return (float) (Long) val;
+	      	return (float) (Long) val;
 	    }
 	    else if ( val instanceof Float ) {
-	      return (Float) val;
+	      	return (float) val;
 	    }
 	    else if ( val instanceof Double ) {
-	      return (float) ((Double) val).doubleValue();
+			return (float) (double) val; // downScaleCheck( "double", "float", (double) val, (double) Float.MIN_VALUE+1f, (double) Float.MAX_VALUE-1f );
 	    }
-	    else if ( val instanceof String ) {
-	      try { return Float.parseFloat((String) val); } catch( Exception ignored) {}
-	    }
-	    else if ( val instanceof Date ) {
-	      return (float) ((Date) val).getTime();
+		else if ( val instanceof Date ) {
+	     	 return (float) ((Date) val).getTime();
 	    }
 	    else {
-	      try { return Float.parseFloat(val.toString()); } catch( Exception ignored) {}
+	      	return Float.parseFloat(val.toString());
 	    }
 	
 	    return (float) 0;
@@ -260,39 +258,39 @@ public final class DataConverter
 	 */
 	public static Long toLong( Object val )
 	{
-	    if ( val == null ) return null;
-
-		if ( val instanceof String && ((String) val).isEmpty()) return null;
-	
-	    if ( val instanceof Boolean ) {
-	      if ((Boolean) val) return 1L;
+	    if ( val == null ) {
+	    	return null;
+		}
+		else if ( val instanceof String ) {
+			if (((String) val).isEmpty()) return null;
+			else return Long.parseLong((String) val);
+		}
+	    else if ( val instanceof Boolean ) {
+	      	if ((Boolean) val) return 1L;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return (long) (Byte) val;
+	      	return (long) (Byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return (long) (Short) val;
+	      	return (long) (Short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return (long) (Integer) val;
+	      	return (long) (Integer) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return (Long) val;
+	      	return (long) val;
 	    }
 	    else if ( val instanceof Float ) {
-	      return (long) ((Float) val).floatValue();
+			return (long) (float) val;
 	    }
 	    else if ( val instanceof Double ) {
-	      return (long) ((Double) val).doubleValue();
-	    }
-	    else if ( val instanceof String ) {
-	      try { return Long.parseLong((String) val); } catch( Exception ignored) {}
+			return (long) downScaleCheck( "double", "long", (double) val, (double) Long.MIN_VALUE, (double) Long.MAX_VALUE );
 	    }
 	    else if ( val instanceof Date ) {
-	      return ((Date) val).getTime();
+	      	return ((Date) val).getTime();
 	    }
 	    else {
-	      try { return Long.parseLong(val.toString()); } catch( Exception ignored) {}
+	    	return Long.parseLong(val.toString());
 	    }
 	
 	    return 0L;
@@ -306,44 +304,44 @@ public final class DataConverter
 	 */
 	public static Integer toInt( Object val )
 	{
-	    if ( val == null ) return null;
-
-		if ( val instanceof String && ((String) val).isEmpty()) return null;
-	
-	    if ( val instanceof Boolean ) {
-	      if ((Boolean) val) return 1;
+	    if ( val == null ) {
+	    	return null;
+		}
+		else if ( val instanceof Integer ) {
+			return (int) val;
+		}
+		else if ( val instanceof String ) {
+			if (((String) val).isEmpty()) return null;
+			else return Integer.parseInt((String)val);
+		}
+	    else if ( val instanceof Boolean ) {
+	      	if ((Boolean) val) return 1;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return (int) (Byte) val;
+	      	return (int) (byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return (int) (Short) val;
-	    }
-	    else if ( val instanceof Integer ) {
-	      return (int) val;
+	      	return (int) (short) val;
 	    }
 	    else if ( val instanceof Long ) {
-	      return (int) val;
+			return (int) downScaleCheck( "long", "int", (long) val, (long) Integer.MIN_VALUE, (long) Integer.MAX_VALUE );
 	    }
 	    else if ( val instanceof Float ) {
-	      return (int) val;
+			return (int) downScaleCheck( "float", "int", (double) (float) val, (double) Integer.MIN_VALUE, (double) Integer.MAX_VALUE );
 	    }
 	    else if ( val instanceof Double ) {
-	      return (int) val;
-	    }
-	    else if ( val instanceof String ) {
-	      try { return Integer.parseInt((String) val); } catch( Exception ignored) {}
-	    }
+			return (int) downScaleCheck( "double", "int", (double) val, (double) Integer.MIN_VALUE, (double) Integer.MAX_VALUE );
+		}
 	    else if ( val instanceof Date ) {
-	      return (int) ((Date) val).getTime();
+			return (int) downScaleCheck( "Date", "int", ((Date) val).getTime(), (long) Integer.MIN_VALUE, (long) Integer.MAX_VALUE );
 	    }
 	    else {
-	      try { return Integer.parseInt(val.toString()); } catch( Exception ignored) {}
+	      	return Integer.parseInt(val.toString());
 	    }
 	
 	    return 0;
 	} // toInt
-	
+
 	/**
 	 * Convert the object value to short value
 	 * 
@@ -352,39 +350,39 @@ public final class DataConverter
 	 */
 	public static Short toShort( Object val )
 	{
-	    if ( val == null ) return null;
-
-		if ( val instanceof String && ((String) val).isEmpty()) return null;
-	
-	    if ( val instanceof Boolean ) {
-	      if ((Boolean) val) return (short) 1;
+	    if ( val == null ) {
+	    	return null;
+		}
+		else if ( val instanceof String ) {
+			if (((String) val).isEmpty()) return null;
+			else return Short.parseShort((String) val);
+		}
+	    else if ( val instanceof Boolean ) {
+	      	if ((Boolean) val) return (short) 1;
 	    }
 	    else if ( val instanceof Byte ) {
-	      return (short) (byte) val;
+	      	return (short) (byte) val;
 	    }
 	    else if ( val instanceof Short ) {
-	      return (Short) val;
+	      	return (short) val;
 	    }
 	    else if ( val instanceof Integer ) {
-	      return (short) ((Integer) val).intValue();
+			return (short) downScaleCheck( "int", "short", (long) (int) val, (long) Short.MIN_VALUE, (long) Short.MAX_VALUE );
 	    }
 	    else if ( val instanceof Long ) {
-	      return (short) ((Long) val).longValue();
+			return (short) downScaleCheck( "long", "short", (long) val, (long) Short.MIN_VALUE, (long) Short.MAX_VALUE );
 	    }
 	    else if ( val instanceof Float ) {
-	      return (short) ((Float) val).floatValue();
+			return (short) downScaleCheck( "float", "short", (double) (float) val, (double) Short.MIN_VALUE, (double) Short.MAX_VALUE );
 	    }
 	    else if ( val instanceof Double ) {
-	      return (short) ((Double) val).doubleValue();
-	    }
-	    else if ( val instanceof String ) {
-	      try { return Short.parseShort((String) val); } catch( Exception ignored) {}
+			return (short) downScaleCheck( "double", "short", (double) val, (double) Short.MIN_VALUE, (double) Short.MAX_VALUE );
 	    }
 	    else if ( val instanceof Date ) {
-	      return (short) ((Date) val).getTime();
+			return (short) downScaleCheck( "Date", "short", (long) ((Date) val).getTime(), (long) Short.MIN_VALUE, (long) Short.MAX_VALUE );
 	    }
 	    else {
-	      try { return Short.parseShort(val.toString()); } catch( Exception ignored) {}
+	      	return Short.parseShort(val.toString());
 	    }
 	
 	    return (short) 0;
@@ -406,31 +404,31 @@ public final class DataConverter
 		}
 		else if ( val instanceof String ) {
 			if (((String) val).isEmpty()) return null;
-			try { return Byte.parseByte((String) val); } catch( Exception ignored) {}
+			return Byte.parseByte((String) val);
 		}
 	    else if ( val instanceof Boolean ) {
 	      if ((Boolean) val) return (byte) 1;
 	    }
 	    else if ( val instanceof Short ) {
-	      return (byte) ((Short) val).intValue();
+			return (byte) downScaleCheck( "short", "byte", (long) (short) val, (long) Byte.MIN_VALUE, (long) Byte.MAX_VALUE );
 	    }
 	    else if ( val instanceof Integer ) {
-	      return (byte) ((Integer) val).intValue();
+			return (byte) downScaleCheck( "int", "byte", (long) (int) val, (long) Byte.MIN_VALUE, (long) Byte.MAX_VALUE );
 	    }
 	    else if ( val instanceof Long ) {
-	      return (byte) ((Long) val).longValue();
+			return (byte) downScaleCheck( "long", "byte", (long) val, (long) Byte.MIN_VALUE, (long) Byte.MAX_VALUE );
 	    }
 	    else if ( val instanceof Float ) {
-	      return (byte) ((Float) val).floatValue();
+			return (byte) downScaleCheck( "float", "byte", (double) (float) val, (double) Byte.MIN_VALUE, (double) Byte.MAX_VALUE );
 	    }
 	    else if ( val instanceof Double ) {
-	      return (byte) ((Double) val).doubleValue();
+			return (byte) downScaleCheck( "double", "byte", (double) val, (double) Byte.MIN_VALUE, (double) Byte.MAX_VALUE );
 	    }
 	    else if ( val instanceof Date ) {
-	      return (byte) ((Date) val).getTime();
+			return (byte) downScaleCheck( "Date", "byte", ((Date) val).getTime(), (long) Byte.MIN_VALUE, (long) Byte.MAX_VALUE );
 	    }
 	    else {
-	      try { return Byte.parseByte(val.toString()); } catch( Exception ignored) {}
+	      	return Byte.parseByte(val.toString());
 	    }
 	
 	    return (byte) 0;
@@ -469,11 +467,7 @@ public final class DataConverter
 	    }
 		else if ( val instanceof String ) {
 			if (((String)val).isEmpty()) return null;
-			try {
-				return new Date(Long.parseLong((String) val));
-			} catch (NumberFormatException e ) {
-				log.error( "Unable to parse Date, expected long value: " + val );
-			}
+			else return new Date(Long.parseLong((String) val));
 		}
 	    else if ( val instanceof Boolean ) {
 	        if ((Boolean) val) return new Date();
@@ -495,12 +489,27 @@ public final class DataConverter
 	        return new Date( (long) ((Float) val ).floatValue() );
 	    }
 	    else if ( val instanceof Double ) {
-	        return new Date( (long) ((Double) val ).doubleValue() );
+			return new Date( (long) downScaleCheck( "double", "long", (double) val, (double) Long.MIN_VALUE, (double) Long.MAX_VALUE ));
 	    }
 
 	    // Catch anything else
-		try { return new Date( Long.parseLong( val.toString() )); }
-		catch( Exception e ) { return new Date( 0 ); }
+		return new Date( Long.parseLong( val.toString() ));
 	} // toDate
-	
+
+	/** Check down scaling for decimals */
+	private static double downScaleCheck( String from, String to, double val, double min, double max ) {
+		if ( val > max  || val < min) {
+			throw new NumberFormatException( "Cannot convert "+from+" to "+to+" as it exceeds the max or min value: " + val );
+		}
+		return val;
+	}
+
+	/** Check down scaling for numbers */
+	private static long downScaleCheck( String from, String to, long val, long min, long max ) {
+		if ( val > max  || val < min) {
+			throw new NumberFormatException( "Cannot convert "+from+" to "+to+" as it exceeds the max or min value: " + val );
+		}
+		return val;
+	}
+
 } // Converter
