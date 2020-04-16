@@ -192,18 +192,25 @@ public abstract class MetaDataReader {
 
             // Try to find it by the provided name in the 'super' attribute
             if (superData == null) {
+                String pkg = null;
+                String sn = null;
                 try {
+                    // TODO:  This shouldn't have needed to be this way
+                    pkg = packageName;
                     if ( parent != null
+                            && !(parent instanceof MetaDataLoader)
                             && !parent.getPackage().isEmpty()
-                            && !parent.getPackage().equals( packageName )) {
-                        packageName = parent.getPackage();
+                            && !parent.getPackage().equals( pkg )) {
+                        pkg = parent.getPackage();
                     }
-                    superName = MetaDataUtil.expandPackageForMetaDataRef(packageName, superName);
-                    superData = getLoader().getMetaDataByName(types.getBaseClass(), superName);
+                    sn = MetaDataUtil.expandPackageForMetaDataRef(pkg, superName);
+                    superData = getLoader().getMetaDataByName(types.getBaseClass(), sn);
                 }
                 catch (MetaDataNotFoundException e) {
-                    log.error("Invalid MetaData [" +typeName+ "][" +name+ "], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
-                    throw new MetaException("Invalid MetaData [" +typeName+ "][" +name+ "], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
+                    //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())
+                    //        +", pkg="+pkg+", superName="+superName+", sn="+sn);
+                    log.error("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent+"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
+                    throw new MetaException("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent+"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
                 }
             }
         }
