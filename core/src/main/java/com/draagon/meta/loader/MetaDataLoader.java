@@ -10,6 +10,7 @@ import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +27,9 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     private final static Log log = LogFactory.getLog(MetaDataLoader.class);
 
     public final static String TYPE_LOADER = "loader";
-
     public final static String SUBTYPE_MANUAL = "manual";
+
+    private final MetaDataConfig config = new MetaDataConfig();
 
     private boolean isRegistered = false;
     private boolean isInitialized = false;
@@ -56,7 +58,12 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * @return The created MetaDataLoader
      */
     public static MetaDataLoader createManual( String name ) {
-        return new MetaDataLoader( "manual", name ) {};
+        return new MetaDataLoader( SUBTYPE_MANUAL, name ) {};
+    }
+
+    /** Return the MetaData Configuration */
+    public MetaDataConfig getConfig() {
+        return config;
     }
 
     /**

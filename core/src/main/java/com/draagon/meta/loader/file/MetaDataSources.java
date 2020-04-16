@@ -19,8 +19,18 @@ public class MetaDataSources {
     // This is only used when we're not loading from a classpath
     private String sourceDir = null;
 
+    /** Holds the SourceData */
+    public static class SourceData {
+        public final String sourceName;
+        public final String sourceData;
+        public SourceData( String sourceName, String sourceData ) {
+            this.sourceName = sourceName;
+            this.sourceData = sourceData;
+        }
+    }
+
     // Stores the loaded metadata files (in memory)
-    private List<String> sourceData = new ArrayList<>();
+    private List<SourceData> sourceData = new ArrayList<>();
 
     protected MetaDataSources() {
     }
@@ -141,14 +151,14 @@ public class MetaDataSources {
 
         try {
             String data = new Scanner( is ).useDelimiter("\\Z").next();
-            if ( !data.isEmpty() ) sourceData.add( data );
+            if ( !data.isEmpty() ) sourceData.add( new SourceData( file, data ));
         }
         catch (Exception e ) {
             log.error( "Error reading from Meta XML File ["+ file + "]: " + e.getMessage(), e );
         }
     }
 
-    List<String> getSourceData() {
+    List<SourceData> getSourceData() {
         return sourceData;
     }
 }

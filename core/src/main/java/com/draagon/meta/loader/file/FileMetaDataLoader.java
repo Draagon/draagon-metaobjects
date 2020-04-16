@@ -6,24 +6,15 @@
  */
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
-import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.util.MetaDataUtil;
-import com.draagon.meta.util.xml.XMLFileReader;
+import com.draagon.meta.loader.file.xml.XMLMetaDataReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 
 /**
@@ -33,39 +24,8 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     private static Log log = LogFactory.getLog(FileMetaDataLoader.class);
 
-    /** Used to store the MetaData types and respective Java classes */
-    public static class MetaDataTypes {
-
-        public final Class<? extends MetaData> baseClass;
-        private final Map<String,Class<? extends MetaData>> classes = new HashMap<String,Class<? extends MetaData>>();
-        private String defaultType = null;
-
-        public MetaDataTypes( Class<? extends MetaData> baseClass ) {
-            this.baseClass = baseClass;
-        }
-
-        public void put( String name, Class<? extends MetaData> clazz, boolean def ) {
-            classes.put( name, clazz );
-            if ( def ) defaultType = name;
-        }
-
-        public Class<? extends MetaData> get( String name ) {
-            return classes.get( name );
-        }
-
-        public Class<? extends MetaData> getDefaultTypeClass() {
-            if ( defaultType == null ) return null;
-            return get( defaultType );
-        }
-
-        public String getDefaultType() {
-            return defaultType;
-        }
-    }
-
     private String typesRef = null;
     private boolean typesLoaded = false;
-    private final ConcurrentHashMap<String, MetaDataTypes> typesMap = new ConcurrentHashMap<String,MetaDataTypes>();
     private String sourceDir = null;
     private final List<MetaDataSources> sources = new ArrayList<MetaDataSources>();
 
@@ -77,7 +37,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
         super( "file", name );
     }
 
-    public String getDefaultMetaDataTypes() {
+    public String getDefaultTypesRef() {
         return "com/draagon/meta/loader/meta.types.xml";
     }
 
@@ -127,20 +87,24 @@ public class FileMetaDataLoader extends MetaDataLoader {
         super.init();
 
         try {
-            if ( !typesLoaded && getTypesRef() != null ) {
-                loadTypesFromFile( getTypesRef() );
+            if ( getConfig().getTypeNames().isEmpty() ) {
+
+                if ( getTypesRef() != null ) {
+                    loadTypesFromFile(getTypesRef());
+                }
+                else if ( getDefaultTypesRef() != null ) {
+                    loadTypesFromFile( getDefaultTypesRef() );
+                }
             }
         } catch (MetaException e) {
             log.error("Could not load metadata types [" + getTypesRef() + "]: " + e.getMessage());
             throw new IllegalStateException("Could not load metadata types [" + getTypesRef() + "]", e);
         }
 
-        // Load all the Meta sources
-        for (MetaDataSources s : sources ) {
-            for ( String data : s.getSourceData() ) {
-                loadFromStream( new ByteArrayInputStream( data.getBytes() ));
-            }
-        }
+        // Load all the source data
+        sources.forEach( s -> s.getSourceData().forEach( d -> {
+            getReaderForFile( d.sourceName ).loadFromStream( d.sourceName, new ByteArrayInputStream( d.sourceData.getBytes() ));
+        }));
 
         return this;
     }
@@ -205,13 +169,25 @@ public class FileMetaDataLoader extends MetaDataLoader {
         }
 
         try {
-            loadTypesFromStream(is);
-        } catch (MetaException e) {
+            getReaderForFile( file ).loadTypesFromStream( file, is );
+        }
+        catch (MetaException e) {
             log.error("Meta Types XML [" + file + "]: " + e.getMessage());
             throw new MetaException("The Types XML file [" + file + "] could not be loaded: " + e.getMessage(), e);
         }
 
         typesLoaded = true;
+    }
+
+    /** Load the MetaDataReader for the specified file */
+    protected MetaDataReader getReaderForFile( String file ) {
+
+        if ( file.endsWith( ".xml" ))
+            return new XMLMetaDataReader( this );
+        else if ( file.endsWith( ".json" ))
+            return new XMLMetaDataReader( this );
+        else
+            throw new MetaDataException( "There is no MetaDataReader supporting the file: " + file );
     }
 
     /**

@@ -776,7 +776,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * Create a newInstance of the specified MetaData class given the specified type, subType, and name
      * @return The newly created MetaData instance
      */
-    protected MetaData newInstanceFromClass( Class<? extends MetaData> c, String type, String subType, String name) {
+    public MetaData newInstanceFromClass( Class<? extends MetaData> c, String type, String subType, String name) {
 
         MetaData v;
 
