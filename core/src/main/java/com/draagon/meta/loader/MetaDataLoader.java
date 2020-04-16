@@ -29,6 +29,7 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     public final static String TYPE_LOADER = "loader";
     public final static String SUBTYPE_MANUAL = "manual";
 
+    // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
     private final MetaDataConfig config = new MetaDataConfig();
 
     private boolean isRegistered = false;

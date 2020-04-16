@@ -183,6 +183,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
     /** Load the MetaDataReader for the specified file */
     protected MetaDataReader getReaderForFile( String file ) {
 
+        // TODO: This needs to be injectable and configurable
         if ( file.endsWith( ".xml" ))
             return new XMLMetaDataReader( this, file );
         else if ( file.endsWith( ".json" ))

@@ -187,24 +187,15 @@ public abstract class MetaDataReader {
                     superData = getLoader().getMetaDataByName(types.getBaseClass(), packageName + MetaDataLoader.PKG_SEPARATOR + superName);
                 }
             } catch (MetaDataNotFoundException e) {
+                // TODO:  Should this throw a real exception
                 log.debug("Could not find MetaData [" + packageName + MetaDataLoader.PKG_SEPARATOR + superName + "], assuming fully qualified");
             }
 
             // Try to find it by the provided name in the 'super' attribute
             if (superData == null) {
-                String pkg = null;
-                String sn = null;
                 try {
-                    // TODO:  This shouldn't have needed to be this way
-                    pkg = packageName;
-                    if ( parent != null
-                            && !(parent instanceof MetaDataLoader)
-                            && !parent.getPackage().isEmpty()
-                            && !parent.getPackage().equals( pkg )) {
-                        pkg = parent.getPackage();
-                    }
-                    sn = MetaDataUtil.expandPackageForMetaDataRef(pkg, superName);
-                    superData = getLoader().getMetaDataByName(types.getBaseClass(), sn);
+                    String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
+                    superData = getLoader().getMetaDataByName(types.getBaseClass(), fullyQualifiedSuperName);
                 }
                 catch (MetaDataNotFoundException e) {
                     //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())
@@ -222,6 +213,24 @@ public abstract class MetaDataReader {
         }
 
         return superData;
+    }
+
+    /** Get the fully qualified metadata name for the Super MetaData */
+    protected String getFullyQualifiedSuperMetaDataName(MetaData parent, String packageName, String superName) {
+
+        if (shouldUseParentPackage(parent, packageName)) {
+            packageName = parent.getPackage();
+        }
+        return MetaDataUtil.expandPackageForMetaDataRef(packageName, superName);
+    }
+
+    /** Determine if the packageName should change based on the parent metadata */
+    protected boolean shouldUseParentPackage( MetaData parent, String packageName ) {
+        // TODO:  This may need to be refactored
+        return parent != null
+                && !(parent instanceof MetaDataLoader)
+                && !parent.getPackage().isEmpty()
+                && !parent.getPackage().equals( packageName );
     }
 
     /** Create new MetaData */

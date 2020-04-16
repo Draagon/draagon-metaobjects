@@ -133,7 +133,7 @@ public class XMLMetaDataReader extends XMLMetaDataReaderBase {
             // PARSE THE ITEMS XML BLOCK
 
             // Look for the <items> element
-            Collection<Element> elements = getElementsOfName(doc, "metadata");
+            Collection<Element> elements = getElementsOfName(doc, "metadata"); // or "types"
             if (elements.isEmpty()) {
                 throw new MetaException( "The root 'meta' element was not found in file ["+getFilename()+"]" );
             }
