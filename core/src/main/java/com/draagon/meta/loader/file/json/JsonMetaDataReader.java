@@ -16,19 +16,19 @@ public class JsonMetaDataReader extends MetaDataReader {
 
     private static Log log = LogFactory.getLog(JsonMetaDataReader.class);
 
-    public JsonMetaDataReader( FileMetaDataLoader loader ) {
-        super( loader );
+    public JsonMetaDataReader( FileMetaDataLoader loader, String filename ) {
+        super( loader, filename );
     }
 
     @Override
-    public MetaDataConfig loadTypesFromStream(String filename, InputStream is) {
-        throw new UnsupportedOperationException( "JsonMetaData Reader is not yet functional [" + filename + "]" );
+    public MetaDataConfig loadTypesFromStream( InputStream is) {
+        throw new UnsupportedOperationException( "JsonMetaData Reader is not yet functional [" + getFilename() + "]" );
         //return getConfig();
     }
 
     @Override
-    public MetaDataConfig loadFromStream(String filename, InputStream is) {
-        throw new UnsupportedOperationException( "JsonMetaData Reader is not yet functional [" + filename + "]" );
+    public MetaDataConfig loadFromStream( InputStream is) {
+        throw new UnsupportedOperationException( "JsonMetaData Reader is not yet functional [" + getFilename() + "]" );
         //return getConfig();
     }
 }

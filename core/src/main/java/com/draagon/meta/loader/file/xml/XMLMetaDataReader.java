@@ -1,19 +1,13 @@
 package com.draagon.meta.loader.file.xml;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.MetaDataReader;
 
-import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.util.xml.XMLFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,125 +21,75 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
-
-public class XMLMetaDataReader extends MetaDataReader {
+public class XMLMetaDataReader extends XMLMetaDataReaderBase {
 
     private static Log log = LogFactory.getLog(XMLMetaDataReader.class);
 
-    public XMLMetaDataReader( FileMetaDataLoader loader ) {
-        super( loader );
+    public final static String ATTR_PACKAGE     = "package";
+    public final static String ATTR_NAME        = "name";
+    public final static String ATTR_CLASS       = "class";
+    public final static String ATTR_TYPES       = "types";
+    public final static String ATTR_TYPE        = "type";
+    public final static String ATTR_SUPER       = "super";
+
+    protected static List<String> reservedAttributes = new ArrayList<>();
+    static {
+        reservedAttributes.add( ATTR_PACKAGE );
+        reservedAttributes.add( ATTR_NAME );
+        reservedAttributes.add( ATTR_CLASS );
+        reservedAttributes.add( ATTR_TYPES );
+        reservedAttributes.add( ATTR_TYPE );
+        reservedAttributes.add( ATTR_SUPER );
+    }
+
+    public XMLMetaDataReader( FileMetaDataLoader loader, String filename ) {
+        super( loader, filename );
     }
 
     /**
      * Loads all the classes specified in the Filename
      */
     @Override
-    public MetaDataConfig loadTypesFromStream( String filename, InputStream is) {
-
-        Document doc = null;
+    public MetaDataConfig loadTypesFromStream( InputStream is) {
 
         try {
-            doc = XMLFileReader.loadFromStream(is);
+            Document doc = XMLFileReader.loadFromStream(is);
+
+            // PARSE THE TYPES XML
+            Collection<Element> elements = getElementsOfName(doc, ATTR_TYPES);
+            if (elements.isEmpty())
+                throw new MetaException("The root 'types' element was not found in file ["+getFilename()+"]");
+
+            loadAllTypes(elements.iterator().next());
+        }
+        catch (SAXException e) {
+            throw new MetaException("Parse error loading MetaData in file ["+getFilename()+"]: " + e.getMessage(), e);
         }
         catch (IOException e) {
-            log.error("IO Error loading Types XML from file ["+filename+"]: " + e.getMessage());
-            throw new MetaException("IO Error loading Types XML ["+filename+"]: " + e.getMessage(), e);
-        }
-
-        //////////////////////////////////////////////////////
-        // PARSE THE TYPES XML
-
-        try {
-            // Look for the <items> element
-            Collection<Element> elements = getElementsOfName(doc, "types");
-
-            if (elements.isEmpty())
-                throw new MetaException("The root 'types' element was not found");
-
-            loadAllTypes( filename, elements.iterator().next());
-
-        } catch (SAXException e) {
-            throw new MetaException("Parse error loading MetaData: " + e.getMessage(), e);
+            log.error("IO Error loading Types XML from file ["+getFilename()+"]: " + e.getMessage());
+            throw new MetaException("IO Error loading Types XML ["+getFilename()+"]: " + e.getMessage(), e);
         }
 
         return getConfig();
     }
 
     /**
-     * Gets all elements within <types> that have a sub element <type>
-     */
-    private List<Element> getElementsWithType( String filename, Element n ) {
-
-        List<Element> elements = new ArrayList<Element>();
-
-        // Get the elements under <type>
-        NodeList list = n.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (node instanceof Element) {
-
-                // Look for a sub element with <type>
-                NodeList list2 = node.getChildNodes();
-                for (int i2 = 0; i2 < list2.getLength(); i2++) {
-                    Node node2 = list2.item(i2);
-                    if (node2 instanceof Element
-                            && node2.getNodeName().equals( ATTR_TYPE )) {
-
-                        // A <type> element was found, so add this name
-                        elements.add( (Element) node );
-                        break;
-                    }
-                }
-            }
-        }
-
-        return elements;
-    }
-
-    /**
      * Loads the specified group types
      */
-    protected synchronized void loadAllTypes( String filename, Element el) throws MetaException, SAXException {
+    protected void loadAllTypes( Element el) throws MetaException, SAXException {
 
         // Get all elements that have <type> elements
-        for( Element e : getElementsWithType( filename, el )) {
-
-            String name = e.getNodeName();
-
-            // Get the TypeConfig with the specified element name
-            TypeConfig typeConfig = getLoader().getConfig().getTypeConfig( name );
-
-            // If it doesn't exist, then create it and check for the "class" attribute
-            if ( typeConfig == null ) {
-
-                // Get the base class for the given element
-                String clazz = e.getAttribute( "class" );
-                if ( clazz == null || clazz.isEmpty() ) {
-                    throw new MetaException( "MetaData Type [" + name + "] has no 'class' attribute specified");
-                }
-
-                try {
-                    Class<? extends MetaData> baseClass = (Class<? extends MetaData>) Class.forName(clazz);
-
-                    // Add a new TypeConfig and add to the mapping
-                    typeConfig = getConfig().createTypeConfig( name, baseClass );
-                }
-                catch( ClassNotFoundException ex ) {
-                    throw new MetaException( "MetaData Type [" + name + "] has an invalid 'class' attribute: " + ex.getMessage(), ex );
-                }
-            }
+        for( Element e: getElements( el )) {
 
             // Load all the types for the specific element type
-            loadTypes( filename, e, typeConfig );
+            loadSubTypes( e, getOrCreateTypeConfig( e.getNodeName(), e.getAttribute( ATTR_CLASS ) ));
         }
     }
 
     /**
      * Loads the specified group types
      */
-    protected void loadTypes(String filename, Element el, TypeConfig typeConfig)
-            throws MetaException, SAXException {
+    protected void loadSubTypes(Element el, TypeConfig typeConfig ) throws MetaException, SAXException {
 
         String section = el.getNodeName();
 
@@ -169,7 +113,7 @@ public class XMLMetaDataReader extends MetaDataReader {
                 typeConfig.addSubType(name, tcl, "true".equals( def ));
             }
             catch (ClassNotFoundException e) {
-                throw new MetaException("MetaData file ["+filename+"] has Type:SubType [" +section+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +section+":"+name+ "] with invalid class: " + e.getMessage());
             }
         }
     }
@@ -178,229 +122,73 @@ public class XMLMetaDataReader extends MetaDataReader {
      * Loads all the classes specified in the Filename
      */
     @Override
-    public MetaDataConfig loadFromStream( String filename, InputStream is) throws MetaException {
+    public MetaDataConfig loadFromStream( InputStream is) throws MetaException {
 
         Document doc = null;
 
         try {
             doc = XMLFileReader.loadFromStream(is);
+
+            //////////////////////////////////////////////////////
+            // PARSE THE ITEMS XML BLOCK
+
+            // Look for the <items> element
+            Collection<Element> elements = getElementsOfName(doc, "metadata");
+            if (elements.isEmpty()) {
+                throw new MetaException( "The root 'meta' element was not found in file ["+getFilename()+"]" );
+            }
+
+            Element pkgEl = elements.iterator().next();
+
+            // Load any types specified in the Metadata XML
+            Collection<Element> typeElements = getElementsOfName(pkgEl, ATTR_TYPES);
+            if (typeElements.size() > 0) {
+                loadAllTypes( typeElements.iterator().next() ); // Load inner tags
+            }
+
+            // Set default package name
+            String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
+            setDefaultPackageName(defPkg);
+
+            // Parse the metadata elements
+            parseMetaData( getLoader(), pkgEl, true );
+        }
+        catch (SAXException e) {
+            throw new MetaException("Parse error loading MetaData from file ["+getFilename()+"]: " + e.getMessage(), e);
         }
         catch (IOException e) {
-            log.error("Error loading MetaData as XML from ["+filename+"]: " + e.getMessage());
-            throw new MetaException("Error loading Meta XML from ["+filename+"]: " + e.getMessage(), e);
+            log.error("Error loading MetaData as XML from ["+getFilename()+"]: " + e.getMessage());
+            throw new MetaException("Error loading Meta XML from ["+getFilename()+"]: " + e.getMessage(), e);
         }
         finally {
             try { is.close(); } catch (Exception e) {}
         }
 
-        //////////////////////////////////////////////////////
-        // PARSE THE ITEMS XML BLOCK
-
-        try {
-            // Look for the <items> element
-            Collection<Element> elements = getElementsOfName(doc, "metadata");
-            if (elements.isEmpty()) {
-                throw new MetaException("The root 'meta' element was not found");
-            }
-
-            Element itemdocElement = elements.iterator().next();
-
-            String defaultPackageName = itemdocElement.getAttribute("package");
-            if (defaultPackageName == null || defaultPackageName.trim().length() == 0) {
-                defaultPackageName = "";
-            }
-            //throw new MetaException( "The Meta XML had no 'package' attribute defined" );
-
-            // Load the types
-            //String types = itemdocElement.getAttribute("types");
-            //if (types != null && types.length() > 0) {
-            //    loadTypesFromFile( filename, types);
-            //}
-
-            // Load any types specified in the Metadata XML
-            try {
-                // Look for the <items> element
-                Collection<Element> typeElements = getElementsOfName(itemdocElement, "types");
-                if (typeElements.size() > 0) {
-                    Element typeEl = typeElements.iterator().next();
-
-                    //String typeFile = typeEl.getAttribute("file");
-                    //if (typeFile.length() > 0) {
-                    //    loadTypesFromFile(typeFile);
-                    //} else {
-                        loadAllTypes( filename, typeEl ); // Load inner tags
-                    //}
-                }
-            } catch (SAXException e) {
-                throw new MetaException("Parse error loading types MetaData from file ["+filename+"]: " + e.getMessage(), e);
-            }
-
-            // Parse the metadata elements
-            parseMetaData( filename, defaultPackageName, getLoader(), itemdocElement, true );
-        }
-        catch (SAXException e) {
-            throw new MetaException("Parse error loading MetaData: " + e.getMessage(), e);
-        }
-
         return getConfig();
     }
 
-    protected void parseMetaData(String filename, String defaultPackageName, MetaData parent, Element element, boolean isRoot )
-            throws SAXException {
+    /** Parse the metadata */
+    protected void parseMetaData( MetaData parent, Element element, boolean isRoot ) throws SAXException {
 
         // Iterate through all elements
         for ( Element el : getElements( element )) {
 
-            String nodeName = el.getNodeName();
+            String typeName     = el.getNodeName();
+            String subTypeName  = el.getAttribute(ATTR_TYPE);
+            String name         = el.getAttribute(ATTR_NAME);
+            String packageName  = el.getAttribute(ATTR_PACKAGE);
+            String superName    = el.getAttribute(ATTR_SUPER);
 
-            // Get the TypeConfig map for this element
-            TypeConfig types = getConfig().getTypeConfig( nodeName );
-            if ( types == null ) {
-                // TODO:  What is the best behavior here?
-                log.warn( "Ignoring element [" +nodeName+ "] found on parent [" +parent+ "] in file [" +filename+ "]" );
+            // NOTE:  This exists for backwards compatibility
+            // TODO:  Handle this based on a configuration of the level of error messages
+            if ( getConfig().getTypeConfig( typeName ) == null ) {
+                if (isRoot) log.warn("Unknown type [" +typeName+ "] found on loader [" +getLoader().getName()+ "] in file [" +getFilename()+ "]");
+                else log.warn("Unknown type [" +typeName+ "] found on parent metadata [" +parent+ "] in file [" +getFilename()+ "]");
                 continue;
             }
 
-            // Get the item name
-            String name = el.getAttribute(ATTR_NAME);
-            if (name == null || name.equals("")) {
-                throw new MetaException("MetaData [" +nodeName+ "] found on parent [" +parent+ "] had no name specfied in file ["+filename+"]");
-            }
-
-            // Get the packaging name
-            String packageName = el.getAttribute("package");
-            if (packageName == null || packageName.trim().isEmpty()) {
-                // If not found, then use the default
-                packageName = defaultPackageName;
-            } else {
-                // Convert any relative paths to the full package path
-                packageName = expandPackageForPath( defaultPackageName, packageName );
-            }
-
-            // Load or get the MetaData
-            MetaData md = null;
-            boolean isNew = false;
-
-            try {
-                if ( isRoot && packageName.length() > 0 ) {
-                    md = parent.getChild( packageName + MetaDataLoader.PKG_SEPARATOR + name, types.getBaseClass() );
-                } else {
-                    md = parent.getChild( name, types.getBaseClass() );
-
-                    // If it's not a child from the same parent, we need to wrap it
-                    if ( md.getParent() != parent ) {
-                        md = md.overload();
-                        isNew = true;
-                    }
-                }
-            } catch (MetaDataNotFoundException e) {
-            }
-
-            // If this MetaData doesn't exist yet, then we need to create it
-            if (md == null) {
-
-                isNew = true;
-
-                // Set the SuperClass if one is defined
-                MetaData superData = null;
-                String superStr = el.getAttribute(ATTR_SUPER);
-
-                // If a super class was specified
-                if (superStr.length() > 0) {
-
-                    // Try to find it with the name prepended if not fully qualified
-                    try {
-                        if (superStr.indexOf(MetaDataLoader.PKG_SEPARATOR) < 0 && packageName.length() > 0) {
-                            superData = getLoader().getMetaDataByName( types.getBaseClass(), packageName + MetaDataLoader.PKG_SEPARATOR + superStr );
-                        }
-                    } catch (MetaObjectNotFoundException e) {
-                        log.debug( "Could not find MetaData [" + packageName + MetaDataLoader.PKG_SEPARATOR + superStr + "], assuming fully qualified" );
-                    }
-
-                    // Try to find it by the provided name in the 'super' attribute
-                    if (superData == null) {
-                        try {
-                            superData = getLoader().getMetaDataByName( types.getBaseClass(), MetaDataUtil.expandPackageForMetaDataRef( packageName, superStr ));
-                        } catch (MetaObjectNotFoundException e) {
-                            log.error("Invalid MetaData [" + nodeName + "][" + md + "], the SuperClass [" + superStr + "] does not exist");
-                            throw new MetaException("Invalid MetaData [" + nodeName + "][" + md + "], the SuperClass [" + superStr + "] does not exist");
-                        }
-                    }
-                }
-                // Check to make sure people arent' defining attributes when it shouldn't
-                else {
-                    String s = el.getAttribute(ATTR_SUPER);
-                    if ( s != null && !s.isEmpty() ) {
-                        log.warn( "Attribute 'super' defined on MetaData [" + nodeName + "][" + name + "] under parent [" + parent + "], but should not be as metadata with that name already existed" );
-                    }
-                }
-
-                // get the class reference and create the class
-                String typeName = el.getAttribute(ATTR_TYPE);
-                if ( typeName.isEmpty() ) typeName = null;
-
-                Class<? extends MetaData> c = null;
-                try {
-                    // Attempt to load the referenced class
-                    if (typeName == null ) {
-
-                        // Use the Super class type if no type is defined and a super class exists
-                        if (superData != null) {
-                            c = superData.getClass();
-                            typeName = superData.getSubTypeName();
-                        }
-                        else {
-                            typeName = types.getDefaultSubTypeName();
-                            c = types.getDefaultTypeClass();
-                            if ( c == null ) {
-                                throw new MetaException("MetaData [" + nodeName + "][" + name + "] has no subtype defined and type [" + types.getTypeName() + "] had no default specified");
-                            }
-                        }
-                    }
-                    else {
-                        c = (Class<? extends MetaData>) types.getSubTypeClass(typeName);
-                        if (c == null) {
-                            throw new MetaException("MetaData [" + nodeName + "] had type [" + typeName + "], but it was not recognized");
-                        }
-                    }
-
-                    // Figure out the full name for the element, needs package prefix if root
-                    String fullname = name;
-                    if ( isRoot ) fullname = packageName + MetaDataLoader.PKG_SEPARATOR + fullname;
-
-                    // Create the object
-                    md = getLoader().newInstanceFromClass( c, nodeName, typeName, fullname );
-
-                    if ( !md.getTypeName().equals( nodeName ))
-                        throw new MetaDataException( "Expected MetaData type ["+nodeName+"], but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md );
-
-                    if ( !md.getSubTypeName().equals( typeName ))
-                        throw new MetaDataException( "Expected MetaData subType ["+typeName+"], but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md );
-
-                    if ( !md.getName().equals( fullname ))
-                        throw new MetaDataException( "Expected MetaData name ["+fullname+"], but MetaData instantiated was of name [" + md.getName() + "]: " + md );
-
-                    //md = (MetaData) c.getConstructor(String.class, String.class, String.class).newInstance( nodeName, typeName, fullname );
-                }
-                catch (MetaException e) {
-                    throw e;
-                }
-                catch (Exception e) {
-                    log.error("Invalid MetaData [" + nodeName + "][" + c.getName() + "]: " + e.getMessage());
-                    throw new MetaException("Invalid MetaData [" + nodeName + "][" + c.getName() + "]", e);
-                }
-
-                // Set the super data class if one exists
-                if ( superData != null ) {
-                    md.setSuperData(superData);
-                }
-            }
-
-            // Add the MetaData to the loader
-            // NOTE:  Add it first to ensure the correct parent is set
-            if (isNew) {
-                parent.addChild(md);
-            }
+            // Create MetaData
+            MetaData md = createOrOverlayMetaData( isRoot, parent, typeName, subTypeName, name, packageName, superName);
 
             // Different behavior if it's a MetaAttribute
             if ( md instanceof MetaAttribute) {
@@ -412,7 +200,7 @@ public class XMLMetaDataReader extends MetaDataReader {
                 parseAttributes( md, el );
 
                 // Parse the sub elements
-                parseMetaData( filename, packageName, md, el, false );
+                parseMetaData( md, el, false );
             }
         }
     }
@@ -444,9 +232,6 @@ public class XMLMetaDataReader extends MetaDataReader {
      */
     protected void parseMetaAttributeValue( MetaAttribute attr, Element el ) {
 
-        ///////////////////////////////////////////////////
-        // Get the Node value
-
         // Get the first node
         Node nv = el.getFirstChild();
 
@@ -475,49 +260,20 @@ public class XMLMetaDataReader extends MetaDataReader {
                     break;
 
                 default:
-                    log.warn("Unsupported Node Type for node [" + nv + "]");
+                    log.warn("Unsupported Node Type for node [" + nv + "] in file ["+getFilename()+"]");
             }
         }
     }
 
     /**
-     * Returns a collection of child elements for the given element
+     * Gets all elements within <types> that have a sub element <type>
      */
-    protected Collection<Element> getElements(Element e) {
+    /*protected List<Element> getChildElementsWithName( Element n, String name ) {
 
-        ArrayList<Element> elements = new ArrayList<Element>();
-        if (e == null)  return elements;
-
-        NodeList list = e.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (node instanceof Element) {
-                elements.add((Element) node);
-            }
-        }
-
-        return elements;
-    }
-
-    /**
-     * Returns a collection of child elements of the given name
-     */
-    protected Collection<Element> getElementsOfName(Node n, String name) {
-        ArrayList<Element> elements = new ArrayList<>();
-        if (n == null) {
-            return elements;
-        }
-
-        NodeList list = n.getChildNodes();
-        for (int i = 0; i < list.getLength(); i++) {
-            Node node = list.item(i);
-            if (node instanceof Element
-                    && node.getNodeName().equals(name)) {
-                elements.add((Element) node);
-            }
-        }
-
-        return elements;
-    }
-
+        Element e = getFirstChildElement( n );
+        if ( e != null )
+            return getElementsOfName( e, name );
+        else
+            return new ArrayList<>();
+    }*/
 }

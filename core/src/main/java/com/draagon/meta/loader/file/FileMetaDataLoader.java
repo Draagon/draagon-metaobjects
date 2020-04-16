@@ -9,6 +9,7 @@ package com.draagon.meta.loader.file;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.file.json.JsonMetaDataReader;
 import com.draagon.meta.loader.file.xml.XMLMetaDataReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,7 +104,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
         // Load all the source data
         sources.forEach( s -> s.getSourceData().forEach( d -> {
-            getReaderForFile( d.sourceName ).loadFromStream( d.sourceName, new ByteArrayInputStream( d.sourceData.getBytes() ));
+            getReaderForFile( d.sourceName ).loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
         }));
 
         return this;
@@ -169,7 +170,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
         }
 
         try {
-            getReaderForFile( file ).loadTypesFromStream( file, is );
+            getReaderForFile( file ).loadTypesFromStream( is );
         }
         catch (MetaException e) {
             log.error("Meta Types XML [" + file + "]: " + e.getMessage());
@@ -183,9 +184,9 @@ public class FileMetaDataLoader extends MetaDataLoader {
     protected MetaDataReader getReaderForFile( String file ) {
 
         if ( file.endsWith( ".xml" ))
-            return new XMLMetaDataReader( this );
+            return new XMLMetaDataReader( this, file );
         else if ( file.endsWith( ".json" ))
-            return new XMLMetaDataReader( this );
+            return new JsonMetaDataReader( this, file );
         else
             throw new MetaDataException( "There is no MetaDataReader supporting the file: " + file );
     }

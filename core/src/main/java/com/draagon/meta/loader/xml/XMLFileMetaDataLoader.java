@@ -14,7 +14,10 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
+import com.draagon.meta.loader.file.MetaDataReader;
 import com.draagon.meta.loader.file.MetaDataSources;
+import com.draagon.meta.loader.file.json.JsonMetaDataReader;
+import com.draagon.meta.loader.file.xml.XMLMetaDataReader;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.util.xml.XMLFileReader;
@@ -44,5 +47,14 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
 
     public XMLFileMetaDataLoader( String name ) {
         super( name );
+    }
+
+    /** Load the MetaDataReader for the specified file */
+    protected MetaDataReader getReaderForFile(String file ) {
+
+        if ( file.endsWith( ".xml" ))
+            return new XMLMetaDataReader( this, file );
+        else
+            throw new MetaDataException( "There is no MetaDataReader supporting the file: " + file );
     }
 }
