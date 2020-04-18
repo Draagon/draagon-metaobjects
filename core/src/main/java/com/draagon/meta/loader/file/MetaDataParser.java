@@ -7,30 +7,27 @@ import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypeConfig;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.MetaDataUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 /**
- * Absract MetaDataReader for reading from source files
+ * Absract MetaDataParser for reading from source files
  */
-public abstract class MetaDataReader {
+public abstract class MetaDataParser {
 
-    private static Log log = LogFactory.getLog(MetaDataReader.class);
+    private static Log log = LogFactory.getLog(MetaDataParser.class);
 
     private FileMetaDataLoader loader;
     private String filename;
     private String defaultPackageName = "";
 
-    /** Create the MetaDataReader */
-    protected MetaDataReader( FileMetaDataLoader loader, String filename ) {
+    /** Create the MetaDataParser */
+    protected MetaDataParser(FileMetaDataLoader loader, String filename ) {
         this.loader = loader;
         this.filename = filename;
     }
@@ -57,11 +54,8 @@ public abstract class MetaDataReader {
 
     /** Return the MetaDataConfig */
     public MetaDataConfig getConfig() {
-        return this.loader.getConfig();
+        return this.loader.getMetaDataConfig();
     }
-
-    /** Load the types configuration from the inputstream */
-    public abstract MetaDataConfig loadTypesFromStream( InputStream is );
 
     /** Load the metadata models from the inputstream */
     public abstract MetaDataConfig loadFromStream( InputStream is );
@@ -79,7 +73,7 @@ public abstract class MetaDataReader {
         }
 
         // Get the TypeConfig with the specified element name
-        TypeConfig typeConfig = getLoader().getConfig().getTypeConfig( typeName );
+        TypeConfig typeConfig = getLoader().getMetaDataConfig().getTypeConfig( typeName );
 
         // If it doesn't exist, then create it and check for the "class" attribute
         if ( typeConfig == null ) {

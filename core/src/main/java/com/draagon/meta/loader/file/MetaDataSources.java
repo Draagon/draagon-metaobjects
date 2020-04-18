@@ -1,10 +1,12 @@
 package com.draagon.meta.loader.file;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -21,10 +23,12 @@ public class MetaDataSources {
 
     /** Holds the SourceData */
     public static class SourceData {
-        public final String sourceName;
+        public final String filename;
+        public final Class<? extends MetaDataSources> sourceClass;
         public final String sourceData;
-        public SourceData( String sourceName, String sourceData ) {
-            this.sourceName = sourceName;
+        public SourceData(String filename, Class<? extends MetaDataSources> sourceClass, String sourceData ) {
+            this.filename = filename;
+            this.sourceClass = sourceClass;
             this.sourceData = sourceData;
         }
     }
@@ -48,24 +52,22 @@ public class MetaDataSources {
     /**
      * Read the specified file
      */
-    protected void read(String file) throws MetaException {
+    protected void read(String filename) throws MetaException {
 
-        if ( file.endsWith( ".xml" )) {
-            loadFromXMLFile( file );
-        } else if ( file.endsWith( ".bundle" )){
-            loadFromBundleFile( file );
+        if ( filename.endsWith( ".bundle" )){
+            loadFromBundleFile( filename );
         } else {
-            log.error( "Unknown metadata file type [" + file + "], so ignoring..." );
+            loadFromInputStream( filename, getInputStreamForFilename( filename ));
         }
     }
 
     /**
      * Loads all the classes specified in the Filename
      */
-    protected void loadFromBundleFile(String file) throws MetaException {
+    protected void loadFromBundleFile(String filename) throws MetaException {
 
         try {
-            LineNumberReader in = new LineNumberReader( new InputStreamReader(getInputStream(file)));
+            LineNumberReader in = new LineNumberReader( new InputStreamReader( getInputStreamForFilename( filename )));
 
             // Read each line in the file, and attempt to load it (including bundles)
             String line;
@@ -78,87 +80,94 @@ public class MetaDataSources {
 
             // Close the bundle
             in.close();
-        } catch( IOException e ) {
-            throw new MetaException( "Error reading metadata bundle [" + file + "]: " + e.getMessage(), e );
+        }
+        catch( IOException e ) {
+            throw new MetaException( "Error reading MetaData bundle [" + filename + "]: " + e.getMessage(), e );
         }
     }
 
     /**
      * Loads all the classes specified in the Filename
      */
-    protected void loadFromXMLFile(String file) throws MetaException {
+    protected InputStream getInputStreamForFilename(String filename) throws MetaException {
 
-        // LOAD THE XML FILE
-        if (file == null) {
-            throw new MetaException("The Meta XML file was not specified");
+        // LOAD THE FILE
+        if (filename == null) {
+            throw new NullPointerException("The MetaData file was null");
+        }
+
+        // Try to load from the file system if a Source Directory was specified
+        if ( sourceDir != null ) {
+            return getFileInputStream(filename);
+
+        }
+        // Otherise, try to load as a resource instead
+        else {
+            return getResourceInputStream(filename);
+        }
+    }
+
+    private InputStream getResourceInputStream(String filename) {
+
+        URL url = getClass().getClassLoader().getResource( filename);
+        if (url == null) {
+
+            url = ClassLoader.getSystemClassLoader().getResource(filename);
+            if (url == null) {
+                throw new MetaException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or MetaDataSources ["+this.getClass().getName()+"]");
+            }
+        }
+
+        // Construct URI and return the File
+        try {
+            return url.openStream();
+        }
+        catch (IOException e) {
+            throw new MetaException("Could not open URL resource [" + url + "] for MetaData file [" +filename+ "]: " + e.getMessage(), e);
+        }
+    }
+
+    private InputStream getFileInputStream(String filename) {
+
+        // Append the source directory if needed
+        String s = sourceDir;
+        if (!s.isEmpty() && !s.endsWith("/")) s = s + "/";
+
+        // See if the filename exists
+        String fn = s + filename;
+        File f = new File(fn);
+
+        if (!f.exists()) {
+            throw new MetaException("The MetaData file [" + f + "] was not found on the filesystem");
         }
 
         try {
-            InputStream is = getInputStream(file);
-            loadFromStream( file, is);
+            return new FileInputStream(f);
         }
-        catch (MetaException e) {
-            throw new MetaException("The Meta XML file [" + file + "] could not be loaded: " + e.getMessage(), e);
+        catch( IOException e ) {
+            throw new MetaDataException( "Error creating FieInputStream for MetaData File ["+ fn + "]: " + e.getMessage(), e );
         }
     }
 
-    /** Add a metadata file */
-    protected InputStream getInputStream( String file ) {
-
-        InputStream is = null;
-
-        if ( sourceDir != null ) {
-
-            // Append the source directory if needed
-            String s = sourceDir;
-            if ( !s.isEmpty() && !s.endsWith( "/" )) s = s + "/";
-
-            // See if the filename exists
-            String fn = s + file;
-            File f = new File(fn);
-
-            if (f.exists()) {
-                try {
-                    is = new FileInputStream(f);
-                } catch (Exception e) {
-                    log.error("Can not read Metadata file [" + fn + "]: " + e.getMessage());
-                    throw new MetaException("Can not read Metadata file [" + fn + "]: " + e.getMessage(), e);
-                }
-            }
-        }
-
-        // Try to load as a resource instead
-        if ( is == null ) {
-            is = getInputStreamAsResource( file );
-        }
-
-        return is;
-    }
-
-    protected InputStream getInputStreamAsResource( String file ) {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(file);
-        if (is == null) {
-            is = ClassLoader.getSystemClassLoader().getResourceAsStream(file);
-            if ( is == null ) {
-                log.error("Metadata file [" + file + "] was not found");
-                throw new MetaException("The Metadata file [" + file + "] was not found");
-            }
-        }
-        return is;
-    }
-
-    protected void loadFromStream( String file, InputStream is ) {
+    protected void loadFromInputStream( String filename, InputStream is ) {
 
         try {
             String data = new Scanner( is ).useDelimiter("\\Z").next();
-            if ( !data.isEmpty() ) sourceData.add( new SourceData( file, data ));
+            if ( data.isEmpty() ) {
+                throw new MetaDataException("MetaData File had no contents [" + filename + "]");
+            }
+
+            sourceData.add( new SourceData( filename, getClass(), data ));
         }
-        catch (Exception e ) {
-            log.error( "Error reading from Meta XML File ["+ file + "]: " + e.getMessage(), e );
+        catch (RuntimeException e ) {
+            throw new MetaDataException( "Error reading from MetaData File ["+ filename + "]: " + e.getMessage(), e );
+        }
+        finally {
+            try { is.close(); } catch( IOException ignore ) {}
         }
     }
 
-    List<SourceData> getSourceData() {
+    public List<SourceData> getSourceData() {
         return sourceData;
     }
 }

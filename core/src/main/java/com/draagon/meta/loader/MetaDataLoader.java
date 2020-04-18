@@ -30,7 +30,7 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     public final static String SUBTYPE_MANUAL = "manual";
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
-    private final MetaDataConfig config = new MetaDataConfig();
+    private final MetaDataConfig metaDataConfig = new MetaDataConfig();
 
     private boolean isRegistered = false;
     private boolean isInitialized = false;
@@ -63,8 +63,8 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     }
 
     /** Return the MetaData Configuration */
-    public MetaDataConfig getConfig() {
-        return config;
+    public MetaDataConfig getMetaDataConfig() {
+        return metaDataConfig;
     }
 
     /**

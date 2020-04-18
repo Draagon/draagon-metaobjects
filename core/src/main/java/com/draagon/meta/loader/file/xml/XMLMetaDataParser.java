@@ -21,14 +21,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class XMLMetaDataReader extends XMLMetaDataReaderBase {
+public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
-    private static Log log = LogFactory.getLog(XMLMetaDataReader.class);
+    private static Log log = LogFactory.getLog(XMLMetaDataParser.class);
 
+    public final static String ATTR_METADATA    = "metadata";
+    public final static String ATTR_TYPES       = "types";
     public final static String ATTR_PACKAGE     = "package";
     public final static String ATTR_NAME        = "name";
     public final static String ATTR_CLASS       = "class";
-    public final static String ATTR_TYPES       = "types";
     public final static String ATTR_TYPE        = "type";
     public final static String ATTR_SUPER       = "super";
 
@@ -42,35 +43,8 @@ public class XMLMetaDataReader extends XMLMetaDataReaderBase {
         reservedAttributes.add( ATTR_SUPER );
     }
 
-    public XMLMetaDataReader( FileMetaDataLoader loader, String filename ) {
+    public XMLMetaDataParser(FileMetaDataLoader loader, String filename ) {
         super( loader, filename );
-    }
-
-    /**
-     * Loads all the classes specified in the Filename
-     */
-    @Override
-    public MetaDataConfig loadTypesFromStream( InputStream is) {
-
-        try {
-            Document doc = XMLFileReader.loadFromStream(is);
-
-            // PARSE THE TYPES XML
-            Collection<Element> elements = getElementsOfName(doc, ATTR_TYPES);
-            if (elements.isEmpty())
-                throw new MetaException("The root 'types' element was not found in file ["+getFilename()+"]");
-
-            loadAllTypes(elements.iterator().next());
-        }
-        catch (SAXException e) {
-            throw new MetaException("Parse error loading MetaData in file ["+getFilename()+"]: " + e.getMessage(), e);
-        }
-        catch (IOException e) {
-            log.error("IO Error loading Types XML from file ["+getFilename()+"]: " + e.getMessage());
-            throw new MetaException("IO Error loading Types XML ["+getFilename()+"]: " + e.getMessage(), e);
-        }
-
-        return getConfig();
     }
 
     /**
@@ -122,7 +96,7 @@ public class XMLMetaDataReader extends XMLMetaDataReaderBase {
      * Loads all the classes specified in the Filename
      */
     @Override
-    public MetaDataConfig loadFromStream( InputStream is) throws MetaException {
+    public MetaDataConfig loadFromStream( InputStream is ) throws MetaException {
 
         Document doc = null;
 
@@ -132,26 +106,34 @@ public class XMLMetaDataReader extends XMLMetaDataReaderBase {
             //////////////////////////////////////////////////////
             // PARSE THE ITEMS XML BLOCK
 
-            // Look for the <items> element
-            Collection<Element> elements = getElementsOfName(doc, "metadata"); // or "types"
-            if (elements.isEmpty()) {
-                throw new MetaException( "The root 'meta' element was not found in file ["+getFilename()+"]" );
+            // Look for the <types> element
+            Collection<Element> elements = getElementsOfName(doc, ATTR_TYPES );
+            if (!elements.isEmpty()) {
+                loadAllTypes(elements.iterator().next());
             }
 
-            Element pkgEl = elements.iterator().next();
+            else {
+                // Look for the <items> element
+                elements = getElementsOfName(doc, "metadata");
+                if (elements.isEmpty()) {
+                    throw new MetaException("The root 'meta' element was not found in file [" + getFilename() + "]");
+                }
 
-            // Load any types specified in the Metadata XML
-            Collection<Element> typeElements = getElementsOfName(pkgEl, ATTR_TYPES);
-            if (typeElements.size() > 0) {
-                loadAllTypes( typeElements.iterator().next() ); // Load inner tags
+                Element pkgEl = elements.iterator().next();
+
+                // Load any types specified in the Metadata XML
+                Collection<Element> typeElements = getElementsOfName(pkgEl, ATTR_TYPES);
+                if (typeElements.size() > 0) {
+                    loadAllTypes(typeElements.iterator().next()); // Load inner tags
+                }
+
+                // Set default package name
+                String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
+                setDefaultPackageName(defPkg);
+
+                // Parse the metadata elements
+                parseMetaData(getLoader(), pkgEl, true);
             }
-
-            // Set default package name
-            String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
-            setDefaultPackageName(defPkg);
-
-            // Parse the metadata elements
-            parseMetaData( getLoader(), pkgEl, true );
         }
         catch (SAXException e) {
             throw new MetaException("Parse error loading MetaData from file ["+getFilename()+"]: " + e.getMessage(), e);

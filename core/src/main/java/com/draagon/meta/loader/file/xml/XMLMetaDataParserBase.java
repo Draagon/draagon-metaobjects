@@ -1,7 +1,7 @@
 package com.draagon.meta.loader.file.xml;
 
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.MetaDataReader;
+import com.draagon.meta.loader.file.MetaDataParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -9,9 +9,9 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class XMLMetaDataReaderBase extends MetaDataReader {
+public abstract class XMLMetaDataParserBase extends MetaDataParser {
 
-    public XMLMetaDataReaderBase(FileMetaDataLoader loader, String file ) {
+    public XMLMetaDataParserBase(FileMetaDataLoader loader, String file ) {
         super( loader, file );
     }
 
