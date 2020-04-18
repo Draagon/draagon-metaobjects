@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 public class FileMetaDataLoaderTest extends FileMetaDataLoaderTestBase {
 
     @Test
-    public void testApple() throws Exception {
+    public void testApple() {
         
         MetaObject ao = MetaDataRegistry.findMetaDataByName( MetaObject.class, "produce::v1::fruit::Apple" );
         Apple apple = (Apple) ao.newInstance();
@@ -57,7 +57,7 @@ public class FileMetaDataLoaderTest extends FileMetaDataLoaderTestBase {
     }
 
     @Test
-    public void testOrange() throws Exception {
+    public void testOrange()  {
         
         Orange orange = new Orange();
         
@@ -70,7 +70,7 @@ public class FileMetaDataLoaderTest extends FileMetaDataLoaderTestBase {
     }
 
     @Test
-    public void testBasket() throws Exception {
+    public void testBasket()  {
         
         MetaObject mo = MetaDataRegistry.findMetaDataByName( MetaObject.class, "produce::v1::container::Basket" );
         ValueObject basket = (ValueObject) mo.newInstance();
@@ -91,10 +91,11 @@ public class FileMetaDataLoaderTest extends FileMetaDataLoaderTestBase {
     }
 
     @Test
-    public void testExtensions() throws Exception {
+    public void testExtensions() {
 
         MetaObject mo = MetaDataRegistry.findMetaDataByName( MetaObject.class,"produce::v1::container::Basket" );
         ValueObject basket = (ValueObject) mo.newInstance();
+        assertTrue( basket.getMetaData() != null );
 
         MetaField overlayField = mo.getMetaField( "specialOverlay" );
         assertNotNull( "specialOverlay exists on Container", overlayField );

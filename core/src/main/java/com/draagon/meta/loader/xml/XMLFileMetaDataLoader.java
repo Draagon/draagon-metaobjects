@@ -40,7 +40,8 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
 
         super( new FileLoaderConfig()
                     .addParser( "*.xml", XMLMetaDataParser.class )
-                    .setShouldRegister( false ),
+                    .setShouldRegister( false )
+                    .setVerbose( false ),
                 name );
     }
 
@@ -58,7 +59,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
     }
 
     public void addSources( MetaDataSources sources ) {
-        getFileConfig().addSources( sources );
+        getLoaderConfig().addSources( sources );
     }
 
     public void setTypesRef(String types) {
@@ -78,7 +79,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
     /** Initialize with the metadata source being set */
     public MetaDataLoader init( MetaDataSources sources, boolean shouldRegister ) {
 
-        FileLoaderConfig config = getFileConfig();
+        FileLoaderConfig config = getLoaderConfig();
         config.setShouldRegister( shouldRegister );
 
         // Prepend the Types XML to load using the default behavior of the original XMLFileMetaDataLoader

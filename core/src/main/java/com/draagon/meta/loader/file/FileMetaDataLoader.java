@@ -6,17 +6,13 @@
  */
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
-import com.draagon.meta.loader.file.json.JsonMetaDataParser;
-import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.util.*;
+import java.util.List;
 
 
 /**
@@ -26,46 +22,41 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     private static Log log = LogFactory.getLog(FileMetaDataLoader.class);
 
-    private final FileLoaderConfig fileConfig;
+    public final static String SUBTYPE_FILE = "file";
 
     public FileMetaDataLoader( FileLoaderConfig fileConfig, String name ) {
-        super( "file", name );
-        this.fileConfig = fileConfig;
-    }
-
-    public FileLoaderConfig getFileConfig() {
-        return fileConfig;
+        super( fileConfig, SUBTYPE_FILE, name );
     }
 
     /** Initialize with the metadata source being set */
-    public MetaDataLoader init( MetaDataSources sources ) {
-        getFileConfig().addSources( sources );
-        return init();
+    public FileMetaDataLoader init( MetaDataSources sources ) {
+        getLoaderConfig().addSources( sources );
+        return (FileMetaDataLoader) init();
+    }
+
+    public FileLoaderConfig getLoaderConfig() {
+        return (FileLoaderConfig) super.getLoaderConfig();
     }
 
     /** Initialize the MetaDataLoader */
     @Override
-    public MetaDataLoader init() {
+    public FileMetaDataLoader init() {
 
-        if ( !getFileConfig().hasSources() ) {
+        if ( !getLoaderConfig().hasSources() ) {
             throw new IllegalStateException( "No Metadata Sources were defined [" + this + "]" );
         }
-        if ( !getFileConfig().hasParsers() ) {
+        if ( !getLoaderConfig().hasParsers() ) {
             throw new IllegalStateException( "No Metadata Parsers were defined [" + this + "]" );
         }
 
         super.init();
 
         // Load all the source data
-        getFileConfig().getSources().forEach( s -> s.getSourceData().forEach( d -> {
-            getFileConfig().getParserForFile( this, d.filename)
+        List<MetaDataSources> sources = (List<MetaDataSources>) getLoaderConfig().getSources();
+        sources.forEach( s -> s.getSourceData().forEach( d -> {
+            getLoaderConfig().getParserForFile( this, d.filename)
                     .loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
         }));
-
-        // Register with the static MetaDataRegistry
-        if ( getFileConfig().shouldRegister() ) {
-            register();
-        }
 
         return this;
     }
@@ -77,7 +68,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
     @Override
     public Class<?> loadClass( String className ) throws ClassNotFoundException {
 
-        for (MetaDataSources s : getFileConfig().getSources() ) {
+        for (MetaDataSources s : (List<MetaDataSources>) getLoaderConfig().getSources() ) {
             try {
                 return s.getClass().getClassLoader().loadClass(className);
             } catch( ClassNotFoundException ignore ) {}

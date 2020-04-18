@@ -1,6 +1,7 @@
 package com.draagon.meta.loader.file.config;
 
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.loader.config.LoaderConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.MetaDataParser;
 import com.draagon.meta.loader.file.MetaDataSources;
@@ -8,10 +9,6 @@ import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 import java.lang.reflect.Constructor;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -19,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * FileMetaDataLoader Configuration Settings
  */
-public class FileLoaderConfig {
+public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N> {
 
     /** Holds the array of MetaDataParser filename match patterns */
     protected final class PatternParser {
@@ -59,7 +56,6 @@ public class FileLoaderConfig {
 
     private final List<PatternParser> patternParsers = new ArrayList<>();
     private final List<MetaDataSources> sources = new ArrayList<>();
-    private boolean shouldRegister = false;
 
     public FileLoaderConfig() {}
 
@@ -72,29 +68,23 @@ public class FileLoaderConfig {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // MetaData Parsers
+    // Builder Overloads
 
-    public FileLoaderConfig setShouldRegister( boolean shouldRegister ) {
-        this.shouldRegister = shouldRegister;
-        return this;
-    }
-
-    public boolean shouldRegister() {
-        return shouldRegister;
-    }
+    public N setShouldRegister(boolean shouldRegister ) { return super.setShouldRegister( shouldRegister ); }
+    public N setVerbose(boolean verbose) { return super.setVerbose( verbose ); }
 
     ///////////////////////////////////////////////////////////////////////////
     // MetaData Sources
 
-    public FileLoaderConfig setSources( List<MetaDataSources> sourcesList ) {
+    public N setSources( List<MetaDataSources> sourcesList ) {
         this.sources.clear();
         this.sources.addAll( sourcesList );
-        return this;
+        return (N) this;
     }
 
-    public FileLoaderConfig addSources( MetaDataSources sources ) {
+    public N addSources( MetaDataSources sources ) {
         this.sources.add( sources );
-        return this;
+        return (N) this;
     }
 
     public List<MetaDataSources> getSources() {
@@ -120,12 +110,12 @@ public class FileLoaderConfig {
         return !patternParsers.isEmpty();
     }
 
-    public FileLoaderConfig addParser( String matchPattern, Class<? extends MetaDataParser> parserClass ) {
+    public N addParser( String matchPattern, Class<? extends MetaDataParser> parserClass ) {
 
         try {
             Constructor<? extends MetaDataParser> c = parserClass.getConstructor(FileMetaDataLoader.class, String.class);
             patternParsers.add(new PatternParser(matchPattern, parserClass, c));
-            return this;
+            return (N) this;
         } catch( NoSuchMethodException e ) {
             throw new IllegalArgumentException( "MetaDataParser class [" + parserClass.getName() + "] has no Constructor (MetaDataLoader, String)" );
         }

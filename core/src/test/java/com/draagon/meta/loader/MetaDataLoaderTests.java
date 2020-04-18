@@ -60,7 +60,7 @@ public class MetaDataLoaderTests {
         assertEquals( "foo.bar.length=10", 10, (int) mo.getMetaField("bar").getMetaAttr( "length").getValue() );
 
         ValueObject o = (ValueObject) mo.newInstance();
-        log.info( "MetaObject: " + o );
+        //log.info( "MetaObject: " + o );
 
         assertEquals( "foo.bar=5", 5, (int) o.getInt( "bar" ));
     }
@@ -107,7 +107,7 @@ public class MetaDataLoaderTests {
                 .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
 
         ValueObject bo = (ValueObject) baby.newInstance();
-        log.info( "MetaObject: " + bo );
+        //log.info( "MetaObject: " + bo );
 
         assertEquals( "foo-baby.bar=6", 6, (int) bo.getInt( "bar" ));
         assertEquals( "foo-baby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
@@ -138,7 +138,7 @@ public class MetaDataLoaderTests {
                 .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
 
         ValueObject bo = (ValueObject) baby.newInstance();
-        log.info( "MetaObject: " + bo );
+        //log.info( "MetaObject: " + bo );
 
         assertEquals( "foo-baby.bar=6", 6, (int) bo.getInt( "bar" ));
         assertEquals( "foo-baby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());

@@ -10,7 +10,9 @@ import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.loader.config.LoaderConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
+import com.draagon.meta.loader.file.config.FileLoaderConfig;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +32,7 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     public final static String SUBTYPE_MANUAL = "manual";
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
+    private final LoaderConfig loaderConfig;
     private final MetaDataConfig metaDataConfig = new MetaDataConfig();
 
     private boolean isRegistered = false;
@@ -40,8 +43,8 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * Constructs a new MetaDataLoader
      * @param subtype The subType for the metadata loader
      */
-    public MetaDataLoader( String subtype ) {
-        this( subtype, TYPE_LOADER + "-" + System.currentTimeMillis());
+    public MetaDataLoader( LoaderConfig loaderConfig, String subtype ) {
+        this( loaderConfig, subtype, TYPE_LOADER + "-" + System.currentTimeMillis());
     }
 
     /**
@@ -49,8 +52,9 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * @param subtype The subtype of the metadata loader
      * @param name The name of the metadata loader
      */
-    public MetaDataLoader( String subtype, String name ) {
+    public MetaDataLoader( LoaderConfig loaderConfig, String subtype, String name ) {
         super( TYPE_LOADER, subtype, name );
+        this.loaderConfig = loaderConfig;
     }
 
     /**
@@ -59,7 +63,18 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * @return The created MetaDataLoader
      */
     public static MetaDataLoader createManual( String name ) {
-        return new MetaDataLoader( SUBTYPE_MANUAL, name ) {};
+        return new MetaDataLoader(
+                new LoaderConfig()
+                        .setShouldRegister( true )
+                        .setVerbose( false ),
+                SUBTYPE_MANUAL, name ) {};
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Configs
+
+    public LoaderConfig getLoaderConfig() {
+        return loaderConfig;
     }
 
     /** Return the MetaData Configuration */
@@ -80,9 +95,19 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * @return This MetaDataLoader
      */
     public MetaDataLoader init() {
+
         if ( isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was already initialized" );
-        log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
+
+        if ( loaderConfig.isVerbose() ) {
+            log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
+        }
+
         isInitialized = true;
+
+        if ( loaderConfig.shouldRegister() ) {
+            register();
+        }
+
         return this;
     }
 
@@ -352,7 +377,9 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
 
         if ( isDestroyed ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was already destroyed!" );
 
-        log.info("Destroying the [" + getName() + "] MetaDataLoader");
+        if ( loaderConfig.isVerbose() ) {
+            log.info("Destroying the [" + getName() + "] MetaDataLoader");
+        }
 
         // Remove all classes
         clearChildren();

@@ -16,8 +16,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
-import com.draagon.meta.loader.xml.LocalMetaDataSources;
-import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.Apple;
@@ -26,9 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -42,11 +38,11 @@ public class FileMetaDataLoaderTest2 {
     private static int counter = 1;
 
     @Before
-    public void initLoader() throws Exception {
+    public void initLoader() {
 
         synchronized (this) {
             // Initialize the loader
-            MetaDataLoader xl = new FileMetaDataLoader(
+            loader = new FileMetaDataLoader(
                     new FileLoaderConfig()
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addSources(new com.draagon.meta.loader.file.LocalMetaDataSources(
@@ -56,16 +52,15 @@ public class FileMetaDataLoaderTest2 {
                                             "metadata/test/produce/v1/produce-v1.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.xml")
                             ))
-                            .setShouldRegister(true),
+                            .setShouldRegister(true)
+                            .setVerbose( false ),
                     getClass().getSimpleName() + "-" + counter++)
                     .init();
-
-            this.loader = xl;
         }
     }
     
     @Test
-    public void testApple() throws Exception {
+    public void testApple() {
         
         MetaObject ao = MetaDataRegistry.findMetaObjectByName( "produce::v1::fruit::Apple" );
         Apple apple = (Apple) ao.newInstance();
@@ -94,7 +89,7 @@ public class FileMetaDataLoaderTest2 {
     }
 
     @Test
-    public void testOrange() throws Exception {
+    public void testOrange() {
         
         Orange orange = new Orange();
         
@@ -107,7 +102,7 @@ public class FileMetaDataLoaderTest2 {
     }
 
     @Test
-    public void testBasket() throws Exception {
+    public void testBasket() {
         
         MetaObject mo = MetaDataRegistry.findMetaObjectByName( "produce::v1::container::Basket" );
         ValueObject basket = (ValueObject) mo.newInstance();
@@ -128,10 +123,11 @@ public class FileMetaDataLoaderTest2 {
     }
 
     @Test
-    public void testExtensions() throws Exception {
+    public void testExtensions() {
 
         MetaObject mo = MetaDataRegistry.findMetaObjectByName( "produce::v1::container::Basket" );
         ValueObject basket = (ValueObject) mo.newInstance();
+        assertTrue( basket != null );
 
         MetaField overlayField = mo.getMetaField( "specialOverlay" );
         assertNotNull( "specialOverlay exists on Container", overlayField );
@@ -147,7 +143,7 @@ public class FileMetaDataLoaderTest2 {
 
 
     @After
-    public void destroyLoader() throws Exception {
+    public void destroyLoader() {
         loader.destroy();
     }
 }

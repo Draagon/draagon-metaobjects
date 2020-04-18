@@ -15,13 +15,9 @@ import com.draagon.meta.loader.file.config.FileLoaderConfig;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  *
@@ -40,7 +36,7 @@ public class FileMetaDataLoaderTestBase {
         synchronized(this) {
 
             // Initialize the loader
-            MetaDataLoader xl = new FileMetaDataLoader(
+            loader = new FileMetaDataLoader(
                     new FileLoaderConfig()
                                 .addParser( "*.xml", XMLMetaDataParser.class )
                                 .addParser( "*.json", JsonMetaDataParser.class )
@@ -50,27 +46,16 @@ public class FileMetaDataLoaderTestBase {
                                             "metadata/test/produce/v1/produce-v1.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.xml")
                                 ))
-                                .setShouldRegister( true ),
+                                .setShouldRegister( true )
+                                .setVerbose( false ),
                     getClass().getSimpleName() + "-" + counter++)
                         .init();
-
-            this.loader = xl;
         }
     }
 
-    //@Before
-    //public void initLoader() throws Exception {
-    //    this.loader = loaderStatic;
-    //}
-
     @After
-    public void destroyLoader() throws Exception {
+    public void destroyLoader() {
         //this.loader = null;
         this.loader.destroy();
     }
-
-    //@AfterClass
-    //public static void destroyLoaderStatic() throws Exception {
-    //    loaderStatic.destroy();
-    //}
 }
