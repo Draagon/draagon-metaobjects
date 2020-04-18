@@ -143,7 +143,7 @@ public class MetaDataUtil {
           String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a );
 
           try {
-            o = d.getLoader().getMetaDataByName(MetaObject.class, name);
+            o = d.getLoader().getMetaObjectByName(name);
           } catch (MetaDataNotFoundException e) {
             throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaData [" + d + "] does not exist", name);
           }

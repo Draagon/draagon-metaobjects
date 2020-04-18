@@ -186,9 +186,9 @@ public class ValueObject implements java.util.Map<String, Object>, Serializable,
                 if (loaderName != null) {
                     MetaDataLoader mcl = MetaDataRegistry.getDataLoader(loaderName);
                     if (mcl != null) {
-                        metaObject = mcl.getMetaDataByName(MetaObject.class, objectName);
+                        metaObject = mcl.getMetaObjectByName(objectName);
                     } else {
-                        metaObject = MetaDataRegistry.findMetaDataByName(MetaObject.class, objectName);
+                        metaObject = MetaDataRegistry.findMetaObjectByName(objectName);
                     }
                 }
 

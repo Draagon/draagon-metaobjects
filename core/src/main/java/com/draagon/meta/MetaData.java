@@ -411,7 +411,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Whether the child data exists
      */
-    protected boolean hasChild(String name, Class<? extends MetaData> c) {
+    public boolean hasChild(String name, Class<? extends MetaData> c) {
         try {
             getChild(name, c);
             return true;
@@ -449,7 +449,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
      */
-    protected void addChild(MetaData data, boolean checkExists)  throws InvalidMetaDataException {
+    public void addChild(MetaData data, boolean checkExists)  throws InvalidMetaDataException {
 
         checkValidChild( data );
 
@@ -513,21 +513,21 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Returns all MetaData children
      */
-    protected List<MetaData> getChildren() {
+    public List<MetaData> getChildren() {
         return getChildren(null, true);
     }
 
     /**
      * Returns all MetaData children which implement the specified class
      */
-    protected List<MetaData> getChildrenOfType( String type, boolean includeParentData ) {
+    public List<MetaData> getChildrenOfType( String type, boolean includeParentData ) {
         return addChildren( type, MetaData.class, includeParentData );
     }
 
     /**
      * Returns all MetaData children which implement the specified class
      */
-    protected <T extends MetaData> List<T> getChildren(Class<T> c, boolean includeParentData ) {
+    public <T extends MetaData> List<T> getChildren(Class<T> c, boolean includeParentData ) {
 
         return addChildren(null, c, includeParentData );
     }
@@ -590,7 +590,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Returns the first child record
      */
-    protected <T extends MetaData> T getFirstChild(Class<T> c) {
+    public <T extends MetaData> T getFirstChild(Class<T> c) {
         Iterator<T> i = getChildren(c, true).iterator();
         if (!i.hasNext())  return null;
         else return i.next();
@@ -599,7 +599,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Returns the first child record of the specified type
      */
-    protected MetaData getFirstChildOfType( String type ) {
+    public MetaData getFirstChildOfType( String type ) {
         Iterator<MetaData> i = getChildrenOfType( type, true).iterator();
         if (!i.hasNext()) return null;
         else return i.next();
@@ -633,18 +633,18 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * @param name The name of the child to retrieve. A null will return the first matching child.
      * @param c The Expected MetaData class to cast to
      */
-    public final <T extends MetaData> T getChild(String name, Class<T> c) throws MetaDataNotFoundException {
+    public <T extends MetaData> T getChild(String name, Class<T> c) throws MetaDataNotFoundException {
         return getChild(name, c, true, true);
     }
 
     /**
      * Returns a child by the specified name of the specified class
      */
-    public final <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData) throws MetaDataNotFoundException {
+    public <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData) throws MetaDataNotFoundException {
         return getChild(name, c, includeParentData, true);
     }
 
-    protected final <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
+    protected <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
         return (T) getChildOfTypeOrClass( null, name, c, includeParentData, shouldThrow );
     }
 
@@ -687,7 +687,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Clears all children
      */
-    protected void clearChildren() {
+    public void clearChildren() {
         if ( !children.isEmpty() ) {
             children.clear();
             flushCaches();
@@ -697,7 +697,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Clears all children of the specified type
      */
-    protected void clearChildrenOfType( String type ) {
+    public void clearChildrenOfType( String type ) {
         if ( children.removeIf(d -> type == null || d.isType( type )))
             flushCaches();
     }
@@ -705,7 +705,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Clears all children of the specified MetaData class
      */
-    protected void clearChildren(Class<? extends MetaData> c) {
+    public void clearChildren(Class<? extends MetaData> c) {
         if (children.removeIf(d -> c == null || c.isInstance(d)))
             flushCaches();
     }

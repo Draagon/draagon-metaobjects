@@ -178,7 +178,7 @@ public abstract class MetaDataParser {
             try {
                 if (superName.indexOf(MetaDataLoader.PKG_SEPARATOR) < 0 && packageName.length() > 0) {
 
-                    superData = getLoader().getMetaDataByName(types.getBaseClass(), packageName + MetaDataLoader.PKG_SEPARATOR + superName);
+                    superData = getLoader().getChild(packageName + MetaDataLoader.PKG_SEPARATOR + superName, types.getBaseClass() );
                 }
             } catch (MetaDataNotFoundException e) {
                 // TODO:  Should this throw a real exception
@@ -189,7 +189,7 @@ public abstract class MetaDataParser {
             if (superData == null) {
                 try {
                     String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
-                    superData = getLoader().getMetaDataByName(types.getBaseClass(), fullyQualifiedSuperName);
+                    superData = getLoader().getChild(fullyQualifiedSuperName, types.getBaseClass());
                 }
                 catch (MetaDataNotFoundException e) {
                     //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())

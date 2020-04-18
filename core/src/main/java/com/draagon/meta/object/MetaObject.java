@@ -73,7 +73,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
      * @deprecated Use MetaDataRegistry.findMetaObjectByName(), if enabled in MetaDataLoader
      */
     public static MetaObject forName(String name) {
-        return MetaDataRegistry.findMetaDataByName( MetaObject.class, name);
+        return MetaDataRegistry.findMetaObjectByName(name);
     }
 
     /**

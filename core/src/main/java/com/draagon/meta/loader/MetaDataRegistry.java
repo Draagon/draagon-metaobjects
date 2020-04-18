@@ -103,13 +103,27 @@ public class MetaDataRegistry {
      * Retrieves the MetaObject with the specified name
      * IMPORTANT:  This traverses ALL classloaders, use getMetaDataByName if you know the metadataloader to use
      */
-    public static  <T extends MetaData> T findMetaDataByName(Class<T> c, String name ) throws MetaDataNotFoundException {
+    public static MetaObject findMetaObjectByName( String name ) throws MetaDataNotFoundException {
 
         for (MetaDataLoader l : getDataLoaders()) {
-            T d = l.getMetaDataByName( c, name );
+            MetaObject d = l.getMetaObjectByName( name );
             if ( d != null ) return d;
         }
 
-        throw new MetaDataNotFoundException("MetaData of type ["+c.getName()+"] and name [" + name + "] not found", name);
+        throw new MetaDataNotFoundException( "MetaObject with name [" + name + "] not found in MetaDataRegistry", name);
+    }
+
+    /**
+     * Retrieves the MetaObject with the specified name
+     * IMPORTANT:  This traverses ALL classloaders, use getMetaDataByName if you know the metadataloader to use
+     */
+    public static <T extends MetaData> T findMetaDataByName( Class<T> c, String name ) throws MetaDataNotFoundException {
+
+        for (MetaDataLoader l : getDataLoaders()) {
+            T d = (T) l.getChild( name, c );
+            if ( d != null ) return (T) d;
+        }
+
+        throw new MetaDataNotFoundException( "MetaObject with name [" + name + "] not found in MetaDataRegistry", name);
     }
 }

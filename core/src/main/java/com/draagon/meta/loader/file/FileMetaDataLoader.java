@@ -47,8 +47,11 @@ public class FileMetaDataLoader extends MetaDataLoader {
     @Override
     public MetaDataLoader init() {
 
-        if ( getFileConfig().getSources().isEmpty() ) {
-            throw new IllegalStateException( "No Metadata Sources defined [" + this + "]" );
+        if ( !getFileConfig().hasSources() ) {
+            throw new IllegalStateException( "No Metadata Sources were defined [" + this + "]" );
+        }
+        if ( !getFileConfig().hasParsers() ) {
+            throw new IllegalStateException( "No Metadata Parsers were defined [" + this + "]" );
         }
 
         super.init();
@@ -60,7 +63,9 @@ public class FileMetaDataLoader extends MetaDataLoader {
         }));
 
         // Register with the static MetaDataRegistry
-        if ( getFileConfig().shouldRegister() ) register();
+        if ( getFileConfig().shouldRegister() ) {
+            register();
+        }
 
         return this;
     }

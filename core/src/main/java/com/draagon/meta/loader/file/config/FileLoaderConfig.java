@@ -101,6 +101,10 @@ public class FileLoaderConfig {
         return sources;
     }
 
+    public boolean hasSources() {
+        return !sources.isEmpty();
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // MetaData Parsers
 
@@ -110,6 +114,10 @@ public class FileLoaderConfig {
             addParser( matchPattern, parserMap.get( matchPattern ));
         }
         return this;
+    }
+
+    public boolean hasParsers() {
+        return !patternParsers.isEmpty();
     }
 
     public FileLoaderConfig addParser( String matchPattern, Class<? extends MetaDataParser> parserClass ) {

@@ -33,9 +33,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class XMLMetaDataLoaderTestBase {
 
-    protected static MetaDataLoader loaderStatic = null;
+    protected static XMLFileMetaDataLoader loaderStatic = null;
 
-    protected MetaDataLoader loader = null;
+    protected XMLFileMetaDataLoader loader = null;
 
     @BeforeClass
     public synchronized static void initLoaderStatic() {

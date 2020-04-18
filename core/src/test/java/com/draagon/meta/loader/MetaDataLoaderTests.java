@@ -51,8 +51,8 @@ public class MetaDataLoaderTests {
 
         assertEquals("1 foo object", 1, loader.getMetaDataOfType(MetaObject.TYPE_OBJECT).size());
 
-        MetaObject mo = loader.getMetaObject(  "foo" );
-        MetaObject mo2 = loader.getChild( "foo", MetaObject.class );
+        MetaObject mo = loader.getMetaObjectByName(  "foo" );
+        MetaObject mo2 = (MetaObject) loader.getChild( "foo", MetaObject.class );
 
         assertEquals( "find foo", mo, mo2 );
         assertEquals( "foo.bar", "bar", mo.getMetaField("bar").getName() );
@@ -68,7 +68,7 @@ public class MetaDataLoaderTests {
     @Test
     public void testValueObject() {
 
-        MetaObject mo = loader.getMetaObject(  "foo" );
+        MetaObject mo = loader.getMetaObjectByName(  "foo" );
 
         ValueObject o = (ValueObject) mo.newInstance();
         ValueObject o2 = (ValueObject) mo.newInstance();
@@ -96,7 +96,7 @@ public class MetaDataLoaderTests {
         //     .bar (parent->foo.bar)
         //         .length = 11
 
-        MetaObject mo = loader.getMetaObject( "foo" );
+        MetaObject mo = loader.getMetaObjectByName( "foo" );
         MetaObject baby = ValueMetaObject.create("foo-baby").setSuperObject( mo );
 
         // Create an overlay for bar and length
@@ -126,7 +126,7 @@ public class MetaDataLoaderTests {
         //     .bar (parent->foo.bar)
         //         .length = 11
 
-        MetaObject mo = loader.getMetaObject( "foo" );
+        MetaObject mo = loader.getMetaObjectByName( "foo" );
         MetaObject baby = ValueMetaObject.create("foo-baby")
                 .setSuperObject( mo );
 
@@ -150,7 +150,7 @@ public class MetaDataLoaderTests {
     @Test
     public void testWrapSameFieldException() {
 
-        MetaObject mo = loader.getMetaObject( "foo" );
+        MetaObject mo = loader.getMetaObjectByName( "foo" );
 
         Exception ex = null;
         try { mo.addMetaField(mo.getMetaField("bar").overload()); }
@@ -162,7 +162,7 @@ public class MetaDataLoaderTests {
     @Test
     public void testSameFieldException() {
 
-        MetaObject mo = loader.getMetaObject( "foo" );
+        MetaObject mo = loader.getMetaObjectByName( "foo" );
 
         Exception ex = null;
         try { mo.addMetaField( StringField.create("bar", "error")); } catch( Exception e ) {ex=e;}
@@ -172,7 +172,7 @@ public class MetaDataLoaderTests {
     @Test
     public void testSameTypeException() {
 
-        MetaObject foo = loader.getMetaObject( "foo" );
+        MetaObject foo = loader.getMetaObjectByName( "foo" );
         MetaField bar = foo.getMetaField( "bar" );
         MetaAttribute defVal = bar.getMetaAttr( MetaField.ATTR_DEFAULT_VALUE );
 

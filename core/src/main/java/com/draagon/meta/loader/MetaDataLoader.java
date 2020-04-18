@@ -98,7 +98,9 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * Register this MetaDataLoader with the MetaDataRegistry
      */
     public MetaDataLoader register() {
-        MetaDataRegistry.registerLoader( this );
+        if ( !isRegistered ) {
+            MetaDataRegistry.registerLoader(this);
+        }
         isRegistered = true;
         return this;
     }
@@ -155,33 +157,19 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
         return getChildrenOfType(type,includeParentData);
     }
 
-    /**
-     * Retrieves a collection of all Meta Classes
-     */
-    public <T extends MetaData> List<T> getMetaData( Class<T> c ) {
-        return getMetaData(c, true);
-    }
-
-    /**
-     * Retrieves a collection of all Meta Classes
-     */
-    public <T extends MetaData> List<T> getMetaData( Class<T> c, boolean includeParentData ) {
-        checkState();
-        return getChildren(c,includeParentData);
-    }
 
     /**
      * Retrieves a collection of all Meta Classes
      */
     public List<MetaObject> getMetaObjects() {
         checkState();
-        return getMetaData( MetaObject.class );
+        return getChildren( MetaObject.class, true );
     }
 
     /**
      * Retrieves a collection of all Meta Classes
      */
-    public MetaObject getMetaObject( String name ) {
+    public MetaObject getMetaObjectByName(String name ) {
         checkState();
         return (MetaObject) getChildOfType( MetaObject.TYPE_OBJECT, name );
     }
@@ -191,7 +179,7 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      */
     public MetaObject getMetaObjectFor(Object obj) {
         checkState();
-        for (MetaObject mc : getMetaData( MetaObject.class )) {
+        for (MetaObject mc : getChildren( MetaObject.class, true )) {
             if (mc.produces(obj)) {
                 return mc;
             }
@@ -200,10 +188,27 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
         return null;
     }
 
+
+    /**
+     * Retrieves a collection of all Meta Classes
+     */
+    public <N extends MetaData> List<N> getMetaData(Class<N> c ) {
+        return getMetaData(c, true);
+    }
+
+    /**
+     * Retrieves a collection of all Meta Classes
+     */
+    public <N extends MetaData> List<N> getMetaData( Class<N> c, boolean includeParentData ) {
+        checkState();
+        return getChildren(c,includeParentData);
+    }
+
+
     /**
      * Gets the MetaData with the specified Class type and name
      */
-    public <T extends MetaData> T getMetaDataByName( Class<T> c, String metaDataName) throws MetaDataNotFoundException {
+    public <N extends MetaData> N getMetaDataByName( Class<N> c, String metaDataName) throws MetaDataNotFoundException {
 
         checkState();
 
@@ -234,7 +239,7 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
         }
 
 
-        return (T) mc;
+        return (N) mc;
     }
 
     /**
@@ -242,23 +247,23 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * <p>
      * Only uses direct 'super' relationship, not 'inherits'
      */
-    protected <T extends MetaData> List<T> getMetaDataBySuper(String metaDataName, List<MetaObject> objects) throws MetaDataNotFoundException {
+    protected List<MetaObject> getMetaDataBySuper(String metaDataName, List<MetaObject> objects) throws MetaDataNotFoundException {
 
         checkState();
 
         String KEY = "QuickCacheDerived-" + metaDataName;
-        List<T> result = (List<T>) getCacheValue(KEY);
+        List<MetaObject> result = (List<MetaObject>) getCacheValue(KEY);
         if (result == null) {
             synchronized (this) {
-                result = (List<T>) getCacheValue(KEY);
+                result = (List<MetaObject>) getCacheValue(KEY);
                 if (result == null) {
                     result = new ArrayList<>();
 
                     for (MetaObject mo : objects) {
                         if (null != mo.getSuperObject()) {
                             if (mo.getSuperObject().getName().equals(metaDataName)) {
-                                result.add((T) mo);
-                                result.addAll((Collection<T>) getMetaDataBySuper(mo.getName(), objects));
+                                result.add( mo);
+                                result.addAll( getMetaDataBySuper(mo.getName(), objects));
                             }
                         }
                     }
@@ -274,16 +279,16 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
      * <p>
      * Only uses direct 'super' relationship, not 'inherits'
      */
-    public <T extends MetaData> List<T> getMetaDataBySuper(String metaDataName) throws MetaDataNotFoundException {
+    public List<MetaObject> getMetaDataBySuper(String metaDataName) throws MetaDataNotFoundException {
 
         checkState();
 
         String KEY = "QuickCacheDerived-" + metaDataName;
-        List<T> result;
-        result = (List<T>) getCacheValue(KEY);
+        List<MetaObject> result;
+        result = (List<MetaObject>) getCacheValue(KEY);
         if (result == null) {
             synchronized (this) {
-                result = (List<T>) getCacheValue(KEY);
+                result = (List<MetaObject>) getCacheValue(KEY);
                 if (result == null) {
                     List<MetaObject> objects = getMetaObjects();
                     // Delegate to a second level, so we don't have to keep retrieving the list of all MetaObjects
@@ -295,6 +300,24 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
         }
 
         return result;
+    }
+
+    /**
+     * Removes the MetaData
+     * @deprecated Use MetaData.deleteChild()
+     */
+    public void removeMetaData( Class<MetaData> c, String name) throws MetaDataNotFoundException {
+        checkState();
+        deleteChild(getMetaDataByName( c, name));
+    }
+
+    /**
+     * Adds the MetaData
+     * @deprecated Use MetaData.addChild
+     */
+    public void addMetaData(MetaData mc) {
+        checkState();
+        addChild(mc);
     }
 
     /**
@@ -312,14 +335,6 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
         }
     }
 
-    /**
-     * Adds the MetaData
-     * @deprecated Use MetaData.addChild
-     */
-    public void addMetaData(MetaData mc) {
-        checkState();
-        addChild(mc);
-    }
 
     /**
      * Adds the child MetaData
@@ -328,15 +343,6 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
     public MetaDataLoader addChild(MetaData mc) {
         checkState();
         return super.addChild(mc);
-    }
-
-    /**
-     * Removes the MetaData
-     * @deprecated Use MetaData.deleteChild()
-     */
-    public void removeMetaData( Class<MetaData> c, String name) throws MetaDataNotFoundException {
-        checkState();
-        deleteChild(getMetaDataByName( c, name));
     }
 
     /**
@@ -373,4 +379,5 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
             return "MetaDataLoader[" + getSubTypeName() + ":" + getName() + "@" + getParent().toString() + "]";
         }
     }
+
 }

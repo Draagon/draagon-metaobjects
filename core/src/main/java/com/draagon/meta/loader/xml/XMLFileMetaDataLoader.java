@@ -6,13 +6,20 @@
  */
 package com.draagon.meta.loader.xml;
 
+import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.LocalMetaDataSources;
 import com.draagon.meta.loader.file.MetaDataParser;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
+import com.draagon.meta.object.MetaObject;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
