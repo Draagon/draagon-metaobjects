@@ -7,7 +7,6 @@
         <version>4.3.0-SNAPSHOT</version>
     </parent>
   
-    <groupId>com.draagon</groupId>
     <artifactId>metaobjects-core</artifactId>
     <packaging>bundle</packaging>
 

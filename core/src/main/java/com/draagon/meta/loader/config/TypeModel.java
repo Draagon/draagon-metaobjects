@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public class TypeConfig {
+public class TypeModel {
 
     private final String typeName;
     private final Class<? extends MetaData> baseClass;
     private final Map<String,Class<? extends MetaData>> subTypes = new TreeMap<>();
     private String defSubTypeName = null;
 
-    public TypeConfig( String typeName, Class<? extends MetaData> baseClass ) {
+    public TypeModel(String typeName, Class<? extends MetaData> baseClass ) {
         this.typeName = typeName;
         this.baseClass = baseClass;
     }
@@ -73,6 +73,6 @@ public class TypeConfig {
     // Misc Methods
 
     public String toString() {
-        return "TypeConfig {typeName="+typeName+",baseClass="+baseClass+",subTypes="+subTypes.toString()+",defSubTypeName="+defSubTypeName+"}";
+        return "TypeModel {typeName="+typeName+",baseClass="+baseClass+",subTypes="+subTypes.toString()+",defSubTypeName="+defSubTypeName+"}";
     }
 }

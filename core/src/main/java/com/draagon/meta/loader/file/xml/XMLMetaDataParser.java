@@ -5,7 +5,7 @@ import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.config.TypeModel;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
 import com.draagon.meta.util.xml.XMLFileReader;
@@ -63,7 +63,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(Element el, TypeConfig typeConfig ) throws MetaException, SAXException {
+    protected void loadSubTypes(Element el, TypeModel typeModel) throws MetaException, SAXException {
 
         String section = el.getNodeName();
 
@@ -84,7 +84,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeConfig.addSubType(name, tcl, "true".equals( def ));
+                typeModel.addSubType(name, tcl, "true".equals( def ));
             }
             catch (ClassNotFoundException e) {
                 throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +section+":"+name+ "] with invalid class: " + e.getMessage());
@@ -163,7 +163,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
-            if ( getConfig().getTypeConfig( typeName ) == null ) {
+            if ( getConfig().getMetaDataTypes().getType( typeName ) == null ) {
                 if (isRoot) log.warn("Unknown type [" +typeName+ "] found on loader [" +getLoader().getName()+ "] in file [" +getFilename()+ "]");
                 else log.warn("Unknown type [" +typeName+ "] found on parent metadata [" +parent+ "] in file [" +getFilename()+ "]");
                 continue;

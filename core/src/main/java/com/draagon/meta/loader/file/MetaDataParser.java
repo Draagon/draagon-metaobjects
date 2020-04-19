@@ -6,7 +6,8 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.config.MetaDataTypes;
+import com.draagon.meta.loader.config.TypeModel;
 import com.draagon.meta.util.MetaDataUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,36 +61,41 @@ public abstract class MetaDataParser {
     /** Load the metadata models from the inputstream */
     public abstract MetaDataConfig loadFromStream( InputStream is );
 
+    /** Get the MetaDataTypes from the loader's MetaDataConfig */
+    public MetaDataTypes getTypes() {
+        return this.loader.getMetaDataConfig().getMetaDataTypes();
+    }
+
     /**
      * Get or Create a Type Configuration
      * @param typeName Name of the metadata type
      * @param typeClass MetaData type class
-     * @return The create TypeConfig
+     * @return The create TypeModel
      */
-    protected TypeConfig getOrCreateTypeConfig( String typeName, String typeClass) {
+    protected TypeModel getOrCreateTypeConfig(String typeName, String typeClass) {
 
         if ( typeName == null || typeName.isEmpty() ) {
             throw new MetaException( "MetaData Type was null or empty ["+typeName+"] in file [" +getFilename()+ "]");
         }
 
-        // Get the TypeConfig with the specified element name
-        TypeConfig typeConfig = getLoader().getMetaDataConfig().getTypeConfig( typeName );
+        // Get the TypeModel with the specified element name
+        TypeModel typeModel = getTypes().getType( typeName );
 
         // If it doesn't exist, then create it and check for the "class" attribute
-        if ( typeConfig == null ) {
+        if ( typeModel == null ) {
 
             if ( typeClass == null || typeClass.isEmpty() )
                 throw new MetaException( "MetaData Type [" + typeName + "] has no 'class' attribute specified in file [" +getFilename()+ "]");
 
             try {
-                // Add a new TypeConfig and add to the mapping
-                typeConfig = getConfig().createTypeConfig( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
+                // Add a new TypeModel and add to the mapping
+                typeModel = getTypes().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
             }
             catch( ClassNotFoundException ex ) {
                 throw new MetaException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
             }
         }
-        return typeConfig;
+        return typeModel;
     }
 
     /** Get the default package from the element */
@@ -109,8 +115,8 @@ public abstract class MetaDataParser {
             throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent+ "] had no name specfied in file ["+getFilename()+"]");
         }
 
-        // Get the TypeConfig map for this element
-        TypeConfig types = getConfig().getTypeConfig( typeName );
+        // Get the TypeModel map for this element
+        TypeModel types = getTypes().getType( typeName );
         if ( types == null ) {
             // TODO:  What is the best behavior here?
             throw new MetaException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
@@ -167,7 +173,7 @@ public abstract class MetaDataParser {
     }
 
     /** Get the Super MetaData if it exists */
-    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName, TypeConfig types ) {
+    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName, TypeModel types ) {
 
         MetaData superData = null;
 
@@ -228,7 +234,7 @@ public abstract class MetaDataParser {
     }
 
     /** Create new MetaData */
-    protected MetaData createNewMetaData( boolean isRoot, String typeName, String subTypeName, String name, String packageName, TypeConfig types, MetaData superData) {
+    protected MetaData createNewMetaData(boolean isRoot, String typeName, String subTypeName, String name, String packageName, TypeModel types, MetaData superData) {
 
         if (subTypeName.isEmpty()) subTypeName = null;
 

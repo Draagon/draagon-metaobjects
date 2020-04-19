@@ -29,6 +29,7 @@
 
     <modules>
         <module>core</module>
+        <module>mojo</module>
         <!-- module>om</module>
         <module>omdb</module -->
         <!-- module>web</module -->
