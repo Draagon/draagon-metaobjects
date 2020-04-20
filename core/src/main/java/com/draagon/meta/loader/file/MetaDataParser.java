@@ -178,7 +178,7 @@ public abstract class MetaDataParser {
         MetaData superData = null;
 
         // If a super class was specified
-        if (superName.length() > 0) {
+        if (superName != null && !superName.isEmpty()) {
 
             // Try to find it with the name prepended if not fully qualified
             try {
@@ -236,7 +236,7 @@ public abstract class MetaDataParser {
     /** Create new MetaData */
     protected MetaData createNewMetaData(boolean isRoot, String typeName, String subTypeName, String name, String packageName, TypeModel types, MetaData superData) {
 
-        if (subTypeName.isEmpty()) subTypeName = null;
+        if (subTypeName != null && subTypeName.isEmpty()) subTypeName = null;
 
         try {
             Class<? extends MetaData> c = null;

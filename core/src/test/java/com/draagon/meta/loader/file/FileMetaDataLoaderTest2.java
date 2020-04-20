@@ -15,6 +15,7 @@ import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
+import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
@@ -45,12 +46,14 @@ public class FileMetaDataLoaderTest2 {
             loader = new FileMetaDataLoader(
                     new FileLoaderConfig()
                             .addParser("*.xml", XMLMetaDataParser.class)
+                            .addParser("*.json", JsonMetaDataParser.class)
+                            .addSources(new LocalMetaDataSources(
+                                    "com/draagon/meta/loader/file/xml/metaobjects.types.xml"))
                             .addSources(new com.draagon.meta.loader.file.LocalMetaDataSources(
                                     "src/test/resources",
                                     Arrays.asList(
-                                            "com/draagon/meta/loader/meta.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle",
-                                            "metadata/test/produce/v1/meta.fruit.overlay.xml")
+                                            "metadata/test/produce/v1/meta.fruit.overlay.json")
                             ))
                             .setShouldRegister(true)
                             .setVerbose( false ),
@@ -85,7 +88,7 @@ public class FileMetaDataLoaderTest2 {
         
         assertEquals( "id field", id, apple.getId() );
         
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).toString() );
+        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
     }
 
     @Test

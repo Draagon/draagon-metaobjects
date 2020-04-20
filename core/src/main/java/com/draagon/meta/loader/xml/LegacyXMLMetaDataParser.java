@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.file.xml;
+package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
@@ -7,11 +7,10 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypeModel;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-
+import com.draagon.meta.loader.file.xml.XMLMetaDataParserBase;
 import com.draagon.meta.util.xml.XMLFileReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -21,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class XMLMetaDataParser extends XMLMetaDataParserBase {
+public class LegacyXMLMetaDataParser extends XMLMetaDataParserBase {
 
-    private static Log log = LogFactory.getLog(XMLMetaDataParser.class);
+    private static Log log = LogFactory.getLog(LegacyXMLMetaDataParser.class);
 
     public final static String ATTR_METADATA    = "metadata";
     public final static String ATTR_TYPES       = "types";
@@ -31,7 +30,6 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     public final static String ATTR_NAME        = "name";
     public final static String ATTR_CLASS       = "class";
     public final static String ATTR_TYPE        = "type";
-    public final static String ATTR_SUBTYPE     = "subtype";
     public final static String ATTR_SUPER       = "super";
 
     protected static List<String> reservedAttributes = new ArrayList<>();
@@ -44,8 +42,53 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
         reservedAttributes.add( ATTR_SUPER );
     }
 
-    public XMLMetaDataParser(FileMetaDataLoader loader, String filename ) {
+    public LegacyXMLMetaDataParser(FileMetaDataLoader loader, String filename ) {
         super( loader, filename );
+    }
+
+    /**
+     * Loads the specified group types
+     */
+    protected void loadAllTypes( Element el) throws MetaException, SAXException {
+
+        // Get all elements that have <type> elements
+        for( Element e: getElements( el )) {
+
+            // Load all the types for the specific element type
+            loadSubTypes( e, getOrCreateTypeConfig( e.getNodeName(), e.getAttribute( ATTR_CLASS ) ));
+        }
+    }
+
+    /**
+     * Loads the specified group types
+     */
+    protected void loadSubTypes(Element el, TypeModel typeModel) throws MetaException, SAXException {
+
+        String section = el.getNodeName();
+
+        Collection<Element> typeCol = getElementsOfName(el, "type");
+
+        // Iterate through each type
+        for (Element typeEl : typeCol) {
+
+            String name = typeEl.getAttribute(ATTR_NAME);
+            String tclass = typeEl.getAttribute("class");
+            String def = typeEl.getAttribute("default");
+
+            if (name.length() == 0) {
+                throw new MetaException("Type of section [" + section + "] has no 'name' attribute specified");
+            }
+
+            try {
+                Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
+
+                // Add the type class with the specified name
+                typeModel.addSubType(name, tcl, "true".equals( def ));
+            }
+            catch (ClassNotFoundException e) {
+                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +section+":"+name+ "] with invalid class: " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -70,7 +113,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             else {
                 // Look for the <items> element
-                elements = getElementsOfName(doc, ATTR_METADATA);
+                elements = getElementsOfName(doc, "metadata");
                 if (elements.isEmpty()) {
                     throw new MetaException("The root 'meta' element was not found in file [" + getFilename() + "]");
                 }
@@ -103,55 +146,6 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
         }
 
         return getConfig();
-    }
-
-    /**
-     * Loads the specified group types
-     */
-    protected void loadAllTypes( Element el) throws MetaException, SAXException {
-
-        // Get all elements that have <type> elements
-        for( Element e: getElementsOfName(el, ATTR_TYPE)) {
-
-            String name = e.getAttribute(ATTR_NAME);
-            if (name.length() == 0) {
-                throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
-            }
-
-            // Load all the types for the specific element type
-            loadSubTypes( e, getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ) ));
-        }
-    }
-
-
-    /**
-     * Loads the specified group types
-     */
-    protected void loadSubTypes(Element el, TypeModel typeModel) throws MetaException, SAXException {
-
-        Collection<Element> subTypeElements = getElementsOfName(el, ATTR_SUBTYPE);
-
-        // Iterate through each type
-        for (Element typeEl : subTypeElements) {
-
-            String name = typeEl.getAttribute(ATTR_NAME);
-            String tclass = typeEl.getAttribute("class");
-            String def = typeEl.getAttribute("default");
-
-            if (name.length() == 0) {
-                throw new MetaException("SubType of Type [" + typeModel.getTypeName() + "] has no 'name' attribute specified");
-            }
-
-            try {
-                Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
-
-                // Add the type class with the specified name
-                typeModel.addSubType(name, tcl, "true".equals( def ));
-            }
-            catch (ClassNotFoundException e) {
-                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeModel.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
-            }
-        }
     }
 
     /** Parse the metadata */
@@ -251,4 +245,16 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             }
         }
     }
+
+    /**
+     * Gets all elements within <types> that have a sub element <type>
+     */
+    /*protected List<Element> getChildElementsWithName( Element n, String name ) {
+
+        Element e = getFirstChildElement( n );
+        if ( e != null )
+            return getElementsOfName( e, name );
+        else
+            return new ArrayList<>();
+    }*/
 }

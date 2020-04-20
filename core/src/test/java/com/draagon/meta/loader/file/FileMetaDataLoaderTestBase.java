@@ -42,7 +42,7 @@ public class FileMetaDataLoaderTestBase {
                                 .addParser( "*.json", JsonMetaDataParser.class )
                                 .addSources( new LocalMetaDataSources(
                                     Arrays.asList(
-                                            "com/draagon/meta/loader/meta.types.xml",
+                                            "com/draagon/meta/loader/file/xml/metaobjects.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.xml")
                                 ))
