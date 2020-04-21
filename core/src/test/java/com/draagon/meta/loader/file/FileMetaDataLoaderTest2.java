@@ -48,7 +48,7 @@ public class FileMetaDataLoaderTest2 {
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addParser("*.json", JsonMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
-                                    "com/draagon/meta/loader/file/xml/metaobjects.types.json"))
+                                    "com/draagon/meta/loader/file/json/metaobjects.types.json"))
                             .addSources(new LocalMetaDataSources(
                                     "src/test/resources",
                                     Arrays.asList(
