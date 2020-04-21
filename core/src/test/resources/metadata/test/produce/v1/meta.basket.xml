@@ -22,7 +22,7 @@
         <field name="apples" type="objectArray" objectRef="..::fruit::Apple"/>
 
         <!-- Oranges -->
-        <field name="numOranges" type="objectArray" objectRef="..::fruit::Orange"/>
+        <field name="oranges" type="objectArray" objectRef="..::fruit::Orange"/>
 
     </object>
 

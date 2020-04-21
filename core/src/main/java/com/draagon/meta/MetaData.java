@@ -652,14 +652,14 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
 
         for (MetaData d : children) {
 
-            // Make sure the name matches if it's not null
-            if ( name != null && !d.getName().equals(name)) continue;
-
             // Make sure the types match if not null
             if ( type != null && !d.isType(type)) continue;
 
             // Make sure the class matches if not null
             if ( c != null && !c.isInstance(d)) continue;
+
+            // Make sure the name matches if it's not null
+            if ( name != null && !d.getName().equals(name)) continue;
 
             // If we made it this far, then return the child
             return (T) d;

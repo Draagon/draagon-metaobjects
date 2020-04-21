@@ -1,0 +1,50 @@
+{"metadata": {"package": "produce::v1::fruit",
+  "children": [
+
+    {"object": {"name": "Fruit", "type": "pojo",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.Fruit"}},
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "length", "type": "int"}},
+        {"field": {"name": "weight", "type": "int"}}
+      ]}},
+
+    {"object": {"name": "Vegetable", "type": "pojo",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.Vegetable"}},
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "length", "type": "int"}},
+        {"field": {"name": "weight", "type": "int"}}
+      ]}},
+
+    {"object": {"name": "Apple", "super": "Fruit",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.Apple"}},
+        {"field": {"name": "orchard", "type": "string",
+          "children": [
+            {"attr": {"name": "len", "value": "80"}}
+          ]}},
+        {"field": {"name": "worms", "type": "short"}},
+        {"field": {"name": "length", "type": "int"}},
+        {"field": {"name": "weight", "type": "int"}}
+      ]}},
+
+    {"object": {"name": "Macintosh", "super": "Apple",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.Macintosh"}}
+      ]}},
+
+    {"object": {"name": "Tomato", "super": "Vegetable",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.Tomato"}}
+      ]}},
+
+    {"object": {"name": "Orange", "super": "Fruit",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.Orange"}},
+        {"field": {"name": "pickedDate", "type": "date"}}
+      ]}}
+  ]}
+}

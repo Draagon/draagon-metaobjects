@@ -3,7 +3,7 @@
     "shortcuts" : [],
     "rules" : [],
     "children": [
-        {"object": {"package": "::ext", "name": "ProductExt",
+        {"object": {"package": "::ext", "name": "ProduceExt",
             "children": [
                 {"field": {"name": "name", "super": "..::common::name"}},
                 {"field": {"name": "foo", "type": "double"}}

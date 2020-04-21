@@ -1,6 +1,7 @@
 package com.draagon.meta.loader.file.xml;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
@@ -75,13 +76,15 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             if (typeElements.size() > 0) {
                 loadAllTypes(typeElements.iterator().next()); // Load inner tags
             }
+            // If it's not a known type, then process as if it's a defined type
+            else {
+                // Set default package name
+                String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
+                setDefaultPackageName(defPkg);
 
-            // Set default package name
-            String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
-            setDefaultPackageName(defPkg);
-
-            // Parse the metadata elements
-            parseMetaData(getLoader(), pkgEl, true);
+                // Parse the metadata elements
+                parseMetaData(getLoader(), pkgEl, true);
+            }
         }
         catch (SAXException e) {
             throw new MetaException("Parse error loading MetaData from file ["+getFilename()+"]: " + e.getMessage(), e);
@@ -172,9 +175,15 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
             if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
-                if (isRoot) log.warn("Unknown type [" +typeName+ "] found on loader [" +getLoader().getName()+ "] in file [" +getFilename()+ "]");
-                else log.warn("Unknown type [" +typeName+ "] found on parent metadata [" +parent+ "] in file [" +getFilename()+ "]");
-                continue;
+                if ( getLoader().getLoaderConfig().isStrict() ) {
+                    throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
+                } else {
+                    if (isRoot)
+                        log.warn("Unknown type [" + typeName + "] found on loader [" + getLoader().getName() + "] in file [" + getFilename() + "]");
+                    else
+                        log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
+                    continue;
+                }
             }
 
             // Create MetaData

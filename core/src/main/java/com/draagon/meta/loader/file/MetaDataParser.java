@@ -220,8 +220,8 @@ public abstract class MetaDataParser {
 
             // Try to find it by the provided name in the 'super' attribute
             if (superData == null) {
+                String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
                 try {
-                    String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
                     superData = getLoader().getChild(fullyQualifiedSuperName, types.getBaseClass());
                 }
                 catch (MetaDataNotFoundException e) {
@@ -278,13 +278,13 @@ public abstract class MetaDataParser {
                 subTypeName = types.getDefaultSubTypeName();
                 c = types.getDefaultTypeClass();
                 if (c == null) {
-                    throw new MetaException("MetaData [" + typeName + "][" + name + "] has no subtype defined and type [" + typeName + "] had no default specified");
+                    throw new MetaException("MetaData [" + typeName + "][" + name + "] has no subtype defined and type [" + typeName + "] had no default specified in file ["+getFilename()+"]");
                 }
             }
         } else {
             c = (Class<? extends MetaData>) types.getSubTypeClass(subTypeName);
             if (c == null) {
-                throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName + "], but it was not recognized");
+                throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName + "], but it was not recognized in file ["+getFilename()+"]");
             }
         }
 

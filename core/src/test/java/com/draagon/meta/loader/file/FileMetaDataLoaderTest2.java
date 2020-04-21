@@ -52,7 +52,7 @@ public class FileMetaDataLoaderTest2 {
                             .addSources(new LocalMetaDataSources(
                                     "src/test/resources",
                                     Arrays.asList(
-                                            "metadata/test/produce/v1/produce-v1.bundle",
+                                            "metadata/test/produce/v1/produce-v1-json.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.json")
                             ))
                             .setShouldRegister(true)
