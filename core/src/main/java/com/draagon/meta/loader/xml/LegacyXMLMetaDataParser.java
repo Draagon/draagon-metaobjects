@@ -5,7 +5,7 @@ import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeModel;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParserBase;
 import com.draagon.meta.util.xml.XMLFileReader;
@@ -62,7 +62,7 @@ public class LegacyXMLMetaDataParser extends XMLMetaDataParserBase {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(Element el, TypeModel typeModel) throws MetaException, SAXException {
+    protected void loadSubTypes(Element el, TypeConfig typeConfig) throws MetaException, SAXException {
 
         String section = el.getNodeName();
 
@@ -83,7 +83,7 @@ public class LegacyXMLMetaDataParser extends XMLMetaDataParserBase {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeModel.addSubType(name, tcl, "true".equals( def ));
+                typeConfig.addSubType(name, tcl, "true".equals( def ));
             }
             catch (ClassNotFoundException e) {
                 throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +section+":"+name+ "] with invalid class: " + e.getMessage());

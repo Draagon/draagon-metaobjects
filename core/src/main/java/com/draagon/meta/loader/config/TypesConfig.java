@@ -8,38 +8,38 @@ import java.util.TreeMap;
 /**
  * Stores the MetaData Configuration data
  */
-public class MetaDataTypes {
+public class TypesConfig {
 
-    private final TreeMap<String, TypeModel> types;
+    private final TreeMap<String, TypeConfig> types;
 
-    public MetaDataTypes() {
+    public TypesConfig() {
         types = new TreeMap<>();
     }
 
     /////////////////////////////////////////////////////////////////////
     // Type Configuration Methods
 
-    public TypeModel createType(String typeName, Class<? extends MetaData> clazz ) {
+    public TypeConfig createType(String typeName, Class<? extends MetaData> clazz ) {
 
         if ( typeName == null ) throw new NullPointerException( "Cannot create a TypeModel with a null name and class [" + clazz + "]" );
         if ( clazz == null ) throw new NullPointerException( "Cannot create TypeModel for type [" +typeName + "] with a null Class" );
 
-        return addType( typeName, new TypeModel( typeName, clazz ) );
+        return addType( typeName, new TypeConfig( typeName, clazz ) );
     }
 
-    public TypeModel addType(String typeName, TypeModel typeModel) {
+    public TypeConfig addType(String typeName, TypeConfig typeConfig) {
 
         if ( typeName == null ) throw new NullPointerException( "Cannot add TypeModel with a null name" );
-        if ( typeModel == null ) throw new NullPointerException( "Cannot add TypeModel [" +typeName + "] with a null value" );
+        if ( typeConfig == null ) throw new NullPointerException( "Cannot add TypeModel [" +typeName + "] with a null value" );
 
         if ( types.containsKey( typeName )) throw new IllegalArgumentException( "MetaData Type [" + typeName + "] already exists as class [" + types.get(typeName).getBaseClass() + "]" );
 
-        types.put( typeName, typeModel);
+        types.put( typeName, typeConfig);
 
-        return typeModel;
+        return typeConfig;
     }
 
-    public TypeModel getType(String name ) {
+    public TypeConfig getType(String name ) {
         return types.get( name );
     }
 
@@ -47,7 +47,7 @@ public class MetaDataTypes {
         return types.keySet();
     }
 
-    public Collection<TypeModel> getTypes() {
+    public Collection<TypeConfig> getTypes() {
         return types.values();
     }
 

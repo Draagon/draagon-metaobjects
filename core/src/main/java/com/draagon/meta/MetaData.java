@@ -776,22 +776,22 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * Create a newInstance of the specified MetaData class given the specified type, subType, and name
      * @return The newly created MetaData instance
      */
-    public MetaData newInstanceFromClass( Class<? extends MetaData> c, String type, String subType, String name) {
+    public MetaData newInstanceFromClass( Class<? extends MetaData> c, String typeName, String subTypeName, String fullname) {
 
-        MetaData v;
+        MetaData md;
 
         try {
             try {
-                v = c.getConstructor(String.class, String.class, String.class).newInstance(type, subType, name);
+                md = c.getConstructor(String.class, String.class, String.class).newInstance(type, subType, fullname);
             } catch (NoSuchMethodException e) {
                 try {
-                    v = c.getConstructor(String.class, String.class).newInstance(subType, name);
+                    md = c.getConstructor(String.class, String.class).newInstance(subType, fullname);
                 } catch (NoSuchMethodException e2) {
                     try {
-                        v = c.getConstructor(String.class).newInstance(name);
+                        md = c.getConstructor(String.class).newInstance(fullname);
                     } catch (NoSuchMethodException e3) {
                         try {
-                            v = c.getConstructor().newInstance();
+                            md = c.getConstructor().newInstance();
                         } catch (NoSuchMethodException e4) {
                             throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "], no valid constructor was found" );
                         }
@@ -802,7 +802,16 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
             throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
         }
 
-        return v;
+        if (!md.getTypeName().equals(typeName))
+            throw new MetaDataException("Expected MetaData type [" + typeName + "], but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md);
+
+        if (!md.getSubTypeName().equals(subTypeName))
+            throw new MetaDataException("Expected MetaData subType [" + subTypeName + "], but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md);
+
+        if (!md.getName().equals(fullname))
+            throw new MetaDataException("Expected MetaData name [" + fullname + "], but MetaData instantiated was of name [" + md.getName() + "]: " + md);
+
+        return md;
     }
 
     /**

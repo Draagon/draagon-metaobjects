@@ -49,7 +49,7 @@ public class FileMetaDataLoaderTest2 {
                             .addParser("*.json", JsonMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
                                     "com/draagon/meta/loader/file/xml/metaobjects.types.xml"))
-                            .addSources(new com.draagon.meta.loader.file.LocalMetaDataSources(
+                            .addSources(new LocalMetaDataSources(
                                     "src/test/resources",
                                     Arrays.asList(
                                             "metadata/test/produce/v1/produce-v1.bundle",

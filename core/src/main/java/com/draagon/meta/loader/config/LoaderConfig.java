@@ -21,6 +21,7 @@ public class LoaderConfig<N extends LoaderConfig> {
 
     private boolean shouldRegister = false;
     private boolean verbose = true;
+    private boolean strict = true;
 
     public LoaderConfig() {}
 
@@ -41,6 +42,13 @@ public class LoaderConfig<N extends LoaderConfig> {
         return shouldRegister;
     }
 
+    /**
+     * verbose = true
+     *   = log output report of loaded metadata types:   # packages, # of objects, etc.
+     *
+     * @param verbose
+     * @return
+     */
     public N setVerbose(boolean verbose) {
         this.verbose = verbose;
         return (N) this;
@@ -48,6 +56,23 @@ public class LoaderConfig<N extends LoaderConfig> {
 
     public boolean isVerbose() {
         return verbose;
+    }
+
+    /**
+     * strict = false
+     *    = log warnings on unknown metadata types
+     *    = output report should # of ignored metadata types
+     *
+     * @param strict
+     * @return
+     */
+    public N setStrict(boolean strict) {
+        this.strict  = strict;
+        return (N) this;
+    }
+
+    public boolean isStrict() {
+        return strict;
     }
 
     ///////////////////////////////////////////////////////////////////////////

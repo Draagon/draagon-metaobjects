@@ -5,7 +5,7 @@ import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeModel;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
 import com.draagon.meta.util.xml.XMLFileReader;
@@ -63,43 +63,34 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             // PARSE THE ITEMS XML BLOCK
 
             // Look for the <types> element
-            Collection<Element> elements = getElementsOfName(doc, ATTR_TYPES );
-            if (!elements.isEmpty()) {
-                loadAllTypes(elements.iterator().next());
+            Collection<Element> elements = getElementsOfName(doc, ATTR_METADATA);
+            if (elements.isEmpty()) {
+                throw new MetaException("The root 'meta' element was not found in file [" + getFilename() + "]");
             }
 
-            else {
-                // Look for the <items> element
-                elements = getElementsOfName(doc, ATTR_METADATA);
-                if (elements.isEmpty()) {
-                    throw new MetaException("The root 'meta' element was not found in file [" + getFilename() + "]");
-                }
+            Element pkgEl = elements.iterator().next();
 
-                Element pkgEl = elements.iterator().next();
-
-                // Load any types specified in the Metadata XML
-                Collection<Element> typeElements = getElementsOfName(pkgEl, ATTR_TYPES);
-                if (typeElements.size() > 0) {
-                    loadAllTypes(typeElements.iterator().next()); // Load inner tags
-                }
-
-                // Set default package name
-                String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
-                setDefaultPackageName(defPkg);
-
-                // Parse the metadata elements
-                parseMetaData(getLoader(), pkgEl, true);
+            // Load any types specified in the Metadata XML
+            Collection<Element> typeElements = getElementsOfName(pkgEl, ATTR_TYPES);
+            if (typeElements.size() > 0) {
+                loadAllTypes(typeElements.iterator().next()); // Load inner tags
             }
+
+            // Set default package name
+            String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
+            setDefaultPackageName(defPkg);
+
+            // Parse the metadata elements
+            parseMetaData(getLoader(), pkgEl, true);
         }
         catch (SAXException e) {
             throw new MetaException("Parse error loading MetaData from file ["+getFilename()+"]: " + e.getMessage(), e);
         }
         catch (IOException e) {
-            log.error("Error loading MetaData as XML from ["+getFilename()+"]: " + e.getMessage());
             throw new MetaException("Error loading Meta XML from ["+getFilename()+"]: " + e.getMessage(), e);
         }
         finally {
-            try { is.close(); } catch (Exception e) {}
+            try { is.close(); } catch (Exception ignore) {}
         }
 
         return getConfig();
@@ -127,7 +118,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(Element el, TypeModel typeModel) throws MetaException, SAXException {
+    protected void loadSubTypes(Element el, TypeConfig typeConfig) throws MetaException, SAXException {
 
         Collection<Element> subTypeElements = getElementsOfName(el, ATTR_SUBTYPE);
 
@@ -139,17 +130,17 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             String def = typeEl.getAttribute("default");
 
             if (name.length() == 0) {
-                throw new MetaException("SubType of Type [" + typeModel.getTypeName() + "] has no 'name' attribute specified");
+                throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeModel.addSubType(name, tcl, "true".equals( def ));
+                typeConfig.addSubType(name, tcl, "true".equals( def ));
             }
             catch (ClassNotFoundException e) {
-                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeModel.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
             }
         }
     }

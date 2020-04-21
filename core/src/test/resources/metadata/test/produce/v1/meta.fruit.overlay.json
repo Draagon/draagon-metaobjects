@@ -1,4 +1,7 @@
 {"metadata": {"package": "produce::v1",
+    "types" : [],
+    "shortcuts" : [],
+    "rules" : [],
     "children": [
         {"object": {"package": "::ext", "name": "ProductExt",
             "children": [

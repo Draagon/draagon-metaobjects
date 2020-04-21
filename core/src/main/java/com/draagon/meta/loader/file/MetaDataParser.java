@@ -1,13 +1,12 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.MetaDataTypes;
-import com.draagon.meta.loader.config.TypeModel;
+import com.draagon.meta.loader.config.TypesConfig;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.util.MetaDataUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,7 +61,7 @@ public abstract class MetaDataParser {
     public abstract MetaDataConfig loadFromStream( InputStream is );
 
     /** Get the MetaDataTypes from the loader's MetaDataConfig */
-    public MetaDataTypes getTypes() {
+    public TypesConfig getTypes() {
         return this.loader.getMetaDataConfig().getMetaDataTypes();
     }
 
@@ -72,30 +71,30 @@ public abstract class MetaDataParser {
      * @param typeClass MetaData type class
      * @return The create TypeModel
      */
-    protected TypeModel getOrCreateTypeConfig(String typeName, String typeClass) {
+    protected TypeConfig getOrCreateTypeConfig(String typeName, String typeClass) {
 
         if ( typeName == null || typeName.isEmpty() ) {
             throw new MetaException( "MetaData Type was null or empty ["+typeName+"] in file [" +getFilename()+ "]");
         }
 
         // Get the TypeModel with the specified element name
-        TypeModel typeModel = getTypes().getType( typeName );
+        TypeConfig typeConfig = getTypes().getType( typeName );
 
         // If it doesn't exist, then create it and check for the "class" attribute
-        if ( typeModel == null ) {
+        if ( typeConfig == null ) {
 
             if ( typeClass == null || typeClass.isEmpty() )
                 throw new MetaException( "MetaData Type [" + typeName + "] has no 'class' attribute specified in file [" +getFilename()+ "]");
 
             try {
                 // Add a new TypeModel and add to the mapping
-                typeModel = getTypes().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
+                typeConfig = getTypes().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
             }
             catch( ClassNotFoundException ex ) {
                 throw new MetaException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
             }
         }
-        return typeModel;
+        return typeConfig;
     }
 
     /** Get the default package from the element */
@@ -116,7 +115,7 @@ public abstract class MetaDataParser {
         }
 
         // Get the TypeModel map for this element
-        TypeModel types = getTypes().getType( typeName );
+        TypeConfig types = getTypes().getType( typeName );
         if ( types == null ) {
             // TODO:  What is the best behavior here?
             throw new MetaException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
@@ -173,7 +172,7 @@ public abstract class MetaDataParser {
     }
 
     /** Get the Super MetaData if it exists */
-    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName, TypeModel types ) {
+    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName, TypeConfig types ) {
 
         MetaData superData = null;
 
@@ -234,58 +233,38 @@ public abstract class MetaDataParser {
     }
 
     /** Create new MetaData */
-    protected MetaData createNewMetaData(boolean isRoot, String typeName, String subTypeName, String name, String packageName, TypeModel types, MetaData superData) {
+    protected MetaData createNewMetaData(boolean isRoot, String typeName, String subTypeName, String name, String packageName, TypeConfig types, MetaData superData) {
 
         if (subTypeName != null && subTypeName.isEmpty()) subTypeName = null;
 
-        try {
-            Class<? extends MetaData> c = null;
+        Class<? extends MetaData> c = null;
 
-            // Attempt to load the referenced class
-            if (subTypeName == null) {
+        // Attempt to load the referenced class
+        if (subTypeName == null) {
 
-                // Use the Super class type if no type is defined and a super class exists
-                if (superData != null) {
-                    c = superData.getClass();
-                    subTypeName = superData.getSubTypeName();
-                } else {
-                    subTypeName = types.getDefaultSubTypeName();
-                    c = types.getDefaultTypeClass();
-                    if (c == null) {
-                        throw new MetaException("MetaData [" + typeName + "][" + name + "] has no subtype defined and type [" + typeName + "] had no default specified");
-                    }
-                }
+            // Use the Super class type if no type is defined and a super class exists
+            if (superData != null) {
+                c = superData.getClass();
+                subTypeName = superData.getSubTypeName();
             } else {
-                c = (Class<? extends MetaData>) types.getSubTypeClass(subTypeName);
+                subTypeName = types.getDefaultSubTypeName();
+                c = types.getDefaultTypeClass();
                 if (c == null) {
-                    throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName + "], but it was not recognized");
+                    throw new MetaException("MetaData [" + typeName + "][" + name + "] has no subtype defined and type [" + typeName + "] had no default specified");
                 }
             }
-
-            // Figure out the full name for the element, needs package prefix if root
-            String fullname = name;
-            if (isRoot) fullname = packageName + MetaDataLoader.PKG_SEPARATOR + fullname;
-
-            // Create the object
-            MetaData md = getLoader().newInstanceFromClass(c, typeName, subTypeName, fullname);
-
-            if (!md.getTypeName().equals(typeName))
-                throw new MetaDataException("Expected MetaData type [" + typeName + "], but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md);
-
-            if (!md.getSubTypeName().equals(subTypeName))
-                throw new MetaDataException("Expected MetaData subType [" + subTypeName + "], but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md);
-
-            if (!md.getName().equals(fullname))
-                throw new MetaDataException("Expected MetaData name [" + fullname + "], but MetaData instantiated was of name [" + md.getName() + "]: " + md);
-
-            return md;
+        } else {
+            c = (Class<? extends MetaData>) types.getSubTypeClass(subTypeName);
+            if (c == null) {
+                throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName + "], but it was not recognized");
+            }
         }
-        catch (MetaException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            log.error("Invalid MetaData [" + typeName + "]: " + e.getMessage());
-            throw new MetaException("Invalid MetaData [" + typeName + "]", e);
-        }
+
+        // Figure out the full name for the element, needs package prefix if root
+        // TODO: Clean this up and go to caller where it exists as well
+        String fullname = isRoot ? packageName + MetaDataLoader.PKG_SEPARATOR + name : name;
+
+        // Create the object
+        return  getLoader().newInstanceFromClass(c, typeName, subTypeName, fullname);
     }
 }

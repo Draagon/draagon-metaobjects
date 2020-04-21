@@ -5,7 +5,7 @@ import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeModel;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.MetaDataParser;
 import com.google.gson.JsonArray;
@@ -126,7 +126,7 @@ public class JsonMetaDataParser extends MetaDataParser {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(JsonObject el, TypeModel typeModel) {
+    protected void loadSubTypes(JsonObject el, TypeConfig typeConfig) {
 
         /*Collection<Element> subTypeElements = getElementsOfName(el, ATTR_SUBTYPE);
 
