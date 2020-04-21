@@ -93,6 +93,12 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             try { is.close(); } catch (Exception ignore) {}
         }
 
+        if ( getLoader().getLoaderConfig().isVerbose() ) {
+            log.info("METADATA - FILE   : " + getFilename() );
+            log.info("         - TYPES  : " + info.types.toString());
+            log.info("         - DATA   : " + info.data.toString());
+        }
+
         return getConfig();
     }
 
@@ -138,6 +144,12 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
                 // Add the type class with the specified name
                 typeConfig.addSubType(name, tcl, "true".equals( def ));
+
+                // Update info msg if verbose
+                if ( getLoader().getLoaderConfig().isVerbose() ) {
+                    // Increment the # of subtypes
+                    info.incData(typeConfig.getTypeName());
+                }
             }
             catch (ClassNotFoundException e) {
                 throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
@@ -159,7 +171,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
-            if ( getConfig().getMetaDataTypes().getType( typeName ) == null ) {
+            if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
                 if (isRoot) log.warn("Unknown type [" +typeName+ "] found on loader [" +getLoader().getName()+ "] in file [" +getFilename()+ "]");
                 else log.warn("Unknown type [" +typeName+ "] found on parent metadata [" +parent+ "] in file [" +getFilename()+ "]");
                 continue;
@@ -167,6 +179,12 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             // Create MetaData
             MetaData md = createOrOverlayMetaData( isRoot, parent, typeName, subTypeName, name, packageName, superName);
+
+            // Update info msg if verbose
+            if ( getLoader().getLoaderConfig().isVerbose() ) {
+                // Increment the # of subtypes
+                info.incData( typeName+":"+subTypeName );
+            }
 
             // Different behavior if it's a MetaAttribute
             if ( md instanceof MetaAttribute) {

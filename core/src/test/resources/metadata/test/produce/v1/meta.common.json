@@ -1,0 +1,10 @@
+{"metadata": {"package": "produce::v1::common",
+    "children": [
+        {"field": {"name": "id", "type": "long", "isKey": "true"}},
+        {"field": {"name": "name", "type": "string",
+            "children": [
+                {"validator": {"name": "required", "type": "required"}},
+                {"attr": {"name": "len", "value": 50}}
+            ]}}
+    ]}
+}

@@ -35,6 +35,7 @@ public class JsonMetaDataParser extends MetaDataParser {
     public final static String ATTR_CLASS       = "class";
     public final static String ATTR_TYPE        = "type";
     public final static String ATTR_SUBTYPE     = "subtype";
+    public final static String ATTR_SUBTYPES    = "subtypes";
     public final static String ATTR_SUPER       = "super";
     public final static String ATTR_VALUE       = "value";
 
@@ -48,6 +49,7 @@ public class JsonMetaDataParser extends MetaDataParser {
         reservedAttributes.add( ATTR_CHILDREN );
         reservedAttributes.add( ATTR_TYPE );
         reservedAttributes.add( ATTR_SUBTYPE );
+        reservedAttributes.add( ATTR_SUBTYPES );
         reservedAttributes.add( ATTR_SUPER );
         reservedAttributes.add( ATTR_VALUE );
     }
@@ -114,8 +116,11 @@ public class JsonMetaDataParser extends MetaDataParser {
                 throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
 
-            // Load all the types for the specific element type
-            loadSubTypes( e, getOrCreateTypeConfig( name, clazz ));
+            // If we have subtypes, load them
+            if ( e.has( ATTR_SUBTYPES )) {
+                // Load all the types for the specific element type
+                loadSubTypes( e.getAsJsonArray( ATTR_SUBTYPES ), getOrCreateTypeConfig(name, clazz));
+            }
         }
     }
 
@@ -126,31 +131,31 @@ public class JsonMetaDataParser extends MetaDataParser {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(JsonObject el, TypeConfig typeConfig) {
-
-        /*Collection<Element> subTypeElements = getElementsOfName(el, ATTR_SUBTYPE);
+    protected void loadSubTypes(JsonArray subtypes, TypeConfig typeConfig) {
 
         // Iterate through each type
-        for (Element typeEl : subTypeElements) {
+        for (JsonElement subtype : subtypes) {
 
-            String name = typeEl.getAttribute(ATTR_NAME);
-            String tclass = typeEl.getAttribute("class");
-            String def = typeEl.getAttribute("default");
+            JsonObject typeEl = subtype.getAsJsonObject();
 
-            if (name.length() == 0) {
-                throw new MetaException("SubType of Type [" + typeModel.getTypeName() + "] has no 'name' attribute specified");
+            String name = getValueAsString( typeEl, ATTR_NAME);
+            String tclass = getValueAsString( typeEl, ATTR_CLASS);
+            String def = getValueAsString( typeEl, "default");
+
+            if (name == null && name.isEmpty()) {
+                throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeModel.addSubType(name, tcl, "true".equals( def ));
+                typeConfig.addSubType(name, tcl, "true".equals( def ));
             }
             catch (ClassNotFoundException e) {
-                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeModel.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
             }
-        }*/
+        }
     }
 
 
@@ -169,12 +174,16 @@ public class JsonMetaDataParser extends MetaDataParser {
             String packageName  = getValueAsString(el, ATTR_PACKAGE);
             String superName    = getValueAsString(el, ATTR_SUPER);
 
-            // NOTE:  This exists for backwards compatibility
-            // TODO:  Handle this based on a configuration of the level of error messages
-            if ( getConfig().getMetaDataTypes().getType( typeName ) == null ) {
-                if (isRoot) log.warn("Unknown type [" +typeName+ "] found on loader [" +getLoader().getName()+ "] in file [" +getFilename()+ "]");
-                else log.warn("Unknown type [" +typeName+ "] found on parent metadata [" +parent+ "] in file [" +getFilename()+ "]");
-                continue;
+            // See if the specified type exists or not
+            if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
+
+                // If we are strict, throw an exception, otheriwse log an error
+                if ( getLoader().getLoaderConfig().isStrict() ) {
+                    throw new MetaException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
+                } else {
+                    log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
+                    continue;
+                }
             }
 
             // Create MetaData

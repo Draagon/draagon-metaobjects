@@ -14,7 +14,7 @@ public class MetaDataConfig {
     /////////////////////////////////////////////////////////////////////
     // Type Configuration Methods
 
-    public TypesConfig getMetaDataTypes() {
+    public TypesConfig getTypesConfig() {
         return types;
     }
 

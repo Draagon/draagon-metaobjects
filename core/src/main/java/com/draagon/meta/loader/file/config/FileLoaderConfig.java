@@ -72,6 +72,7 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
 
     public N setShouldRegister(boolean shouldRegister ) { return super.setShouldRegister( shouldRegister ); }
     public N setVerbose(boolean verbose) { return super.setVerbose( verbose ); }
+    public N setStrict(boolean strict) { return super.setStrict( strict ); }
 
     ///////////////////////////////////////////////////////////////////////////
     // MetaData Sources

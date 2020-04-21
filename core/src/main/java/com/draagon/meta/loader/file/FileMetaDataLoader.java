@@ -51,14 +51,25 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
         super.init();
 
+        loadSourceFiles();
+
+        return this;
+    }
+
+    protected void loadSourceFiles() {
+
         // Load all the source data
         List<MetaDataSources> sources = (List<MetaDataSources>) getLoaderConfig().getSources();
         sources.forEach( s -> s.getSourceData().forEach( d -> {
-            getLoaderConfig().getParserForFile( this, d.filename)
-                    .loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
+
+            MetaDataParser p = getLoaderConfig().getParserForFile( this, d.filename);
+            p.loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
+
         }));
 
-        return this;
+        if ( getLoaderConfig().isVerbose() ) {
+            log.info( "METADATA - All Source Files Loaded" );
+        }
     }
 
     /**

@@ -782,10 +782,10 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
 
         try {
             try {
-                md = c.getConstructor(String.class, String.class, String.class).newInstance(type, subType, fullname);
+                md = c.getConstructor(String.class, String.class, String.class).newInstance(typeName, subTypeName, fullname);
             } catch (NoSuchMethodException e) {
                 try {
-                    md = c.getConstructor(String.class, String.class).newInstance(subType, fullname);
+                    md = c.getConstructor(String.class, String.class).newInstance(typeName, fullname);
                 } catch (NoSuchMethodException e2) {
                     try {
                         md = c.getConstructor(String.class).newInstance(fullname);

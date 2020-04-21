@@ -1,6 +1,7 @@
 package com.draagon.meta.loader.config;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 
 import java.util.Collection;
 import java.util.TreeMap;
@@ -21,18 +22,18 @@ public class TypesConfig {
 
     public TypeConfig createType(String typeName, Class<? extends MetaData> clazz ) {
 
-        if ( typeName == null ) throw new NullPointerException( "Cannot create a TypeModel with a null name and class [" + clazz + "]" );
-        if ( clazz == null ) throw new NullPointerException( "Cannot create TypeModel for type [" +typeName + "] with a null Class" );
+        if ( typeName == null ) throw new MetaDataException( "Cannot create a TypeModel with a null name and class [" + clazz + "]" );
+        if ( clazz == null ) throw new MetaDataException( "Cannot create TypeModel for type [" +typeName + "] with a null Class" );
 
         return addType( typeName, new TypeConfig( typeName, clazz ) );
     }
 
     public TypeConfig addType(String typeName, TypeConfig typeConfig) {
 
-        if ( typeName == null ) throw new NullPointerException( "Cannot add TypeModel with a null name" );
-        if ( typeConfig == null ) throw new NullPointerException( "Cannot add TypeModel [" +typeName + "] with a null value" );
+        if ( typeName == null ) throw new MetaDataException( "Cannot add TypeModel with a null name" );
+        if ( typeConfig == null ) throw new MetaDataException( "Cannot add TypeModel [" +typeName + "] with a null value" );
 
-        if ( types.containsKey( typeName )) throw new IllegalArgumentException( "MetaData Type [" + typeName + "] already exists as class [" + types.get(typeName).getBaseClass() + "]" );
+        if ( types.containsKey( typeName )) throw new MetaDataException( "MetaData Type [" + typeName + "] already exists as class [" + types.get(typeName).getBaseClass() + "]" );
 
         types.put( typeName, typeConfig);
 

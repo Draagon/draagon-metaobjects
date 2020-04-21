@@ -162,7 +162,7 @@ public class LegacyXMLMetaDataParser extends XMLMetaDataParserBase {
 
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
-            if ( getConfig().getMetaDataTypes().getType( typeName ) == null ) {
+            if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
                 if (isRoot) log.warn("Unknown type [" +typeName+ "] found on loader [" +getLoader().getName()+ "] in file [" +getFilename()+ "]");
                 else log.warn("Unknown type [" +typeName+ "] found on parent metadata [" +parent+ "] in file [" +getFilename()+ "]");
                 continue;

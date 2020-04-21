@@ -30,24 +30,26 @@ public class MetaDataUtil {
    * Returns the MetaObject for the class name string specified
    * @param name MetaObject name
    * @return MetaClass representing the name specified
-   * @deprecated Use MetaDataRegistry.findMetaObject( name )
+   * @deprecated Use MetaDataRegistry.findMetaObjectByName( name )
    */
   public static MetaObject forName( String name ) {
-      return MetaDataRegistry.findMetaObject( name );
+      return MetaDataRegistry.findMetaObjectByName( name );
   }
 
   /**
    * Returns a new object based on the MetaClass name specified
    * @param metaClassName
    * @return new object instance
+   * @deprecated Use MetaDataRegistry.findMetaObjectByName( name )
    */
   public static Object newInstance( String metaClassName ) {
-    return newInstance( MetaDataUtil.forName( metaClassName ));
+    return newInstance( MetaDataRegistry.findMetaObjectByName( metaClassName ));
   }
 
   /**
    * Returns a new object based on the MetaClass name specified
    * @return new object instance
+   * @deprecated Use MetaObject.newInstance()
    */
   public static Object newInstance( MetaObject mc ) {
       return mc.newInstance();
@@ -58,13 +60,15 @@ public class MetaDataUtil {
    * null if no CLASSNAME static field exists on the object.
    * @param c Class to retrieve
    * @return MetaClass
+   * @deprecated Use MetaDataRegistry.findMetaObjectByName( name )
    */
   public static MetaObject forClass( Class<?> c )
   {
     try {
       Field f = c.getField( "CLASSNAME" );
       String metaclassname = (String) f.get( null );
-      return MetaObject.forName( metaclassname );
+      //return MetaObject.forName( metaclassname );
+      return MetaDataRegistry.findMetaObjectByName( metaclassname );
     }
     catch (SecurityException e1) {
       throw new RuntimeException( "Security violation accessing CLASSNAME field on class [" + c + "]", e1 );
@@ -84,20 +88,13 @@ public class MetaDataUtil {
   /**
    * @param o
    * @return
+   *
+   * @deprecated Use MetaDataRegistry.findMetaObject( o )
    */
   public static MetaObject findMetaObject(Object o) {
     return MetaDataRegistry.findMetaObject( o );
   }
 
-  /*public static String getMetaFieldLabel(HttpServletRequest request, MetaField mf) {
-    MessageResources resources = (MessageResources) request.getAttribute(Globals.MESSAGES_KEY);
-    String label = mf.getName();
-    if(mf.hasAttribute("labelKey")) {
-      label = (String) mf.getAttribute("labelKey");
-      label = resources.getMessage( request.getLocale(), label );
-    }
-    return label;
-  }*/
 
   /** Find an actual package traversing parents if needed */
   public static String findPackageForMetaData( MetaData d ) {
@@ -158,71 +155,47 @@ public class MetaDataUtil {
 
   /** Expands the provided package if using relative package paths */
   public static String expandPackageForMetaDataRef(String basePkg, String metaDataRef ) {
-
-    final String origRef = metaDataRef;
-
-    // If there is no base package then handle a few default behaviors
-    if ( basePkg == null || basePkg.isEmpty() ) basePkg = "";
-
-    // If it's relative, then strip it off
-    if ( metaDataRef.startsWith( SEP )) {
-      metaDataRef = basePkg + metaDataRef;
-    }
-    else if ( metaDataRef.startsWith( ".."+SEP )) {
-
-      // Split out the base package in case we have to traverse downward
-      String [] base = basePkg.split( SEP );
-      int i = base.length;
-
-      // Trim off all the proceeding dropdown paths
-      while (metaDataRef.startsWith(".."+SEP)) {
-        metaDataRef = metaDataRef.substring(4);
-        i--;
-        if (i < 0) throw new IllegalStateException("Base package [" + basePkg + "] cannot drop that many relative paths for [" + origRef + "]");
-      }
-
-      // Reform the package
-      for( int x = i-1; x >= 0; x-- ) {
-        metaDataRef = base[x] + SEP + metaDataRef;
-      }
-    }
-
-    return metaDataRef;
+    return expandPackageFor( basePkg, metaDataRef );
   }
 
   /** Expands the provided package if using relative package paths */
   public static String expandPackageForPath(String basePkg, String pkgPath ) {
+    return expandPackageFor( basePkg, pkgPath );
+  }
 
-    final String origPkg = pkgPath;
+  /** Expands the provided value if using relative package paths */
+  private static String expandPackageFor(String basePkg, String value ) {
+
+    final String origPkg = value;
 
     // If there is no base package then handle a few default behaviors
     if ( basePkg == null || basePkg.isEmpty() ) basePkg = "";
 
     // If it's relative, then strip it off
-    if ( pkgPath.startsWith( SEP )) {
-      pkgPath = basePkg + pkgPath;
+    if ( value.startsWith( SEP )) {
+      value = basePkg + value;
     }
 
     // Drop down the package paths
-    else if ( pkgPath.startsWith( ".."+SEP )) {
+    else if ( value.startsWith( ".."+SEP )) {
 
       // Split out the base package in case we have to traverse downward
       String [] base = basePkg.split( SEP );
       int i = base.length;
 
       // Trim off all the proceeding dropdown paths
-      while (pkgPath.startsWith(".."+SEP)) {
-        pkgPath = pkgPath.substring(4);
+      while (value.startsWith(".."+SEP)) {
+        value = value.substring(4);
         i--;
         if (i < 0) throw new IllegalStateException("Base package [" + basePkg + "] cannot drop that many relative paths for [" + origPkg + "]");
       }
 
       // Reform the package
       for( int x = i-1; x >= 0; x-- ) {
-        pkgPath = base[x] + SEP + pkgPath;
+        value = base[x] + SEP + value;
       }
     }
 
-    return pkgPath;
+    return value;
   }
 }

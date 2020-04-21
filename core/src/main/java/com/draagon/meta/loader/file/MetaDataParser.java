@@ -12,6 +12,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
@@ -25,6 +27,32 @@ public abstract class MetaDataParser {
     private FileMetaDataLoader loader;
     private String filename;
     private String defaultPackageName = "";
+
+    protected class ParserInfoMsg {
+
+        public final Map<String,Integer> types = new TreeMap <>();
+        public final Map<String,Integer> data = new TreeMap <>();
+
+        public ParserInfoMsg() {}
+        public int incType( String n ) { return incMap( types, n ); }
+        public int incData( String n ) { return incMap( data, n ); }
+
+
+        public int incMap( Map<String,Integer> map, String n ) {
+            synchronized(map) {
+                if ( map.get(n) == null ) {
+                    map.put(n, 0);
+                    return 0;
+                } else {
+                    Integer i = map.get(n);
+                    map.put(n, ++i);
+                    return i;
+                }
+            }
+        }
+    }
+
+    protected ParserInfoMsg info = new ParserInfoMsg();
 
     /** Create the MetaDataParser */
     protected MetaDataParser(FileMetaDataLoader loader, String filename ) {
@@ -61,8 +89,8 @@ public abstract class MetaDataParser {
     public abstract MetaDataConfig loadFromStream( InputStream is );
 
     /** Get the MetaDataTypes from the loader's MetaDataConfig */
-    public TypesConfig getTypes() {
-        return this.loader.getMetaDataConfig().getMetaDataTypes();
+    public TypesConfig getTypesConfig() {
+        return this.loader.getMetaDataConfig().getTypesConfig();
     }
 
     /**
@@ -78,7 +106,7 @@ public abstract class MetaDataParser {
         }
 
         // Get the TypeModel with the specified element name
-        TypeConfig typeConfig = getTypes().getType( typeName );
+        TypeConfig typeConfig = getTypesConfig().getType( typeName );
 
         // If it doesn't exist, then create it and check for the "class" attribute
         if ( typeConfig == null ) {
@@ -88,7 +116,7 @@ public abstract class MetaDataParser {
 
             try {
                 // Add a new TypeModel and add to the mapping
-                typeConfig = getTypes().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
+                typeConfig = getTypesConfig().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
             }
             catch( ClassNotFoundException ex ) {
                 throw new MetaException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
@@ -115,7 +143,7 @@ public abstract class MetaDataParser {
         }
 
         // Get the TypeModel map for this element
-        TypeConfig types = getTypes().getType( typeName );
+        TypeConfig types = getTypesConfig().getType( typeName );
         if ( types == null ) {
             // TODO:  What is the best behavior here?
             throw new MetaException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );

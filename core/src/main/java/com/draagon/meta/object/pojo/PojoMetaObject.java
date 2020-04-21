@@ -32,8 +32,17 @@ public class PojoMetaObject extends MetaObject {
     /**
      * Constructs a bean MetaClass
      */
-    public PojoMetaObject( String subType, String name ) {
+    protected PojoMetaObject( String subType, String name ) {
         super( subType, name );
+    }
+
+    /**
+     * Manually create a PojoMetaObject with the specified name
+     * @param name Name for the PojoMetaObject
+     * @return Created Object
+     */
+    public static PojoMetaObject create( String name ) {
+        return new PojoMetaObject( name );
     }
 
     /**

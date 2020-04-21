@@ -1,6 +1,7 @@
 package com.draagon.meta.loader.config;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,25 +35,25 @@ public class TypeConfig {
 
     public void addSubType( String subtypeName, Class<? extends MetaData> clazz, boolean def ) {
 
-        if ( subtypeName == null ) throw new NullPointerException( "Cannot add subType with a null name and class [" + clazz + "]" );
-        if ( clazz == null ) throw new NullPointerException( "Cannot add subType [" +subtypeName + "] with a null Class" );
+        if ( subtypeName == null ) throw new NullPointerException( "Cannot add subType on type ["+typeName+"] with a null name and class [" + clazz + "]" );
+        if ( clazz == null ) throw new NullPointerException( "Cannot add subType [" +subtypeName + "] on type ["+typeName+"] with a null Class" );
 
         subTypes.put( subtypeName, clazz );
         if ( def ) defSubTypeName = subtypeName;
     }
 
     public Class<? extends MetaData> getSubTypeClass( String subTypeName ) {
-        if ( defSubTypeName == null ) throw new NullPointerException( "Cannot get subType with a null value" );
+        if ( defSubTypeName == null ) throw new MetaDataException( "Cannot get subType on type ["+typeName+"] with a null value" );
         return subTypes.get( subTypeName );
     }
 
     public void setDefaultSubTypeName(String subTypeName ) {
 
         if ( defSubTypeName == null )
-            throw new NullPointerException( "Cannot set default subType with a null" );
+            throw new MetaDataException( "Cannot set default subType on type ["+typeName+"] with a null value" );
 
         if ( getSubTypeClass( defSubTypeName ) == null )
-            throw new IllegalArgumentException( "Cannot set default subType [" +defSubTypeName+ "], subType with that name was not found" );
+            throw new MetaDataException( "Cannot set default subType [" +defSubTypeName+ "] on type ["+typeName+"], subType with that name was not found" );
 
         defSubTypeName = subTypeName;
     }
