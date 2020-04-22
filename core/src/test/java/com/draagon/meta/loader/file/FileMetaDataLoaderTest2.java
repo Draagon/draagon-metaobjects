@@ -50,7 +50,7 @@ public class FileMetaDataLoaderTest2 {
                             .addSources(new LocalMetaDataSources(
                                     "com/draagon/meta/loader/file/json/metaobjects.types.json"))
                             .addSources(new LocalMetaDataSources(
-                                    "src/test/resources",
+                                    //"src/test/resources",
                                     Arrays.asList(
                                             "metadata/test/produce/v1/produce-v1-json.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.json")

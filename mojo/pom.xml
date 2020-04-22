@@ -45,6 +45,19 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-test-models</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>3.6.1</version>

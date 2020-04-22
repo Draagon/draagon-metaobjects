@@ -18,7 +18,6 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.Apple;
 import com.draagon.meta.test.Orange;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,9 +40,9 @@ public class XMLMetaDataLoaderTest2 {
         // Initialize the loader
         XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test" );
         List<String> list = new ArrayList<String>();
-        list.add( "metadata/test/produce/v1/produce-v1.bundle" );
-        list.add( "metadata/test/produce/v1/meta.fruit.overlay.xml" );
-        xl.init(new LocalMetaDataSources( "src/test/resources", list));
+        list.add("metadata/test/produce/v1/produce-v1.bundle");
+        list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
+        xl.init(new LocalMetaDataSources( /*"src/test/resources",*/ list));
         xl.register();
 
         this.loader = xl;

@@ -401,9 +401,9 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
 
     public String toString() {
         if (getParent() == null) {
-            return "MetaDataLoader[" + getSubTypeName() + ":" + getName() + "]";
+            return getClass().getSimpleName() + "[" + getSubTypeName() + ":" + getName() + "]";
         } else {
-            return "MetaDataLoader[" + getSubTypeName() + ":" + getName() + "@" + getParent().toString() + "]";
+            return getClass().getSimpleName() + "[" + getSubTypeName() + ":" + getName() + "@" + getParent().toString() + "]";
         }
     }
 

@@ -41,8 +41,8 @@ public abstract class MetaDataParser {
         public int incMap( Map<String,Integer> map, String n ) {
             synchronized(map) {
                 if ( map.get(n) == null ) {
-                    map.put(n, 0);
-                    return 0;
+                    map.put(n, 1);
+                    return 1;
                 } else {
                     Integer i = map.get(n);
                     map.put(n, ++i);

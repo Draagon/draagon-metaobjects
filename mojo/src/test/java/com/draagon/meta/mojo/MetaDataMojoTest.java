@@ -23,6 +23,7 @@ public class MetaDataMojoTest {
     @Test
     public void testDocGenMojo() throws Exception {
         File pom = new File(PlexusTestCase.getBasedir(), "src/test/resources/mojo/pom.xml" );
+        //System.out.println( "BASEDIR: " + PlexusTestCase.getBasedir() );
 
         final Properties properties = new Properties();
         final MavenProject mavenProject = Mockito.mock(MavenProject.class);
@@ -30,12 +31,21 @@ public class MetaDataMojoTest {
 
         PlexusConfiguration configuration = rule.extractPluginConfiguration("metaobjects-maven-plugin", pom);
         assertNotNull( configuration );
-        assertEquals("loaderName", configuration.getChild("loaderName").getValue());
-        assertEquals("rootPkg", configuration.getChild("rootPkg").getValue());
-        assertEquals("sourceDir", configuration.getChild("sourceDir").getValue());
-        assertEquals("template", configuration.getChild("template").getValue());
-        assertEquals("output", configuration.getChild("output").getValue());
-        assertEquals("suffix", configuration.getChild("suffix").getValue());
+        //System.out.println( "configuration: " + configuration );
+        //System.out.println( "loader: " + configuration.getChild("loader").getChild("name").getValue() );
+
+        assertEquals("mojo-test-pom", configuration.getChild("loader").getChild("name").getValue());
+        assertEquals("com.draagon.meta.loader.file.FileMetaDataLoader", configuration.getChild("loader").getChild("classname").getValue());
+        assertEquals(2, configuration.getChild("loader").getChild("sources").getChildren().length);
+
+        //assertEquals("rootPkg", configuration.getChild("loader").getChild("rootPkg").getValue());
+        //assertEquals("sourceDir", configuration.getChild("sourceDir").getValue());
+        //assertEquals("template", configuration.getChild("template").getValue());
+        //assertEquals("output", configuration.getChild("output").getValue());
+        //assertEquals("suffix", configuration.getChild("suffix").getValue());
+
+        //System.out.println( "rule: " + pom );
+        //System.out.println( "rule: " + rule );
 
         MetaDataMojo metaDataMojo = (MetaDataMojo) rule.lookupMojo("metadata", pom);
         assertNotNull(metaDataMojo);

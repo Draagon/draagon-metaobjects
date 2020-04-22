@@ -16,6 +16,14 @@ package com.draagon.meta.mojo;
  * limitations under the License.
  */
 
+import com.draagon.meta.MetaException;
+import com.draagon.meta.loader.config.LoaderConfig;
+import com.draagon.meta.loader.file.FileMetaDataLoader;
+import com.draagon.meta.loader.file.LocalMetaDataSources;
+import com.draagon.meta.loader.file.MetaDataSources;
+import com.draagon.meta.loader.file.config.FileLoaderConfig;
+import com.draagon.meta.loader.file.json.JsonMetaDataParser;
+import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,7 +35,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Execute MetaData maven plugins.
@@ -37,7 +48,7 @@ import java.util.List;
  * @phase generate-sources
  */
 @Mojo(name="metadata",
-        requiresDependencyResolution= ResolutionScope.COMPILE_PLUS_RUNTIME,
+        requiresDependencyResolution= ResolutionScope.RUNTIME_PLUS_SYSTEM,
         defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class MetaDataMojo extends AbstractMojo
 {
@@ -47,11 +58,35 @@ public class MetaDataMojo extends AbstractMojo
     @Parameter(required = true, property="project.build.directory", defaultValue="${project.build.directory}")
     private File outputDirectory;
 
-    @Parameter
-    private String loaderName = null;
+    @Parameter(name="loader")
+    private Loader loaderConfig = null;
+    public Loader getLoader() {
+        return loaderConfig;
+    }
+    public void setLoader(Loader loaderConfig) {
+        this.loaderConfig = loaderConfig;
+    }
 
     @Parameter
-    private String rootPkg = null;
+    public Map<String,String> globals;
+    public Map<String, String> getGlobals() {
+        return globals;
+    }
+    public void setGlobals(Map<String, String> globalArgs) {
+        this.globals = globalArgs;
+    }
+
+    @Parameter
+    public List<Generator> generators;
+    public List<Generator> getGenerators() {
+        return generators;
+    }
+    public void setGenerators(List<Generator> generators) {
+        this.generators = generators;
+    }
+
+    /*@Parameter
+    public String rootPkg = null;
 
     @Parameter
     private String sourceDir = null;
@@ -66,48 +101,61 @@ public class MetaDataMojo extends AbstractMojo
     String output = null;
 
     @Parameter
-    private String suffix = null;
+    private String suffix = null;*/
 
     public void execute()
         throws MojoExecutionException
     {
-        File f = outputDirectory;
-        if ( f==null ) {
-            //throw new MojoExecutionException( "Output Directory was null! ");
-            f = new File("./target/" );
+        if ( getLoader() == null ) {
+            getLog().error( "No <loade> block was defined");
         }
 
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
+        FileMetaDataLoader loader = createLoader();
 
-        File touch = new File( f, "metadata.txt" );
-
-        FileWriter w = null;
-        try
-        {
-            w = new FileWriter( touch );
-
-            w.write( "metadata.txt" );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Error creating file " + touch, e );
-        }
-        finally
-        {
-            if ( w != null )
-            {
-                try
-                {
-                    w.close();
+        if ( getGenerators() != null ) {
+            for ( Generator g : getGenerators() ) {
+                try {
+                    GeneratorImpl impl = (GeneratorImpl) Class.forName(g.getClassname()).newInstance();
+                    Map<String,String> allargs = g.getArgs();
+                    allargs.putAll(globals);
+                    impl.setArgs(allargs);
+                    impl.setFilter(g.getFilter());
+                    impl.setScripts(g.getScripts());
+                    impl.execute(loader);
                 }
-                catch ( IOException e )
-                {
-                    // ignore
+                catch( Exception e ) {
+                    throw new MetaException( "Error running generator ["+g.getClassname()+"]: "+e, e );
                 }
             }
         }
+    }
+
+    protected FileMetaDataLoader createLoader() {
+
+        // TODO:  Clean this all up
+        FileLoaderConfig config = new FileLoaderConfig()
+            .setVerbose(true)
+            .setStrict(true)
+            .addParser( "*.xml", XMLMetaDataParser.class)
+            .addParser( "*.json", JsonMetaDataParser.class);
+
+        MetaDataSources sources = new LocalMetaDataSources( loaderConfig.getSources() );
+        FileMetaDataLoader loader = null;
+
+        if ( loaderConfig.getClassname() != null ) {
+            Constructor<FileMetaDataLoader> c = null;
+            try {
+                c = (Constructor<FileMetaDataLoader>) Class.forName( loaderConfig.getClassname() )
+                        .getConstructor(FileLoaderConfig.class, String.class);
+                loader = c.newInstance( config, loaderConfig.getName() );
+            } catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new MetaException( "Could not create FileMetaDataLoader with class [" + loaderConfig.getClassname() + "]: " + e.getMessage(), e );
+            }
+        } else {
+            loader = new FileMetaDataLoader( config, loaderConfig.getName() );
+        }
+
+        loader.init( sources );
+        return loader;
     }
 }

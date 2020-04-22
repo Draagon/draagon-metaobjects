@@ -97,9 +97,11 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
         }
 
         if ( getLoader().getLoaderConfig().isVerbose() ) {
-            log.info("METADATA - FILE   : " + getFilename() );
-            log.info("         - TYPES  : " + info.types.toString());
-            log.info("         - DATA   : " + info.data.toString());
+            log.info("---------------------------------------------------\n"
+                    +"METADATA - FILE   : " + getFilename() + "\n"
+                    +"         - TYPES  : " + info.types.toString() + "\n"
+                    +"         - DATA   : " + info.data.toString()  + "\n"
+                    +"---------------------------------------------------");
         }
 
         return getConfig();
@@ -151,7 +153,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 // Update info msg if verbose
                 if ( getLoader().getLoaderConfig().isVerbose() ) {
                     // Increment the # of subtypes
-                    info.incData(typeConfig.getTypeName());
+                    info.incType(typeConfig.getTypeName());
                 }
             }
             catch (ClassNotFoundException e) {
@@ -192,7 +194,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             // Update info msg if verbose
             if ( getLoader().getLoaderConfig().isVerbose() ) {
                 // Increment the # of subtypes
-                info.incData( typeName+":"+subTypeName );
+                info.incData( typeName );
             }
 
             // Different behavior if it's a MetaAttribute

@@ -28,6 +28,7 @@
     </organization>
 
     <modules>
+        <module>test-models</module>
         <module>core</module>
         <module>mojo</module>
         <!-- module>om</module>

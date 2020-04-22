@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Meta Class loader for Files
@@ -57,17 +58,19 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     protected void loadSourceFiles() {
 
+        AtomicInteger i = new AtomicInteger();
+
         // Load all the source data
         List<MetaDataSources> sources = (List<MetaDataSources>) getLoaderConfig().getSources();
         sources.forEach( s -> s.getSourceData().forEach( d -> {
 
             MetaDataParser p = getLoaderConfig().getParserForFile( this, d.filename);
             p.loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
-
+            i.getAndIncrement();
         }));
 
         if ( getLoaderConfig().isVerbose() ) {
-            log.info( "METADATA - All Source Files Loaded" );
+            log.info( "METADATA - ("+i+") Source Files Loaded in " +toString() );
         }
     }
 
