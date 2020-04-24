@@ -30,11 +30,12 @@
     <modules>
         <module>test-models</module>
         <module>core</module>
-        <module>mojo</module>
+        <module>generators</module>
+        <module>maven-plugin</module>
         <!-- module>om</module>
-        <module>omdb</module -->
-        <!-- module>web</module -->
-        <!-- module>demo</module -->
+        <module>omdb</module>
+        <module>web</module>
+        <module>demo</module -->
     </modules>
 
     <developers>

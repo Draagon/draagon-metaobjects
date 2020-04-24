@@ -28,10 +28,10 @@ public class FileMetaDataLoaderTestBase {
     //protected static MetaDataLoader loaderStatic = null;
     private static int counter=1;
 
-    protected MetaDataLoader loader = null;
+    protected FileMetaDataLoader loader = null;
 
     @Before
-    public void initLoaderStatic() {
+    public void initLoader() {
 
         synchronized(this) {
 
