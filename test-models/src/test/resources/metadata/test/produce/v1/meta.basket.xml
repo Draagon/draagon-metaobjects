@@ -19,10 +19,14 @@
         <field name="numOranges" type="int"/>
 
         <!-- Apples -->
-        <field name="apples" type="objectArray" objectRef="..::fruit::Apple"/>
+        <field name="apples" type="objectArray" objectRef="..::fruit::Apple">
+            <objectRef name="appleRef" type="oneToMany" reference="..::fruit::Apple"/>
+        </field>
 
         <!-- Oranges -->
-        <field name="oranges" type="objectArray" objectRef="..::fruit::Orange"/>
+        <field name="oranges" type="objectArray" objectRef="..::fruit::Orange">
+            <objectRef name="orangeRef" type="oneToMany" reference="..::fruit::Orange"/>
+        </field>
 
     </object>
 
