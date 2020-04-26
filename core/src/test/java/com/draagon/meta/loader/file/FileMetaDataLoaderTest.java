@@ -17,6 +17,8 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.Apple;
 import com.draagon.meta.test.Orange;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -26,6 +28,14 @@ import static org.junit.Assert.*;
  * @author dmealing
  */
 public class FileMetaDataLoaderTest extends FileMetaDataLoaderTestBase {
+
+    protected FileMetaDataLoader loader = null;
+
+    @Before
+    public void initLoader() { this.loader = super.initLoader("xml");}
+
+    @After
+    public void destroyLoader() { this.loader.destroy(); }
 
     @Test
     public void testApple() {

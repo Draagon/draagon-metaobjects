@@ -1,6 +1,7 @@
 package com.draagon.meta.relation.ref;
 
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.relation.ObjectRelation;
@@ -20,8 +21,8 @@ public abstract class ObjectReference extends ObjectRelation {
         super(TYPE_OBJECTREF, subType, name);
     }
 
-    public MetaObject getSuperObject() {
-        return (MetaObject) getSuperData();
+    public MetaField getParentField() {
+        return (MetaField) getParent();
     }
 
     /** Gets the MetaObject referenced by this ObjectReference using the reference attribute */
@@ -39,13 +40,13 @@ public abstract class ObjectReference extends ObjectRelation {
                 if (a != null) {
 
                     String name = MetaDataUtil.expandPackageForMetaDataRef(
-                            MetaDataUtil.findPackageForMetaData( getSuperObject() ), a );
+                            MetaDataUtil.findPackageForMetaData( this.getParent() ), a );
 
                     try {
                         o = getLoader().getMetaObjectByName(name);
                     } catch (MetaDataNotFoundException e) {
                         throw new MetaObjectNotFoundException(
-                                "MetaObject[" + name + "] referenced by MetaObject [" + getSuperObject() + "] does not exist", name);
+                                "MetaObject[" + name + "] referenced by ObjectReference [" + this + "] does not exist", name);
                     }
 
                     setCacheValue(KEY, o);

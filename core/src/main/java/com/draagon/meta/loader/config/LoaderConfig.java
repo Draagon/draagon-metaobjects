@@ -11,6 +11,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 
@@ -78,13 +79,27 @@ public class LoaderConfig<N extends LoaderConfig> {
     ///////////////////////////////////////////////////////////////////////////
     // Misc Functions
 
-    protected StringBuilder toStringBuilder( StringBuilder b ) {
-        if (b.length() > 0) b.append( "," );
-        b.append( "shouldRegister="+shouldRegister);
-        return b;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LoaderConfig<?> that = (LoaderConfig<?>) o;
+        return shouldRegister == that.shouldRegister &&
+                verbose == that.verbose &&
+                strict == that.strict;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(shouldRegister, verbose, strict);
+    }
+
+    @Override
     public String toString() {
-        return toStringBuilder( new StringBuilder() ).toString();
+        return "LoaderConfig{" +
+                "shouldRegister=" + shouldRegister +
+                ", verbose=" + verbose +
+                ", strict=" + strict +
+                '}';
     }
 }

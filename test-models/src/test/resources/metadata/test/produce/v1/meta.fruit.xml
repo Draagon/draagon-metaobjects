@@ -4,20 +4,20 @@
 
     <!-- Fruit -->
     <object name="Fruit" type="pojo">
-    
-      <attr name="object">com.draagon.meta.test.Fruit</attr>
-      
-      <!-- Id -->
-      <field name="id" super="..::common::id"/>
-      
-      <!-- Name -->
-      <field name="name" super="..::common::name"/>
-      
-      <!-- Length -->
-      <field name="length" type="int"/>
 
-      <!-- Weight -->
-      <field name="weight" type="int"/>
+        <attr name="object">com.draagon.meta.test.Fruit</attr>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
      
     </object>
 
@@ -42,28 +42,34 @@
 
     <!-- Apple -->
     <object name="Apple" super="Fruit">
+
+        <objectKey name="key"/>
+
+        <attr name="object">com.draagon.meta.test.Apple</attr>
     
-      <attr name="object">com.draagon.meta.test.Apple</attr>
-    
-      <!-- Orachard -->
-      <field name="orhcard" type="string">
-        <attr name="len">80</attr>
-      </field>
-     
-      <!-- Worms -->
-      <field name="worms" type="short"/>
+        <!-- Orachard -->
+        <field name="orhcard" type="string">
+            <attr name="len">80</attr>
+        </field>
+
+        <!-- Worms -->
+        <field name="worms" type="short"/>
       
     </object>  
 
     <!-- Macintosh -->
-    <object name="Macintosh" super="Apple" inherits="Vegetable">
+    <object name="Macintosh" super="Apple">
+
+        <objectKey name="key"/>
 
         <attr name="object">com.draagon.meta.test.Macintosh</attr>
 
     </object>
 
     <!-- Macintosh -->
-    <object name="Tomato" super="Vegetable" inherits="Fruit">
+    <object name="Tomato" super="Vegetable">
+
+        <objectKey name="key"/>
 
         <attr name="object">com.draagon.meta.test.Tomato</attr>
 
@@ -71,11 +77,12 @@
 
     <!-- Orange -->
     <object name="Orange" super="Fruit">
-    
-      <attr name="object">com.draagon.meta.test.Orange</attr>
 
-      <!-- Picked Date -->
-      <field name="pickedDate" type="date"/>
+        <objectKey name="key"/>
+
+        <attr name="object">com.draagon.meta.test.Orange</attr>
+
+        <field name="pickedDate" type="date"/>
            
     </object>
 

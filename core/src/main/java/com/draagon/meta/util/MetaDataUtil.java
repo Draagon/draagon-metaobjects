@@ -8,12 +8,16 @@ package com.draagon.meta.util;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
+import com.draagon.meta.relation.key.ObjectKey;
+import com.draagon.meta.relation.ref.ObjectReference;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  * @author dmealing
@@ -107,7 +111,7 @@ public class MetaDataUtil {
 
       if (pkg == null) {
 
-        MetaData p = d.getParent();
+        MetaData p = d; // d.getParent();
         pkg = p.getPackage();
 
         while ((pkg == null || pkg.equals("")) && p != null) {
@@ -124,7 +128,7 @@ public class MetaDataUtil {
 
 
   /** Gets the MetaObject referenced by this MetaData using the objectRef attribute */
-  public static MetaObject getObjectRef( MetaData d ) {
+  public static MetaObject getObjectRef( MetaField d ) {
 
     synchronized ( d ) {
 
@@ -134,19 +138,36 @@ public class MetaDataUtil {
 
       if (o == null) {
 
-        String a = d.getMetaAttr(ATTR_OBJECT_REF).getValueAsString();
-        if (a != null) {
-
-          String name = expandPackageForMetaDataRef(findPackageForMetaData(d), a );
-
-          try {
-            o = d.getLoader().getMetaObjectByName(name);
-          } catch (MetaDataNotFoundException e) {
-            throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaData [" + d + "] does not exist", name);
+        // Try to find an ObjectReference on a MetaField
+        if ( d instanceof MetaField ) {
+          List<MetaData> refs = ((MetaField) d).getChildrenOfType( ObjectReference.TYPE_OBJECTREF, true );
+          if ( !refs.isEmpty() ) {
+            o = ((ObjectReference) refs.get(0)).getReferencedObject();
           }
-
-          d.setCacheValue(KEY, o);
         }
+
+        // If it's an ObjectReference access it directly
+        //if ( o == null || d instanceof ObjectReference) {
+        //  o = ((ObjectReference) d).getReferencedObject();
+        //}
+
+        // Look for the old way with the ATTR_OBJECT_REF
+        if ( o == null ) {
+
+          String objectRef = d.getMetaAttr(ATTR_OBJECT_REF).getValueAsString();
+          if (objectRef != null) {
+
+            String name = expandPackageForMetaDataRef(findPackageForMetaData(d), objectRef);
+
+            try {
+              o = d.getLoader().getMetaObjectByName(name);
+            } catch (MetaDataNotFoundException e) {
+              throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaData [" + d + "] does not exist", name);
+            }
+          }
+        }
+
+        d.setCacheValue(KEY, o);
       }
 
       return o;

@@ -46,6 +46,18 @@
 
   </field>
 
+  <type name="objectKey"         class="com.draagon.meta.relation.key.ObjectKey">
+    <subtype name="primary"      class="com.draagon.meta.relation.key.PrimaryKey" default="true"/>
+    <subtype name="compound"     class="com.draagon.meta.relation.key.CompoundKey" />
+  </type>
+
+  <type name="objectRef"         class="com.draagon.meta.relation.ref.ObjectReference">
+    <subtype name="oneToOne"     class="com.draagon.meta.relation.ref.OneToOneReference" default="true"/>
+    <subtype name="oneToMany"    class="com.draagon.meta.relation.ref.OneToManyReference" />
+    <subtype name="manyToOne"    class="com.draagon.meta.relation.ref.ManyToOneReference" />
+    <subtype name="manyToMany"   class="com.draagon.meta.relation.ref.ManyToManyReference" />
+  </type>
+
   <validator class="com.draagon.meta.validator.MetaValidator">
     <type name="required"     class="com.draagon.meta.validator.RequiredValidator" default="true"/>
     <type name="regex"        class="com.draagon.meta.validator.RegexValidator" />

@@ -33,36 +33,16 @@ import static org.junit.Assert.*;
  *
  * @author dmealing
  */
-public class FileMetaDataLoaderTest2 {
-    
-    private MetaDataLoader loader = null;
-    private static int counter = 1;
+public class FileMetaDataLoaderTest2 extends FileMetaDataLoaderTestBase {
+
+    protected FileMetaDataLoader loader = null;
 
     @Before
-    public void initLoader() {
+    public void initLoader() { loader = super.initLoader("json");}
 
-        synchronized (this) {
-            // Initialize the loader
-            loader = new FileMetaDataLoader(
-                    new FileLoaderConfig()
-                            .addParser("*.xml", XMLMetaDataParser.class)
-                            .addParser("*.json", JsonMetaDataParser.class)
-                            .addSources(new LocalMetaDataSources(
-                                    "com/draagon/meta/loader/file/json/metaobjects.types.json"))
-                            .addSources(new LocalMetaDataSources(
-                                    //"src/test/resources",
-                                    Arrays.asList(
-                                            "metadata/test/produce/v1/produce-v1-json.bundle",
-                                            "metadata/test/produce/v1/meta.fruit.overlay.json")
-                            ))
-                            .setShouldRegister(true)
-                            .setStrict(true)
-                            .setVerbose(false),
-                    getClass().getSimpleName() + "-" + counter++)
-                    .init();
-        }
-    }
-    
+    @After
+    public void destroyLoader() { this.loader.destroy(); }
+
     @Test
     public void testApple() {
         
@@ -143,11 +123,5 @@ public class FileMetaDataLoaderTest2 {
         MetaObject extMo = ((ObjectField) extField ).getObjectRef();
         assertNotNull( "Extension Object exists", extMo );
         assertEquals( "Extension Object name == ProduceExt", "produce::v1::ext::ProduceExt", extMo.getName() );
-    }
-
-
-    @After
-    public void destroyLoader() {
-        loader.destroy();
     }
 }

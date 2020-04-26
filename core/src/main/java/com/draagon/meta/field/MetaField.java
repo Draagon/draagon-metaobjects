@@ -16,10 +16,7 @@ import com.draagon.meta.view.MetaView;
 import com.draagon.meta.view.MetaViewNotFoundException;
 import com.draagon.meta.object.MetaObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * A MetaField represents a field of an object and is contained within a MetaClass.
@@ -445,5 +442,27 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         mf.lookedForDefault = lookedForDefault;
         mf.length = length;
         return mf;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MetaField<?> metaField = (MetaField<?>) o;
+        return length == metaField.length &&
+                Objects.equals(defaultValue, metaField.defaultValue) &&
+                dataType == metaField.dataType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), defaultValue, length, dataType);
+    }
+
+    /** Get the toString Prefix */
+    @Override
+    protected String getToStringPrefix() {
+        return  super.getToStringPrefix() + "{dataType=" + dataType + ", defaultValue=" + defaultValue + "}";
     }
 }

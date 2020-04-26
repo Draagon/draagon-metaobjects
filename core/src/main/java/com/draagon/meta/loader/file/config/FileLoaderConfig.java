@@ -138,4 +138,33 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
 
         throw new MetaDataException( "No MetaDataParser was found for file ["+filename+"] on MetaDataLoader ["+loader+"]" );
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Misc Methods
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FileLoaderConfig<?> config = (FileLoaderConfig<?>) o;
+        return Objects.equals(patternParsers, config.patternParsers) &&
+                Objects.equals(sources, config.sources);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), patternParsers, sources);
+    }
+
+    @Override
+    public String toString() {
+        return "FileLoaderConfig{" +
+                "shouldRegister=" + shouldRegister() +
+                ", verbose=" + isVerbose() +
+                ", strict=" + isStrict() +
+                ", patternParsers=" + patternParsers +
+                ", sources=" + sources +
+                '}';
+    }
 }

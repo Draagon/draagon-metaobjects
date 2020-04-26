@@ -9,6 +9,8 @@ package com.draagon.meta.attr;
 import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
 
+import java.util.Objects;
+
 /**
  * An attribute of a MetaClass, MetaField, or MetaView
  */
@@ -115,5 +117,26 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
         MetaAttribute<T> a = (MetaAttribute<T>) super.clone();
         a.value = value;
         return a;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MetaAttribute<?> that = (MetaAttribute<?>) o;
+        return Objects.equals(value, that.value) &&
+                dataType == that.dataType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), value, dataType);
+    }
+
+    /** Get the toString Prefix */
+    @Override
+    protected String getToStringPrefix() {
+        return  super.getToStringPrefix() + "{dataType=" + dataType + ", value=" + value + "}";
     }
 }

@@ -2,15 +2,22 @@
     "children": [
         {"object": {"name": "Basket", "type": "value",
             "children": [
-                {"field": {"name": "id", "super": "..::common::id"}},
+                {"objectKey": {"name": "key"}},
                 {"field": {"name": "name", "super": "..::common::name"}},
                 {"field": {"name": "numApples", "type": "int"}},
                 {"field": {"name": "numOranges", "type": "int"}},
-                {"field": {"name": "apples", "type": "objectArray", "objectRef": "..::fruit::Apple"}},
-                {"field": {"name": "oranges",  "type": "objectArray", "objectRef": "..::fruit::Orange"}}
+                {"field": {"name": "apples", "type": "objectArray",
+                    "children": [
+                        {"objectRef": {"name": "appleRef", "type": "oneToMany", "reference": "..::fruit::Apple"}}
+                        ]}},
+                {"field": {"name": "oranges",  "type": "objectArray",
+                    "children": [
+                        {"objectRef": {"name": "orangeRef", "type": "oneToMany", "reference": "..::fruit::Orange"}}
+                    ]}}
             ]}},
         {"object": {"package": "..::fruit", "name": "Fruit",
             "children": [
+                {"objectKey": {"name": "key"}},
                 {"field": {"name": "inBasket", "type": "boolean"}}
             ]}}
     ]}

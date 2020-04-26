@@ -251,7 +251,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
         try {
             deleteChild(name, MetaAttribute.class);
         } catch (MetaException e) {
-            throw new MetaAttributeNotFoundException("MetaAtribute [" + name + "] not found in [" + toInternalString() + "]", name);
+            throw new MetaAttributeNotFoundException("MetaAtribute [" + name + "] not found in [" + toString() + "]", name);
         }
     }
 
@@ -265,7 +265,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
         try {
             ma = (MetaAttribute<?>) getChild(name, MetaAttribute.class);
         } catch (MetaDataNotFoundException e) {
-            throw new MetaAttributeNotFoundException("MetaAttribute [" + name + "] was not found in [" + toInternalString() + "]", name);
+            throw new MetaAttributeNotFoundException("MetaAttribute [" + name + "] was not found in [" + toString() + "]", name);
         }
         
         ma.setValueAsObject(value);
@@ -301,7 +301,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
         try {
             return (MetaAttribute) getChild( name, MetaAttribute.class, includeParentData);
         } catch (MetaDataNotFoundException e) {
-            throw new MetaAttributeNotFoundException( "MetaAtribute [" + name + "] not found in [" + toInternalString() + "]", name );
+            throw new MetaAttributeNotFoundException( "MetaAtribute [" + name + "] not found in [" + toString() + "]", name );
         }
     }
 
@@ -460,7 +460,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
                     if (deleteOnAdd( d )) {
                         deleteChild(d);
                     } else {
-                        throw new InvalidMetaDataException("MetaData [" + data.toInternalString() + "] with name [" + data.getName() + "] already exists in [" + toInternalString() + "] as [" + d + "]");
+                        throw new InvalidMetaDataException("MetaData [" + data.toString() + "] with name [" + data.getName() + "] already exists in [" + toString() + "] as [" + d + "]");
                     }
                 }
             } catch (MetaDataNotFoundException ignored) {
@@ -481,7 +481,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
             children.remove(d);
             flushCaches();
         } else {
-            throw new MetaDataNotFoundException("You cannot delete MetaData with type [" + type +"] and name [" + name + "] from SuperData of [" + toInternalString() + "]", name );
+            throw new MetaDataNotFoundException("You cannot delete MetaData with type [" + type +"] and name [" + name + "] from SuperData of [" + toString() + "]", name );
         }
     }
 
@@ -494,7 +494,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
             children.remove(d);
             flushCaches();
         } else {
-            throw new MetaDataNotFoundException("You cannot delete MetaData with name [" + name + "] from a SuperData of [" + toInternalString() + "]", name );
+            throw new MetaDataNotFoundException("You cannot delete MetaData with name [" + name + "] from a SuperData of [" + toString() + "]", name );
         }
     }
 
@@ -503,7 +503,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      */
     public void deleteChild(MetaData data) {
         if (data.getParent() != this) {
-            throw new IllegalArgumentException("MetaData [" + data.toInternalString() + "] is not a child of [" + toInternalString() + "]");
+            throw new IllegalArgumentException("MetaData [" + data.toString() + "] is not a child of [" + toString() + "]");
         }
         
         children.remove(data);
@@ -841,6 +841,28 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
         return cacheValues.get(key);
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+    // Misc Methods
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetaData<?> metaData = (MetaData<?>) o;
+        return Objects.equals(children, metaData.children) &&
+                type.equals(metaData.type) &&
+                subType.equals(metaData.subType) &&
+                name.equals(metaData.name) &&
+                Objects.equals(superData, metaData.superData) &&
+                Objects.equals(parentRef, metaData.parentRef);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(children, type, subType, name, superData, parentRef);
+    }
+
+    /** Get the toString Prefix */
     protected String getToStringPrefix() {
 
         String name = getClass().getName();
@@ -849,30 +871,31 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
             name = name.substring(i + 1);
         }
 
-        return name + "[" + getTypeName() +":" + getSubTypeName() + "]";
+        return name + "[" + getTypeName() +":" + getSubTypeName() + "]{" + getName() + "}";
     }
 
     /**
      * Returns a string representation of the MetaData
      */
-    private String toInternalString() {
+    /*private String toInternalString() {
 
         if (getParent() == null) {
-            return getToStringPrefix() + "{" + getName() + "}";
+            return getToStringPrefix();
         } else {
-            return getToStringPrefix() + "{" + getName() + "}@" + getParent().toInternalString();
+            return getToStringPrefix() + "@" + getParent().toInternalString();
         }
-    }
+    }*/
 
     /**
      * Returns a string representation of the MetaData
      */
+    @Override
     public String toString() {
 
         if (getParent() == null) {
-            return getToStringPrefix() + "{" + getName() + "}";
+            return getToStringPrefix();
         } else {
-            return getToStringPrefix() + "{" + getName() + "}@" + getParent().toString();
+            return getToStringPrefix() + "@" + getParent().toString();
         }
     }
 }

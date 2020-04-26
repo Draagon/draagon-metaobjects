@@ -4,6 +4,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
@@ -73,6 +74,23 @@ public class TypeConfig {
     /////////////////////////////////////////////////////////////////////
     // Misc Methods
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeConfig that = (TypeConfig) o;
+        return Objects.equals(typeName, that.typeName) &&
+                Objects.equals(baseClass, that.baseClass) &&
+                Objects.equals(subTypes, that.subTypes) &&
+                Objects.equals(defSubTypeName, that.defSubTypeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(typeName, baseClass, subTypes, defSubTypeName);
+    }
+
+    @Override
     public String toString() {
         return "TypeModel {typeName="+typeName+",baseClass="+baseClass+",subTypes="+subTypes.toString()+",defSubTypeName="+defSubTypeName+"}";
     }

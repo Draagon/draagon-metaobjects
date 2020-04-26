@@ -10,6 +10,7 @@
  */
 package com.draagon.meta.loader.file;
 
+import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
@@ -18,6 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -26,36 +28,53 @@ import java.util.Arrays;
 public class FileMetaDataLoaderTestBase {
 
     //protected static MetaDataLoader loaderStatic = null;
-    private static int counter=1;
+    private static AtomicInteger i = new AtomicInteger();
 
-    protected FileMetaDataLoader loader = null;
+    protected FileMetaDataLoader initLoader( String type ) {
 
-    @Before
-    public void initLoader() {
+        FileMetaDataLoader loader = null;
 
-        synchronized(this) {
-
+        if ("json".equals(type)) {
             // Initialize the loader
             loader = new FileMetaDataLoader(
                     new FileLoaderConfig()
-                                .addParser( "*.xml", XMLMetaDataParser.class )
-                                .addParser( "*.json", JsonMetaDataParser.class )
-                                .addSources( new LocalMetaDataSources(
+                            .addParser("*.xml", XMLMetaDataParser.class)
+                            .addParser("*.json", JsonMetaDataParser.class)
+                            .addSources(new LocalMetaDataSources(
+                                    "com/draagon/meta/loader/file/json/metaobjects.types.json"))
+                            .addSources(new LocalMetaDataSources(
+                                    //"src/test/resources",
+                                    Arrays.asList(
+                                            "metadata/test/produce/v1/produce-v1-json.bundle",
+                                            "metadata/test/produce/v1/meta.fruit.overlay.json")
+                            ))
+                            .setShouldRegister(true)
+                            .setStrict(true)
+                            .setVerbose(false),
+                    getClass().getSimpleName() + "-" + i.incrementAndGet())
+                    .init();
+        }
+        else if ( "xml".equals(type)) {
+            // Initialize the loader
+            loader = new FileMetaDataLoader(
+                    new FileLoaderConfig()
+                            .addParser("*.xml", XMLMetaDataParser.class)
+                            .addParser("*.json", JsonMetaDataParser.class)
+                            .addSources(new LocalMetaDataSources(
                                     Arrays.asList(
                                             "com/draagon/meta/loader/file/xml/metaobjects.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.xml")
-                                ))
-                                .setShouldRegister( true )
-                                .setVerbose( false ),
-                    getClass().getSimpleName() + "-" + counter++)
-                        .init();
+                            ))
+                            .setShouldRegister(true)
+                            .setVerbose(false),
+                    getClass().getSimpleName() + "-" + i.incrementAndGet())
+                    .init();
         }
-    }
+        else {
+            throw new MetaException( "Unknown initLoader type [" + type + "], must be xml or json" );
+        }
 
-    @After
-    public void destroyLoader() {
-        //this.loader = null;
-        this.loader.destroy();
+        return loader;
     }
 }

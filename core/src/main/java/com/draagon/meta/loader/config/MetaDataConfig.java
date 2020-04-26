@@ -1,5 +1,8 @@
 package com.draagon.meta.loader.config;
 
+import java.util.Comparator;
+import java.util.Objects;
+
 /**
  * Stores the MetaData Configuration data
  */
@@ -21,7 +24,23 @@ public class MetaDataConfig {
     /////////////////////////////////////////////////////////////////////
     // Misc Methods
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetaDataConfig that = (MetaDataConfig) o;
+        return Objects.equals(types, that.types);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(types);
+    }
+
+    @Override
     public String toString() {
-        return "MetaDataConfig: " + types.toString();
+        return "MetaDataConfig{" +
+                "types=" + types +
+                '}';
     }
 }

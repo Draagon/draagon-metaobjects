@@ -23,15 +23,16 @@ import static org.junit.Assert.assertEquals;
  *
  * @author dmealing
  */
-public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase{
-    static final Log log = LogFactory.getLog(XMLMetaDataSuperTest.class);
+public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase {
 
+    static final Log log = LogFactory.getLog(XMLMetaDataSuperTest.class);
 
     @Test
     public void testSuperListFruit() {
         List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Fruit");
 
         for(MetaObject mo : result){
+
             if ( log.isDebugEnabled()) {
                 log.debug(String.format("[%s]->[%s]",
                         ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));

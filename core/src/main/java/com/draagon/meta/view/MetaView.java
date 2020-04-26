@@ -94,7 +94,8 @@ public abstract class MetaView extends MetaData<MetaView>
    */
   public String getDisplayString( Object obj ) {
 
-    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
+    MetaObject mc = getLoader().getMetaObjectFor( obj );
+    if ( mc == null ) MetaDataRegistry.findMetaObject( obj );
     MetaField mf = mc.getMetaField( getParent().getName() );
     return "" + mf.getString( obj );
   }

@@ -4,6 +4,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -55,6 +56,20 @@ public class TypesConfig {
     /////////////////////////////////////////////////////////////////////
     // Misc Methods
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypesConfig that = (TypesConfig) o;
+        return Objects.equals(types, that.types);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(types);
+    }
+
+    @Override
     public String toString() {
         return "MetaDataTypes: " + types.toString();
     }

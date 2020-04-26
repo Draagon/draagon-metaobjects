@@ -14,6 +14,8 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -25,8 +27,16 @@ import static org.junit.Assert.assertEquals;
  * @author dmealing
  */
 public class FileMetaDataParentTest extends FileMetaDataLoaderTestBase {
-    static final Log log = LogFactory.getLog(FileMetaDataParentTest.class);
 
+    private static final Log log = LogFactory.getLog(FileMetaDataParentTest.class);
+
+    protected FileMetaDataLoader loader = null;
+
+    @Before
+    public void initLoader() { this.loader = super.initLoader("xml");}
+
+    @After
+    public void destroyLoader() { this.loader.destroy(); }
 
     private void testObjectFieldCount(String objectName, boolean includeParentData, int expectedCount) {
         List<MetaObject> result = loader.getChildren(MetaObject.class, includeParentData);

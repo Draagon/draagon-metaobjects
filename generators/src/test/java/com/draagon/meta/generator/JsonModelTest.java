@@ -1,6 +1,8 @@
 package com.draagon.meta.generator;
 
 import com.draagon.meta.generator.direct.JsonModelGenerator;
+import com.draagon.meta.loader.file.FileMetaDataLoader;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +11,16 @@ import java.util.Map;
 
 public class JsonModelTest extends GeneratorTestBase {
 
+
+    protected FileMetaDataLoader loader = null;
+
+    @Before
+    public void initLoader() { this.loader = super.initLoader("xml");}
+
+    @After
+    public void destroyLoader() { this.loader.destroy(); }
+
+    
     protected String getGeneratedTestSourcesPath() {
         // TODO:  Get this from Maven
         return "./target/generated-test-sources";
