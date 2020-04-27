@@ -11,9 +11,9 @@
     <artifactId>metaobjects-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
-    <name>MetaObjects :: Maven Mojo</name>
+    <name>MetaObjects :: Maven Plugin</name>
     <url>https://github.com/Draagon/draagon-metaobjects</url>
-    <description>MetaObjects for Model-driven development - Maven Mojo</description>
+    <description>MetaObjects for Model-driven development - Maven Plugin</description>
 
     <build>
         <plugins>
