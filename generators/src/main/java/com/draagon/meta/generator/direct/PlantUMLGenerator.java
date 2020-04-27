@@ -3,14 +3,15 @@ package com.draagon.meta.generator.direct;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.GeneratorMetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.google.gson.stream.JsonWriter;
+import com.draagon.meta.relation.ref.*;
+import com.draagon.meta.util.MetaDataUtil;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -33,20 +34,41 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             pw = new PrintWriter(outf);
 
             pw.println("@startuml");
+            pw.println();
+            pw.println("skinparam class {");
+            pw.println("    BackgroundColor PaleGreen");
+            pw.println("    ArrowColor SeaGreen");
+            pw.println("    BorderColor DarkGreen");
+            pw.println("    BackgroundColor<<Abstract>> Wheat");
+            pw.println("    BorderColor<<Abstract>> Tomato");
+            pw.println("}");
+            pw.println("skinparam stereotypeCBackgroundColor YellowGreen");
+            pw.println("skinparam stereotypeCBackgroundColor<< Abstract >> DimGray");
+            pw.println();
             pw.println("set namespaceSeparator ::");
 
             List<MetaData> filtered = getFilteredMetaData(loader);
-            for ( String p : getNamespaces( filtered )) {
+            for ( String p : getUniquePackages( filtered )) {
 
                 if (!p.isEmpty()) pw.println("namespace " + p + " {" );
 
+                // Write MetaObjects
                 for (MetaData md : filtered) {
-                    if ( md.getPackage().equals( p )) {
-                        writerMetaData(pw, "  ", md);
+                    if ( md instanceof MetaObject && md.getPackage().equals( p )) {
+                        MetaObject mo = (MetaObject) md;
+
+                        writerMetaData(pw, "  ", mo);
                     }
                 }
 
                 if (!p.isEmpty()) pw.println("}" );
+
+                // Write Object References
+                for (MetaData md : filtered) {
+                    if ( md instanceof MetaObject && md.getPackage().equals( p )) {
+                        writeObjectRelationships(pw, "", (MetaObject) md);
+                    }
+                }
             }
 
 
@@ -60,29 +82,24 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected List<String> getNamespaces( List<MetaData> filtered ) throws IOException {
-        List<String> pkgs = new ArrayList<>();
-
-        filtered.forEach( md -> {
-            if ( md instanceof MetaObject
-                    && !pkgs.contains( md.getPackage() )) {
-                pkgs.add( md.getPackage() );
-            }
-        });
-
-        return pkgs;
-    }
-
     protected void writerMetaData( PrintWriter pw, String indent, MetaData md ) throws IOException {
 
-        pw.print( indent + "class "+md.getShortName()+" << (O,#FF7700) "+md.getSubTypeName()+" >>");
-        if ( md.getSuperData() != null ) pw.print( " extends " + md.getSuperData().getName() );
-        pw.println(" {");
+        boolean isAbstract = false;
+        if ( md.hasAttr("_isAbstract")) {
+            isAbstract = "true".equals( md.getMetaAttr( "_isAbstract").getValueAsString());
+        }
+
+        pw.print( indent + "class "+md.getShortName() );
+        if ( isAbstract ) pw.print( " << (A,#FF7700) Abstract");
+        else pw.print( " << (O,#AAAAFF)");
+        pw.println( " >> {");
+
+        pw.println(indent+"  .. Attributes ..");
+        pw.println(indent+"  type="+md.getSubTypeName() );
 
         // Write Attributes
         List<MetaAttribute> attrs = (List<MetaAttribute>) md.getChildren(MetaAttribute.class, false);
         if ( !attrs.isEmpty() ) {
-            pw.println(indent+"  .. Attributes ..");
             writeAttributes( pw, indent+" ", null, attrs );
         }
 
@@ -103,42 +120,87 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         pw.println(indent+"}");
     }
 
-    protected void writeAttributes( PrintWriter pw, String indent, MetaField f, List<MetaAttribute> attrs ) {
 
-        String pre = "";
-        if ( f != null ) pre = " --"; //+f.getShortName() + ":";
-        for (MetaAttribute a : attrs) {
-            //pw.println(indent+"{"+a.getSubTypeName() + "} " + a.getShortName() +" = "+a.getValueAsString());
-            pw.println(indent+pre+ a.getShortName() +"="+a.getValueAsString());
+    protected void writeObjectRelationships( PrintWriter pw, String indent, MetaObject mo ) throws IOException {
+
+        if ( mo.getSuperObject() != null ) {
+            pw.println( mo.getName() + " ..|> " + mo.getSuperObject().getName() + " : extends" );
+        }
+
+        // Write Fields
+        List<MetaField> fields = (List<MetaField>) mo.getChildren(MetaField.class, false);
+        if ( !fields.isEmpty() ) {
+
+            pw.println();
+
+            for (MetaField f : fields) {
+
+                ObjectReference oref = (ObjectReference) f.getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
+                if ( oref != null ) {
+                    MetaObject objRef = oref.getReferencedObject();
+                    if (objRef != null) {
+                        pw.print(f.getParent().getName());
+                        if (oref instanceof OneToOneReference) pw.print("\"1\" --> \"1\"");
+                        else if (oref instanceof OneToManyReference) pw.print("\"1\" --> \"many\"");
+                        else if (oref instanceof ManyToOneReference) pw.print("\"many\" --> \"1\"");
+                        else if (oref instanceof ManyToManyReference) pw.print("\"many\" --> \"many\"");
+                        else pw.print(" --> ");
+                        pw.print(objRef.getName() + " : " );
+                        if ( oref.getName() == null ) pw.println( f.getShortName());
+                        else pw.println( f.getShortName() +":"+ oref.getName() );
+                    }
+                }
+                else {
+                    try {
+                        MetaObject objRef = MetaDataUtil.getObjectRef(f);
+                        pw.print(f.getParent().getName() + " --> " + objRef.getName() + " : " + f.getShortName() );
+                    } catch (MetaAttributeNotFoundException e) {}
+                }
+            }
         }
     }
 
-    /*protected String writeAttrNameValue( MetaAttribute attr ) throws IOException {
+    protected void writeAttributes( PrintWriter pw, String indent, MetaField f, List<MetaAttribute> attrs ) {
+
+        String pre = "";
+        for (MetaAttribute a : attrs) {
+            //pw.println(indent+"{"+a.getSubTypeName() + "} " + a.getShortName() +" = "+a.getValueAsString());
+            if ( f != null ) pre = " [attr:"+a.getSubTypeName() + "] ";
+            pw.println(indent+pre+ a.getShortName() +"="+getAttrValue(a));
+        }
+    }
+
+    protected String getAttrValue(  MetaAttribute attr ) {
 
         Object val = attr.getValue();
         if ( val == null ) {
             return null;
         }
+        // TODO:  This should be handled differently
+        else if ( attr.getName().equals( ObjectReference.ATTR_REFERENCE)
+                || attr.getName().equals( "objectRef" )) {
+            return "\""+MetaDataUtil.expandPackageForPath(MetaDataUtil.findPackageForMetaData( attr ), attr.getValueAsString() )+"\"";
+        }
         else if ( attr.getDataType() == DataTypes.STRING_ARRAY ) {
-            return val.toString() );
+            return "\""+val.toString()+"\"";
         }
         else if ( val instanceof String) {
-            jsonWriter.name(name).value( (String) val );
+            return "\""+val.toString()+"\"";
         }
         else if ( val instanceof Boolean ) {
-            jsonWriter.name(name).value( (Boolean) val );
-        }
-        else if ( val instanceof Long ) {
-            jsonWriter.name(name).value( (Long) val );
+            return val.toString();
         }
         else if ( val instanceof Date) {
-            jsonWriter.name(name).value( ((Date) val).getTime() );
+            return val.toString();
         }
         else if ( val instanceof Number ) {
-            jsonWriter.name(name).value( (Number) val );
+            return val.toString();
+        }
+        else if ( val instanceof Float ) {
+            return val.toString();
         }
         else if ( val instanceof Double ) {
-            jsonWriter.name(name).value( (Double) val );
+            return val.toString();
         }
         else if ( val instanceof Properties) {
             StringBuilder b = new StringBuilder();
@@ -146,12 +208,10 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                 if ( b.length() > 0 ) b.append( ',' );
                  b.append( e.getKey() ).append(':').append( e.getValue() );
              }
-            jsonWriter.name(name).value( b.toString() );
+            return b.toString();
         }
         else {
-            return false;
+            return "...";
         }
-
-        return true;
-    }*/
+    }
 }

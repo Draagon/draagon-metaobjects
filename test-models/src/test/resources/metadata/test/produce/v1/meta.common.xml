@@ -1,12 +1,17 @@
 <metadata package="produce::v1::common">
 
     <!-- Id -->
-    <field name="id" type="long" isKey="true"/>
+    <field name="id" type="long">
+        <attr type="boolean" name="isKey">true</attr>
+    </field>
 
     <!-- Name -->
     <field name="name" type="string">
         <validator name="required" type="required"/>
-        <attr name="len">50</attr>
+        <validator name="length" type="length">
+            <attr type="int" name="max">50</attr>
+            <attr type="int" name="min">1</attr>
+        </validator>
     </field>
 
 </metadata>

@@ -3,7 +3,7 @@
 <metadata package="produce::v1::fruit">
 
     <!-- Fruit -->
-    <object name="Fruit" type="pojo">
+    <object name="Fruit" type="pojo" _isAbstract="true">
 
         <attr name="object">com.draagon.meta.test.Fruit</attr>
 
@@ -22,7 +22,7 @@
     </object>
 
     <!-- Fruit -->
-    <object name="Vegetable" type="pojo">
+    <object name="Vegetable" type="pojo" _isAbstract="true">
 
         <attr name="object">com.draagon.meta.test.Vegetable</attr>
 
@@ -48,8 +48,8 @@
         <attr name="object">com.draagon.meta.test.Apple</attr>
     
         <!-- Orachard -->
-        <field name="orhcard" type="string">
-            <attr name="len">80</attr>
+        <field name="orchard" type="string">
+            <attr type="int" name="len">80</attr>
         </field>
 
         <!-- Worms -->
