@@ -116,13 +116,14 @@ public class JsonMetaDataParser extends MetaDataParser {
 
             String name = getValueAsString(typeEl, ATTR_NAME);
             String clazz = getValueAsString(typeEl, ATTR_CLASS);
-            String defaultSubType =  getValueAsString(typeEl, "defaultSubType");
 
             if (name == null || name.isEmpty()) {
                 throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
             TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
-            typeConfig.setDefaultSubTypeName( defaultSubType );
+
+            typeConfig.setDefaultSubTypeName(getValueAsString(typeEl, "defaultSubType"));
+            typeConfig.setDefaultName(getValueAsString(typeEl, "defaultName"));
 
             // If we have subtypes, load them
             if ( typeEl.has( ATTR_SUBTYPES )) {

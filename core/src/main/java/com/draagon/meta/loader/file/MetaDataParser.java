@@ -138,10 +138,6 @@ public abstract class MetaDataParser {
     /** Create or Overlay the MetaData */
     protected MetaData createOrOverlayMetaData( boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, String superName) {
 
-        if (name == null || name.equals("")) {
-            throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent+ "] had no name specfied in file ["+getFilename()+"]");
-        }
-
         // Get the TypeModel map for this element
         TypeConfig types = getTypesConfig().getType( typeName );
         if ( types == null ) {
@@ -149,9 +145,14 @@ public abstract class MetaDataParser {
             throw new MetaException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
         }
 
+        if (name == null || name.equals("")) {
+            name = types.getDefaultName();
+            if ( name == null )
+                throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent+ "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
+        }
+
         // Load or get the MetaData
         MetaData md = null;
-
 
         if (packageName == null || packageName.trim().isEmpty()) {
             // If not found, then use the default
