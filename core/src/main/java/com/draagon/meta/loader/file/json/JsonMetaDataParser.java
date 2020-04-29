@@ -28,6 +28,7 @@ public class JsonMetaDataParser extends MetaDataParser {
     private static Log log = LogFactory.getLog(JsonMetaDataParser.class);
 
     public final static String ATTR_METADATA    = "metadata";
+    public final static String ATTR_TYPESCONFIG = "typesConfig";
     public final static String ATTR_TYPES       = "types";
     public final static String ATTR_PACKAGE     = "package";
     public final static String ATTR_CHILDREN    = "children";
@@ -64,8 +65,8 @@ public class JsonMetaDataParser extends MetaDataParser {
         try {
             JsonObject root = new JsonParser().parse(new InputStreamReader( is )).getAsJsonObject();
 
-            if ( root.has( ATTR_TYPES )) {
-                loadAllTypes( root.getAsJsonArray( ATTR_TYPES ));
+            if ( root.has( ATTR_TYPESCONFIG )) {
+                loadAllTypes( root.getAsJsonObject( ATTR_TYPESCONFIG ).getAsJsonArray( ATTR_TYPES ));
             }
             else if ( root.has( ATTR_METADATA )) {
 
@@ -76,9 +77,9 @@ public class JsonMetaDataParser extends MetaDataParser {
                     setDefaultPackageName( defPkg );
                 }
 
-                if ( metadata.has( ATTR_TYPES )) {
-                    loadAllTypes( metadata.getAsJsonArray( ATTR_TYPES ));
-                }
+                //if ( metadata.has( ATTR_TYPES )) {
+                //    loadAllTypes( metadata.getAsJsonArray( ATTR_TYPES ));
+                //}
 
                 // Parse the metadata elements
                 if (  metadata.has( ATTR_CHILDREN )) {
@@ -115,15 +116,18 @@ public class JsonMetaDataParser extends MetaDataParser {
 
             String name = getValueAsString(typeEl, ATTR_NAME);
             String clazz = getValueAsString(typeEl, ATTR_CLASS);
+            String defaultSubType =  getValueAsString(typeEl, "defaultSubType");
 
             if (name == null || name.isEmpty()) {
                 throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
+            TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
+            typeConfig.setDefaultSubTypeName( defaultSubType );
 
             // If we have subtypes, load them
             if ( typeEl.has( ATTR_SUBTYPES )) {
                 // Load all the types for the specific element type
-                loadSubTypes( typeEl.getAsJsonArray( ATTR_SUBTYPES ), getOrCreateTypeConfig(name, clazz));
+                loadSubTypes( typeEl.getAsJsonArray( ATTR_SUBTYPES ), typeConfig );
             }
         }
     }
@@ -151,7 +155,8 @@ public class JsonMetaDataParser extends MetaDataParser {
 
             String name = getValueAsString( subTypeEl, ATTR_NAME);
             String tclass = getValueAsString( subTypeEl, ATTR_CLASS);
-            Boolean def = getValueAsBoolean( subTypeEl, "default");
+            //Boolean def = getValueAsBoolean( subTypeEl, "default");
+            //if ( Boolean.TRUE.equals( def )) typeConfig.setDefaultSubTypeName( name );
 
             if (name == null && name.isEmpty()) {
                 throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
@@ -161,7 +166,7 @@ public class JsonMetaDataParser extends MetaDataParser {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeConfig.addSubType(name, tcl, Boolean.TRUE.equals( def ));
+                typeConfig.addSubType(name, tcl);
             }
             catch (ClassNotFoundException e) {
                 throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());

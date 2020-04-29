@@ -10,6 +10,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.LocalMetaDataSources;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
+import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 
 /**
@@ -29,14 +30,14 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
     public XMLFileMetaDataLoader( String name ) {
 
         super( new FileLoaderConfig()
-                    .addParser( "*.xml", LegacyXMLMetaDataParser.class )
+                    .addParser( "*.xml", XMLMetaDataParser.class )
                     .setShouldRegister( false )
                     .setVerbose( false ),
                 name );
     }
 
     public String getDefaultTypesRef() {
-        return "com/draagon/meta/loader/meta.types.xml";
+        return "com/draagon/meta/loader/xml/metaobjects.types.xml";
     }
 
     public void setSourceDir( String dir ) {

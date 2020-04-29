@@ -11,12 +11,9 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaException;
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.config.FileLoaderConfig;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
-import org.junit.After;
-import org.junit.Before;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +38,7 @@ public class FileMetaDataLoaderTestBase {
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addParser("*.json", JsonMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
-                                    "com/draagon/meta/loader/file/json/metaobjects.types.json"))
+                                    "com/draagon/meta/loader/json/metaobjects.types.json"))
                             .addSources(new LocalMetaDataSources(
                                     //"src/test/resources",
                                     Arrays.asList(
@@ -62,7 +59,7 @@ public class FileMetaDataLoaderTestBase {
                             .addParser("*.json", JsonMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
                                     Arrays.asList(
-                                            "com/draagon/meta/loader/file/xml/metaobjects.types.xml",
+                                            "com/draagon/meta/loader/xml/metaobjects.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle",
                                             "metadata/test/produce/v1/meta.fruit.overlay.xml")
                             ))

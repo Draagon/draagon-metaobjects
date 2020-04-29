@@ -5,6 +5,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
@@ -18,22 +19,22 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
     private static Log log = LogFactory.getLog(XMLMetaDataParser.class);
 
-    public final static String ATTR_METADATA    = "metadata";
-    public final static String ATTR_TYPES       = "types";
-    public final static String ATTR_PACKAGE     = "package";
-    public final static String ATTR_NAME        = "name";
-    public final static String ATTR_CLASS       = "class";
-    public final static String ATTR_TYPE        = "type";
-    public final static String ATTR_SUBTYPE     = "subtype";
-    public final static String ATTR_SUPER       = "super";
+    public final static String ATTR_METADATA            = "metadata";
+    public final static String ATTR_DEFAULTPACKAGE      = "package";
+    public final static String ATTR_TYPESCONFIG         = "typesConfig";
+    public final static String ATTR_TYPES               = "types";
+    public final static String ATTR_PACKAGE             = "package";
+    public final static String ATTR_NAME                = "name";
+    public final static String ATTR_CLASS               = "class";
+    public final static String ATTR_TYPE                = "type";
+    public final static String ATTR_SUBTYPE             = "subType";
+    public final static String ATTR_SUPER               = "super";
 
     protected static List<String> reservedAttributes = new ArrayList<>();
     static {
@@ -63,23 +64,30 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             //////////////////////////////////////////////////////
             // PARSE THE ITEMS XML BLOCK
 
-            // Look for the <types> element
-            Collection<Element> elements = getElementsOfName(doc, ATTR_METADATA);
-            if (elements.isEmpty()) {
-                throw new MetaException("The root 'meta' element was not found in file [" + getFilename() + "]");
-            }
+            // Look for the <typesConfig> element
+            Collection<Element> elements = getElementsOfName(doc, ATTR_TYPESCONFIG);
+            if ( !elements.isEmpty() ) {
 
-            Element pkgEl = elements.iterator().next();
+                Element typesConfigEl = elements.iterator().next();
 
-            // Load any types specified in the Metadata XML
-            Collection<Element> typeElements = getElementsOfName(pkgEl, ATTR_TYPES);
-            if (typeElements.size() > 0) {
-                loadAllTypes(typeElements.iterator().next()); // Load inner tags
+                // Load any types specified in the Metadata XML
+                Collection<Element> typeElements = getElementsOfName(typesConfigEl, ATTR_TYPES);
+                if (typeElements.size() > 0) {
+                    loadAllTypes(typeElements.iterator().next()); // Load inner tags
+                }
+
             }
-            // If it's not a known type, then process as if it's a defined type
+            // Look for the <metadata> element
             else {
+                elements = getElementsOfName(doc, ATTR_METADATA);
+                if (elements.isEmpty()) {
+                    throw new MetaException("The root '"+ATTR_METADATA+"' or '"+ATTR_DEFAULTPACKAGE+"' element was not found in file [" + getFilename() + "]");
+                }
+
+                Element pkgEl = elements.iterator().next();
+
                 // Set default package name
-                String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
+                String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_DEFAULTPACKAGE));
                 setDefaultPackageName(defPkg);
 
                 // Parse the metadata elements
@@ -120,11 +128,37 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
 
+            TypeConfig typeConfig = getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ));
+            if ( e.hasAttribute("defaultSubType")) typeConfig.setDefaultSubTypeName( e.getAttribute( "defaultSubType" ));
+            if ( e.hasAttribute("defaultName")) typeConfig.setDefaultName( e.getAttribute( "defaultName" ));
+            if ( e.hasAttribute("defaultNamePrefix")) typeConfig.setDefaultNamePrefix( e.getAttribute( "defaultNamePrefix" ));
+            loadChildren( e ).forEach( c-> typeConfig.addTypeChild(c));
+
             // Load all the types for the specific element type
-            loadSubTypes( e, getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ) ));
+            loadSubTypes( e, typeConfig );
         }
     }
 
+    protected  List<ChildConfig> loadChildren(Element el) {
+        List<ChildConfig> children = new ArrayList<>();
+        List<Element> childrenEl = getElementsOfName(el, "children");
+        if ( !childrenEl.isEmpty() ) {
+            for (Element ec : getElementsOfName(childrenEl.iterator().next(), "child")) {
+                ChildConfig cc = new ChildConfig( ec.getAttribute(ATTR_TYPE), ec.getAttribute(ATTR_SUBTYPE), ec.getAttribute(ATTR_NAME));
+                if ( ec.hasAttribute("nameAliases"))        cc.setNameAliases( new HashSet<String>( Arrays.asList( ec.getAttribute( "nameAliases").split(","))));
+                if ( ec.hasAttribute("required"))           cc.setRequired( Boolean.parseBoolean( ec.getAttribute( "required")));
+                if ( ec.hasAttribute("autoCreate"))         cc.setAutoCreate( Boolean.parseBoolean( ec.getAttribute( "autoCreate")));
+                if ( ec.hasAttribute("defaultValue"))       cc.setDefaultValue( ec.getAttribute( "defaultValue"));
+                if ( ec.hasAttribute("minValue"))           cc.setMinValue( Integer.parseInt( ec.getAttribute( "minValue")));
+                if ( ec.hasAttribute("maxValue"))           cc.setMaxValue( Integer.parseInt( ec.getAttribute( "maxValue")));
+                if ( ec.hasAttribute("inlineAttr"))         cc.setInlineAttr( ec.getAttribute( "inlineAttr"));
+                if ( ec.hasAttribute("inlineAttrName"))     cc.setInlineAttrName( ec.getAttribute( "inlineAttrName"));
+                if ( ec.hasAttribute("inlineAttrValueMap")) cc.setInlineAttrValueMap( ec.getAttribute( "inlineAttrValueMap"));
+                children.add( cc );
+            }
+        }
+        return children;
+    }
 
     /**
      * Loads the specified group types
@@ -144,11 +178,13 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
+            loadChildren( typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
+
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeConfig.addSubType(name, tcl, "true".equals( def ));
+                typeConfig.addSubType(name, tcl);
 
                 // Update info msg if verbose
                 if ( getLoader().getLoaderConfig().isVerbose() ) {
