@@ -9,16 +9,22 @@ import java.util.Set;
 
 public final class ChildConfig {
 
+    // Valid type/subType/name combinations that include '*'
     private final String type;
     private final String subType;
     private final String name;
 
+    // Specialized behaviors
     private Set<String> nameAliases = null;
     private Boolean required = null;
     private Boolean autoCreate = null;
+
+    // Support for value defaults and validations
     private String defaultValue = null;
     private Integer minValue = null;
     private Integer maxValue = null;
+
+    // Support for inline attributes
     private String inlineAttr = null;
     private String inlineAttrName = null;
     private String inlineAttrValueMap = null;

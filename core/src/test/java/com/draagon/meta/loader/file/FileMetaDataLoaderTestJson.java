@@ -12,20 +12,14 @@ package com.draagon.meta.loader.file;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.ObjectField;
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
-import com.draagon.meta.loader.file.config.FileLoaderConfig;
-import com.draagon.meta.loader.file.json.JsonMetaDataParser;
-import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.test.Apple;
-import com.draagon.meta.test.Orange;
+import com.draagon.meta.test.produce.v1.Apple;
+import com.draagon.meta.test.produce.v1.Orange;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +27,7 @@ import static org.junit.Assert.*;
  *
  * @author dmealing
  */
-public class FileMetaDataLoaderTest2 extends FileMetaDataLoaderTestBase {
+public class FileMetaDataLoaderTestJson extends FileMetaDataLoaderTestBase {
 
     protected FileMetaDataLoader loader = null;
 

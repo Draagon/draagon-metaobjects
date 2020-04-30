@@ -88,12 +88,12 @@
             <subType name="object"       class="com.draagon.meta.field.ObjectField">
                 <children>
                     <child type="objectRef" subType="oneToOne" name="*" inlineAttr="optional" inlineAttrName="objectRef" inlineAttrValueMap="reference" />
-                    <child type="objectRef" subType="oneToMany" name="*" />
+                    <child type="objectRef" subType="manyToOne" name="*" />
                 </children>
             </subType>
             <subType name="objectArray"  class="com.draagon.meta.field.ObjectArrayField" >
                 <children>
-                    <child type="objectRef" subType="manyToOne" name="*" inlineAttr="optional" inlineAttrName="objectRef" inlineAttrValueMap="reference" />
+                    <child type="objectRef" subType="oneToMany" name="*" inlineAttr="optional" inlineAttrName="objectRef" inlineAttrValueMap="reference" />
                     <child type="objectRef" subType="manyToMany" name="*"/>
                 </children>
             </subType>

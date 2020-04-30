@@ -16,8 +16,8 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.test.Apple;
-import com.draagon.meta.test.Orange;
+import com.draagon.meta.test.produce.v1.Apple;
+import com.draagon.meta.test.produce.v1.Orange;
 import org.junit.Before;
 import org.junit.Test;
 

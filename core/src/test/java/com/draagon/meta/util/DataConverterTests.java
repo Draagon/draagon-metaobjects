@@ -1,6 +1,6 @@
 package com.draagon.meta.util;
 
-import com.draagon.meta.test.Orange;
+import com.draagon.meta.test.produce.v1.Orange;
 import org.junit.Test;
 
 import java.util.Date;

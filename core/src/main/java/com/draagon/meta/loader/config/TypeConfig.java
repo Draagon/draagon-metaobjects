@@ -46,7 +46,7 @@ public class TypeConfig {
     /////////////////////////////////////////////////////////////////////
     // Child Config methods
 
-    protected ChildConfig getBestMatchChildConfig( List<ChildConfig> children, String type, String subType, String name ) {
+    public ChildConfig getBestMatchChildConfig( List<ChildConfig> children, String type, String subType, String name ) {
 
         ChildConfig out = null;
         for ( ChildConfig cc: children ) {
@@ -56,7 +56,7 @@ public class TypeConfig {
             // If the subtypes don't match continue
             if ( subType != null && !subType.equals(cc.getSubType()) && !cc.getSubType().equals("*")) continue;
             // If the names don't match continue
-            if ( name != null && !name.equals(cc.getName()) && !cc.getName().equals("*")) continue;
+            if ( name != null && !hasMatchNameWithAliases( name, cc ) && !cc.getName().equals("*")) continue;
 
             // TODO:  Cleanup and verify this logic
 
@@ -67,13 +67,25 @@ public class TypeConfig {
                 // If the subtype on the current one is not * and the new one is a *, then continue
                 if ( subType != null && !out.getSubType().equals( "*" ) && cc.getSubType().equals( "*" )) continue;
                 // If name and subtype are not null and it matches the new one, use that one
-                if ( name != null && subType != null && (!name.equals( cc.getName() ) || !subType.equals( cc.getSubType() ))) continue;
+                if ( name != null && subType != null
+                        && (!hasMatchNameWithAliases( name, out ) || !subType.equals( cc.getSubType() ))) continue;
             }
 
             out = cc;
         }
 
         return out;
+    }
+
+    protected boolean hasMatchNameWithAliases( String name, ChildConfig cc ) {
+
+        if ( name.equals( cc.getName() )) return true;
+        if ( cc.getNameAliases() != null ) {
+            for (String alias : cc.getNameAliases()) {
+                if (name.equals(alias)) return true;
+            }
+        }
+        return false;
     }
 
     protected ChildConfig getExactMatchChildConfig( List<ChildConfig> children, ChildConfig in) {
@@ -85,7 +97,6 @@ public class TypeConfig {
                 return cc;
             }
         }
-
         return null;
     }
 
@@ -123,7 +134,16 @@ public class TypeConfig {
         if ( subtypeName == null ) throw new NullPointerException( "Cannot add subType on type ["+typeName+"] with a null name and class [" + clazz + "]" );
         if ( clazz == null ) throw new NullPointerException( "Cannot add subType [" +subtypeName + "] on type ["+typeName+"] with a null Class" );
 
-        subTypes.put( subtypeName, clazz );
+        if ( subTypes.containsKey( subtypeName )) {
+            Class<? extends MetaData> c = subTypes.get( subtypeName );
+            if ( !c.equals( clazz )) {
+                throw new MetaDataException("On Type [" + typeName + "], subType [" + subtypeName + "] already existed, but the classes do not match ["+c.getName()+" != "+clazz.getName() +"]");
+            }
+        }
+        else {
+            subTypes.put(subtypeName, clazz);
+            subTypeChildren.put(subtypeName, new ArrayList<ChildConfig>());
+        }
     }
 
     public Class<? extends MetaData> getSubTypeClass( String subTypeName ) {

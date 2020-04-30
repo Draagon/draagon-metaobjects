@@ -185,13 +185,20 @@ public class JsonMetaDataParser extends MetaDataParser {
                 throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
-            loadChildren( subTypeEl ).forEach( c-> typeConfig.addSubTypeChild(name,c));
-
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
                 typeConfig.addSubType(name, tcl);
+
+                // Load subtypes
+                loadChildren( subTypeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
+
+                // Update info msg if verbose
+                if ( getLoader().getLoaderConfig().isVerbose() ) {
+                    // Increment the # of subtypes
+                    info.incType(typeConfig.getTypeName());
+                }
             }
             catch (ClassNotFoundException e) {
                 throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());

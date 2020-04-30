@@ -33,14 +33,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-test-models</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>${commons.validator.version}</version>

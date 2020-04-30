@@ -8,7 +8,7 @@
  * Contributors:
  *    Doug Mealing LLC - initial API and implementation and/or initial documentation
  */
-package com.draagon.meta.test;
+package com.draagon.meta.test.produce.v1;
 
 import java.util.Date;
 

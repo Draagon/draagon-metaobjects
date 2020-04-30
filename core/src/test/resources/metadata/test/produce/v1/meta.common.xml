@@ -9,8 +9,8 @@
     <field name="name" type="string">
         <validator type="required"/>
         <validator type="length">
-            <attr type="int" name="max">50</attr>
             <attr type="int" name="min">1</attr>
+            <attr name="max">50</attr>
         </validator>
     </field>
 

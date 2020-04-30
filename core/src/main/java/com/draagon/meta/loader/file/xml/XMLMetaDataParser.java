@@ -168,13 +168,14 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
-            loadChildren( typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
-
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
                 typeConfig.addSubType(name, tcl);
+
+                // Load subtypes
+                loadChildren( typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
 
                 // Update info msg if verbose
                 if ( getLoader().getLoaderConfig().isVerbose() ) {

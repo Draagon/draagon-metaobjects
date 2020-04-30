@@ -28,7 +28,7 @@
     </organization>
 
     <modules>
-        <module>test-models</module>
+        <!-- module>test-models</module -->
         <module>core</module>
         <module>generators</module>
         <module>maven-plugin</module>

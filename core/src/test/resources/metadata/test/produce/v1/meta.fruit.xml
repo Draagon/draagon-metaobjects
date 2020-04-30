@@ -5,7 +5,7 @@
     <!-- Fruit -->
     <object name="Fruit" type="pojo" _isAbstract="true">
 
-        <attr name="object">com.draagon.meta.test.Fruit</attr>
+        <attr name="object">com.draagon.meta.test.produce.v1.Fruit</attr>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -24,7 +24,7 @@
     <!-- Fruit -->
     <object name="Vegetable" type="pojo" _isAbstract="true">
 
-        <attr name="object">com.draagon.meta.test.Vegetable</attr>
+        <attr name="object">com.draagon.meta.test.produce.v1.Vegetable</attr>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -45,12 +45,10 @@
 
         <objectKey name="key"/>
 
-        <attr name="object">com.draagon.meta.test.Apple</attr>
+        <attr name="object">com.draagon.meta.test.produce.v1.Apple</attr>
     
         <!-- Orachard -->
-        <field name="orchard" type="string">
-            <attr type="int" name="len">80</attr>
-        </field>
+        <field name="orchard" type="string"/>
 
         <!-- Worms -->
         <field name="worms" type="short"/>
@@ -62,7 +60,7 @@
 
         <objectKey name="key"/>
 
-        <attr name="object">com.draagon.meta.test.Macintosh</attr>
+        <attr name="object">com.draagon.meta.test.produce.v1.Macintosh</attr>
 
     </object>
 
@@ -71,7 +69,7 @@
 
         <objectKey name="key"/>
 
-        <attr name="object">com.draagon.meta.test.Tomato</attr>
+        <attr name="object">com.draagon.meta.test.produce.v1.Tomato</attr>
 
     </object>
 
@@ -80,7 +78,7 @@
 
         <objectKey name="key"/>
 
-        <attr name="object">com.draagon.meta.test.Orange</attr>
+        <attr name="object">com.draagon.meta.test.produce.v1.Orange</attr>
 
         <field name="pickedDate" type="date"/>
            

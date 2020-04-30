@@ -8,9 +8,8 @@
  * Contributors:
  *    Doug Mealing LLC - initial API and implementation and/or initial documentation
  */
-package com.draagon.meta.test;
+package com.draagon.meta.test.produce.v1;
 
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 
@@ -18,16 +17,16 @@ import com.draagon.meta.object.MetaObjectAware;
  *
  * @author dmealing
  */
-public abstract class Fruit implements MetaObjectAware {
-    
+public abstract class Vegetable implements MetaObjectAware {
+
     private Long id;
     private String name;
-    private Integer height;
+    private Integer length;
     private Integer width;
 
     private MetaObject metaObject = null;
-    
-    public Fruit() {
+
+    public Vegetable() {
     }
     
     @Override
@@ -56,12 +55,12 @@ public abstract class Fruit implements MetaObjectAware {
         this.name = name;
     }
 
-    public Integer getHeight() {
-        return height;
+    public Integer getLength() {
+        return length;
     }
 
-    public void setHeight(Integer height) {
-        this.height = height;
+    public void setLength(Integer length) {
+        this.length = length;
     }
 
     public Integer getWidth() {

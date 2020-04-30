@@ -4,6 +4,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypesConfig;
 import com.draagon.meta.loader.config.TypeConfig;
@@ -184,7 +185,8 @@ public abstract class MetaDataParser {
                 if ( prefix != null ) {
                     name = getNextNamePrefix(parent, typeName, prefix);
                 }
-                if ( name == null ) throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent+ "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
+                if ( name == null ) throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent
+                        + "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
             }
         }
 
@@ -199,6 +201,7 @@ public abstract class MetaDataParser {
             packageName = expandPackageForPath( getDefaultPackageName(), packageName );
         }
 
+        // Check if the metadata described already existed, and if so create and overloaded version
         try {
             if ( isRoot && packageName.length() > 0 ) {
                 md = parent.getChild( packageName + MetaDataLoader.PKG_SEPARATOR + name, types.getBaseClass() );
@@ -223,7 +226,7 @@ public abstract class MetaDataParser {
             MetaData superData = getSuperMetaData(parent, typeName, name, packageName, superName, types);
 
             // Create the new MetaData
-            md = createNewMetaData(isRoot, typeName, subTypeName, name, packageName, types, superData);
+            md = createNewMetaData(isRoot, parent, typeName, subTypeName, name, packageName, types, superData);
 
             // Add to the parent metadata
             parent.addChild(md);
@@ -265,15 +268,17 @@ public abstract class MetaDataParser {
                 catch (MetaDataNotFoundException e) {
                     //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())
                     //        +", pkg="+pkg+", superName="+superName+", sn="+sn);
-                    log.error("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent+"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
-                    throw new MetaException("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent+"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
+                    //log.error("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent+"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
+                    throw new MetaException("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent
+                            +"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
                 }
             }
         }
         // Check to make sure people arent' defining attributes when it shouldn't
         else {
             if (superName != null && !superName.isEmpty()) {
-                log.warn("Attribute 'super' defined on MetaData [" +typeName+ "][" +name+ "] under parent [" + parent + "], but should not be as metadata with that name already existed");
+                log.warn("Attribute 'super' defined on MetaData [" +typeName+ "][" +name+ "] under parent [" +parent
+                        + "], but should not be as metadata with that name already existed: file ["+getFilename()+"]");
             }
         }
 
@@ -299,7 +304,7 @@ public abstract class MetaDataParser {
     }
 
     /** Create new MetaData */
-    protected MetaData createNewMetaData(boolean isRoot, String typeName, String subTypeName, String name, String packageName, TypeConfig types, MetaData superData) {
+    protected MetaData createNewMetaData(boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, TypeConfig typeConfig, MetaData superData) {
 
         if (subTypeName != null && subTypeName.isEmpty()) subTypeName = null;
 
@@ -312,25 +317,104 @@ public abstract class MetaDataParser {
             if (superData != null) {
                 c = superData.getClass();
                 subTypeName = superData.getSubTypeName();
-            } else {
-                subTypeName = types.getDefaultSubTypeName();
-                c = types.getDefaultTypeClass();
+            }
+            else {
+                if ( isRoot ) {
+                    subTypeName = getSubTypeFromChildConfigs(ATTR_METADATA, null, typeConfig, name);
+                } else {
+                    subTypeName = getSubTypeFromChildConfigs(parent.getTypeName(), parent.getSubTypeName(), typeConfig, name);
+                }
+
+                if ( subTypeName == null ) {
+                    subTypeName = typeConfig.getDefaultSubTypeName();
+                    c = typeConfig.getDefaultTypeClass();
+                }
+                else {
+                    c = (Class<? extends MetaData>) typeConfig.getSubTypeClass(subTypeName);
+                }
                 if (c == null) {
-                    throw new MetaException("MetaData [" + typeName + "][" + name + "] has no subtype defined and type [" + typeName + "] had no default specified in file ["+getFilename()+"]");
+                    throw new MetaException("MetaData [type=" + typeName + "][name=" + name
+                            + "] has no subtype defined and type [" + typeName + "] had no default specified in file ["
+                            + getFilename() + "]");
                 }
             }
         } else {
-            c = (Class<? extends MetaData>) types.getSubTypeClass(subTypeName);
-            if (c == null) {
-                throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName + "], but it was not recognized in file ["+getFilename()+"]");
-            }
+            c = (Class<? extends MetaData>) typeConfig.getSubTypeClass(subTypeName);
+        }
+
+        if (c == null) {
+            throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName
+                    + "], but it was not recognized in file ["+getFilename()+"]");
         }
 
         // Figure out the full name for the element, needs package prefix if root
         // TODO: Clean this up and go to caller where it exists as well
         String fullname = isRoot ? packageName + MetaDataLoader.PKG_SEPARATOR + name : name;
 
+        // Use the parent type child records to verify this metadata child is acceptable
+        if ( isRoot ) {
+            verifyAcceptableChild( ATTR_METADATA, null, typeName, subTypeName, name);
+        } else {
+            verifyAcceptableChild(parent.getTypeName(), parent.getSubTypeName(), typeName, subTypeName, name);
+        }
+
         // Create the object
-        return  getLoader().newInstanceFromClass(c, typeName, subTypeName, fullname);
+        MetaData md= getLoader().newInstanceFromClass(c, typeName, subTypeName, fullname);
+
+        return md;
+    }
+
+
+    protected String getSubTypeFromChildConfigs( String parentType, String parentSubType, TypeConfig typeConfig, String name ) {
+
+        TypeConfig tc = getTypesConfig ().getType( parentType );
+
+        ChildConfig cc = findBestChildConfigtMatch( tc, parentType, parentSubType,
+                typeConfig.getTypeName(), null, name );
+
+        if ( cc == null ) return null;
+
+        return ( cc.getSubType().equals("*")) ? null : cc.getSubType();
+    }
+
+
+    protected void verifyAcceptableChild( String parentType, String parentSubType, String type, String subType, String name ) {
+
+        TypeConfig tc = getTypesConfig ().getType( parentType );
+
+        ChildConfig cc = findBestChildConfigtMatch( tc, parentType, parentSubType, type, subType, name );
+
+        if (cc == null) {
+            String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
+                    +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]";
+            if ( getLoader().getLoaderConfig().isStrict() ) {
+                throw new MetaException( errMsg );
+            } else {
+                if ( log.isWarnEnabled() ) log.warn( errMsg );
+            }
+        }
+    }
+
+    private ChildConfig findBestChildConfigtMatch( TypeConfig parentTypeConfig, String parentType, String parentSubType, String type, String subType, String name ) {
+
+        ChildConfig cc = null;
+        TypeConfig tc = parentTypeConfig;
+
+        List<ChildConfig> ccList;// Check for best match on subtype
+        if ( parentSubType != null ) {
+            ccList = tc.getSubTypeChildConfigs(parentSubType);
+            if ( ccList != null ) {
+                cc = tc.getBestMatchChildConfig(ccList, type, subType, name);
+            }
+        }
+
+        if ( cc == null ) {
+
+            // Check for best match type level
+            ccList = tc.getTypeChildConfigs();
+            cc = tc.getBestMatchChildConfig(ccList, type, subType, name);
+        }
+
+        return cc;
     }
 }
