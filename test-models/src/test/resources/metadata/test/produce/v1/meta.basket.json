@@ -2,7 +2,8 @@
     "children": [
         {"object": {"name": "Basket", "type": "value",
             "children": [
-                {"objectKey": {"name": "key"}},
+                {"objectKey": {}},
+                {"field": {"name": "id", "super": "..::common::id"}},
                 {"field": {"name": "name", "super": "..::common::name"}},
                 {"field": {"name": "numApples", "type": "int"}},
                 {"field": {"name": "numOranges", "type": "int"}},
@@ -17,7 +18,7 @@
             ]}},
         {"object": {"package": "..::fruit", "name": "Fruit",
             "children": [
-                {"objectKey": {"name": "key"}},
+                {"objectKey": {}},
                 {"field": {"name": "inBasket", "type": "boolean"}}
             ]}}
     ]}

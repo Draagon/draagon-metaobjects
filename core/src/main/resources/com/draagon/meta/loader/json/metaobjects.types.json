@@ -56,7 +56,7 @@
                 {"subtype": {"name": "manyToMany",  "class": "com.draagon.meta.relation.ref.ManyToManyReference"}}
             ]}},
 
-        {"type": {"name": "validator", "class": "com.draagon.meta.validator.MetaValidator", "defaultSubType": "required",
+        {"type": {"name": "validator", "class": "com.draagon.meta.validator.MetaValidator", "defaultSubType": "required", "defaultNamePrefix": "validator",
             "subtypes": [
                 {"subtype": {"name": "required",    "class": "com.draagon.meta.validator.RequiredValidator"}},
                 {"subtype": {"name": "regex",       "class": "com.draagon.meta.validator.RegexValidator"}},

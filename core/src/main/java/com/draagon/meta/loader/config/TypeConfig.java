@@ -132,7 +132,7 @@ public class TypeConfig {
     }
 
     public void setDefaultSubTypeName(String subTypeName ) {
-
+        if ( subTypeName.equals("")) subTypeName = null;
         defSubTypeName = subTypeName;
     }
 
@@ -141,6 +141,7 @@ public class TypeConfig {
     }
 
     public void setDefaultName( String defName ) {
+        if ( defName.equals("")) defName = null;
         this.defName = defName;
     }
 
@@ -149,6 +150,7 @@ public class TypeConfig {
     }
 
     public void setDefaultNamePrefix( String defNamePrefix ) {
+        if ( defNamePrefix.equals("")) defNamePrefix = null;
         this.defNamePrefix = defNamePrefix;
     }
 

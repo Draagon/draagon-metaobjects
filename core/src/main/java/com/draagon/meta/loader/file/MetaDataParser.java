@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -135,6 +136,20 @@ public abstract class MetaDataParser {
         return defaultPackageName;
     }
 
+    protected String getNextNamePrefix( MetaData parent, String typeName, String prefix ) {
+        int i = 1;
+        for( MetaData md : (List<MetaData>) parent.getChildrenOfType( typeName, true )) {
+            if ( md.getName().startsWith( prefix )) {
+                try {
+                    int n = Integer.parseInt(md.getName().substring(prefix.length()));
+                    if ( n >= i ) i = n+1;
+                }
+                catch( NumberFormatException ignore ) {}
+            }
+        }
+        return prefix + i;
+    }
+
     /** Create or Overlay the MetaData */
     protected MetaData createOrOverlayMetaData( boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, String superName) {
 
@@ -147,8 +162,13 @@ public abstract class MetaDataParser {
 
         if (name == null || name.equals("")) {
             name = types.getDefaultName();
-            if ( name == null )
-                throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent+ "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
+            if ( name == null ) {
+                String prefix = types.getDefaultNamePrefix();
+                if ( prefix != null ) {
+                    name = getNextNamePrefix(parent, typeName, prefix);
+                }
+                if ( name == null ) throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent+ "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
+            }
         }
 
         // Load or get the MetaData

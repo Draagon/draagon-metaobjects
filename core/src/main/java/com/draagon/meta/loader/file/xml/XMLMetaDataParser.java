@@ -129,9 +129,9 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             }
 
             TypeConfig typeConfig = getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ));
-            if ( e.hasAttribute("defaultSubType")) typeConfig.setDefaultSubTypeName( e.getAttribute( "defaultSubType" ));
-            if ( e.hasAttribute("defaultName")) typeConfig.setDefaultName( e.getAttribute( "defaultName" ));
-            if ( e.hasAttribute("defaultNamePrefix")) typeConfig.setDefaultNamePrefix( e.getAttribute( "defaultNamePrefix" ));
+            if ( e.hasAttribute( "defaultSubType")) typeConfig.setDefaultSubTypeName( e.getAttribute( "defaultSubType" ));
+            if ( e.hasAttribute( "defaultName")) typeConfig.setDefaultName( e.getAttribute( "defaultName" ));
+            if ( e.hasAttribute( "defaultNamePrefix")) typeConfig.setDefaultNamePrefix( e.getAttribute( "defaultNamePrefix" ));
             loadChildren( e ).forEach( c-> typeConfig.addTypeChild(c));
 
             // Load all the types for the specific element type

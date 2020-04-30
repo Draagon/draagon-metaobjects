@@ -7,8 +7,8 @@
 
     <!-- Name -->
     <field name="name" type="string">
-        <validator name="required" type="required"/>
-        <validator name="length" type="length">
+        <validator type="required"/>
+        <validator type="length">
             <attr type="int" name="max">50</attr>
             <attr type="int" name="min">1</attr>
         </validator>

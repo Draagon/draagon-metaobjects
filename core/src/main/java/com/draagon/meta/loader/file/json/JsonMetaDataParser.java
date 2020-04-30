@@ -122,8 +122,9 @@ public class JsonMetaDataParser extends MetaDataParser {
             }
             TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
 
-            typeConfig.setDefaultSubTypeName(getValueAsString(typeEl, "defaultSubType"));
-            typeConfig.setDefaultName(getValueAsString(typeEl, "defaultName"));
+            if ( typeEl.has( "defaultSubType")) typeConfig.setDefaultSubTypeName(getValueAsString(typeEl, "defaultSubType"));
+            if ( typeEl.has( "defaultName")) typeConfig.setDefaultName(getValueAsString(typeEl, "defaultName"));
+            if ( typeEl.has( "defaultNamePrefix")) typeConfig.setDefaultNamePrefix(getValueAsString(typeEl, "defaultNamePrefix"));
 
             // If we have subtypes, load them
             if ( typeEl.has( ATTR_SUBTYPES )) {

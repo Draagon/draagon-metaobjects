@@ -2,11 +2,10 @@
 
 <metadata package="produce::v1::container">
 
-
     <!-- Basket -->
     <object name="Basket" type="value">
 
-        <objectKey name="key"/>
+        <objectKey/>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -22,19 +21,19 @@
 
         <!-- Apples -->
         <field name="apples" type="objectArray" objectRef="..::fruit::Apple">
-            <objectRef name="appleRef" type="oneToMany" reference="..::fruit::Apple"/>
+            <objectRef type="oneToMany" reference="..::fruit::Apple"/>
         </field>
 
         <!-- Oranges -->
         <field name="oranges" type="objectArray" objectRef="..::fruit::Orange">
-            <objectRef name="orangeRef" type="oneToMany" reference="..::fruit::Orange"/>
+            <objectRef type="oneToMany" reference="..::fruit::Orange"/>
         </field>
 
     </object>
 
     <!-- Add an overlay for the basket for all fruit -->
     <object package="..::fruit" name="Fruit">
-        <objectKey name="key"/>
+        <objectKey/>
         <field name="inBasket" type="boolean"/>
     </object>
 
