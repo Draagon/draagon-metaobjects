@@ -1,5 +1,7 @@
 package com.draagon.meta.loader.config;
 
+import com.draagon.meta.MetaDataException;
+
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -19,6 +21,13 @@ public class MetaDataConfig {
 
     public TypesConfig getTypesConfig() {
         return types;
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    // Validation Method
+
+    public void validate() {
+        types.validate();
     }
 
     /////////////////////////////////////////////////////////////////////

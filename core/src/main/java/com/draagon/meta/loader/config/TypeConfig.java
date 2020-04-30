@@ -174,6 +174,8 @@ public class TypeConfig {
         if ( defSubTypeName != null && getSubTypeClass( defSubTypeName ) == null )
             throw new MetaDataException( "Default subType [" +defSubTypeName+ "] on type ["+typeName+"] was not found" );
 
+        if ( subTypes.size() == 0 )
+            throw new MetaDataException( "No SubTypes existed for type ["+typeName+"]" );
     }
 
     /////////////////////////////////////////////////////////////////////

@@ -53,6 +53,14 @@ public class TypesConfig {
         return types.values();
     }
 
+
+    //////////////////////////////////////////////////////////////////////
+    // Validation Method
+
+    public void validate() {
+        for ( TypeConfig tc : types.values() ) tc.validate();
+    }
+
     /////////////////////////////////////////////////////////////////////
     // Misc Methods
 

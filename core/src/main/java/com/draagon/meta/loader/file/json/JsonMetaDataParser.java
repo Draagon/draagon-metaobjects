@@ -27,19 +27,6 @@ public class JsonMetaDataParser extends MetaDataParser {
 
     private static Log log = LogFactory.getLog(JsonMetaDataParser.class);
 
-    public final static String ATTR_METADATA    = "metadata";
-    public final static String ATTR_TYPESCONFIG = "typesConfig";
-    public final static String ATTR_TYPES       = "types";
-    public final static String ATTR_PACKAGE     = "package";
-    public final static String ATTR_CHILDREN    = "children";
-    public final static String ATTR_NAME        = "name";
-    public final static String ATTR_CLASS       = "class";
-    public final static String ATTR_TYPE        = "type";
-    public final static String ATTR_SUBTYPE     = "subtype";
-    public final static String ATTR_SUBTYPES    = "subtypes";
-    public final static String ATTR_SUPER       = "super";
-    public final static String ATTR_VALUE       = "value";
-
     protected static List<String> reservedAttributes = new ArrayList<>();
     static {
         reservedAttributes.add( ATTR_METADATA );
@@ -72,10 +59,10 @@ public class JsonMetaDataParser extends MetaDataParser {
 
                 JsonObject metadata = root.getAsJsonObject( ATTR_METADATA );
 
-                if ( metadata.has( ATTR_PACKAGE )) {
-                    String defPkg = parsePackageValue( metadata.getAsJsonPrimitive( ATTR_PACKAGE ).getAsString() );
-                    setDefaultPackageName( defPkg );
-                }
+                String defPkg = "";
+                if ( metadata.has( ATTR_DEFPACKAGE )) defPkg = parsePackageValue( metadata.getAsJsonPrimitive( ATTR_DEFPACKAGE ).getAsString() );
+                else if ( metadata.has( ATTR_PACKAGE )) defPkg = parsePackageValue( metadata.getAsJsonPrimitive( ATTR_PACKAGE ).getAsString() );
+                setDefaultPackageName( defPkg );
 
                 //if ( metadata.has( ATTR_TYPES )) {
                 //    loadAllTypes( metadata.getAsJsonArray( ATTR_TYPES ));
@@ -122,9 +109,9 @@ public class JsonMetaDataParser extends MetaDataParser {
             }
             TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
 
-            if ( typeEl.has( "defaultSubType")) typeConfig.setDefaultSubTypeName(getValueAsString(typeEl, "defaultSubType"));
-            if ( typeEl.has( "defaultName")) typeConfig.setDefaultName(getValueAsString(typeEl, "defaultName"));
-            if ( typeEl.has( "defaultNamePrefix")) typeConfig.setDefaultNamePrefix(getValueAsString(typeEl, "defaultNamePrefix"));
+            if ( typeEl.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName(getValueAsString(typeEl, ATTR_DEFSUBTYPE));
+            if ( typeEl.has( ATTR_DEFNAME)) typeConfig.setDefaultName(getValueAsString(typeEl, ATTR_DEFNAME));
+            if ( typeEl.has( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix(getValueAsString(typeEl, ATTR_DEFNAMEPREFIX));
 
             // If we have subtypes, load them
             if ( typeEl.has( ATTR_SUBTYPES )) {

@@ -25,6 +25,23 @@ public abstract class MetaDataParser {
 
     private static Log log = LogFactory.getLog(MetaDataParser.class);
 
+    public final static String ATTR_METADATA        = "metadata";
+    public final static String ATTR_TYPESCONFIG     = "typesConfig";
+    public final static String ATTR_TYPES           = "types";
+    public final static String ATTR_PACKAGE         = "package";
+    public final static String ATTR_DEFPACKAGE      = "defaultPackage";
+    public final static String ATTR_CHILDREN        = "children";
+    public final static String ATTR_NAME            = "name";
+    public final static String ATTR_DEFNAME         = "defaultName";
+    public final static String ATTR_DEFNAMEPREFIX   = "defaultNamePrefix";
+    public final static String ATTR_CLASS           = "class";
+    public final static String ATTR_TYPE            = "type";
+    public final static String ATTR_SUBTYPE         = "subType";
+    public final static String ATTR_SUBTYPES        = "subTypes";
+    public final static String ATTR_DEFSUBTYPE      = "defaultSubType";
+    public final static String ATTR_SUPER           = "super";
+    public final static String ATTR_VALUE           = "value";
+
     private FileMetaDataLoader loader;
     private String filename;
     private String defaultPackageName = "";

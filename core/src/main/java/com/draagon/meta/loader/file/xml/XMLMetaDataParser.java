@@ -25,17 +25,6 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
     private static Log log = LogFactory.getLog(XMLMetaDataParser.class);
 
-    public final static String ATTR_METADATA            = "metadata";
-    public final static String ATTR_DEFAULTPACKAGE      = "package";
-    public final static String ATTR_TYPESCONFIG         = "typesConfig";
-    public final static String ATTR_TYPES               = "types";
-    public final static String ATTR_PACKAGE             = "package";
-    public final static String ATTR_NAME                = "name";
-    public final static String ATTR_CLASS               = "class";
-    public final static String ATTR_TYPE                = "type";
-    public final static String ATTR_SUBTYPE             = "subType";
-    public final static String ATTR_SUPER               = "super";
-
     protected static List<String> reservedAttributes = new ArrayList<>();
     static {
         reservedAttributes.add( ATTR_PACKAGE );
@@ -75,19 +64,20 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 if (typeElements.size() > 0) {
                     loadAllTypes(typeElements.iterator().next()); // Load inner tags
                 }
-
             }
             // Look for the <metadata> element
             else {
                 elements = getElementsOfName(doc, ATTR_METADATA);
                 if (elements.isEmpty()) {
-                    throw new MetaException("The root '"+ATTR_METADATA+"' or '"+ATTR_DEFAULTPACKAGE+"' element was not found in file [" + getFilename() + "]");
+                    throw new MetaException("The root '"+ATTR_METADATA+"' or '"+ATTR_DEFPACKAGE+"' element was not found in file [" + getFilename() + "]");
                 }
 
                 Element pkgEl = elements.iterator().next();
 
                 // Set default package name
-                String defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_DEFAULTPACKAGE));
+                String defPkg = "";
+                if (pkgEl.hasAttribute(ATTR_DEFPACKAGE)) defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_DEFPACKAGE));
+                else if (pkgEl.hasAttribute(ATTR_PACKAGE)) defPkg = parsePackageValue(pkgEl.getAttribute(ATTR_PACKAGE));
                 setDefaultPackageName(defPkg);
 
                 // Parse the metadata elements

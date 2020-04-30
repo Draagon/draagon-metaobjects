@@ -98,6 +98,9 @@ public abstract class MetaDataLoader extends MetaData<MetaDataLoader> {
 
         if ( isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was already initialized" );
 
+        // Validate the metadata configuration
+        metaDataConfig.validate();
+
         if ( loaderConfig.isVerbose() ) {
             log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
         }
