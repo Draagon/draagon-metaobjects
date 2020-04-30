@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,6 +43,20 @@ public abstract class MetaDataParser {
     public final static String ATTR_DEFSUBTYPE      = "defaultSubType";
     public final static String ATTR_SUPER           = "super";
     public final static String ATTR_VALUE           = "value";
+
+    protected static List<String> reservedAttributes = new ArrayList<>();
+    static {
+        reservedAttributes.add( ATTR_PACKAGE );
+        reservedAttributes.add( ATTR_NAME );
+        reservedAttributes.add( ATTR_CLASS );
+        //reservedAttributes.add( ATTR_TYPES );
+        reservedAttributes.add( ATTR_CHILDREN );
+        reservedAttributes.add( ATTR_TYPE );
+        reservedAttributes.add( ATTR_SUBTYPE );
+        reservedAttributes.add( ATTR_SUBTYPES );
+        reservedAttributes.add( ATTR_SUPER );
+        reservedAttributes.add( ATTR_VALUE );
+    }
 
     private FileMetaDataLoader loader;
     private String filename;

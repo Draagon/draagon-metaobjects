@@ -210,6 +210,9 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
              }
             return b.toString();
         }
+        else if ( val instanceof Class ) {
+            return ((Class)val).getName();
+        }
         else {
             return "...";
         }

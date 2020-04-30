@@ -25,16 +25,6 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
     private static Log log = LogFactory.getLog(XMLMetaDataParser.class);
 
-    protected static List<String> reservedAttributes = new ArrayList<>();
-    static {
-        reservedAttributes.add( ATTR_PACKAGE );
-        reservedAttributes.add( ATTR_NAME );
-        reservedAttributes.add( ATTR_CLASS );
-        reservedAttributes.add( ATTR_TYPES );
-        reservedAttributes.add( ATTR_TYPE );
-        reservedAttributes.add( ATTR_SUPER );
-    }
-
     public XMLMetaDataParser(FileMetaDataLoader loader, String filename ) {
         super( loader, filename );
     }
@@ -252,13 +242,16 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             if ( !reservedAttributes.contains( attrName )) {
 
                 String value = n.getNodeValue();
-
-                // TODO:  This should be replaced by the ruleset for handling attributes in the future
-                StringAttribute sa = new StringAttribute( attrName );
-                sa.setValue( value );
-                md.addMetaAttr(sa);
+                createAttributeOnParent(md, attrName, value);
             }
         }
+    }
+
+    protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
+        // TODO:  This should be replaced by the ruleset for handling attributes in the future
+        StringAttribute sa = new StringAttribute( attrName );
+        sa.setValue( value );
+        parentMetaData.addMetaAttr(sa);
     }
 
     /**

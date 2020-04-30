@@ -31,21 +31,6 @@ public class JsonMetaDataParser extends MetaDataParser {
 
     private static Log log = LogFactory.getLog(JsonMetaDataParser.class);
 
-    protected static List<String> reservedAttributes = new ArrayList<>();
-    static {
-        reservedAttributes.add( ATTR_METADATA );
-        reservedAttributes.add( ATTR_PACKAGE );
-        reservedAttributes.add( ATTR_NAME );
-        reservedAttributes.add( ATTR_CLASS );
-        reservedAttributes.add( ATTR_TYPES );
-        reservedAttributes.add( ATTR_CHILDREN );
-        reservedAttributes.add( ATTR_TYPE );
-        reservedAttributes.add( ATTR_SUBTYPE );
-        reservedAttributes.add( ATTR_SUBTYPES );
-        reservedAttributes.add( ATTR_SUPER );
-        reservedAttributes.add( ATTR_VALUE );
-    }
-
     public JsonMetaDataParser(FileMetaDataLoader loader, String filename ) {
         super( loader, filename );
     }
