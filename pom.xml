@@ -28,7 +28,6 @@
     </organization>
 
     <modules>
-        <!-- module>test-models</module -->
         <module>core</module>
         <module>generators</module>
         <module>maven-plugin</module>
@@ -176,7 +175,6 @@
         </extensions>
 
         <plugins>
-
             <!-- Maven Core Plugins -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -289,7 +287,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
 
     </build>

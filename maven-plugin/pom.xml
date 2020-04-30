@@ -52,11 +52,11 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-generators</artifactId>
@@ -67,12 +67,6 @@
             <artifactId>maven-plugin-annotations</artifactId>
             <version>3.6.0</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
