@@ -4,6 +4,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
@@ -14,10 +15,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Element;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -96,30 +100,60 @@ public class JsonMetaDataParser extends MetaDataParser {
         for (JsonElement el : types ) {
 
             JsonObject entry = el.getAsJsonObject();
-            JsonObject typeEl = entry.getAsJsonObject( ATTR_TYPE );
-            if (typeEl==null) {
+            JsonObject type = entry.getAsJsonObject( ATTR_TYPE );
+            if (type==null) {
                 throw new MetaException("Types array has no 'type' object in file [" +getFilename()+ "]");
             }
 
-            String name = getValueAsString(typeEl, ATTR_NAME);
-            String clazz = getValueAsString(typeEl, ATTR_CLASS);
+            String name = getValueAsString(type, ATTR_NAME);
+            String clazz = getValueAsString(type, ATTR_CLASS);
 
             if (name == null || name.isEmpty()) {
                 throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
             TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
 
-            if ( typeEl.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName(getValueAsString(typeEl, ATTR_DEFSUBTYPE));
-            if ( typeEl.has( ATTR_DEFNAME)) typeConfig.setDefaultName(getValueAsString(typeEl, ATTR_DEFNAME));
-            if ( typeEl.has( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix(getValueAsString(typeEl, ATTR_DEFNAMEPREFIX));
+            if ( type.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName(getValueAsString(type, ATTR_DEFSUBTYPE));
+            if ( type.has( ATTR_DEFNAME)) typeConfig.setDefaultName(getValueAsString(type, ATTR_DEFNAME));
+            if ( type.has( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix(getValueAsString(type, ATTR_DEFNAMEPREFIX));
+            loadChildren( type ).forEach( c-> typeConfig.addTypeChild(c));
 
             // If we have subtypes, load them
-            if ( typeEl.has( ATTR_SUBTYPES )) {
+            if ( type.has( ATTR_SUBTYPES )) {
                 // Load all the types for the specific element type
-                loadSubTypes( typeEl.getAsJsonArray( ATTR_SUBTYPES ), typeConfig );
+                loadSubTypes( type.getAsJsonArray( ATTR_SUBTYPES ), typeConfig );
             }
         }
     }
+
+    protected  List<ChildConfig> loadChildren(JsonObject el) {
+        List<ChildConfig> children = new ArrayList<>();
+        if ( el.has(ATTR_CHILDREN)) {
+            JsonArray chArray = el.get(ATTR_CHILDREN).getAsJsonArray();
+            for( JsonElement e : chArray ) {
+                JsonObject o = e.getAsJsonObject();
+                if ( o.has( "child")) {
+                    JsonObject ec = o.get("child").getAsJsonObject();
+                    ChildConfig cc = new ChildConfig(ec.get(ATTR_TYPE).getAsString(), ec.get(ATTR_SUBTYPE).getAsString(), ec.get(ATTR_NAME).getAsString());
+                    if (ec.has("nameAliases"))
+                        cc.setNameAliases(new HashSet<String>(Arrays.asList(ec.get("nameAliases").getAsString().split(","))));
+                    if (ec.has("required")) cc.setRequired(ec.get("required").getAsBoolean());
+                    if (ec.has("autoCreate"))
+                        cc.setAutoCreate(ec.get("autoCreate").getAsBoolean());
+                    if (ec.has("defaultValue")) cc.setDefaultValue(ec.get("defaultValue").getAsString());
+                    if (ec.has("minValue")) cc.setMinValue(ec.get("minValue").getAsInt());
+                    if (ec.has("maxValue")) cc.setMaxValue(ec.get("maxValue").getAsInt());
+                    if (ec.has("inlineAttr")) cc.setInlineAttr(ec.get("inlineAttr").getAsString());
+                    if (ec.has("inlineAttrName")) cc.setInlineAttrName(ec.get("inlineAttrName").getAsString());
+                    if (ec.has("inlineAttrValueMap"))
+                        cc.setInlineAttrValueMap(ec.get("inlineAttrValueMap").getAsString());
+                    children.add(cc);
+                }
+            }
+        }
+        return children;
+    }
+
 
     private String getValueAsString(JsonObject e, String name) {
         return e.has(name) ? e.getAsJsonPrimitive(name).getAsString() : null;
@@ -150,6 +184,8 @@ public class JsonMetaDataParser extends MetaDataParser {
             if (name == null && name.isEmpty()) {
                 throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
+
+            loadChildren( subTypeEl ).forEach( c-> typeConfig.addSubTypeChild(name,c));
 
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);

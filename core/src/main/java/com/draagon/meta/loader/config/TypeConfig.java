@@ -189,17 +189,22 @@ public class TypeConfig {
         return Objects.equals(typeName, that.typeName) &&
                 Objects.equals(baseClass, that.baseClass) &&
                 Objects.equals(subTypes, that.subTypes) &&
-                Objects.equals(defSubTypeName, that.defSubTypeName)&&
-                Objects.equals(defName, that.defName);
+                Objects.equals(defSubTypeName, that.defSubTypeName) &&
+                Objects.equals(defName, that.defName) &&
+                Objects.equals(defNamePrefix, that.defNamePrefix) &&
+                Objects.equals(typeChildren, that.typeChildren) &&
+                Objects.equals(subTypeChildren, that.subTypeChildren);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeName, baseClass, subTypes, defSubTypeName, defName);
+        return Objects.hash(typeName, baseClass, subTypes, defSubTypeName, defName, defNamePrefix, typeChildren, subTypeChildren);
     }
 
     @Override
     public String toString() {
-        return "TypeModel {typeName="+typeName+",baseClass="+baseClass+",subTypes="+subTypes.toString()+",defSubTypeName="+defSubTypeName+",defName="+defName+"}";
+        return "TypeModel {typeName="+typeName+",baseClass="+baseClass+",subTypes="+subTypes.toString()+"}";
+                //+",defSubTypeName="+defSubTypeName+",defName="+defName+",defNamePrefix="+defNamePrefix
+                //+",typeChildren="+typeChildren+",subTypeChildren="+subTypeChildren+"}";
     }
 }

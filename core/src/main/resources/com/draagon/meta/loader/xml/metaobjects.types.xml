@@ -9,8 +9,7 @@
 
         <type name="metadata" class="com.draagon.meta.MetaData" >
             <children>
-                <child type="attr" subType="string" name="defaultPackage" required="false"/>
-                <child type="object-name" subType="*" name="*"/>
+                <child type="object" subType="*" name="*"/>
                 <child type="field" subType="*" name="*"/>
                 <child type="validator" subType="*" name="*"/>
             </children>
@@ -32,7 +31,7 @@
 
         <type name="objectRef"  class="com.draagon.meta.relation.ref.ObjectReference" defaultName="ref">
             <children>
-                <child type="attr" subType="metaDataRef" name="reference" required="true" inlineAttr="optional"/>
+                <child type="attr" subType="string" name="reference" required="true" inlineAttr="optional"/>
             </children>
             <subType name="oneToOne"     class="com.draagon.meta.relation.ref.OneToOneReference" />
             <subType name="oneToMany"    class="com.draagon.meta.relation.ref.OneToManyReference" />
