@@ -50,14 +50,14 @@
         <xs:attribute name="subType" type="subTypeNameDef" use="required"/>
         <xs:attribute name="name" type="metaDataNameDef" use="required"/>
         <xs:attribute name="nameAliases" type="typeNameArrayDef"/>
-        <xs:attribute name="required" type="xs:boolean" />
+        <!--xs:attribute name="required" type="xs:boolean" />
         <xs:attribute name="autoCreate" type="xs:boolean" />
         <xs:attribute name="defaultValue" type="xs:string" />
         <xs:attribute name="minValue" type="xs:int" />
         <xs:attribute name="maxValue" type="xs:int" />
         <xs:attribute name="inlineAttr" type="inlineAttrDef"/>
         <xs:attribute name="inlineAttrName" type="subTypeDef"/>
-        <xs:attribute name="inlineAttrValueMap" type="xs:string"/>
+        <xs:attribute name="inlineAttrValueMap" type="xs:string"/-->
     </xs:complexType>
 
     <xs:simpleType name="baseNameDef">
@@ -104,7 +104,7 @@
         <xs:restriction base="xs:string">
             <xs:enumeration value="optional"/>
             <xs:enumeration value="required"/>
-            <xs:enumeration value="illegal"/>
+            <xs:enumeration value="disallow"/>
         </xs:restriction>
     </xs:simpleType>
 

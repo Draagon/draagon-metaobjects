@@ -6,6 +6,7 @@
  */
 package com.draagon.meta.object.value;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.field.*;
 import com.draagon.meta.object.pojo.PojoMetaObject;
@@ -14,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 public class ValueMetaObject extends PojoMetaObject
 {
@@ -48,8 +48,8 @@ public class ValueMetaObject extends PojoMetaObject
     protected Class<?> getObjectClass() throws ClassNotFoundException {
         try { 
             return super.getObjectClass();
-        } catch( ClassNotFoundException e ) {
-            if (hasAttr(ATTR_OBJECT)) {
+        } catch( MetaDataException e ) {
+            if (hasAttr(ATTR_OBJECT)||hasAttr(ATTR_CLASS)) {
                 throw e;
             }
             //log.warn( "Could not find Java class for MetaObject [" + getName() + "], returning generic ValueObject instead" );

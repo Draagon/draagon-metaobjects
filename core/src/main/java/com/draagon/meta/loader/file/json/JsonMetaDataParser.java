@@ -120,18 +120,15 @@ public class JsonMetaDataParser extends MetaDataParser {
                 if ( o.has( "child")) {
                     JsonObject ec = o.get("child").getAsJsonObject();
                     ChildConfig cc = new ChildConfig(ec.get(ATTR_TYPE).getAsString(), ec.get(ATTR_SUBTYPE).getAsString(), ec.get(ATTR_NAME).getAsString());
-                    if (ec.has("nameAliases"))
-                        cc.setNameAliases(new HashSet<String>(Arrays.asList(ec.get("nameAliases").getAsString().split(","))));
-                    if (ec.has("required")) cc.setRequired(ec.get("required").getAsBoolean());
-                    if (ec.has("autoCreate"))
-                        cc.setAutoCreate(ec.get("autoCreate").getAsBoolean());
-                    if (ec.has("defaultValue")) cc.setDefaultValue(ec.get("defaultValue").getAsString());
-                    if (ec.has("minValue")) cc.setMinValue(ec.get("minValue").getAsInt());
-                    if (ec.has("maxValue")) cc.setMaxValue(ec.get("maxValue").getAsInt());
-                    if (ec.has("inlineAttr")) cc.setInlineAttr(ec.get("inlineAttr").getAsString());
-                    if (ec.has("inlineAttrName")) cc.setInlineAttrName(ec.get("inlineAttrName").getAsString());
-                    if (ec.has("inlineAttrValueMap"))
-                        cc.setInlineAttrValueMap(ec.get("inlineAttrValueMap").getAsString());
+                    if (ec.has("nameAliases")) cc.setNameAliases(new HashSet<String>(Arrays.asList(ec.get("nameAliases").getAsString().split(","))));
+                    //if (ec.has("required")) cc.setRequired(ec.get("required").getAsBoolean());
+                    //if (ec.has("autoCreate")) cc.setAutoCreate(ec.get("autoCreate").getAsBoolean());
+                    //if (ec.has("defaultValue")) cc.setDefaultValue(ec.get("defaultValue").getAsString());
+                    //if (ec.has("minValue")) cc.setMinValue(ec.get("minValue").getAsInt());
+                    //if (ec.has("maxValue")) cc.setMaxValue(ec.get("maxValue").getAsInt());
+                    //if (ec.has("inlineAttr")) cc.setInlineAttr(ec.get("inlineAttr").getAsString());
+                    //if (ec.has("inlineAttrName")) cc.setInlineAttrName(ec.get("inlineAttrName").getAsString());
+                    //if (ec.has("inlineAttrValueMap")) cc.setInlineAttrValueMap(ec.get("inlineAttrValueMap").getAsString());
                     children.add(cc);
                 }
             }

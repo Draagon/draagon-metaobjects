@@ -126,14 +126,14 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             for (Element ec : getElementsOfName(childrenEl.iterator().next(), "child")) {
                 ChildConfig cc = new ChildConfig( ec.getAttribute(ATTR_TYPE), ec.getAttribute(ATTR_SUBTYPE), ec.getAttribute(ATTR_NAME));
                 if ( ec.hasAttribute("nameAliases"))        cc.setNameAliases( new HashSet<String>( Arrays.asList( ec.getAttribute( "nameAliases").split(","))));
-                if ( ec.hasAttribute("required"))           cc.setRequired( Boolean.parseBoolean( ec.getAttribute( "required")));
-                if ( ec.hasAttribute("autoCreate"))         cc.setAutoCreate( Boolean.parseBoolean( ec.getAttribute( "autoCreate")));
-                if ( ec.hasAttribute("defaultValue"))       cc.setDefaultValue( ec.getAttribute( "defaultValue"));
-                if ( ec.hasAttribute("minValue"))           cc.setMinValue( Integer.parseInt( ec.getAttribute( "minValue")));
-                if ( ec.hasAttribute("maxValue"))           cc.setMaxValue( Integer.parseInt( ec.getAttribute( "maxValue")));
-                if ( ec.hasAttribute("inlineAttr"))         cc.setInlineAttr( ec.getAttribute( "inlineAttr"));
-                if ( ec.hasAttribute("inlineAttrName"))     cc.setInlineAttrName( ec.getAttribute( "inlineAttrName"));
-                if ( ec.hasAttribute("inlineAttrValueMap")) cc.setInlineAttrValueMap( ec.getAttribute( "inlineAttrValueMap"));
+                //if ( ec.hasAttribute("required"))           cc.setRequired( Boolean.parseBoolean( ec.getAttribute( "required")));
+                //if ( ec.hasAttribute("autoCreate"))         cc.setAutoCreate( Boolean.parseBoolean( ec.getAttribute( "autoCreate")));
+                //if ( ec.hasAttribute("defaultValue"))       cc.setDefaultValue( ec.getAttribute( "defaultValue"));
+                //if ( ec.hasAttribute("minValue"))           cc.setMinValue( Integer.parseInt( ec.getAttribute( "minValue")));
+                //if ( ec.hasAttribute("maxValue"))           cc.setMaxValue( Integer.parseInt( ec.getAttribute( "maxValue")));
+                //if ( ec.hasAttribute("inlineAttr"))         cc.setInlineAttr( ec.getAttribute( "inlineAttr"));
+                //if ( ec.hasAttribute("inlineAttrName"))     cc.setInlineAttrName( ec.getAttribute( "inlineAttrName"));
+                //if ( ec.hasAttribute("inlineAttrValueMap")) cc.setInlineAttrValueMap( ec.getAttribute( "inlineAttrValueMap"));
                 children.add( cc );
             }
         }

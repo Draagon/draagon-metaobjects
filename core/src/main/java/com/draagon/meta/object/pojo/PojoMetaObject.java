@@ -6,6 +6,7 @@
  */
 package com.draagon.meta.object.pojo;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
@@ -205,5 +206,14 @@ public class PojoMetaObject extends MetaObject {
         catch (ClassNotFoundException e) {
             return false;
         }
-    }    
+    }
+
+    @Override
+    public void validate() {
+        if ( !hasAttr(ATTR_OBJECT) && !hasAttr(ATTR_CLASS)) {
+            if ( createClassFromMetaDataName( false ) == null ) {
+                throw new MetaDataException("PojoMetaObject requires a 'class' attribute or metadata name that matches the fully qualified Java class: " + getName());
+            }
+        }
+    }
 }

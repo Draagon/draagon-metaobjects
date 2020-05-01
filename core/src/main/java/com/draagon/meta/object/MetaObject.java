@@ -31,6 +31,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
     /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
+    public final static String ATTR_CLASS = "class";
 
     /**
      * Legacy constructor used in unit tests
@@ -185,8 +186,12 @@ public abstract class MetaObject extends MetaData<MetaObject> {
         Class<?> c;
 
         if (hasAttr(ATTR_OBJECT)) {
+            c = (Class) getMetaAttr(ATTR_OBJECT).getValue();
+        }
+        else if (hasAttr(ATTR_CLASS)) {
+            c = (Class) getMetaAttr(ATTR_CLASS).getValue();
 
-            String ostr = null;
+            /*String ostr = null;
             try {
                 ostr = getMetaAttr(ATTR_OBJECT).getValueAsString();
                 ostr = ostr.trim();
@@ -204,20 +209,29 @@ public abstract class MetaObject extends MetaData<MetaObject> {
                 if (log.isDebugEnabled())
                     log.debug(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
                 c = getLoader().loadClass(ostr);
-            }
+            }*/
         }
         else {
-            String ostr = getName().replaceAll(MetaDataLoader.PKG_SEPARATOR, ".");
-
-            try {
-                c = Class.forName(ostr);
-            }
-            catch (ClassNotFoundException e) {
-                throw new ClassNotFoundException("Derived Object Class [" + ostr + "] was not found");
-            }
+            c = createClassFromMetaDataName( true );
         }
 
         return c;
+    }
+
+    protected Class createClassFromMetaDataName( boolean throwError ) {
+
+        String ostr = getName().replaceAll(MetaDataLoader.PKG_SEPARATOR, ".");
+
+        try {
+            return Class.forName(ostr);
+        }
+        catch (ClassNotFoundException e) {
+            if ( throwError ) {
+                throw new MetaDataException("Derived Object Class [" + ostr + "] was not found for MetaObject ["+getName()+"]");
+            }
+        }
+
+        return null;
     }
 
     /**

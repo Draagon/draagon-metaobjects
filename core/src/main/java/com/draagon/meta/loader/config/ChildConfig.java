@@ -15,19 +15,19 @@ public final class ChildConfig {
     private final String name;
 
     // Specialized behaviors
-    private Set<String> nameAliases = null;
-    private Boolean required = null;
-    private Boolean autoCreate = null;
+    private Set<String> nameAliases = null;     // aliases for the names
+    //private Boolean required = null;            // is the attribute required
+    //private Boolean autoCreate = null;          // whether to auto create if it doesn't exist
 
     // Support for value defaults and validations
-    private String defaultValue = null;
-    private Integer minValue = null;
-    private Integer maxValue = null;
+    //private String defaultValue = null;         // default value if not specified
+    //private Integer minValue = null;            // minimum value if numeric
+    //private Integer maxValue = null;            // maximum value if numeric
 
     // Support for inline attributes
-    private String inlineAttr = null;
-    private String inlineAttrName = null;
-    private String inlineAttrValueMap = null;
+    //private String inlineAttr = null;           // values:  disallow, optional, required
+    //private String inlineAttrName = null;       // Name when it's an attribute
+    //private String inlineAttrValueMap = null;   // What to map the value to
 
     public ChildConfig( String type, String subType, String name ) {
         this.type = type;
@@ -58,7 +58,7 @@ public final class ChildConfig {
         this.nameAliases = nameAliases;
     }
 
-    public Boolean getRequired() {
+    /*public Boolean getRequired() {
         return required;
     }
 
@@ -120,7 +120,7 @@ public final class ChildConfig {
 
     public void setInlineAttrValueMap(String inlineAttrValueMap) {
         this.inlineAttrValueMap = inlineAttrValueMap;
-    }
+    }*/
 
     ///////////////////////////////////////////////////////////////////////
     // MISC METHODS
@@ -132,14 +132,14 @@ public final class ChildConfig {
             throw new MetaException("Cannot merge when different type/subtype/name: ["+toString()+"] merged with ["+cc.toString()+"]");
         }
         if ( cc.nameAliases != null ) mergeNameAliases( cc.getNameAliases() );
-        if ( cc.required != null ) required = cc.required;
-        if ( cc.autoCreate != null ) autoCreate = cc.autoCreate;
-        if ( cc.defaultValue != null ) defaultValue = cc.defaultValue;
-        if ( cc.minValue != null ) minValue = cc.minValue;
-        if ( cc.maxValue != null ) maxValue = cc.maxValue;
-        if ( cc.inlineAttr != null ) inlineAttr = cc.inlineAttr;
-        if ( cc.inlineAttrName != null ) inlineAttrName = cc.inlineAttrName;
-        if ( cc.inlineAttrValueMap != null ) inlineAttrValueMap = cc.inlineAttrValueMap;
+        //if ( cc.required != null ) required = cc.required;
+        //if ( cc.autoCreate != null ) autoCreate = cc.autoCreate;
+        //if ( cc.defaultValue != null ) defaultValue = cc.defaultValue;
+        //if ( cc.minValue != null ) minValue = cc.minValue;
+        //if ( cc.maxValue != null ) maxValue = cc.maxValue;
+        //if ( cc.inlineAttr != null ) inlineAttr = cc.inlineAttr;
+        //if ( cc.inlineAttrName != null ) inlineAttrName = cc.inlineAttrName;
+        //if ( cc.inlineAttrValueMap != null ) inlineAttrValueMap = cc.inlineAttrValueMap;
     }
 
     private void mergeNameAliases(Set<String> nameAliases) {
@@ -159,20 +159,20 @@ public final class ChildConfig {
         return Objects.equals(type, that.type) &&
                 Objects.equals(subType, that.subType) &&
                 Objects.equals(name, that.name) &&
-                Objects.equals(nameAliases, that.nameAliases) &&
-                Objects.equals(required, that.required) &&
-                Objects.equals(autoCreate, that.autoCreate) &&
-                Objects.equals(defaultValue, that.defaultValue) &&
-                Objects.equals(minValue, that.minValue) &&
-                Objects.equals(maxValue, that.maxValue) &&
-                Objects.equals(inlineAttr, that.inlineAttr) &&
-                Objects.equals(inlineAttrName, that.inlineAttrName) &&
-                Objects.equals(inlineAttrValueMap, that.inlineAttrValueMap);
+                Objects.equals(nameAliases, that.nameAliases);// &&
+                //Objects.equals(required, that.required) &&
+                //Objects.equals(autoCreate, that.autoCreate) &&
+                //Objects.equals(defaultValue, that.defaultValue) &&
+                //Objects.equals(minValue, that.minValue) &&
+                //Objects.equals(maxValue, that.maxValue) &&
+                //Objects.equals(inlineAttr, that.inlineAttr) &&
+                //Objects.equals(inlineAttrName, that.inlineAttrName) &&
+                //Objects.equals(inlineAttrValueMap, that.inlineAttrValueMap);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, subType, name, nameAliases, required, autoCreate, defaultValue, minValue, maxValue, inlineAttr, inlineAttrName, inlineAttrValueMap);
+        return Objects.hash(type, subType, name, nameAliases); //, required, autoCreate, defaultValue, minValue, maxValue, inlineAttr, inlineAttrName, inlineAttrValueMap);
     }
 
     @Override
@@ -182,14 +182,14 @@ public final class ChildConfig {
                 ", subType='" + subType + '\'' +
                 ", name='" + name + '\'' +
                 ", nameAliases=" + nameAliases +
-                ", required=" + required +
-                ", autoCreate=" + autoCreate +
-                ", defaultValue='" + defaultValue + '\'' +
-                ", minValue=" + minValue +
-                ", maxValue=" + maxValue +
-                ", inlineAttr='" + inlineAttr + '\'' +
-                ", inlineAttrName='" + inlineAttrName + '\'' +
-                ", inlineAttrValueMap='" + inlineAttrValueMap + '\'' +
+                //", required=" + required +
+                //", autoCreate=" + autoCreate +
+                //", defaultValue='" + defaultValue + '\'' +
+                //", minValue=" + minValue +
+                //", maxValue=" + maxValue +
+                //", inlineAttr='" + inlineAttr + '\'' +
+                //", inlineAttrName='" + inlineAttrName + '\'' +
+                //", inlineAttrValueMap='" + inlineAttrValueMap + '\'' +
                 '}';
     }
 }
