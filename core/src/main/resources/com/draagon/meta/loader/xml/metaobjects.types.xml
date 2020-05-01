@@ -31,7 +31,7 @@
 
         <type name="objectRef"  class="com.draagon.meta.relation.ref.ObjectReference" defaultName="ref">
             <children>
-                <child type="attr" subType="string" name="reference" required="true"/> <!-- inlineAttr="optional"/ -->
+                <child type="attr" subType="string" name="reference"/> <!-- required="true" inlineAttr="optional"/ -->
             </children>
             <subType name="oneToOne"     class="com.draagon.meta.relation.ref.OneToOneReference" />
             <subType name="oneToMany"    class="com.draagon.meta.relation.ref.OneToManyReference" />
@@ -53,7 +53,7 @@
             </subType>
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
                 <children>
-                    <child type="attr" subType="class" name="class" nameAliases="object" required="true"/> <!-- inlineAttr="optional" / -->
+                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
                 </children>
             </subType>
         </type>
@@ -63,6 +63,7 @@
                 <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
                 <child type="attr" subType="boolean" name="isKey"/> <!-- inlineAttr="optional" / -->
                 <child type="attr" subType="boolean" name="foreignKey"/> <!-- inlineAttr="optional" / -->
+                <child type="attr" subType="string" name="objectRef"/> <!-- inlineAttr="optional" / -->
                 <child type="validator" subType="*" name="*"/>
                 <child type="view" subType="*" name="*"/>
             </children>

@@ -186,6 +186,8 @@ public abstract class MetaDataParser {
     /** Create or Overlay the MetaData */
     protected MetaData createOrOverlayMetaData( boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, String superName) {
 
+        if ( subTypeName != null && subTypeName.equals("*")) subTypeName = null;
+
         // Get the TypeModel map for this element
         TypeConfig types = getTypesConfig().getType( typeName );
         if ( types == null ) {
@@ -384,7 +386,7 @@ public abstract class MetaDataParser {
 
         TypeConfig tc = getTypesConfig ().getType( parentType );
 
-        ChildConfig cc = findBestChildConfigtMatch( tc, parentType, parentSubType,
+        ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType,
                 typeConfig.getTypeName(), null, name );
 
         if ( cc == null ) return null;
@@ -397,7 +399,7 @@ public abstract class MetaDataParser {
 
         TypeConfig tc = getTypesConfig ().getType( parentType );
 
-        ChildConfig cc = findBestChildConfigtMatch( tc, parentType, parentSubType, type, subType, name );
+        ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
 
         if (cc == null) {
             String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
@@ -410,7 +412,7 @@ public abstract class MetaDataParser {
         }
     }
 
-    private ChildConfig findBestChildConfigtMatch( TypeConfig parentTypeConfig, String parentType, String parentSubType, String type, String subType, String name ) {
+    protected ChildConfig findBestChildConfigMatch(TypeConfig parentTypeConfig, String parentType, String parentSubType, String type, String subType, String name ) {
 
         ChildConfig cc = null;
         TypeConfig tc = parentTypeConfig;

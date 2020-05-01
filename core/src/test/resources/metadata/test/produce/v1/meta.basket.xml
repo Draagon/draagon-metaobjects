@@ -14,10 +14,14 @@
         <field name="name" super="..::common::name"/>
 
         <!-- Number of apples -->
-        <field name="numApples" type="int"/>
+        <field name="numApples" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
 
         <!-- Number of oranges -->
-        <field name="numOranges" type="int"/>
+        <field name="numOranges" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
 
         <!-- Apples -->
         <field name="apples" type="objectArray" objectRef="..::fruit::Apple">

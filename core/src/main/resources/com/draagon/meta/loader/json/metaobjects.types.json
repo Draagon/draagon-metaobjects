@@ -27,7 +27,7 @@
 
         {"type": {"name": "objectRef", "class": "com.draagon.meta.relation.ref.ObjectReference", "defaultName": "ref",
             "children": [
-                {"child": {"type": "attr", "subType": "string", "name": "reference", "required": true, "inlineAttr": "optional"}}
+                {"child": {"type": "attr", "subType": "string", "name": "reference"}}
             ],
             "subTypes": [
                 {"subType": {"name": "oneToOne",    "class": "com.draagon.meta.relation.ref.OneToOneReference"}},
@@ -38,27 +38,28 @@
 
         {"type": {"name": "object", "class": "com.draagon.meta.object.MetaObject", "defaultSubType": "value",
             "children": [
-                {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract", "inlineAttr": "required"}},
-                {"child": {"type": "attr", "subType": "boolean", "name": "isInterface", "inlineAttr": "required"}},
-                {"child": {"type": "objectKey", "subType": "*", "name": "*", "autoCreate": true, "inlineAttr": "optional", "inlineAttrName": "keyType", "inlineAttrValueMap": "subType"}},
+                {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract"}},
+                {"child": {"type": "attr", "subType": "boolean", "name": "isInterface"}},
+                {"child": {"type": "objectKey", "subType": "*", "name": "*"}},
                 {"child": {"type": "field", "subType": "*", "name": "*"}}
             ],
             "subTypes": [
                 {"subType": {"name": "value", "class": "com.draagon.meta.object.value.ValueMetaObject",
                     "children": [
-                        {"child": {"type": "attr", "subType": "class", "name": "class", "nameAliases": "object", "autoCreate": true, "inlineAttr": "optional", "defaultValue": "com.draagon.meta.object.value.ValueObject"}}
+                        {"child": {"type": "attr", "subType": "class", "name": "class", "nameAliases": "object"}}
                     ]}},
                 {"subType": {"name": "pojo",  "class": "com.draagon.meta.object.pojo.PojoMetaObject",
                     "children": [
-                        {"child": {"type": "attr", "subType": "class", "name": "class", "nameAliases": "object", "required": true, "inlineAttr": "optional"}}
+                        {"child": {"type": "attr", "subType": "class", "name": "class", "nameAliases": "object"}}
                     ]}}
             ]}},
 
         {"type": {"name": "field", "class": "com.draagon.meta.field.MetaField", "defaultSubType": "string",
             "children": [
-                {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract", "inlineAttr": "required"}},
-                {"child": {"type": "attr", "subType": "boolean", "name": "isKey", "inlineAttr": "optional"}},
-                {"child": {"type": "attr", "subType": "boolean", "name": "foreignKey", "inlineAttr": "optional"}},
+                {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract"}},
+                {"child": {"type": "attr", "subType": "boolean", "name": "isKey"}},
+                {"child": {"type": "attr", "subType": "boolean", "name": "foreignKey"}},
+                {"child": {"type": "attr", "subType": "string", "name": "objectRef"}},
                 {"child": {"type": "validator", "subType": "*", "name": "*"}},
                 {"child": {"type": "view", "subType": "*", "name": "*"}}
             ],
@@ -75,12 +76,12 @@
                 {"subType": {"name": "stringArray", "class": "com.draagon.meta.field.StringArrayField"}},
                 {"subType": {"name": "object",      "class": "com.draagon.meta.field.ObjectField",
                     "children": [
-                        {"child": {"type": "objectRef", "subType": "oneToOne", "name": "*", "inlineAttr": "optional", "inlineAttrName": "objectRef", "inlineAttrValueMap": "reference"}},
+                        {"child": {"type": "objectRef", "subType": "oneToOne", "name": "*"}},
                         {"child": {"type": "objectRef", "subType": "manyToOne", "name": "*"}}
                     ]}},
                 {"subType": {"name": "objectArray", "class": "com.draagon.meta.field.ObjectArrayField",
                     "children": [
-                        {"child": {"type": "objectRef", "subType": "oneToMany", "name": "*", "inlineAttr": "optional", "inlineAttrName": "objectRef", "inlineAttrValueMap": "reference"}},
+                        {"child": {"type": "objectRef", "subType": "oneToMany", "name": "*"}},
                         {"child": {"type": "objectRef", "subType": "manyToMany", "name": "*"}}
                     ]}}
             ]}},
@@ -90,13 +91,13 @@
                 {"subType": {"name": "required",    "class": "com.draagon.meta.validator.RequiredValidator"}},
                 {"subType": {"name": "regex",       "class": "com.draagon.meta.validator.RegexValidator",
                     "children": [
-                        {"child": {"type": "attr", "subType": "regex", "name": "mask", "inlineAttr": "optional", "required": true}}
+                        {"child": {"type": "attr", "subType": "regex", "name": "mask"}}
                     ]}},
                 {"subType": {"name": "numeric",     "class": "com.draagon.meta.validator.NumericValidator"}},
                 {"subType": {"name": "length",      "class": "com.draagon.meta.validator.LengthValidator",
                     "children": [
-                        {"child": {"type": "attr", "subType": "int", "name": "min", "inlineAttr": "optional", "autoCreate": true, "defaultValue": 0, "minValue": 0}},
-                        {"child": {"type": "attr", "subType": "int", "name": "max", "inlineAttr": "optional", "required": true, "minValue": 0}}
+                        {"child": {"type": "attr", "subType": "int", "name": "min"}},
+                        {"child": {"type": "attr", "subType": "int", "name": "max"}}
                     ]}}
             ]}}
     ]}

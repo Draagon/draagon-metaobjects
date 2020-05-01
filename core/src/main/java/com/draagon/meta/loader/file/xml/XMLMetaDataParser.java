@@ -5,6 +5,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
 import com.draagon.meta.loader.config.TypeConfig;
@@ -248,10 +249,32 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     }
 
     protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
-        // TODO:  This should be replaced by the ruleset for handling attributes in the future
-        StringAttribute sa = new StringAttribute( attrName );
-        sa.setValue( value );
-        parentMetaData.addMetaAttr(sa);
+
+        String parentType = parentMetaData.getTypeName();
+        String parentSubType = parentMetaData.getSubTypeName();
+
+        TypeConfig parentTypeConfig = getTypesConfig().getType( parentMetaData.getTypeName() );
+        ChildConfig cc = findBestChildConfigMatch( parentTypeConfig, parentType, parentSubType,
+                MetaAttribute.TYPE_ATTR, null, attrName );
+
+        MetaAttribute attr = null;
+
+        if ( cc == null ) {
+            String errMsg = "MetaAttribute with name ["+attrName+"] is not allowed on parent record ["
+                    +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
+            if ( getLoader().getLoaderConfig().isStrict() ) {
+                throw new MetaDataException( errMsg );
+            } else {
+                if ( log.isWarnEnabled() ) log.warn( errMsg );
+                attr = new StringAttribute( attrName );
+            }
+        }
+        else {
+            attr = (MetaAttribute) createOrOverlayMetaData( parentType.equals(MetaDataLoader.TYPE_LOADER), parentMetaData,
+                    cc.getType(), cc.getSubType(), cc.getName(), null, null );
+        }
+
+        attr.setValue(value);
     }
 
     /**

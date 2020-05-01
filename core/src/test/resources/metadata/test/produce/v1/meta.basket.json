@@ -5,8 +5,14 @@
                 {"objectKey": {}},
                 {"field": {"name": "id", "super": "..::common::id"}},
                 {"field": {"name": "name", "super": "..::common::name"}},
-                {"field": {"name": "numApples", "type": "int"}},
-                {"field": {"name": "numOranges", "type": "int"}},
+                {"field": {"name": "numApples", "type": "int",
+                    "children": [
+                        {"validator": {"type": "length", "min": 0, "max": 10}}
+                    ]}},
+                {"field": {"name": "numOranges", "type": "int",
+                    "children": [
+                        {"validator": {"type": "length", "min": 0, "max": 10}}
+                    ]}},
                 {"field": {"name": "apples", "type": "objectArray",
                     "children": [
                         {"objectRef": {"name": "appleRef", "type": "oneToMany", "reference": "..::fruit::Apple"}}
