@@ -10,8 +10,6 @@ public abstract class ObjectKey extends ObjectRelation {
 
     public final static String TYPE_OBJECTKEY = "objectKey";
 
-    public final static String CACHE_FIELDKEYS = "ObjectKey-fieldKeys";
-
     public final static String ATTR_KEY = "key";
     public final static String ATTR_ISKEY = "isKey";
 
@@ -28,14 +26,19 @@ public abstract class ObjectKey extends ObjectRelation {
     /** Get Field Keys */
     protected List<MetaField> getFieldKeys() {
 
+        final String KEY = "getFieldKeys()";
+
         List<MetaField> keys = null;
         synchronized (this) {
-            keys = (List<MetaField>) getCacheValue(CACHE_FIELDKEYS);
+            keys = (List<MetaField>) getCacheValue(KEY);
             if (keys == null) {
                 for (MetaField f : getChildren(MetaField.class, true)) {
-                    if (f.hasAttr(ATTR_ISKEY)) keys.add(f);
+                    if (f.hasAttr(ATTR_ISKEY)
+                            && Boolean.TRUE.equals( f.getMetaAttr(ATTR_ISKEY).getValue())) {
+                        keys.add(f);
+                    }
                 }
-                setCacheValue(CACHE_FIELDKEYS, new ArrayList<MetaField>());
+                setCacheValue(KEY, new ArrayList<MetaField>());
             }
         }
 

@@ -15,10 +15,10 @@ package com.draagon.meta.test.produce.v1;
  * @author dmealing
  */
 public class Apple extends Fruit {
-    
+
     private short worms;
     private String orchard;
-    
+
     public Apple() {
     }
 
@@ -26,7 +26,7 @@ public class Apple extends Fruit {
         return worms;
     }
 
-    public void setWorms(short worms) {
+    public void setWorms(Short worms) {
         this.worms = worms;
     }
 

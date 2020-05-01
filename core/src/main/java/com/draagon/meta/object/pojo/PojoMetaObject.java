@@ -7,6 +7,7 @@
 package com.draagon.meta.object.pojo;
 
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.MetaException;
 import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
@@ -126,17 +127,9 @@ public class PojoMetaObject extends MetaObject {
 
                 String name = getSetterName(f);
 
-                for( Method m : objClass.getMethods() ) {
-                    if (m.getName().equals(name)
-                            && m.getParameterTypes().length == 1
-                            && m.getParameterTypes()[ 0] == f.getValueClass()) {
-                        method = m;
-                        break;
-                    }
-                }
-
-
-                if (method == null) {
+                try {
+                    method = objClass.getMethod( name,f.getValueClass() );
+                } catch (NoSuchMethodException e) {
                     throw new NoSuchMethodError("No setter with a single variable exists named [" + name + "] with argument class [" + f.getValueClass().getSimpleName() + "] on object [" + objClass.getName() + "]");
                 }
 

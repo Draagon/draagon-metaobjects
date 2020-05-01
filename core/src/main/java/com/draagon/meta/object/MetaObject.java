@@ -326,6 +326,9 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
             // Set the Default Values
             setDefaultValues(o);
+            if ( o instanceof MetaObjectAware) {
+                ((MetaDataAware) o).setMetaData( this );
+            }
 
             return o;
         } catch (InstantiationException e) {

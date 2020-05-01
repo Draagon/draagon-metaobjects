@@ -403,7 +403,7 @@ public class ObjectManagerXML extends ObjectManager
     protected String getFileRef( MetaObject mc )
     {
         try {
-            return (String) mc.getAttribute( "fileRef" );
+            return (String) mc.getMetaAttr( "fileRef" ).getValueAsString();
         }
         catch( MetaAttributeNotFoundException e ) { }
 

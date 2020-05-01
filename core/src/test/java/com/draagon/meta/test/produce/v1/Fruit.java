@@ -10,9 +10,10 @@
  */
 package com.draagon.meta.test.produce.v1;
 
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
+
+import java.util.Objects;
 
 /**
  *
@@ -20,10 +21,11 @@ import com.draagon.meta.object.MetaObjectAware;
  */
 public abstract class Fruit implements MetaObjectAware {
     
-    private Long id;
-    private String name;
-    private Integer length;
-    private Integer width;
+    private Long id = null;
+    private String name = null;
+    private Integer length = null;
+    private Integer weight = null;
+    private Boolean inBasket = null;
 
     private MetaObject metaObject = null;
     
@@ -64,11 +66,50 @@ public abstract class Fruit implements MetaObjectAware {
         this.length = length;
     }
 
-    public Integer getWidth() {
-        return width;
+    public Integer getWeight() {
+        return weight;
     }
 
-    public void setWidth(Integer width) {
-        this.width = width;
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
+
+    public Boolean getInBasket() {
+        return inBasket;
+    }
+
+    public void setInBasket(Boolean inBasket) {
+        this.inBasket = inBasket;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Fruit fruit = (Fruit) o;
+        return Objects.equals(id, fruit.id) &&
+                Objects.equals(name, fruit.name) &&
+                Objects.equals(length, fruit.length) &&
+                Objects.equals(weight, fruit.weight) &&
+                Objects.equals(inBasket, fruit.inBasket) &&
+                Objects.equals(metaObject, fruit.metaObject);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, length, weight, inBasket, metaObject);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Fruit{");
+        sb.append("id=").append(id);
+        sb.append(", name='").append(name).append('\'');
+        if ( length != null ) sb.append(", length=").append(length);
+        if ( weight != null ) sb.append(", weight=").append(weight);
+        if ( inBasket != null ) sb.append(", inBasket=").append(inBasket);
+        if ( metaObject != null )  sb.append(", metaObject=").append(metaObject.getName());
+        sb.append('}');
+        return sb.toString();
     }
 }

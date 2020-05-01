@@ -6,6 +6,7 @@
  */
 package com.draagon.meta.object.managed;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaException;
 import com.draagon.meta.field.*;
 import com.draagon.meta.manager.ManagerAwareMetaObject;
@@ -29,7 +30,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
         super(name);
     }
 
-    public static MetaObject createFromTemplate(String name, String template) {
+    /*public static MetaObject createFromTemplate(String name, String template) {
         // Let's create one from scratch
         ManagedMetaObject mc = new ManagedMetaObject(name);
         //mc.setName( name );
@@ -96,7 +97,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
         }
 
         return mc;
-    }
+    }*/
 
     /**
      * Retrieves the object class of an object
@@ -104,7 +105,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     protected Class<?> getObjectClass() throws ClassNotFoundException {
         try { 
             return super.getObjectClass();
-        } catch( ClassNotFoundException e ) {
+        } catch( MetaDataException e ) {
             return ManagedObject.class;
         }
     }
@@ -158,11 +159,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     @Override
     public ObjectManager getManager( Object obj )
     {
-        //try { 
-            return getManagedObject( obj ).getObjectManager(); 
-        //}
-        //catch( MetaException e ) { log.error( e.getMessage(), e ); }
-        //return null;
+        return getManagedObject( obj ).getObjectManager();
     }
     
     /**
@@ -181,24 +178,9 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
         return (ManagedObject) o;
     }
 
-    /**
-     * Retrieve the id of the object
-     */
-    //public String getId( Object obj )
-    //  throws MetaException
-    //{
-    //  return getMetaObject( obj ).getObjectId();
-    //}
-    /**
-     * Retrieve the id of the object
-     */
-    //public void setId( Object obj, String id )
-    //  throws MetaException
-    //{
-    //  getMetaObject( obj ).setObjectId( id );
-    //}
     ////////////////////////////////////////////////////
     // PERSISTENCE METHODS
+
     private ManagedObject.Value getAttributeValue(MetaField f, Object obj)
             throws MetaException {
         if (!(obj instanceof ManagedObject)) {
