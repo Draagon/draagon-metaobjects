@@ -10,14 +10,16 @@ package com.draagon.meta.util.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
-import javax.xml.crypto.dsig.XMLObject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Meta Class loader for XML files
@@ -29,64 +31,18 @@ public class XMLFileReader
     /**
      * Loads all the classes specified in the Filename
      */
-    public static Document loadFromStream( InputStream is )
-            throws IOException
-    {
-        Document d = null;
-
-        // Try Xerces First
-        d = getPluginAndTryLoad( is, "com.draagon.meta.util.xml.XercesXMLPlugin" );
-        if ( d != null ) return d;
-
-        // Try the JAXP Parser
-        d = getPluginAndTryLoad( is, "com.draagon.meta.util.xml.JAXPXMLPlugin" );
-        if ( d != null ) return d;
-
-        // If not Plugin worked, then error out
-        throw new IOException( "No valid XML Plugin was found to load XML document" );
-    }
-
-    private static Document getPluginAndTryLoad( InputStream is, String className )
-            throws IOException
-    {
-        XMLPlugin plugin = getPlugin( className );
-        if ( plugin == null ) return null;
-
-        //ystem.out.println( "TRYING PLUGIN: " + plugin );
+    public static Document loadFromStream( InputStream is ) throws IOException {
 
         try {
-            return plugin.loadFromStream( is );
-        }
-        catch( IOException e ) {
-            log.debug( "Error attempting to use plugin [" + className + "]: " + e.getMessage() );
-            throw e;
-        }
-        catch( Throwable e ) {
-            //ystem.out.println( "ERROR: Cannot use [" + className + "]: " + e.getMessage() );
-            log.debug( "Error attempting to use plugin [" + className + "]: " + e.getMessage() );
-        }
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setValidating(false);
+            DocumentBuilder db = dbf.newDocumentBuilder();
 
-        return null;
-    }
-
-    private static XMLPlugin getPlugin( String className )
-    {
-        try {
-            Class<?> c = (Class<?>) Class.forName( className );
-            if( XMLPlugin.class.isAssignableFrom( c )) {
-                for (Constructor<?> cc : c.getDeclaredConstructors()) {
-                    if (cc.getParameterCount() == 0) {
-                        return (XMLPlugin) cc.newInstance();
-                    }
-                }
-            }
+            return db.parse(is);
         }
-        catch( Throwable e ) {
-            //ystem.out.println( "ERROR: Cannot load [" + className + "]: " + e.getMessage() );
-            if ( log.isDebugEnabled() ) log.debug( "Unable to load XML Plugin [" + className + "]: " + e.getMessage() );
+        catch( ParserConfigurationException | SAXException e ) {
+            throw new IOException(  "Error attempting to open XML inputStream: " + e.getMessage(), e );
         }
-
-        return null;
     }
 }
 

@@ -31,7 +31,7 @@ public class CompoundKey extends ObjectKey {
     @Override
     public void validate() {
         if ( getFieldKeys().size() <= 1 ) {
-            throw new MetaException( "CompundKey must have more than one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());
+            throw new MetaException( "CompoundKey must have more than one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());
         }
     }
 }

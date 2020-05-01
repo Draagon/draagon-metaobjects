@@ -1,5 +1,7 @@
 <metadata package="produce::v1::common">
 
+    <attr name="farmName">Big Bob's Farm</attr>
+
     <!-- Id -->
     <field name="id" type="long">
         <attr type="boolean" name="isKey">true</attr>

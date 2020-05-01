@@ -1,0 +1,10 @@
+{"typesConfig": {
+
+  "types": [
+
+    {"type": {"name": "metadata", "class": "com.draagon.meta.MetaData",
+      "children": [
+        {"child": {"type": "attr", "subType": "string", "name": "farmName"}}
+      ]}}
+  ]}
+}

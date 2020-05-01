@@ -4,11 +4,7 @@
         {"field": {"name": "name", "type": "string",
             "children": [
                 {"validator": {"type": "required"}},
-                {"validator": {"type": "length",
-                    "children": [
-                        {"attr": {"name": "min", "value": 1}},
-                        {"attr": {"name": "max", "value": 50}}
-                    ]}}
+                {"validator": {"type": "length", "min": 1, "max": 50 }}
             ]}}
     ]}
 }

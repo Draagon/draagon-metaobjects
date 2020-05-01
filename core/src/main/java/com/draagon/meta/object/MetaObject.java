@@ -370,6 +370,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     @Override
     public void validate() {
         if ( getObjectKey() == null ) {
+            // TODO:  Don't do this if Abstract
             objectKey = new PrimaryKey(ObjectKey.ATTR_KEY);
             addChild( objectKey );
         }
