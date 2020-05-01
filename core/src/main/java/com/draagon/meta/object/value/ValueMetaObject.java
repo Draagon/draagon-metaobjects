@@ -11,14 +11,14 @@ import com.draagon.meta.MetaException;
 import com.draagon.meta.field.*;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.util.DataConverter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
 
 public class ValueMetaObject extends PojoMetaObject
 {
-    private final static Log log = LogFactory.getLog(ValueMetaObject.class);
+    //private final static Log log = LogFactory.getLog(ValueMetaObject.class);
 
     public final static String SUBTYPE_VALUE = "value";
 

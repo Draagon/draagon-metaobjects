@@ -17,7 +17,10 @@ import com.draagon.meta.loader.MetaDataRegistry;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.List;
 
+import com.draagon.meta.relation.key.ObjectKey;
+import com.draagon.meta.relation.key.PrimaryKey;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +35,8 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
     public final static String ATTR_CLASS = "class";
+
+    private ObjectKey objectKey = null;
 
     /**
      * Legacy constructor used in unit tests
@@ -342,6 +347,30 @@ public abstract class MetaObject extends MetaData<MetaObject> {
      * Sets the value on the object
      */
     public abstract void setValue(MetaField f, Object obj, Object val);
+
+    ////////////////////////////////////////////////////
+    // Key  Methods
+
+    public ObjectKey getObjectKey() {
+        if ( objectKey == null ) {
+            List<ObjectKey> keys = getChildren(ObjectKey.class, true);
+            if ( !keys.isEmpty() ) {
+                objectKey = keys.iterator().next();
+            }
+        }
+        return objectKey;
+    }
+
+    ////////////////////////////////////////////////////
+    // Validation Methods
+
+    @Override
+    public void validate() {
+        if ( getObjectKey() == null ) {
+            objectKey = new PrimaryKey(ObjectKey.ATTR_KEY);
+            addChild( objectKey );
+        }
+    }
 
     ////////////////////////////////////////////////////
     // MISC METHODS
