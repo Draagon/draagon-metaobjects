@@ -41,11 +41,11 @@
     </object>
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit"> <!--object="com.draagon.meta.test.produce.v1.Apple"-->
-
-        <attr name="object">com.draagon.meta.test.produce.v1.Apple</attr>
+    <object name="Apple" super="Fruit" object="com.draagon.meta.test.produce.v1.Apple">
 
         <objectKey name="key"/>
+
+        <!-- attr name="object">com.draagon.meta.test.produce.v1.Apple</attr -->
 
         <!-- Orachard -->
         <field name="orchard" type="string"/>

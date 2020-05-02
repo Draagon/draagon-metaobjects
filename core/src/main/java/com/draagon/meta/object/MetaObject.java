@@ -190,11 +190,21 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
         Class<?> c;
 
-        if (hasAttr(ATTR_OBJECT)) {
-            c = (Class) getMetaAttr(ATTR_OBJECT).getValue();
+        if (hasAttr(ATTR_OBJECT, false)) {
+            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
+            c = Class.forName( c.getName() );
+        }
+        else if (hasAttr(ATTR_CLASS, false )) {
+            c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
+            c = Class.forName(c.getName());
+        }
+        else if (hasAttr(ATTR_OBJECT)) {
+            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
+            c = Class.forName( c.getName() );
         }
         else if (hasAttr(ATTR_CLASS)) {
-            c = (Class) getMetaAttr(ATTR_CLASS).getValue();
+            c = (Class) getMetaAttr(ATTR_CLASS, false ).getValue();
+            c = Class.forName( c.getName() );
 
             /*String ostr = null;
             try {
@@ -308,7 +318,8 @@ public abstract class MetaObject extends MetaData<MetaObject> {
                 for( Constructor<?> c : oc.getDeclaredConstructors() ) {
                     if ( c.getParameterCount() == 0 ) {
                         try {
-                            o = (oc.getDeclaredConstructors()[0]).newInstance();
+                            c.setAccessible(true);
+                            o = c.newInstance();
                         } catch (InvocationTargetException ex) {
                             throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);
                         }
@@ -321,20 +332,20 @@ public abstract class MetaObject extends MetaData<MetaObject> {
                 if ( o == null ) throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: No empty constructor existed" );
             }
             catch (InvocationTargetException e) {
-                throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+                throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e, e);
             }
 
             // Set the Default Values
             setDefaultValues(o);
-            if ( o instanceof MetaObjectAware) {
-                ((MetaDataAware) o).setMetaData( this );
-            }
+            //if ( o instanceof MetaObjectAware) {
+            //    ((MetaDataAware) o).setMetaData( this );
+            //}
 
             return o;
         } catch (InstantiationException e) {
-            throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+            throw new RuntimeException("Could not instantiate a new Object of Class [" + oc.getName() + "] for MetaObject [" + getName() + "]: " + e, e);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Illegal Access Exception instantiating a new Object for MetaObject [" + getName() + "]: " + e.getMessage(), e);
+            throw new RuntimeException("Illegal Access Exception instantiating a new Object for MetaObject [" + getName() + "]: " + e, e);
         }
     }
 

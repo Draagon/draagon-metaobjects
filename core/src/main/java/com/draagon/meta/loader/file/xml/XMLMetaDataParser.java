@@ -271,10 +271,11 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
         }
         else {
             attr = (MetaAttribute) createOrOverlayMetaData( parentType.equals(MetaDataLoader.TYPE_LOADER), parentMetaData,
-                    cc.getType(), cc.getSubType(), cc.getName(), null, null );
+                    cc.getType(), cc.getSubType(), attrName /*cc.getName()*/, null, null );
+            // TODO:  Fix the other place attributes allow aliases and use the alias name
         }
 
-        attr.setValue(value);
+        attr.setValueAsString(value);
     }
 
     /**

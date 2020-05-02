@@ -61,7 +61,7 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
             if ( value == null ) {
                 setValue( null );
             } else {
-                setValue(Class.forName(value));
+                setValue( (Class<?>) Class.forName(value));
             }
         } catch (ClassNotFoundException e) {
             throw new InvalidAttributeValueException("Invalid Class Name [" + value + "] for ClassAttribute");
