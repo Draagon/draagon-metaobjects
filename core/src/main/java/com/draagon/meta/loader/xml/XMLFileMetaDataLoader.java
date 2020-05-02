@@ -32,6 +32,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
         super( new FileLoaderConfig()
                     .addParser( "*.xml", XMLMetaDataParser.class )
                     .setShouldRegister( false )
+                    .setStrict( false )
                     .setVerbose( false ),
                 name );
     }
@@ -53,33 +54,31 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
         getLoaderConfig().addSources( sources );
     }
 
-    public void setTypesRef(String types) {
+    /*public void setTypesRef(String types) {
         if ( types.isEmpty() ) types = null;
         typesRef = types;
     }
 
     public String getTypesRef() {
         return typesRef;
-    }
+    }*/
 
     /** Initialize with the metadata source being set */
-    public MetaDataLoader init( MetaDataSources sources ) {
+    public XMLFileMetaDataLoader init( MetaDataSources sources ) {
         return init( sources, false );
     }
 
     /** Initialize with the metadata source being set */
-    public MetaDataLoader init( MetaDataSources sources, boolean shouldRegister ) {
+    public XMLFileMetaDataLoader init( MetaDataSources sources, boolean shouldRegister ) {
 
         FileLoaderConfig config = getLoaderConfig();
         config.setShouldRegister( shouldRegister );
 
         // Prepend the Types XML to load using the default behavior of the original XMLFileMetaDataLoader
-        if ( getTypesRef() != null ) {
-            config.addSources( new LocalMetaDataSources( getTypesRef()) );
-        } else if ( getDefaultTypesRef() != null ) {
+        if ( getDefaultTypesRef() != null ) {
             config.addSources( new LocalMetaDataSources( getDefaultTypesRef()) );
         }
 
-        return super.init( sources );
+        return (XMLFileMetaDataLoader) super.init( sources );
     }
 }
