@@ -297,8 +297,9 @@ public abstract class MetaDataParser {
         // Check to make sure people arent' defining attributes when it shouldn't
         else {
             if (superName != null && !superName.isEmpty()) {
-                log.warn("Attribute 'super' defined on MetaData [" +typeName+ "][" +name+ "] under parent [" +parent
-                        + "], but should not be as metadata with that name already existed: file ["+getFilename()+"]");
+                logErrorOnce( parent, "getSuperMetaData("+typeName+","+name+")",
+                        "Attribute 'super' defined on MetaData [" +typeName+ "][" +name+ "] under parent [" +parent
+                                + "], but should not be as metadata with that name already existed: file ["+getFilename()+"]");
             }
         }
 
@@ -410,7 +411,31 @@ public abstract class MetaDataParser {
             if ( getLoader().getLoaderConfig().isStrict() ) {
                 throw new MetaException( errMsg );
             } else {
-                if ( log.isWarnEnabled() ) log.warn( errMsg );
+                logErrorOnce( getLoader(), "verifyAcceptableChild("+parentType+","+parentSubType+","+
+                        type+","+subType+","+name+")", errMsg );
+            }
+        }
+    }
+
+    protected void logErrorOnce( MetaData parent, String KEY, String errMsg ) {
+
+        if ( log.isErrorEnabled() ) {
+            Object v = parent.getCacheValue( KEY );
+            if ( v == null ) {
+                log.error( errMsg );
+                parent.setCacheValue( KEY, Boolean.TRUE );
+            }
+        }
+    }
+
+
+    protected void logWarnOnce( MetaData parent, String KEY, String errMsg ) {
+
+        if ( log.isWarnEnabled() ) {
+            Object v = parent.getCacheValue( KEY );
+            if ( v == null ) {
+                log.warn( errMsg );
+                parent.setCacheValue( KEY, Boolean.TRUE );
             }
         }
     }
@@ -461,7 +486,8 @@ public abstract class MetaDataParser {
                 throw new MetaDataException( errMsg );
             }
             else {
-                if ( log.isWarnEnabled() ) log.warn( errMsg );
+                logWarnOnce( parentMetaData, "createAttributeOnParent("+attrName+")", errMsg );
+
                 attr = new StringAttribute( attrName );
                 parentMetaData.addChild( attr );
             }
