@@ -406,12 +406,22 @@ public abstract class MetaDataParser {
         ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
 
         if (cc == null) {
-            String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
-                    +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]";
             if ( getLoader().getLoaderConfig().isStrict() ) {
-                throw new MetaException( errMsg );
-            } else {
-                logErrorOnce( getLoader(), "verifyAcceptableChild("+parentType+","+parentSubType+","+
+                throw new MetaException( "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
+                        +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]" );
+            }
+            else if ( type.equals( MetaAttribute.TYPE_ATTR ) && getLoader().getLoaderConfig().allowsAutoAttrs() ) {
+                // Auto add the new child configuration
+                cc = new ChildConfig( type, subType, name );
+                cc.setAutoCreatedFromFile( getFilename() );
+                tc.addTypeChild( cc );
+            }
+            else {
+                //log.info( "LOADER: " + getLoader() );
+                //log.info( "LOADER CONFIG: " + getLoader().getLoaderConfig() );
+                String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] was not configured"
+                        +" for parent records ["+parentType+":"+parentSubType+"]: file ["+getFilename()+"]";
+                logWarnOnce( getLoader(), "verifyAcceptableChild("+parentType+","+parentSubType+","+
                         type+","+subType+","+name+")", errMsg );
             }
         }
