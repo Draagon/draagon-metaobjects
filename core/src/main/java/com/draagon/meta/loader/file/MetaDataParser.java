@@ -1,8 +1,11 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
+import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
@@ -433,5 +436,44 @@ public abstract class MetaDataParser {
         }
 
         return cc;
+    }
+
+    protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
+
+        String parentType = parentMetaData.getTypeName();
+        String parentSubType = parentMetaData.getSubTypeName();
+
+        TypeConfig parentTypeConfig = getTypesConfig().getType( parentMetaData.getTypeName() );
+        ChildConfig cc = findBestChildConfigMatch( parentTypeConfig, parentType, parentSubType,
+                MetaAttribute.TYPE_ATTR, null, attrName );
+
+        MetaAttribute attr = null;
+
+        if ( cc == null ) {
+            String errMsg = "MetaAttribute with name ["+attrName+"] is not allowed on parent record ["
+                    +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
+
+            if ( getLoader().getLoaderConfig().allowsAutoAttrs() ) {
+                cc = new ChildConfig( StringAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName );
+                cc.setAutoCreatedFromFile( getFilename() );
+            }
+            else if ( getLoader().getLoaderConfig().isStrict() ) {
+                throw new MetaDataException( errMsg );
+            }
+            else {
+                if ( log.isWarnEnabled() ) log.warn( errMsg );
+                attr = new StringAttribute( attrName );
+                parentMetaData.addChild( attr );
+            }
+        }
+
+        if ( attr == null && cc != null ) {
+            attr = (MetaAttribute) createOrOverlayMetaData(parentType.equals(MetaDataLoader.TYPE_LOADER), parentMetaData,
+                    cc.getType(), cc.getSubType(), attrName /*cc.getName()*/, null, null);
+        }
+
+        if ( attr != null ) {
+            attr.setValueAsString(value);
+        }
     }
 }
