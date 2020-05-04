@@ -6,6 +6,7 @@ public class LoaderParam {
 
     private String name = null;
     private String classname = null;
+    private String sourceDir = null;
     private List<String> sources = null;
 
     public LoaderParam() {}
@@ -28,6 +29,14 @@ public class LoaderParam {
 
     public void setClassname(String classname) {
         this.classname = classname;
+    }
+
+    public String getSourceDir() {
+        return sourceDir;
+    }
+
+    public void setSourceDir(String sourceDir) {
+        this.sourceDir = sourceDir;
     }
 
     public List<String> getSources() {

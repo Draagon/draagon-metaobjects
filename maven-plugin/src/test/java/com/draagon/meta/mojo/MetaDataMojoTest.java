@@ -47,7 +47,7 @@ public class MetaDataMojoTest {
         //System.out.println( "rule: " + pom );
         //System.out.println( "rule: " + rule );
 
-        MetaDataMojo metaDataMojo = (MetaDataMojo) rule.lookupMojo("metadata", pom);
+        MetaDataMojo metaDataMojo = (MetaDataMojo) rule.lookupMojo("generate", pom);
         assertNotNull(metaDataMojo);
 
         //ToDo check output upon execution
