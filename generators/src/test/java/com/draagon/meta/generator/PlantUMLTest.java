@@ -31,15 +31,46 @@ public class PlantUMLTest extends GeneratorTestBase {
     public void testPlantUMLGenerator1() {
 
         Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "true" );
+        args.put( "showAbstracts", "true" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-1.pu" );
+
+        drawUML( args, "*" );
+    }
+
+    @Test
+    public void testPlantUMLGenerator2() {
+
+        Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "false" );
+        args.put( "showAbstracts", "true" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-2.pu" );
+
+        drawUML( args, "*" );
+    }
+
+    @Test
+    public void testPlantUMLGenerator3() {
+
+        Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "false" );
+        args.put( "showAbstracts", "false" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-3.pu" );
+
+        drawUML( args, "*" );
+    }
+
+    protected void drawUML( Map<String,String> args, String filter ) {
+
         args.put( GeneratorBase.ARG_OUTPUTDIR, getGeneratedTestSourcesPath() );
-        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test1-metadata.pu" );
 
         Generator generator = new PlantUMLGenerator()
                 .setArgs( args )
-                .setFilter( "*" );
+                .setFilter( filter );
 
         generator.execute( loader );
 
         // TODO: add tests
     }
+
 }
