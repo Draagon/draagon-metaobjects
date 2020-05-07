@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 /**
@@ -18,20 +19,46 @@ public class MetaDataSources {
 
     private static Log log = LogFactory.getLog(MetaDataSources.class);
 
-    // This is only used when we're not loading from a classpath
-    private String sourceDir = null;
-
     /** Holds the SourceData */
     public static class SourceData {
+
         public final String filename;
         public final Class<? extends MetaDataSources> sourceClass;
         public final String sourceData;
+
         public SourceData(String filename, Class<? extends MetaDataSources> sourceClass, String sourceData ) {
             this.filename = filename;
             this.sourceClass = sourceClass;
             this.sourceData = sourceData;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SourceData that = (SourceData) o;
+            return Objects.equals(filename, that.filename) &&
+                    Objects.equals(sourceClass, that.sourceClass) &&
+                    Objects.equals(sourceData, that.sourceData);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(filename, sourceClass, sourceData);
+        }
+
+        @Override
+        public String toString() {
+            return "SourceData{" +
+                    "filename='" + filename + '\'' +
+                    ", sourceClass=" + sourceClass.getName() +
+                    ", sourceData.hash='" + sourceData.hashCode() + '\'' +
+                    '}';
+        }
     }
+
+    // This is only used when we're not loading from a classpath
+    private String sourceDir = null;
 
     // Stores the loaded metadata files (in memory)
     private List<SourceData> sourceData = new ArrayList<>();
@@ -169,5 +196,30 @@ public class MetaDataSources {
 
     public List<SourceData> getSourceData() {
         return sourceData;
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Misc Methods
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MetaDataSources that = (MetaDataSources) o;
+        return Objects.equals(sourceDir, that.sourceDir) &&
+                Objects.equals(sourceData, that.sourceData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sourceDir, sourceData);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() +"{" +
+                "sourceDir='" + sourceDir + '\'' +
+                ", sourceData=" + sourceData +
+                '}';
     }
 }

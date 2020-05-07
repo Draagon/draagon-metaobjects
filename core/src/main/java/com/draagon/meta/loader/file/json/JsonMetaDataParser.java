@@ -246,11 +246,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             if ( !reservedAttributes.contains( attrName )) {
 
                 String value = n.getValue().getAsString();
-
-                // TODO:  This should be replaced by the ruleset for handling attributes in the future
-                StringAttribute sa = new StringAttribute( attrName );
-                sa.setValue( value );
-                md.addMetaAttr(sa);
+                createAttributeOnParent(md, attrName, value);
             }
         });
     }

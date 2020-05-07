@@ -18,11 +18,22 @@ import java.util.*;
 
 public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
+    private boolean showAttrs = false;
+    private boolean showAbstracts = true;
+
     @Override
     public void execute(MetaDataLoader loader) {
 
         File outf = null;
         PrintWriter pw = null;
+
+        if ( hasArg( "showAttrs"))
+            showAttrs = Boolean.parseBoolean( getArg( "showAttrs"));
+        if ( hasArg( "showAbstracts"))
+            showAbstracts = Boolean.parseBoolean( getArg( "showAbstracts"));
+
+        System.out.println( "PlantUML: showAttrs="+showAttrs);
+        System.out.println( "PlantUML: showAbstracts="+showAbstracts);
 
         try {
             File f = getOutputDir();
@@ -54,7 +65,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
                 // Write MetaObjects
                 for (MetaData md : filtered) {
-                    if ( md instanceof MetaObject && md.getPackage().equals( p )) {
+                    if ( md instanceof MetaObject && md.getPackage().equals( p )
+                            && ( !isAbstract( md ) || (isAbstract(md) && showAbstracts ))) {
                         MetaObject mo = (MetaObject) md;
 
                         writerMetaData(pw, "  ", mo);
@@ -84,47 +96,93 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
     protected void writerMetaData( PrintWriter pw, String indent, MetaData md ) throws IOException {
 
-        boolean isAbstract = false;
-        if ( md.hasAttr("_isAbstract")) {
-            isAbstract = "true".equals( md.getMetaAttr( "_isAbstract").getValueAsString());
-        }
+        boolean isAbstract = isAbstract( md );
 
-        pw.print( indent + "class "+md.getShortName() );
+        pw.print( indent + "class "+ _pu(md.getShortName()));
         if ( isAbstract ) pw.print( " << (A,#FF7700) Abstract");
         else pw.print( " << (O,#AAAAFF)");
         pw.println( " >> {");
 
-        pw.println(indent+"  .. Attributes ..");
-        pw.println(indent+"  type="+md.getSubTypeName() );
-
         // Write Attributes
-        List<MetaAttribute> attrs = (List<MetaAttribute>) md.getChildren(MetaAttribute.class, false);
-        if ( !attrs.isEmpty() ) {
-            writeAttributes( pw, indent+" ", null, attrs );
+        if ( showAttrs ) {
+
+            pw.println(indent+"  .. Attributes ..");
+            pw.println(indent+"  type="+md.getSubTypeName() );
+
+            List<MetaAttribute> attrs = (List<MetaAttribute>) md.getChildren(MetaAttribute.class, true );
+            if (!attrs.isEmpty()) {
+                writeAttributes(pw, indent + " ", null, attrs);
+            }
         }
 
         // Write Fields
-        List<MetaField> fields = (List<MetaField>) md.getChildren(MetaField.class, false);
+        List<MetaField> fields = (List<MetaField>) md.getChildren(MetaField.class, true );
         if ( !fields.isEmpty() ) {
-            pw.println(indent+" .. Fields ..");
-            for (MetaField f : fields) {
-                pw.print(indent+"  + " + f.getShortName() + " {"+f.getSubTypeName() + "} ");
-                if ( f.getSuperData() != null ) pw.print( "[" + f.getSuperData().getName() + "]");
-                pw.println();
+            pw.println(indent + " .. Fields ..");
 
-                attrs = (List<MetaAttribute>) f.getChildren(MetaAttribute.class, false);
-                if ( !attrs.isEmpty() ) writeAttributes( pw, indent+"   ", f, attrs );
+            fields = (List<MetaField>) md.getChildren(MetaField.class, false);
+            writeFields(pw, indent + "  ", fields);
+
+            if (md.getSuperData() != null && isAbstract(md.getSuperData()) && !showAbstracts) {
+                pw.println(indent + " .. "+md.getSuperData().getShortName()+" Fields ..");
+                fields = (List<MetaField>) md.getSuperData().getChildren(MetaField.class, true);
+                writeFields(pw, indent + "  ", fields);
             }
+            else if ( md.getSuperData() != null && fields.isEmpty() ) {
+                pw.println(indent+" .. "+md.getSuperData().getShortName()+" ..");
+            }
+        }
+        else {
+            pw.println(indent+" .. No Fields ..");
         }
 
         pw.println(indent+"}");
     }
 
+    protected void writeFields(PrintWriter pw, String indent, List<MetaField> fields) {
+
+        for (MetaField f : fields) {
+
+            if ( !isAbstract(f) && (!showAbstracts && isAbstract( f ))) continue;
+
+            pw.print(indent+"  + " + _pu(f.getShortName()) + " ");
+
+            MetaData oref = null;
+            try { oref = MetaDataUtil.getObjectRef( f ); } catch( Exception e ) {}
+            if ( oref != null ) {
+                pw.println();
+                pw.print( "    --> ");
+                if ( f.getDataType().isArray() ) pw.print("[] " );
+                pw.print( oref.getShortName() );
+                //pw.print("}");
+            }
+            else if ( f.getSuperData() != null ) {
+                pw.println("{"+f.getSubTypeName() + "}");
+                pw.print( "    super=" + _pu( _slimPkg( f.getSuperField().getPackage(), f.getPackage() )
+                        + f.getSuperField().getShortName()));
+            }
+            else {
+                pw.print("{"+f.getSubTypeName() + "}");
+            }
+
+            pw.println();
+
+            if ( showAttrs ) {
+                List<MetaAttribute> attrs = (List<MetaAttribute>) f.getChildren(MetaAttribute.class, !showAbstracts);
+                if (!attrs.isEmpty()) {
+                    writeAttributes(pw, indent + "   ", f, attrs);
+                }
+            }
+        }
+    }
+
 
     protected void writeObjectRelationships( PrintWriter pw, String indent, MetaObject mo ) throws IOException {
 
-        if ( mo.getSuperObject() != null ) {
-            pw.println( mo.getName() + " ..|> " + mo.getSuperObject().getName() + " : extends" );
+        if ( mo.getSuperObject() != null
+                && ( !isAbstract( mo.getSuperObject() )
+                    || (isAbstract( mo.getSuperObject() ) && showAbstracts))) {
+            pw.println( _pu(mo.getName()) + " ..|> " + _pu( mo.getSuperObject().getName()) + " : extends" );
         }
 
         // Write Fields
@@ -138,22 +196,28 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                 ObjectReference oref = (ObjectReference) f.getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
                 if ( oref != null ) {
                     MetaObject objRef = oref.getReferencedObject();
-                    if (objRef != null) {
-                        pw.print(f.getParent().getName());
-                        if (oref instanceof OneToOneReference) pw.print("\"1\" --> \"1\"");
-                        else if (oref instanceof OneToManyReference) pw.print("\"1\" --> \"many\"");
-                        else if (oref instanceof ManyToOneReference) pw.print("\"many\" --> \"1\"");
-                        else if (oref instanceof ManyToManyReference) pw.print("\"many\" --> \"many\"");
-                        else pw.print(" --> ");
-                        pw.print(objRef.getName() + " : " );
-                        if ( oref.getName() == null ) pw.println( f.getShortName());
-                        else pw.println( f.getShortName() +":"+ oref.getName() );
+
+                    if ( !isAbstract( oref ) || ( isAbstract(oref) && showAbstracts)) {
+
+                        if (objRef != null) {
+                            pw.print(_pu(f.getParent().getName()));
+                            if (oref instanceof OneToOneReference) pw.print("\"1\" --> \"1\"");
+                            else if (oref instanceof OneToManyReference) pw.print("\"1\" --> \"many\"");
+                            else if (oref instanceof ManyToOneReference) pw.print("\"many\" --> \"1\"");
+                            else if (oref instanceof ManyToManyReference) pw.print("\"many\" --> \"many\"");
+                            else pw.print(" --> ");
+                            pw.print(_pu(objRef.getName()) + " : ");
+                            if (oref.getName() == null) pw.println(_pu(f.getShortName()));
+                            else pw.println(_pu(f.getShortName()) + ":" + _pu(oref.getName()));
+                        }
                     }
                 }
                 else {
                     try {
                         MetaObject objRef = MetaDataUtil.getObjectRef(f);
-                        pw.print(f.getParent().getName() + " --> " + objRef.getName() + " : " + f.getShortName() );
+                        if ( !isAbstract( objRef ) || (isAbstract( objRef ) && showAbstracts )) {
+                            pw.println(_pu(f.getParent().getName()) + " --> " + _pu(objRef.getName()) + " : " + _pu(f.getShortName()));
+                        }
                     } catch (MetaAttributeNotFoundException e) {}
                 }
             }
@@ -166,8 +230,59 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         for (MetaAttribute a : attrs) {
             //pw.println(indent+"{"+a.getSubTypeName() + "} " + a.getShortName() +" = "+a.getValueAsString());
             if ( f != null ) pre = " [attr:"+a.getSubTypeName() + "] ";
-            pw.println(indent+pre+ a.getShortName() +"="+getAttrValue(a));
+            pw.println(indent+pre+ _pu(a.getShortName()) +"="+getAttrValue(a));
         }
+    }
+
+    protected String _slimPkg( String p1, String p2 ) {
+
+        if (p1 == null || p1.isEmpty()
+            || p2 == null || p2.isEmpty() ) {
+            return "";
+        }
+
+        if ( p2.length() < p1.length() ) {
+            return "...::";
+        }
+
+        StringBuilder converted = new StringBuilder();
+
+        boolean skip = false;
+        for (int i = 0; i < p1.length(); i++ ) {
+
+            if ( !skip && p1.charAt(i) == p2.charAt(i)) continue;
+            else {
+                skip = true;
+                converted.append(p1.charAt(i));
+            }
+        }
+
+        return converted.toString();
+    }
+
+    protected String _pu( String text ) {
+
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        StringBuilder converted = new StringBuilder();
+
+        boolean convertNext = false;
+        for (char ch : text.toCharArray()) {
+            if (ch == '-') {
+                convertNext = true;
+            } else if (convertNext) {
+                ch = Character.toTitleCase(ch);
+                convertNext = false;
+                converted.append(ch);
+            } else {
+                ch = ch; //Character.toLowerCase(ch);
+                converted.append(ch);
+            }
+        }
+
+        return converted.toString();
     }
 
     protected String getAttrValue(  MetaAttribute attr ) {
@@ -216,5 +331,13 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         else {
             return "...";
         }
+    }
+
+    protected boolean isAbstract( MetaData md ) {
+        if ( md.hasAttr("_isAbstract")
+                && Boolean.TRUE.equals( md.getMetaAttr( "_isAbstract" ).getValue())) {
+            return true;
+        }
+        return false;
     }
 }

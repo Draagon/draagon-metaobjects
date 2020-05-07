@@ -29,6 +29,8 @@ public final class ChildConfig {
     //private String inlineAttrName = null;       // Name when it's an attribute
     //private String inlineAttrValueMap = null;   // What to map the value to
 
+    private String createdFromFile = null;
+
     public ChildConfig( String type, String subType, String name ) {
         this.type = type;
         this.subType = subType;
@@ -122,6 +124,18 @@ public final class ChildConfig {
         this.inlineAttrValueMap = inlineAttrValueMap;
     }*/
 
+    public void setAutoCreatedFromFile( String file ) {
+        this.createdFromFile = file;
+    }
+
+    public boolean wasAutoCreated() {
+        return createdFromFile != null;
+    }
+
+    public String getCreatedFromFile() {
+        return createdFromFile;
+    }
+
     ///////////////////////////////////////////////////////////////////////
     // MISC METHODS
 
@@ -182,6 +196,7 @@ public final class ChildConfig {
                 ", subType='" + subType + '\'' +
                 ", name='" + name + '\'' +
                 ", nameAliases=" + nameAliases +
+                ", wasAutoCreated=" + wasAutoCreated() +
                 //", required=" + required +
                 //", autoCreate=" + autoCreate +
                 //", defaultValue='" + defaultValue + '\'' +

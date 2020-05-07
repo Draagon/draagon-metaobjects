@@ -1,8 +1,11 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaException;
+import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.MetaDataConfig;
@@ -294,8 +297,9 @@ public abstract class MetaDataParser {
         // Check to make sure people arent' defining attributes when it shouldn't
         else {
             if (superName != null && !superName.isEmpty()) {
-                log.warn("Attribute 'super' defined on MetaData [" +typeName+ "][" +name+ "] under parent [" +parent
-                        + "], but should not be as metadata with that name already existed: file ["+getFilename()+"]");
+                logErrorOnce( parent, "getSuperMetaData("+typeName+","+name+")",
+                        "Attribute 'super' defined on MetaData [" +typeName+ "][" +name+ "] under parent [" +parent
+                                + "], but should not be as metadata with that name already existed: file ["+getFilename()+"]");
             }
         }
 
@@ -402,12 +406,46 @@ public abstract class MetaDataParser {
         ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
 
         if (cc == null) {
-            String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
-                    +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]";
             if ( getLoader().getLoaderConfig().isStrict() ) {
-                throw new MetaException( errMsg );
-            } else {
-                if ( log.isWarnEnabled() ) log.warn( errMsg );
+                throw new MetaException( "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
+                        +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]" );
+            }
+            else if ( type.equals( MetaAttribute.TYPE_ATTR ) && getLoader().getLoaderConfig().allowsAutoAttrs() ) {
+                // Auto add the new child configuration
+                cc = new ChildConfig( type, subType, name );
+                cc.setAutoCreatedFromFile( getFilename() );
+                tc.addTypeChild( cc );
+            }
+            else {
+                //log.info( "LOADER: " + getLoader() );
+                //log.info( "LOADER CONFIG: " + getLoader().getLoaderConfig() );
+                String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] was not configured"
+                        +" for parent records ["+parentType+":"+parentSubType+"]: file ["+getFilename()+"]";
+                logWarnOnce( getLoader(), "verifyAcceptableChild("+parentType+","+parentSubType+","+
+                        type+","+subType+","+name+")", errMsg );
+            }
+        }
+    }
+
+    protected void logErrorOnce( MetaData parent, String KEY, String errMsg ) {
+
+        if ( log.isErrorEnabled() ) {
+            Object v = parent.getCacheValue( KEY );
+            if ( v == null ) {
+                log.error( errMsg );
+                parent.setCacheValue( KEY, Boolean.TRUE );
+            }
+        }
+    }
+
+
+    protected void logWarnOnce( MetaData parent, String KEY, String errMsg ) {
+
+        if ( log.isWarnEnabled() ) {
+            Object v = parent.getCacheValue( KEY );
+            if ( v == null ) {
+                log.warn( errMsg );
+                parent.setCacheValue( KEY, Boolean.TRUE );
             }
         }
     }
@@ -433,5 +471,45 @@ public abstract class MetaDataParser {
         }
 
         return cc;
+    }
+
+    protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
+
+        String parentType = parentMetaData.getTypeName();
+        String parentSubType = parentMetaData.getSubTypeName();
+
+        TypeConfig parentTypeConfig = getTypesConfig().getType( parentMetaData.getTypeName() );
+        ChildConfig cc = findBestChildConfigMatch( parentTypeConfig, parentType, parentSubType,
+                MetaAttribute.TYPE_ATTR, null, attrName );
+
+        MetaAttribute attr = null;
+
+        if ( cc == null ) {
+            String errMsg = "MetaAttribute with name ["+attrName+"] is not allowed on parent record ["
+                    +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
+
+            if ( getLoader().getLoaderConfig().allowsAutoAttrs() ) {
+                cc = new ChildConfig( StringAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName );
+                cc.setAutoCreatedFromFile( getFilename() );
+            }
+            else if ( getLoader().getLoaderConfig().isStrict() ) {
+                throw new MetaDataException( errMsg );
+            }
+            else {
+                logWarnOnce( parentMetaData, "createAttributeOnParent("+attrName+")", errMsg );
+
+                attr = new StringAttribute( attrName );
+                parentMetaData.addChild( attr );
+            }
+        }
+
+        if ( attr == null && cc != null ) {
+            attr = (MetaAttribute) createOrOverlayMetaData(parentType.equals(MetaDataLoader.TYPE_LOADER), parentMetaData,
+                    cc.getType(), cc.getSubType(), attrName /*cc.getName()*/, null, null);
+        }
+
+        if ( attr != null ) {
+            attr.setValueAsString(value);
+        }
     }
 }

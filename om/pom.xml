@@ -11,7 +11,7 @@
     <artifactId>metaobjects-om</artifactId>
     <packaging>bundle</packaging>
 
-    <name>MetaObjects :: OM</name>
+    <name>MetaObjects :: ObjectManager</name>
     <url>https://github.com/Draagon/draagon-metaobjects</url>
     <description>MetaObjects for Model-driven development - ObjectManager</description>
 

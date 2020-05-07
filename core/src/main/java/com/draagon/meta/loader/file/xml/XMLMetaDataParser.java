@@ -248,36 +248,6 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
         }
     }
 
-    protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
-
-        String parentType = parentMetaData.getTypeName();
-        String parentSubType = parentMetaData.getSubTypeName();
-
-        TypeConfig parentTypeConfig = getTypesConfig().getType( parentMetaData.getTypeName() );
-        ChildConfig cc = findBestChildConfigMatch( parentTypeConfig, parentType, parentSubType,
-                MetaAttribute.TYPE_ATTR, null, attrName );
-
-        MetaAttribute attr = null;
-
-        if ( cc == null ) {
-            String errMsg = "MetaAttribute with name ["+attrName+"] is not allowed on parent record ["
-                    +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
-            if ( getLoader().getLoaderConfig().isStrict() ) {
-                throw new MetaDataException( errMsg );
-            } else {
-                if ( log.isWarnEnabled() ) log.warn( errMsg );
-                attr = new StringAttribute( attrName );
-            }
-        }
-        else {
-            attr = (MetaAttribute) createOrOverlayMetaData( parentType.equals(MetaDataLoader.TYPE_LOADER), parentMetaData,
-                    cc.getType(), cc.getSubType(), attrName /*cc.getName()*/, null, null );
-            // TODO:  Fix the other place attributes allow aliases and use the alias name
-        }
-
-        attr.setValueAsString(value);
-    }
-
     /**
      * Parse the MetaAttribute Value
      */

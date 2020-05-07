@@ -54,6 +54,7 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
         return out;
     }
 
+    private boolean allowAutoAttrs = false;
     private final List<PatternParser> patternParsers = new ArrayList<>();
     private final List<MetaDataSources> sources = new ArrayList<>();
 
@@ -64,6 +65,7 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
                 .addParser( "*.xml", XMLMetaDataParser.class )
                 .addParser( "*.json", JsonMetaDataParser.class )
                 .setSources( sources )
+                .setAllowAutoAttrs( true )
                 .setShouldRegister( shouldRegister );
     }
 
@@ -139,6 +141,15 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
         throw new MetaDataException( "No MetaDataParser was found for file ["+filename+"] on MetaDataLoader ["+loader+"]" );
     }
 
+    public boolean allowsAutoAttrs() {
+        return allowAutoAttrs;
+    }
+
+    public FileLoaderConfig setAllowAutoAttrs(boolean allowAutoAttrs) {
+        this.allowAutoAttrs = allowAutoAttrs;
+        return this;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // Misc Methods
 
@@ -148,13 +159,14 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         FileLoaderConfig<?> config = (FileLoaderConfig<?>) o;
-        return Objects.equals(patternParsers, config.patternParsers) &&
+        return allowAutoAttrs == config.allowAutoAttrs &&
+                Objects.equals(patternParsers, config.patternParsers) &&
                 Objects.equals(sources, config.sources);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), patternParsers, sources);
+        return Objects.hash(super.hashCode(), allowAutoAttrs, patternParsers, sources);
     }
 
     @Override
@@ -163,6 +175,7 @@ public class FileLoaderConfig<N extends FileLoaderConfig> extends LoaderConfig<N
                 "shouldRegister=" + shouldRegister() +
                 ", verbose=" + isVerbose() +
                 ", strict=" + isStrict() +
+                ", allowAutoAttrs=" + allowAutoAttrs +
                 ", patternParsers=" + patternParsers +
                 ", sources=" + sources +
                 '}';
