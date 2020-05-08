@@ -18,7 +18,7 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
     public static String ARG_OUTPUTFILENAME = "outputFilename";
 
     private Map<String,String> args = new HashMap<>();
-    private String filter = null;
+    private List<String> filters = new ArrayList<>();
     private List<String> scripts = new ArrayList<>();
 
     @Override
@@ -26,6 +26,7 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
          args.putAll( argMap );
         return (T) this;
     }
+
 
     protected Map<String,String> getArgs() {
         return args;
@@ -47,13 +48,23 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
     }
 
     @Override
-    public T setFilter(String filter) {
-        this.filter = filter;
+    public T setFilters(List<String> filters) {
+        this.filters = filters;
         return (T) this;
     }
 
-    protected String getFilter() {
-        return filter;
+    protected List<String> getFilters() {
+        return filters;
+    }
+
+    @Override
+    public T setScripts(List<String> scripts) {
+        this.scripts = scripts;
+        return (T) this;
+    }
+
+    protected List<String> getScripts() {
+        return scripts;
     }
 
     protected String getOutputFilename() {

@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class JsonModelTest extends GeneratorTestBase {
 
         Generator generator = new JsonModelGenerator()
                 .setArgs( args )
-                .setFilter( "*" );
+                .setFilters(Arrays.asList( new String[] {"*"} ));
 
         generator.execute( loader );
 

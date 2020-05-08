@@ -36,7 +36,9 @@
                             <args>
                                 <basePkg>src/main/java</basePkg>
                             </args>
-                            <filter>test::v1:produce::*</filter>
+                            <filters>
+                                <filter>test::v1:produce::*</filter>
+                            </filters>
                             <scripts>
                                 <script>test-produce.groovy</script>
                             </scripts>

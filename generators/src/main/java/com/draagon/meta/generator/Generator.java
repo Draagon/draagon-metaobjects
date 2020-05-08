@@ -8,7 +8,7 @@ import java.util.Map;
 public interface Generator<T extends Generator> {
 
     public Generator setArgs( Map<String,String> args );
-    public Generator setFilter( String filter );
+    public Generator setFilters( List<String> filters );
     public Generator setScripts( List<String> scripts );
 
     public void execute( MetaDataLoader loader );

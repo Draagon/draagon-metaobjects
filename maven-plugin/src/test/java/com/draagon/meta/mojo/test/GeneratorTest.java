@@ -10,7 +10,7 @@ public class GeneratorTest implements Generator<GeneratorTest> {
 
     private MetaDataLoader loader = null;
     private Map<String,String> args = null;
-    private String filter = null;
+    private List<String> filters = null;
     private List<String> scripts = null;
 
     public GeneratorTest() {}
@@ -22,8 +22,8 @@ public class GeneratorTest implements Generator<GeneratorTest> {
     }
 
     @Override
-    public GeneratorTest setFilter(String filter) {
-        this.filter = filter;
+    public GeneratorTest setFilters(List<String> filters) {
+        this.filters = filters;
         return this;
     }
 
@@ -37,9 +37,9 @@ public class GeneratorTest implements Generator<GeneratorTest> {
     public void execute(MetaDataLoader loader) {
         this.loader = loader;
 
-        System.out.println( "LOADER:  " +loader );
-        System.out.println( "ARGS:    " +args );
-        System.out.println( "FILTER:  " +filter );
-        System.out.println( "SCRIPTS: " +scripts );
+        System.out.println( "LOADER:  "  + loader );
+        System.out.println( "ARGS:    "  + args );
+        System.out.println( "FILTERS:  " + filters );
+        System.out.println( "SCRIPTS: "  + scripts );
     }
 }

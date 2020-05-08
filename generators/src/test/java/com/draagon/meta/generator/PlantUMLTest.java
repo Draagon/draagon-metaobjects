@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public class PlantUMLTest extends GeneratorTestBase {
 
         Generator generator = new PlantUMLGenerator()
                 .setArgs( args )
-                .setFilter( filter );
+                .setFilters(Arrays.asList( new String[] {"*"} ));
 
         generator.execute( loader );
 

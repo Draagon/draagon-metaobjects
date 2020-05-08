@@ -122,7 +122,7 @@ public class MetaDataMojo extends AbstractMojo
                     if ( globals != null ) allargs.putAll(globals);
                     impl.setArgs(allargs);
 
-                    if ( g.getFilter() != null ) impl.setFilter(g.getFilter());
+                    if ( g.getFilters() != null ) impl.setFilters(g.getFilters());
                     if ( g.getScripts() != null ) impl.setScripts(g.getScripts());
                     impl.execute(loader);
                 }

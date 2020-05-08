@@ -7,7 +7,7 @@ public class GeneratorParam {
 
     private String classname = null;
     private Map<String,String> args = null;
-    private String filter = null;
+    private List<String> filters = null;
     private List<String> scripts = null;
 
     public GeneratorParam() {}
@@ -28,12 +28,12 @@ public class GeneratorParam {
         this.args = args;
     }
 
-    public String getFilter() {
-        return filter;
+    public List<String> getFilters() {
+        return filters;
     }
 
-    public void setFilter(String filter) {
-        this.filter = filter;
+    public void setFilters(String filter) {
+        this.filters = filters;
     }
 
     public List<String> getScripts() {
