@@ -34,7 +34,8 @@ public class GeneratorUtil {
             switch(c)
             {
                 case '*': out += ".*"; break;
-                case '?': out += '.'; break;
+                case '@': out += "[^:]+"; break;
+                case '?': out += "."; break;
                 case '.': out += "\\."; break;
                 case ':': out += "\\:"; break;      // TODO:  This doesn't seem to work on enforcing the ::'s as a separator for *
                 case '\\': out += "\\\\"; break;
