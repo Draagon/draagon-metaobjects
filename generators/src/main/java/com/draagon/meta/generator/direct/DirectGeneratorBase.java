@@ -9,6 +9,7 @@ import com.draagon.meta.object.MetaObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public abstract class DirectGeneratorBase<T extends DirectGeneratorBase> extends
     }
 
 
-    protected List<String> getUniquePackages(List<MetaData> filtered ) throws IOException {
+    protected List<String> getUniquePackages(Collection<? extends MetaData> filtered ) throws IOException {
         List<String> pkgs = new ArrayList<>();
 
         filtered.forEach( md -> {

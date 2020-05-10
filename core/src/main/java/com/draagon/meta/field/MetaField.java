@@ -9,6 +9,7 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.relation.ref.ObjectReference;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
@@ -112,6 +113,13 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
      */
     public MetaField addMetaAttr(MetaAttribute attr) {
         return addChild(attr);
+    }
+
+    /**
+     * Get an ObjectReference for the MetaField
+     */
+    public ObjectReference getFirstObjectReference() {
+        return (ObjectReference) getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
     }
 
     /**

@@ -2,15 +2,13 @@ package com.draagon.meta.generator;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
+import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class GeneratorBase<T extends GeneratorBase> implements Generator<T> {
 
@@ -87,9 +85,11 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
         return f;
     }
 
-    protected List<MetaData> getFilteredMetaData( MetaDataLoader loader ) {
+    protected Collection<MetaData> getFilteredMetaData( MetaDataLoader loader ) {
+        return GeneratorUtil.getFilteredMetaData( loader, getFilters() );
+    }
 
-        // TODO:  Make this actually filter
-        return loader.getChildren();
+    protected Collection<MetaObject> getFilteredMetaObjects( MetaDataLoader loader ) {
+        return GeneratorUtil.getFilteredMetaData( loader, MetaObject.class, getFilters() );
     }
 }

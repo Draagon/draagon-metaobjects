@@ -43,7 +43,7 @@ public class UIJsonModelGenerator extends JsonModelGenerator {
             jsonWriter.beginObject();
             jsonWriter.name( "metadata" ).beginArray();
 
-            List<MetaData> filtered = getFilteredMetaData(loader);
+            Collection<MetaObject> filtered = getFilteredMetaObjects(loader);
             List<String> packages = getUniquePackages( filtered );
 
             for ( String p : packages ) {
@@ -65,7 +65,7 @@ public class UIJsonModelGenerator extends JsonModelGenerator {
         }
     }
 
-    protected List<MetaData> getMetaDataForPackage( String pkg, List<MetaData> mds) {
+    protected List<MetaData> getMetaDataForPackage( String pkg, Collection<MetaObject> mds) {
         List<MetaData> out = new ArrayList<>();
         for (MetaData md : mds ) {
             if ( md.getPackage().equals( pkg )) out.add( md );

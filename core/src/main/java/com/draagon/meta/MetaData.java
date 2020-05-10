@@ -368,9 +368,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      */
     public List<MetaAttribute> getMetaAttrs( boolean includeParentData ) {
 
-        return getChildren(MetaAttribute.class, includeParentData); //.stream()
-                //.map(MetaAttribute.class::cast)
-                //.collect(Collectors.toList());
+        return getChildren(MetaAttribute.class, includeParentData);
     }
 
     /////////////////////////////////////////////////////////////////////////////

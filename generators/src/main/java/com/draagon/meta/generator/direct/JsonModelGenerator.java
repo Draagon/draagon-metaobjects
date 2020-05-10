@@ -38,7 +38,7 @@ public class JsonModelGenerator extends DirectGeneratorBase<JsonModelGenerator> 
             jsonWriter.beginObject();
             jsonWriter.name( "metadata" ).beginArray();
 
-            for (MetaData md : getFilteredMetaData(loader)) {
+            for (MetaData md : getFilteredMetaObjects(loader)) {
                 writeMetaData( jsonWriter, md );
             }
 

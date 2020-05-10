@@ -3,13 +3,14 @@ package com.draagon.meta.generator.direct;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.GeneratorMetaException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.relation.ref.*;
 import com.draagon.meta.util.MetaDataUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,73 +19,58 @@ import java.util.*;
 
 public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
+    private Log log = LogFactory.getLog( this.getClass() );
+
     private boolean showAttrs = false;
     private boolean showAbstracts = true;
 
+    /** Passes at context data for the execution */
+    public static class Context {
+
+        public final PrintWriter pw;
+        public final String indent;
+        public final Collection<MetaObject> objects;
+
+        public Context( PrintWriter pw, String indent, Collection<MetaObject> objects ) {
+            this.pw = pw;
+            this.indent = indent;
+            this.objects = objects;
+        }
+        public Context copyAndInc() {
+            return new Context( pw, indent + "  ", objects);
+        }
+    }
+
     @Override
-    public void execute(MetaDataLoader loader) {
+    public void execute( MetaDataLoader loader ) {
 
         File outf = null;
         PrintWriter pw = null;
 
-        if ( hasArg( "showAttrs"))
-            showAttrs = Boolean.parseBoolean( getArg( "showAttrs"));
-        if ( hasArg( "showAbstracts"))
-            showAbstracts = Boolean.parseBoolean( getArg( "showAbstracts"));
-
-        System.out.println( "PlantUML: showAttrs="+showAttrs);
-        System.out.println( "PlantUML: showAbstracts="+showAbstracts);
+        parseArgs();
 
         try {
-            File f = getOutputDir();
-
-            // TODO: Use an argument here for the filename
-            outf = new File(f, getOutputFilename());
+            // Create output file
+            outf = new File(getOutputDir(), getOutputFilename());
             outf.createNewFile();
 
+            // Get the printwriter
             pw = new PrintWriter(outf);
 
-            pw.println("@startuml");
-            pw.println();
-            pw.println("skinparam class {");
-            pw.println("    BackgroundColor PaleGreen");
-            pw.println("    ArrowColor SeaGreen");
-            pw.println("    BorderColor DarkGreen");
-            pw.println("    BackgroundColor<<Abstract>> Wheat");
-            pw.println("    BorderColor<<Abstract>> Tomato");
-            pw.println("}");
-            pw.println("skinparam stereotypeCBackgroundColor YellowGreen");
-            pw.println("skinparam stereotypeCBackgroundColor<< Abstract >> DimGray");
-            pw.println();
-            pw.println("set namespaceSeparator ::");
+            // Get the filtered objects
+            Collection<MetaObject> filteredObjects = getFilteredMetaObjects(loader);
 
-            List<MetaData> filtered = getFilteredMetaData(loader);
-            for ( String p : getUniquePackages( filtered )) {
+            // Create the Context for passing through the writers
+            Context c = new Context( pw, "", filteredObjects );
 
-                if (!p.isEmpty()) pw.println("namespace " + p + " {" );
+            // Write start of UML file
+            drawFileStart(c);
 
-                // Write MetaObjects
-                for (MetaData md : filtered) {
-                    if ( md instanceof MetaObject && md.getPackage().equals( p )
-                            && ( !isAbstract( md ) || (isAbstract(md) && showAbstracts ))) {
-                        MetaObject mo = (MetaObject) md;
+            // Write Packages
+            writePackages(c);
 
-                        writerMetaData(pw, "  ", mo);
-                    }
-                }
-
-                if (!p.isEmpty()) pw.println("}" );
-
-                // Write Object References
-                for (MetaData md : filtered) {
-                    if ( md instanceof MetaObject && md.getPackage().equals( p )) {
-                        writeObjectRelationships(pw, "", (MetaObject) md);
-                    }
-                }
-            }
-
-
-            pw.println("@enduml");
+            // Write end of UML file
+            drawFileEnd(c);
         }
         catch( IOException e ) {
             throw new GeneratorMetaException( "Unable to write PlantUML to file [" + outf + "]: " + e, e );
@@ -94,143 +80,174 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected void writerMetaData( PrintWriter pw, String indent, MetaData md ) throws IOException {
 
-        boolean isAbstract = isAbstract( md );
+    protected void parseArgs() {
 
-        pw.print( indent + "class "+ _pu(md.getShortName()));
-        if ( isAbstract ) pw.print( " << (A,#FF7700) Abstract");
-        else pw.print( " << (O,#AAAAFF)");
-        pw.println( " >> {");
+        if ( hasArg( "showAttrs"))
+            showAttrs = Boolean.parseBoolean( getArg( "showAttrs"));
+        if ( hasArg( "showAbstracts"))
+            showAbstracts = Boolean.parseBoolean( getArg( "showAbstracts"));
 
-        // Write Attributes
-        if ( showAttrs ) {
+        if ( log.isDebugEnabled() ) {
+            log.debug("PlantUML: showAttrs=" + showAttrs);
+            log.debug("PlantUML: showAbstracts=" + showAbstracts);
+        }
+    }
 
-            pw.println(indent+"  .. Attributes ..");
-            pw.println(indent+"  type="+md.getSubTypeName() );
+    protected void writePackages(Context c) throws IOException {
 
-            List<MetaAttribute> attrs = (List<MetaAttribute>) md.getChildren(MetaAttribute.class, true );
-            if (!attrs.isEmpty()) {
-                writeAttributes(pw, indent + " ", null, attrs);
+        for ( String p : getUniquePackages( c.objects )) {
+
+            if (!p.isEmpty()) drawNamespaceStart( c, p );
+
+            // Write MetaObjects
+            writeMetaObjects(c, p);
+
+            if (!p.isEmpty()) drawNamespaceEnd( c );
+
+            // Write Object References
+            renderObjectRelationships(c, p);
+        }
+    }
+
+    protected void writeMetaObjects(Context c, String p) throws IOException {
+
+        for (MetaObject mo : c.objects) {
+            if ( mo.getPackage().equals( p )
+                    && showIfAbstract(mo)) {
+
+                renderMetaObject( c.copyAndInc(), mo );
             }
         }
+    }
+
+
+    protected void renderObjectRelationships(Context c, String p) throws IOException {
+
+        for (MetaObject mo : c.objects) {
+            if ( mo.getPackage().equals( p )) {
+                renderObjectRelationships(c, mo);
+            }
+        }
+    }
+
+    protected void renderMetaObject(Context c, MetaObject mo ) throws IOException {
+
+        drawObjectStart( c, mo );
+
+        // Write Attributes
+        writeObjectAttrSection( c.copyAndInc(), mo );
+
+        writeObjectFieldSection(c, mo);
+
+        drawObjectEnd(c);
+    }
+
+    protected void writeObjectAttrSection(Context c, MetaObject mo) {
+        if ( showAttrs ) {
+            drawObjectAttrHeader(c, mo);
+
+            List<MetaAttribute> attrs = (List<MetaAttribute>) mo.getChildren(MetaAttribute.class, true);
+            if (!attrs.isEmpty()) {
+                attrs.forEach( a -> drawObjectAttr(c.copyAndInc(), a));
+            }
+        }
+    }
+
+    protected void writeObjectFieldSection(Context c, MetaObject mo) {
 
         // Write Fields
-        List<MetaField> fields = (List<MetaField>) md.getChildren(MetaField.class, true );
+        Collection<MetaField> fields = mo.getMetaFields();
         if ( !fields.isEmpty() ) {
-            pw.println(indent + " .. Fields ..");
 
-            fields = (List<MetaField>) md.getChildren(MetaField.class, false);
-            writeFields(pw, indent + "  ", fields);
+            drawObjectFieldSection(c, "Fields");
 
-            if (md.getSuperData() != null && isAbstract(md.getSuperData()) && !showAbstracts) {
-                pw.println(indent + " .. "+md.getSuperData().getShortName()+" Fields ..");
-                fields = (List<MetaField>) md.getSuperData().getChildren(MetaField.class, true);
-                writeFields(pw, indent + "  ", fields);
-            }
-            else if ( md.getSuperData() != null && fields.isEmpty() ) {
-                pw.println(indent+" .. "+md.getSuperData().getShortName()+" ..");
+            fields = mo.getMetaFields( false);
+            writeObjectFields(c.copyAndInc(), fields);
+
+            MetaObject parent = mo.getSuperObject();
+            if ( parent != null ) {
+                if (isAbstract(parent) && !showAbstracts) {
+
+                    drawObjectFieldSection(c, parent.getShortName() + " Fields");
+                    writeObjectFields(c.copyAndInc(), parent.getMetaFields());
+                }
+                else if (fields.isEmpty()) {
+                    drawObjectFieldSection(c, parent.getShortName());
+                }
             }
         }
         else {
-            pw.println(indent+" .. No Fields ..");
+            drawObjectFieldSection(c, "No Fields");
         }
-
-        pw.println(indent+"}");
     }
 
-    protected void writeFields(PrintWriter pw, String indent, List<MetaField> fields) {
+    protected void writeObjectFields(Context c, Collection<MetaField> fields) {
 
         for (MetaField f : fields) {
 
             if ( !isAbstract(f) && (!showAbstracts && isAbstract( f ))) continue;
 
-            pw.print(indent+"  + " + _pu(f.getShortName()) + " ");
-
-            MetaData oref = null;
-            try { oref = MetaDataUtil.getObjectRef( f ); } catch( Exception e ) {}
+            MetaData oref = getMetaObjectRef(f);
             if ( oref != null ) {
-                pw.println();
-                pw.print( "    --> ");
-                if ( f.getDataType().isArray() ) pw.print("[] " );
-                pw.print( oref.getShortName() );
-                //pw.print("}");
+                drawObjectFieldWithRef(c.copyAndInc(), f, oref);
             }
-            else if ( f.getSuperData() != null ) {
-                pw.println("{"+f.getSubTypeName() + "}");
-                pw.print( "    super=" + _pu( _slimPkg( f.getSuperField().getPackage(), f.getPackage() )
-                        + f.getSuperField().getShortName()));
+            else if ( f.getSuperField() != null ) {
+                drawObjectFieldWithSuper(c.copyAndInc(), f);
             }
             else {
-                pw.print("{"+f.getSubTypeName() + "}");
+                drawObjectField(c.copyAndInc(), f);
             }
 
-            pw.println();
-
             if ( showAttrs ) {
-                List<MetaAttribute> attrs = (List<MetaAttribute>) f.getChildren(MetaAttribute.class, !showAbstracts);
-                if (!attrs.isEmpty()) {
-                    writeAttributes(pw, indent + "   ", f, attrs);
-                }
+                List<MetaAttribute> attrs = f.getMetaAttrs( !showAbstracts );
+                attrs.forEach( a -> drawFieldAttr(c.copyAndInc(), f, a));
             }
         }
     }
 
+    protected MetaObject getMetaObjectRef(MetaField f) {
+        try { return MetaDataUtil.getObjectRef( f ); } 
+        catch( Exception e ) { return null; }
+    }
 
-    protected void writeObjectRelationships( PrintWriter pw, String indent, MetaObject mo ) throws IOException {
+    protected void renderObjectRelationships(Context c, MetaObject mo ) throws IOException {
 
         if ( mo.getSuperObject() != null
-                && ( !isAbstract( mo.getSuperObject() )
-                    || (isAbstract( mo.getSuperObject() ) && showAbstracts))) {
-            pw.println( _pu(mo.getName()) + " ..|> " + _pu( mo.getSuperObject().getName()) + " : extends" );
+                && showIfAbstract(mo.getSuperObject())) {
+
+            drawObjectSuperReference(c, mo);
         }
 
         // Write Fields
         List<MetaField> fields = (List<MetaField>) mo.getChildren(MetaField.class, false);
         if ( !fields.isEmpty() ) {
 
-            pw.println();
+            drawNewLine(c);
 
             for (MetaField f : fields) {
 
-                ObjectReference oref = (ObjectReference) f.getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
+                ObjectReference oref = f.getFirstObjectReference();
                 if ( oref != null ) {
+                    
                     MetaObject objRef = oref.getReferencedObject();
+                    if (objRef != null
+                            && c.objects.contains(objRef)
+                            && showIfAbstract(objRef)) {
 
-                    if ( !isAbstract( oref ) || ( isAbstract(oref) && showAbstracts)) {
-
-                        if (objRef != null) {
-                            pw.print(_pu(f.getParent().getName()));
-                            if (oref instanceof OneToOneReference) pw.print("\"1\" --> \"1\"");
-                            else if (oref instanceof OneToManyReference) pw.print("\"1\" --> \"many\"");
-                            else if (oref instanceof ManyToOneReference) pw.print("\"many\" --> \"1\"");
-                            else if (oref instanceof ManyToManyReference) pw.print("\"many\" --> \"many\"");
-                            else pw.print(" --> ");
-                            pw.print(_pu(objRef.getName()) + " : ");
-                            if (oref.getName() == null) pw.println(_pu(f.getShortName()));
-                            else pw.println(_pu(f.getShortName()) + ":" + _pu(oref.getName()));
-                        }
+                        drawObjectKeyReference(c, f, oref);
                     }
                 }
                 else {
-                    try {
-                        MetaObject objRef = MetaDataUtil.getObjectRef(f);
-                        if ( !isAbstract( objRef ) || (isAbstract( objRef ) && showAbstracts )) {
-                            pw.println(_pu(f.getParent().getName()) + " --> " + _pu(objRef.getName()) + " : " + _pu(f.getShortName()));
-                        }
-                    } catch (MetaAttributeNotFoundException e) {}
+                    MetaObject objRef = getMetaObjectRef(f);
+                    if ( objRef != null
+                            && c.objects.contains(objRef)
+                            && showIfAbstract(objRef)) {
+
+                        drawObjectReference(c, f, objRef);
+                    }
                 }
             }
-        }
-    }
-
-    protected void writeAttributes( PrintWriter pw, String indent, MetaField f, List<MetaAttribute> attrs ) {
-
-        String pre = "";
-        for (MetaAttribute a : attrs) {
-            //pw.println(indent+"{"+a.getSubTypeName() + "} " + a.getShortName() +" = "+a.getValueAsString());
-            if ( f != null ) pre = " [attr:"+a.getSubTypeName() + "] ";
-            pw.println(indent+pre+ _pu(a.getShortName()) +"="+getAttrValue(a));
         }
     }
 
@@ -339,5 +356,119 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             return true;
         }
         return false;
+    }
+    
+    protected boolean showIfAbstract(MetaObject superObject) {
+        return !isAbstract(superObject)
+                || (isAbstract(superObject)
+                && showAbstracts);
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    // UML Output methods
+
+    protected void drawFileStart(Context c ) {
+
+        c.pw.println("@startuml");
+        c.pw.println();
+        c.pw.println("skinparam class {");
+        c.pw.println("    BackgroundColor PaleGreen");
+        c.pw.println("    ArrowColor SeaGreen");
+        c.pw.println("    BorderColor DarkGreen");
+        c.pw.println("    BackgroundColor<<Abstract>> Wheat");
+        c.pw.println("    BorderColor<<Abstract>> Tomato");
+        c.pw.println("}");
+        c.pw.println("skinparam stereotypeCBackgroundColor YellowGreen");
+        c.pw.println("skinparam stereotypeCBackgroundColor<< Abstract >> DimGray");
+        c.pw.println();
+        c.pw.println("set namespaceSeparator ::");
+    }
+
+    protected void drawFileEnd(Context c ) {
+        c.pw.println("@enduml");
+    }
+
+    protected void drawNamespaceStart(Context c, String pkg ) {
+        c.pw.println("namespace " + pkg + " {" );
+    }
+
+    protected void drawNamespaceEnd(Context c ) {
+        c.pw.println("}" );
+    }
+
+    protected void drawObjectStart( Context c, MetaObject mo ) {
+        c.pw.print( c.indent + "class "+ _pu(mo.getShortName()));
+        if ( isAbstract( mo ) ) c.pw.print( " << (A,#FF7700) Abstract");
+        else c.pw.print( " << (O,#AAAAFF)");
+        c.pw.println( " >> {");
+    }
+
+    protected void drawObjectEnd(Context c) {
+        c.pw.println(c.indent+"}");
+    }
+
+    protected void drawObjectAttrHeader(Context c, MetaObject mo) {
+        c.pw.println(c.indent+"  .. Attributes ..");
+        c.pw.println(c.indent+"  type="+mo.getSubTypeName() );
+    }
+
+    protected void drawObjectAttr(Context c, MetaAttribute a) {
+        c.pw.println(c.indent+ _pu(a.getShortName()) +"="+getAttrValue(a));
+    }
+
+    protected void drawObjectFieldSection(Context c, String s) {
+        c.pw.println(c.indent + " .. " + s + " .. ");
+    }
+
+    protected void drawObjectField(Context c, MetaField f) {
+        c.pw.print(c.indent+"+ " + _pu(f.getShortName()) + " ");
+        c.pw.println("{"+f.getSubTypeName() + "}");
+    }
+
+    protected void drawObjectFieldWithSuper(Context c, MetaField f) {
+        c.pw.print(c.indent+"+ " + _pu(f.getShortName()) + " ");
+        c.pw.println("{"+f.getSubTypeName() + "}");
+        c.pw.println(c.indent+"super="
+                + _pu( _slimPkg( f.getSuperField().getPackage(), f.getPackage() )
+                + f.getSuperField().getShortName()));
+    }
+
+    protected void drawObjectFieldWithRef(Context c, MetaField f, MetaData oref) {
+        c.pw.println(c.indent+"+ " + _pu(f.getShortName()) + " ");
+        c.pw.print(c.indent+"--> ");
+        if ( f.getDataType().isArray() ) c.pw.print("[] " );
+        c.pw.println( oref.getShortName() );
+    }
+
+    protected void drawFieldAttr(Context c, MetaField f, MetaAttribute a) {
+        c.pw.print(c.indent+" [attr:"+a.getSubTypeName() + "] ");
+        c.pw.println( _pu(a.getShortName()) +"="+getAttrValue(a));
+    }
+
+    protected void drawObjectSuperReference(Context c, MetaObject mo) {
+        c.pw.println( _pu(mo.getName()) +" ..|> " 
+                + _pu( mo.getSuperObject().getName()) +" : extends" );
+    }
+
+    protected void drawObjectKeyReference(Context c, MetaField f, ObjectReference oref ) {
+        c.pw.print(c.indent+_pu(f.getParent().getName()));
+        MetaObject objRef = oref.getReferencedObject();
+        if (oref instanceof OneToOneReference) c.pw.print("\"1\" --> \"1\"");
+        else if (oref instanceof OneToManyReference) c.pw.print("\"1\" --> \"many\"");
+        else if (oref instanceof ManyToOneReference) c.pw.print("\"many\" --> \"1\"");
+        else if (oref instanceof ManyToManyReference) c.pw.print("\"many\" --> \"many\"");
+        else c.pw.print(" --> ");
+        c.pw.print(_pu(objRef.getName()) +" : ");
+        if (oref.getName() == null) c.pw.println(_pu(f.getShortName()));
+        else c.pw.println(_pu(f.getShortName()) + ":" + _pu(oref.getName()));
+    }
+
+    protected void drawObjectReference(Context c, MetaField f, MetaObject objRef) {
+        c.pw.println(c.indent + _pu(f.getParent().getName()) 
+                +" --> "+ _pu(objRef.getName()) +" : "+ _pu(f.getShortName()));
+    }
+
+    protected void drawNewLine(Context c) {
+        c.pw.println();
     }
 }

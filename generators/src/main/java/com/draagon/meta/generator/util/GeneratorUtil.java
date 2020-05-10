@@ -10,14 +10,35 @@ import java.util.regex.Pattern;
 
 public class GeneratorUtil {
 
+
+    public static Collection<MetaData> getFilteredMetaData(MetaDataLoader loader, List<String> filters ) {
+
+        return filterMetaData( loader.getChildren(), MetaData.class, filters );
+    }
+
     public static <T extends MetaData> Collection<T> getFilteredMetaData(MetaDataLoader loader, Class<T> clazz, List<String> filters ) {
+        return filterMetaData( loader.getMetaData( clazz ), clazz, filters );
+    }
+
+    public static <T extends MetaData> Collection<T> filterMetaData( Collection<T> in, Class<T> clazz, List<String> filters ) {
 
         List<T> out = new ArrayList<>();
-        for ( T md : loader.getMetaData( clazz, true )) {
-            for ( String f : filters ) {
-                if ( filterMatch( md.getName(), f ));
+
+        for ( T md : in ) {
+
+            if ( filters == null || filters.isEmpty() ) {
+                out.add(md);
+            }
+            else {
+                for (String f : filters) {
+                    if (filterMatch(md.getName(), f)) {
+                        out.add(md);
+                        break;
+                    }
+                }
             }
         }
+
         return out;
     }
 

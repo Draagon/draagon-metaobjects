@@ -50,7 +50,7 @@ public class MetaDataXSDGenerator extends DirectGeneratorBase<MetaDataXSDGenerat
             pw.println();
             pw.println("set namespaceSeparator ::");
 
-            List<MetaData> filtered = getFilteredMetaData(loader);
+            Collection<MetaObject> filtered = getFilteredMetaObjects(loader);
             for ( String p : getUniquePackages( filtered )) {
 
                 if (!p.isEmpty()) pw.println("namespace " + p + " {" );
