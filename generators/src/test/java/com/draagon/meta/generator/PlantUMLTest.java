@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlantUMLTest extends GeneratorTestBase {
@@ -36,7 +37,7 @@ public class PlantUMLTest extends GeneratorTestBase {
         args.put( "showAbstracts", "true" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-1.pu" );
 
-        drawUML( args, "*" );
+        drawUML( args, Arrays.asList( new String[] {"*"} ) );
     }
 
     @Test
@@ -47,7 +48,7 @@ public class PlantUMLTest extends GeneratorTestBase {
         args.put( "showAbstracts", "true" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-2.pu" );
 
-        drawUML( args, "*" );
+        drawUML( args, Arrays.asList( new String[] {"*"} ) );
     }
 
     @Test
@@ -58,16 +59,75 @@ public class PlantUMLTest extends GeneratorTestBase {
         args.put( "showAbstracts", "false" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-3.pu" );
 
-        drawUML( args, "*" );
+        drawUML( args, Arrays.asList( new String[] {"*"} ) );
     }
 
-    protected void drawUML( Map<String,String> args, String filter ) {
+
+    @Test
+    public void testPlantUMLGenerator4() {
+
+        Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "false" );
+        args.put( "showAbstracts", "false" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-4.pu" );
+
+        drawUML( args, Arrays.asList( new String[] {
+                "produce::v1::fruit::*",
+                "produce::v1::container::*"
+        } ));
+    }
+
+    @Test
+    public void testPlantUMLGenerator5() {
+
+        Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "false" );
+        args.put( "showAbstracts", "false" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-5.pu" );
+
+        drawUML( args, Arrays.asList( new String[] {
+                "produce::v1::fruit::*",
+                "produce::v1::container::@"
+        } ));
+    }
+
+    @Test
+    public void testPlantUMLGenerator6() {
+
+        Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "false" );
+        args.put( "showAbstracts", "false" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-6.pu" );
+
+        drawUML( args, Arrays.asList( new String[] {
+                "produce::v1::fruit::*",
+                "produce::v1::vegetable::*",
+                "produce::v1::container::@"
+        } ));
+    }
+
+    @Test
+    public void testPlantUMLGenerator7() {
+
+        Map<String,String> args = new HashMap<>();
+        args.put( "showAttrs", "false" );
+        args.put( "showAbstracts", "true" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-7.pu" );
+
+        drawUML( args, Arrays.asList( new String[] {
+                "produce::v1::fruit::*",
+                "produce::v1::vegetable::*",
+                "produce::v1::container::@"
+        } ));
+    }
+
+    protected void drawUML( Map<String,String> args, List<String> filters ) {
 
         args.put( GeneratorBase.ARG_OUTPUTDIR, getGeneratedTestSourcesPath() );
 
         Generator generator = new PlantUMLGenerator()
                 .setArgs( args )
-                .setFilters(Arrays.asList( new String[] {"*"} ));
+                .setFilters( filters );
 
         generator.execute( loader );
 

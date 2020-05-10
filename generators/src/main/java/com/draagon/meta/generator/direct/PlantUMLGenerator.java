@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
@@ -61,7 +62,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             pw = new PrintWriter(outf);
 
             // Get the filtered objects
-            Collection<MetaObject> filteredObjects = getFilteredMetaObjects(loader);
+            Collection<MetaObject> filteredObjects =
+                    filterByConfig( getFilteredMetaObjects(loader));
 
             // Create the Context for passing through the writers
             Context c = new Context(
@@ -74,7 +76,11 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             drawFileStart(c);
 
             // Write Packages
-            writePackages(c);
+            writeObjectPackages(c);
+
+            drawNewLine(c);
+
+            writeRelationships(c);
 
             // Write end of UML file
             drawFileEnd(c);
@@ -87,6 +93,19 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
+    /** Filter more based on UML generator configuration */
+    protected Collection<MetaObject> filterByConfig( Collection<MetaObject> objects ) {
+        return objects
+                .stream()
+                .filter( mo -> shouldShowObject(mo) )
+                .collect( Collectors.toList());
+    }
+
+    protected boolean shouldShowObject(MetaObject mo) {
+        return !isAbstract(mo)
+                || (isAbstract(mo)
+                    && showAbstracts);
+    }
 
     protected void parseArgs() {
 
@@ -101,46 +120,55 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected void writePackages(Context c) throws IOException {
+    protected void writeObjectPackages(Context c) throws IOException {
 
-        for ( String p : getUniquePackages( c.objects )) {
+        List<String> pkgs = getUniquePackages(c.objects);
+
+        writeEmptyPackageNesting( c, pkgs );
+
+        for ( String p : pkgs ) {
 
             if (!p.isEmpty()) drawNamespaceStart( c, p );
 
             // Write MetaObjects
-            writeMetaObjects(c, p);
+            for (MetaObject mo : c.objects) {
+                if ( mo.getPackage().equals( p )) {
+                    writeMetaObject( c.incIndent(), mo );
+                }
+            }
 
             if (!p.isEmpty()) drawNamespaceEnd( c );
         }
-
-        for ( String p : getUniquePackages( c.objects )) {
-            // Write Object References
-            renderObjectRelationships(c, p);
-        }
     }
 
-    protected void writeMetaObjects(Context c, String p) throws IOException {
-
-        for (MetaObject mo : c.objects) {
-            if ( mo.getPackage().equals( p )
-                    && showIfAbstract(mo)) {
-
-                renderMetaObject( c.incIndent(), mo );
+    protected void writeEmptyPackageNesting(Context c, List<String> pkgsIn) {
+        List<String> pkgs = new ArrayList<>( pkgsIn );
+        for( String pkg : pkgsIn ) {
+            String p = pkg.substring( 0, pkg.lastIndexOf( "::" ));
+            if ( !p.isEmpty() && !pkgs.contains( p )) {
+                drawNamespaceStart( c, p );
+                drawNamespaceEnd( c );
+                pkgs.add( p );
             }
         }
     }
 
-
-    protected void renderObjectRelationships(Context c, String p) throws IOException {
+    protected void writeRelationships(Context c) throws IOException {
 
         for (MetaObject mo : c.objects) {
-            if ( mo.getPackage().equals( p )) {
-                renderObjectRelationships(c, mo);
+
+            // Write super object relationships (extends)
+            if ( mo.getSuperObject() != null
+                    && shouldShowObject( mo.getSuperObject() )) {
+                drawObjectSuperReference(c, mo);
             }
+
+            // Write ObjectRef relationships
+            writeObjectRefRelationships(c, mo);
         }
     }
 
-    protected void renderMetaObject(Context c, MetaObject mo ) throws IOException {
+    protected void writeMetaObject(Context c, MetaObject mo ) throws IOException {
 
         drawObjectStart( c, mo );
 
@@ -231,53 +259,45 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         catch( Exception e ) { return null; }
     }
 
-    protected void renderObjectRelationships(Context c, MetaObject mo ) throws IOException {
-
-        if ( mo.getSuperObject() != null
-                && showIfAbstract(mo.getSuperObject())) {
-
-            drawObjectSuperReference(c, mo);
-        }
+    protected void writeObjectRefRelationships(Context c, MetaObject mo ) throws IOException {
 
         // Write Fields
-        List<MetaField> fields = (List<MetaField>) mo.getChildren(MetaField.class, false);
-        if ( !fields.isEmpty() ) {
+        boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
 
-            drawNewLine(c);
+        for (MetaField f : mo.getMetaFields(includeParentData)) {
 
-            for (MetaField f : fields) {
+            ObjectReference oref = f.getFirstObjectReference();
+            if ( oref != null ) {
 
-                ObjectReference oref = f.getFirstObjectReference();
-                if ( oref != null ) {
-                    
-                    MetaObject objRef = oref.getReferencedObject();
-                    if (objRef != null
-                            && c.objects.contains(objRef)) {
+                MetaObject objRef = oref.getReferencedObject();
+                if (objRef != null) {
 
-                        if (isAbstract( objRef ) && !showAbstracts ) {
-                            getDerivedObjects(c, objRef).forEach( o -> drawObjectKeyReference(c, f, oref, o));
-                        }
-                        else {
-                            drawObjectKeyReference(c, f, oref, objRef);
-                        }
+                    if (isAbstract( objRef ) && !showAbstracts ) {
+                        getDerivedObjects(c, objRef)
+                                .stream()
+                                .filter( o -> c.objects.contains( o ))
+                                .forEach( o -> drawObjectKeyReference(c, f, oref, o));
+                    }
+                    else if (c.objects.contains( objRef )){
+                        drawObjectKeyReference(c, f, oref, objRef);
                     }
                 }
-                else {
-                    MetaObject objRef = getMetaObjectRef(f);
-                    if ( objRef != null
-                            && c.objects.contains(objRef)) {
+            }
+            else {
+                MetaObject objRef = getMetaObjectRef(f);
+                if ( objRef != null
+                        && c.objects.contains(objRef)) {
 
-                        drawObjectReference(c, f, objRef);
-                    }
+                    drawObjectReference(c, f, objRef);
                 }
             }
         }
     }
 
-    protected Collection<MetaObject> getDerivedObjects(Context c, MetaObject objRef) {
+    protected Collection<MetaObject> getDerivedObjects(Context c, MetaObject metaObject ) {
          Collection<MetaObject> out = new ArrayList<>();
          for ( MetaObject mo : c.loader.getChildren(MetaObject.class) ) {
-             if ( objRef.equals(mo.getSuperObject())) {
+             if ( metaObject.equals(mo.getSuperObject())) {
                  if ( isAbstract( mo ) && !showAbstracts )
                      out.addAll( getDerivedObjects( c, mo ));
                  else
@@ -288,15 +308,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     }
 
     protected String _slimPkg( String p1, String p2 ) {
-        String pkg = GeneratorUtil.toRelativePackage( p1, p2 );
-        System.out.println( "IN p1: " + p1 );
-        System.out.println( "IN p2: " + p2 );
-        System.out.println( "OUT: " + pkg );
-        return pkg;
-    }
-
-    protected String _puo( MetaObject mo, boolean showPkg ) {
-        return (showPkg ? _pp(mo) : "" ) + GeneratorUtil.toCamelCase( mo.getShortName(), true );
+       return GeneratorUtil.toRelativePackage( p1, p2 );
     }
 
     protected String _pu( MetaData md ) {
@@ -304,7 +316,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     }
 
     protected String _pu( MetaData md, boolean showPkg ) {
-        return (showPkg ? _pp(md) : "" ) + GeneratorUtil.toCamelCase( md.getShortName(), true );
+        return (showPkg ? _pp(md) : "" ) + GeneratorUtil.toCamelCase( md.getShortName(), md instanceof MetaObject );
     }
 
     protected String _pp( MetaData md ) {
@@ -366,12 +378,6 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
         return false;
     }
-    
-    protected boolean showIfAbstract(MetaObject superObject) {
-        return !isAbstract(superObject)
-                || (isAbstract(superObject)
-                && showAbstracts);
-    }
 
     //////////////////////////////////////////////////////////////////////
     // UML Output methods
@@ -407,7 +413,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     }
 
     protected void drawObjectStart( Context c, MetaObject mo ) {
-        c.pw.print( c.indent + "class "+ _puo(mo,false));
+        c.pw.print( c.indent + "class "+ _pu(mo));
         if ( isAbstract( mo ) ) c.pw.print( " << (A,#FF7700) Abstract");
         else c.pw.print( " << (O,#AAAAFF)");
         c.pw.println( " >> {");
@@ -466,18 +472,18 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     }
 
     protected void drawObjectSuperReference(Context c, MetaObject mo) {
-        c.pw.println( _puo(mo, true) +" ..|> "
+        c.pw.println( _pu(mo, true) +" ..|> "
                 + _pu( mo.getSuperObject(), true) +" : extends" );
     }
 
     protected void drawObjectKeyReference(Context c, MetaField f, ObjectReference oref, MetaObject objRef ) {
-        c.pw.print(c.indent+_puo((MetaObject)f.getParent(),true));
+        c.pw.print(c.indent+_pu((MetaObject)f.getParent(),true));
         if (oref instanceof OneToOneReference) c.pw.print("\"1\" --> \"1\"");
         else if (oref instanceof OneToManyReference) c.pw.print("\"1\" --> \"many\"");
         else if (oref instanceof ManyToOneReference) c.pw.print("\"many\" --> \"1\"");
         else if (oref instanceof ManyToManyReference) c.pw.print("\"many\" --> \"many\"");
         else c.pw.print(" --> ");
-        c.pw.print(_puo(objRef,true) +" : ");
+        c.pw.print(_pu(objRef,true) +" : ");
         if (oref.getName() == null) c.pw.println(_pu(f));
         else c.pw.println(_pu(f) + ":" + _pu(oref));
     }

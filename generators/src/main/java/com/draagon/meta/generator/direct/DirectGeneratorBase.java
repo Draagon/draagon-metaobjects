@@ -20,7 +20,6 @@ public abstract class DirectGeneratorBase<T extends DirectGeneratorBase> extends
         throw new GeneratorMetaException( "A Direct Generator does not support specifying scripts");
     }
 
-
     protected List<String> getUniquePackages(Collection<? extends MetaData> filtered ) throws IOException {
         List<String> pkgs = new ArrayList<>();
 
@@ -33,5 +32,4 @@ public abstract class DirectGeneratorBase<T extends DirectGeneratorBase> extends
 
         return pkgs;
     }
-
 }
