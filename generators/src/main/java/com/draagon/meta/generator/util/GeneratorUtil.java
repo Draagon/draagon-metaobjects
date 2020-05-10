@@ -1,12 +1,14 @@
 package com.draagon.meta.generator.util;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class GeneratorUtil {
 
@@ -24,29 +26,89 @@ public class GeneratorUtil {
 
         List<T> out = new ArrayList<>();
 
-        for ( T md : in ) {
+        if ( filters == null || filters.isEmpty() ) {
+            out.addAll(in);
+        }
+        else {
+            List<String> incFilters = filters.stream()
+                    .filter( f -> !f.startsWith("!"))
+                    .collect(Collectors.toList());
+            List<String> excFilters = filters.stream()
+                    .filter( f -> f.startsWith("!"))
+                    .collect(Collectors.toList());
 
-            if ( filters == null || filters.isEmpty() ) {
-                out.add(md);
-            }
-            else {
-                for (String f : filters) {
-                    if (filterMatch(md.getName(), f)) {
-                        out.add(md);
+            for (T md : in) {
+
+                boolean shouldAdd = incFilters.isEmpty();
+
+                // Check inclusive filters
+                for (String f : incFilters) {
+                    if ( filterMatch(md, f)) {
+                        shouldAdd = true;
                         break;
                     }
                 }
+
+                // Check inclusive filters
+                for (String f : excFilters) {
+                    if ( filterMatch(md, f.substring(1))) {
+                        shouldAdd = false;
+                        break;
+                    }
+                }
+
+                if (shouldAdd) out.add(md);
             }
         }
 
         return out;
     }
 
-    public static boolean filterMatch(String metaDataName, String filter ) {
-        return  Pattern.compile(createRegexFromGlob(filter)).matcher( metaDataName ).matches();
+    public static boolean filterMatch(MetaData md, String filter ) {
+
+        String f = filter;
+        int i = filter.indexOf( ".[");
+        if ( i > 0 ) f = filter.substring( 0, i );
+
+        boolean match = filterByName(md.getName(), f);
+
+        if ( match && i > 0 ) match = filterByMetaData( md, filter.substring( i+1 ).trim());
+
+        return match;
     }
 
-    public static String createRegexFromGlob(String glob)
+    public static boolean filterByMetaData(MetaData md, String metaDataFilter) {
+
+        // TODO:  Add better error handling
+        String [] v1 = metaDataFilter.split( "=");
+        if ( v1.length > 0 ) {
+
+            String[] attrs = v1[0].split(":");
+            if ( attrs.length == 2 && attrs[0].equals("[attr")) {
+
+                String an = attrs[1].substring( 0, attrs[1].length()-1);
+                if ( md.hasAttr( an ) ) {
+                    if (v1.length > 1) {
+                        String[] vals = v1[1].split("\"");
+                        if ( vals.length > 0 ) {
+                            return vals[0].equals( md.getMetaAttr(an).getValueAsString() );
+                        }
+                    }
+                    else {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean filterByName( String metaDataName, String nameFilter) {
+        return Pattern.compile(createRegexFromGlob(nameFilter)).matcher( metaDataName ).matches();
+    }
+
+    private static String createRegexFromGlob(String glob)
     {
         String out = "^";
         for(int i = 0; i < glob.length(); ++i)

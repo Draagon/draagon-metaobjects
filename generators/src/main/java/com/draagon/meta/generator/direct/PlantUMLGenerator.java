@@ -145,12 +145,37 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         List<String> pkgs = new ArrayList<>( pkgsIn );
         for( String pkg : pkgsIn ) {
             String p = pkg.substring( 0, pkg.lastIndexOf( "::" ));
-            if ( !p.isEmpty() && !pkgs.contains( p )) {
-                drawNamespaceStart( c, p );
-                drawNamespaceEnd( c );
+            if ( !p.isEmpty()
+                    && !pkgs.contains( p )) {
+                if ( hasDifferentSubPackages( p, pkgsIn )) {
+                    drawNamespaceStart(c, p);
+                    drawNamespaceEnd(c);
+                }
                 pkgs.add( p );
             }
         }
+    }
+
+    protected boolean hasDifferentSubPackages(String p, List<String> pkgsIn) {
+        String lastFound  = null;
+        for( String in : pkgsIn ) {
+
+            int i = p.length()+2;
+            if ( in.startsWith( p ) && in.length() > i) {
+
+                int j = in.indexOf( "::", i);
+                if ( j == -1 ) j = in.length();
+
+                String found = in.substring( i, j );
+                if ( !found.isEmpty() ) {
+                    if (lastFound != null && !lastFound.equals( found )) {
+                        return true;
+                    }
+                    lastFound = found;
+                }
+            }
+        }
+        return false;
     }
 
     protected void writeRelationships(Context c) throws IOException {
@@ -159,7 +184,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
             // Write super object relationships (extends)
             if ( mo.getSuperObject() != null
-                    && shouldShowObject( mo.getSuperObject() )) {
+                    && shouldShowObject( mo.getSuperObject() )
+                    && c.objects.contains( mo.getSuperObject() )) {
                 drawObjectSuperReference(c, mo);
             }
 
@@ -172,7 +198,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
         drawObjectStart( c, mo );
 
-        writeObjectInheritenceSection(c.incIndent(), mo);
+        writeObjectInheritanceSection(c.incIndent(), mo);
 
         writeObjectAttrSection(c.incIndent(), mo);
 
@@ -181,14 +207,14 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         drawObjectEnd(c);
     }
 
-    protected void writeObjectInheritenceSection(Context c, MetaObject mo) {
-        if ( !showAbstracts ) {
+    protected void writeObjectInheritanceSection(Context c, MetaObject mo) {
+        //if ( !showAbstracts ) {
             MetaObject parent = mo.getSuperObject();
             if ( parent != null && isAbstract(parent)) {
                 drawObjectInheritanceHeader(c);
                 drawObjectExtension(c, mo, parent);
             }
-        }
+        //}
     }
 
     protected void writeObjectAttrSection(Context c, MetaObject mo) {
@@ -261,6 +287,17 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
     protected void writeObjectRefRelationships(Context c, MetaObject mo ) throws IOException {
 
+        // If it's abstract, then we need to iterate on this
+        /*if ( isAbstract( mo ) && !showAbstracts ) {
+            for ( MetaObject dmo : getDerivedObjects( c, mo )) {
+                writeObjectRefRelationships( c, dmo );
+            }
+        }
+        // If it's not abstract and we were iterating, then exit if we shouldn't show this one
+        else if ( !c.objects.contains( mo )) {
+            return;
+        }*/
+
         // Write Fields
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
 
@@ -275,20 +312,29 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                     if (isAbstract( objRef ) && !showAbstracts ) {
                         getDerivedObjects(c, objRef)
                                 .stream()
+                                .filter( o -> !isAbstract(o) || (isAbstract(o) && !showAbstracts))
                                 .filter( o -> c.objects.contains( o ))
-                                .forEach( o -> drawObjectKeyReference(c, f, oref, o));
+                                .forEach( o -> drawObjectKeyReference(c, mo, f, oref, o));
                     }
                     else if (c.objects.contains( objRef )){
-                        drawObjectKeyReference(c, f, oref, objRef);
+                        drawObjectKeyReference(c, mo, f, oref, objRef);
                     }
                 }
             }
             else {
                 MetaObject objRef = getMetaObjectRef(f);
-                if ( objRef != null
-                        && c.objects.contains(objRef)) {
+                if ( objRef != null ) {
 
-                    drawObjectReference(c, f, objRef);
+                    if (isAbstract( objRef ) && !showAbstracts ) {
+                        getDerivedObjects(c, objRef)
+                                .stream()
+                                .filter( o -> !isAbstract(o) || (isAbstract(o) && !showAbstracts))
+                                .filter( o -> c.objects.contains( o ))
+                                .forEach( o -> drawObjectReference(c, mo, f, o));
+                    }
+                    else if (c.objects.contains( objRef )) {
+                        drawObjectReference(c, mo, f, objRef);
+                    }
                 }
             }
         }
@@ -476,8 +522,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                 + _pu( mo.getSuperObject(), true) +" : extends" );
     }
 
-    protected void drawObjectKeyReference(Context c, MetaField f, ObjectReference oref, MetaObject objRef ) {
-        c.pw.print(c.indent+_pu((MetaObject)f.getParent(),true));
+    protected void drawObjectKeyReference(Context c, MetaObject mo, MetaField f, ObjectReference oref, MetaObject objRef ) {
+        c.pw.print(c.indent+_pu(mo,true));
         if (oref instanceof OneToOneReference) c.pw.print("\"1\" --> \"1\"");
         else if (oref instanceof OneToManyReference) c.pw.print("\"1\" --> \"many\"");
         else if (oref instanceof ManyToOneReference) c.pw.print("\"many\" --> \"1\"");
@@ -488,9 +534,9 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         else c.pw.println(_pu(f) + ":" + _pu(oref));
     }
 
-    protected void drawObjectReference(Context c, MetaField f, MetaObject objRef) {
-        c.pw.println(c.indent + _pu(f.getParent())
-                +" --> "+ _pu(objRef) +" : "+ _pu(f));
+    protected void drawObjectReference(Context c, MetaObject mo, MetaField f, MetaObject objRef) {
+        c.pw.println(c.indent + _pu(mo, true)
+                +" --> "+ _pu(objRef, true) +" : "+ _pu(f));
     }
 
     protected void drawNewLine(Context c) {

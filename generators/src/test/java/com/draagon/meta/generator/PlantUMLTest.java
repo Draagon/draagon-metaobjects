@@ -37,7 +37,7 @@ public class PlantUMLTest extends GeneratorTestBase {
         args.put( "showAbstracts", "true" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-1.pu" );
 
-        drawUML( args, Arrays.asList( new String[] {"*"} ) );
+        drawUML( args, null );
     }
 
     @Test
@@ -48,7 +48,7 @@ public class PlantUMLTest extends GeneratorTestBase {
         args.put( "showAbstracts", "true" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-2.pu" );
 
-        drawUML( args, Arrays.asList( new String[] {"*"} ) );
+        drawUML( args, Arrays.asList( new String[] {} ) );
     }
 
     @Test
@@ -59,7 +59,7 @@ public class PlantUMLTest extends GeneratorTestBase {
         args.put( "showAbstracts", "false" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-3.pu" );
 
-        drawUML( args, Arrays.asList( new String[] {"*"} ) );
+        drawUML( args, Arrays.asList( new String[] {} ) );
     }
 
 
@@ -68,12 +68,12 @@ public class PlantUMLTest extends GeneratorTestBase {
 
         Map<String,String> args = new HashMap<>();
         args.put( "showAttrs", "false" );
-        args.put( "showAbstracts", "false" );
+        args.put( "showAbstracts", "true" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-4.pu" );
 
         drawUML( args, Arrays.asList( new String[] {
-                "produce::v1::fruit::*",
-                "produce::v1::container::*"
+                "!produce::v1::vegetable::*.[attr:_isAbstract]=true",
+                "!produce::v1::container::ext::*"
         } ));
     }
 
