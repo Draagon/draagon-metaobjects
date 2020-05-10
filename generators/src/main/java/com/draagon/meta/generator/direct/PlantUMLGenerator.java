@@ -5,6 +5,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.GeneratorMetaException;
+import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.relation.ref.*;
@@ -27,17 +28,19 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     /** Passes at context data for the execution */
     public static class Context {
 
+        public final MetaDataLoader loader;
         public final PrintWriter pw;
         public final String indent;
         public final Collection<MetaObject> objects;
 
-        public Context( PrintWriter pw, String indent, Collection<MetaObject> objects ) {
+        public Context( MetaDataLoader loader, PrintWriter pw, String indent, Collection<MetaObject> objects ) {
+            this.loader = loader;
             this.pw = pw;
             this.indent = indent;
             this.objects = objects;
         }
-        public Context copyAndInc() {
-            return new Context( pw, indent + "  ", objects);
+        public Context incIndent() {
+            return new Context( loader, pw, indent + "  ", objects);
         }
     }
 
@@ -61,7 +64,11 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             Collection<MetaObject> filteredObjects = getFilteredMetaObjects(loader);
 
             // Create the Context for passing through the writers
-            Context c = new Context( pw, "", filteredObjects );
+            Context c = new Context(
+                    loader,
+                    pw,
+                    "",
+                    filteredObjects );
 
             // Write start of UML file
             drawFileStart(c);
@@ -104,7 +111,9 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             writeMetaObjects(c, p);
 
             if (!p.isEmpty()) drawNamespaceEnd( c );
+        }
 
+        for ( String p : getUniquePackages( c.objects )) {
             // Write Object References
             renderObjectRelationships(c, p);
         }
@@ -116,7 +125,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             if ( mo.getPackage().equals( p )
                     && showIfAbstract(mo)) {
 
-                renderMetaObject( c.copyAndInc(), mo );
+                renderMetaObject( c.incIndent(), mo );
             }
         }
     }
@@ -135,12 +144,23 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
         drawObjectStart( c, mo );
 
-        // Write Attributes
-        writeObjectAttrSection( c.copyAndInc(), mo );
+        writeObjectInheritenceSection(c.incIndent(), mo);
 
-        writeObjectFieldSection(c, mo);
+        writeObjectAttrSection(c.incIndent(), mo);
+
+        writeObjectFieldSection(c.incIndent(), mo);
 
         drawObjectEnd(c);
+    }
+
+    protected void writeObjectInheritenceSection(Context c, MetaObject mo) {
+        if ( !showAbstracts ) {
+            MetaObject parent = mo.getSuperObject();
+            if ( parent != null && isAbstract(parent)) {
+                drawObjectInheritanceHeader(c);
+                drawObjectExtension(c, mo, parent);
+            }
+        }
     }
 
     protected void writeObjectAttrSection(Context c, MetaObject mo) {
@@ -149,7 +169,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
             List<MetaAttribute> attrs = (List<MetaAttribute>) mo.getChildren(MetaAttribute.class, true);
             if (!attrs.isEmpty()) {
-                attrs.forEach( a -> drawObjectAttr(c.copyAndInc(), a));
+                attrs.forEach( a -> drawObjectAttr(c.incIndent(), a));
             }
         }
     }
@@ -163,18 +183,18 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             drawObjectFieldSection(c, "Fields");
 
             fields = mo.getMetaFields( false);
-            writeObjectFields(c.copyAndInc(), fields);
+            writeObjectFields(c, fields);
 
             MetaObject parent = mo.getSuperObject();
             if ( parent != null ) {
                 if (isAbstract(parent) && !showAbstracts) {
 
                     drawObjectFieldSection(c, parent.getShortName() + " Fields");
-                    writeObjectFields(c.copyAndInc(), parent.getMetaFields());
+                    writeObjectFields(c, parent.getMetaFields());
                 }
-                else if (fields.isEmpty()) {
-                    drawObjectFieldSection(c, parent.getShortName());
-                }
+                //else if (fields.isEmpty()) {
+                //   drawObjectFieldSection(c, parent.getShortName());
+                //}
             }
         }
         else {
@@ -190,18 +210,18 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
             MetaData oref = getMetaObjectRef(f);
             if ( oref != null ) {
-                drawObjectFieldWithRef(c.copyAndInc(), f, oref);
+                drawObjectFieldWithRef(c.incIndent(), f, oref);
             }
             else if ( f.getSuperField() != null ) {
-                drawObjectFieldWithSuper(c.copyAndInc(), f);
+                drawObjectFieldWithSuper(c.incIndent(), f);
             }
             else {
-                drawObjectField(c.copyAndInc(), f);
+                drawObjectField(c.incIndent(), f);
             }
 
             if ( showAttrs ) {
                 List<MetaAttribute> attrs = f.getMetaAttrs( !showAbstracts );
-                attrs.forEach( a -> drawFieldAttr(c.copyAndInc(), f, a));
+                attrs.forEach( a -> drawFieldAttr(c.incIndent(), f, a));
             }
         }
     }
@@ -232,17 +252,20 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                     
                     MetaObject objRef = oref.getReferencedObject();
                     if (objRef != null
-                            && c.objects.contains(objRef)
-                            && showIfAbstract(objRef)) {
+                            && c.objects.contains(objRef)) {
 
-                        drawObjectKeyReference(c, f, oref);
+                        if (isAbstract( objRef ) && !showAbstracts ) {
+                            getDerivedObjects(c, objRef).forEach( o -> drawObjectKeyReference(c, f, oref, o));
+                        }
+                        else {
+                            drawObjectKeyReference(c, f, oref, objRef);
+                        }
                     }
                 }
                 else {
                     MetaObject objRef = getMetaObjectRef(f);
                     if ( objRef != null
-                            && c.objects.contains(objRef)
-                            && showIfAbstract(objRef)) {
+                            && c.objects.contains(objRef)) {
 
                         drawObjectReference(c, f, objRef);
                     }
@@ -251,55 +274,41 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected String _slimPkg( String p1, String p2 ) {
-
-        if (p1 == null || p1.isEmpty()
-            || p2 == null || p2.isEmpty() ) {
-            return "";
-        }
-
-        if ( p2.length() < p1.length() ) {
-            return "...::";
-        }
-
-        StringBuilder converted = new StringBuilder();
-
-        boolean skip = false;
-        for (int i = 0; i < p1.length(); i++ ) {
-
-            if ( !skip && p1.charAt(i) == p2.charAt(i)) continue;
-            else {
-                skip = true;
-                converted.append(p1.charAt(i));
-            }
-        }
-
-        return converted.toString();
+    protected Collection<MetaObject> getDerivedObjects(Context c, MetaObject objRef) {
+         Collection<MetaObject> out = new ArrayList<>();
+         for ( MetaObject mo : c.loader.getChildren(MetaObject.class) ) {
+             if ( objRef.equals(mo.getSuperObject())) {
+                 if ( isAbstract( mo ) && !showAbstracts )
+                     out.addAll( getDerivedObjects( c, mo ));
+                 else
+                    out.add( mo );
+             }
+         }
+         return out;
     }
 
-    protected String _pu( String text ) {
+    protected String _slimPkg( String p1, String p2 ) {
+        String pkg = GeneratorUtil.toRelativePackage( p1, p2 );
+        System.out.println( "IN p1: " + p1 );
+        System.out.println( "IN p2: " + p2 );
+        System.out.println( "OUT: " + pkg );
+        return pkg;
+    }
 
-        if (text == null || text.isEmpty()) {
-            return text;
-        }
+    protected String _puo( MetaObject mo, boolean showPkg ) {
+        return (showPkg ? _pp(mo) : "" ) + GeneratorUtil.toCamelCase( mo.getShortName(), true );
+    }
 
-        StringBuilder converted = new StringBuilder();
+    protected String _pu( MetaData md ) {
+        return _pu( md, false );
+    }
 
-        boolean convertNext = false;
-        for (char ch : text.toCharArray()) {
-            if (ch == '-') {
-                convertNext = true;
-            } else if (convertNext) {
-                ch = Character.toTitleCase(ch);
-                convertNext = false;
-                converted.append(ch);
-            } else {
-                ch = ch; //Character.toLowerCase(ch);
-                converted.append(ch);
-            }
-        }
+    protected String _pu( MetaData md, boolean showPkg ) {
+        return (showPkg ? _pp(md) : "" ) + GeneratorUtil.toCamelCase( md.getShortName(), true );
+    }
 
-        return converted.toString();
+    protected String _pp( MetaData md ) {
+        return (md.getPackage().isEmpty()) ? "" : md.getPackage() + "::";
     }
 
     protected String getAttrValue(  MetaAttribute attr ) {
@@ -382,6 +391,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         c.pw.println("skinparam stereotypeCBackgroundColor<< Abstract >> DimGray");
         c.pw.println();
         c.pw.println("set namespaceSeparator ::");
+        c.pw.println();
     }
 
     protected void drawFileEnd(Context c ) {
@@ -397,7 +407,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     }
 
     protected void drawObjectStart( Context c, MetaObject mo ) {
-        c.pw.print( c.indent + "class "+ _pu(mo.getShortName()));
+        c.pw.print( c.indent + "class "+ _puo(mo,false));
         if ( isAbstract( mo ) ) c.pw.print( " << (A,#FF7700) Abstract");
         else c.pw.print( " << (O,#AAAAFF)");
         c.pw.println( " >> {");
@@ -407,65 +417,74 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         c.pw.println(c.indent+"}");
     }
 
+    protected void drawObjectInheritanceHeader(Context c) {
+        c.pw.println(c.indent+".. Inheritance ..");
+    }
+
+    protected void drawObjectExtension(Context c, MetaObject mo, MetaObject parent ) {
+        c.pw.println(c.indent+"extends "+_slimPkg( mo.getPackage(), parent.getPackage() )
+                +parent.getShortName() );
+    }
+
     protected void drawObjectAttrHeader(Context c, MetaObject mo) {
-        c.pw.println(c.indent+"  .. Attributes ..");
-        c.pw.println(c.indent+"  type="+mo.getSubTypeName() );
+        c.pw.println(c.indent+".. Attributes ..");
+        c.pw.println(c.indent+"@type="+mo.getSubTypeName() );
     }
 
     protected void drawObjectAttr(Context c, MetaAttribute a) {
-        c.pw.println(c.indent+ _pu(a.getShortName()) +"="+getAttrValue(a));
+        c.pw.println(c.indent+ _pu(a) +"="+getAttrValue(a));
     }
 
     protected void drawObjectFieldSection(Context c, String s) {
-        c.pw.println(c.indent + " .. " + s + " .. ");
+        c.pw.println(c.indent + ".. " + s + " ..");
     }
 
     protected void drawObjectField(Context c, MetaField f) {
-        c.pw.print(c.indent+"+ " + _pu(f.getShortName()) + " ");
+        c.pw.print(c.indent+"+ " + _pu(f) + " ");
         c.pw.println("{"+f.getSubTypeName() + "}");
     }
 
     protected void drawObjectFieldWithSuper(Context c, MetaField f) {
-        c.pw.print(c.indent+"+ " + _pu(f.getShortName()) + " ");
+        c.pw.print(c.indent+"+ " + _pu(f) + " ");
         c.pw.println("{"+f.getSubTypeName() + "}");
         c.pw.println(c.indent+"super="
-                + _pu( _slimPkg( f.getSuperField().getPackage(), f.getPackage() )
-                + f.getSuperField().getShortName()));
+                +  _slimPkg( f.getParent().getPackage(), f.getSuperField().getPackage() )
+                + _pu( f.getSuperField()));
     }
 
     protected void drawObjectFieldWithRef(Context c, MetaField f, MetaData oref) {
-        c.pw.println(c.indent+"+ " + _pu(f.getShortName()) + " ");
-        c.pw.print(c.indent+"--> ");
+        c.pw.print(c.indent+"+ " + _pu(f) +" {");
         if ( f.getDataType().isArray() ) c.pw.print("[] " );
-        c.pw.println( oref.getShortName() );
+        c.pw.print( _slimPkg( f.getParent().getPackage(), oref.getPackage()));
+        c.pw.print(oref.getShortName());
+        c.pw.println("}");
     }
 
     protected void drawFieldAttr(Context c, MetaField f, MetaAttribute a) {
         c.pw.print(c.indent+" [attr:"+a.getSubTypeName() + "] ");
-        c.pw.println( _pu(a.getShortName()) +"="+getAttrValue(a));
+        c.pw.println( _pu(a) +"="+getAttrValue(a));
     }
 
     protected void drawObjectSuperReference(Context c, MetaObject mo) {
-        c.pw.println( _pu(mo.getName()) +" ..|> " 
-                + _pu( mo.getSuperObject().getName()) +" : extends" );
+        c.pw.println( _puo(mo, true) +" ..|> "
+                + _pu( mo.getSuperObject(), true) +" : extends" );
     }
 
-    protected void drawObjectKeyReference(Context c, MetaField f, ObjectReference oref ) {
-        c.pw.print(c.indent+_pu(f.getParent().getName()));
-        MetaObject objRef = oref.getReferencedObject();
+    protected void drawObjectKeyReference(Context c, MetaField f, ObjectReference oref, MetaObject objRef ) {
+        c.pw.print(c.indent+_puo((MetaObject)f.getParent(),true));
         if (oref instanceof OneToOneReference) c.pw.print("\"1\" --> \"1\"");
         else if (oref instanceof OneToManyReference) c.pw.print("\"1\" --> \"many\"");
         else if (oref instanceof ManyToOneReference) c.pw.print("\"many\" --> \"1\"");
         else if (oref instanceof ManyToManyReference) c.pw.print("\"many\" --> \"many\"");
         else c.pw.print(" --> ");
-        c.pw.print(_pu(objRef.getName()) +" : ");
-        if (oref.getName() == null) c.pw.println(_pu(f.getShortName()));
-        else c.pw.println(_pu(f.getShortName()) + ":" + _pu(oref.getName()));
+        c.pw.print(_puo(objRef,true) +" : ");
+        if (oref.getName() == null) c.pw.println(_pu(f));
+        else c.pw.println(_pu(f) + ":" + _pu(oref));
     }
 
     protected void drawObjectReference(Context c, MetaField f, MetaObject objRef) {
-        c.pw.println(c.indent + _pu(f.getParent().getName()) 
-                +" --> "+ _pu(objRef.getName()) +" : "+ _pu(f.getShortName()));
+        c.pw.println(c.indent + _pu(f.getParent())
+                +" --> "+ _pu(objRef) +" : "+ _pu(f));
     }
 
     protected void drawNewLine(Context c) {

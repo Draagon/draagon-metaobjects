@@ -3,9 +3,9 @@
     "shortcuts" : [],
     "rules" : [],
     "children": [
-        {"object": {"package": "::ext", "name": "ProduceExt",
+        {"object": {"package": "::container::ext", "name": "ProduceExt",
             "children": [
-                {"field": {"name": "name", "super": "..::common::name"}},
+                {"field": {"name": "name", "super": "..::..::common::name"}},
                 {"field": {"name": "foo", "type": "double"}}
             ]
         }},
@@ -19,7 +19,7 @@
                 {"field": {"name": "specialOverlay", "type": "string"}},
                 {"field": {"name": "specialExt", "type": "object",
                     "children": [
-                        {"objectRef": {"name": "special", "type": "oneToOne", "reference": "..::ext::ProduceExt"}}
+                        {"objectRef": {"name": "special", "type": "oneToOne", "reference": "::ext::ProduceExt"}}
                     ]}}
                 ]}
         }]

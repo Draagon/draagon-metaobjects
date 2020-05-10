@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<metadata package="produce::v1::vegetable">
+
+    <!-- Vegetable -->
+    <object name="Vegetable" type="pojo" _isAbstract="true">
+
+        <attr name="object">com.draagon.meta.test.produce.v1.Vegetable</attr>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
+
+    </object>
+
+    <!-- Tomato -->
+    <object name="Tomato" super="Vegetable">
+
+        <objectKey name="key"/>
+
+        <attr name="object">com.draagon.meta.test.produce.v1.Tomato</attr>
+
+    </object>
+
+</metadata>

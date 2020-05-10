@@ -21,25 +21,6 @@
      
     </object>
 
-    <!-- Fruit -->
-    <object name="Vegetable" type="pojo" _isAbstract="true">
-
-        <attr name="object">com.draagon.meta.test.produce.v1.Vegetable</attr>
-
-        <!-- Id -->
-        <field name="id" super="..::common::id"/>
-
-        <!-- Name -->
-        <field name="name" super="..::common::name"/>
-
-        <!-- Length -->
-        <field name="length" type="int"/>
-
-        <!-- Weight -->
-        <field name="weight" type="int"/>
-
-    </object>
-
     <!-- Apple -->
     <object name="Apple" super="Fruit" object="com.draagon.meta.test.produce.v1.Apple">
 
@@ -61,15 +42,6 @@
         <objectKey name="key"/>
 
         <attr name="object">com.draagon.meta.test.produce.v1.Macintosh</attr>
-
-    </object>
-
-    <!-- Macintosh -->
-    <object name="Tomato" super="Vegetable">
-
-        <objectKey name="key"/>
-
-        <attr name="object">com.draagon.meta.test.produce.v1.Tomato</attr>
 
     </object>
 

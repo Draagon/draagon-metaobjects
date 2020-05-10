@@ -525,8 +525,14 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Returns all MetaData children which implement the specified class
      */
-    public <T extends MetaData> List<T> getChildren(Class<T> c, boolean includeParentData ) {
+    public <T extends MetaData> List<T> getChildren(Class<T> c) {
+        return addChildren(null, c, true );
+    }
 
+    /**
+     * Returns all MetaData children which implement the specified class
+     */
+    public <T extends MetaData> List<T> getChildren(Class<T> c, boolean includeParentData ) {
         return addChildren(null, c, includeParentData );
     }
 

@@ -23,6 +23,11 @@
             <validator type="length" min="0" max="10"/>
         </field>
 
+        <!-- Number of oranges -->
+        <field name="numVeggies" type="int">
+            <validator type="length" min="0" max="5"/>
+        </field>
+
         <!-- Apples -->
         <field name="apples" type="objectArray" objectRef="..::fruit::Apple">
             <objectRef type="oneToMany" reference="..::fruit::Apple"/>
@@ -31,6 +36,11 @@
         <!-- Oranges -->
         <field name="oranges" type="objectArray" objectRef="..::fruit::Orange">
             <objectRef type="oneToMany" reference="..::fruit::Orange"/>
+        </field>
+
+        <!-- Veggies -->
+        <field name="veggies" type="objectArray">
+            <objectRef type="oneToMany" reference="..::vegetable::Vegetable"/>
         </field>
 
     </object>

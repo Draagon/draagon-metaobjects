@@ -46,7 +46,7 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase {
 
     @Test
     public void testSuperListVegetable() {
-        List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::fruit::Vegetable");
+        List<MetaObject> result = loader.getMetaDataBySuper("produce::v1::vegetable::Vegetable");
 
         for(MetaObject mo : result){
             if ( log.isDebugEnabled()) {

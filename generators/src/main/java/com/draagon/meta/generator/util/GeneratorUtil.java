@@ -66,4 +66,81 @@ public class GeneratorUtil {
         out += '$';
         return out;
     }
+
+    public static String toRelativePackage( String p1, String p2 ) {
+
+        if (p1.isEmpty() && p2.isEmpty() ) {
+            return "";
+        }
+
+        if ( p2.isEmpty() ) return "";
+        if ( p1.isEmpty() ) return p2 + "::";
+
+        String [] p1s = p1.split("::");
+        String [] p2s = p2.split("::");
+
+        if ( !p1s[0].equals(p2s[0])) return p2 + "::";
+
+        int max = p1s.length;
+        if ( p2s.length < p1s.length ) max = p2s.length;
+
+        int n = 0;
+        while( max > n && p1s[n].equals(p2s[n])) {
+            n++;
+        }
+
+        StringBuilder out = new StringBuilder();
+
+        if ( p2s.length < p1s.length ) {
+            out.append("...::");
+        }
+        else if (n==max) {
+            out.append("::");
+        }
+        else {
+            for (int i = n; i < max; i++) {
+                out.append("..::");
+            }
+        }
+
+        for (int i = n; i < p2s.length; i++ ) {
+            out.append( p2s[i] +"::");
+        }
+
+        //out.append( "::");
+
+        return out.toString();
+    }
+
+    public static String toCamelCase( String text, boolean capitalizeFirstChar ) {
+
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        StringBuilder converted = new StringBuilder();
+
+        boolean first = true;
+        boolean convertNext = false;
+        for (char ch : text.toCharArray()) {
+            if (ch == '-') {
+                convertNext = true;
+            }
+            else if (convertNext) {
+                ch = Character.toTitleCase(ch);
+                convertNext = false;
+                converted.append(ch);
+            }
+            else if (first && capitalizeFirstChar) {
+                ch = Character.toTitleCase(ch);
+                converted.append(ch);
+            }
+            else {
+                converted.append(ch);
+            }
+            if ( first ) first = false;
+        }
+
+        return converted.toString();
+    }
 }

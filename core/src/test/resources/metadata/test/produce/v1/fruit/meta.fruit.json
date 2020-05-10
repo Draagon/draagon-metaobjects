@@ -10,15 +10,6 @@
         {"field": {"name": "weight", "type": "int"}}
       ]}},
 
-    {"object": {"name": "Vegetable", "type": "pojo",
-      "children": [
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Vegetable"}},
-        {"field": {"name": "id", "super": "..::common::id"}},
-        {"field": {"name": "name", "super": "..::common::name"}},
-        {"field": {"name": "length", "type": "int"}},
-        {"field": {"name": "weight", "type": "int"}}
-      ]}},
-
     {"object": {"name": "Apple", "super": "Fruit",
       "children": [
         {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Apple"}},
@@ -31,11 +22,6 @@
     {"object": {"name": "Macintosh", "super": "Apple",
       "children": [
         {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Macintosh"}}
-      ]}},
-
-    {"object": {"name": "Tomato", "super": "Vegetable",
-      "children": [
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Tomato"}}
       ]}},
 
     {"object": {"name": "Orange", "super": "Fruit",

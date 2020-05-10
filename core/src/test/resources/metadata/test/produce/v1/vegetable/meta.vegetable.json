@@ -1,0 +1,18 @@
+{"metadata": {"package": "produce::v1::vegetable",
+  "children": [
+
+    {"object": {"name": "Vegetable", "type": "pojo",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Vegetable"}},
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "length", "type": "int"}},
+        {"field": {"name": "weight", "type": "int"}}
+      ]}},
+
+    {"object": {"name": "Tomato", "super": "Vegetable",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Tomato"}}
+      ]}}
+  ]}
+}
