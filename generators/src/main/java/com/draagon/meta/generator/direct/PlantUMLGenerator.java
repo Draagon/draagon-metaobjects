@@ -72,6 +72,9 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                     "",
                     filteredObjects );
 
+            log.info("Writing PlantUML to file: " + outf.getName() );
+
+            // Write the UML File
             writeFile(c);
         }
         catch( IOException e ) {
@@ -80,36 +83,6 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         finally {
             if ( pw != null ) pw.close();
         }
-    }
-
-    protected void writeFile(Context c) throws IOException {
-
-        // Write start of UML file
-        drawFileStart(c);
-
-        // Write Packages
-        writeObjectPackages(c);
-
-        drawNewLine(c);
-
-        writeRelationships(c);
-
-        // Write end of UML file
-        drawFileEnd(c);
-    }
-
-    /** Filter more based on UML generator configuration */
-    protected Collection<MetaObject> filterByConfig( Collection<MetaObject> objects ) {
-        return objects
-                .stream()
-                .filter( mo -> shouldShowObject(mo) )
-                .collect( Collectors.toList());
-    }
-
-    protected boolean shouldShowObject(MetaObject mo) {
-        return !isAbstract(mo)
-                || (isAbstract(mo)
-                    && showAbstracts);
     }
 
     protected void parseArgs() {
@@ -123,6 +96,26 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             log.debug("PlantUML: showAttrs=" + showAttrs);
             log.debug("PlantUML: showAbstracts=" + showAbstracts);
         }
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    // UML Write Logic methods
+
+    protected void writeFile(Context c) throws IOException {
+
+        // Write start of UML file
+        drawFileStart(c);
+
+        // Write object packages (namespaces in PlantUML)
+        writeObjectPackages(c);
+
+        drawNewLine(c);
+
+        // Write object relationships
+        writeRelationships(c);
+
+        // Write end of UML file
+        drawFileEnd(c);
     }
 
     protected void writeObjectPackages(Context c) throws IOException {
@@ -187,15 +180,21 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
         for (MetaObject mo : c.objects) {
 
-            // Write super object relationships (extends)
-            if ( mo.getSuperObject() != null
-                    && shouldShowObject( mo.getSuperObject() )
-                    && c.objects.contains( mo.getSuperObject() )) {
-                drawObjectSuperReference(c, mo);
-            }
+            writeObjectParentRelationships(c, mo);
 
             // Write ObjectRef relationships
             writeObjectRefRelationships(c, mo);
+        }
+    }
+
+    protected void writeObjectParentRelationships(Context c, MetaObject mo) {
+
+        // Write super object relationships (extends)
+        if ( mo.getSuperObject() != null
+                && shouldShowObject( mo.getSuperObject() )
+                && c.objects.contains( mo.getSuperObject() )) {
+
+            drawObjectSuperReference(c, mo, mo.getSuperObject() );
         }
     }
 
@@ -203,16 +202,22 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
         drawObjectStart( c, mo );
 
+        writeObjectSections(c, mo);
+
+        drawObjectEnd(c);
+    }
+
+    protected void writeObjectSections(Context c, MetaObject mo) {
+        
         writeObjectDetailsSection(c.incIndent(), mo);
 
         writeObjectAttrSection(c.incIndent(), mo);
 
         writeObjectFieldSection(c.incIndent(), mo);
-
-        drawObjectEnd(c);
     }
 
     protected void writeObjectDetailsSection(Context c, MetaObject mo) {
+
         drawObjectDetailsHeader(c);
         drawObjectMetaDataType(c, mo);
 
@@ -278,23 +283,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected MetaObject getMetaObjectRef(MetaField f) {
-        try { return MetaDataUtil.getObjectRef( f ); } 
-        catch( Exception e ) { return null; }
-    }
-
     protected void writeObjectRefRelationships(Context c, MetaObject mo ) throws IOException {
-
-        // If it's abstract, then we need to iterate on this
-        /*if ( isAbstract( mo ) && !showAbstracts ) {
-            for ( MetaObject dmo : getDerivedObjects( c, mo )) {
-                writeObjectRefRelationships( c, dmo );
-            }
-        }
-        // If it's not abstract and we were iterating, then exit if we shouldn't show this one
-        else if ( !c.objects.contains( mo )) {
-            return;
-        }*/
 
         // Write Fields
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
@@ -338,21 +327,54 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected Collection<MetaObject> getDerivedObjects(Context c, MetaObject metaObject ) {
-         Collection<MetaObject> out = new ArrayList<>();
-         for ( MetaObject mo : c.loader.getChildren(MetaObject.class) ) {
-             if ( metaObject.equals(mo.getSuperObject())) {
-                 if ( isAbstract( mo ) && !showAbstracts )
-                     out.addAll( getDerivedObjects( c, mo ));
-                 else
-                    out.add( mo );
-             }
-         }
-         return out;
+    //////////////////////////////////////////////////////////////////////
+    // Logic Utility methods
+
+    /** Filter more based on UML generator configuration */
+    protected Collection<MetaObject> filterByConfig( Collection<MetaObject> objects ) {
+        return objects.stream()
+                .filter( mo -> shouldShowObject(mo) )
+                .collect( Collectors.toList());
     }
 
+    protected boolean shouldShowObject(MetaObject mo) {
+        return !isAbstract(mo)
+                || (isAbstract(mo)
+                && showAbstracts);
+    }
+
+
+    protected MetaObject getMetaObjectRef(MetaField f) {
+        try { return MetaDataUtil.getObjectRef( f ); }
+        catch( Exception e ) { return null; }
+    }
+
+    protected Collection<MetaObject> getDerivedObjects(Context c, MetaObject metaObject ) {
+        Collection<MetaObject> out = new ArrayList<>();
+        for ( MetaObject mo : c.loader.getChildren(MetaObject.class) ) {
+            if ( metaObject.equals(mo.getSuperObject())) {
+                if ( isAbstract( mo ) && !showAbstracts )
+                    out.addAll( getDerivedObjects( c, mo ));
+                else
+                    out.add( mo );
+            }
+        }
+        return out;
+    }
+
+    protected boolean isAbstract( MetaData md ) {
+        if ( md.hasAttr("_isAbstract")
+                && Boolean.TRUE.equals( md.getMetaAttr( "_isAbstract" ).getValue())) {
+            return true;
+        }
+        return false;
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    // Draw Helper methods
+
     protected String _slimPkg( String p1, String p2 ) {
-       return GeneratorUtil.toRelativePackage( p1, p2 );
+        return GeneratorUtil.toRelativePackage( p1, p2 );
     }
 
     protected String _pu( MetaData md ) {
@@ -403,8 +425,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
             StringBuilder b = new StringBuilder();
             for (Map.Entry<Object,Object> e : (((Properties) val).entrySet()) ) {
                 if ( b.length() > 0 ) b.append( ',' );
-                 b.append( e.getKey() ).append(':').append( e.getValue() );
-             }
+                b.append( e.getKey() ).append(':').append( e.getValue() );
+            }
             return b.toString();
         }
         else if ( val instanceof Class ) {
@@ -415,16 +437,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
-    protected boolean isAbstract( MetaData md ) {
-        if ( md.hasAttr("_isAbstract")
-                && Boolean.TRUE.equals( md.getMetaAttr( "_isAbstract" ).getValue())) {
-            return true;
-        }
-        return false;
-    }
-
     //////////////////////////////////////////////////////////////////////
-    // UML Output methods
+    // UML Draw methods
 
     protected void drawFileStart(Context c ) {
 
@@ -514,8 +528,8 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         c.pw.println(c.indent+"  "+ _pu(a) + " {"+a.getSubTypeName()+"} ="+getAttrValue(a));
     }
 
-    protected void drawObjectSuperReference(Context c, MetaObject mo) {
-        c.pw.println( _pu(mo, true) +" ..|> " + _pu( mo.getSuperObject(), true) +" : extends" );
+    protected void drawObjectSuperReference(Context c, MetaObject mo, MetaObject parent ) {
+        c.pw.println( _pu(mo, true) +" ..|> " + _pu( parent, true) +" : extends" );
     }
 
     protected void drawObjectKeyReference(Context c, MetaObject mo, MetaField f, ObjectReference oref, MetaObject objRef ) {
@@ -536,5 +550,20 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
     protected void drawNewLine(Context c) {
         c.pw.println();
+    }
+
+    //////////////////////////////////////////////////////////////////////
+    // Misc methods
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer(this.getClass().getSimpleName()+"{");
+        sb.append("args=").append(getArgs());
+        sb.append(", filters=").append(getFilters());
+        sb.append(", scripts=").append(getScripts());
+        sb.append(", showAttrs=").append(showAttrs);
+        sb.append(", showAbstracts=").append(showAbstracts);
+        sb.append('}');
+        return sb.toString();
     }
 }

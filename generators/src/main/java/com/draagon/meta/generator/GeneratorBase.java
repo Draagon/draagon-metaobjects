@@ -92,4 +92,18 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
     protected Collection<MetaObject> getFilteredMetaObjects( MetaDataLoader loader ) {
         return GeneratorUtil.getFilteredMetaData( loader, MetaObject.class, getFilters() );
     }
+
+
+    //////////////////////////////////////////////////////////////////////
+    // Misc methods
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer(this.getClass().getSimpleName()+"{");
+        sb.append("args=").append(getArgs());
+        sb.append(", filters=").append(getFilters());
+        sb.append(", scripts=").append(getScripts());
+        sb.append('}');
+        return sb.toString();
+    }
 }
