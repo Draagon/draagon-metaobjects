@@ -8,6 +8,7 @@ public class LoaderParam {
     private String classname = null;
     private String sourceDir = null;
     private List<String> sources = null;
+    private List<String> filters = null;
 
     public LoaderParam() {}
 
@@ -45,5 +46,13 @@ public class LoaderParam {
 
     public void setSources(List<String> sources) {
         this.sources = sources;
+    }
+
+    public List<String> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<String> filters) {
+        this.filters = filters;
     }
 }

@@ -1,21 +1,5 @@
 package com.draagon.meta.mojo;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import com.draagon.meta.MetaException;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
@@ -86,29 +70,11 @@ public class MetaDataMojo extends AbstractMojo
         this.generators = generators;
     }
 
-    /*@Parameter
-    public String rootPkg = null;
-
-    @Parameter
-    private String sourceDir = null;
-
-    @Parameter
-    private String template = null;
-
-    @Parameter
-    private List<String> metaData = null;
-
-    @Parameter
-    String output = null;
-
-    @Parameter
-    private String suffix = null;*/
-
     public void execute()
         throws MojoExecutionException
     {
         if ( getLoader() == null ) {
-            getLog().error( "No <loade> block was defined");
+            throw new MojoExecutionException( "No <loader> element was defined");
         }
 
         FileMetaDataLoader loader = createLoader();
@@ -117,13 +83,22 @@ public class MetaDataMojo extends AbstractMojo
             for ( GeneratorParam g : getGenerators() ) {
                 try {
                     Generator impl = (Generator) Class.forName(g.getClassname()).newInstance();
+
+                    // Merge generator args and global args
                     Map<String,String> allargs = new HashMap<>();
                     if ( g.getArgs() != null ) allargs.putAll(g.getArgs());
                     if ( globals != null ) allargs.putAll(globals);
                     impl.setArgs(allargs);
 
-                    if ( g.getFilters() != null ) impl.setFilters(g.getFilters());
+                    // Merge loader filters and generator filters
+                    List<String> allFilters = new ArrayList<>();
+                    if ( g.getFilters() != null ) allFilters.addAll( g.getFilters() );
+                    if ( loaderConfig.getFilters() != null ) allFilters.addAll( loaderConfig.getFilters() );
+                    impl.setFilters( allFilters );
+
+                    // Set the scripts
                     if ( g.getScripts() != null ) impl.setScripts(g.getScripts());
+
                     impl.execute(loader);
                 }
                 catch( Exception e ) {
