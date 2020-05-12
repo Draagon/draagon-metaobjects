@@ -19,72 +19,15 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
-
-    private Log log = LogFactory.getLog( this.getClass() );
+public class PlantUMLGenerator extends SingleFileDirectGeneratorBase {
 
     private boolean showAttrs = false;
     private boolean showAbstracts = true;
 
-    /** Passes at context data for the execution */
-    protected static class Context {
-
-        public final MetaDataLoader loader;
-        public final PrintWriter pw;
-        public final String indent;
-        public final Collection<MetaObject> objects;
-
-        public Context( MetaDataLoader loader, PrintWriter pw, String indent, Collection<MetaObject> objects ) {
-            this.loader = loader;
-            this.pw = pw;
-            this.indent = indent;
-            this.objects = objects;
-        }
-        public Context incIndent() {
-            return new Context( loader, pw, indent + "  ", objects);
-        }
-    }
+    //////////////////////////////////////////////////////////////////////
+    // SingleFileDirectorGenerator Execute Override methods
 
     @Override
-    public void execute( MetaDataLoader loader ) {
-
-        File outf = null;
-        PrintWriter pw = null;
-
-        parseArgs();
-
-        try {
-            // Create output file
-            outf = new File(getOutputDir(), getOutputFilename());
-            outf.createNewFile();
-
-            // Get the printwriter
-            pw = new PrintWriter(outf);
-
-            // Get the filtered objects
-            Collection<MetaObject> filteredObjects =
-                    filterByConfig( getFilteredMetaObjects(loader));
-
-            // Create the Context for passing through the writers
-            Context c = new Context(
-                    loader,
-                    pw,
-                    "",
-                    filteredObjects );
-
-            log.info("Writing PlantUML to file: " + outf.getName() );
-
-            // Write the UML File
-            writeFile(c);
-        }
-        catch( IOException e ) {
-            throw new GeneratorMetaException( "Unable to write PlantUML to file [" + outf + "]: " + e, e );
-        }
-        finally {
-            if ( pw != null ) pw.close();
-        }
-    }
-
     protected void parseArgs() {
 
         if ( hasArg( "showAttrs"))
@@ -98,10 +41,22 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         }
     }
 
+
+    /** Filter more based on UML generator configuration */
+    @Override
+    protected Collection<MetaObject> filterByConfig( Collection<MetaObject> objects ) {
+        return objects.stream()
+                .filter( mo -> shouldShowObject(mo) )
+                .collect( Collectors.toList());
+    }
+
     //////////////////////////////////////////////////////////////////////
     // UML Write Logic methods
 
-    protected void writeFile(Context c) throws IOException {
+    @Override
+    protected void writeFile(Context c, String filename ) throws IOException {
+
+        log.info("Writing PlantUML file: " + filename );
 
         // Write start of UML file
         drawFileStart(c);
@@ -329,13 +284,6 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
 
     //////////////////////////////////////////////////////////////////////
     // Logic Utility methods
-
-    /** Filter more based on UML generator configuration */
-    protected Collection<MetaObject> filterByConfig( Collection<MetaObject> objects ) {
-        return objects.stream()
-                .filter( mo -> shouldShowObject(mo) )
-                .collect( Collectors.toList());
-    }
 
     protected boolean shouldShowObject(MetaObject mo) {
         return !isAbstract(mo)
