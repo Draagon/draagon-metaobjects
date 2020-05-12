@@ -533,13 +533,13 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     }
 
     protected void drawObjectKeyReference(Context c, MetaObject mo, MetaField f, ObjectReference oref, MetaObject objRef ) {
-        c.pw.print(c.indent+_pu(mo,true));
+        c.pw.print(c.indent+_pu(mo,true) +" ");
         if (oref instanceof OneToOneReference) c.pw.print("\"1\" --> \"1\"");
         else if (oref instanceof OneToManyReference) c.pw.print("\"1\" --> \"many\"");
         else if (oref instanceof ManyToOneReference) c.pw.print("\"many\" --> \"1\"");
         else if (oref instanceof ManyToManyReference) c.pw.print("\"many\" --> \"many\"");
-        else c.pw.print(" --> ");
-        c.pw.println(_pu(objRef,true) +" : "+ _pu(f));
+        else c.pw.print("-->");
+        c.pw.println(" "+ _pu(objRef,true) +" : "+ _pu(f));
         //if (oref.getName() == null) c.pw.println(_pu(f));
         // else c.pw.println(_pu(f) + ":" + _pu(oref));
     }
