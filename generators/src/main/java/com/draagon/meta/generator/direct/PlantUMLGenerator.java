@@ -27,7 +27,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
     private boolean showAbstracts = true;
 
     /** Passes at context data for the execution */
-    public static class Context {
+    protected static class Context {
 
         public final MetaDataLoader loader;
         public final PrintWriter pw;
@@ -72,18 +72,7 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
                     "",
                     filteredObjects );
 
-            // Write start of UML file
-            drawFileStart(c);
-
-            // Write Packages
-            writeObjectPackages(c);
-
-            drawNewLine(c);
-
-            writeRelationships(c);
-
-            // Write end of UML file
-            drawFileEnd(c);
+            writeFile(c);
         }
         catch( IOException e ) {
             throw new GeneratorMetaException( "Unable to write PlantUML to file [" + outf + "]: " + e, e );
@@ -91,6 +80,22 @@ public class PlantUMLGenerator extends DirectGeneratorBase<PlantUMLGenerator> {
         finally {
             if ( pw != null ) pw.close();
         }
+    }
+
+    protected void writeFile(Context c) throws IOException {
+
+        // Write start of UML file
+        drawFileStart(c);
+
+        // Write Packages
+        writeObjectPackages(c);
+
+        drawNewLine(c);
+
+        writeRelationships(c);
+
+        // Write end of UML file
+        drawFileEnd(c);
     }
 
     /** Filter more based on UML generator configuration */
