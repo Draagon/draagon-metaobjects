@@ -1,7 +1,6 @@
 package com.draagon.meta.generator;
 
-import com.draagon.meta.generator.direct.JsonModelGenerator;
-import com.draagon.meta.generator.direct.UIJsonModelGenerator;
+import com.draagon.meta.generator.direct.json.model.UIJsonModelGenerator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import org.junit.After;
 import org.junit.Before;

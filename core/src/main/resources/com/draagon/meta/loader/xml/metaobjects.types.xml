@@ -2,7 +2,7 @@
 <typesConfig
         xmlns="https://www.draagon.com"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://www.draagon.com/xml types-config.xsd">
+        xsi:schemaLocation="https://www.draagon.com/types/v2 types-config.xsd">
 
     <types>
 
@@ -64,7 +64,6 @@
                 <child type="attr" subType="boolean" name="foreignKey"/> <!-- inlineAttr="optional" / -->
                 <child type="attr" subType="string" name="objectRef"/> <!-- inlineAttr="optional" / -->
                 <child type="validator" subType="*" name="*"/>
-                <child type="view" subType="*" name="*"/>
             </children>
             <subType name="boolean"      class="com.draagon.meta.field.BooleanField" />
             <subType name="byte"         class="com.draagon.meta.field.ByteField" />

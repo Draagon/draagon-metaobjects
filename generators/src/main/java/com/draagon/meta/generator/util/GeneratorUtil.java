@@ -2,8 +2,11 @@ package com.draagon.meta.generator.util;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.generator.direct.MetaDataFilters;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.object.MetaObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,19 +15,20 @@ import java.util.stream.Collectors;
 
 public class GeneratorUtil {
 
-
-    public static Collection<MetaData> getFilteredMetaData(MetaDataLoader loader, List<String> filters ) {
+    public static Collection<MetaData> getFilteredMetaData(MetaDataLoader loader, MetaDataFilters filters ) {
 
         return filterMetaData( loader.getChildren(), MetaData.class, filters );
     }
 
-    public static <T extends MetaData> Collection<T> getFilteredMetaData(MetaDataLoader loader, Class<T> clazz, List<String> filters ) {
+    public static <T extends MetaData> Collection<T> getFilteredMetaData(MetaDataLoader loader, Class<T> clazz, MetaDataFilters filters ) {
         return filterMetaData( loader.getMetaData( clazz ), clazz, filters );
     }
 
-    public static <T extends MetaData> Collection<T> filterMetaData( Collection<T> in, Class<T> clazz, List<String> filters ) {
+    private static <T extends MetaData> Collection<T> filterMetaData( Collection<T> in, Class<T> clazz, MetaDataFilters filtersIn ) {
 
         List<T> out = new ArrayList<>();
+
+        List<String> filters = filtersIn==null?null:filtersIn.getFilters();
 
         if ( filters == null || filters.isEmpty() ) {
             out.addAll(in);
@@ -204,5 +208,26 @@ public class GeneratorUtil {
         }
 
         return converted.toString();
+    }
+
+    public static List<String> getUniquePackages(Collection<? extends MetaData> filtered ) throws IOException {
+        List<String> pkgs = new ArrayList<>();
+
+        filtered.forEach( md -> {
+            if ( md instanceof MetaObject
+                    && !pkgs.contains( md.getPackage() )) {
+                pkgs.add( md.getPackage() );
+            }
+        });
+
+        return pkgs;
+    }
+
+    public static boolean isAbstract( MetaData md ) {
+        if ( md.hasAttr("_isAbstract")
+                && Boolean.TRUE.equals( md.getMetaAttr( "_isAbstract" ).getValue())) {
+            return true;
+        }
+        return false;
     }
 }

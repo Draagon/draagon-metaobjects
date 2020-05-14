@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="https://www.draagon.com"
-           xmlns="https://www.draagon.com"
+           targetNamespace="https://www.draagon.com/types/v2"
+           xmlns="https://www.draagon.com/types/v2"
            elementFormDefault="qualified">
 
     <xs:element name="typesConfig">

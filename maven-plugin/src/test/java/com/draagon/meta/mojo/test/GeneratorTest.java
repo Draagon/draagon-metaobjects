@@ -6,7 +6,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import java.util.List;
 import java.util.Map;
 
-public class GeneratorTest implements Generator<GeneratorTest> {
+public class GeneratorTest implements Generator {
 
     private MetaDataLoader loader = null;
     private Map<String,String> args = null;

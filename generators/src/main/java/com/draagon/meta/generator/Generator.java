@@ -5,7 +5,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import java.util.List;
 import java.util.Map;
 
-public interface Generator<T extends Generator> {
+public interface Generator {
 
     public Generator setArgs( Map<String,String> args );
     public Generator setFilters( List<String> filters );

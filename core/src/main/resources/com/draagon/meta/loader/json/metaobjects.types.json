@@ -60,8 +60,7 @@
                 {"child": {"type": "attr", "subType": "boolean", "name": "isKey"}},
                 {"child": {"type": "attr", "subType": "boolean", "name": "foreignKey"}},
                 {"child": {"type": "attr", "subType": "string", "name": "objectRef"}},
-                {"child": {"type": "validator", "subType": "*", "name": "*"}},
-                {"child": {"type": "view", "subType": "*", "name": "*"}}
+                {"child": {"type": "validator", "subType": "*", "name": "*"}}
             ],
             "subTypes": [
                 {"subType": {"name": "boolean",     "class": "com.draagon.meta.field.BooleanField"}},

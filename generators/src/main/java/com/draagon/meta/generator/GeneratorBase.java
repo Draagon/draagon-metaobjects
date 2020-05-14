@@ -2,6 +2,7 @@ package com.draagon.meta.generator;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaException;
+import com.draagon.meta.generator.direct.MetaDataFilters;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -10,21 +11,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public abstract class GeneratorBase<T extends GeneratorBase> implements Generator<T> {
+public abstract class GeneratorBase implements Generator {
 
     public static String ARG_OUTPUTDIR = "outputDir";
     public static String ARG_OUTPUTFILENAME = "outputFilename";
 
     private Map<String,String> args = new HashMap<>();
-    private List<String> filters = new ArrayList<>();
+    private MetaDataFilters filters = new MetaDataFilters();
     private List<String> scripts = new ArrayList<>();
 
     @Override
-    public T setArgs(Map<String, String> argMap) {
+    public GeneratorBase setArgs(Map<String, String> argMap) {
          args.putAll( argMap );
-        return (T) this;
+        return this;
     }
-
 
     protected Map<String,String> getArgs() {
         return args;
@@ -46,19 +46,19 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
     }
 
     @Override
-    public T setFilters(List<String> filters) {
-        this.filters = filters;
-        return (T) this;
+    public GeneratorBase setFilters(List<String> filters) {
+        this.filters.addFilters( filters );
+        return this;
     }
 
     protected List<String> getFilters() {
-        return filters;
+        return filters.getFilters();
     }
 
     @Override
-    public T setScripts(List<String> scripts) {
+    public GeneratorBase setScripts(List<String> scripts) {
         this.scripts = scripts;
-        return (T) this;
+        return this;
     }
 
     protected List<String> getScripts() {
@@ -84,15 +84,6 @@ public abstract class GeneratorBase<T extends GeneratorBase> implements Generato
 
         return f;
     }
-
-    protected Collection<MetaData> getFilteredMetaData( MetaDataLoader loader ) {
-        return GeneratorUtil.getFilteredMetaData( loader, getFilters() );
-    }
-
-    protected Collection<MetaObject> getFilteredMetaObjects( MetaDataLoader loader ) {
-        return GeneratorUtil.getFilteredMetaData( loader, MetaObject.class, getFilters() );
-    }
-
 
     //////////////////////////////////////////////////////////////////////
     // Misc methods

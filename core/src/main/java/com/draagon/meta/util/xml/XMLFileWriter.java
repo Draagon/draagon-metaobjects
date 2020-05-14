@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -44,11 +45,12 @@ public class XMLFileWriter
         }
     }
 
-    public static void writeToStream( Document document, OutputStream out ) throws IOException {
+    public static void writeToStream( Document document, OutputStream out, boolean indent ) throws IOException {
 
         try {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+            if (indent) transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             DOMSource domSource = new DOMSource(document);
             StreamResult streamResult = new StreamResult(out);
 

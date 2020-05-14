@@ -1,7 +1,9 @@
-package com.draagon.meta.generator;
+package com.draagon.meta.generator.plantuml;
 
-import com.draagon.meta.generator.direct.JsonModelGenerator;
-import com.draagon.meta.generator.direct.PlantUMLGenerator;
+import com.draagon.meta.generator.Generator;
+import com.draagon.meta.generator.GeneratorBase;
+import com.draagon.meta.generator.GeneratorTestBase;
+import com.draagon.meta.generator.direct.plantuml.PlantUMLGenerator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import org.junit.After;
 import org.junit.Before;
