@@ -1,18 +1,15 @@
 package com.draagon.meta.generator.direct.plantuml;
+import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.FileDirectWriter;
-import com.draagon.meta.generator.direct.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.generator.direct.SingleFileDirectGeneratorBase;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.draagon.meta.generator.util.GeneratorUtil.getFilteredMetaData;
 
-public class PlantUMLGenerator extends SingleFileDirectGeneratorBase {
+public class PlantUMLGenerator extends SingleFileDirectGeneratorBase<PlantUMLWriter> {
 
     private boolean showAttrs = false;
     private boolean showAbstracts = true;
@@ -30,8 +27,15 @@ public class PlantUMLGenerator extends SingleFileDirectGeneratorBase {
     }
 
     @Override
-    protected FileDirectWriter getWriter(MetaDataLoader loader) {
-        return new PlantUMLWriter(loader, MetaDataFilters.create(getFilters()), showAttrs, showAbstracts);
+    protected PlantUMLWriter getWriter(MetaDataLoader loader, PrintWriter pw ) {
+        return new PlantUMLWriter(loader, pw)
+                .showAttrs(showAttrs)
+                .showAbstracts(showAbstracts);
+    }
+
+    @Override
+    protected void writeFile(PlantUMLWriter writer) throws MetaDataWriterException {
+        writer.writeUML();
     }
 
 

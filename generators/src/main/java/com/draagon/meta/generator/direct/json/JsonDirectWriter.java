@@ -1,47 +1,60 @@
 package com.draagon.meta.generator.direct.json;
 
-import com.draagon.meta.generator.WriterContext;
-import com.draagon.meta.generator.direct.DirectWriter;
-import com.draagon.meta.generator.direct.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataWriter;
+import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-public abstract class JsonDirectWriter<D> extends DirectWriter<JsonWriter,D> {
+import java.io.*;
 
-    /** Passes at context data for the execution */
-    public static class Context extends WriterContext<Context,JsonWriter,String> {
+public abstract class JsonDirectWriter<T extends JsonDirectWriter> extends MetaDataWriter<T> {
 
-        protected Context(JsonWriter json, String path ) {
-            this( null, json, path );
-        }
-        protected Context( Context parent, JsonWriter json, String path ) {
-            super(parent, json, path);
-        }
+    private final Gson gson;
+    private final Writer writer;
+    protected final JsonWriter out;
 
-        @Override
-        public Context newInstance(Context parent, JsonWriter root, String node) {
-            return new Context( parent, root, node );
-        }
+    public JsonDirectWriter(MetaDataLoader loader, OutputStream os ) throws MetaDataWriterException {
+        this(loader, new OutputStreamWriter( os ));
+    }
 
-        @Override
-        public String getNodePathName() {
-            return node;
+    public JsonDirectWriter(MetaDataLoader loader, Writer writer ) throws MetaDataWriterException {
+        super(loader);
+        this.gson = new Gson();
+        this.writer = writer;
+        try {
+            this.out = gson.newJsonWriter( writer );
+        } catch (IOException e) {
+            throw new MetaDataWriterException( this, "Error opening JsonWriter: " + e, e );
         }
     }
 
-    public JsonDirectWriter(MetaDataLoader loader, MetaDataFilters filters) {
-        super(loader, filters);
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Options
+
+    public T withIndent( String indent ) {
+        out.setIndent( indent );
+        return (T) this;
+    }
+
+    public abstract void writeJson() throws MetaDataWriterException;
+
+    protected JsonWriter out() {
+        return out;
     }
 
     @Override
-    public void write( JsonWriter json, D data ) {
-
-        Context c = new Context( json, "metadata" );
-        writeJson( c, data );
+    public void close() throws MetaDataWriterException {
+        try {
+            if (out != null) out.close();
+            else if (writer != null) writer.close();
+        } catch (IOException e) {
+            throw new MetaDataWriterException( this, "Error closing "+(out!=null?"JsonWriter":"Writer")+": " + e, e );
+        }
     }
-
-    public abstract void writeJson( Context c, D data );
-
 }

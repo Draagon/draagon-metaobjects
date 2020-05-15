@@ -1,14 +1,6 @@
 package com.draagon.meta.generator;
 
-import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaException;
-import com.draagon.meta.generator.direct.MetaDataFilters;
-import com.draagon.meta.generator.util.GeneratorUtil;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public abstract class GeneratorBase implements Generator {

@@ -7,10 +7,10 @@ import com.draagon.meta.loader.MetaDataLoader;
 
 import java.io.Writer;
 
-public class JsonModelGenerator extends SingleJsonDirectGeneratorBase {
+public class JsonMetaDataGenerator extends SingleJsonDirectGeneratorBase {
 
     @Override
     protected JsonDirectWriter getWriter(MetaDataLoader loader, Writer writer) throws MetaDataWriterException {
-        return new JsonModelWriter(loader, writer);
+        return new JsonMetaDatalWriter(loader, writer);
     }
 }

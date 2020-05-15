@@ -1,5 +1,8 @@
-package com.draagon.meta.generator;
+package com.draagon.meta.generator.json;
 
+import com.draagon.meta.generator.Generator;
+import com.draagon.meta.generator.GeneratorBase;
+import com.draagon.meta.generator.GeneratorTestBase;
 import com.draagon.meta.generator.direct.json.model.UIJsonModelGenerator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import org.junit.After;
@@ -24,7 +27,7 @@ public class UIJsonModelTest extends GeneratorTestBase {
 
     protected String getGeneratedTestSourcesPath() {
         // TODO:  Get this from Maven
-        return "./target/generated-test-sources";
+        return "./target/generated-test-resources";
     }
 
     @Test
@@ -32,7 +35,7 @@ public class UIJsonModelTest extends GeneratorTestBase {
 
         Map<String,String> args = new HashMap<>();
         args.put( GeneratorBase.ARG_OUTPUTDIR, getGeneratedTestSourcesPath() );
-        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "ui-test1-metadata.json" );
+        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test1-ui-model.json" );
 
         Generator generator = new UIJsonModelGenerator()
                 .setArgs( args )

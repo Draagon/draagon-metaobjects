@@ -1,63 +1,73 @@
 package com.draagon.meta.generator.direct.xml.xsd;
 
-import com.draagon.meta.generator.direct.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.config.TypesConfig;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
-public class MetaDataXSDWriter extends XMLDirectWriter<String> {
+public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
-    protected final String nameSpace;
+    private String nameSpace;
 
-    public MetaDataXSDWriter(MetaDataLoader loader, String nameSpace ) {
-        super( loader, null );
-        this.nameSpace = nameSpace;
+    public MetaDataXSDWriter( MetaDataLoader loader, OutputStream out ) throws MetaDataWriterException {
+        super(loader,out);
     }
 
-    @Override
-    public void writeXML(Context c, String filename ) {
+    /////////////////////////////////////////////////////////////////////////
+    // Options
 
-        log.info("Writing MetaDataXSD file: " + filename );
+    public MetaDataXSDWriter withNamespace( String nameSpace ) {
+        this.nameSpace = nameSpace;
+        return this;
+    }
 
-        Element rootElement = c.out.createElementNS("example:ns:uri", "test-results-upload");
+    public String getNameSpace() {
+        return nameSpace;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // MetaDataXSD Methods
+
+    public void writeXML() throws MetaDataWriterException {
+
+        Element rootElement = doc().createElementNS("example:ns:uri", "test-results-upload");
         rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", "example:ns:uri");
         rootElement.setAttributeNS("example:ns:uri", "attr1", "XXX");
         rootElement.setAttributeNS("example:ns:uri", "attr2", "YYY");
 
-        c.out.setDocumentURI("http://www.w3.org/2001/XMLSchema");
-        //c.out.setPrefix("xs");
-        c.out.setStrictErrorChecking(true);
-        c.out.appendChild( rootElement );
+        doc().setDocumentURI("http://www.w3.org/2001/XMLSchema");
+        //doc().setPrefix("xs");
+        doc().setStrictErrorChecking(true);
+        doc().appendChild( rootElement );
 
-        writeTypes( c.inc(rootElement), loader.getMetaDataConfig().getTypesConfig() );
+        writeTypes( rootElement, getLoader().getMetaDataConfig().getTypesConfig() );
     }
 
-    protected void writeTypes(Context c, TypesConfig tsc ) {
+    protected void writeTypes( Element el, TypesConfig tsc )  throws MetaDataWriterException {
         for (TypeConfig tc : tsc.getTypes()) {
-            writeType(c, tc);
+            writeType(el, tc);
         }
     }
 
-    protected void writeType( Context c, TypeConfig tc) {
+    protected void writeType( Element el, TypeConfig tc) throws MetaDataWriterException {
 
         // <xs:element name="attr">
-        Element typeEl = c.out.createElement( "element");
+        Element typeEl = doc().createElement( "element");
         typeEl.setAttribute( "name", tc.getTypeName() );
 
-        c.node.appendChild( typeEl );
+        el.appendChild( typeEl );
 
-        writeTypeChildren( c.inc(typeEl), tc, tc.getTypeChildConfigs() );
-        writeTypeAttributes( c.inc(typeEl), tc, tc.getTypeChildConfigs() );
+        writeTypeChildren( typeEl, tc, tc.getTypeChildConfigs() );
+        writeTypeAttributes( typeEl, tc, tc.getTypeChildConfigs() );
     }
 
-    protected void writeTypeChildren(Context c, TypeConfig tc, List<ChildConfig> typeChildConfigs) {
+    protected void writeTypeChildren(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
 
         //Set<String> types = getUniqueChildTypes( typeChildConfigs );
 
@@ -71,11 +81,11 @@ public class MetaDataXSDWriter extends XMLDirectWriter<String> {
     }
 
 
-    protected void writeTypeChild(Context c, TypeConfig tc, String type) {
+    protected void writeTypeChild(Element el, TypeConfig tc, String type)  throws MetaDataWriterException {
         //pn(c,c.indent+"<xs:element ref=\""+type+"\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>");
     }
 
-    protected void writeTypeAttributes(Context c, TypeConfig tc, List<ChildConfig> typeChildConfigs) {
+    protected void writeTypeAttributes(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
         //pn(c,c.indent+"<xs:attribute name=\"package\"/>");
         //pn(c,c.indent+"<xs:attribute name=\"type\"/>");
         //pn(c,c.indent+"<xs:attribute name=\"subtype\"/>");
@@ -119,4 +129,14 @@ public class MetaDataXSDWriter extends XMLDirectWriter<String> {
     protected void drawNewLine( Context c ) {
         pn(c,"");
     }*/
+
+
+    /////////////////////////////////////////////////////////////////////////
+    // Misc Methods
+
+    @Override
+    protected String getToStringOptions() {
+        return super.getToStringOptions()
+                +",nameSpace="+nameSpace;
+    }
 }

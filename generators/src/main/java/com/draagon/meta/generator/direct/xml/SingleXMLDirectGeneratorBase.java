@@ -1,16 +1,15 @@
 package com.draagon.meta.generator.direct.xml;
 
 import com.draagon.meta.generator.GeneratorMetaException;
+import com.draagon.meta.generator.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.DirectGeneratorBase;
 import com.draagon.meta.generator.direct.FileDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.xml.XMLFileWriter;
 import org.w3c.dom.Document;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 
 public abstract class SingleXMLDirectGeneratorBase extends DirectGeneratorBase {
 
@@ -18,7 +17,8 @@ public abstract class SingleXMLDirectGeneratorBase extends DirectGeneratorBase {
     public void execute( MetaDataLoader loader ) {
 
         File outf = null;
-        FileOutputStream fos = null;
+        OutputStream fos = null;
+        XMLDirectWriter writer = null;
 
         parseArgs();
 
@@ -27,36 +27,36 @@ public abstract class SingleXMLDirectGeneratorBase extends DirectGeneratorBase {
             outf = new File(getOutputDir(), getOutputFilename());
             outf.createNewFile();
 
-            fos = new FileOutputStream( outf );
-
-            Document doc = XMLFileWriter.getBuilder();
-
             // Create the XML Writer
-            XMLDirectWriter writer = getWriter( loader );
+            fos = new FileOutputStream( outf );
+            writer = getWriter( loader, fos );
+            writer.withFilename( outf.toString())
+                    .withFilters(MetaDataFilters.create( getFilters() ));
 
             // Write the XML File
-            writeXML(writer, doc, outf.toString());
-
-            // Write the XML Document to the file
-            XMLFileWriter.writeToStream( doc, fos, true );
+            writeXML( writer );
         }
-        catch( IOException e ) {
+        catch( IOException | MetaDataWriterException e ) {
             throw new GeneratorMetaException( "Unable to write to XML file [" + outf + "]: " + e, e );
         }
         finally {
             try {
-                if (fos != null) fos.close();
-            } catch ( IOException e ) {
+                // NOTE: This is critical as the close flushes the XML to the outputstream
+                if (writer != null) writer.close();
+                else if ( fos != null ) fos.close();
+            } catch ( IOException | MetaDataWriterException e ) {
                 log.error( "Error closing XML file ["+outf+"]: "+e, e );
             }
         }
     }
 
-    protected abstract XMLDirectWriter getWriter( MetaDataLoader loader );
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Implementation Methods
 
-    protected void writeXML( XMLDirectWriter writer, Document doc, String filename ) {
-        log.info("{"+writer+"} Writing XML file: " + filename );
+    protected abstract XMLDirectWriter getWriter( MetaDataLoader loader, OutputStream os ) throws MetaDataWriterException;
 
-        writer.write(doc, filename );
+    protected void writeXML( XMLDirectWriter writer ) throws MetaDataWriterException {
+        log.info("Writing XML file: " + writer.getFilename() );
+        writer.writeXML();
     }
 }

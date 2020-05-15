@@ -5,10 +5,11 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.GeneratorMetaException;
+import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.FileDirectWriter;
 import static com.draagon.meta.generator.util.GeneratorUtil.*;
 
-import com.draagon.meta.generator.direct.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -16,93 +17,101 @@ import com.draagon.meta.relation.ref.*;
 import com.draagon.meta.util.MetaDataUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PlantUMLWriter extends FileDirectWriter<String> {
+public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
-    protected final boolean showAttrs;
-    protected final boolean showAbstracts;
-    protected final List<MetaObject> objects;
+    protected boolean showAttrs = false;
+    protected boolean showAbstracts = true;
+    protected Collection<MetaObject> filteredObjects;
 
-    public PlantUMLWriter( MetaDataLoader loader ) {
-        this( loader, null, false, true );
+    public PlantUMLWriter( MetaDataLoader loader, PrintWriter pw ) {
+        super( loader, pw );
     }
 
-    public PlantUMLWriter( MetaDataLoader loader, MetaDataFilters filters ) {
-        this( loader, filters, false, true );
-    }
+    //////////////////////////////////////////////////////////////////////
+    // Options
 
-    public PlantUMLWriter( MetaDataLoader loader, MetaDataFilters filters,
-                           boolean showAttrs, boolean showAbstracts ) {
-
-        super( loader, filters );
-
+    public PlantUMLWriter showAttrs( boolean showAttrs ) {
         this.showAttrs = showAttrs;
-        this.showAbstracts = showAbstracts;
-
-        objects = GeneratorUtil.getFilteredMetaData( loader, MetaObject.class, filters )
-                .stream()
-                .filter( mo -> shouldShowObject(mo) )
-                .collect( Collectors.toList());
+        return this;
     }
+
+    public PlantUMLWriter showAbstracts( boolean showAbstracts ) {
+        this.showAbstracts = showAbstracts;
+        return this;
+    }
+
+    protected Collection<MetaObject> objects() {
+        if ( filteredObjects == null ) {
+            filteredObjects = GeneratorUtil.getFilteredMetaData(getLoader(), MetaObject.class, getFilters() )
+                    .stream()
+                    .filter(mo -> shouldShowObject(mo))
+                    .collect(Collectors.toList());
+        }
+        return filteredObjects;
+    }
+
 
     //////////////////////////////////////////////////////////////////////
     // UML Write Logic methods
 
-    @Override
-    protected void writeFile(Context c, String filename) {
+    public void writeUML() throws MetaDataWriterException {
 
         try {
             // Write start of UML file
-            drawFileStart(c);
+            drawFileStart();
 
             // Write object packages (namespaces in PlantUML)
-            writeObjectPackages(c);
+            writeObjectPackages();
 
-            drawNewLine(c);
+            drawNewLine();
 
             // Write object relationships
-            writeRelationships(c);
+            writeRelationships();
 
             // Write end of UML file
-            drawFileEnd(c);
+            drawFileEnd();
         }
         catch( IOException e ) {
-            throw new GeneratorMetaException( "Error writing file ["+filename+"]: "+e, e);
+            throw new MetaDataWriterException( this, "Error writing PlantUML: "+e, e);
         }
     }
 
-    protected void writeObjectPackages(Context c) throws IOException {
+    protected void writeObjectPackages() throws IOException {
 
-        List<String> pkgs = getUniquePackages(objects);
+        List<String> pkgs = getUniquePackages(objects());
 
-        writeEmptyPackageNesting( c, pkgs );
+        writeEmptyPackageNesting( pkgs );
 
         for ( String p : pkgs ) {
 
-            if (!p.isEmpty()) drawNamespaceStart( c, p );
+            if (!p.isEmpty()) drawNamespaceStart( p );
 
             // Write MetaObjects
-            for (MetaObject mo : objects) {
+            inc();
+            for (MetaObject mo : objects()) {
                 if ( mo.getPackage().equals( p )) {
-                    writeMetaObject( c.inc(p), mo );
+                    writeMetaObject( mo );
                 }
             }
+            dec();
 
-            if (!p.isEmpty()) drawNamespaceEnd( c );
+            if (!p.isEmpty()) drawNamespaceEnd();
         }
     }
 
-    protected void writeEmptyPackageNesting(Context c, List<String> pkgsIn) {
+    protected void writeEmptyPackageNesting(List<String> pkgsIn) {
         List<String> pkgs = new ArrayList<>( pkgsIn );
         for( String pkg : pkgsIn ) {
             String p = pkg.substring( 0, pkg.lastIndexOf( "::" ));
             if ( !p.isEmpty()
-                    && !pkgs.contains( p )) {
+                    && !pkgs.contains(p)) {
                 if ( hasDifferentSubPackages( p, pkgsIn )) {
-                    drawNamespaceStart(c, p);
-                    drawNamespaceEnd(c);
+                    drawNamespaceStart(p);
+                    drawNamespaceEnd();
                 }
                 pkgs.add( p );
             }
@@ -131,114 +140,124 @@ public class PlantUMLWriter extends FileDirectWriter<String> {
         return false;
     }
 
-    protected void writeRelationships(Context c) throws IOException {
+    protected void writeRelationships() throws IOException {
 
-        for (MetaObject mo : objects) {
+        for (MetaObject mo : objects()) {
 
-            writeObjectParentRelationships(c, mo);
+            writeObjectParentRelationships(mo);
 
             // Write ObjectRef relationships
-            writeObjectRefRelationships(c, mo);
+            writeObjectRefRelationships(mo);
         }
     }
 
-    protected void writeObjectParentRelationships(Context c, MetaObject mo) {
+    protected void writeObjectParentRelationships(MetaObject mo) {
 
         // Write super object relationships (extends)
         if ( mo.getSuperObject() != null
                 && shouldShowObject( mo.getSuperObject() )
-                && objects.contains( mo.getSuperObject() )) {
+                && objects().contains( mo.getSuperObject() )) {
 
-            drawObjectSuperReference(c, mo, mo.getSuperObject() );
+            drawObjectSuperReference(mo, mo.getSuperObject() );
         }
     }
 
-    protected void writeMetaObject(Context c, MetaObject mo ) throws IOException {
+    protected void writeMetaObject(MetaObject mo ) throws IOException {
 
-        drawObjectStart( c, mo );
+        drawObjectStart(mo);
 
-        writeObjectSections(c.inc(mo.getName()), mo);
+        inc();
+        writeObjectSections(mo);
+        dec();
 
-        drawObjectEnd(c);
+        drawObjectEnd();
     }
 
-    protected void writeObjectSections(Context c, MetaObject mo) {
+    protected void writeObjectSections(MetaObject mo) {
 
-        writeObjectDetailsSection(c, mo);
-        writeObjectAttrSection(c, mo);
-        writeObjectFieldSection(c, mo);
+        writeObjectDetailsSection(mo);
+        writeObjectAttrSection(mo);
+        writeObjectFieldSection(mo);
     }
 
-    protected void writeObjectDetailsSection(Context c, MetaObject mo) {
+    protected void writeObjectDetailsSection(MetaObject mo) {
 
-        drawObjectDetailsHeader(c);
-        drawObjectMetaDataType(c.inc("@type"), mo);
+        drawObjectDetailsHeader();
+
+        inc();
+        drawObjectMetaDataType(mo);
 
         MetaObject parent = mo.getSuperObject();
         if ( parent != null ) { //&& isAbstract(parent)) {
-            drawObjectExtension(c.inc("@super"), mo, parent);
+            drawObjectExtension(mo, parent);
         }
+        dec();
     }
 
-    protected void writeObjectAttrSection(Context c, MetaObject mo) {
+    protected void writeObjectAttrSection(MetaObject mo) {
 
         List<MetaAttribute> attrs = mo.getMetaAttrs();
         if ( showAttrs & !attrs.isEmpty()) {
 
-            drawObjectAttrHeader(c, mo);
-            attrs.forEach( a -> drawObjectAttr(c.inc(a.getShortName()), a));
+            drawObjectAttrHeader(mo);
+            inc();
+            attrs.forEach( a -> drawObjectAttr(a));
+            dec();
         }
     }
 
-    protected void writeObjectFieldSection(Context c, MetaObject mo) {
-        iterateWriteObjectFieldSection(c, mo, true);
+    protected void writeObjectFieldSection(MetaObject mo) {
+        iterateWriteObjectFieldSection(mo, true);
     }
 
-    protected void iterateWriteObjectFieldSection(Context c, MetaObject mo, boolean primary ) {
+    protected void iterateWriteObjectFieldSection(MetaObject mo, boolean primary ) {
 
         // Write Object Fields
         Collection<MetaField> fields = mo.getMetaFields( false);
         if ( !fields.isEmpty() ) {
-            drawObjectFieldSection(c, primary, mo );
-            writeObjectFields(c, primary, mo, fields);
+            drawObjectFieldSection(primary, mo );
+            writeObjectFields(primary, mo, fields);
         }
 
         // Write parent fields if we're not showing abstracts or the parent not on the objects list
         MetaObject parent = mo.getSuperObject();
         if ( parent != null && ((isAbstract(parent) && !showAbstracts)
-                || !objects.contains(parent))) {
+                || !objects().contains(parent))) {
 
-            iterateWriteObjectFieldSection( c, parent, false );
+            iterateWriteObjectFieldSection(parent, false );
         }
     }
 
-    protected void writeObjectFields(Context c2, boolean primary, MetaObject mo, Collection<MetaField> fields) {
+    protected void writeObjectFields(boolean primary, MetaObject mo, Collection<MetaField> fields) {
+
+        inc();
 
         for (MetaField f : fields) {
-
-            final Context c = c2.inc( f.getShortName() );
 
             if ( !isAbstract(f) && (!showAbstracts && isAbstract( f ))) continue;
 
             MetaData oref = getMetaObjectRef(f);
             if ( oref != null ) {
-                drawObjectFieldWithRef(c, primary, mo, f, oref);
+                drawObjectFieldWithRef(primary, mo, f, oref);
             }
             else if ( f.getSuperField() != null ) {
-                drawObjectFieldWithSuper(c, primary, mo, f);
+                drawObjectFieldWithSuper(primary, mo, f);
             }
             else {
-                drawObjectField(c, primary, mo, f);
+                drawObjectField(primary, mo, f);
             }
 
             if ( showAttrs ) {
                 List<MetaAttribute> attrs = f.getMetaAttrs( !showAbstracts );
-                attrs.forEach( a -> drawFieldAttr(c, f, a));
+                attrs.forEach( a -> drawFieldAttr(f, a));
             }
+
         }
+
+        dec();
     }
 
-    protected void writeObjectRefRelationships(Context c, MetaObject mo ) throws IOException {
+    protected void writeObjectRefRelationships(MetaObject mo ) throws IOException {
 
         // Write Fields
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
@@ -252,14 +271,14 @@ public class PlantUMLWriter extends FileDirectWriter<String> {
                 if (objRef != null) {
 
                     if (isAbstract( objRef ) && !showAbstracts ) {
-                        getDerivedObjects(c, objRef)
+                        getDerivedObjects(objRef)
                                 .stream()
                                 .filter( o -> !isAbstract(o) || (isAbstract(o) && !showAbstracts))
-                                .filter( o -> objects.contains( o ))
-                                .forEach( o -> drawObjectKeyReference(c, mo, f, oref, o));
+                                .filter( o -> objects().contains( o ))
+                                .forEach( o -> drawObjectKeyReference(mo, f, oref, o));
                     }
-                    else if (objects.contains( objRef )){
-                        drawObjectKeyReference(c, mo, f, oref, objRef);
+                    else if (objects().contains( objRef )){
+                        drawObjectKeyReference(mo, f, oref, objRef);
                     }
                 }
             }
@@ -268,14 +287,14 @@ public class PlantUMLWriter extends FileDirectWriter<String> {
                 if ( objRef != null ) {
 
                     if (isAbstract( objRef ) && !showAbstracts ) {
-                        getDerivedObjects(c, objRef)
+                        getDerivedObjects(objRef)
                                 .stream()
                                 .filter( o -> !isAbstract(o) || (isAbstract(o) && !showAbstracts))
-                                .filter( o -> objects.contains( o ))
-                                .forEach( o -> drawObjectReference(c, mo, f, o));
+                                .filter( o -> objects().contains( o ))
+                                .forEach( o -> drawObjectReference(mo, f, o));
                     }
-                    else if (objects.contains( objRef )) {
-                        drawObjectReference(c, mo, f, objRef);
+                    else if (objects().contains( objRef )) {
+                        drawObjectReference(mo, f, objRef);
                     }
                 }
             }
@@ -296,12 +315,12 @@ public class PlantUMLWriter extends FileDirectWriter<String> {
         catch( Exception e ) { return null; }
     }
 
-    protected Collection<MetaObject> getDerivedObjects(Context c, MetaObject metaObject ) {
+    protected Collection<MetaObject> getDerivedObjects(MetaObject metaObject) {
         Collection<MetaObject> out = new ArrayList<>();
-        for ( MetaObject mo : loader.getChildren(MetaObject.class) ) {
+        for ( MetaObject mo : getLoader().getChildren(MetaObject.class) ) {
             if ( metaObject.equals(mo.getSuperObject())) {
                 if ( isAbstract( mo ) && !showAbstracts )
-                    out.addAll( getDerivedObjects( c, mo ));
+                    out.addAll( getDerivedObjects( mo ));
                 else
                     out.add( mo );
             }
@@ -379,115 +398,115 @@ public class PlantUMLWriter extends FileDirectWriter<String> {
     //////////////////////////////////////////////////////////////////////
     // UML Draw methods
 
-    protected void drawFileStart(Context c ) {
+    protected void drawFileStart() {
 
-        pn(c,"@startuml");
-        pn(c);
-        pn(c,"skinparam class {");
-        pn(c,"    BackgroundColor PaleGreen");
-        pn(c,"    ArrowColor SeaGreen");
-        pn(c,"    BorderColor DarkGreen");
-        pn(c,"    BackgroundColor<<Abstract>> Wheat");
-        pn(c,"    BorderColor<<Abstract>> Tomato");
-        pn(c,"}");
-        pn(c,"skinparam stereotypeCBackgroundColor YellowGreen");
-        pn(c,"skinparam stereotypeCBackgroundColor<< Abstract >> DimGray");
-        pn(c);
-        pn(c,"set namespaceSeparator ::");
-        pn(c);
+        println("@startuml");
+        println();
+        println("skinparam class {");
+        println("    BackgroundColor PaleGreen");
+        println("    ArrowColor SeaGreen");
+        println("    BorderColor DarkGreen");
+        println("    BackgroundColor<<Abstract>> Wheat");
+        println("    BorderColor<<Abstract>> Tomato");
+        println("}");
+        println("skinparam stereotypeCBackgroundColor YellowGreen");
+        println("skinparam stereotypeCBackgroundColor<< Abstract >> DimGray");
+        println();
+        println("set namespaceSeparator ::");
+        println();
     }
 
-    protected void drawFileEnd(Context c ) {
-        pn(c,"@enduml");
+    protected void drawFileEnd() {
+        println("@enduml");
     }
 
-    protected void drawNamespaceStart(Context c, String pkg ) {
-        pn(c,"namespace " + pkg + " {" );
+    protected void drawNamespaceStart(String pkg) {
+        println("namespace " + pkg + " {" );
     }
 
-    protected void drawNamespaceEnd(Context c ) {
-        pn(c,"}" );
+    protected void drawNamespaceEnd() {
+        println("}" );
     }
 
-    protected void drawObjectStart(Context c, MetaObject mo ) {
-        pr(c, c.indent + "class "+ _pu(mo));
-        if ( isAbstract( mo ) ) pr(c, " << (A,#FF7700) Abstract");
-        else pr(c, " << (O,#AAAAFF)");
-        pn(c, " >> {");
+    protected void drawObjectStart(MetaObject mo) {
+        print(true, "class "+ _pu(mo));
+        if ( isAbstract( mo ) ) print(" << (A,#FF7700) Abstract");
+        else print(" << (O,#AAAAFF)");
+        println(" >> {");
     }
 
-    protected void drawObjectEnd(Context c) {
-        pn(c,c.indent+"}");
+    protected void drawObjectEnd() {
+        println(true,"}");
     }
 
-    protected void drawObjectDetailsHeader(Context c) {
-        pn(c,c.indent+".. Details ..");
+    protected void drawObjectDetailsHeader() {
+        println(true,".. Details ..");
     }
 
-    protected void drawObjectMetaDataType(Context c, MetaObject mo) {
-        pn(c,c.indent+"@type="+mo.getSubTypeName() );
+    protected void drawObjectMetaDataType(MetaObject mo) {
+        println(true,"@type="+mo.getSubTypeName() );
     }
 
-    protected void drawObjectExtension(Context c, MetaObject mo, MetaObject parent ) {
-        pn(c,c.indent+"@extends="+_slimPkg( mo.getPackage(), parent.getPackage() )
+    protected void drawObjectExtension(MetaObject mo, MetaObject parent ) {
+        println(true,"@extends="+_slimPkg( mo.getPackage(), parent.getPackage() )
                 +parent.getShortName() );
     }
 
-    protected void drawObjectAttrHeader(Context c, MetaObject mo) {
-        pn(c,c.indent+".. Attributes ..");
+    protected void drawObjectAttrHeader(MetaObject mo) {
+        println(true,".. Attributes ..");
     }
 
-    protected void drawObjectAttr(Context c, MetaAttribute a) {
-        pn(c,c.indent+ _pu(a) +"="+getAttrValue(a));
+    protected void drawObjectAttr(MetaAttribute a) {
+        println(true, _pu(a) +"="+getAttrValue(a));
     }
 
-    protected void drawObjectFieldSection(Context c, boolean primary, MetaObject mo) {
-        pn(c,c.indent + ".. " + (!primary?mo.getShortName()+" ":"") + "Fields ..");
+    protected void drawObjectFieldSection(boolean primary, MetaObject mo) {
+        println(true, ".. " + (!primary?mo.getShortName()+" ":"") + "Fields ..");
     }
 
-    protected void drawObjectField(Context c, boolean primary, MetaObject mo, MetaField f) {
-        pn(c,c.indent+(primary?"+":"#")+ _pu(f) + " {"+f.getSubTypeName() + "}");
+    protected void drawObjectField(boolean primary, MetaObject mo, MetaField f) {
+        println(true,(primary?"+":"#")+ _pu(f) + " {"+f.getSubTypeName() + "}");
     }
 
-    protected void drawObjectFieldWithSuper(Context c, boolean primary, MetaObject mo, MetaField f) {
-        pn(c,c.indent+(primary?"+":"#")+ _pu(f) + " {"+f.getSubTypeName() + "}");
-        pn(c,c.indent+"@super=" + _slimPkg( mo.getPackage(), f.getSuperField().getPackage() )
+    protected void drawObjectFieldWithSuper(boolean primary, MetaObject mo, MetaField f) {
+        println(true,(primary?"+":"#")+ _pu(f) + " {"+f.getSubTypeName() + "}");
+        println(true,"@super=" + _slimPkg( mo.getPackage(), f.getSuperField().getPackage() )
                 + _pu( f.getSuperField()));
     }
 
-    protected void drawObjectFieldWithRef(Context c, boolean primary, MetaObject mo, MetaField f, MetaData oref) {
-        pr(c,c.indent+(primary?"+":"#")+" " + _pu(f) +" {");
-        if ( f.getDataType().isArray() ) pr(c,"[] ");
-        pr(c, _slimPkg( mo.getPackage(), oref.getPackage()));
-        pr(c,oref.getShortName());
-        pn(c,"}");
+    protected void drawObjectFieldWithRef(boolean primary, MetaObject mo, MetaField f, MetaData oref) {
+        print(true,(primary?"+":"#")+" " + _pu(f) +" {");
+        if ( f.getDataType().isArray() ) print("[] ");
+        print( _slimPkg( mo.getPackage(), oref.getPackage()));
+        print(oref.getShortName());
+        println("}");
     }
 
-    protected void drawFieldAttr(Context c, MetaField f, MetaAttribute a) {
-        pn(c,c.indent+"  "+ _pu(a) + " {"+a.getSubTypeName()+"} ="+getAttrValue(a));
+    protected void drawFieldAttr(MetaField f, MetaAttribute a) {
+        println(true,"  "+ _pu(a) + " {"+a.getSubTypeName()+"} ="+getAttrValue(a));
     }
 
-    protected void drawObjectSuperReference(Context c, MetaObject mo, MetaObject parent ) {
-        pn(c, _pu(mo, true) +" ..|> " + _pu( parent, true) +" : extends" );
+    protected void drawObjectSuperReference(MetaObject mo, MetaObject parent ) {
+        println( _pu(mo, true) +" ..|> " + _pu( parent, true) +" : extends" );
     }
 
-    protected void drawObjectKeyReference(Context c, MetaObject mo, MetaField f, ObjectReference oref, MetaObject objRef ) {
-        pr(c,c.indent+_pu(mo,true) +" ");
-        if (oref instanceof OneToOneReference) pr(c,"\"1\" --> \"1\"");
-        else if (oref instanceof OneToManyReference) pr(c,"\"1\" --> \"many\"");
-        else if (oref instanceof ManyToOneReference) pr(c,"\"many\" --> \"1\"");
-        else if (oref instanceof ManyToManyReference) pr(c,"\"many\" --> \"many\"");
-        else pr(c,"-->");
-        pn(c," "+ _pu(objRef,true) +" : "+ _pu(f));
-        //if (oref.getName() == null) pn(c,_pu(f));
-        // else pn(c,_pu(f) + ":" + _pu(oref));
+    protected void drawObjectKeyReference(MetaObject mo, MetaField f, ObjectReference oref, MetaObject objRef ) {
+        print(true,_pu(mo,true) +" ");
+        if (oref instanceof OneToOneReference) print("\"1\" --> \"1\"");
+        else if (oref instanceof OneToManyReference) print("\"1\" --> \"many\"");
+        else if (oref instanceof ManyToOneReference) print("\"many\" --> \"1\"");
+        else if (oref instanceof ManyToManyReference) print("\"many\" --> \"many\"");
+        else print("-->");
+        println(" "+ _pu(objRef,true) +" : "+ _pu(f));
+        //if (oref.getName() == null) println(_pu(f));
+        // else println(_pu(f) + ":" + _pu(oref));
     }
 
-    protected void drawObjectReference(Context c, MetaObject mo, MetaField f, MetaObject objRef) {
-        pn(c,c.indent + _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(f));
+    protected void drawObjectReference(MetaObject mo, MetaField f, MetaObject objRef) {
+        println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(f));
     }
 
-    protected void drawNewLine(Context c) {
-        pn(c);
+    protected void drawNewLine() {
+        println();
     }
 }

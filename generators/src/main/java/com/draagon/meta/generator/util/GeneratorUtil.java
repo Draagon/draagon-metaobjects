@@ -1,8 +1,7 @@
 package com.draagon.meta.generator.util;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.generator.direct.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 public class GeneratorUtil {
 
     public static Collection<MetaData> getFilteredMetaData(MetaDataLoader loader, MetaDataFilters filters ) {
-
         return filterMetaData( loader.getChildren(), MetaData.class, filters );
     }
 

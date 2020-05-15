@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct;
+package com.draagon.meta.generator;
 
 import java.util.ArrayList;
 import java.util.List;

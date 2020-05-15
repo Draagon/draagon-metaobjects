@@ -1,74 +1,87 @@
 package com.draagon.meta.generator.direct;
 
-import com.draagon.meta.generator.WriterContext;
+import com.draagon.meta.generator.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataWriter;
+import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.util.FileIndentor;
 import com.draagon.meta.loader.MetaDataLoader;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
 
-public abstract class FileDirectWriter<D> extends DirectWriter<PrintWriter,D> {
+public abstract class FileDirectWriter<T extends FileDirectWriter> extends MetaDataWriter<T> {
 
-    /** Passes at context data for the execution */
-    public static class Context extends WriterContext<Context,PrintWriter,String> {
+    private FileIndentor indentor;
+    protected final PrintWriter pw;
 
-        public final String indent;
-
-        protected Context(PrintWriter pw, String name ) {
-            this(null, pw, name, "");
-        }
-
-        protected Context(Context parent, PrintWriter pw, String name, String indent ) {
-            super( parent, pw, name );
-            this.indent = indent;
-        }
-
-        @Override
-        public Context newInstance( Context parent, PrintWriter pw, String name ) {
-            return new Context( parent, pw, name, indent+"  ");
-        }
-
-        @Override
-        public String getNodePathName() {
-            return node;
-        }
+    public FileDirectWriter(MetaDataLoader loader, PrintWriter pw ) {
+        super(loader);
+        this.pw = pw;
     }
 
-    public FileDirectWriter(MetaDataLoader loader, MetaDataFilters filters) {
-        super(loader, filters);
+    /////////////////////////////////////////////////////////////////////////
+    // Options
+
+    //public FileDirectWriter withFilename( String filename ) { return (FileDirectWriter) super.withFilename( filename ); }
+
+    public T withIndentor( String indentor ) {
+        this.indentor = new FileIndentor( indentor );
+        return (T) this;
+    }
+
+    protected FileIndentor getIndentor() {
+        if ( indentor == null ) {
+            indentor = new FileIndentor( "  " );
+        }
+        return indentor;
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    // FileWriter methods
+
+    protected void inc() {
+        indentor = getIndentor().inc();
+    }
+
+    protected void dec() {
+        indentor = getIndentor().dec();
     }
 
     @Override
-    public void write( PrintWriter out, D data ) {
-        Context c = new Context(out,"root");
-        writeFile(c,data);
+    public void close() throws MetaDataWriterException {
+        pw.close();
+        if ( indentor != null && indentor.isIndented() ) throw new MetaDataWriterException(this, "The indenting increment is not back to root level, invalid logic");
     }
 
-    protected abstract void writeFile(Context c, D data);
+    /////////////////////////////////////////////////////////////////////////
+    // Print Methods
 
-    ////////////////////////////////////////////////////////
-    // Draw Helper Utils
-
-    protected void pr1(Context c, String s ) {
-        c.out.print( s );
+    protected void print( String s ) {
+        print( false, s );
     }
 
-    protected void pr(Context c, String s ) {
-        c.out.print( s );
+    protected void println( String s ) {
+        println( false, s );
     }
 
-    protected void pn(Context c, String s ) {
-        c.out.println( s );
+    protected void print( boolean indent, String s ) {
+        pw.print( (indent?getIndentor().pre():"") + s );
     }
 
-    protected void pn(Context c) {
-        c.out.println();
+    protected void println( boolean indent, String s ) {
+        pw.println((indent?getIndentor().pre():"") + s );
     }
 
-    ////////////////////////////////////////////////////////
+    protected void println() {
+        pw.println();
+    }
+
+    /////////////////////////////////////////////////////////////////////////
     // Misc Methods
 
     @Override
-    public String toString() {
-        return this.getClass().getClass().getSimpleName();
+    protected String getToStringOptions() {
+        return ","+getIndentor();
     }
 }

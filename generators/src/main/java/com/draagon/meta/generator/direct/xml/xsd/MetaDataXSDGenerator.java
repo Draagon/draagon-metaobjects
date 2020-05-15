@@ -1,9 +1,16 @@
 package com.draagon.meta.generator.direct.xml.xsd;
 
 import com.draagon.meta.generator.GeneratorMetaException;
+import com.draagon.meta.generator.MetaDataWriter;
+import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.xml.SingleXMLDirectGeneratorBase;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class MetaDataXSDGenerator extends SingleXMLDirectGeneratorBase {
 
@@ -25,8 +32,9 @@ public class MetaDataXSDGenerator extends SingleXMLDirectGeneratorBase {
     }
 
     @Override
-    protected XMLDirectWriter getWriter(MetaDataLoader loader) {
-        return new MetaDataXSDWriter(loader, nameSpace);
+    protected XMLDirectWriter getWriter(MetaDataLoader loader, OutputStream os ) throws MetaDataWriterException {
+        return new MetaDataXSDWriter(loader, os)
+                .withNamespace(nameSpace);
     }
 
     ///////////////////////////////////////////////////

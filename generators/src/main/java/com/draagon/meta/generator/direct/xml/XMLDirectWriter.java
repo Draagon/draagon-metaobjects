@@ -1,39 +1,57 @@
 package com.draagon.meta.generator.direct.xml;
 
-import com.draagon.meta.generator.WriterContext;
-import com.draagon.meta.generator.direct.DirectWriter;
-import com.draagon.meta.generator.direct.MetaDataFilters;
+import com.draagon.meta.generator.MetaDataWriter;
+import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.util.xml.XMLFileWriter;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-public abstract class XMLDirectWriter<D> extends DirectWriter<Document,D> {
+import java.io.IOException;
+import java.io.OutputStream;
 
-    /** Passes at context data for the execution */
-    public static class Context extends WriterContext<Context,Document,Element> {
+public abstract class XMLDirectWriter<T extends XMLDirectWriter> extends MetaDataWriter<T> {
 
-        protected Context(Document doc) {
-            super(doc);
-        }
-        protected Context(Context parent, Document doc, Element e ) {
-            super(parent, doc, e);
-        }
-        @Override
-        public Context newInstance(Context parent, Document root, Element node) {
-            return new Context( parent, root, node );
+    private OutputStream out;
+    private Document doc;
+
+    public XMLDirectWriter(MetaDataLoader loader, OutputStream out ) throws MetaDataWriterException {
+        super(loader);
+        this.out = out;
+    }
+
+    public abstract void writeXML() throws MetaDataWriterException;
+
+    /////////////////////////////////////////////////////////////////////////
+    // XMLWriter Methods
+
+    protected Document createDocument() throws MetaDataWriterException {
+        try {
+            return XMLFileWriter.getBuilder();
+        } catch( IOException e ) {
+            throw new MetaDataWriterException( this, "Error creating XML Builder: "+e, e );
         }
     }
 
-    public XMLDirectWriter(MetaDataLoader loader, MetaDataFilters filters) {
-        super(loader, filters);
+    protected void writeDocument(Document doc, OutputStream out) throws MetaDataWriterException {
+        try {
+            XMLFileWriter.writeToStream( doc, out, true );
+        } catch (IOException e) {
+            throw new MetaDataWriterException( this, "Error writing XML Document to Outputstream: " + e, e );
+        }
+    }
+
+    protected Document doc() throws MetaDataWriterException {
+        if (doc == null) doc = createDocument();
+        return doc;
     }
 
     @Override
-    public void write( Document doc, D data ) {
-
-        Context c = new Context( doc );
-        writeXML( c, data );
+    public void close() throws MetaDataWriterException {
+        writeDocument( doc, out );
+        try {
+            out.close();
+        } catch (IOException e) {
+            throw new MetaDataWriterException( this, "Error closing outputstream: " + e, e );
+        }
     }
-
-    public abstract void writeXML( Context c, D data );
 }

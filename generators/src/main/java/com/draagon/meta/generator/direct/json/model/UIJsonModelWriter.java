@@ -1,60 +1,52 @@
 package com.draagon.meta.generator.direct.json.model;
 
-import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
-import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.generator.WriterException;
-import com.draagon.meta.generator.direct.MetaDataFilters;
-import com.draagon.meta.generator.direct.json.JsonDirectWriter;
+import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.relation.key.ObjectKey;
 import com.draagon.meta.relation.ref.ObjectReference;
-import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.view.MetaView;
-import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 import static com.draagon.meta.generator.util.GeneratorUtil.getUniquePackages;
 
-public class UIJsonModelWriter extends JsonModelWriter {
+public class UIJsonModelWriter extends JsonModelWriter<UIJsonModelWriter> {
 
-    public UIJsonModelWriter(MetaDataLoader loader) {
-        super( loader, null );
-    }
-
-    public UIJsonModelWriter(MetaDataLoader loader, MetaDataFilters filters) {
-        super( loader, filters );
+    public UIJsonModelWriter(MetaDataLoader loader, Writer writer) throws MetaDataWriterException {
+        super(loader, writer);
     }
 
     @Override
-    public void writeJson( Context c, String filename ) {
+    public void writeJson() throws MetaDataWriterException {
 
         try {
-            c.out.beginObject();
-            c.out.name( "metadata" ).beginArray();
+            out().beginObject();
+            out().name( "metadata" ).beginArray();
 
-            Collection<MetaObject> filtered = GeneratorUtil.getFilteredMetaData(loader,MetaObject.class,filters);
+            Collection<MetaObject> filtered = GeneratorUtil.getFilteredMetaData(getLoader(),MetaObject.class,getFilters());
             List<String> packages = getUniquePackages( filtered );
 
             for ( String p : packages ) {
 
-                c.out.beginObject();
-                c.out.name( "package" ).value( p );
-                writeMetaDataGroupedByType(c, getMetaDataForPackage( p, filtered ));
-                c.out.endObject();
+                out().beginObject();
+                out().name( "package" ).value( p );
+                writeMetaDataGroupedByType( getMetaDataForPackage( p, filtered ));
+                out().endObject();
             }
 
-            c.out.endArray();
-            c.out.endObject();
+            out().endArray();
+            out().endObject();
         }
         catch (IOException e ) {
-            throw new WriterException( "Error writing Json file ["+filename+"]: "+e, c, e );
+            throw new MetaDataWriterException( this, "Error writing Json: "+e, e );
         }
     }
 
@@ -66,7 +58,7 @@ public class UIJsonModelWriter extends JsonModelWriter {
         return out;
     }
 
-    protected void writeMetaDataForType(Context c, Class clazz, String names, List<MetaData> mds) throws IOException {
+    protected void writeMetaDataForType( Class clazz, String names, List<MetaData> mds) throws IOException {
 
         List<MetaData> out = new ArrayList<>();
         for (MetaData md : mds ) {
@@ -74,21 +66,21 @@ public class UIJsonModelWriter extends JsonModelWriter {
         }
 
         if ( out.size() > 0 ) {
-            c.out.name(names).beginArray();
+            out().name(names).beginArray();
             for ( MetaData md : out ) {
-                writeMetaData(c, md);
+                writeMetaData(md);
             }
-            c.out.endArray();
+            out().endArray();
         }
     }
 
-    protected void writeMetaDataGroupedByType( Context c, List<MetaData> mds ) throws IOException {
+    protected void writeMetaDataGroupedByType( List<MetaData> mds ) throws IOException {
 
-        writeMetaDataForType( c, MetaObject.class, "objects", mds );
-        writeMetaDataForType( c, ObjectKey.class, "keys", mds );
-        writeMetaDataForType( c, MetaField.class, "fields", mds );
-        writeMetaDataForType( c, ObjectReference.class, "references", mds );
-        writeMetaDataForType( c, MetaView.class, "views", mds );
-        writeMetaDataForType( c, MetaValidator.class, "validators", mds );
+        writeMetaDataForType( MetaObject.class, "objects", mds );
+        writeMetaDataForType( ObjectKey.class, "keys", mds );
+        writeMetaDataForType( MetaField.class, "fields", mds );
+        writeMetaDataForType( ObjectReference.class, "references", mds );
+        writeMetaDataForType( MetaView.class, "views", mds );
+        writeMetaDataForType( MetaValidator.class, "validators", mds );
     }
 }
