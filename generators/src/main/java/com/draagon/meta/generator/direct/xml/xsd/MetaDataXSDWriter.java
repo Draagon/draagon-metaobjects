@@ -1,14 +1,21 @@
 package com.draagon.meta.generator.direct.xml.xsd;
 
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.ChildConfig;
 import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.config.TypesConfig;
+import com.draagon.meta.util.xml.XMLFileWriter;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
@@ -34,17 +41,25 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     ///////////////////////////////////////////////////////////////////////////
     // MetaDataXSD Methods
 
+    protected Document createDocument() throws MetaDataWriterException {
+        try {
+            DocumentBuilder db = XMLFileWriter.getBuilder();
+            DOMImplementation domImpl = db.getDOMImplementation();
+            return domImpl.createDocument( "http://www.w3.org/2001/XMLSchema", "xs:schema", null );
+        } catch( IOException e ) {
+            throw new MetaDataWriterException( this, "Error creating XML Builder: "+e, e );
+        }
+    }
+
     public void writeXML() throws MetaDataWriterException {
 
-        Element rootElement = doc().createElementNS("example:ns:uri", "test-results-upload");
-        rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", "example:ns:uri");
-        rootElement.setAttributeNS("example:ns:uri", "attr1", "XXX");
-        rootElement.setAttributeNS("example:ns:uri", "attr2", "YYY");
+        Element rootElement = doc().getDocumentElement();
+        rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xs", "http://www.w3.org/2001/XMLSchema");
+        rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", nameSpace);
+        rootElement.setAttribute("targetNamespace", nameSpace);
+        rootElement.setAttribute("elementFormDefault", "qualified");
 
-        doc().setDocumentURI("http://www.w3.org/2001/XMLSchema");
-        //doc().setPrefix("xs");
         doc().setStrictErrorChecking(true);
-        doc().appendChild( rootElement );
 
         writeTypes( rootElement, getLoader().getMetaDataConfig().getTypesConfig() );
     }
@@ -58,80 +73,108 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     protected void writeType( Element el, TypeConfig tc) throws MetaDataWriterException {
 
         // <xs:element name="attr">
-        Element typeEl = doc().createElement( "element");
+        Element typeEl = doc().createElement( "xs:element");
         typeEl.setAttribute( "name", tc.getTypeName() );
-
         el.appendChild( typeEl );
 
-        writeTypeChildren( typeEl, tc, tc.getTypeChildConfigs() );
-        writeTypeAttributes( typeEl, tc, tc.getTypeChildConfigs() );
+        Element ctEl = doc().createElement( "xs:complexType");
+
+        writeTypeChildren( ctEl, tc, tc.getTypeChildConfigs() );
+        writeTypeAttributes( ctEl, tc, tc.getTypeChildConfigs() );
+
+        typeEl.appendChild( ctEl );
     }
 
-    protected void writeTypeChildren(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
+    protected boolean writeTypeChildren(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
 
-        //Set<String> types = getUniqueChildTypes( typeChildConfigs );
+        List<String> types = new ArrayList<>();
 
-        //if ( !types.isEmpty() ) {
-        //drawTypeChildStart(c, tc);
+        if ( !typeChildConfigs.isEmpty() ) {
 
-        //types.forEach(type -> writeTypeChild(c.incIndent(), tc, type));
+            Element choiceEl = doc().createElement( "xs:choice" );
+            choiceEl.setAttribute("maxOccurs", "unbounded");
+            el.appendChild( choiceEl );
 
-        //drawTypeChildEnd(c, tc);
-        //}
+            for (ChildConfig cc : typeChildConfigs) {
+
+                if ( !types.contains( cc.getType() )) {
+
+                    writeTypeChild( choiceEl, cc );
+                    types.add( cc.getType() );
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
 
-    protected void writeTypeChild(Element el, TypeConfig tc, String type)  throws MetaDataWriterException {
-        //pn(c,c.indent+"<xs:element ref=\""+type+"\" minOccurs=\"0\" maxOccurs=\"unbounded\"/>");
+    protected void writeTypeChild(Element el, ChildConfig cc)  throws MetaDataWriterException {
+
+        Element ccEl = doc().createElement( "xs:element");
+        ccEl.setAttribute( "ref", cc.getType() );
+        ccEl.setAttribute( "minOccurs", "0");
+        ccEl.setAttribute( "maxOccurs", "unbounded");
+        el.appendChild( ccEl );
     }
 
     protected void writeTypeAttributes(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
-        //pn(c,c.indent+"<xs:attribute name=\"package\"/>");
-        //pn(c,c.indent+"<xs:attribute name=\"type\"/>");
-        //pn(c,c.indent+"<xs:attribute name=\"subtype\"/>");
-        //pn(c,c.indent+"<xs:attribute name=\"_isAbstract\"/>");
+
+        writeAttribute( el, "package", "string");
+        if ( !tc.getTypeName().equals("metadata")) {
+            writeAttribute( el, "type", "string");
+            writeAttribute( el, "subtype", "string");
+            writeAttribute( el, "super", "string");
+        }
+
+        for (ChildConfig cc : typeChildConfigs) {
+
+            if ( MetaAttribute.TYPE_ATTR.equals( cc.getType() )) {
+                writeAttribute( el, cc.getName(), cc.getSubType() );
+            }
+        }
     }
 
-    //////////////////////////////////////////////////////////////////////
-    // XSD Draw methods
+    /*protected void writeTypeAttribute(Element el, ChildConfig childConfig) throws MetaDataWriterException {
 
-    /*protected void drawFileStart( Context c ) {
-
-        pn(c,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        pn(c,"<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"");
-        pn(c,"    xmlns=\""+nameSpace+"\"");
-        pn(c,"    targetNamespace=\""+nameSpace+"\"");
-        pn(c,"    elementFormDefault=\"qualified\">");
-    }
-
-    protected void drawFileEnd( Context c ) {
-        c.pw.println("</xs:schema>");
-    }
-
-    protected void drawTypeStart(Context c, TypeConfig tc) {
-        pn(c, c.indent+"<xs:element name=\"" + tc.getTypeName() + "\">");
-        pn(c, c.indent+"  <xs:complexType>");
-    }
-
-    protected void drawTypeEnd(Context c, TypeConfig tc) {
-        pn(c, c.indent+"  </xs:complexType>");
-        pn(c, c.indent+"</xs:element>");
-    }
-
-    protected void drawTypeChildStart(Context c, TypeConfig tc) {
-        pn(c, c.indent+"<xs:choice maxOccurs=\"unbounded\">");
-    }
-
-    protected void drawTypeChildEnd(Context c, TypeConfig tc) {
-        pn(c, c.indent+"</xs:choice>");
-    }
-
-    protected void drawNewLine( Context c ) {
-        pn(c,"");
+        Element attrEl = doc().createElement( "xs:attribute" );
+        attrEl.setAttribute("name", childConfig.getName() );
+        el.appendChild( attrEl );
     }*/
 
+    protected void writeAttribute(Element el, String name, String type) throws MetaDataWriterException {
 
-    /////////////////////////////////////////////////////////////////////////
+        Element attrEl = doc().createElement( "xs:attribute");
+        attrEl.setAttribute("name", name );
+
+        if ( type.equals("string")
+                || type.equals("stringArray")
+                || type.equals("int")
+                || type.equals("boolean")) {
+
+            Element stEl = doc().createElement("xs:simpleType");
+            attrEl.appendChild(stEl);
+            Element rEl = doc().createElement("xs:restriction");
+
+            if ( type.equals("string") || type.equals("stringArray")) {
+                rEl.setAttribute("base", "xs:string");
+            }
+            else if ( type.equals("integer")) {
+                rEl.setAttribute("base", "xs:integer");
+            }
+            else if ( type.equals("boolean")) {
+                rEl.setAttribute("base", "xs:boolean");
+            }
+
+            stEl.appendChild(rEl);
+        }
+
+        el.appendChild( attrEl );
+    }
+
+    ////////////////////////////////////////////////////////////////////
     // Misc Methods
 
     @Override

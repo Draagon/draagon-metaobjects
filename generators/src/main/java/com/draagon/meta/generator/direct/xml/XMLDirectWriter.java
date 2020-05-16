@@ -26,7 +26,7 @@ public abstract class XMLDirectWriter<T extends XMLDirectWriter> extends MetaDat
 
     protected Document createDocument() throws MetaDataWriterException {
         try {
-            return XMLFileWriter.getBuilder();
+            return XMLFileWriter.getBuilder().newDocument();
         } catch( IOException e ) {
             throw new MetaDataWriterException( this, "Error creating XML Builder: "+e, e );
         }

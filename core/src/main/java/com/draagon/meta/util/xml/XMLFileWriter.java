@@ -34,15 +34,21 @@ public class XMLFileWriter
     /**
      * Loads all the classes specified in the Filename
      */
-    public static Document getBuilder() throws IOException {
+    public static DocumentBuilder getBuilder() throws IOException {
         try {
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-            return documentBuilder.newDocument();
+            return documentFactory.newDocumentBuilder();
         }
         catch (ParserConfigurationException e) {
             throw new IOException( "Unable to get a new XML Document Builder: " + e.toString(), e );
         }
+    }
+
+    /**
+     * Loads all the classes specified in the Filename
+     */
+    public static Document getDocument() throws IOException {
+        return getBuilder().newDocument();
     }
 
     public static void writeToStream( Document document, OutputStream out, boolean indent ) throws IOException {
@@ -50,7 +56,10 @@ public class XMLFileWriter
         try {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
-            if (indent) transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            if (indent) {
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            }
             DOMSource domSource = new DOMSource(document);
             StreamResult streamResult = new StreamResult(out);
 
