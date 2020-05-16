@@ -1,7 +1,7 @@
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.loader.config.TypesConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.typed.config.TypesConfig;
+import com.draagon.meta.loader.typed.config.TypeConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

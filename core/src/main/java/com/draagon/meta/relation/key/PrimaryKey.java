@@ -1,6 +1,6 @@
 package com.draagon.meta.relation.key;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 
 public class PrimaryKey extends ObjectKey {
@@ -27,7 +27,7 @@ public class PrimaryKey extends ObjectKey {
     @Override
     public void validate() {
         if ( getFieldKeys().size() != 1 ) {
-            throw new MetaException( "PrimaryKey must have one and only one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());
+            throw new MetaDataException( "PrimaryKey must have one and only one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());
         }
     }
 }

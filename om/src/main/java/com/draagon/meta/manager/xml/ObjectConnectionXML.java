@@ -33,49 +33,49 @@ public class ObjectConnectionXML implements ObjectConnection
   }
 
   public void setReadOnly( boolean state )
-    throws MetaException
+    throws MetaDataException
   {
     readonly = state;
   }
 
   public boolean isReadOnly()
-    throws MetaException
+    throws MetaDataException
   {
     return readonly;
   }
 
   public void setAutoCommit( boolean state )
-    throws MetaException
+    throws MetaDataException
   {
     auto = state;
   }
 
   public boolean getAutoCommit()
-    throws MetaException
+    throws MetaDataException
   {
     return auto;
   }
 
   public void commit()
-    throws MetaException
+    throws MetaDataException
   {
     // Do nothing for now
   }
 
   public void rollback()
-    throws MetaException
+    throws MetaDataException
   {
     // Do nothing for now
   }
 
   public void close()
-    throws MetaException
+    throws MetaDataException
   {
     closed = true;
   }
 
   public boolean isClosed()
-    throws MetaException
+    throws MetaDataException
   {
     return closed;
   }

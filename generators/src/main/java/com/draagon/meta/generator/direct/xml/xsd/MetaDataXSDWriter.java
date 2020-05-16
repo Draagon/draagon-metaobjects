@@ -4,10 +4,11 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.TypeConfig;
-import com.draagon.meta.loader.config.TypesConfig;
-import com.draagon.meta.util.xml.XMLFileWriter;
+import com.draagon.meta.loader.typed.TypedMetaDataLoader;
+import com.draagon.meta.loader.typed.config.ChildConfig;
+import com.draagon.meta.loader.typed.config.TypeConfig;
+import com.draagon.meta.loader.typed.config.TypesConfig;
+import com.draagon.meta.util.XMLUtil;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,7 +44,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
     protected Document createDocument() throws MetaDataWriterException {
         try {
-            DocumentBuilder db = XMLFileWriter.getBuilder();
+            DocumentBuilder db = XMLUtil.getBuilder();
             DOMImplementation domImpl = db.getDOMImplementation();
             return domImpl.createDocument( "http://www.w3.org/2001/XMLSchema", "xs:schema", null );
         } catch( IOException e ) {
@@ -61,7 +62,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
         doc().setStrictErrorChecking(true);
 
-        writeTypes( rootElement, getLoader().getMetaDataConfig().getTypesConfig() );
+        writeTypes( rootElement, ((TypedMetaDataLoader)getLoader()).getMetaDataConfig().getTypesConfig() );
     }
 
     protected void writeTypes( Element el, TypesConfig tsc )  throws MetaDataWriterException {

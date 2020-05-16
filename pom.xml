@@ -28,6 +28,7 @@
     </organization>
 
     <modules>
+        <module>metadata</module>
         <module>core</module>
         <module>generators</module>
         <module>maven-plugin</module>

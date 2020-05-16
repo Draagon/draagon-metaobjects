@@ -6,10 +6,9 @@
  */
 package com.draagon.meta.loader.xml;
 
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.LocalMetaDataSources;
-import com.draagon.meta.loader.file.config.FileLoaderConfig;
+import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 
@@ -29,7 +28,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
 
     public XMLFileMetaDataLoader( String name ) {
 
-        super( new FileLoaderConfig()
+        super( new FileLoaderOptions()
                     .addParser( "*.xml", XMLMetaDataParser.class )
                     .setShouldRegister( false )
                     .setAllowAutoAttrs( true )
@@ -52,7 +51,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
     }
 
     public void addSources( MetaDataSources sources ) {
-        getLoaderConfig().addSources( sources );
+        getLoaderOptions().addSources( sources );
     }
 
     /*public void setTypesRef(String types) {
@@ -72,7 +71,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
     /** Initialize with the metadata source being set */
     public XMLFileMetaDataLoader init( MetaDataSources sources, boolean shouldRegister ) {
 
-        FileLoaderConfig config = getLoaderConfig();
+        FileLoaderOptions config = getLoaderOptions();
         config.setShouldRegister( shouldRegister );
 
         // Prepend the Types XML to load using the default behavior of the original XMLFileMetaDataLoader

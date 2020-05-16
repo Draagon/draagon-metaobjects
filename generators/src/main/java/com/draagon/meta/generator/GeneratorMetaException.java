@@ -1,8 +1,8 @@
 package com.draagon.meta.generator;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 
-public class GeneratorMetaException extends MetaException {
+public class GeneratorMetaException extends MetaDataException {
 
     public GeneratorMetaException( String msg ) {
         super(msg);

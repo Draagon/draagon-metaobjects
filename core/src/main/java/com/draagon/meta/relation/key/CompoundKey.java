@@ -1,6 +1,6 @@
 package com.draagon.meta.relation.key;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class CompoundKey extends ObjectKey {
     @Override
     public void validate() {
         if ( getFieldKeys().size() <= 1 ) {
-            throw new MetaException( "CompoundKey must have more than one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());
+            throw new MetaDataException( "CompoundKey must have more than one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());
         }
     }
 }

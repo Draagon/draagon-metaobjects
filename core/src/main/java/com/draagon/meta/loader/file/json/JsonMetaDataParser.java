@@ -1,12 +1,11 @@
 package com.draagon.meta.loader.file.json;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.typed.config.ChildConfig;
+import com.draagon.meta.loader.typed.config.MetaDataConfig;
+import com.draagon.meta.loader.typed.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.MetaDataParser;
 import com.google.gson.JsonArray;
@@ -15,7 +14,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Element;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,11 +61,11 @@ public class JsonMetaDataParser extends MetaDataParser {
                 }
             }
             else {
-                throw new MetaException("The root 'metadata' or 'types' object was not found in file [" + getFilename() + "]");
+                throw new MetaDataException("The root 'metadata' or 'types' object was not found in file [" + getFilename() + "]");
             }
         }
         catch (NullPointerException ex) {
-            throw new MetaException("NullPointer Exception loading MetaData from file ["+getFilename()+"]: " + ex.getMessage(), ex);
+            throw new MetaDataException("NullPointer Exception loading MetaData from file ["+getFilename()+"]: " + ex.getMessage(), ex);
         }
         finally {
             try { is.close(); } catch (Exception e) {}
@@ -79,7 +77,7 @@ public class JsonMetaDataParser extends MetaDataParser {
     /**
      * Loads the specified group types
      */
-    protected void loadAllTypes( JsonArray types ) throws MetaException {
+    protected void loadAllTypes( JsonArray types ) throws MetaDataException {
 
         // Get all elements that have <type> elements
         for (JsonElement el : types ) {
@@ -87,14 +85,14 @@ public class JsonMetaDataParser extends MetaDataParser {
             JsonObject entry = el.getAsJsonObject();
             JsonObject type = entry.getAsJsonObject( ATTR_TYPE );
             if (type==null) {
-                throw new MetaException("Types array has no 'type' object in file [" +getFilename()+ "]");
+                throw new MetaDataException("Types array has no 'type' object in file [" +getFilename()+ "]");
             }
 
             String name = getValueAsString(type, ATTR_NAME);
             String clazz = getValueAsString(type, ATTR_CLASS);
 
             if (name == null || name.isEmpty()) {
-                throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
+                throw new MetaDataException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
             TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
 
@@ -155,7 +153,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             JsonObject entry = subtype.getAsJsonObject();
             JsonObject subTypeEl = entry.getAsJsonObject( ATTR_SUBTYPE );
             if (subTypeEl==null) {
-                throw new MetaException("Types array has no 'type' object in file [" +getFilename()+ "]");
+                throw new MetaDataException("Types array has no 'type' object in file [" +getFilename()+ "]");
             }
 
             String name = getValueAsString( subTypeEl, ATTR_NAME);
@@ -164,7 +162,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             //if ( Boolean.TRUE.equals( def )) typeConfig.setDefaultSubTypeName( name );
 
             if (name == null && name.isEmpty()) {
-                throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
+                throw new MetaDataException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
             try {
@@ -177,13 +175,13 @@ public class JsonMetaDataParser extends MetaDataParser {
                 loadChildren( subTypeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
 
                 // Update info msg if verbose
-                if ( getLoader().getLoaderConfig().isVerbose() ) {
+                if ( getLoader().getLoaderOptions().isVerbose() ) {
                     // Increment the # of subtypes
                     info.incType(typeConfig.getTypeName());
                 }
             }
             catch (ClassNotFoundException e) {
-                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
             }
         }
     }
@@ -208,8 +206,8 @@ public class JsonMetaDataParser extends MetaDataParser {
             if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
 
                 // If we are strict, throw an exception, otheriwse log an error
-                if ( getLoader().getLoaderConfig().isStrict() ) {
-                    throw new MetaException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
+                if ( getLoader().getLoaderOptions().isStrict() ) {
+                    throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                 } else {
                     log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                     continue;

@@ -7,12 +7,10 @@
 package com.draagon.meta.object.managed;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaException;
 import com.draagon.meta.field.*;
 import com.draagon.meta.manager.ManagerAwareMetaObject;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.manager.StateAwareMetaObject;
-import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.util.Converter;
 import java.lang.reflect.Method;
@@ -168,11 +166,11 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     private ManagedObject getManagedObject(Object o) {
         
         if (o == null) {
-            throw new MetaException("Null value found, MetaObject expected");
+            throw new MetaDataException("Null value found, MetaObject expected");
         }
 
         if (!(o instanceof ManagedObject)) {
-            throw new MetaException("MetaObject expected, not [" + o.getClass().getName() + "]");
+            throw new MetaDataException("MetaObject expected, not [" + o.getClass().getName() + "]");
         }
 
         return (ManagedObject) o;
@@ -182,9 +180,9 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     // PERSISTENCE METHODS
 
     private ManagedObject.Value getAttributeValue(MetaField f, Object obj)
-            throws MetaException {
+            throws MetaDataException {
         if (!(obj instanceof ManagedObject)) {
-            throw new MetaException("MetaObject expected, not [" + obj.getClass().getName() + "]");
+            throw new MetaDataException("MetaObject expected, not [" + obj.getClass().getName() + "]");
         }
 
         return ((ManagedObject) obj).getObjectAttributeValue(f.getName());
@@ -280,47 +278,47 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     //////////////////////////////////////////////////////////////
     // Stateful methods
     public boolean isNew(Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getManagedObject(obj).isNew();
     }
 
     public boolean isModified(Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getManagedObject(obj).isModified();
     }
 
     public boolean isDeleted(Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getManagedObject(obj).isDeleted();
     }
 
     public void setNew(Object obj, boolean state)
-            throws MetaException {
+            throws MetaDataException {
         getManagedObject(obj).setNew(state);
     }
 
     public void setModified(Object obj, boolean state)
-            throws MetaException {
+            throws MetaDataException {
         getManagedObject(obj).setModified(state);
     }
 
     public void setDeleted(Object obj, boolean state)
-            throws MetaException {
+            throws MetaDataException {
         getManagedObject(obj).setDeleted(state);
     }
 
     public long getCreationTime(Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getManagedObject(obj).getCreationTime();
     }
 
     public long getModifiedTime(Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getManagedObject(obj).getModifiedTime();
     }
 
     public long getDeletedTime(Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getManagedObject(obj).getDeletedTime();
     }
 
@@ -328,7 +326,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
      * Returns whether the field on the object was modified
      */
     public boolean isFieldModified(MetaField f, Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getAttributeValue(f, obj).isModified();
     }
 
@@ -336,7 +334,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
      * Sets whether the field is modified
      */
     public void setFieldModified(MetaField f, Object obj, boolean state)
-            throws MetaException {
+            throws MetaDataException {
         getAttributeValue(f, obj).setModified(state);
     }
 
@@ -344,7 +342,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
      * Gets the time the field was modified
      */
     public long getFieldModifiedTime(MetaField f, Object obj)
-            throws MetaException {
+            throws MetaDataException {
         return getAttributeValue(f, obj).getModifiedTime();
     }
 }

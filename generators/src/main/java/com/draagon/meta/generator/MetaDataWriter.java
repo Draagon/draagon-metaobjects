@@ -3,6 +3,7 @@ package com.draagon.meta.generator;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.typed.TypedMetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

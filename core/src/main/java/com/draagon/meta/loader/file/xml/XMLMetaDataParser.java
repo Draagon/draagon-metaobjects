@@ -2,16 +2,13 @@ package com.draagon.meta.loader.file.xml;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.typed.config.ChildConfig;
+import com.draagon.meta.loader.typed.config.MetaDataConfig;
+import com.draagon.meta.loader.typed.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
-import com.draagon.meta.util.xml.XMLFileReader;
+import com.draagon.meta.util.XMLUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,12 +31,12 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
      * Loads all the classes specified in the Filename
      */
     @Override
-    public MetaDataConfig loadFromStream( InputStream is ) throws MetaException {
+    public MetaDataConfig loadFromStream( InputStream is ) throws MetaDataException {
 
         Document doc = null;
 
         try {
-            doc = XMLFileReader.loadFromStream(is);
+            doc = XMLUtil.loadFromStream(is);
 
             //////////////////////////////////////////////////////
             // PARSE THE ITEMS XML BLOCK
@@ -60,7 +57,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             else {
                 elements = getElementsOfName(doc, ATTR_METADATA);
                 if (elements.isEmpty()) {
-                    throw new MetaException("The root '"+ATTR_METADATA+"' or '"+ATTR_DEFPACKAGE+"' element was not found in file [" + getFilename() + "]");
+                    throw new MetaDataException("The root '"+ATTR_METADATA+"' or '"+ATTR_DEFPACKAGE+"' element was not found in file [" + getFilename() + "]");
                 }
 
                 Element pkgEl = elements.iterator().next();
@@ -76,16 +73,16 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             }
         }
         catch (SAXException e) {
-            throw new MetaException("Parse error loading MetaData from file ["+getFilename()+"]: " + e.getMessage(), e);
+            throw new MetaDataException("Parse error loading MetaData from file ["+getFilename()+"]: " + e.getMessage(), e);
         }
         catch (IOException e) {
-            throw new MetaException("Error loading Meta XML from ["+getFilename()+"]: " + e.getMessage(), e);
+            throw new MetaDataException("Error loading Meta XML from ["+getFilename()+"]: " + e.getMessage(), e);
         }
         finally {
             try { is.close(); } catch (Exception ignore) {}
         }
 
-        if ( getLoader().getLoaderConfig().isVerbose() ) {
+        if ( getLoader().getLoaderOptions().isVerbose() ) {
             log.info("---------------------------------------------------\n"
                     +"METADATA - FILE   : " + getFilename() + "\n"
                     +"         - TYPES  : " + info.types.toString() + "\n"
@@ -99,14 +96,14 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     /**
      * Loads the specified group types
      */
-    protected void loadAllTypes( Element el) throws MetaException, SAXException {
+    protected void loadAllTypes( Element el) throws MetaDataException, SAXException {
 
         // Get all elements that have <type> elements
         for( Element e: getElementsOfName(el, ATTR_TYPE)) {
 
             String name = e.getAttribute(ATTR_NAME);
             if (name.length() == 0) {
-                throw new MetaException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
+                throw new MetaDataException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
 
             TypeConfig typeConfig = getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ));
@@ -144,7 +141,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(Element el, TypeConfig typeConfig) throws MetaException, SAXException {
+    protected void loadSubTypes(Element el, TypeConfig typeConfig) throws MetaDataException, SAXException {
 
         Collection<Element> subTypeElements = getElementsOfName(el, ATTR_SUBTYPE);
 
@@ -156,7 +153,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             String def = typeEl.getAttribute("default");
 
             if (name.length() == 0) {
-                throw new MetaException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
+                throw new MetaDataException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
             }
 
             try {
@@ -169,13 +166,13 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 loadChildren( typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
 
                 // Update info msg if verbose
-                if ( getLoader().getLoaderConfig().isVerbose() ) {
+                if ( getLoader().getLoaderOptions().isVerbose() ) {
                     // Increment the # of subtypes
                     info.incType(typeConfig.getTypeName());
                 }
             }
             catch (ClassNotFoundException e) {
-                throw new MetaException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
             }
         }
     }
@@ -195,7 +192,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
             if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
-                if ( getLoader().getLoaderConfig().isStrict() ) {
+                if ( getLoader().getLoaderOptions().isStrict() ) {
                     throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                 } else {
                     if (isRoot)
@@ -210,7 +207,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             MetaData md = createOrOverlayMetaData( isRoot, parent, typeName, subTypeName, name, packageName, superName);
 
             // Update info msg if verbose
-            if ( getLoader().getLoaderConfig().isVerbose() ) {
+            if ( getLoader().getLoaderOptions().isVerbose() ) {
                 // Increment the # of subtypes
                 info.incData( typeName );
             }

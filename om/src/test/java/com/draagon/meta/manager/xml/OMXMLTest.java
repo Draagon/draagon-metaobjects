@@ -13,10 +13,8 @@ package com.draagon.meta.manager.xml;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.LocalMetaDataSources;
-import com.draagon.meta.loader.file.config.FileLoaderConfig;
-import com.draagon.meta.loader.file.json.JsonMetaDataParser;
+import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
-import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
 import com.draagon.meta.manager.ObjectConnection;
 
 import com.draagon.meta.manager.QueryOptions;
@@ -24,12 +22,8 @@ import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.test.produce.v1.Apple;
 import org.junit.*;
 
-import javax.sql.DataSource;
-import java.io.PrintWriter;
-import java.sql.*;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 /**
  *
@@ -50,7 +44,7 @@ public class OMXMLTest {
 
             // Initialize the loader
             loader = new FileMetaDataLoader(
-                    new FileLoaderConfig()
+                    new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
                                     Arrays.asList(

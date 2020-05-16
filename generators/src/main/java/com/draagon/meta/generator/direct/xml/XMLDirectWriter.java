@@ -3,7 +3,7 @@ package com.draagon.meta.generator.direct.xml;
 import com.draagon.meta.generator.MetaDataWriter;
 import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.util.xml.XMLFileWriter;
+import com.draagon.meta.util.XMLUtil;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public abstract class XMLDirectWriter<T extends XMLDirectWriter> extends MetaDat
 
     protected Document createDocument() throws MetaDataWriterException {
         try {
-            return XMLFileWriter.getBuilder().newDocument();
+            return XMLUtil.getBuilder().newDocument();
         } catch( IOException e ) {
             throw new MetaDataWriterException( this, "Error creating XML Builder: "+e, e );
         }
@@ -34,7 +34,7 @@ public abstract class XMLDirectWriter<T extends XMLDirectWriter> extends MetaDat
 
     protected void writeDocument(Document doc, OutputStream out) throws MetaDataWriterException {
         try {
-            XMLFileWriter.writeToStream( doc, out, true );
+            XMLUtil.writeToStream( doc, out, true );
         } catch (IOException e) {
             throw new MetaDataWriterException( this, "Error writing XML Document to Outputstream: " + e, e );
         }

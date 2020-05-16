@@ -1,9 +1,9 @@
 package com.draagon.meta.manager.exp.parser;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 
 @SuppressWarnings("serial")
-public class ExpressionParseError extends MetaException
+public class ExpressionParseError extends MetaDataException
 {
   private String msgKey;
   private int start;
@@ -23,6 +23,7 @@ public class ExpressionParseError extends MetaException
    */
   public ExpressionParseError( String msgKey, int start, int end, String arg1 )
   {
+    super( msgKey );
     this.msgKey = msgKey;
     this.start = start;
     this.end = end;

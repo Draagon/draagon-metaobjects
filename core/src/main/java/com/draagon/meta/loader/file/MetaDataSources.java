@@ -1,7 +1,6 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -79,7 +78,7 @@ public class MetaDataSources {
     /**
      * Read the specified file
      */
-    protected void read(String filename) throws MetaException {
+    protected void read(String filename) throws MetaDataException {
 
         if ( filename.endsWith( ".bundle" )){
             loadFromBundleFile( filename );
@@ -91,7 +90,7 @@ public class MetaDataSources {
     /**
      * Loads all the classes specified in the Filename
      */
-    protected void loadFromBundleFile(String filename) throws MetaException {
+    protected void loadFromBundleFile(String filename) throws MetaDataException {
 
         try {
             LineNumberReader in = new LineNumberReader( new InputStreamReader( getInputStreamForFilename( filename )));
@@ -109,14 +108,14 @@ public class MetaDataSources {
             in.close();
         }
         catch( IOException e ) {
-            throw new MetaException( "Error reading MetaData bundle [" + filename + "]: " + e.getMessage(), e );
+            throw new MetaDataException( "Error reading MetaData bundle [" + filename + "]: " + e.getMessage(), e );
         }
     }
 
     /**
      * Loads all the classes specified in the Filename
      */
-    protected InputStream getInputStreamForFilename(String filename) throws MetaException {
+    protected InputStream getInputStreamForFilename(String filename) throws MetaDataException {
 
         // LOAD THE FILE
         if (filename == null) {
@@ -141,7 +140,7 @@ public class MetaDataSources {
 
             url = ClassLoader.getSystemClassLoader().getResource(filename);
             if (url == null) {
-                throw new MetaException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or MetaDataSources ["+this.getClass().getName()+"]");
+                throw new MetaDataException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or MetaDataSources ["+this.getClass().getName()+"]");
             }
         }
 
@@ -150,7 +149,7 @@ public class MetaDataSources {
             return url.openStream();
         }
         catch (IOException e) {
-            throw new MetaException("Could not open URL resource [" + url + "] for MetaData file [" +filename+ "]: " + e.getMessage(), e);
+            throw new MetaDataException("Could not open URL resource [" + url + "] for MetaData file [" +filename+ "]: " + e.getMessage(), e);
         }
     }
 
@@ -165,7 +164,7 @@ public class MetaDataSources {
         File f = new File(fn);
 
         if (!f.exists()) {
-            throw new MetaException("The MetaData file [" + f + "] was not found on the filesystem");
+            throw new MetaDataException("The MetaData file [" + f + "] was not found on the filesystem");
         }
 
         try {

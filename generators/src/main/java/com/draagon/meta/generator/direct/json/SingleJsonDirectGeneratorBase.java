@@ -4,11 +4,7 @@ import com.draagon.meta.generator.GeneratorMetaException;
 import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.generator.MetaDataWriterException;
 import com.draagon.meta.generator.direct.DirectGeneratorBase;
-import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.util.xml.XMLFileWriter;
-import com.google.gson.stream.JsonWriter;
-import org.w3c.dom.Document;
 
 import java.io.*;
 

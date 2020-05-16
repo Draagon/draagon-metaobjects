@@ -10,8 +10,7 @@
  */
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.MetaException;
-import com.draagon.meta.loader.file.config.FileLoaderConfig;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
@@ -34,7 +33,7 @@ public class FileMetaDataLoaderTestBase {
         if ("json".equals(type)) {
             // Initialize the loader
             loader = new FileMetaDataLoader(
-                    new FileLoaderConfig()
+                    new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addParser("*.json", JsonMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
@@ -54,7 +53,7 @@ public class FileMetaDataLoaderTestBase {
         else if ( "xml".equals(type)) {
             // Initialize the loader
             loader = new FileMetaDataLoader(
-                    new FileLoaderConfig()
+                    new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addParser("*.json", JsonMetaDataParser.class)
                             .addSources(new LocalMetaDataSources(
@@ -69,7 +68,7 @@ public class FileMetaDataLoaderTestBase {
                     .init();
         }
         else {
-            throw new MetaException( "Unknown initLoader type [" + type + "], must be xml or json" );
+            throw new MetaDataException( "Unknown initLoader type [" + type + "], must be xml or json" );
         }
 
         return loader;

@@ -3,14 +3,13 @@ package com.draagon.meta.loader.file;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
-import com.draagon.meta.MetaException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.MetaDataConfig;
-import com.draagon.meta.loader.config.TypesConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.typed.config.ChildConfig;
+import com.draagon.meta.loader.typed.config.MetaDataConfig;
+import com.draagon.meta.loader.typed.config.TypesConfig;
+import com.draagon.meta.loader.typed.config.TypeConfig;
 import com.draagon.meta.util.MetaDataUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -139,7 +138,7 @@ public abstract class MetaDataParser {
     protected TypeConfig getOrCreateTypeConfig(String typeName, String typeClass) {
 
         if ( typeName == null || typeName.isEmpty() ) {
-            throw new MetaException( "MetaData Type was null or empty ["+typeName+"] in file [" +getFilename()+ "]");
+            throw new MetaDataException( "MetaData Type was null or empty ["+typeName+"] in file [" +getFilename()+ "]");
         }
 
         // Get the TypeModel with the specified element name
@@ -149,14 +148,14 @@ public abstract class MetaDataParser {
         if ( typeConfig == null ) {
 
             if ( typeClass == null || typeClass.isEmpty() )
-                throw new MetaException( "MetaData Type [" + typeName + "] has no 'class' attribute specified in file [" +getFilename()+ "]");
+                throw new MetaDataException( "MetaData Type [" + typeName + "] has no 'class' attribute specified in file [" +getFilename()+ "]");
 
             try {
                 // Add a new TypeModel and add to the mapping
                 typeConfig = getTypesConfig().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
             }
             catch( ClassNotFoundException ex ) {
-                throw new MetaException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
+                throw new MetaDataException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
             }
         }
         return typeConfig;
@@ -195,7 +194,7 @@ public abstract class MetaDataParser {
         TypeConfig types = getTypesConfig().getType( typeName );
         if ( types == null ) {
             // TODO:  What is the best behavior here?
-            throw new MetaException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
+            throw new MetaDataException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
         }
 
         if (name == null || name.equals("")) {
@@ -205,7 +204,7 @@ public abstract class MetaDataParser {
                 if ( prefix != null ) {
                     name = getNextNamePrefix(parent, typeName, prefix);
                 }
-                if ( name == null ) throw new MetaException("MetaData [" +typeName+ "] found on parent [" +parent
+                if ( name == null ) throw new MetaDataException("MetaData [" +typeName+ "] found on parent [" +parent
                         + "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
             }
         }
@@ -289,7 +288,7 @@ public abstract class MetaDataParser {
                     //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())
                     //        +", pkg="+pkg+", superName="+superName+", sn="+sn);
                     //log.error("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent+"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
-                    throw new MetaException("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent
+                    throw new MetaDataException("Invalid MetaData [" +typeName+ "][" +name+ "] on parent ["+parent
                             +"], the SuperClass [" + superName + "] does not exist in file ["+getFilename()+"]");
                 }
             }
@@ -354,7 +353,7 @@ public abstract class MetaDataParser {
                     c = (Class<? extends MetaData>) typeConfig.getSubTypeClass(subTypeName);
                 }
                 if (c == null) {
-                    throw new MetaException("MetaData [type=" + typeName + "][name=" + name
+                    throw new MetaDataException("MetaData [type=" + typeName + "][name=" + name
                             + "] has no subtype defined and type [" + typeName + "] had no default specified in file ["
                             + getFilename() + "]");
                 }
@@ -364,7 +363,7 @@ public abstract class MetaDataParser {
         }
 
         if (c == null) {
-            throw new MetaException("MetaData [" + typeName + "] had type [" + subTypeName
+            throw new MetaDataException("MetaData [" + typeName + "] had type [" + subTypeName
                     + "], but it was not recognized in file ["+getFilename()+"]");
         }
 
@@ -406,11 +405,11 @@ public abstract class MetaDataParser {
         ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
 
         if (cc == null) {
-            if ( getLoader().getLoaderConfig().isStrict() ) {
-                throw new MetaException( "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
+            if ( getLoader().getLoaderOptions().isStrict() ) {
+                throw new MetaDataException( "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
                         +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]" );
             }
-            else if ( type.equals( MetaAttribute.TYPE_ATTR ) && getLoader().getLoaderConfig().allowsAutoAttrs() ) {
+            else if ( type.equals( MetaAttribute.TYPE_ATTR ) && getLoader().getLoaderOptions().allowsAutoAttrs() ) {
                 // Auto add the new child configuration
                 cc = new ChildConfig( type, subType, name );
                 cc.setAutoCreatedFromFile( getFilename() );
@@ -488,11 +487,11 @@ public abstract class MetaDataParser {
             String errMsg = "MetaAttribute with name ["+attrName+"] is not allowed on parent record ["
                     +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
 
-            if ( getLoader().getLoaderConfig().allowsAutoAttrs() ) {
+            if ( getLoader().getLoaderOptions().allowsAutoAttrs() ) {
                 cc = new ChildConfig( StringAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName );
                 cc.setAutoCreatedFromFile( getFilename() );
             }
-            else if ( getLoader().getLoaderConfig().isStrict() ) {
+            else if ( getLoader().getLoaderOptions().isStrict() ) {
                 throw new MetaDataException( errMsg );
             }
             else {

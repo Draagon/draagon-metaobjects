@@ -33,27 +33,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>commons-validator</groupId>
-            <artifactId>commons-validator</artifactId>
-            <version>${commons.validator.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.5</version>
-        </dependency>
-        <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>${xml.apis.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>${xerces.version}</version>
-            <type>jar</type>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>4.3.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
                     

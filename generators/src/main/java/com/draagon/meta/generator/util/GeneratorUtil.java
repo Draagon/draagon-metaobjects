@@ -89,7 +89,7 @@ public class GeneratorUtil {
             if ( attrs.length == 2 && attrs[0].equals("[attr")) {
 
                 String an = attrs[1].substring( 0, attrs[1].length()-1);
-                if ( md.hasAttr( an ) ) {
+                if ( md.hasMetaAttr( an ) ) {
                     if (v1.length > 1) {
                         String[] vals = v1[1].split("\"");
                         if ( vals.length > 0 ) {
@@ -222,7 +222,7 @@ public class GeneratorUtil {
     }
 
     public static boolean isAbstract( MetaData md ) {
-        if ( md.hasAttr("_isAbstract")
+        if ( md.hasMetaAttr("_isAbstract")
                 && Boolean.TRUE.equals( md.getMetaAttr( "_isAbstract" ).getValue())) {
             return true;
         }

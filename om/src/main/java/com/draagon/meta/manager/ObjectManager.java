@@ -11,7 +11,7 @@ package com.draagon.meta.manager;
 //import com.draagon.meta.manager.db.MappingHandler;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -84,9 +84,9 @@ public abstract class ObjectManager
 	/**
 	 * Retrieves a connection object representing the datastore
 	 */
-	public abstract ObjectConnection getConnection() throws MetaException;
+	public abstract ObjectConnection getConnection() throws MetaDataException;
 
-	public abstract void releaseConnection( ObjectConnection oc ) throws MetaException;
+	public abstract void releaseConnection( ObjectConnection oc ) throws MetaDataException;
 
 	///////////////////////////////////////////////////////
 	// ABSTRACT PERSISTENCE METHODS
@@ -155,27 +155,27 @@ public abstract class ObjectManager
 	/**
 	 * Gets the object by the id; throws exception if it did not exist
 	 */
-	public abstract Object getObjectByRef( ObjectConnection c, String refStr ) throws MetaException;
+	public abstract Object getObjectByRef( ObjectConnection c, String refStr ) throws MetaDataException;
 
 	/**
 	 * Load the specified object from the datastore
 	 */
-	public abstract void loadObject( ObjectConnection c, Object obj ) throws MetaException;
+	public abstract void loadObject( ObjectConnection c, Object obj ) throws MetaDataException;
 
 	/**
 	 * Add the specified object to the datastore
 	 */
-	public abstract void createObject( ObjectConnection c, Object obj ) throws MetaException;
+	public abstract void createObject( ObjectConnection c, Object obj ) throws MetaDataException;
 
 	/**
 	 * Update the specified object in the datastore
 	 */
-	public abstract void updateObject( ObjectConnection c, Object obj ) throws MetaException;
+	public abstract void updateObject( ObjectConnection c, Object obj ) throws MetaDataException;
 
 	/**
 	 * Delete the specified object from the datastore
 	 */
-	public abstract void deleteObject( ObjectConnection c, Object obj ) throws MetaException;
+	public abstract void deleteObject( ObjectConnection c, Object obj ) throws MetaDataException;
 
 	///////////////////////////////////////////////////////
 	// DEFAULT IMPEMENTATIONS
@@ -203,7 +203,7 @@ public abstract class ObjectManager
 		return auto;
 	}
 
-	protected void handleAutoFields( ObjectConnection c, MetaObject mc, Object obj, int state, int action ) throws MetaException
+	protected void handleAutoFields( ObjectConnection c, MetaObject mc, Object obj, int state, int action ) throws MetaDataException
 	{
 		for( MetaField f : getAutoFields( mc ))
 		{
@@ -212,7 +212,7 @@ public abstract class ObjectManager
 		}
 	}
 
-	public void handleAutoField( ObjectConnection c, MetaObject mc, MetaField mf, Object obj, Object auto, int state, int action ) throws MetaException
+	public void handleAutoField( ObjectConnection c, MetaObject mc, MetaField mf, Object obj, Object auto, int state, int action ) throws MetaDataException
 	{
 		if ( state == AUTO_PRIOR )
 		{
@@ -225,12 +225,12 @@ public abstract class ObjectManager
 		}
 	}
 
-	public void prePersistence( ObjectConnection c, MetaObject mc, Object obj, int action ) throws MetaException
+	public void prePersistence( ObjectConnection c, MetaObject mc, Object obj, int action ) throws MetaDataException
 	{
 		handleAutoFields( c, mc, obj, AUTO_PRIOR , action);
 	}
 
-	public void postPersistence( ObjectConnection c, MetaObject mc, Object obj, int action ) throws MetaException
+	public void postPersistence( ObjectConnection c, MetaObject mc, Object obj, int action ) throws MetaDataException
 	{
 		handleAutoFields( c, mc, obj, AUTO_POST , action);
 
@@ -388,13 +388,13 @@ public abstract class ObjectManager
   }*/
 
 	/** Gets the total count of objects */
-	public long getObjectsCount( ObjectConnection c, MetaObject mc ) throws MetaException
+	public long getObjectsCount( ObjectConnection c, MetaObject mc ) throws MetaDataException
 	{
 		return getObjectsCount( c, mc, null );
 	}
 	
 	/** Gets the total count of objects with the specified options */
-	public long getObjectsCount( ObjectConnection c, MetaObject mc, Expression exp ) throws MetaException
+	public long getObjectsCount( ObjectConnection c, MetaObject mc, Expression exp ) throws MetaDataException
 	{
 		Collection<MetaField> fields = new ArrayList<MetaField>();
 		fields.add( getPrimaryKeys(mc).iterator().next() );
@@ -406,7 +406,7 @@ public abstract class ObjectManager
 	/**
 	 * Get all objects of the specified kind from the datastore
 	 */
-	public Collection<?> getObjects( ObjectConnection c, MetaObject mc ) throws MetaException
+	public Collection<?> getObjects( ObjectConnection c, MetaObject mc ) throws MetaDataException
 	{
 		// Collection fields = getReadableFields( mc );
 		return getObjects( c, mc, new QueryOptions() );
@@ -415,7 +415,7 @@ public abstract class ObjectManager
 	/**
 	 * Get all objects of the specified kind from the datastore
 	 */
-	public abstract Collection<?> getObjects( ObjectConnection c, MetaObject mc, QueryOptions options ) throws MetaException;
+	public abstract Collection<?> getObjects( ObjectConnection c, MetaObject mc, QueryOptions options ) throws MetaDataException;
 	/*  {
         Collection fields = null;
 
@@ -478,7 +478,7 @@ public abstract class ObjectManager
 	 * Loads the specified objects from the datastore
 	 */
 	public void loadObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaException
+	throws MetaDataException
 	{
 		for( Iterator<?> i = objs.iterator(); i.hasNext(); )
 		{
@@ -492,7 +492,7 @@ public abstract class ObjectManager
 	 * Add the specified objects to the datastore
 	 */
 	public void createObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaException
+	throws MetaDataException
 	{
 		for( Iterator<?> i = objs.iterator(); i.hasNext(); )
 			createObject( c, i.next() );
@@ -502,7 +502,7 @@ public abstract class ObjectManager
 	 * Update the specified objects in the datastore
 	 */
 	public void updateObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaException
+	throws MetaDataException
 	{
 		for( Iterator<?> i = objs.iterator(); i.hasNext(); )
 			updateObject( c, i.next() );
@@ -512,7 +512,7 @@ public abstract class ObjectManager
 	 * Delete the specified object from the datastore
 	 */
 	public void deleteObjectByRef( ObjectConnection c, String ref )
-	throws MetaException
+	throws MetaDataException
 	{
 		deleteObject( c, getObjectByRef( c, ref ));
 	}
@@ -521,7 +521,7 @@ public abstract class ObjectManager
 	 * Delete the specified objects from the datastore
 	 */
 	public int deleteObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaException
+	throws MetaDataException
 	{
 		int j = 0;
 		for( Iterator<?> i = objs.iterator(); i.hasNext(); ) {
@@ -535,7 +535,7 @@ public abstract class ObjectManager
 	 * Delete the objects from the datastore where the field has the specified value
 	 */
 	public int deleteObjects( ObjectConnection c, MetaObject mc, Expression exp )
-	throws MetaException
+	throws MetaDataException
 	{
 		return deleteObjects( c, getObjects( c, mc, new QueryOptions( exp )));
 	}
@@ -544,7 +544,7 @@ public abstract class ObjectManager
 	 * Stores all objecs in the Collection by adding or updating
 	 */
 	public void storeObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaException
+	throws MetaDataException
 	{
 		for( Iterator<?> i = objs.iterator(); i.hasNext(); )
 			storeObject( c, i.next() );
@@ -560,7 +560,7 @@ public abstract class ObjectManager
 	 */
 	@SuppressWarnings("unchecked")
 	public static Collection<Object> sortObjects( Collection<Object> objs, SortOrder sort )
-	throws MetaException
+	throws MetaDataException
 	{
 		if ( objs.size() == 0 ||
 				sort.getOrder() == SortOrder.NONE ) return objs;
@@ -597,7 +597,7 @@ public abstract class ObjectManager
 	 * Gets the SQL WHERE clause for the fields of a class
 	 */
 	private static boolean getExpressionResult( MetaObject mc, Expression exp, Object obj )
-	throws MetaException
+	throws MetaDataException
 	{
 		if ( exp instanceof ExpressionGroup )
 		{
@@ -622,7 +622,7 @@ public abstract class ObjectManager
 		}
 		else if ( exp.isSpecial() )
 		{
-			throw new MetaException( "Unsupported Special Expression [" + exp + "]" );
+			throw new MetaDataException( "Unsupported Special Expression [" + exp + "]" );
 		}
 		else
 		{
@@ -662,7 +662,7 @@ public abstract class ObjectManager
 				return rc;
 			}
 			else
-				throw new MetaException( "Unsupported Expression Condition (" + Expression.condStr(condition) + ") on Expression [" + exp + "]" );
+				throw new MetaDataException( "Unsupported Expression Condition (" + Expression.condStr(condition) + ") on Expression [" + exp + "]" );
 		}
 	}
 
@@ -809,7 +809,7 @@ public abstract class ObjectManager
 	 * Filters the specified objects by the provided expression
 	 */
 	public static Collection<Object> filterObjects( Collection<Object> objs, Expression exp )
-	throws MetaException
+	throws MetaDataException
 	{
 		ArrayList<Object> a = new ArrayList<Object>();
 
@@ -832,7 +832,7 @@ public abstract class ObjectManager
 	 * Clips the specified objects by the provided range
 	 */
 	public static Collection<Object> clipObjects( Collection<Object> objs, Range range )
-	throws MetaException
+	throws MetaDataException
 	{
 		ArrayList<Object> a = new ArrayList<Object>();
 		int j = 1;
@@ -849,7 +849,7 @@ public abstract class ObjectManager
 	 * Clips the specified objects by the provided range
 	 */
 	public static Collection<Object> distinctObjects( Collection<?> objs )
-	throws MetaException
+	throws MetaDataException
 	{
 		// TODO:  Check this, as I don't think it works!
 
@@ -888,9 +888,9 @@ public abstract class ObjectManager
 	// OBJECT QUERY LANGUAGE METHODS
 	//
 
-	public abstract int execute( ObjectConnection c, String query, Collection<?> arguments ) throws MetaException;
+	public abstract int execute( ObjectConnection c, String query, Collection<?> arguments ) throws MetaDataException;
 
-	public abstract Collection<?> executeQuery( ObjectConnection c, String query, Collection<?> arguments ) throws MetaException;
+	public abstract Collection<?> executeQuery( ObjectConnection c, String query, Collection<?> arguments ) throws MetaDataException;
 
 
 	///////////////////////////////////////////////////////

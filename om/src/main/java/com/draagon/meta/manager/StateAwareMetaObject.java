@@ -7,7 +7,7 @@
  */
 package com.draagon.meta.manager;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 
 /**
@@ -19,36 +19,36 @@ public interface StateAwareMetaObject {
     ///////////////////////////////////////////////////////////////
     // Object State Methods
 
-    public abstract boolean isNew(Object obj) throws MetaException;
+    public abstract boolean isNew(Object obj) throws MetaDataException;
 
-    public abstract boolean isModified(Object obj) throws MetaException;
+    public abstract boolean isModified(Object obj) throws MetaDataException;
 
-    public abstract boolean isDeleted(Object obj) throws MetaException;
+    public abstract boolean isDeleted(Object obj) throws MetaDataException;
 
-    public abstract void setNew(Object obj, boolean state) throws MetaException;
+    public abstract void setNew(Object obj, boolean state) throws MetaDataException;
 
-    public abstract void setModified(Object obj, boolean state) throws MetaException;
+    public abstract void setModified(Object obj, boolean state) throws MetaDataException;
 
-    public abstract void setDeleted(Object obj, boolean state) throws MetaException;
+    public abstract void setDeleted(Object obj, boolean state) throws MetaDataException;
 
-    public abstract long getCreationTime(Object obj) throws MetaException;
+    public abstract long getCreationTime(Object obj) throws MetaDataException;
 
-    public abstract long getModifiedTime(Object obj) throws MetaException;
+    public abstract long getModifiedTime(Object obj) throws MetaDataException;
 
-    public abstract long getDeletedTime(Object obj) throws MetaException;
+    public abstract long getDeletedTime(Object obj) throws MetaDataException;
 
     /**
      * Returns whether the field on the object was modified
      */
-    public abstract boolean isFieldModified(MetaField f, Object obj) throws MetaException;
+    public abstract boolean isFieldModified(MetaField f, Object obj) throws MetaDataException;
 
     /**
      * Sets whether the field is modified
      */
-    public abstract void setFieldModified(MetaField f, Object obj, boolean state) throws MetaException;
+    public abstract void setFieldModified(MetaField f, Object obj, boolean state) throws MetaDataException;
 
     /**
      * Gets the time the field was modified
      */
-    public abstract long getFieldModifiedTime(MetaField f, Object obj) throws MetaException;
+    public abstract long getFieldModifiedTime(MetaField f, Object obj) throws MetaDataException;
 }

@@ -1,14 +1,13 @@
 package com.draagon.meta.mojo;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.LocalMetaDataSources;
 import com.draagon.meta.loader.file.MetaDataSources;
-import com.draagon.meta.loader.file.config.FileLoaderConfig;
+import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -102,7 +101,7 @@ public class MetaDataMojo extends AbstractMojo
                     impl.execute(loader);
                 }
                 catch( Exception e ) {
-                    throw new MetaException( "Error running generator ["+g.getClassname()+"]: "+e, e );
+                    throw new MetaDataException( "Error running generator ["+g.getClassname()+"]: "+e, e );
                 }
             }
         }
@@ -111,7 +110,7 @@ public class MetaDataMojo extends AbstractMojo
     protected FileMetaDataLoader createLoader() {
 
         // TODO:  Clean this all up
-        FileLoaderConfig config = new FileLoaderConfig()
+        FileLoaderOptions config = new FileLoaderOptions()
             .setVerbose(true)
             .setStrict(true)
             .addParser( "*.xml", XMLMetaDataParser.class)
@@ -131,7 +130,7 @@ public class MetaDataMojo extends AbstractMojo
             Constructor<FileMetaDataLoader> c = null;
             try {
                 c = (Constructor<FileMetaDataLoader>) Class.forName( loaderConfig.getClassname() )
-                        .getConstructor(FileLoaderConfig.class, String.class);
+                        .getConstructor(FileLoaderOptions.class, String.class);
                 loader = c.newInstance( config, loaderConfig.getName() );
             }
             catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
@@ -141,7 +140,7 @@ public class MetaDataMojo extends AbstractMojo
                     loader = c.newInstance( loaderConfig.getName() ); //, loaderConfig.getName() );
                 }
                 catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    throw new MetaException( "Could not create FileMetaDataLoader with class [" + loaderConfig.getClassname() + "]: " + e.getMessage(), e );
+                    throw new MetaDataException( "Could not create FileMetaDataLoader with class [" + loaderConfig.getClassname() + "]: " + e.getMessage(), e );
                 }
             }
         }
