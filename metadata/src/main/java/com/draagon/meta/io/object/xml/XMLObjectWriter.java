@@ -1,33 +1,36 @@
-package com.draagon.meta.io.value.xml;
+package com.draagon.meta.io.object.xml;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
+
+import com.draagon.meta.io.util.IOUtil;
 import com.draagon.meta.io.xml.XMLMetaDataWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.util.DataConverter;
 import org.w3c.dom.Element;
 
 import java.io.OutputStream;
 
-public class XMLValueObjectWriter extends XMLMetaDataWriter {
+public class XMLObjectWriter extends XMLMetaDataWriter {
 
-    public XMLValueObjectWriter(MetaDataLoader loader, OutputStream out ) {
+    public XMLObjectWriter(MetaDataLoader loader, OutputStream out ) {
         super(loader, out);
     }
 
-    public void write( ValueObject vo ) throws MetaDataIOException {
+    public void write( Object vo ) throws MetaDataIOException {
 
-        if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null ValueObject");
+        if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null Object");
 
         initDoc();
 
-        writeObject( doc().getDocumentElement(), vo.getMetaData(), vo );
+        MetaObject mo = null;
+        writeObject( doc().getDocumentElement(), IOUtil.getMetaObjectFor(getLoader(),vo), vo );
     }
 
-    protected void writeObject( Element el, MetaObject mo, ValueObject vo) throws MetaDataIOException {
+
+    protected void writeObject( Element el, MetaObject mo, Object vo) throws MetaDataIOException {
 
         Element objEl = doc().createElement(getXmlName( mo ));
         if ( el == null ) doc().appendChild( objEl );
@@ -36,7 +39,7 @@ public class XMLValueObjectWriter extends XMLMetaDataWriter {
         writeObjectFields( objEl, mo, vo);
     }
 
-    protected void writeObjectFields( Element objEl, MetaObject mo, ValueObject vo ) throws MetaDataIOException {
+    protected void writeObjectFields( Element objEl, MetaObject mo, Object vo ) throws MetaDataIOException {
 
         for( MetaField mf : mo.getMetaFields()) {
             // TODO: Add more efficient way to check on null values
@@ -51,14 +54,14 @@ public class XMLValueObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeFieldAsAttr( Element el, MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldAsAttr( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
         // TODO:  Need support here for unsupported DataTypes
 
         el.setAttribute( getXmlName( mf ), mf.getString( vo ));
     }
 
-    protected void writeField( Element el, MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeField( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
         // TODO:  Should we worry about the objectRef?
         if ( xmlWrap( mf )) {
@@ -97,38 +100,25 @@ public class XMLValueObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeFieldObjectArray( Element el, MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldObjectArray( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
         for (Object o : DataConverter.toObjectArray(mf.getObject(vo))) {
-
             if ( o != null ) {
-                if (!( o instanceof ValueObject )) {
-                    throw new MetaDataIOException(this, "Object DataType did not return ValueObject [" + mf + "]");
-                }
-
-                ValueObject voc = (ValueObject) o;
-
                 // TODO: Attribute to use Field name vs. Object name?
-                writeObject(el, voc.getMetaData(), voc);
+                writeObject(el, IOUtil.getMetaObjectFor(getLoader(),o), o);
             }
         }
     }
 
-    protected void writeFieldObject( Element el, MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldObject( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
         // TODO:  Should we worry about the objectRef?
 
         Object o = mf.getObject( vo );
         if ( o != null ) {
 
-            if (!(o instanceof ValueObject)) {
-                throw new MetaDataIOException(this, "Object DataType did not return ValueObject [" + mf + "]");
-            }
-
-            ValueObject voc = (ValueObject) o;
-
             // TODO: Attribute to use Field name vs. Object name?
-            writeObject(el, voc.getMetaData(), voc);
+            writeObject(el, IOUtil.getMetaObjectFor(getLoader(),o), o);
 
             //Element objEl = doc().createElement( getXmlName( mo ));
             //el.appendChild( objEl );
@@ -136,7 +126,7 @@ public class XMLValueObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeFieldCustom( Element el, MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldCustom( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 }

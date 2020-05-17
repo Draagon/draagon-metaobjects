@@ -1,6 +1,8 @@
 package com.draagon.meta.io;
 
+import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataAware;
+import com.draagon.meta.io.util.PathTracker;
 import com.draagon.meta.loader.MetaDataLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +14,7 @@ public abstract class MetaDataWriter implements MetaDataIO {
     protected Log log = LogFactory.getLog( this.getClass() );
 
     private final MetaDataLoader loader;
+    private final PathTracker path = new PathTracker();
 
     protected MetaDataWriter(MetaDataLoader loader) {
         this.loader = loader;
@@ -19,6 +22,10 @@ public abstract class MetaDataWriter implements MetaDataIO {
 
     public MetaDataLoader getLoader() {
         return loader;
+    }
+
+    public PathTracker path() {
+        return path;
     }
 
     //public abstract void write( D data ) throws MetaDataIOException;

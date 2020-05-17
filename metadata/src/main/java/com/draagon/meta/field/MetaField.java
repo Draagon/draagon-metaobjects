@@ -392,9 +392,28 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
     }
 
     public void setObject(Object obj, Object value) {
-        setObjectAttribute(obj, DataConverter.toType(getDataType(), (value != null) ? value : null ));
+        setObjectAttribute(obj, DataConverter.toType(getDataType(), value ));
     }
 
+    public void setObjectArray(Object obj, List<?> value) {
+        if ( getDataType() != DataTypes.OBJECT_ARRAY ) throw new InvalidValueException(
+                "Cannot set List to non ObjectArray type ["+getDataType()+"]" );
+        setObjectAttribute(obj, value);
+    }
+
+    public void addToObjectArray(Object o, Object value) {
+        if ( value == null ) return;
+        List<Object> values = getObjectArray(o);
+        if ( values == null ) {
+            values = new ArrayList<>();
+            setObjectArray(o,values);
+        }
+        values.add( value );
+    }
+
+    public List<Object> getObjectArray(Object obj) {
+        return DataConverter.toObjectArray(getObjectAttribute(obj));
+    }
 
     ////////////////////////////////////////////////////
     // OBJECT GETTER METHODS

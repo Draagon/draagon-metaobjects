@@ -1,14 +1,15 @@
-package com.draagon.meta.io.value;
+package com.draagon.meta.io.object;
 
 import com.draagon.meta.attr.BooleanAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.io.MetaDataIOException;
-import com.draagon.meta.io.value.json.JsonValueObjectReader;
-import com.draagon.meta.io.value.json.JsonValueObjectWriter;
-import com.draagon.meta.io.value.xml.XMLValueObjectReader;
-import com.draagon.meta.io.value.xml.XMLValueObjectWriter;
+import com.draagon.meta.io.object.json.JsonObjectReader;
+import com.draagon.meta.io.object.json.JsonObjectWriter;
+import com.draagon.meta.io.object.xml.XMLObjectReader;
+import com.draagon.meta.io.object.xml.XMLObjectWriter;
 import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueMetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.relation.ref.ObjectReference;
@@ -19,7 +20,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ValueObjectIOTestBase {
+public abstract class ObjectIOTestBase {
 
     protected MetaDataLoader loader = null;
     
@@ -87,28 +88,28 @@ public abstract class ValueObjectIOTestBase {
                 );
     }
 
-    protected ValueObject createBasket( int id, String name ) {
+    protected ValueObject createBasket(int id, String name ) {
         ValueObject o = (ValueObject) loader.getMetaObjectByName( MD.OBJ_BASKET).newInstance();
         o.setInt( MD.ID, id );
         o.setString( MD.NAME, name);
         return o;
     }
 
-    protected ValueObject createFruit( int id, String name ) {
+    protected ValueObject createFruit(int id, String name ) {
         ValueObject o = (ValueObject) loader.getMetaObjectByName( MD.OBJ_FRUIT).newInstance();
         o.setInt( MD.ID, id );
         o.setString( MD.NAME, name);
         return o;
     }
 
-    protected ValueObject createBug( int id, String name ) {
+    protected ValueObject createBug(int id, String name ) {
         ValueObject o = (ValueObject) loader.getMetaObjectByName( MD.OBJ_BUG).newInstance();
         o.setInt( MD.ID, id );
         o.setString( MD.NAME, name);
         return o;
     }
 
-    protected void addToBasket( ValueObject b, ValueObject f ) {
+    protected void addToBasket(ValueObject b, ValueObject f ) {
         List<Object> objects = (List<Object>) b.getObject( MD.BASKET_FRUITS);
         if ( objects == null ) {
             objects = new ArrayList<>();
@@ -168,36 +169,36 @@ public abstract class ValueObjectIOTestBase {
         runTest(b, "inbasketbugs");
     }
 
-    protected abstract void runTest( ValueObject o, String name ) throws IOException, MetaDataIOException;
+    protected abstract void runTest(ValueObject o, String name ) throws IOException, MetaDataIOException;
 
     protected void writeXML( String filename, ValueObject vo ) throws IOException, MetaDataIOException {
 
-        XMLValueObjectWriter writer = new XMLValueObjectWriter( loader, getTestFileOutputStream( filename ) );
+        XMLObjectWriter writer = new XMLObjectWriter( loader, getTestFileOutputStream( filename ) );
         //writer.withIndent(true);
         writer.write( vo );
         writer.close();
     }
 
-    protected ValueObject readXML( String filename ) throws IOException, MetaDataIOException {
+    protected ValueObject readXML(String filename, MetaObject mo) throws IOException, MetaDataIOException {
 
-        XMLValueObjectReader reader = new XMLValueObjectReader( loader, getTestFileInputStream( filename ) );
-        ValueObject vo = reader.read();
+        XMLObjectReader reader = new XMLObjectReader( loader, getTestFileInputStream( filename ) );
+        ValueObject vo = (ValueObject) reader.read( mo );
         reader.close();
         return vo;
     }
 
     protected void writeJson( String filename, ValueObject vo ) throws IOException, MetaDataIOException {
 
-        JsonValueObjectWriter writer = new JsonValueObjectWriter( loader, getTestFileWriter( filename ) );
+        JsonObjectWriter writer = new JsonObjectWriter( loader, getTestFileWriter( filename ) );
         writer.withIndent("  ");
         writer.write( vo );
         writer.close();
     }
 
-    protected ValueObject readJson( String filename ) throws IOException, MetaDataIOException {
+    protected ValueObject readJson(String filename ) throws IOException, MetaDataIOException {
 
-        JsonValueObjectReader reader = new JsonValueObjectReader( loader, getTestFileReader( filename ) );
-        ValueObject vo = reader.read();
+        JsonObjectReader reader = new JsonObjectReader( loader, getTestFileReader( filename ) );
+        ValueObject vo = (ValueObject) reader.read();
         reader.close();
         return vo;
     }

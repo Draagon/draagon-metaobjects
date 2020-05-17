@@ -144,6 +144,10 @@ public class PojoMetaObject extends MetaObject {
      */
     @Override
     public void setValue(MetaField f, Object obj, Object val)  {
+        setValueWithReflection(f, obj, val);
+    }
+
+    protected void setValueWithReflection(MetaField f, Object obj, Object val) {
 
         if (obj == null)
             throw new IllegalArgumentException("Cannot set value on a null Object for field [" + f + "]");
@@ -172,6 +176,10 @@ public class PojoMetaObject extends MetaObject {
      */
     @Override
     public Object getValue(MetaField f, Object obj)  {
+        return setValueWithReflection(f, obj);
+    }
+
+    protected Object setValueWithReflection(MetaField f, Object obj) {
 
         if (obj == null)
             throw new IllegalArgumentException("Null object found, Object expected for field [" + f + "]");
@@ -186,7 +194,7 @@ public class PojoMetaObject extends MetaObject {
             throw new RuntimeException("Illegal Access Exception setting field [" + f + "] on object [" + obj.getClass() + "]: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Whether the MetaObject produces the object specified
      */
@@ -200,11 +208,16 @@ public class PojoMetaObject extends MetaObject {
         }
     }
 
+    public boolean hasObjectInstanceAttrs() {
+        return hasMetaAttr(MetaObject.ATTR_OBJECT)|| hasMetaAttr(MetaObject.ATTR_CLASS);
+    }
+
+
     @Override
     public void validate() {
-        if ( !hasMetaAttr(ATTR_OBJECT) && !hasMetaAttr(ATTR_CLASS)) {
+        if ( !hasObjectInstanceAttrs()) {
             if ( createClassFromMetaDataName( false ) == null ) {
-                throw new MetaDataException("PojoMetaObject requires a 'class' attribute or metadata name that matches the fully qualified Java class: " + getName());
+                throw new MetaDataException( this.getClass().getName()+" requires a 'class' attribute or metadata name that matches the fully qualified Java class: " + getName());
             }
         }
     }

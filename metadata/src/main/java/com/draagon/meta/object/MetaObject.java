@@ -180,6 +180,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
     ////////////////////////////////////////////////////
     // OBJECT METHODS
+
     /**
      * Retrieves the object class of an object, or null if one is not specified
      */

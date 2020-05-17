@@ -1,13 +1,13 @@
-package com.draagon.meta.io.value.json;
+package com.draagon.meta.io.object.json;
 
 import com.draagon.meta.io.MetaDataIOException;
-import com.draagon.meta.io.value.ValueObjectIOTestBase;
+import com.draagon.meta.io.object.ObjectIOTestBase;
 import com.draagon.meta.object.value.ValueObject;
 import org.junit.Assert;
 
 import java.io.*;
 
-public class JsonValueObjectIOTest extends ValueObjectIOTestBase {
+public class JsonObjectIOTest extends ObjectIOTestBase {
 
     private final static String PRE = "json-valueobject-io-test-";
 

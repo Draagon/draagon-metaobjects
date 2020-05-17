@@ -1,45 +1,52 @@
-package com.draagon.meta.io.value.json;
+package com.draagon.meta.io.object.json;
 
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.ObjectArrayField;
-import com.draagon.meta.io.MetaDataIO;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataWriter;
+import com.draagon.meta.io.util.IOUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.util.DataConverter;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
 
-public class JsonValueObjectWriter extends JsonMetaDataWriter {
+public class JsonObjectWriter extends JsonMetaDataWriter {
 
-    public JsonValueObjectWriter(MetaDataLoader loader, Writer writer ) throws MetaDataIOException {
+    public JsonObjectWriter(MetaDataLoader loader, Writer writer ) throws MetaDataIOException {
         super(loader, writer);
     }
 
-    public void write(ValueObject vo) throws MetaDataIOException {
-        if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null ValueObject");
-        writeObject( vo.getMetaData(), vo );
+    public void write(Object vo) throws MetaDataIOException {
+        if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null Object");
+        try {
+            writeObject(IOUtil.getMetaObjectFor(getLoader(), vo ), vo);
+        } catch (RuntimeException e) {
+            throw new MetaDataIOException( this, e.toString(), e );
+        }
     }
 
-    protected void writeObject(MetaObject mo, ValueObject vo) throws MetaDataIOException {
+    protected void writeObject(MetaObject mo, Object vo) throws MetaDataIOException {
         try {
-            out().beginObject().name("@type").value(mo.getName());
+            path().inc("{}");
+            out().beginObject();
+            path().inc( mo );
+            out().name("@type").value(mo.getName());
             for( MetaField mf : mo.getMetaFields()) {
                 writeField( mo, mf, vo );
             }
+            path().dec();
             out().endObject();
+            path().dec();
         }
         catch( IOException e ) {
-            throw new MetaDataIOException( this, "Error writing object ["+mo.getName()+"]: "+e, e );
+            throw new MetaDataIOException( this, "Error writing json ["+mo.getName()+"]: "+e, e );
         }
     }
 
-    protected void writeField(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeField(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
         try {
+            path().inc(mf);
             out().name(mf.getName());
             if ( mf.getObject(vo) == null ) {
                 out().nullValue();
@@ -82,24 +89,20 @@ public class JsonValueObjectWriter extends JsonMetaDataWriter {
                         throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] not supported [" + mf + "]");
                 }
             }
+            path().dec();
         }
         catch( IOException e ) {
-            throw new MetaDataIOException( this, "Error writing object ["+mo.getName()+"]: "+e, e );
+            throw new MetaDataIOException( this, "Error writing json ["+mo.getName()+"]: "+e, e );
         }
     }
 
-    protected void writeFieldObjectArray(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldObjectArray(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
         // TODO:  Should we worry about the objectRef?
         try {
             out().beginArray();
             for (Object o : DataConverter.toObjectArray(mf.getObject(vo))) {
-                if (o instanceof ValueObject) {
-                    ValueObject vo2 = (ValueObject) o;
-                    writeObject(vo2.getMetaData(), vo2);
-                } else {
-                    throw new MetaDataIOException(this, "ObjectArray DataType did not return ValueObjects [" + mf + "]");
-                }
+                writeObject(IOUtil.getMetaObjectFor(getLoader(), o), o);
             }
             out().endArray();
         }
@@ -108,19 +111,14 @@ public class JsonValueObjectWriter extends JsonMetaDataWriter {
         }
     }
 
-    protected void writeFieldObject(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldObject(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
         // TODO:  Should we worry about the objectRef?
         Object o = mf.getObject( vo );
-        if (o instanceof ValueObject) {
-            ValueObject vo2 = (ValueObject) o;
-            writeObject(vo2.getMetaData(), vo2);
-        } else {
-            throw new MetaDataIOException(this, "Object DataType, but did not return a ValueObject [" + mf + "]");
-        }
+        writeObject(IOUtil.getMetaObjectFor(getLoader(), o ), o);
     }
 
-    protected void writeFieldCustom(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void writeFieldCustom(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 }

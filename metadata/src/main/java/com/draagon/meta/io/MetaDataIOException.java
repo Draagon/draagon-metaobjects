@@ -17,7 +17,7 @@ public class MetaDataIOException extends Exception {
         // Don't write again if the wrapper one already has
         if ( e instanceof MetaDataIOException ) return "";
 
-        return "["+ io.getClass().getSimpleName() + "{" +
+        return "["+io.path().getPathAndClear()+"]{writer="+ io.getClass().getSimpleName() + "," +
             "loader="  + io.getLoader().getName() + "}";
     }
 }

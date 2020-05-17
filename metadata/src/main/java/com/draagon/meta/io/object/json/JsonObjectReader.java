@@ -1,80 +1,54 @@
-package com.draagon.meta.io.value.json;
+package com.draagon.meta.io.object.json;
 
-import com.draagon.meta.MetaData;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataReader;
+import static com.draagon.meta.io.xml.XMLIOUtil.*;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.relation.ref.ObjectReference;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonValueObjectReader extends JsonMetaDataReader {
+public class JsonObjectReader extends JsonMetaDataReader {
 
     public final static String TYPE_FIELD = "@type";
 
-    private List<String> pathList = new ArrayList<>();
-
-    public JsonValueObjectReader(MetaDataLoader loader, Reader reader ) {
+    public JsonObjectReader(MetaDataLoader loader, Reader reader ) {
         super(loader, reader);
     }
 
-    public ValueObject read() throws MetaDataIOException {
+    public Object read() throws MetaDataIOException {
         return read( null );
     }
 
-    public ValueObject read( MetaObject mo ) throws MetaDataIOException {
+    public Object read(MetaObject mo ) throws MetaDataIOException {
 
         try {
             if ( !in().hasNext() ) return null;
             return readObject( mo );
         }
-        catch (MetaDataIOException e) {
-            throw new MetaDataIOException( this, "["+getPathAndClear()+"]: "+e.getMessage(), e );
-        }
         catch (IOException e) {
-            throw new MetaDataIOException( this, "["+getPathAndClear()+"] Error reading MetaObject ["+mo+"]: "+e, e );
+            throw new MetaDataIOException( this, "Error reading MetaObject ["+mo+"]: "+e, e );
         }
         catch (RuntimeException e) {
-            throw new MetaDataIOException( this, "["+getPathAndClear()+"]: "+e, e );
+            throw new MetaDataIOException( this, e.toString(), e );
         }
     }
 
-    protected void inc( MetaData md ) {
-        inc( "["+md.getTypeName()+":"+md.getName()+"]" );
-    }
-
-    protected void inc( String path ) {
-        pathList.add( "/"+path );
-    }
-
-    protected String dec() {
-        return pathList.remove( pathList.size()-1 );
-    }
-
-    protected String getPathAndClear() {
-        StringBuilder b = new StringBuilder();
-        for ( String p : pathList ) b.append( p );
-        pathList.clear();
-        return b.toString();
-    }
-
-    protected ValueObject readObject( MetaObject mo ) throws MetaDataIOException {
+    protected Object readObject(MetaObject mo ) throws MetaDataIOException {
 
         try {
-            inc("{}");
+            path().inc("{}");
             in().beginObject();
 
-            ValueObject vo = readObjectFields( mo );
+            Object vo = readObjectFields( mo );
 
             in().endObject();
-            dec();  // {}
+            path().dec();  // {}
 
             return vo;
         }
@@ -83,15 +57,15 @@ public class JsonValueObjectReader extends JsonMetaDataReader {
         }
     }
 
-    protected ValueObject readObjectFields(MetaObject mo) throws MetaDataIOException {
+    protected Object readObjectFields(MetaObject mo) throws MetaDataIOException {
 
-        ValueObject vo = null;
+        Object vo = null;
         String lastName = null;
 
         try {
             while( in().hasNext()) {
                 lastName = in().nextName();
-                inc( lastName );
+                path().inc( lastName );
 
                 if ( TYPE_FIELD.equals(lastName)) {
                     mo = processMetaObjectType( mo );
@@ -102,15 +76,15 @@ public class JsonValueObjectReader extends JsonMetaDataReader {
                 }
                 else {
                     if ( vo == null ) {
-                        vo = (ValueObject) mo.newInstance();
+                        vo = mo.newInstance();
                     }
 
                     MetaField mf = mo.getMetaField(lastName);
-                    inc(mf);
+                    path().inc(mf);
                     readFieldValue(mo, mf, vo);
-                    dec(); // mf
+                    path().dec(); // mf
                 }
-                dec(); // lastName
+                path().dec(); // lastName
             }
 
             return vo;
@@ -133,7 +107,7 @@ public class JsonValueObjectReader extends JsonMetaDataReader {
         //}
 
         String objectName = in().nextString();
-        inc( objectName);
+        path().inc( objectName);
 
         MetaObject mo2 = getLoader().getMetaObjectByName( objectName );
 
@@ -146,12 +120,12 @@ public class JsonValueObjectReader extends JsonMetaDataReader {
             mo = mo2;
         }
 
-        dec();
+        path().dec();
 
         return mo;
     }
 
-    protected void readFieldValue(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void readFieldValue(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
         try {
             switch( mf.getDataType() ) {
                 case BOOLEAN:       mf.setBoolean( vo, in().nextBoolean() ); break;
@@ -179,48 +153,42 @@ public class JsonValueObjectReader extends JsonMetaDataReader {
         }
     }
 
-    protected void readFieldObjectArray(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException, IOException {
+    protected void readFieldObjectArray(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException, IOException {
 
-        inc("[]");
+        path().inc("[]");
         in().beginArray();
 
-        ObjectReference oref = mf.getFirstObjectReference();
-        if ( oref == null ) throw new MetaDataIOException( this, "No ObjectReference existed ["+mf+"]" );
-        MetaObject refmo = oref.getReferencedObject();
-        if ( refmo == null ) throw new MetaDataIOException( this, "No MetaObject reference not found ["+refmo+"]" );
+        MetaObject refmo = getObjectRef( this, mf );
 
         List<Object> objects = new ArrayList<>();
         mf.setObject( vo, objects );
 
         while ( in().hasNext() ) {
-            ValueObject voc = readObject( refmo );
+            Object voc = readObject( refmo );
             if ( voc != null ) objects.add( voc );
         }
 
         in().endArray();
-        dec();
+        path().dec();
     }
 
-    protected void readFieldObject(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void readFieldObject(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
-        ObjectReference oref = mf.getFirstObjectReference();
-        if ( oref == null ) throw new MetaDataIOException( this, "No ObjectReference existed ["+mf+"]" );
-        MetaObject refmo = oref.getReferencedObject();
-        if ( refmo == null ) throw new MetaDataIOException( this, "No MetaObject reference not found ["+refmo+"]" );
+        MetaObject refmo = getObjectRef( this, mf );
 
-        ValueObject voc = readObject( refmo );
+        Object voc = readObject( refmo );
         mf.setObject( vo, voc );
     }
 
-    protected void readFieldCustom(MetaObject mo, MetaField mf, ValueObject vo) throws MetaDataIOException {
+    protected void readFieldCustom(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 
     @Override
     public void close() throws MetaDataIOException {
         super.close();
-        if ( !pathList.isEmpty() ) {
-            throw new IllegalStateException( "On writer ["+toString()+"], path was not empty ["+getPathAndClear()+"], logic error" );
+        if ( !path().isAtRoot() ) {
+            throw new IllegalStateException( "On writer ["+toString()+"], path was not empty ["+path().getPathAndClear()+"], logic error" );
         }
     }
 }

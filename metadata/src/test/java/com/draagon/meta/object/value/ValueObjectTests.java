@@ -1,6 +1,5 @@
 package com.draagon.meta.object.value;
 
-import com.draagon.meta.object.value.ValueObject;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
