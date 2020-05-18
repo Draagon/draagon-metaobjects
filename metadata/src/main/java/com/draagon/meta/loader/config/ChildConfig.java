@@ -9,7 +9,8 @@ import java.util.List;
 public final class ChildConfig extends ConfigObjectAbstract {
 
     public final static String OBJECT_NAME       = "ChildConfig";
-    public final static String OBJECT_IONAME    = "child";
+    public final static String OBJECT_IONAME     = "child";
+    public final static String FIELD_TYPE        = "type";
     public final static String FIELD_SUBTYPE     = "subType";
     public final static String FIELD_NAME        = "name";
     public final static String FIELD_NAMEALIASES = "nameAliases";
@@ -24,15 +25,27 @@ public final class ChildConfig extends ConfigObjectAbstract {
     // GETTERS AND SETTERS
 
     public String getType() {
-        return getString(FIELD_TYPE);
+        return _getString(FIELD_TYPE);
+    }
+
+    public void setType(String type) {
+        _setString(FIELD_TYPE,type);
     }
 
     public String getSubType() {
-        return getString(FIELD_SUBTYPE);
+        return _getString(FIELD_SUBTYPE);
+    }
+
+    public void setSubType(String subType) {
+        _setString(FIELD_SUBTYPE,subType);
     }
 
     public String getName() {
-        return getString(FIELD_NAME);
+        return _getString(FIELD_NAME);
+    }
+
+    public void setName(String name) {
+        _setString(FIELD_NAME,name);
     }
 
     public List<String> getNameAliases() {

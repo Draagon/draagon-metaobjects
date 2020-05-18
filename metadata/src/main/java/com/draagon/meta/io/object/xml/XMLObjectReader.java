@@ -63,14 +63,22 @@ public class XMLObjectReader extends XMLMetaDataReader {
 
     protected void readMetaFields( Element e, MetaObject mo, Object vo) throws MetaDataIOException {
 
+        if ( isXmlTyped(mo)) {
+            String fieldName = getXmlTypedField( mo );
+            String name = e.getNodeName();
+            // TODO: Reverse Lookup off the XML Name
+            mo.getMetaField( fieldName ).setString( vo, name );
+        }
+
         for ( MetaField mf : mo.getMetaFields() ) {
             path().inc( mf);
 
-            if ( isXmlAttr( mf )) {
-                readFieldAsAttribute( e, mo, mf, vo);
-            }
-            else {
-                readFieldAsElement( e, mo, mf, vo);
+            if ( !ifXmlIgnore( mf )) {
+                if (isXmlAttr(mf)) {
+                    readFieldAsAttribute(e, mo, mf, vo);
+                } else {
+                    readFieldAsElement(e, mo, mf, vo);
+                }
             }
 
             path().dec();
@@ -142,7 +150,8 @@ public class XMLObjectReader extends XMLMetaDataReader {
             e = getFirstElementOfName(  e, xmlName );
         }
 
-        String name = getXmlName(refmo);
+        String name = null;
+        if ( !isXmlTyped(refmo)) name = getXmlName(refmo);
         Element el = getFirstElementOfName(e, name);
         if ( el != null ) {
             Object value = readObject(el, refmo);

@@ -11,12 +11,12 @@ import java.util.*;
  * as "attributes".  You can also associate "properties" to the object that can be used for special behaviors
  * when persisting or transforming objects.
  */
-public abstract class DataObject extends DataObjectBase {
+public class DataObject extends DataObjectBase {
 
     /**
      * Create a generic data object
      */
-    public DataObject() { }
+    public DataObject( String name ) { super(name); }
 
     /**
      * Create a generic data object associated to the MetaObject
@@ -133,7 +133,7 @@ public abstract class DataObject extends DataObjectBase {
         return DataConverter.toDouble(_get(name));
     }
 
-    protected String getString(String name) {
+    protected String _getString(String name) {
         return DataConverter.toString(_get(name));
     }
 

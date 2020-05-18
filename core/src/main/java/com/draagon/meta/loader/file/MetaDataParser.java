@@ -6,10 +6,9 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.typed.config.ChildConfig;
-import com.draagon.meta.loader.typed.config.MetaDataConfig;
-import com.draagon.meta.loader.typed.config.TypesConfig;
-import com.draagon.meta.loader.typed.config.TypeConfig;
+import com.draagon.meta.loader.config.ChildConfig;
+import com.draagon.meta.loader.config.TypesConfig;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.util.MetaDataUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -116,17 +115,12 @@ public abstract class MetaDataParser {
         return defaultPackageName;
     }
 
-    /** Return the MetaDataConfig */
-    public MetaDataConfig getConfig() {
-        return this.loader.getMetaDataConfig();
-    }
-
     /** Load the metadata models from the inputstream */
-    public abstract MetaDataConfig loadFromStream( InputStream is );
+    public abstract void loadFromStream( InputStream is );
 
     /** Get the MetaDataTypes from the loader's MetaDataConfig */
     public TypesConfig getTypesConfig() {
-        return this.loader.getMetaDataConfig().getTypesConfig();
+        return this.loader.getTypesConfig();
     }
 
     /**
@@ -400,7 +394,7 @@ public abstract class MetaDataParser {
 
     protected void verifyAcceptableChild( String parentType, String parentSubType, String type, String subType, String name ) {
 
-        TypeConfig tc = getTypesConfig ().getType( parentType );
+        TypeConfig tc = getTypesConfig().getType( parentType );
 
         ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
 
@@ -411,9 +405,9 @@ public abstract class MetaDataParser {
             }
             else if ( type.equals( MetaAttribute.TYPE_ATTR ) && getLoader().getLoaderOptions().allowsAutoAttrs() ) {
                 // Auto add the new child configuration
-                cc = new ChildConfig( type, subType, name );
+                cc = tc.createChildConfig( type, subType, name );
                 cc.setAutoCreatedFromFile( getFilename() );
-                tc.addTypeChild( cc );
+                tc.addTypeChildConfig( cc );
             }
             else {
                 //log.info( "LOADER: " + getLoader() );
@@ -488,7 +482,7 @@ public abstract class MetaDataParser {
                     +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
 
             if ( getLoader().getLoaderOptions().allowsAutoAttrs() ) {
-                cc = new ChildConfig( StringAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName );
+                cc = parentTypeConfig.createChildConfig( StringAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName );
                 cc.setAutoCreatedFromFile( getFilename() );
             }
             else if ( getLoader().getLoaderOptions().isStrict() ) {

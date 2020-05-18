@@ -23,19 +23,48 @@ import static com.draagon.meta.io.xml.XMLIOConstants.*;
 public class XMLIOUtil {
 
     public static String getXmlName( MetaData md ) {
+
+        if ( md instanceof MetaObject && isXmlTyped( (MetaObject) md )) return null;
+
         if ( md.hasMetaAttr( ATTR_XMLNAME )) {
             return md.getMetaAttr( ATTR_XMLNAME ).getValueAsString();
         }
         return md.getShortName();
     }
 
-    public static boolean isXmlAttr( MetaField mf ) {
-        if ( mf.hasMetaAttr( ATTR_ISXMLATTR )) {
-            MetaAttribute isXml = mf.getMetaAttr( ATTR_ISXMLATTR );
-            if ( isXml.getValue() == null ) return false;
-            return DataConverter.toBoolean( isXml.getValue() );
+    public static boolean isXmlTyped( MetaObject mo ) {
+        if (mo.hasMetaAttr(ATTR_XMLTYPED)) {
+            MetaAttribute a = mo.getMetaAttr(ATTR_XMLTYPED);
+            if (a.getValue() == null) return false;
+            return true;
         }
         return false;
+    }
+
+    public static String getXmlTypedField( MetaObject mo ) {
+        if (mo.hasMetaAttr(ATTR_XMLTYPED)) {
+            MetaAttribute a = mo.getMetaAttr(ATTR_XMLTYPED);
+            if (a.getValue() == null) return null;
+            return a.getValueAsString();
+        }
+        return null;
+    }
+
+    public static boolean ifXmlIgnore( MetaField mf ) {
+        return xmlBoolean(mf, ATTR_XMLIGNORE);
+    }
+
+    public static boolean xmlBoolean(MetaField mf, String attrName) {
+        if (mf.hasMetaAttr(attrName)) {
+            MetaAttribute a = mf.getMetaAttr(attrName);
+            if (a.getValue() == null) return false;
+            return DataConverter.toBoolean(a.getValue());
+        }
+        return false;
+    }
+
+    public static boolean isXmlAttr( MetaField mf ) {
+        return xmlBoolean(mf, ATTR_ISXMLATTR);
     }
 
     public static boolean xmlWrap( MetaField mf ) {
@@ -104,7 +133,7 @@ public class XMLIOUtil {
      * or all elements if name is null
      */
     public static Element getFirstElementOfName(Node n, String name) {
-        if ( name == null ) throw new IllegalArgumentException("Name cannot be null");
+        //if ( name == null ) throw new IllegalArgumentException("Name cannot be null");
         List<Element> els = getElementsOfName( n, name, true );
         if ( els.isEmpty() ) return null;
         return els.iterator().next();
@@ -115,7 +144,7 @@ public class XMLIOUtil {
      * or all elements if name is null
      */
     public static List<Element> getElementsOfName(Node n, String name) {
-        if ( name == null ) throw new IllegalArgumentException("Name cannot be null");
+        //if ( name == null ) throw new IllegalArgumentException("Name cannot be null");
         return getElementsOfName( n, name, false );
     }
 

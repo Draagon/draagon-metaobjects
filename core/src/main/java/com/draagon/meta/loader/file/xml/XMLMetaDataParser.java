@@ -3,9 +3,8 @@ package com.draagon.meta.loader.file.xml;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.typed.config.ChildConfig;
-import com.draagon.meta.loader.typed.config.MetaDataConfig;
-import com.draagon.meta.loader.typed.config.TypeConfig;
+import com.draagon.meta.loader.config.ChildConfig;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
 import com.draagon.meta.util.XMLUtil;
@@ -31,7 +30,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
      * Loads all the classes specified in the Filename
      */
     @Override
-    public MetaDataConfig loadFromStream( InputStream is ) throws MetaDataException {
+    public void loadFromStream( InputStream is ) throws MetaDataException {
 
         Document doc = null;
 
@@ -89,8 +88,6 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                     +"         - DATA   : " + info.data.toString()  + "\n"
                     +"---------------------------------------------------");
         }
-
-        return getConfig();
     }
 
     /**
@@ -110,20 +107,20 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             if ( e.hasAttribute( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName( e.getAttribute( ATTR_DEFSUBTYPE ));
             if ( e.hasAttribute( ATTR_DEFNAME)) typeConfig.setDefaultName( e.getAttribute( ATTR_DEFNAME ));
             if ( e.hasAttribute( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix( e.getAttribute( ATTR_DEFNAMEPREFIX ));
-            loadChildren( e ).forEach( c-> typeConfig.addTypeChild(c));
+            loadChildren( typeConfig, e ).forEach( c-> typeConfig.addTypeChildConfig(c));
 
             // Load all the types for the specific element type
             loadSubTypes( e, typeConfig );
         }
     }
 
-    protected  List<ChildConfig> loadChildren(Element el) {
+    protected List<ChildConfig> loadChildren(TypeConfig tc, Element el) {
         List<ChildConfig> children = new ArrayList<>();
         List<Element> childrenEl = getElementsOfName(el, "children");
         if ( !childrenEl.isEmpty() ) {
             for (Element ec : getElementsOfName(childrenEl.iterator().next(), "child")) {
-                ChildConfig cc = new ChildConfig( ec.getAttribute(ATTR_TYPE), ec.getAttribute(ATTR_SUBTYPE), ec.getAttribute(ATTR_NAME));
-                if ( ec.hasAttribute("nameAliases"))        cc.setNameAliases( new HashSet<String>( Arrays.asList( ec.getAttribute( "nameAliases").split(","))));
+                ChildConfig cc = tc.createChildConfig( ec.getAttribute(ATTR_TYPE), ec.getAttribute(ATTR_SUBTYPE), ec.getAttribute(ATTR_NAME));
+                if ( ec.hasAttribute("nameAliases"))    cc.setNameAliases( Arrays.asList( ec.getAttribute( "nameAliases").split(",")));
                 //if ( ec.hasAttribute("required"))           cc.setRequired( Boolean.parseBoolean( ec.getAttribute( "required")));
                 //if ( ec.hasAttribute("autoCreate"))         cc.setAutoCreate( Boolean.parseBoolean( ec.getAttribute( "autoCreate")));
                 //if ( ec.hasAttribute("defaultValue"))       cc.setDefaultValue( ec.getAttribute( "defaultValue"));
@@ -163,7 +160,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 typeConfig.addSubType(name, tcl);
 
                 // Load subtypes
-                loadChildren( typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
+                loadChildren( typeConfig, typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
 
                 // Update info msg if verbose
                 if ( getLoader().getLoaderOptions().isVerbose() ) {
@@ -191,7 +188,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
-            if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
+            if ( getTypesConfig().getType( typeName ) == null ) {
                 if ( getLoader().getLoaderOptions().isStrict() ) {
                     throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                 } else {

@@ -10,12 +10,16 @@ import java.util.*;
 public class TypeConfig extends ConfigObjectAbstract {
     
     public final static String OBJECT_NAME       = "TypeConfig";
-    public final static String OBJECT_IONAME    = "type";
+    public final static String OBJECT_IONAME     = "type";
+    public final static String FIELD_NAME        = "name";
+    public final static String FIELD_BASECLASS   = "class";
     public final static String FIELD_SUBTYPES    = "subTypes";
     public final static String OBJREF_SUBTYPE    = "subTypeRef";
     public final static String FIELD_DEFSUBTYPE  = "defaultSubType";
     public final static String FIELD_DEFNAME     = "defaultName";
     public final static String FIELD_DEFPREFIX   = "defaultNamePrefix";
+    public final static String FIELD_CHILDREN    = "children";
+    public final static String OBJREF_CHILD      = "childRef";
 
     public TypeConfig( MetaObject mo ) {
         super(mo);
@@ -25,31 +29,39 @@ public class TypeConfig extends ConfigObjectAbstract {
     // Type  Methods
 
     public String getTypeName() {
-        return getString( FIELD_TYPE );
+        return _getString(FIELD_NAME);
+    }
+
+    public void setTypeName(String name) {
+        _setString(FIELD_NAME, name);
     }
 
     public Class<? extends MetaData> getBaseClass() {
         return _getClass( MetaData.class, FIELD_BASECLASS );
     }
 
-    public List<ChildConfig> getTypeChildConfigs() {
-        return _getObjectArray( ChildConfig.class, FIELD_CHILDREN );
+    public void setBaseClass(Class<? extends MetaData> clazz) {
+        _setClass( FIELD_BASECLASS, clazz );
     }
 
-    public void addChildConfig( ChildConfig config ) {
-        mergeChildConfigs( FIELD_CHILDREN, config );
+    public List<ChildConfig> getTypeChildConfigs() {
+        return _getAndCreateObjectArray(ChildConfig.class, FIELD_CHILDREN );
+    }
+
+    public void addTypeChildConfig( ChildConfig config ) {
+        mergeChildConfig( getTypeChildConfigs(), config );
     }
 
     public String getDefaultName() {
-        return getString( FIELD_DEFNAME );
+        return _getString( FIELD_DEFNAME );
     }
 
     public String getDefaultNamePrefix() {
-        return getString( FIELD_DEFPREFIX );
+        return _getString( FIELD_DEFPREFIX );
     }
 
     public String getDefaultSubTypeName() {
-        return getString( FIELD_DEFSUBTYPE );
+        return _getString( FIELD_DEFSUBTYPE );
     }
 
     public void setDefaultSubTypeName(String subTypeName ) {
@@ -80,13 +92,79 @@ public class TypeConfig extends ConfigObjectAbstract {
     }
 
     public Collection<SubTypeConfig> getSubTypes() {
-        return _getObjectArray( SubTypeConfig.class, FIELD_SUBTYPES);
+        return _getAndCreateObjectArray( SubTypeConfig.class, FIELD_SUBTYPES);
     }
 
     public void addSubTypeConfig( SubTypeConfig subType ) {
+        if ( getSubType( subType.getTypeName() ) != null ) {
+            throw new IllegalStateException( "SubType with the same name ["+subType.getTypeName()+"] already "+
+                    "exists on Type ["+getTypeName()+"]");
+        }
         _addToObjectArray( FIELD_SUBTYPES, subType );
     }
-    
+
+    /////////////////////////////////////////////////////////////////////
+    // Merge methods
+
+    public void merge(TypeConfig tc) {
+
+        // Merge TypeConfig fields
+        overwriteAttributeIfNotNull(FIELD_BASECLASS, tc);
+        overwriteAttributeIfNotNull(FIELD_DEFNAME, tc);
+        // TODO: Ensure both NAME and PREFIX are not set
+        overwriteAttributeIfNotNull(FIELD_DEFPREFIX, tc);
+        overwriteAttributeIfNotNull(FIELD_DEFSUBTYPE, tc);
+
+        // Merge SubTypeConfigs
+        for( SubTypeConfig stc : tc.getSubTypes() ) {
+            SubTypeConfig existing = getSubType( stc.getTypeName() );
+            if ( existing != null ) {
+                // Merge SubType Fields
+                existing.overwriteAttributeIfNotNull(SubTypeConfig.FIELD_BASECLASS, stc);
+                // Merge SubType ChildConfigs
+                mergeChildConfigs( existing.getChildConfigs(), stc.getChildConfigs() );
+            }
+            else {
+                // Add SubTypeConfig
+                addSubTypeConfig( stc );
+            }
+        }
+
+        // Merge Type ChildConfigs
+        mergeChildConfigs( getTypeChildConfigs(), tc.getTypeChildConfigs() );
+    }
+
+    protected void mergeChildConfigs( List<ChildConfig> existing, List<ChildConfig> children) {
+
+        for( ChildConfig cc : children ) {
+            // TODO:  Merge same children together
+            mergeChildConfig( existing, cc );
+        }
+    }
+
+    protected void mergeChildConfig( List<ChildConfig> existing, ChildConfig cc ) {
+
+        ChildConfig match = getSameChildConfig( existing, cc );
+        if ( match == null ) {
+            existing.add( cc );
+        }
+        else {
+            match.overwriteAttributeIfNotNull(ChildConfig.FIELD_NAMEALIASES, cc);
+            // TODO: Merge more fields, and need to merge aliases
+        }
+    }
+
+    protected ChildConfig getSameChildConfig( List<ChildConfig> existing, ChildConfig cc ) {
+        for ( ChildConfig ecc : existing ) {
+            if ( ecc.getType().equals( cc.getType() )
+                    && ecc.getSubType().equals( cc.getSubType() )
+                    && ecc.getName().equals( cc.getName() )) {
+                return ecc;
+            }
+        }
+        return null;
+    }
+
     /////////////////////////////////////////////////////////////////////
     // Child Config methods
 
@@ -189,6 +267,14 @@ public class TypeConfig extends ConfigObjectAbstract {
 
     public Class<? extends MetaData> getDefaultTypeClass() {
         return getSubType(getDefaultSubTypeName()).getBaseClass();
+    }
+
+    public ChildConfig createChildConfig(String type, String subType, String name) {
+        ChildConfig cc = new ChildConfig(getMetaData().getLoader().getMetaObjectByName(ChildConfig.OBJECT_NAME));
+        cc.setType(type);
+        cc.setSubType(subType);
+        cc.setName(name);
+        return cc;
     }
 
     //////////////////////////////////////////////////////////////////////

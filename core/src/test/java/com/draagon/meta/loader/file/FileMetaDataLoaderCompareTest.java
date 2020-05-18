@@ -1,7 +1,7 @@
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.loader.typed.config.TypesConfig;
-import com.draagon.meta.loader.typed.config.TypeConfig;
+import com.draagon.meta.loader.config.TypesConfig;
+import com.draagon.meta.loader.config.TypeConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,8 +28,8 @@ public class FileMetaDataLoaderCompareTest extends FileMetaDataLoaderTestBase {
     public void testMetaObjectsTypes() {
 
         // Compare the meta data configurations of metaobjects.types.xml and metaobjects.types.json
-        TypesConfig c1 = loaderXml.getMetaDataConfig().getTypesConfig();
-        TypesConfig c2 = loaderJson.getMetaDataConfig().getTypesConfig();
+        TypesConfig c1 = loaderXml.getTypesConfig();
+        TypesConfig c2 = loaderJson.getTypesConfig();
 
         Assert.assertEquals("Type Names", c1.getTypeNames(), c2.getTypeNames());
 

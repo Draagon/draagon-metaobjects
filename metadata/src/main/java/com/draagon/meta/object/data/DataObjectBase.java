@@ -13,6 +13,7 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.loader.config.ConfigObjectAbstract;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.util.DataConverter;
@@ -201,7 +202,7 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware {
         else {
             try {
                 // If we find the MetaObject, then attach to this DataObject
-                MetaObject mo = MetaDataRegistry.findMetaObject(this);
+                MetaObject mo = MetaDataRegistry.findMetaObjectByName(objectName);
                 setMetaData( mo );
 
             } catch( MetaDataNotFoundException e ) {
@@ -222,7 +223,7 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware {
         if ( allowExtensions ) return true;
 
         if ( !hasMetaDataAttached()) {
-            throw new IllegalArgumentException( "There is no MetaObject attached to this DataObject and it is not extendable, so it field ["+name+"] cannot be read or written to");
+            throw new IllegalArgumentException( "There is no MetaObject attached to this DataObject and it is not extendable, so field ["+name+"] cannot be read or written to");
         }
         else if ( !getMetaData().hasMetaField( name )) {
             if ( enforceStrictness ) {

@@ -6,7 +6,8 @@
  */
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.loader.typed.TypedMetaDataLoader;
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.config.TypesConfigLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,14 +18,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Meta Class loader for Files
  */
-public class FileMetaDataLoader extends TypedMetaDataLoader {
+public class FileMetaDataLoader extends MetaDataLoader {
 
     private static Log log = LogFactory.getLog(FileMetaDataLoader.class);
 
     public final static String SUBTYPE_FILE = "file";
 
+    protected final TypesConfigLoader typesLoader;
+
     public FileMetaDataLoader(FileLoaderOptions fileConfig, String name ) {
         super( fileConfig, SUBTYPE_FILE, name );
+
+        // Create the TypesConfigLoader and set a new TypesConfig
+        typesLoader = TypesConfigLoader.create();
+        setTypesConfig( typesLoader.newTypesConfig() );
     }
 
     /** Initialize with the metadata source being set */

@@ -1,6 +1,7 @@
 package com.draagon.meta.loader.config;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
@@ -16,6 +17,10 @@ public class TypesConfig extends ConfigObjectAbstract {
     public final static String FIELD_TYPES      = "types";
     public final static String OBJREF_TYPE      = "typeRef";
 
+    public TypesConfig() {
+        super( TypesConfigBuilder.createTypesConfig() );
+    }
+
     public TypesConfig( MetaObject mo ) {
         super( mo );
     }
@@ -27,8 +32,42 @@ public class TypesConfig extends ConfigObjectAbstract {
     /////////////////////////////////////////////////////////////////////
     // Type Configuration Methods
 
-    public Collection<TypeConfig> getTypes() {
-        return _getObjectArray( TypeConfig.class, FIELD_TYPES);
+    public List<TypeConfig> getTypes() {
+        return _getAndCreateObjectArray(TypeConfig.class, FIELD_TYPES);
+    }
+
+    public TypeConfig createType(String typeName, Class<? extends MetaData> clazz ) {
+
+        if ( typeName == null ) throw new MetaDataException( "Cannot create a TypeModel with a null name and class [" + clazz + "]" );
+        if ( clazz == null ) throw new MetaDataException( "Cannot create TypeModel for type [" +typeName + "] with a null Class" );
+
+        TypeConfig tc = new TypeConfig( getMetaData().getLoader().getMetaObjectByName(TypeConfig.OBJECT_NAME));
+        tc.setTypeName( typeName );
+        tc.setBaseClass( clazz );
+
+        return addType( typeName, tc );
+    }
+
+    public TypeConfig addType(String typeName, TypeConfig typeConfig) {
+
+        if ( typeName == null ) throw new MetaDataException( "Cannot add TypeModel with a null name" );
+        if ( typeConfig == null ) throw new MetaDataException( "Cannot add TypeModel [" +typeName + "] with a null value" );
+
+        if ( getType( typeName ) != null ) throw new MetaDataException( "MetaData Type [" + typeName + "] "+
+                "already exists as class [" + getType(typeName).getBaseClass() + "]" );
+
+        _addToObjectArray( FIELD_TYPES, typeConfig );
+
+        return typeConfig;
+    }
+
+    public void addOrMergeType(TypeConfig tc) {
+        TypeConfig tc2 = getType( tc.getTypeName() );
+        if ( tc2 == null ) {
+            _addToObjectArray( FIELD_TYPES, tc );
+        } else {
+            tc2.merge( tc );
+        }
     }
 
     public TypeConfig getType( String name ) {

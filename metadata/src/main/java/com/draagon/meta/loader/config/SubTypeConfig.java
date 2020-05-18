@@ -11,10 +11,11 @@ import java.util.List;
 public class SubTypeConfig extends ConfigObjectAbstract {
 
     public final static String OBJECT_NAME        = "SubTypeConfig";
-    public final static String OBJECT_IONAME     = "subType";
-    public final static String FIELD_TYPE         = "type";
+    public final static String OBJECT_IONAME      = "subType";
+    public final static String FIELD_NAME         = "name";
     public final static String FIELD_BASECLASS    = "class";
     public final static String FIELD_CHILDREN     = "children";
+    public final static String OBJREF_CHILD       = "childRef";
 
     public SubTypeConfig(MetaObject mo ) {
         super(mo);
@@ -32,13 +33,12 @@ public class SubTypeConfig extends ConfigObjectAbstract {
     /////////////////////////////////////////////////////////////////////
     // Type  Methods
 
-
     public String getTypeName() {
-        return getString( FIELD_TYPE );
+        return _getString( FIELD_NAME );
     }
 
     public void setTypeName(String type) {
-        _setString( FIELD_TYPE, type );
+        _setString( FIELD_NAME, type );
     }
 
     public Class<? extends MetaData> getBaseClass() {
@@ -53,13 +53,10 @@ public class SubTypeConfig extends ConfigObjectAbstract {
         return _getAndCreateObjectArray( ChildConfig.class, FIELD_CHILDREN );
     }
 
-    public void setChildConfigs( List<ChildConfig> children ) {
-        _setObjectArray( FIELD_CHILDREN, children );
-    }
-
-    //public void addOrMergeChildConfig( ChildConfig config ) {
-    //    super.mergeChildConfigs( FIELD_CHILDREN, config );
+    //public void setChildConfigs( List<ChildConfig> children ) {
+    //    _setObjectArray( FIELD_CHILDREN, children );
     //}
+
 
     //////////////////////////////////////////////////////////////////////
     // Validation Method

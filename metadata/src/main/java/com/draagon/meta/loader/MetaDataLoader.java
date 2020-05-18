@@ -9,6 +9,8 @@ package com.draagon.meta.loader;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.loader.config.TypesConfig;
+import com.draagon.meta.loader.model.MetaDataModelLoader;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +30,7 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> {
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
     private final LoaderOptions loaderOptions;
+    private static TypesConfig typesConfig = null;
 
     private boolean isRegistered = false;
     private boolean isInitialized = false;
@@ -58,7 +61,7 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> {
      */
     public static MetaDataLoader createManual( boolean shouldRegister, String name ) {
         return new MetaDataLoader(
-                LoaderOptions.create( false, false),
+                LoaderOptions.create( false, false, true),
                         SUBTYPE_MANUAL, name );
     }
 
@@ -67,6 +70,15 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> {
 
     public LoaderOptions getloaderOptions() {
         return loaderOptions;
+    }
+
+    public TypesConfig getTypesConfig() {
+        return typesConfig;
+    }
+
+    public MetaDataLoader setTypesConfig(TypesConfig typesConfig ) {
+        this.typesConfig = typesConfig;
+        return this;
     }
 
     /**

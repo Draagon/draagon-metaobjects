@@ -4,7 +4,6 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
-import com.draagon.meta.loader.typed.TypedLoaderOptions;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -14,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * FileMetaDataLoader Configuration Settings
  */
-public class FileLoaderOptions<T extends FileLoaderOptions> extends TypedLoaderOptions<T> {
+public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOptions<T> {
 
     /** Holds the array of MetaDataParser filename match patterns */
     protected final class PatternParser {

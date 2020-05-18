@@ -10,13 +10,15 @@ public class LoaderOptions<T extends LoaderOptions> {
 
     private boolean shouldRegister = false;
     private boolean verbose = true;
+    private boolean strict = true;
 
     public LoaderOptions() {}
 
-    public static LoaderOptions create(boolean shouldRegister, boolean verbose ) {
+    public static LoaderOptions create(boolean shouldRegister, boolean verbose, boolean strict ) {
         LoaderOptions config = new LoaderOptions()
                 .setShouldRegister( shouldRegister )
-                .setVerbose( verbose);
+                .setVerbose( verbose)
+                .setStrict( strict);
         return config;
     }
 
@@ -32,13 +34,6 @@ public class LoaderOptions<T extends LoaderOptions> {
         return shouldRegister;
     }
 
-    /**
-     * verbose = true
-     *   = log output report of loaded metadata types:   # packages, # of objects, etc.
-     *
-     * @param verbose
-     * @return
-     */
     public T setVerbose(boolean verbose) {
         this.verbose = verbose;
         return (T) this;
@@ -46,6 +41,15 @@ public class LoaderOptions<T extends LoaderOptions> {
 
     public boolean isVerbose() {
         return verbose;
+    }
+
+    public T setStrict(boolean strict) {
+        this.strict = strict;
+        return (T) this;
+    }
+
+    public boolean isStrict() {
+        return strict;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -57,7 +61,8 @@ public class LoaderOptions<T extends LoaderOptions> {
         if (o == null || getClass() != o.getClass()) return false;
         LoaderOptions<?> that = (LoaderOptions<?>) o;
         return shouldRegister == that.shouldRegister &&
-                verbose == that.verbose;
+                verbose == that.verbose &&
+                strict == that.strict;
     }
 
     @Override
@@ -67,7 +72,8 @@ public class LoaderOptions<T extends LoaderOptions> {
 
     protected String getToStringOptions() {
         return "shouldRegister=" + shouldRegister +
-                ", verbose=" + verbose;
+                ", verbose=" + verbose +
+                ", strict=" + strict;
     }
 
     @Override

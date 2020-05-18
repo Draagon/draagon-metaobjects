@@ -3,9 +3,8 @@ package com.draagon.meta.loader.file.json;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.typed.config.ChildConfig;
-import com.draagon.meta.loader.typed.config.MetaDataConfig;
-import com.draagon.meta.loader.typed.config.TypeConfig;
+import com.draagon.meta.loader.config.ChildConfig;
+import com.draagon.meta.loader.config.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.MetaDataParser;
 import com.google.gson.JsonArray;
@@ -34,7 +33,7 @@ public class JsonMetaDataParser extends MetaDataParser {
     }
 
     @Override
-    public MetaDataConfig loadFromStream( InputStream is) {
+    public void loadFromStream( InputStream is) {
 
         try {
             JsonObject root = new JsonParser().parse(new InputStreamReader( is )).getAsJsonObject();
@@ -70,8 +69,6 @@ public class JsonMetaDataParser extends MetaDataParser {
         finally {
             try { is.close(); } catch (Exception e) {}
         }
-
-        return getConfig();
     }
 
     /**
@@ -99,7 +96,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             if ( type.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName(getValueAsString(type, ATTR_DEFSUBTYPE));
             if ( type.has( ATTR_DEFNAME)) typeConfig.setDefaultName(getValueAsString(type, ATTR_DEFNAME));
             if ( type.has( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix(getValueAsString(type, ATTR_DEFNAMEPREFIX));
-            loadChildren( type ).forEach( c-> typeConfig.addTypeChild(c));
+            loadChildren( typeConfig, type ).forEach( c-> typeConfig.addTypeChildConfig(c));
 
             // If we have subtypes, load them
             if ( type.has( ATTR_SUBTYPES )) {
@@ -109,7 +106,7 @@ public class JsonMetaDataParser extends MetaDataParser {
         }
     }
 
-    protected  List<ChildConfig> loadChildren(JsonObject el) {
+    protected  List<ChildConfig> loadChildren(TypeConfig tc, JsonObject el) {
         List<ChildConfig> children = new ArrayList<>();
         if ( el.has(ATTR_CHILDREN)) {
             JsonArray chArray = el.get(ATTR_CHILDREN).getAsJsonArray();
@@ -117,8 +114,8 @@ public class JsonMetaDataParser extends MetaDataParser {
                 JsonObject o = e.getAsJsonObject();
                 if ( o.has( "child")) {
                     JsonObject ec = o.get("child").getAsJsonObject();
-                    ChildConfig cc = new ChildConfig(ec.get(ATTR_TYPE).getAsString(), ec.get(ATTR_SUBTYPE).getAsString(), ec.get(ATTR_NAME).getAsString());
-                    if (ec.has("nameAliases")) cc.setNameAliases(new HashSet<String>(Arrays.asList(ec.get("nameAliases").getAsString().split(","))));
+                    ChildConfig cc = tc.createChildConfig(ec.get(ATTR_TYPE).getAsString(), ec.get(ATTR_SUBTYPE).getAsString(), ec.get(ATTR_NAME).getAsString());
+                    if (ec.has("nameAliases")) cc.setNameAliases(Arrays.asList(ec.get("nameAliases").getAsString().split(",")));
                     //if (ec.has("required")) cc.setRequired(ec.get("required").getAsBoolean());
                     //if (ec.has("autoCreate")) cc.setAutoCreate(ec.get("autoCreate").getAsBoolean());
                     //if (ec.has("defaultValue")) cc.setDefaultValue(ec.get("defaultValue").getAsString());
@@ -172,7 +169,7 @@ public class JsonMetaDataParser extends MetaDataParser {
                 typeConfig.addSubType(name, tcl);
 
                 // Load subtypes
-                loadChildren( subTypeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
+                loadChildren( typeConfig, subTypeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
 
                 // Update info msg if verbose
                 if ( getLoader().getLoaderOptions().isVerbose() ) {
@@ -203,7 +200,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             String superName    = getValueAsString(el, ATTR_SUPER);
 
             // See if the specified type exists or not
-            if ( getConfig().getTypesConfig().getType( typeName ) == null ) {
+            if ( getTypesConfig().getType( typeName ) == null ) {
 
                 // If we are strict, throw an exception, otheriwse log an error
                 if ( getLoader().getLoaderOptions().isStrict() ) {

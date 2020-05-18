@@ -73,7 +73,6 @@ public class MetaDataRegistry {
         return null;
     }
 
-
     /**
      * Retrieves the MetaObject for the specified Object
      */

@@ -10,11 +10,9 @@ import java.util.List;
 
 public abstract class ConfigObjectAbstract extends DataObject {
 
-    public final static String FIELD_TYPE       = "type";
-    public final static String FIELD_BASECLASS  = "class";
-    public final static String FIELD_CHILDREN   = "children";
-    public final static String OBJREF_CHILD     = "childRef";
-
+    protected ConfigObjectAbstract(String name) {
+        super( name );
+    }
     protected ConfigObjectAbstract(MetaObject mo ) {
         super( mo );
     }
@@ -22,10 +20,8 @@ public abstract class ConfigObjectAbstract extends DataObject {
     /////////////////////////////////////////////////////////////////////
     // Helper ConfigValue Methods
 
-    protected void mergeChildConfigs(String childrenField, ChildConfig config) {
-
-        // TODO:  Merge same children together
-        _addToObjectArray( childrenField, config );
+    protected void overwriteAttributeIfNotNull(String name, ConfigObjectAbstract co ) {
+        if ( co._getObjectAttribute(name) != null ) _setObjectAttribute( name, co._getObjectAttribute( name ));
     }
 
     /////////////////////////////////////////////////////////////////////
