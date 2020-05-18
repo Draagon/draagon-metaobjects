@@ -2,6 +2,7 @@
 package com.draagon.meta.object.data;
 
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.Validatable;
 import com.draagon.meta.util.DataConverter;
 
 import java.util.*;
@@ -12,11 +13,6 @@ import java.util.*;
  * when persisting or transforming objects.
  */
 public class DataObject extends DataObjectBase {
-
-    /**
-     * Create a generic data object
-     */
-    public DataObject( String name ) { super(name); }
 
     /**
      * Create a generic data object associated to the MetaObject
@@ -69,16 +65,20 @@ public class DataObject extends DataObjectBase {
         _set(name, value);
     }
 
+    protected void _setStringArray(String name, List<String> value ) {
+        _set( name, value );
+    }
+
     protected void _setDate(String name, java.util.Date value) {
         _set(name, value);
     }
 
-    protected <T> void _setObject(String name, T value) {
-        _set(name, value);
+    protected <T> void _setClass( String name, Class<T> value ) {
+        _set(name, value );
     }
 
-    protected void _setStringArray(String fieldName, List<String> value ) {
-        _set( fieldName, value );
+    protected <T> void _setObject(String name, T value) {
+        _set(name, value);
     }
 
     protected <T> void _setObjectArray(String name, List<T> value) {
@@ -90,9 +90,6 @@ public class DataObject extends DataObjectBase {
         current.add( value );
     }
 
-    protected <T> void _setClass( String fieldName, Class<T> value ) {
-        _set(fieldName, value );
-    }
 
     //////////////////////////////////////////////////////////////
     // GETTER VALUES
@@ -137,23 +134,28 @@ public class DataObject extends DataObjectBase {
         return DataConverter.toString(_get(name));
     }
 
+    protected List<String> _getStringArray( String fieldName ) {
+        return DataConverter.toStringArray( _get( fieldName ));
+    }
+
     protected java.util.Date _getDate(String name) {
         return DataConverter.toDate(_get(name));
+    }
+
+    protected <T> Class<T> _getClass(Class<T> clazz, String fieldName ) {
+        return _objectToTypedClass( clazz, _get(fieldName));
     }
 
     protected <T> T _getObject( Class<T> clazz, String name) {
         return (T) _get(name);
     }
 
-    protected List<String> _getStringArray( String fieldName ) {
-        return DataConverter.toStringArray( _get( fieldName ));
-    }
-
     protected <T> List<T> _getObjectArray( Class<T> clazz, String name ) {
         return _objectToTypedArray( clazz, _get(name));
     }
 
-    protected <T> Class<T> _getClass(Class<T> clazz, String fieldName ) {
-        return _objectToTypedClass( clazz, _get(fieldName));
+    @Override
+    public void validate() {
+        if ( getMetaData() == null ) throw new IllegalStateException( "No MetaData is associated with this object" );
     }
 }

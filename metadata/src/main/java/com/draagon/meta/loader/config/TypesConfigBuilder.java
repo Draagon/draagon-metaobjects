@@ -81,14 +81,14 @@ public class TypesConfigBuilder {
     // Generic Builder Methods
 
     protected static MetaObject createMetaObject( String objectName, String ioName,
-                                               Class<? extends ConfigObjectAbstract> clazz ) {
+                                               Class<? extends ConfigObjectBase> clazz ) {
         return ValueMetaObject.create(objectName)
                 .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
                 .addChild(createObjectClassAttr(clazz));
     }
 
-    protected static ClassAttribute createObjectClassAttr( Class<? extends ConfigObjectAbstract> clazz ) {
+    protected static ClassAttribute createObjectClassAttr( Class<? extends ConfigObjectBase> clazz ) {
         return ClassAttribute.create(MetaObject.ATTR_CLASS, clazz);
     }
 

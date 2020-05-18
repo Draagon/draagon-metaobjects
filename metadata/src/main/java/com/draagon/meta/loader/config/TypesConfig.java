@@ -1,5 +1,6 @@
 package com.draagon.meta.loader.config;
 
+import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.MetaDataLoader;
@@ -10,7 +11,7 @@ import java.util.*;
 /**
  * Stores the MetaData Configuration data
  */
-public class TypesConfig extends ConfigObjectAbstract {
+public class TypesConfig extends ConfigObjectBase {
 
     public final static String OBJECT_NAME      = "TypesConfig";
     public final static String OBJECT_IONAME   = "typesConfig";
@@ -89,6 +90,8 @@ public class TypesConfig extends ConfigObjectAbstract {
     // Validation Method
 
     public void validate() {
-        for ( TypeConfig tc : getTypes() ) tc.validate();
+        super.validate();
+        if (getTypes() == null ) throw new InvalidValueException( "types field is null on TypeConfig "+toString() );
+        getTypes().forEach( tc -> tc.validate());
     }
 }

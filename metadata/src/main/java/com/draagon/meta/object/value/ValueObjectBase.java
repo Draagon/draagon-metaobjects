@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
-public class ValueObjectBase extends DataObjectBase implements Map<String, Object> {
+public abstract class ValueObjectBase extends DataObjectBase implements Map<String, Object> {
 
     static final Log log = LogFactory.getLog( ValueObjectBase.class );
 

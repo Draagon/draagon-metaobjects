@@ -43,7 +43,7 @@ public class SimpleLoader extends MetaDataLoader {
         // Load MetaData
         MetaDataModelLoader modelLoader = MetaDataModelLoader.create( "simple", getTypesConfig() );
         SimpleModelParser simpleModelParser = new SimpleModelParser( modelLoader, sourceData );
-        simpleModelParser.loadAndMerge( this, sourceData );
+        //simpleModelParser.loadAndMerge( this, sourceData );
         //TODO: Finish me
 
         return this;

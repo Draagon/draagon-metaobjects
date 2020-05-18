@@ -116,7 +116,7 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
 
         MetaObject extMo = ((ObjectField) extField ).getObjectRef();
         assertNotNull( "Extension Object exists", extMo );
-        assertEquals( "Extension Object name == ProduceExt", "produce::v1::ext::ProduceExt", extMo.getName() );
+        assertEquals( "Extension Object name == ProduceExt", "produce::v1::container::ext::ProduceExt", extMo.getName() );
     }
 
     /*@Test(expected=com.draagon.meta.field.MetaFieldNotFoundException.class)

@@ -61,7 +61,7 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> {
      */
     public static MetaDataLoader createManual( boolean shouldRegister, String name ) {
         return new MetaDataLoader(
-                LoaderOptions.create( false, false, true),
+                LoaderOptions.create( false, false, false),
                         SUBTYPE_MANUAL, name );
     }
 

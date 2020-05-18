@@ -20,6 +20,8 @@ public abstract class TypesConfigParser<S> extends ParserBase<TypesConfigLoader,
 
     protected void mergeTypesConfig(TypesConfig intoConfig, TypesConfig loadedConfig) {
 
+        loadedConfig.validate();
+
         List<TypeConfig> loaded = loadedConfig.getTypes();
         for( TypeConfig tc : loaded ) {
             intoConfig.addOrMergeType(tc);

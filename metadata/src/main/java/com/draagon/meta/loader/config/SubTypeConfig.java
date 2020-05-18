@@ -5,10 +5,11 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public class SubTypeConfig extends ConfigObjectAbstract {
+public class SubTypeConfig extends ConfigObjectBase {
 
     public final static String OBJECT_NAME        = "SubTypeConfig";
     public final static String OBJECT_IONAME      = "subType";
@@ -62,7 +63,13 @@ public class SubTypeConfig extends ConfigObjectAbstract {
     // Validation Method
 
     public void validate() {
-        if ( getTypeName() == null ) throw new InvalidValueException( "Type value cannot be null" );
-        if ( getBaseClass() == null ) throw new InvalidValueException( "Base class cannot be null" );
+        super.validate();
+        if ( getTypeName() == null ) throw new InvalidValueException( "Type name on SubType cannot be null" );
+        if ( getBaseClass() == null ) throw new InvalidValueException( "Base class on SubType ["+getTypeName()+"] cannot be null" );
+
+        if ( Modifier.isAbstract( getBaseClass().getModifiers() )) throw new InvalidValueException(
+                "Base class ["+getBaseClass()+"] on SubType ["+getTypeName()+"] cannot be Abstract" );
+
+        getChildConfigs().forEach( cc -> cc.validate() );
     }
 }

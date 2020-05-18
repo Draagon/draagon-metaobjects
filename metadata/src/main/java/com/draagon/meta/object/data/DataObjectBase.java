@@ -13,9 +13,9 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
-import com.draagon.meta.loader.config.ConfigObjectAbstract;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
+import com.draagon.meta.object.Validatable;
 import com.draagon.meta.util.DataConverter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +28,7 @@ import java.util.*;
  * as "attributes".  You can also associate "properties" to the object that can be used for special behaviors
  * when persisting or transforming objects.
  */
-public abstract class DataObjectBase implements Serializable, MetaObjectAware {
+public abstract class DataObjectBase implements Serializable, MetaObjectAware, Validatable {
 
     static final Log log = LogFactory.getLog( DataObjectBase.class );
 

@@ -1,13 +1,15 @@
 package com.draagon.meta.loader.config;
 
+import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.loader.model.MetaDataModel;
 import com.draagon.meta.object.MetaObject;
 
 import java.util.*;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public class TypeConfig extends ConfigObjectAbstract {
+public class TypeConfig extends ConfigObjectBase {
     
     public final static String OBJECT_NAME       = "TypeConfig";
     public final static String OBJECT_IONAME     = "type";
@@ -282,10 +284,19 @@ public class TypeConfig extends ConfigObjectAbstract {
 
     public void validate() {
 
+        super.validate();
+
+        if ( getTypeName() == null ) throw new InvalidValueException( "TypeConfig has null name" );
+        if ( getBaseClass() == null ) throw new InvalidValueException( "TypeConfig ["+getTypeName()+"] has null BaseClass" );
+
+        if (!getTypeName().equals(MetaDataModel.OBJECT_NAME)
+                && (getSubTypes() == null || getSubTypes().isEmpty() ))
+            throw new MetaDataException( "No SubTypes existed for type ["+getTypeName()+"]" );
+
         if ( getDefaultSubTypeName() != null && getSubTypeClass( getDefaultSubTypeName() ) == null )
             throw new MetaDataException( "Default subType [" +getDefaultSubTypeName()+ "] on type ["+getTypeName()+"] was not found" );
 
-        if ( getSubTypes() == null && getSubTypes().isEmpty() )
-            throw new MetaDataException( "No SubTypes existed for type ["+getTypeName()+"]" );
+        getSubTypes().forEach( stc -> stc.validate() );
+        getTypeChildConfigs().forEach( cc -> cc.validate() );
     }
 }

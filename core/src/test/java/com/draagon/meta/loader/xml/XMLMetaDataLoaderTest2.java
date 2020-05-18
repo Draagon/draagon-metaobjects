@@ -43,7 +43,7 @@ public class XMLMetaDataLoaderTest2 {
         list.add("metadata/test/produce/v1/produce-v1.bundle");
         list.add("metadata/test/produce/v1/overlay/meta.fruit.overlay.xml");
         xl.init(new LocalMetaDataSources( /*"src/test/resources",*/ list));
-        xl.register();
+        //xl.register();
 
         this.loader = xl;
     }
@@ -74,7 +74,7 @@ public class XMLMetaDataLoaderTest2 {
         
         assertEquals( "id field", id, apple.getId() );
         
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).toString() );
+        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
     }
 
     @Test
@@ -126,7 +126,7 @@ public class XMLMetaDataLoaderTest2 {
 
         MetaObject extMo = ((ObjectField) extField ).getObjectRef();
         assertNotNull( "Extension Object exists", extMo );
-        assertEquals( "Extension Object name == ProduceExt", "produce::v1::ext::ProduceExt", extMo.getName() );
+        assertEquals( "Extension Object name == ProduceExt", "produce::v1::container::ext::ProduceExt", extMo.getName() );
     }
 
 

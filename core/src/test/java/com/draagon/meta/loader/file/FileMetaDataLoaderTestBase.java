@@ -45,7 +45,7 @@ public class FileMetaDataLoaderTestBase {
                                             "metadata/test/produce/v1/overlay/meta.fruit.overlay.json")
                             ))
                             .setShouldRegister(true)
-                            .setStrict(true)
+                            .setStrict(false)
                             .setVerbose(false),
                     getClass().getSimpleName() + "-" + i.incrementAndGet())
                     .init();
@@ -63,6 +63,7 @@ public class FileMetaDataLoaderTestBase {
                                             "metadata/test/produce/v1/overlay/meta.fruit.overlay.xml")
                             ))
                             .setShouldRegister(true)
+                            .setStrict(false)
                             .setVerbose(false),
                     getClass().getSimpleName() + "-" + i.incrementAndGet())
                     .init();

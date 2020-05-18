@@ -99,6 +99,10 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
         _setObjectAttribute(name, value);
     }
 
+    public void setStringArray(String name, List<String> value) {
+        _setObjectAttribute(name, value);
+    }
+
     public void setDate(String name, java.util.Date value) {
         _setObjectAttribute(name, value);
     }
@@ -106,6 +110,11 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
     public void setObject(String name, Object value) {
         _setObjectAttribute(name, value);
     }
+
+    public void setObjectArray(String name, List<Object> value) {
+        _setObjectAttribute(name, value);
+    }
+
 
     //////////////////////////////////////////////////////////////
     // GETTER VALUES
@@ -146,11 +155,24 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
         return DataConverter.toString(getObjectAttribute(name));
     }
 
+    public List<String> getStringArray(String name) {
+        return DataConverter.toStringArray(getObjectAttribute(name));
+    }
+
     public java.util.Date getDate(String name) {
         return DataConverter.toDate(getObjectAttribute(name));
     }
 
     public Object getObject(String name) {
         return getObjectAttribute(name);
+    }
+
+    public List<Object> getObjectArray(String name) {
+        return DataConverter.toObjectArray(getObjectAttribute(name));
+    }
+
+    @Override
+    public void validate() {
+        // TODO: Do nothing?
     }
 }

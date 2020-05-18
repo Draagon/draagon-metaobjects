@@ -6,7 +6,7 @@ import com.draagon.meta.object.MetaObject;
 
 import java.util.List;
 
-public final class ChildConfig extends ConfigObjectAbstract {
+public final class ChildConfig extends ConfigObjectBase {
 
     public final static String OBJECT_NAME       = "ChildConfig";
     public final static String OBJECT_IONAME     = "child";
@@ -78,9 +78,9 @@ public final class ChildConfig extends ConfigObjectAbstract {
 
     @Override
     public void validate() {
-        // TODO:  Use validators
+        super.validate();
         if ( getType() == null || getSubType() == null || getName() == null ) {
-            throw new InvalidValueException( "ChildConfig does not have type|subType|Name fields set: " + toString() );
+            throw new InvalidValueException( "ChildConfig does not have type,subType, and/or name fields set: " + toString() );
         }
     }
 

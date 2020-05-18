@@ -446,6 +446,8 @@ public final class DataConverter
 	    	return null;
 		} else if ( val instanceof Date ) {
 	        return String.valueOf(((Date) val ).getTime());
+		} else if ( val instanceof Class ) {
+			return String.valueOf(((Class) val ).getName());
 	    } else {
 			return val.toString();
 		}
