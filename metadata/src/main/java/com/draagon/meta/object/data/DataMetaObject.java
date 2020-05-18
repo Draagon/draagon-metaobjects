@@ -12,7 +12,9 @@ import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.util.DataConverter;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
@@ -29,6 +31,15 @@ public class DataMetaObject extends PojoMetaObject
     // NOTE:  The PojoMetaObject will keep attempting to use reflection, so this bypasses that
     public final static String CACHE_PARAM_HAS_GETTER_METHOD = "hasGetterMethod";
     public final static String CACHE_PARAM_HAS_SETTER_METHOD = "hasSetterMethod";
+
+    public final static List<String> ignoreGetterFieldNames = Arrays.asList( "class", "metaData" );
+
+    @Override
+    protected String getGetterName( MetaField mf ) {
+        if ( ignoreGetterFieldNames.contains( mf.getName() )) return null;
+        return super.getGetterName( mf );
+    }
+
 
     /**
      * Constructs the MetaClassObject for MetaObjects

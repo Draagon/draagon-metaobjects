@@ -36,11 +36,11 @@ public abstract class JsonMetaDataReader extends MetaDataReader {
                 in.close();
             }
             catch (IOException e) {
-                if ( reader != null ) {
+                /*if ( reader != null ) {
                     try {
                         reader.close();
                     } catch (IOException ignore) {}
-                }
+                }*/
                 throw new MetaDataIOException(this, e.toString(), e);
             }
         }

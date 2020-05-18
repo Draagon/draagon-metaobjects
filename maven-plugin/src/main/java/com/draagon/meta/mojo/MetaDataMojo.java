@@ -111,8 +111,8 @@ public class MetaDataMojo extends AbstractMojo
 
         // TODO:  Clean this all up
         FileLoaderOptions config = new FileLoaderOptions()
-            .setVerbose(true)
-            .setStrict(false)
+            .setVerbose(false)
+            .setStrict(true)
             .addParser( "*.xml", XMLMetaDataParser.class)
             .addParser( "*.json", JsonMetaDataParser.class);
 

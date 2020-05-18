@@ -52,7 +52,7 @@ public abstract class JsonDirectWriter<T extends JsonDirectWriter> extends MetaD
     public void close() throws MetaDataWriterException {
         try {
             if (out != null) out.close();
-            else if (writer != null) writer.close();
+            //else if (writer != null) writer.close();
         } catch (IOException e) {
             throw new MetaDataWriterException( this, "Error closing "+(out!=null?"JsonWriter":"Writer")+": " + e, e );
         }

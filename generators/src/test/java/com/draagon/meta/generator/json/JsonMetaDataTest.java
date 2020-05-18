@@ -63,6 +63,7 @@ public class JsonMetaDataTest extends GeneratorTestBase {
                                 TESTFILE)
                         )
                         .setShouldRegister(true)
+                        // NOTE: Keep false because test data has fruite overlay to add farmName onto metadata root
                         .setStrict(false)
                         .setVerbose(false),
                 TESTFILE)
@@ -72,7 +73,7 @@ public class JsonMetaDataTest extends GeneratorTestBase {
             MetaData md2 = loader.getMetaDataByName( MetaData.class, md.getName() );
             Assert.assertEquals( md.getName(), md, md2);
             Assert.assertTrue( md.getName(), md.equals(md2));
-            System.out.println( "MATCH: " +md+ " == " + md2 );
+            //System.out.println( "MATCH: " +md+ " == " + md2 );
         }
     }
 }

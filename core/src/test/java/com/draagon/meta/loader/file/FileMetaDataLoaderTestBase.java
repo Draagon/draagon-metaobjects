@@ -45,7 +45,7 @@ public class FileMetaDataLoaderTestBase {
                                             "metadata/test/produce/v1/overlay/meta.fruit.overlay.json")
                             ))
                             .setShouldRegister(true)
-                            .setStrict(false)
+                            .setStrict(true)
                             .setVerbose(false),
                     getClass().getSimpleName() + "-" + i.incrementAndGet())
                     .init();

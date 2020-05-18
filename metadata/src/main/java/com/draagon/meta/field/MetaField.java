@@ -352,6 +352,11 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         }
     }
 
+    public void validate() {
+        super.validate();
+        if ( getName() == null ) throw new MetaDataException( "Name of MetaField was null :" + toString() );
+    }
+
     ////////////////////////////////////////////////////
     // OBJECT SETTER METHODS
 
@@ -387,6 +392,10 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         setObject(obj, value );
     }
 
+    public void setStringArray(Object obj, List<String> value) {
+        setObject(obj, value );
+    }
+
     public void setDate(Object obj, Date value) {
         setObject(obj, value );
     }
@@ -411,9 +420,6 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         values.add( value );
     }
 
-    public List<Object> getObjectArray(Object obj) {
-        return DataConverter.toObjectArray(getObjectAttribute(obj));
-    }
 
     ////////////////////////////////////////////////////
     // OBJECT GETTER METHODS
@@ -450,12 +456,20 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         return DataConverter.toString(getObjectAttribute(obj));
     }
 
+    public List<String> getStringArray(Object obj) {
+        return DataConverter.toStringArray(getObjectAttribute(obj));
+    }
+
     public Date getDate(Object obj) {
         return DataConverter.toDate(getObjectAttribute(obj));
     }
 
     public Object getObject(Object obj) {
         return getObjectAttribute(obj);
+    }
+
+    public List<Object> getObjectArray(Object obj) {
+        return DataConverter.toObjectArray(getObjectAttribute(obj));
     }
 
     ////////////////////////////////////////////////////

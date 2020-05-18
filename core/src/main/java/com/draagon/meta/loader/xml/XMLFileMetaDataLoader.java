@@ -32,7 +32,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
                     .addParser( "*.xml", XMLMetaDataParser.class )
                     .setShouldRegister( false )
                     .setAllowAutoAttrs( true )
-                    .setStrict( false )
+                    .setStrict( true )
                     .setVerbose( false ),
                 name );
     }

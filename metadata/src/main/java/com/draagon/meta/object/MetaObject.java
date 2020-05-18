@@ -189,16 +189,16 @@ public abstract class MetaObject extends MetaData<MetaObject> {
         Class<?> c;
 
         if (hasMetaAttr(ATTR_OBJECT, false)) {
-            String s = (String) getMetaAttr(ATTR_OBJECT, false).getValue();
-            c = Class.forName( s );
+            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
+            c = Class.forName( c.getName() );
         }
         else if (hasMetaAttr(ATTR_CLASS, false )) {
             c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
             c = Class.forName(c.getName());
         }
         else if (hasMetaAttr(ATTR_OBJECT)) {
-            String s = (String) getMetaAttr(ATTR_OBJECT, false).getValue();
-            c = Class.forName( s);
+            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
+            c = Class.forName( c.getName());
         }
         else if (hasMetaAttr(ATTR_CLASS)) {
             c = (Class) getMetaAttr(ATTR_CLASS, false ).getValue();

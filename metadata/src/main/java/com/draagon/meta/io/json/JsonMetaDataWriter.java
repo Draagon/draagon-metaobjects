@@ -44,12 +44,12 @@ public abstract class JsonMetaDataWriter extends MetaDataWriter {
                 throw new MetaDataIOException( this, e.toString(), e );
             }
         }
-        else if ( writer != null ) {
+        /*else if ( writer != null ) {
             try {
                 writer.close();
             } catch (IOException e) {
                 throw new MetaDataIOException( this, e.toString(), e );
             }
-        }
+        }*/
     }
 }

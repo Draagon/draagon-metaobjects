@@ -34,12 +34,12 @@ public abstract class XMLMetaDataReader extends MetaDataReader {
 
     @Override
     public void close() throws MetaDataIOException {
-        if (in!=null) {
+        /*if (in!=null) {
             try {
                 in.close();
             } catch (IOException e) {
                 throw new MetaDataIOException(this, e.toString(), e);
             }
-        }
+        }*/
     }
 }

@@ -1,6 +1,7 @@
 package com.draagon.meta.io.util;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataAware;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
@@ -13,6 +14,7 @@ import java.util.List;
 public class IOUtil {
 
     public static MetaObject getMetaObjectFor(MetaDataLoader loader, Object o) {
+        if ( o instanceof MetaDataAware ) return (MetaObject) ((MetaDataAware) o).getMetaData();
         return loader.getMetaObjectFor( o );
     }
 

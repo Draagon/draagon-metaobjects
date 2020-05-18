@@ -6,6 +6,7 @@ import com.draagon.meta.attr.ClassAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.ObjectArrayField;
+import com.draagon.meta.field.StringArrayField;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.io.json.JsonIOConstants;
 import com.draagon.meta.io.xml.XMLIOConstants;
@@ -41,8 +42,8 @@ public class TypesConfigBuilder {
                 .addChild(createStringField(TypeConfig.FIELD_DEFSUBTYPE,true))
                 .addChild(createStringField(TypeConfig.FIELD_DEFNAME,true))
                 .addChild(createStringField(TypeConfig.FIELD_DEFPREFIX,true))
-                .addChild(createSubTypeConfigArray())
-                .addChild(createTypeChildConfigArray());
+                .addChild(createTypeChildConfigArray())
+                .addChild(createSubTypeConfigArray());
     }
 
     protected static MetaObject createSubTypeConfig() {
@@ -58,7 +59,7 @@ public class TypesConfigBuilder {
                 .addChild(createStringField(ChildConfig.FIELD_TYPE,true))
                 .addChild(createStringField(ChildConfig.FIELD_SUBTYPE,true))
                 .addChild(createStringField(ChildConfig.FIELD_NAME,true))
-                .addChild(createStringField(ChildConfig.FIELD_NAMEALIASES,true));
+                .addChild(createStringArrayField(ChildConfig.FIELD_NAMEALIASES,true));
     }
 
     protected static MetaField createTypeConfigArray() {
@@ -100,6 +101,11 @@ public class TypesConfigBuilder {
 
     protected static MetaData createStringField(String name, boolean asXmlAttr ) {
         return StringField.create(name,null)
+                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
+    }
+
+    protected static MetaData createStringArrayField(String name, boolean asXmlAttr ) {
+        return StringArrayField.create(name,null)
                 .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
     }
 }

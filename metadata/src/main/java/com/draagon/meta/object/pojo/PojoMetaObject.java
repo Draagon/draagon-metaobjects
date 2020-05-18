@@ -11,6 +11,8 @@ import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * MetaObject that supports POJO objects
@@ -85,13 +87,13 @@ public class PojoMetaObject extends MetaObject {
         synchronized (f) {
             Method method = (Method) f.getCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName());
             if (method == null) {
-
                 String name = getGetterName(f);
-
-                try {
-                    method = objClass.getMethod(name); //, new Class[0]);
-                } catch (NoSuchMethodException e) {
-                    throw new NoSuchMethodError("No getter exists named [" + name + "] on object [" + objClass.getName() + "]");
+                if ( name != null ) {
+                    try {
+                        method = objClass.getMethod(name); //, new Class[0]);
+                    } catch (NoSuchMethodException e) {
+                        throw new NoSuchMethodError("No getter exists named [" + name + "] on object [" + objClass.getName() + "]");
+                    }
                 }
 
                 f.setCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName(), method);
@@ -156,7 +158,7 @@ public class PojoMetaObject extends MetaObject {
 
         Class<?> c = method.getParameterTypes()[ 0];
 
-        if (val != null && val.getClass() != c) {
+        if (val != null && !c.isAssignableFrom(val.getClass() )) {
             throw new ValueException("Setter expected class [" + c.getName() + "] but value was of type [" + val.getClass() + "]");
         }
 

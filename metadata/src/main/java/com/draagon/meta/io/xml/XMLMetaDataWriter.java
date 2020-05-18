@@ -13,6 +13,7 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
 
     private final OutputStream out;
     private Document doc;
+    private boolean flushed = false;
 
     protected XMLMetaDataWriter(MetaDataLoader loader, OutputStream out ) {
         super(loader);
@@ -43,17 +44,24 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
         }
     }
 
+    public void flush() throws MetaDataIOException {
+        if ( !flushed ) {
+            flushed = true;
+            writeDocument(doc, out);
+        }
+    }
+
     @Override
     public void close() throws MetaDataIOException {
 
-        writeDocument( doc, out );
+        flush();
 
-        if (out!=null) {
+        /*if (out!=null) {
             try {
                 out.close();
             } catch (IOException e) {
                 throw new MetaDataIOException( this, e.toString(), e );
             }
-        }
+        }*/
     }
 }

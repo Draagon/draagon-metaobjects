@@ -27,6 +27,9 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
         MetaObject mo = null;
         writeObject( doc().getDocumentElement(), IOUtil.getMetaObjectFor(getLoader(),vo), vo );
+
+        // Flush the document to the OutputStream
+        flush();
     }
 
 
@@ -56,19 +59,34 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
     protected void writeFieldAsAttr( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
-        // TODO:  Need support here for unsupported DataTypes
+        String value = null;
 
-        el.setAttribute( getXmlName( mf ), mf.getString( vo ));
+        switch (mf.getDataType()) {
+            case BOOLEAN:
+            case BYTE:
+            case SHORT:
+            case INT:
+            case DATE:      // TODO: Special Handling?
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+            case STRING_ARRAY:
+            case STRING:
+            case OBJECT:
+            case OBJECT_ARRAY:
+                value = mf.getString( vo );
+                break;
+
+            case CUSTOM:
+            default:
+                throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] not supported [" + mf + "]");
+        }
+        if ( value != null ) {
+            el.setAttribute(getXmlName(mf), value);
+        }
     }
 
     protected void writeField( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
-
-        // TODO:  Should we worry about the objectRef?
-        if ( xmlWrap( mf )) {
-            Element wrap = doc().createElement( getXmlName( mf ));
-            el.appendChild( wrap );
-            el = wrap;
-        }
 
         switch (mf.getDataType()) {
             case BOOLEAN:
@@ -82,6 +100,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
             case STRING_ARRAY:  // TODO: Special Handling
             case STRING:
                 // TODO:  Add Helper for this for special cases
+                el = drawFieldWrapper( el, mf );
                 el.appendChild( doc().createTextNode( mf.getString( vo )));
                 break;
             case OBJECT:
@@ -102,12 +121,28 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
     protected void writeFieldObjectArray( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
 
+        boolean first = true;
         for (Object o : DataConverter.toObjectArray(mf.getObject(vo))) {
             if ( o != null ) {
+
+                if ( first ) {
+                    el = drawFieldWrapper( el, mf );
+                    first = false;
+                }
+
                 // TODO: Attribute to use Field name vs. Object name?
                 writeObject(el, IOUtil.getMetaObjectFor(getLoader(),o), o);
             }
         }
+    }
+
+    protected Element drawFieldWrapper( Element el, MetaField mf ) {
+        if ( xmlWrap( mf )) {
+            Element wrap = doc().createElement( getXmlName( mf ));
+            el.appendChild( wrap );
+            el = wrap;
+        }
+        return el;
     }
 
     protected void writeFieldObject( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
@@ -116,6 +151,8 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
         Object o = mf.getObject( vo );
         if ( o != null ) {
+
+            el = drawFieldWrapper( el, mf );
 
             // TODO: Attribute to use Field name vs. Object name?
             writeObject(el, IOUtil.getMetaObjectFor(getLoader(),o), o);

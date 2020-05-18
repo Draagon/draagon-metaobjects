@@ -70,7 +70,12 @@ public final class DataConverter
 		else if ( val instanceof String ) {
 			List<String> list = new ArrayList<>();
 			if ( !((String) val).isEmpty()) {
-				Collections.addAll(list, ((String) val).split(","));
+				String s= (String) val;
+				if (s.contains(",")) {
+					Collections.addAll(list, ((String) val).split(","));
+				} else {
+					list.add( s );
+				}
 			}
 			return list;
 		}
@@ -444,6 +449,8 @@ public final class DataConverter
 	{
 	    if ( val == null ) {
 	    	return null;
+		} else if ( val instanceof List ) {
+			return String.join(",", (List) val );
 		} else if ( val instanceof Date ) {
 	        return String.valueOf(((Date) val ).getTime());
 		} else if ( val instanceof Class ) {
