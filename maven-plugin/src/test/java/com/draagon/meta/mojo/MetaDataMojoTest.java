@@ -35,8 +35,8 @@ public class MetaDataMojoTest {
         //System.out.println( "loader: " + configuration.getChild("loader").getChild("name").getValue() );
 
         assertEquals("mojo-test-pom", configuration.getChild("loader").getChild("name").getValue());
-        assertEquals("com.draagon.meta.loader.file.FileMetaDataLoader", configuration.getChild("loader").getChild("classname").getValue());
-        assertEquals(2, configuration.getChild("loader").getChild("sources").getChildren().length);
+        assertEquals("com.draagon.meta.loader.simple.SimpleLoader", configuration.getChild("loader").getChild("classname").getValue());
+        assertEquals(1, configuration.getChild("loader").getChild("sources").getChildren().length);
 
         //assertEquals("rootPkg", configuration.getChild("loader").getChild("rootPkg").getValue());
         //assertEquals("sourceDir", configuration.getChild("sourceDir").getValue());

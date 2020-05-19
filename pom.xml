@@ -29,9 +29,9 @@
 
     <modules>
         <module>metadata</module>
+        <module>maven-plugin</module>
         <module>core</module>
         <module>generators</module>
-        <module>maven-plugin</module>
         <module>om</module>
         <!-- module>omdb</module>
         <module>web</module>

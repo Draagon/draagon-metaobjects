@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.config;
+package com.draagon.meta.loader.types;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.BooleanAttribute;
@@ -82,14 +82,14 @@ public class TypesConfigBuilder {
     // Generic Builder Methods
 
     protected static MetaObject createMetaObject( String objectName, String ioName,
-                                               Class<? extends ConfigObjectBase> clazz ) {
+                                               Class<? extends ConfigBase> clazz ) {
         return ValueMetaObject.create(objectName)
                 .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
                 .addChild(createObjectClassAttr(clazz));
     }
 
-    protected static ClassAttribute createObjectClassAttr( Class<? extends ConfigObjectBase> clazz ) {
+    protected static ClassAttribute createObjectClassAttr( Class<? extends ConfigBase> clazz ) {
         return ClassAttribute.create(MetaObject.ATTR_CLASS, clazz);
     }
 

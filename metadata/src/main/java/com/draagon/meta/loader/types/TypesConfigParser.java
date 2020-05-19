@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.config;
+package com.draagon.meta.loader.types;
 
 import com.draagon.meta.loader.parser.ParserBase;
 

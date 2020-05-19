@@ -2,12 +2,9 @@ package com.draagon.meta.mojo;
 
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.generator.Generator;
-import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.LocalMetaDataSources;
-import com.draagon.meta.loader.file.MetaDataSources;
-import com.draagon.meta.loader.file.FileLoaderOptions;
-import com.draagon.meta.loader.file.json.JsonMetaDataParser;
-import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.simple.SimpleLoader;
+import com.draagon.meta.loader.uri.URIHelper;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -19,6 +16,7 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -76,7 +74,7 @@ public class MetaDataMojo extends AbstractMojo
             throw new MojoExecutionException( "No <loader> element was defined");
         }
 
-        FileMetaDataLoader loader = createLoader();
+        MetaDataLoader loader = createLoader();
 
         if ( getGenerators() != null ) {
             for ( GeneratorParam g : getGenerators() ) {
@@ -107,48 +105,86 @@ public class MetaDataMojo extends AbstractMojo
         }
     }
 
-    protected FileMetaDataLoader createLoader() {
+    protected MetaDataLoader createLoader() {
 
-        // TODO:  Clean this all up
-        FileLoaderOptions config = new FileLoaderOptions()
-            .setVerbose(false)
-            .setStrict(true)
-            .addParser( "*.xml", XMLMetaDataParser.class)
-            .addParser( "*.json", JsonMetaDataParser.class);
-
-        MetaDataSources sources = null;
-        if ( loaderConfig.getSourceDir() != null )
-            sources = new LocalMetaDataSources( loaderConfig.getSourceDir(), loaderConfig.getSources() );
-        else
-            sources = new LocalMetaDataSources( loaderConfig.getSources() );
-        FileMetaDataLoader loader = null;
-
+        MetaDataLoader loader = null;
 
         if ( loaderConfig.getClassname() != null ) {
 
             // TODO:  Clean this up
-            Constructor<FileMetaDataLoader> c = null;
+            Constructor<MetaDataLoader> c = null;
             try {
-                c = (Constructor<FileMetaDataLoader>) Class.forName( loaderConfig.getClassname() )
-                        .getConstructor(FileLoaderOptions.class, String.class);
-                loader = c.newInstance( config, loaderConfig.getName() );
+                c = (Constructor<MetaDataLoader>) Class.forName( loaderConfig.getClassname() )
+                        .getConstructor(String.class);
+                loader = c.newInstance( loaderConfig.getName() );
             }
-            catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-                try {
-                    c = (Constructor<FileMetaDataLoader>) Class.forName( loaderConfig.getClassname() )
-                            .getConstructor(String.class);
-                    loader = c.newInstance( loaderConfig.getName() ); //, loaderConfig.getName() );
-                }
-                catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    throw new MetaDataException( "Could not create FileMetaDataLoader with class [" + loaderConfig.getClassname() + "]: " + e.getMessage(), e );
-                }
+            catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException
+                    | InvocationTargetException ex) {
+                throw new MetaDataException( "Could not create MetaDataLoader(name) with class "+
+                        "[" + loaderConfig.getClassname() + "]: " + ex.getMessage(), ex );
             }
         }
         else {
-            loader = new FileMetaDataLoader( config, loaderConfig.getName() );
+            loader = new SimpleLoader( loaderConfig.getName() );
         }
 
-        loader.init( sources );
+        // Get the Source Directory if it is specified
+        //File srcDir = getSourceDir();
+
+        // Process and create URI Sources from the Source list
+        List<URI> uriSources = new ArrayList<>();
+        for ( String s : loaderConfig.getSources() ) {
+            uriSources.add(URIHelper.toURI( s ));
+        }
+
+        loader.mojoSetURISources( uriSources );
+        loader.mojoInit( getGlobals() );
+
         return loader;
     }
+
+    public static final String URI_FILE = "file";
+    public static final String URI_FILE_PREFIX = URI_FILE+"//";
+    public static final String URI_CLASSPATH = "classpath";
+    public static final String URI_CLASSPATH_PREFIX = URI_CLASSPATH+":";
+
+    /*protected String toSourceUri( File srcDir, String s ) {
+
+        if ( s.contains(":")) {
+            if ( s.startsWith( URI_FILE_PREFIX )) {
+                s = fileToSourceUri( new File( s.substring( URI_FILE_PREFIX.length() )));
+            }
+        }
+        else if ( srcDir != null ) {
+            s = fileToSourceUri( new File( srcDir, s ));
+        }
+        else {
+
+        }
+
+        return s;
+    }
+
+    protected String fileToSourceUri( File f ) {
+        if (!f.exists()) {
+            throw new IllegalArgumentException("Source file [" + f.getName() + "] does not exist");
+        }
+        else if (!f.canRead()) {
+            throw new IllegalArgumentException("Source file [" + f.getName() + "] cannot be read");
+        }
+
+        return URI_FILE_PREFIX + f.getName();
+    }
+
+    protected File getSourceDir() {
+        String srcDir = loaderConfig.getSourceDir();
+        File sourceDir = null;
+        if ( srcDir != null ) {
+            sourceDir = new File( loaderConfig.getSourceDir() );
+            if ( !sourceDir.exists() ) {
+                throw new IllegalArgumentException( "SourceDir [" + srcDir + "] does not exist" );
+            }
+        }
+        return sourceDir;
+    }*/
 }

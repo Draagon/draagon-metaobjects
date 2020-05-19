@@ -7,12 +7,17 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.config.TypesConfigLoader;
+import com.draagon.meta.loader.types.TypesConfigLoader;
+import com.draagon.meta.loader.file.json.JsonMetaDataParser;
+import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -41,8 +46,41 @@ public class FileMetaDataLoader extends MetaDataLoader {
     }
 
     public FileLoaderOptions getLoaderOptions() {
-        return (FileLoaderOptions) super.getloaderOptions();
+        return (FileLoaderOptions) super.getLoaderOptions();
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // MOJO Support Methods
+
+    @Override
+    public void mojoSetURISources(List<URI> sourceURIList) {
+
+        if ( sourceURIList == null ) throw new IllegalArgumentException(
+                "sourceURIList was null on setURIList for Loader: " + toString());
+
+        LocalMetaDataSources source = null;
+        List<URI> uriSourceList = new ArrayList<>();
+        for ( URI uri: sourceURIList ) {
+            uriSourceList.add(uri);
+        }
+        URIMetaDataSources sources = new URIMetaDataSources( uriSourceList );
+        getLoaderOptions().addSources( sources );
+    }
+
+    @Override
+    public void mojoInit( Map<String, String> args ) {
+
+        mojoInitArgs( args );
+
+        FileLoaderOptions options = getLoaderOptions()
+                .addParser( "*.xml", XMLMetaDataParser.class)
+                .addParser( "*.json", JsonMetaDataParser.class);
+
+        init();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialization Methods
 
     /** Initialize the MetaDataLoader */
     @Override

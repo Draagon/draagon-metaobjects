@@ -1,16 +1,16 @@
-package com.draagon.meta.loader.config;
+package com.draagon.meta.loader.types;
 
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.ValueException;
-import com.draagon.meta.loader.model.MetaDataModel;
+import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.object.MetaObject;
 
 import java.util.*;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public class TypeConfig extends ConfigObjectBase {
+public class TypeConfig extends ConfigBase {
     
     public final static String OBJECT_NAME       = "TypeConfig";
     public final static String OBJECT_IONAME     = "type";
@@ -290,7 +290,7 @@ public class TypeConfig extends ConfigObjectBase {
         if ( getTypeName() == null ) throw new InvalidValueException( "TypeConfig has null name" );
         if ( getBaseClass() == null ) throw new InvalidValueException( "TypeConfig ["+getTypeName()+"] has null BaseClass" );
 
-        if (!getTypeName().equals(MetaDataModel.OBJECT_NAME)
+        if (!getTypeName().equals(MetaModel.OBJECT_NAME)
                 && (getSubTypes() == null || getSubTypes().isEmpty() ))
             throw new MetaDataException( "No SubTypes existed for type ["+getTypeName()+"]" );
 

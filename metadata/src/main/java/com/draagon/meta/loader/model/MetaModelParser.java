@@ -1,20 +1,19 @@
 package com.draagon.meta.loader.model;
 
-import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.config.*;
+import com.draagon.meta.loader.types.*;
 import com.draagon.meta.loader.parser.ParserBase;
 
 import java.util.List;
 
-public abstract class MetaDataModelParser<I extends MetaDataLoader,S> extends ParserBase<MetaDataModelLoader,I,S> {
+public abstract class MetaModelParser<I extends MetaDataLoader,S> extends ParserBase<MetaModelLoader,I,S> {
 
     private String defaultPackageName = null;
 
-    protected MetaDataModelParser(MetaDataModelLoader modelLoader, String sourceName) {
+    protected MetaModelParser(MetaModelLoader modelLoader, String sourceName) {
         super(modelLoader, sourceName);
     }
 
@@ -32,7 +31,7 @@ public abstract class MetaDataModelParser<I extends MetaDataLoader,S> extends Pa
     public abstract void loadAndMerge( I intoLoader, S source );
 
     /** Merge the loaded MetaDataModel into the specified MetaDataLoader */
-    protected void mergeMetaDataModel( I intoLoader, MetaDataModel model ) {
+    protected void mergeMetaDataModel( I intoLoader, MetaModel model ) {
 
         TypesConfig typesConfig = intoLoader.getTypesConfig();
         if ( typesConfig == null ) throw new IllegalStateException( "MetaDataLoader did not have a TypesConfig set, loader=["+intoLoader+"]");
@@ -44,13 +43,13 @@ public abstract class MetaDataModelParser<I extends MetaDataLoader,S> extends Pa
         }
     }
 
-    protected void mergeMetaData(MetaData parent, String pkgDef, MetaDataModel model,
+    protected void mergeMetaData(MetaData parent, String pkgDef, MetaModel model,
                                  TypesConfig typesConfig, boolean isRoot ) {
 
-        List<MetaDataModel> children = model.getChildren();
+        List<MetaModel> children = model.getChildren();
         if ( children == null ) return;
 
-        for ( MetaDataModel child : children ) {
+        for ( MetaModel child : children ) {
 
             String type = child.getType();
             String subType = child.getSubType();

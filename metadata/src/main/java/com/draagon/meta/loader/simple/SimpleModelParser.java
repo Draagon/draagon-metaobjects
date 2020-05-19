@@ -1,30 +1,40 @@
 package com.draagon.meta.loader.simple;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.object.xml.XMLObjectReader;
-import com.draagon.meta.loader.model.MetaDataModel;
-import com.draagon.meta.loader.model.MetaDataModelLoader;
-import com.draagon.meta.loader.model.MetaDataModelParser;
+import com.draagon.meta.loader.model.MetaModel;
+import com.draagon.meta.loader.model.MetaModelLoader;
+import com.draagon.meta.loader.model.MetaModelParser;
+import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
-public class SimpleModelParser extends MetaDataModelParser<SimpleLoader,String> {
+public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
 
-    protected SimpleModelParser(MetaDataModelLoader modelLoader, String sourceName) {
+    protected SimpleModelParser(MetaModelLoader modelLoader, String sourceName) {
         super(modelLoader, sourceName);
     }
 
     @Override
-    public void loadAndMerge( SimpleLoader intoLoader, String resource) {
+    public void loadAndMerge( SimpleLoader intoLoader, URI uri) {
 
+        InputStream is = null;
         try {
-            InputStream is = intoLoader.getResourceInputStream(resource);
+            is = URIHelper.getInputStream( uri );
+            //intoLoader.getResourceInputStream(resource);
             loadAndMergeFromStream( intoLoader, is );
         }
         catch( IOException e ) {
-            throw new MetaDataException( "Unable to load typesConfig from resource ["+resource+"]: " + e.getMessage(), e );
+            throw new MetaDataException( "Unable to load URI ["+uri+"]: " + e.getMessage(), e );
+        }
+        finally {
+            try {
+                if ( is != null ) is.close();
+            } catch( IOException e ) {
+                throw new MetaDataException( "Unable to close URI ["+uri+"]: " + e.getMessage(), e );
+            }
         }
     }
 
@@ -33,12 +43,12 @@ public class SimpleModelParser extends MetaDataModelParser<SimpleLoader,String> 
 
         IOException ioEx = null;
 
-        MetaDataModel metadata = null;
+        MetaModel metadata = null;
         XMLObjectReader reader = null;
 
         try {
             reader = new XMLObjectReader( getLoader(), in );
-            metadata = (MetaDataModel) reader.read( getLoader().getMetaObjectByName(MetaDataModel.OBJECT_NAME));
+            metadata = (MetaModel) reader.read( getLoader().getMetaObjectByName(MetaModel.OBJECT_NAME));
         } catch (IOException e) {
             ioEx = e;
         }

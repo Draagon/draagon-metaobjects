@@ -10,23 +10,13 @@
  */
 package com.draagon.meta.loader.file;
 
-import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
-import com.draagon.meta.io.object.json.JsonObjectWriter;
-import com.draagon.meta.io.object.xml.XMLObjectWriter;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.SubTypeConfig;
-import com.draagon.meta.loader.config.TypeConfig;
-import com.draagon.meta.loader.config.TypesConfig;
-import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.loader.types.TypesConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.OutputStreamWriter;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 

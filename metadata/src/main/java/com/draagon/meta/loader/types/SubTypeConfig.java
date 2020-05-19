@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.config;
+package com.draagon.meta.loader.types;
 
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
@@ -10,7 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public class SubTypeConfig extends ConfigObjectBase {
+public class SubTypeConfig extends ConfigBase {
 
     public final static String OBJECT_NAME        = "SubTypeConfig";
     public final static String OBJECT_IONAME      = "subType";

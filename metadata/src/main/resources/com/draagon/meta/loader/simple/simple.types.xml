@@ -2,7 +2,7 @@
 <typesConfig
         xmlns="https://www.draagon.com/types/v2"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://www.draagon.com/types/v2 ../config/types-config.xsd">
+        xsi:schemaLocation="https://www.draagon.com/types/v2 ../types/types-config.xsd">
 
     <types>
 

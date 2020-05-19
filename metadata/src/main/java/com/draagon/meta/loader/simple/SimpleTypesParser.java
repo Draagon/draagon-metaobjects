@@ -1,14 +1,15 @@
 package com.draagon.meta.loader.simple;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.object.xml.XMLObjectReader;
-import com.draagon.meta.loader.config.TypesConfig;
-import com.draagon.meta.loader.config.TypesConfigLoader;
-import com.draagon.meta.loader.config.TypesConfigParser;
+import com.draagon.meta.loader.types.TypesConfig;
+import com.draagon.meta.loader.types.TypesConfigLoader;
+import com.draagon.meta.loader.types.TypesConfigParser;
+import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 public class SimpleTypesParser extends TypesConfigParser<InputStream> {
 
@@ -16,16 +17,23 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
         super(loader, sourceName);
     }
 
-    public void loadAndMerge( SimpleLoader simpleLoader, String resource ) {
+    public void loadAndMerge( SimpleLoader simpleLoader, URI uri ) {
 
         InputStream is = null;
-
         try {
-            is = simpleLoader.getResourceInputStream( resource);
+            is = URIHelper.getInputStream( uri );
+            //intoLoader.getResourceInputStream(resource);
             loadAndMerge( simpleLoader.getTypesConfig(), is );
         }
         catch( IOException e ) {
-            throw new MetaDataException( "Unable to load typesConfig from resource ["+resource+"]: " + e.getMessage(), e );
+            throw new MetaDataException( "Unable to load URI ["+uri+"]: " + e.getMessage(), e );
+        }
+        finally {
+            try {
+                is.close();
+            } catch( IOException e ) {
+                throw new MetaDataException( "Unable to close URI ["+uri+"]: " + e.getMessage(), e );
+            }
         }
     }
 

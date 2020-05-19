@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.config;
+package com.draagon.meta.loader.types;
 
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaDataException;
@@ -7,7 +7,7 @@ import com.draagon.meta.object.MetaObject;
 
 import java.util.List;
 
-public final class ChildConfig extends ConfigObjectBase {
+public final class ChildConfig extends ConfigBase {
 
     public final static String OBJECT_NAME       = "ChildConfig";
     public final static String OBJECT_IONAME     = "child";

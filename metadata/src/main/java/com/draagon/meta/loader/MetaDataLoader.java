@@ -9,19 +9,21 @@ package com.draagon.meta.loader;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.config.TypesConfig;
-import com.draagon.meta.loader.model.MetaDataModelLoader;
+import com.draagon.meta.loader.types.TypesConfig;
+import com.draagon.meta.loader.mojo.MojoSupport;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  MetaDataLoader with common functions for all MetaDataLoaders
  */
-public class MetaDataLoader extends MetaData<MetaDataLoader> {
+public class MetaDataLoader extends MetaData<MetaDataLoader> implements MojoSupport {
 
     private final static Log log = LogFactory.getLog(MetaDataLoader.class);
 
@@ -68,7 +70,7 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> {
     ///////////////////////////////////////////////////////////////////////
     // Configs
 
-    public LoaderOptions getloaderOptions() {
+    public LoaderOptions getLoaderOptions() {
         return loaderOptions;
     }
 
@@ -88,6 +90,41 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> {
         if ( !isInitialized ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] was not initialized" );
         if ( isDestroyed ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] is destroyed" );
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // MOJO Support Methods
+
+    @Override
+    public void mojoSetURISources(List<URI> sourceURIList) {
+
+        String name = this.getClass().getSimpleName();
+        if ( sourceURIList == null ) throw new IllegalArgumentException(
+                "sourceURIList was null on setURIList for " + name);
+        if ( sourceURIList.size() > 0  ) throw new IllegalArgumentException( name +
+                " does not support URI sources");
+    }
+
+    protected void mojoInitArgs( Map<String, String> args ) {
+
+        if ( args.get( MojoSupport.ARG_REGISTER ) != null ) {
+            getLoaderOptions().setShouldRegister( Boolean.parseBoolean( args.get( MojoSupport.ARG_REGISTER ) ));
+        }
+        if ( args.get( MojoSupport.ARG_VERBOSE ) != null ) {
+            getLoaderOptions().setVerbose( Boolean.parseBoolean( args.get( MojoSupport.ARG_VERBOSE ) ));
+        }
+        if ( args.get( MojoSupport.ARG_STRICT ) != null ) {
+            getLoaderOptions().setStrict( Boolean.parseBoolean( args.get( MojoSupport.ARG_STRICT ) ));
+        }
+    }
+
+    @Override
+    public void mojoInit( Map<String, String> args ) {
+        init();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialization Methods
 
     /**
      * Initialize the MetaDataLoader.  It will prevent a second init call.

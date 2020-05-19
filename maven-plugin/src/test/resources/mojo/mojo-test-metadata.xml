@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<metadata package="simple::fruitbasket">
+
+    <!-- Id -->
+    <field package="simple::common" name="id" type="long" _isAbstract="true">
+        <attr type="boolean" name="isKey">true</attr>
+    </field>
+
+    <!-- Name -->
+    <field package="simple::common" name="name" type="string" _isAbstract="true">
+        <validator type="required"/>
+        <validator type="length">
+            <attr type="int" name="min">1</attr>
+            <attr name="max">50</attr>
+        </validator>
+    </field>
+    
+    <!-- Basket -->
+    <object name="Basket" type="value" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
+
+        <objectKey/>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Number of apples -->
+        <field name="numApples" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
+
+        <!-- Number of oranges -->
+        <field name="numOranges" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
+
+        <!-- Number of veggies -->
+        <!-- field name="numVeggies" type="int">
+            <validator type="length" min="0" max="5"/>
+        </field -->
+
+        <!-- Apples -->
+        <field name="apples" type="objectArray" objectRef="::Apple">
+            <objectRef type="oneToMany" reference="::Apple"/>
+        </field>
+
+        <!-- Oranges -->
+        <field name="oranges" type="objectArray" objectRef="::Orange">
+            <objectRef type="oneToMany" reference="::Orange"/>
+        </field>
+
+        <!-- Veggies -->
+        <!-- field name="veggies" type="objectArray">
+            <objectRef type="oneToMany" reference="..::vegetable::Vegetable"/>
+        </field -->
+
+    </object>
+
+    <!-- Fruit -->
+    <object name="Fruit" type="data" _isAbstract="true">
+
+        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Fruit</attr>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
+
+        <!-- In Basket -->
+        <field name="inBasket" type="boolean"/>
+        
+    </object>
+
+    <!-- Apple -->
+    <object name="Apple" super="Fruit" object="com.draagon.meta.loader.simple.fruitbasket.Apple">
+
+        <objectKey name="key"/>
+
+        <!-- attr name="object">com.draagon.meta.loader.simple.fruitbasket.Apple</attr -->
+
+        <!-- Orachard -->
+        <field name="orchard" type="string"/>
+
+        <!-- Worms -->
+        <field name="worms" type="short"/>
+
+    </object>
+
+    <!-- Macintosh -->
+    <object name="Macintosh" super="Apple">
+
+        <objectKey name="key"/>
+
+        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Macintosh</attr>
+
+    </object>
+
+    <!-- Orange -->
+    <object name="Orange" super="Fruit">
+
+        <objectKey name="key"/>
+
+        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Orange</attr>
+
+        <field name="pickedDate" type="date"/>
+
+    </object>
+
+</metadata>

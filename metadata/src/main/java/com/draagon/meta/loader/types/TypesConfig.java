@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.config;
+package com.draagon.meta.loader.types;
 
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Stores the MetaData Configuration data
  */
-public class TypesConfig extends ConfigObjectBase {
+public class TypesConfig extends ConfigBase {
 
     public final static String OBJECT_NAME      = "TypesConfig";
     public final static String OBJECT_IONAME   = "typesConfig";

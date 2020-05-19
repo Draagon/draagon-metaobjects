@@ -5,7 +5,7 @@ import com.draagon.meta.object.value.ValueObject;
 
 import java.util.List;
 
-public class MetaDataModel extends ValueObject {
+public class MetaModel extends ValueObject {
 
     public final static String OBJECT_NAME      = "metadata";
     public final static String FIELD_PACKAGE    = "package";
@@ -16,7 +16,7 @@ public class MetaDataModel extends ValueObject {
     public final static String FIELD_CHILDREN   = "children";
     public final static String OBJREF_CHILDREF  = "childRef";
 
-    public MetaDataModel( MetaObject mo ) {
+    public MetaModel(MetaObject mo ) {
         super(mo);
     }
 
@@ -40,7 +40,7 @@ public class MetaDataModel extends ValueObject {
         return getString( FIELD_SUPER );
     }
 
-    public List<MetaDataModel> getChildren() {
-        return super.getObjectArray( MetaDataModel.class, FIELD_CHILDREN );
+    public List<MetaModel> getChildren() {
+        return super.getObjectArray( MetaModel.class, FIELD_CHILDREN );
     }
 }

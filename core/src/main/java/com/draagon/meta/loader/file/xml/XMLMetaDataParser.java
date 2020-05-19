@@ -3,8 +3,8 @@ package com.draagon.meta.loader.file.xml;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.types.ChildConfig;
+import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
 import com.draagon.meta.util.XMLUtil;

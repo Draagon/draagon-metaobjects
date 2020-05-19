@@ -3,8 +3,8 @@ package com.draagon.meta.loader.file.json;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.config.ChildConfig;
-import com.draagon.meta.loader.config.TypeConfig;
+import com.draagon.meta.loader.types.ChildConfig;
+import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.MetaDataParser;
 import com.google.gson.JsonArray;
@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 /**
