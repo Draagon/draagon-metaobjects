@@ -10,7 +10,6 @@ package com.draagon.meta.util;
 
 import java.io.*;
 
-import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,14 +36,14 @@ public class XMLUtil
     /**
      * Loads all the classes specified in the Filename
      */
-    public static Document load(Reader in, String encoding, boolean validating ) throws IOException {
+    /*public static Document load(Reader in, String encoding, boolean validating ) throws IOException {
 
         try {
             return getBuilder( validating ).parse(new ReaderInputStream( in, encoding));
         } catch( SAXException e ) {
             throw new IOException(  "Error attempting to read XML from inputStream: " + e.getMessage(), e );
         }
-    }
+    }*/
 
     /**
      * Loads all the classes specified in the Filename
