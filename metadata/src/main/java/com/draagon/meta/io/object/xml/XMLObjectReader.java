@@ -1,5 +1,7 @@
 package com.draagon.meta.io.object.xml;
 
+import com.draagon.meta.MetaDataAware;
+import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
 import static com.draagon.meta.io.xml.XMLIOConstants.*;
@@ -7,15 +9,24 @@ import static com.draagon.meta.io.xml.XMLIOUtil.*;
 import com.draagon.meta.io.xml.XMLMetaDataReader;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.Validatable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class XMLObjectReader extends XMLMetaDataReader {
 
     public XMLObjectReader(MetaDataLoader loader, InputStream is ) {
         super(loader, is);
+    }
+
+    public static <T> T readObject( Class<T> clazz, MetaObject mo, InputStream is ) throws MetaDataIOException {
+        XMLObjectReader writer = new XMLObjectReader(mo.getLoader(), is);
+        Object o = writer.read( mo);
+        writer.close();
+        return (T) o;
     }
 
     public Object read() throws MetaDataIOException {
@@ -32,8 +43,17 @@ public class XMLObjectReader extends XMLMetaDataReader {
 
         Element e = doc.getDocumentElement();
 
-        o = readObject( e, mo );
+        return validate( readObject( e, mo ));
+    }
 
+    protected Object validate( Object o ) throws MetaDataIOException {
+        if ( o != null && o instanceof Validatable ) {
+            try {
+                ((Validatable) o).validate();
+            } catch( ValueException e ) {
+                throw new MetaDataIOException( this, "Final Object read was invalid: "+e, e );
+            }
+        }
         return o;
     }
 
@@ -172,7 +192,10 @@ public class XMLObjectReader extends XMLMetaDataReader {
         if ( e != null ) {
             path().inc(e.getNodeName());
 
-            String name = getXmlName(refmo);
+            // Use Null to get all elements since it's typed object
+            String name = null;
+            if ( !isXmlTyped(refmo)) name = getXmlName(refmo);
+
             for (Element el : getElementsOfName(e, name)) {
 
                 path().inc(refmo);

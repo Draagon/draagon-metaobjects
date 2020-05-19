@@ -19,9 +19,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 
-public class MetaDataLoaderTests {
+public class MetaDataLoaderTest {
 
-    static final Log log = LogFactory.getLog(MetaDataLoaderTests.class);
+    static final Log log = LogFactory.getLog(MetaDataLoaderTest.class);
 
     protected MetaDataLoader loader = null;
 

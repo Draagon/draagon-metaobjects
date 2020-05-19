@@ -11,26 +11,15 @@ package com.draagon.meta;
  * the value of an object.
  */
 @SuppressWarnings("serial")
-public class ValueException extends RuntimeException
+public abstract class ValueException extends RuntimeException
 {
   public ValueException( String msg, Throwable t )
   {
     super( msg, t );
   }
 
-  public ValueException( Throwable t )
-  {
-    super( t );
-  }
-
   public ValueException( String msg )
   {
     super( msg );
   }
-
-  public ValueException()
-  {
-    super( "Value Exception" );
-  }
-
 }

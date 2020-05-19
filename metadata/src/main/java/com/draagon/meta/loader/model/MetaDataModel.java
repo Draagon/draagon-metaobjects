@@ -11,7 +11,6 @@ public class MetaDataModel extends ValueObject {
     public final static String FIELD_PACKAGE    = "package";
     public final static String FIELD_TYPE       = "type";
     public final static String FIELD_SUBTYPE    = "subType";
-    public final static String FIELD_IOSUBTYPE  = "type";
     public final static String FIELD_NAME       = "name";
     public final static String FIELD_SUPER      = "super";
     public final static String FIELD_CHILDREN   = "children";
@@ -30,11 +29,11 @@ public class MetaDataModel extends ValueObject {
     }
 
     public String getSubType() {
-        return getString( FIELD_SUBTYPE );
+        return getString(FIELD_SUBTYPE);
     }
 
     public String getName() {
-        return getString( FIELD_NAME );
+        return getString(FIELD_NAME);
     }
 
     public String getSuper() {
@@ -42,6 +41,6 @@ public class MetaDataModel extends ValueObject {
     }
 
     public List<MetaDataModel> getChildren() {
-        return super._getAndCreateObjectArray( MetaDataModel.class, FIELD_CHILDREN );
+        return super.getObjectArray( MetaDataModel.class, FIELD_CHILDREN );
     }
 }

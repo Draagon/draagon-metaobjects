@@ -1,5 +1,6 @@
 package com.draagon.meta.io.object.xml;
 
+import com.draagon.meta.MetaDataAware;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
@@ -19,6 +20,12 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         super(loader, out);
     }
 
+    public static void writeObject(MetaDataAware o, OutputStream out) throws MetaDataIOException {
+        XMLObjectWriter writer = new XMLObjectWriter(o.getMetaData().getLoader(), out);
+        writer.write(o);
+        writer.close();
+    }
+
     public void write( Object vo ) throws MetaDataIOException {
 
         if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null Object");
@@ -35,7 +42,14 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
     protected void writeObject( Element el, MetaObject mo, Object vo) throws MetaDataIOException {
 
-        Element objEl = doc().createElement(getXmlName( mo ));
+        String xmlName = null;
+        if ( isXmlTyped( mo )) {
+            xmlName = mo.getMetaField( getXmlTypedField( mo )).getString( vo );
+        } else {
+            xmlName = getXmlName(mo);
+        }
+
+        Element objEl = doc().createElement( xmlName );
         if ( el == null ) doc().appendChild( objEl );
         else el.appendChild( objEl );
 
@@ -44,7 +58,16 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
     protected void writeObjectFields( Element objEl, MetaObject mo, Object vo ) throws MetaDataIOException {
 
+        String typedField = null;
+        if (isXmlTyped( mo )) {
+            typedField = getXmlTypedField(mo);
+        }
+
         for( MetaField mf : mo.getMetaFields()) {
+
+            // Skipped the typed field
+            if ( typedField != null && mf.getName().equals( typedField )) continue;
+
             // TODO: Add more efficient way to check on null values
             Object val = mf.getObject( vo );
             if ( val != null ) {

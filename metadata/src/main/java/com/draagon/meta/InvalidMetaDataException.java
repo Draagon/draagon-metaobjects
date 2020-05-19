@@ -11,12 +11,15 @@ package com.draagon.meta;
 @SuppressWarnings("serial")
 public class InvalidMetaDataException extends MetaDataException {
 
-    public InvalidMetaDataException(String msg) {
-        super(msg);
+    public InvalidMetaDataException( MetaData md, String msg) {
+        super(prefix(md)+msg);
+    }
+    public InvalidMetaDataException( MetaData md, String msg, Throwable cause) {
+        super(prefix(md)+msg, cause);
     }
 
-    public InvalidMetaDataException(String msg, Throwable cause) {
-        super(msg, cause);
+    protected static String prefix( MetaData md ) {
+        if ( md == null ) return "[null] ";
+        return "["+md.toString()+"] ";
     }
 }
-

@@ -93,7 +93,7 @@ public abstract class ValueObjectBase extends DataObjectBase implements Map<Stri
     /**
      * Sets a property to be associated with this object.  Properties are used for special operations, not to define fields
      */
-    public void _setObjectProperty(String name, String key ) {
+    public void setObjectProperty(String name, String key ) {
         super._setObjectProperty( name, key );
     }
 

@@ -24,7 +24,9 @@ public class XMLIOUtil {
 
     public static String getXmlName( MetaData md ) {
 
-        if ( md instanceof MetaObject && isXmlTyped( (MetaObject) md )) return null;
+        // Return null for the XML Name so it pulls all children and sets the type field
+        if ( md instanceof MetaObject && isXmlTyped( (MetaObject) md ))
+            return null;
 
         if ( md.hasMetaAttr( ATTR_XMLNAME )) {
             return md.getMetaAttr( ATTR_XMLNAME ).getValueAsString();

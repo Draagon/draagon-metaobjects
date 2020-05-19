@@ -1,6 +1,9 @@
 package com.draagon.meta.loader.model;
 
+import com.draagon.meta.InvalidMetaDataException;
+import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.config.*;
 import com.draagon.meta.loader.parser.ParserBase;
@@ -37,33 +40,77 @@ public abstract class MetaDataModelParser<I extends MetaDataLoader,S> extends Pa
         if ( tc.getTypeName().equals( "metadata" )) {
             String defPkg = model.getPackage();
             if ( defPkg == null ) defPkg = "";
-            buildMetaData( intoLoader, defPkg, model, typesConfig, true );
+            mergeMetaData( intoLoader, defPkg, model, typesConfig, true );
         }
     }
 
-    protected void buildMetaData(MetaData parent, String pkgDef, MetaDataModel model,
-                                      TypesConfig typesConfig, boolean isRoot ) {
+    protected void mergeMetaData(MetaData parent, String pkgDef, MetaDataModel model,
+                                 TypesConfig typesConfig, boolean isRoot ) {
 
         List<MetaDataModel> children = model.getChildren();
-        for ( MetaDataModel md : children ) {
+        if ( children == null ) return;
 
-            String type = md.getType();
-            String subType = md.getSubType();
-            String name = md.getName();
-            String pkg = md.getPackage();
-            String fullname = name;
+        for ( MetaDataModel child : children ) {
 
-            if (isRoot && pkg.equals(null)) pkg = pkgDef;
-            if (isRoot && !pkg.isEmpty()) fullname = pkg + "::" + name;
+            String type = child.getType();
+            String subType = child.getSubType();
+            String name = child.getName();
+            String pkg = child.getPackage();
+
+            if ( type == null ) {
+                throw new InvalidValueException( "Type is null, cannot merge MetaDataModel ["+child+"]" );
+            }
 
             TypeConfig tc = typesConfig.getType(type);
-            SubTypeConfig stc = tc.getSubType(subType);
-
-            MetaData parentChild = parent.getChildOfType( type, fullname );
-            if ( parentChild == null ) {
-                Class<? extends MetaData> clazz = stc.getBaseClass();
-                MetaData mdNew = (MetaData) parent.newInstanceFromClass( clazz, type, subType, fullname );
+            if ( tc == null ) {
+                throw new InvalidValueException( "Type ["+type+"] did not exist in TypesConfig, "+
+                        "cannot merge MetaDataModel ["+child+"]" );
             }
+
+            SubTypeConfig stc = null;
+            if ( subType == null && tc.getDefaultSubTypeName() != null ) {
+                subType = tc.getDefaultSubTypeName();
+            }
+            if ( subType != null ) {
+                stc = tc.getSubType(subType);
+            }
+
+            if ( name == null ) {
+                if ( tc.getDefaultName() != null ) {
+                    name = tc.getDefaultName();
+                } else if ( tc.getDefaultNamePrefix() != null ) {
+                    // TODO: Make this increment!
+                    name = tc.getDefaultNamePrefix()+"1";
+                }
+                else {
+                    throw new InvalidValueException( "Name is null, cannot merge MetaDataModel ["+child+"]" );
+                }
+            }
+
+            String fullname = name;
+            if (isRoot && pkg == null) pkg = pkgDef;
+            if (isRoot && !pkg.isEmpty()) fullname = pkg + "::" + name;
+
+            MetaData merge = null;
+            try {
+                merge = parent.getChildOfType(type, fullname);
+
+                // TODO:  Merge!
+            }
+            catch( MetaDataNotFoundException e ) {
+
+                if ( stc == null ) {
+                    throw new InvalidValueException( "SubType ["+subType+"] did not exist in TypesConfig, "+
+                            "cannot merge MetaDataModel ["+child+"]" );
+                }
+
+                Class<? extends MetaData> clazz = stc.getBaseClass();
+                merge = (MetaData) parent.newInstanceFromClass( clazz, type, subType, fullname );
+                parent.addChild( merge );
+            }
+
+            // Merge child records
+            mergeMetaData( merge, pkgDef, child, typesConfig, false );
         }
     }
 }

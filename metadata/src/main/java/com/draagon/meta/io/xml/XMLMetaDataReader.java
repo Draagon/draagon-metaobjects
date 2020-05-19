@@ -1,12 +1,10 @@
 package com.draagon.meta.io.xml;
 
-import com.draagon.meta.MetaDataException;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.MetaDataReader;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.XMLUtil;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +21,8 @@ public abstract class XMLMetaDataReader extends MetaDataReader {
 
     protected Document loadXML() throws MetaDataIOException {
         try {
-            doc = XMLUtil.loadFromStream(in);
+            // TODO: Add flag for validating XML
+            doc = XMLUtil.loadFromStream(in, false);
         //} catch (SAXException e) {
         //    throw new MetaDataIOException( this, "Parse error loading XML: " + e, e);
         } catch (IOException e) {

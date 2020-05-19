@@ -1,20 +1,30 @@
 package com.draagon.meta.io.object.json;
 
+import com.draagon.meta.MetaDataAware;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataWriter;
+import com.draagon.meta.io.object.xml.XMLObjectWriter;
 import com.draagon.meta.io.util.IOUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.DataConverter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 
 public class JsonObjectWriter extends JsonMetaDataWriter {
 
     public JsonObjectWriter(MetaDataLoader loader, Writer writer ) throws MetaDataIOException {
         super(loader, writer);
+    }
+
+    public static void writeObject(MetaDataAware o, Writer out) throws MetaDataIOException {
+        JsonObjectWriter writer = new JsonObjectWriter(o.getMetaData().getLoader(), out);
+        writer.withIndent( "  " );
+        writer.write(o);
+        writer.close();
     }
 
     public void write(Object vo) throws MetaDataIOException {

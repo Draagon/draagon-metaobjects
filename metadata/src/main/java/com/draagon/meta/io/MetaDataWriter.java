@@ -28,8 +28,6 @@ public abstract class MetaDataWriter implements MetaDataIO {
         return path;
     }
 
-    //public abstract void write( D data ) throws MetaDataIOException;
-
     /////////////////////////////////////////////////////////////////////////
     // Misc Methods
 

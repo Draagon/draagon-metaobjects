@@ -11,21 +11,14 @@ package com.draagon.meta;
  * is not found.
  */
 @SuppressWarnings("serial")
-public class ValueNotFoundException extends ValueException
-{
+public class ValueNotFoundException extends ValueException  {
+
   public ValueNotFoundException( String msg, Throwable t )
   {
     super( msg, t );
   }
-
   public ValueNotFoundException( String msg )
   {
     super( msg );
   }
-
-  public ValueNotFoundException()
-  {
-    super( "Value Not Found" );
-  }
-
 }

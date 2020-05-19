@@ -1,14 +1,19 @@
 package com.draagon.meta.io.object.json;
 
+import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataReader;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
+
+import com.draagon.meta.io.object.xml.XMLObjectReader;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.Validatable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +26,13 @@ public class JsonObjectReader extends JsonMetaDataReader {
         super(loader, reader);
     }
 
+    public static <T> T readObject( Class<T> clazz, MetaObject mo, Reader reader ) throws MetaDataIOException {
+        JsonObjectReader writer = new JsonObjectReader(mo.getLoader(), reader);
+        Object o = writer.read( mo);
+        writer.close();
+        return (T) o;
+    }
+
     public Object read() throws MetaDataIOException {
         return read( null );
     }
@@ -29,14 +41,22 @@ public class JsonObjectReader extends JsonMetaDataReader {
 
         try {
             if ( !in().hasNext() ) return null;
-            return readObject( mo );
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new MetaDataIOException( this, "Error reading MetaObject ["+mo+"]: "+e, e );
         }
-        catch (RuntimeException e) {
-            throw new MetaDataIOException( this, e.toString(), e );
+
+        return validate( readObject( mo ));
+    }
+
+    protected Object validate( Object o ) throws MetaDataIOException {
+        if ( o != null && o instanceof Validatable ) {
+            try {
+                ((Validatable) o).validate();
+            } catch( ValueException e ) {
+                throw new MetaDataIOException( this, "Final Object read was invalid: "+e, e );
+            }
         }
+        return o;
     }
 
     protected Object readObject(MetaObject mo ) throws MetaDataIOException {

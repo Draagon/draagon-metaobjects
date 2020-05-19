@@ -203,7 +203,7 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
 
         // Ensure the data types are accurate
         if (val != null && !getValueClass().isInstance(val))
-            throw new ValueException("Invalid value [" + val + "], expected class [" + getValueClass().getName() + "]");
+            throw new InvalidValueException("Invalid value [" + val + "], expected class [" + getValueClass().getName() + "]");
 
         // Perform validation -- Disabled for performance reasons
         //performValidation( obj, val );

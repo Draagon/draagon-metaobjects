@@ -3,6 +3,7 @@ package com.draagon.meta.loader.config;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.ValueException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
@@ -89,9 +90,9 @@ public class TypesConfig extends ConfigObjectBase {
     //////////////////////////////////////////////////////////////////////
     // Validation Method
 
-    public void validate() {
+    public void validate() throws ValueException {
         super.validate();
         if (getTypes() == null ) throw new InvalidValueException( "types field is null on TypeConfig "+toString() );
-        getTypes().forEach( tc -> tc.validate());
+        getTypes().forEach( tc -> { tc.validate(); });
     }
 }

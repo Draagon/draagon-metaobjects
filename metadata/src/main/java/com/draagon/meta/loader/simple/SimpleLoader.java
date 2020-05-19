@@ -18,6 +18,13 @@ public class SimpleLoader extends MetaDataLoader {
     private static String sourceData = null;
     private final TypesConfigLoader typesLoader;
 
+    public static SimpleLoader createManual( String name, String resource ) {
+        SimpleLoader simpleLoader = new SimpleLoader( name );
+        simpleLoader.setSourceData( resource );
+        simpleLoader.init();
+        return simpleLoader;
+    }
+
     public SimpleLoader(String name) {
         super(LoaderOptions.create( false, false, true), SUBTYPE_SIMPLE, name );
 
@@ -43,7 +50,7 @@ public class SimpleLoader extends MetaDataLoader {
         // Load MetaData
         MetaDataModelLoader modelLoader = MetaDataModelLoader.create( "simple", getTypesConfig() );
         SimpleModelParser simpleModelParser = new SimpleModelParser( modelLoader, sourceData );
-        //simpleModelParser.loadAndMerge( this, sourceData );
+        simpleModelParser.loadAndMerge( this, sourceData );
         //TODO: Finish me
 
         return this;

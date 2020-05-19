@@ -8,10 +8,9 @@
  */
 package com.draagon.meta.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,17 +37,31 @@ public class XMLUtil
     /**
      * Loads all the classes specified in the Filename
      */
-    public static Document loadFromStream( InputStream is ) throws IOException {
+    public static Document load(Reader in, String encoding, boolean validating ) throws IOException {
 
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setValidating(false);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-
-            return db.parse(is);
+            return getBuilder( validating ).parse(new ReaderInputStream( in, encoding));
+        } catch( SAXException e ) {
+            throw new IOException(  "Error attempting to read XML from inputStream: " + e.getMessage(), e );
         }
-        catch( ParserConfigurationException | SAXException e ) {
-            throw new IOException(  "Error attempting to open XML inputStream: " + e.getMessage(), e );
+    }
+
+    /**
+     * Loads all the classes specified in the Filename
+     */
+    public static Document loadFromStream( InputStream is ) throws IOException {
+        return loadFromStream( is, false );
+    }
+
+    /**
+     * Loads all the classes specified in the Filename
+     */
+    public static Document loadFromStream( InputStream is, boolean validating ) throws IOException {
+
+        try {
+            return getBuilder( validating ).parse(is);
+        } catch( SAXException e ) {
+            throw new IOException(  "Error attempting to read XML from inputStream: " + e.getMessage(), e );
         }
     }
 
@@ -56,8 +69,16 @@ public class XMLUtil
      * Create an instance of an XML DocumentBuilder
      */
     public static DocumentBuilder getBuilder() throws IOException {
+        return getBuilder( false );
+    }
+
+    /**
+     * Create an instance of an XML DocumentBuilder
+     */
+    public static DocumentBuilder getBuilder( boolean validating ) throws IOException {
         try {
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            documentFactory.setValidating(validating);
             return documentFactory.newDocumentBuilder();
         }
         catch (ParserConfigurationException e) {
@@ -69,7 +90,31 @@ public class XMLUtil
      * Write an XML Document to an OutputStream
      */
     public static void writeToStream(Document document, OutputStream out, boolean indent ) throws IOException {
+        try {
+            DOMSource domSource = new DOMSource(document);
+            StreamResult streamResult = new StreamResult(out);
+            getTransformer(document, indent).transform( domSource, streamResult );
+        }
+        catch (TransformerException e) {
+            throw new IOException( "Unable to write XML document [" + document.getDocumentURI() +"]: " + e.toString(), e );
+        }
+    }
+    /**
+     * Write an XML Document to a Writer
+     */
+    public static void write(Document document, Writer out, boolean indent ) throws IOException {
+        try {
+            DOMSource domSource = new DOMSource(document);
+            StreamResult streamResult = new StreamResult(out);
+            getTransformer(document, indent).transform( domSource, streamResult );
+        }
+        catch (TransformerException e) {
+            throw new IOException( "Unable to write XML document [" + document.getDocumentURI() +"]: " + e.toString(), e );
+        }
+    }
 
+    /** Get an XML Transformer for the specified Document and specify indent */
+    public static Transformer getTransformer(Document document, boolean indent) throws IOException {
         try {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -77,10 +122,7 @@ public class XMLUtil
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");
                 transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             }
-            DOMSource domSource = new DOMSource(document);
-            StreamResult streamResult = new StreamResult(out);
-
-            transformer.transform( domSource, streamResult );
+            return transformer;
         }
         catch (TransformerException e) {
             throw new IOException( "Unable to write XML document [" + document.getDocumentURI() +"]: " + e.toString(), e );

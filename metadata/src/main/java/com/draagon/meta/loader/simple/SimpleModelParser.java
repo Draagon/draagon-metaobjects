@@ -29,7 +29,7 @@ public class SimpleModelParser extends MetaDataModelParser<SimpleLoader,String> 
     }
 
     /* Load MetaDataModel Stream */
-    public void loadAndMergeFromStream( SimpleLoader intoLoader, InputStream is ) {
+    public void loadAndMergeFromStream( SimpleLoader intoLoader, InputStream in ) {
 
         MetaDataIOException ioEx = null;
 
@@ -37,7 +37,7 @@ public class SimpleModelParser extends MetaDataModelParser<SimpleLoader,String> 
         XMLObjectReader reader = null;
 
         try {
-            reader = new XMLObjectReader( getLoader(), is );
+            reader = new XMLObjectReader( getLoader(), in );
             metadata = (MetaDataModel) reader.read( getLoader().getMetaObjectByName(MetaDataModel.OBJECT_NAME));
         } catch (MetaDataIOException e) {
             ioEx = e;

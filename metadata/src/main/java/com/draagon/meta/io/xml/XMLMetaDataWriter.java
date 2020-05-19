@@ -30,7 +30,8 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
 
     protected Document createDocument() throws MetaDataIOException {
         try {
-            return XMLUtil.getBuilder().newDocument();
+            // TODO: Add flag for validating
+            return XMLUtil.getBuilder(false).newDocument();
         } catch( IOException e ) {
             throw new MetaDataIOException( this, "Error creating XML Builder: "+e, e );
         }

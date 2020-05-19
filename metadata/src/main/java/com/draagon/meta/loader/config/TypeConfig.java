@@ -3,6 +3,7 @@ package com.draagon.meta.loader.config;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.ValueException;
 import com.draagon.meta.loader.model.MetaDataModel;
 import com.draagon.meta.object.MetaObject;
 
@@ -282,7 +283,7 @@ public class TypeConfig extends ConfigObjectBase {
     //////////////////////////////////////////////////////////////////////
     // Validation Method
 
-    public void validate() {
+    public void validate() throws ValueException {
 
         super.validate();
 

@@ -12,20 +12,14 @@ package com.draagon.meta;
  * of an object.
  */
 @SuppressWarnings("serial")
-public class InvalidValueException extends ValueException
-{
+public class InvalidValueException extends ValueException {
+
   public InvalidValueException( String msg, Throwable t )
   {
     super( msg, t );
   }
-
   public InvalidValueException( String msg )
   {
     super( msg );
-  }
-
-  public InvalidValueException()
-  {
-    super( "Invalid Value" );
   }
 }

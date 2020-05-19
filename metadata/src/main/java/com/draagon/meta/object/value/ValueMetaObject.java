@@ -6,9 +6,7 @@
  */
 package com.draagon.meta.object.value;
 
-import com.draagon.meta.MetaDataException;
 import com.draagon.meta.object.data.DataMetaObject;
-import com.draagon.meta.object.data.DataObject;
 
 public class ValueMetaObject extends DataMetaObject
 {

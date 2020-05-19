@@ -1,8 +1,8 @@
 
 package com.draagon.meta.object.data;
 
+import com.draagon.meta.ValueException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.Validatable;
 import com.draagon.meta.util.DataConverter;
 
 import java.util.*;
@@ -155,7 +155,7 @@ public class DataObject extends DataObjectBase {
     }
 
     @Override
-    public void validate() {
+    public void validate() throws ValueException {
         if ( getMetaData() == null ) throw new IllegalStateException( "No MetaData is associated with this object" );
     }
 }

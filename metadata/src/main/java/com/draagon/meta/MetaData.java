@@ -458,7 +458,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
                     if (deleteOnAdd( d )) {
                         deleteChild(d);
                     } else {
-                        throw new InvalidMetaDataException("MetaData [" + data.toString() + "] with name [" + data.getName() + "] already exists in [" + toString() + "] as [" + d + "]");
+                        throw new InvalidMetaDataException(data, "MetaData already exists in [" + toString() + "] as [" + d + "]");
                     }
                 }
             } catch (MetaDataNotFoundException ignored) {
@@ -740,8 +740,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Validates the state of the data in the MetaData object
      */
-    public void validate() {
-
+    public void validate() throws InvalidMetaDataException {
         // Validate the children
         getChildren().forEach( d -> d.validate() );
     }
@@ -803,17 +802,21 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "]: " + e.getMessage(), e);
+            throw new RuntimeException("Could not create new instance of MetaData class "
+                    +"["+ getClass().getName() + "]: " + e.getMessage(), e);
         }
 
         if (!md.getTypeName().equals(typeName))
-            throw new MetaDataException("Expected MetaData type [" + typeName + "], but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md);
+            throw new MetaDataException("Expected MetaData type [" + typeName + "],"+
+                    " but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md);
 
         if (!md.getSubTypeName().equals(subTypeName))
-            throw new MetaDataException("Expected MetaData subType [" + subTypeName + "], but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md);
+            throw new MetaDataException("Expected MetaData subType [" + subTypeName + "], "
+                    +"but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md);
 
         if (!md.getName().equals(fullname))
-            throw new MetaDataException("Expected MetaData name [" + fullname + "], but MetaData instantiated was of name [" + md.getName() + "]: " + md);
+            throw new MetaDataException("Expected MetaData name [" + fullname + "], but MetaData "+
+                    "instantiated was of name [" + md.getName() + "]: " + md);
 
         return md;
     }
@@ -868,27 +871,9 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
 
     /** Get the toString Prefix */
     protected String getToStringPrefix() {
-
-        String name = getClass().getName();
-        int i = name.lastIndexOf('.');
-        if (i >= 0) {
-            name = name.substring(i + 1);
-        }
-
+        String name = getClass().getSimpleName();
         return name + "[" + getTypeName() +":" + getSubTypeName() + "]{" + getName() + "}";
     }
-
-    /**
-     * Returns a string representation of the MetaData
-     */
-    /*private String toInternalString() {
-
-        if (getParent() == null) {
-            return getToStringPrefix();
-        } else {
-            return getToStringPrefix() + "@" + getParent().toInternalString();
-        }
-    }*/
 
     /**
      * Returns a string representation of the MetaData
@@ -896,7 +881,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     @Override
     public String toString() {
 
-        if (getParent() == null) {
+        if (getParent() == null ) {
             return getToStringPrefix();
         } else {
             return getToStringPrefix() + "@" + getParent().toString();

@@ -6,8 +6,8 @@
  */
 package com.draagon.meta.object.value;
 
+import com.draagon.meta.ValueException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.data.DataObject;
 import com.draagon.meta.util.DataConverter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,7 +111,7 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
         _setObjectAttribute(name, value);
     }
 
-    public void setObjectArray(String name, List<Object> value) {
+    public <T> void setObjectArray( String name, List<T> value) {
         _setObjectAttribute(name, value);
     }
 
@@ -167,12 +167,16 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
         return getObjectAttribute(name);
     }
 
-    public List<Object> getObjectArray(String name) {
-        return DataConverter.toObjectArray(getObjectAttribute(name));
+    public <T> List<T> getObjectArray(Class<T> clazz, String name) {
+        return _objectToTypedArray( clazz, getObjectAttribute(name));
+    }
+
+    public <T> List<T> getAndCreateObjectArray( Class<T> clazz, String name) {
+        return _getAndCreateObjectArray( clazz, name );
     }
 
     @Override
-    public void validate() {
+    public void validate() throws ValueException {
         // TODO: Do nothing?
     }
 }

@@ -6,6 +6,7 @@
  */
 package com.draagon.meta.object.pojo;
 
+import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
@@ -159,7 +160,7 @@ public class PojoMetaObject extends MetaObject {
         Class<?> c = method.getParameterTypes()[ 0];
 
         if (val != null && !c.isAssignableFrom(val.getClass() )) {
-            throw new ValueException("Setter expected class [" + c.getName() + "] but value was of type [" + val.getClass() + "]");
+            throw new InvalidValueException("Setter expected class [" + c.getName() + "] but value was of type [" + val.getClass() + "]");
         }
 
         Object[] arglist = new Object[1];

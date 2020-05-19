@@ -11,20 +11,16 @@ public class MetaDataNotFoundException extends MetaDataException {
 
     private final String name;
 
-    public MetaDataNotFoundException(String msg, String name) {
+    public MetaDataNotFoundException( String msg, String name ) {
         super(msg);
         this.name = name;
+    }
+
+    protected String prefix( String type, String name ) {
+        return "["+name+"]";
     }
 
     public String getName() {
         return name;
     }
-
-    //public MetaDataNotFoundException( String msg, Throwable cause )
-    //{
-    //  super( msg, cause );
-    //}
-    //public MetaDataNotFoundException() {
-    //    super("MetaData Not Found Exception");
-    //}
 }

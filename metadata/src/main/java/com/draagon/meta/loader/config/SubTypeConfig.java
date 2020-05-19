@@ -2,6 +2,7 @@ package com.draagon.meta.loader.config;
 
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
+import com.draagon.meta.ValueException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
@@ -62,7 +63,7 @@ public class SubTypeConfig extends ConfigObjectBase {
     //////////////////////////////////////////////////////////////////////
     // Validation Method
 
-    public void validate() {
+    public void validate() throws ValueException {
         super.validate();
         if ( getTypeName() == null ) throw new InvalidValueException( "Type name on SubType cannot be null" );
         if ( getBaseClass() == null ) throw new InvalidValueException( "Base class on SubType ["+getTypeName()+"] cannot be null" );

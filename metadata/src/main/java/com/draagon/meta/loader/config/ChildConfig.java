@@ -2,6 +2,7 @@ package com.draagon.meta.loader.config;
 
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.ValueException;
 import com.draagon.meta.object.MetaObject;
 
 import java.util.List;
@@ -77,7 +78,7 @@ public final class ChildConfig extends ConfigObjectBase {
     // Validation
 
     @Override
-    public void validate() {
+    public void validate() throws ValueException {
         super.validate();
         if ( getType() == null || getSubType() == null || getName() == null ) {
             throw new InvalidValueException( "ChildConfig does not have type,subType, and/or name fields set: " + toString() );
