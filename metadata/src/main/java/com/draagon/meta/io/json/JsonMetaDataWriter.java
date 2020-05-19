@@ -15,15 +15,11 @@ public abstract class JsonMetaDataWriter extends MetaDataWriter {
     private final Writer writer;
     private final JsonWriter out;
 
-    protected JsonMetaDataWriter(MetaDataLoader loader, Writer writer ) throws MetaDataIOException {
+    protected JsonMetaDataWriter(MetaDataLoader loader, Writer writer ) throws IOException {
         super(loader);
         this.gson = new Gson();
         this.writer = writer;
-        try {
-            this.out = gson.newJsonWriter( writer );
-        } catch (IOException e) {
-            throw new MetaDataIOException( this, "Error opening JsonWriter: " + e, e );
-        }
+        this.out = gson.newJsonWriter( writer );
     }
 
     public JsonMetaDataWriter withIndent( String indent ) {
@@ -36,13 +32,9 @@ public abstract class JsonMetaDataWriter extends MetaDataWriter {
     }
 
     @Override
-    public void close() throws MetaDataIOException {
+    public void close() throws IOException {
         if ( out != null ) {
-            try {
-                out.close();
-            } catch (IOException e) {
-                throw new MetaDataIOException( this, e.toString(), e );
-            }
+            out.close();
         }
         /*else if ( writer != null ) {
             try {

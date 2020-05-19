@@ -12,6 +12,7 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.DataConverter;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 public class XMLObjectWriter extends XMLMetaDataWriter {
@@ -20,13 +21,13 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         super(loader, out);
     }
 
-    public static void writeObject(MetaDataAware o, OutputStream out) throws MetaDataIOException {
+    public static void writeObject(MetaDataAware o, OutputStream out) throws IOException {
         XMLObjectWriter writer = new XMLObjectWriter(o.getMetaData().getLoader(), out);
         writer.write(o);
         writer.close();
     }
 
-    public void write( Object vo ) throws MetaDataIOException {
+    public void write( Object vo ) throws IOException {
 
         if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null Object");
 
@@ -40,7 +41,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
     }
 
 
-    protected void writeObject( Element el, MetaObject mo, Object vo) throws MetaDataIOException {
+    protected void writeObject( Element el, MetaObject mo, Object vo) throws IOException {
 
         String xmlName = null;
         if ( isXmlTyped( mo )) {
@@ -56,7 +57,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         writeObjectFields( objEl, mo, vo);
     }
 
-    protected void writeObjectFields( Element objEl, MetaObject mo, Object vo ) throws MetaDataIOException {
+    protected void writeObjectFields( Element objEl, MetaObject mo, Object vo ) throws IOException {
 
         String typedField = null;
         if (isXmlTyped( mo )) {
@@ -80,7 +81,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeFieldAsAttr( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldAsAttr( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         String value = null;
 
@@ -109,7 +110,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeField( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeField( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         switch (mf.getDataType()) {
             case BOOLEAN:
@@ -142,7 +143,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeFieldObjectArray( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldObjectArray( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         boolean first = true;
         for (Object o : DataConverter.toObjectArray(mf.getObject(vo))) {
@@ -168,7 +169,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         return el;
     }
 
-    protected void writeFieldObject( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldObject( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         // TODO:  Should we worry about the objectRef?
 
@@ -186,7 +187,7 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
         }
     }
 
-    protected void writeFieldCustom( Element el, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldCustom( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 }

@@ -20,7 +20,7 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
         this.out = out;
     }
 
-    protected void initDoc() throws MetaDataIOException {
+    protected void initDoc() throws IOException {
         if (doc == null) doc = createDocument();
     }
 
@@ -28,7 +28,7 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
         return doc;
     }
 
-    protected Document createDocument() throws MetaDataIOException {
+    protected Document createDocument() throws IOException {
         try {
             // TODO: Add flag for validating
             return XMLUtil.getBuilder(false).newDocument();
@@ -37,7 +37,7 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
         }
     }
 
-    protected void writeDocument(Document doc, OutputStream out) throws MetaDataIOException {
+    protected void writeDocument(Document doc, OutputStream out) throws IOException {
         try {
             XMLUtil.writeToStream( doc, out, true );
         } catch (IOException e) {
@@ -45,7 +45,7 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
         }
     }
 
-    public void flush() throws MetaDataIOException {
+    public void flush() throws IOException {
         if ( !flushed ) {
             flushed = true;
             writeDocument(doc, out);
@@ -53,7 +53,7 @@ public abstract class XMLMetaDataWriter extends MetaDataWriter {
     }
 
     @Override
-    public void close() throws MetaDataIOException {
+    public void close() throws IOException {
 
         flush();
 

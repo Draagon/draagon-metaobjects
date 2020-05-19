@@ -13,6 +13,7 @@ import com.draagon.meta.object.Validatable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -22,18 +23,18 @@ public class XMLObjectReader extends XMLMetaDataReader {
         super(loader, is);
     }
 
-    public static <T> T readObject( Class<T> clazz, MetaObject mo, InputStream is ) throws MetaDataIOException {
+    public static <T> T readObject( Class<T> clazz, MetaObject mo, InputStream is ) throws IOException {
         XMLObjectReader writer = new XMLObjectReader(mo.getLoader(), is);
         Object o = writer.read( mo);
         writer.close();
         return (T) o;
     }
 
-    public Object read() throws MetaDataIOException {
+    public Object read() throws IOException {
         return read(null);
     }
 
-    public Object read (MetaObject mo ) throws MetaDataIOException {
+    public Object read (MetaObject mo ) throws IOException {
 
         Object o = null;
 
@@ -46,7 +47,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         return validate( readObject( e, mo ));
     }
 
-    protected Object validate( Object o ) throws MetaDataIOException {
+    protected Object validate( Object o ) throws IOException {
         if ( o != null && o instanceof Validatable ) {
             try {
                 ((Validatable) o).validate();
@@ -57,7 +58,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         return o;
     }
 
-    protected Object readObject(Element e, MetaObject mo) throws MetaDataIOException {
+    protected Object readObject(Element e, MetaObject mo) throws IOException {
 
         String name = e.getNodeName();
         path().inc( name );
@@ -81,7 +82,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         return o;
     }
 
-    protected void readMetaFields( Element e, MetaObject mo, Object vo) throws MetaDataIOException {
+    protected void readMetaFields( Element e, MetaObject mo, Object vo) throws IOException {
 
         if ( isXmlTyped(mo)) {
             String fieldName = getXmlTypedField( mo );
@@ -105,7 +106,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         }
     }
 
-    protected void readFieldAsAttribute(Element e, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void readFieldAsAttribute(Element e, MetaObject mo, MetaField mf, Object vo) throws IOException {
         String name = getXmlName(mf);
         path().inc( name );
         if ( e.hasAttribute( name)) {
@@ -115,7 +116,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         path().dec();
     }
 
-    protected void readFieldAsElement(Element e, MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void readFieldAsElement(Element e, MetaObject mo, MetaField mf, Object vo) throws IOException {
         String xmlName = getXmlName(mf);
         path().inc( xmlName );
 
@@ -150,7 +151,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         path().dec();
     }
 
-    protected void readFieldAsString(Element e, String xmlName, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void readFieldAsString(Element e, String xmlName, MetaField mf, Object vo) throws IOException {
 
         Element el = getFirstElementOfName( e, xmlName );
         if (el == null) return;
@@ -163,7 +164,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         path().dec();
     }
 
-    protected void readFieldObject(Element e, String xmlName, MetaField mf, Object o) throws MetaDataIOException {
+    protected void readFieldObject(Element e, String xmlName, MetaField mf, Object o) throws IOException {
         MetaObject refmo = getObjectRef( this, mf );
 
         if ( xmlWrap( mf )) {
@@ -179,7 +180,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         }
     }
 
-    protected void readFieldObjectArray(Element e, String xmlName, MetaField mf, Object o) throws MetaDataIOException {
+    protected void readFieldObjectArray(Element e, String xmlName, MetaField mf, Object o) throws IOException {
 
         path().inc( xmlName);
 
@@ -213,7 +214,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         path().dec();
     }
 
-    protected void readFieldCustom(Element e, String xmlName, MetaField mf, Object o) throws MetaDataIOException {
+    protected void readFieldCustom(Element e, String xmlName, MetaField mf, Object o) throws IOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 }

@@ -26,18 +26,18 @@ public class JsonObjectReader extends JsonMetaDataReader {
         super(loader, reader);
     }
 
-    public static <T> T readObject( Class<T> clazz, MetaObject mo, Reader reader ) throws MetaDataIOException {
+    public static <T> T readObject( Class<T> clazz, MetaObject mo, Reader reader ) throws IOException {
         JsonObjectReader writer = new JsonObjectReader(mo.getLoader(), reader);
         Object o = writer.read( mo);
         writer.close();
         return (T) o;
     }
 
-    public Object read() throws MetaDataIOException {
+    public Object read() throws IOException {
         return read( null );
     }
 
-    public Object read(MetaObject mo ) throws MetaDataIOException {
+    public Object read(MetaObject mo ) throws IOException {
 
         try {
             if ( !in().hasNext() ) return null;
@@ -48,7 +48,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         return validate( readObject( mo ));
     }
 
-    protected Object validate( Object o ) throws MetaDataIOException {
+    protected Object validate( Object o ) throws IOException {
         if ( o != null && o instanceof Validatable ) {
             try {
                 ((Validatable) o).validate();
@@ -59,7 +59,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         return o;
     }
 
-    protected Object readObject(MetaObject mo ) throws MetaDataIOException {
+    protected Object readObject(MetaObject mo ) throws IOException {
 
         try {
             path().inc("{}");
@@ -77,7 +77,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         }
     }
 
-    protected Object readObjectFields(MetaObject mo) throws MetaDataIOException {
+    protected Object readObjectFields(MetaObject mo) throws IOException {
 
         Object vo = null;
         String lastName = null;
@@ -118,7 +118,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         }
     }
 
-    protected MetaObject processMetaObjectType( MetaObject mo ) throws MetaDataIOException, IOException {
+    protected MetaObject processMetaObjectType( MetaObject mo ) throws IOException, IOException {
 
         //String typeField = in().nextName();
         //if ( !TYPE_FIELD.equals( typeField )) {
@@ -145,7 +145,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         return mo;
     }
 
-    protected void readFieldValue(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void readFieldValue(MetaObject mo, MetaField mf, Object vo) throws IOException {
         try {
             switch( mf.getDataType() ) {
                 case BOOLEAN:       mf.setBoolean( vo, in().nextBoolean() ); break;
@@ -173,7 +173,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         }
     }
 
-    protected void readFieldObjectArray(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException, IOException {
+    protected void readFieldObjectArray(MetaObject mo, MetaField mf, Object vo) throws IOException, IOException {
 
         path().inc("[]");
         in().beginArray();
@@ -192,7 +192,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         path().dec();
     }
 
-    protected void readFieldObject(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void readFieldObject(MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         MetaObject refmo = getObjectRef( this, mf );
 
@@ -200,12 +200,12 @@ public class JsonObjectReader extends JsonMetaDataReader {
         mf.setObject( vo, voc );
     }
 
-    protected void readFieldCustom(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void readFieldCustom(MetaObject mo, MetaField mf, Object vo) throws IOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 
     @Override
-    public void close() throws MetaDataIOException {
+    public void close() throws IOException {
         super.close();
         if ( !path().isAtRoot() ) {
             throw new IllegalStateException( "On writer ["+toString()+"], path was not empty ["+path().getPathAndClear()+"], logic error" );

@@ -2,7 +2,7 @@ package com.draagon.meta.io;
 
 import java.io.IOException;
 
-public class MetaDataIOException extends Exception {
+public class MetaDataIOException extends IOException {
 
     public MetaDataIOException(MetaDataIO io, String msg ) {
         this( io, msg, null );

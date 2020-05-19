@@ -19,15 +19,9 @@ public abstract class XMLMetaDataReader extends MetaDataReader {
         this.in = in;
     }
 
-    protected Document loadXML() throws MetaDataIOException {
-        try {
-            // TODO: Add flag for validating XML
-            doc = XMLUtil.loadFromStream(in, false);
-        //} catch (SAXException e) {
-        //    throw new MetaDataIOException( this, "Parse error loading XML: " + e, e);
-        } catch (IOException e) {
-            throw new MetaDataIOException( this, "Error reading XML: " + e, e);
-        }
+    protected Document loadXML() throws IOException {
+        // TODO: Add flag for validating XML
+        doc = XMLUtil.loadFromStream(in, false);
         return doc;
     }
 

@@ -16,18 +16,18 @@ import java.io.Writer;
 
 public class JsonObjectWriter extends JsonMetaDataWriter {
 
-    public JsonObjectWriter(MetaDataLoader loader, Writer writer ) throws MetaDataIOException {
+    public JsonObjectWriter(MetaDataLoader loader, Writer writer ) throws IOException {
         super(loader, writer);
     }
 
-    public static void writeObject(MetaDataAware o, Writer out) throws MetaDataIOException {
+    public static void writeObject(MetaDataAware o, Writer out) throws IOException {
         JsonObjectWriter writer = new JsonObjectWriter(o.getMetaData().getLoader(), out);
         writer.withIndent( "  " );
         writer.write(o);
         writer.close();
     }
 
-    public void write(Object vo) throws MetaDataIOException {
+    public void write(Object vo) throws IOException {
         if ( vo == null ) throw new MetaDataIOException( this, "Cannot write a null Object");
         try {
             writeObject(IOUtil.getMetaObjectFor(getLoader(), vo ), vo);
@@ -36,7 +36,7 @@ public class JsonObjectWriter extends JsonMetaDataWriter {
         }
     }
 
-    protected void writeObject(MetaObject mo, Object vo) throws MetaDataIOException {
+    protected void writeObject(MetaObject mo, Object vo) throws IOException {
         try {
             path().inc("{}");
             out().beginObject();
@@ -54,7 +54,7 @@ public class JsonObjectWriter extends JsonMetaDataWriter {
         }
     }
 
-    protected void writeField(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeField(MetaObject mo, MetaField mf, Object vo) throws IOException {
         try {
             path().inc(mf);
             out().name(mf.getName());
@@ -106,7 +106,7 @@ public class JsonObjectWriter extends JsonMetaDataWriter {
         }
     }
 
-    protected void writeFieldObjectArray(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldObjectArray(MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         // TODO:  Should we worry about the objectRef?
         try {
@@ -121,14 +121,14 @@ public class JsonObjectWriter extends JsonMetaDataWriter {
         }
     }
 
-    protected void writeFieldObject(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldObject(MetaObject mo, MetaField mf, Object vo) throws IOException {
 
         // TODO:  Should we worry about the objectRef?
         Object o = mf.getObject( vo );
         writeObject(IOUtil.getMetaObjectFor(getLoader(), o ), o);
     }
 
-    protected void writeFieldCustom(MetaObject mo, MetaField mf, Object vo) throws MetaDataIOException {
+    protected void writeFieldCustom(MetaObject mo, MetaField mf, Object vo) throws IOException {
         throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
     }
 }

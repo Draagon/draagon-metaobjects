@@ -34,20 +34,20 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
 
         TypesConfig loadedConfig = null;
         XMLObjectReader reader = null;
-        MetaDataIOException ioEx = null;
+        IOException ioEx = null;
 
         // Read the TypesConfig
         try {
             reader = new XMLObjectReader( getLoader(), is );
             loadedConfig = (TypesConfig) reader.read( getLoader().getMetaObjectByName(TypesConfig.OBJECT_NAME));
-        } catch (MetaDataIOException e) {
+        } catch (IOException e) {
             ioEx = e;
         }
 
         // Close the Reader
         try {
             reader.close();
-        } catch (MetaDataIOException ex) {
+        } catch (IOException ex) {
             if ( ioEx != null ) ioEx = ex;
         }
 

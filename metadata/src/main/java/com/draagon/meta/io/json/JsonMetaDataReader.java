@@ -29,7 +29,7 @@ public abstract class JsonMetaDataReader extends MetaDataReader {
     }
 
     @Override
-    public void close() throws MetaDataIOException {
+    public void close() throws IOException {
 
         if ( in!=null ) {
             try {
