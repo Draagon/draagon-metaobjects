@@ -77,7 +77,7 @@ public class XMLUtil
     public static DocumentBuilder getBuilder( boolean validating ) throws IOException {
         try {
             DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-            documentFactory.setValidating(validating);
+            //documentFactory.setValidating(validating);
             return documentFactory.newDocumentBuilder();
         }
         catch (ParserConfigurationException e) {

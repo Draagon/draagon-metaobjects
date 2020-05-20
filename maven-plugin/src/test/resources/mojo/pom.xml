@@ -22,9 +22,11 @@
                     <loader>
                         <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
                         <name>mojo-test-pom</name>
+                        <sourceDir>./src/test/resources</sourceDir>
                         <sources>
                             <!--source>types:com/draagon/meta/loader/xml/metaobjects.types.xml</source-->
-                            <source>model:resource:mojo/mojo-test-metadata.xml</source>
+                            <!--source>model:resource:mojo/mojo-test-metadata.xml</source -->
+                            <source>mojo/mojo-test-metadata.xml</source>
                         </sources>
                     </loader>
                     <globals>

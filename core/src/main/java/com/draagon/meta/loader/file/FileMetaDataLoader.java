@@ -10,6 +10,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
+import com.draagon.meta.loader.uri.URIHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,18 +54,33 @@ public class FileMetaDataLoader extends MetaDataLoader {
     // MOJO Support Methods
 
     @Override
-    public void mojoSetURISources(List<URI> sourceURIList) {
+    protected void mojoProcessSources( String sourceDir, List<String> rawSources ) {
 
-        if ( sourceURIList == null ) throw new IllegalArgumentException(
+        if ( rawSources == null ) throw new IllegalArgumentException(
                 "sourceURIList was null on setURIList for Loader: " + toString());
 
-        LocalMetaDataSources source = null;
+        List<String> localSourceList = new ArrayList<>();
         List<URI> uriSourceList = new ArrayList<>();
-        for ( URI uri: sourceURIList ) {
-            uriSourceList.add(uri);
+
+        // See if the raw input is a URI or not and add to appropriate list
+        for ( String raw: rawSources ) {
+            if ( raw.indexOf(":") > 0) uriSourceList.add(URIHelper.toURI(raw));
+            else localSourceList.add(raw);
         }
-        URIMetaDataSources sources = new URIMetaDataSources( uriSourceList );
-        getLoaderOptions().addSources( sources );
+
+        // Set URI Souces
+        if (!uriSourceList.isEmpty()) {
+            URIMetaDataSources uriSources = new URIMetaDataSources(uriSourceList);
+            getLoaderOptions().addSources(uriSources);
+        }
+
+        // Set Local Sources
+        if (!localSourceList.isEmpty()) {
+            LocalMetaDataSources localSources = null;
+            if ( sourceDir != null ) localSources = new LocalMetaDataSources(sourceDir,localSourceList);
+            else localSources = new LocalMetaDataSources(localSourceList);
+            getLoaderOptions().addSources(localSources);
+        }
     }
 
     @Override

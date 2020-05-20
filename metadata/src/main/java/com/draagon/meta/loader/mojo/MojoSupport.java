@@ -11,5 +11,6 @@ public interface MojoSupport {
     public final static String ARG_STRICT       = "strict";
 
     public void mojoInit( Map<String, String> args );
-    public void mojoSetURISources( List<URI> sourceURIList );
+    public void mojoSetSources( List<String> sourceList );
+    public void mojoSetSourceDir( String sourceDir );
 }

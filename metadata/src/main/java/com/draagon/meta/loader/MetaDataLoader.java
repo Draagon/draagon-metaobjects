@@ -15,6 +15,7 @@ import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,14 +95,30 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> implements MojoSupp
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // MOJO Support Methods
+    private String mojoSourceDir=null;
 
     @Override
-    public void mojoSetURISources(List<URI> sourceURIList) {
+    public void mojoSetSourceDir( String sourceDir ) {
+        File sd = new File(sourceDir);
+        if ( !sd.exists() ) throw new IllegalStateException( "MojoSourceDir ["+sourceDir+"] does not exist");
+        mojoSourceDir = sourceDir;
+    }
+
+    @Override
+    public void mojoSetSources(List<String> sourceList) {
+
+        if ( sourceList == null ) throw new IllegalArgumentException(
+                "sourceURIList was null on setURIList for Loader: " + toString());
+
+        mojoProcessSources( mojoSourceDir, sourceList );
+    }
+
+    protected void mojoProcessSources( String sourceDir, List<String> sourceList ) {
 
         String name = this.getClass().getSimpleName();
-        if ( sourceURIList == null ) throw new IllegalArgumentException(
+        if ( sourceList == null ) throw new IllegalArgumentException(
                 "sourceURIList was null on setURIList for " + name);
-        if ( sourceURIList.size() > 0  ) throw new IllegalArgumentException( name +
+        if ( sourceList.size() > 0  ) throw new IllegalArgumentException( name +
                 " does not support URI sources");
     }
 

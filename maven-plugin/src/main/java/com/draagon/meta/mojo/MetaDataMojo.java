@@ -67,8 +67,7 @@ public class MetaDataMojo extends AbstractMojo
         this.generators = generators;
     }
 
-    public void execute()
-        throws MojoExecutionException
+    public void execute() throws MojoExecutionException
     {
         if ( getLoader() == null ) {
             throw new MojoExecutionException( "No <loader> element was defined");
@@ -129,15 +128,9 @@ public class MetaDataMojo extends AbstractMojo
         }
 
         // Get the Source Directory if it is specified
-        //File srcDir = getSourceDir();
-
-        // Process and create URI Sources from the Source list
-        List<URI> uriSources = new ArrayList<>();
-        for ( String s : loaderConfig.getSources() ) {
-            uriSources.add(URIHelper.toURI( s ));
-        }
-
-        loader.mojoSetURISources( uriSources );
+        File srcDir = getSourceDir();
+        if ( srcDir != null ) loader.mojoSetSourceDir( loaderConfig.getSourceDir() );
+        loader.mojoSetSources( loaderConfig.getSources() );
         loader.mojoInit( getGlobals() );
 
         return loader;
@@ -174,7 +167,7 @@ public class MetaDataMojo extends AbstractMojo
         }
 
         return URI_FILE_PREFIX + f.getName();
-    }
+    }*/
 
     protected File getSourceDir() {
         String srcDir = loaderConfig.getSourceDir();
@@ -186,5 +179,5 @@ public class MetaDataMojo extends AbstractMojo
             }
         }
         return sourceDir;
-    }*/
+    }
 }

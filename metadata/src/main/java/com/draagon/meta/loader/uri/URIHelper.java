@@ -9,7 +9,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class URIHelper implements URIConstants {
 
@@ -44,14 +46,26 @@ public class URIHelper implements URIConstants {
     }
 
     public static URI constructURI(String uriType, String uriSourceType, String source) {
+        return constructURI( uriType, uriSourceType, source, null );
+    }
+    public static URI constructURI(String uriType, String uriSourceType, String source, Map<String,String> args ) {
         validateUriType( uriType );
         validateUriSourceType( uriSourceType );
         validateUriSource( uriSourceType, source );
-        return constructValidatedURI( uriType, uriSourceType, source );
+        return constructValidatedURI( uriType, uriSourceType, source, args );
     }
 
-    public static URI constructValidatedURI(String uriType, String uriSourceType, String source) {
+    public static URI constructValidatedURI(String uriType, String uriSourceType, String source, Map<String,String> args) {
         String uriStr = uriType + ":" + uriSourceType + ":" + source;
+        if ( args != null && !args.isEmpty() ) {
+            uriStr += ";";
+            boolean first = true;
+            for (String key : args.keySet() ) {
+                if ( first ) first = false;
+                else uriStr += "&";
+                uriStr += key+"="+args.get(key);
+            }
+        }
         try {
             return new URI(uriStr );
         } catch( URISyntaxException e ) {
@@ -161,21 +175,29 @@ public class URIHelper implements URIConstants {
         String uriType = null;
         String uriSourceType = null;
         String uriSource = null;
+        String uriString = in;
+        String uriArgs = null;
+
+        int j = uriString.indexOf(';');
+        if (j > 0) {
+            uriString = in.substring(0, j);
+            uriArgs = in.substring(j+1);
+        }
 
         String token = null;
-        String afterType = in;
-        String tail = in;
+        String afterType = uriString;
+        String tail = uriString;
 
         //////////////////////////////////////////////////////////////////////////
         // Extract the URI Type
 
-        int i = in.indexOf(":");
+        int i = uriString.indexOf(":");
         if ( i == 0 ) {
             throw new IllegalArgumentException("Invalid syntax, cannot start with : ["+in+"]");
         }
         else if ( i > 0 ) {
-            token = in.substring(0, i);
-            tail = in.substring(i+1);
+            token = uriString.substring(0, i);
+            tail = uriString.substring(i+1);
             if (VALID_URI_TYPES.contains(token)) {
                 uriType = token;
                 afterType = tail;
@@ -192,14 +214,18 @@ public class URIHelper implements URIConstants {
         }
 
         //////////////////////////////////////////////////////////////////////////
-        // Extract the URI SubType
+        // Extract the URI SubType and Sources
 
+        // NOTE:  Assume it's a model if types isn't specified
         if ( uriType == null ) {
             uriType = URI_TYPE_MODEL;
         }
 
-        // NOTE:  Assume it's a model if types isn't specified
-        if (token.startsWith("resource")) {
+        if ( i < 0 ) {
+            uriSourceType = URI_SOURCE_RESOURCE;
+            uriSource = uriString;
+        }
+        else if (token.startsWith("resource")) {
 
             uriSourceType = URI_SOURCE_RESOURCE;
             uriSource = tail;
@@ -222,7 +248,7 @@ public class URIHelper implements URIConstants {
                 uriSource = tail;
             } else {
                 //uriSource = tail;
-                throw new IllegalArgumentException("Invalid URL syntax after [url:] : ["+tail+"]");
+                throw new IllegalArgumentException("Invalid URL syntax after [url:] : ["+in+"]");
             }
         }
         else if (token.startsWith("http")) {
@@ -236,7 +262,44 @@ public class URIHelper implements URIConstants {
             uriSource = afterType;
         }
 
-        return new URIModel( uriType, uriSourceType, uriSource );
+
+        //////////////////////////////////////////////////////////////////////////
+        // Extract the URI Args
+
+        Map<String,String> argMap = new HashMap<>();
+
+        String args = uriArgs;
+        String argset = null;
+        while( args != null ) {
+
+            // Parse key/value set
+            j = args.indexOf('&');
+            if (j > 0) {
+                argset = args.substring(0, j);
+                args = args.substring(j+1);
+            } else if (j < 0) {
+                argset = args;
+                args = null;
+            } else {
+                throw new IllegalArgumentException("Invalid URI syntax on '&' in params: ["+in+"]");
+            }
+
+            // Parse key & value
+            j = argset.indexOf('=');
+            if (j > 0) {
+                argMap.put( argset.substring(0, j), argset.substring(j+1));
+            } else if (j < 0) {
+                argMap.put( argset, "");
+            } else {
+                throw new IllegalArgumentException("Invalid URI syntax on '=' in params: ["+in+"]");
+            }
+        }
+
+
+        //////////////////////////////////////////////////////////////////////////
+        // Construct the URI Model
+
+        return new URIModel( uriType, uriSourceType, uriSource, argMap );
     }
 
 
@@ -244,20 +307,33 @@ public class URIHelper implements URIConstants {
         return getInputStream( null, model );
     }
 
-    public static InputStream getInputStream( ClassLoader classLoader, URIModel model) throws IOException {
+    public static InputStream getInputStream( List<ClassLoader> classLoaders, URIModel model) throws IOException {
 
         String st = model.getUriSourceType();
         if ( URI_SOURCE_RESOURCE.equals( st )) {
             URL url = null;
 
-            if (classLoader != null )  url = classLoader.getResource(model.getUriSource());
+            if (classLoaders != null ) {
+                for (ClassLoader classLoader : classLoaders) {
+                    url = classLoader.getResource(model.getUriSource());
+                    if ( url !=null ) break;
+                }
+            }
             if ( url == null ) url = ClassLoader.getSystemClassLoader().getResource(model.getUriSource());
             if ( url == null )  throw new IOException( "Could not open resource: "+ model.toURI());
 
             return url.openStream();
         }
         else if ( URI_SOURCE_FILE.equals( st )) {
-            return new FileInputStream( new File( model.getUriSource() ));
+            File file=null;
+            String f = model.getUriSource();
+            String srcDir = model.getUriArg( URI_ARG_SOURCEDIR );
+            if ( srcDir != null ) {
+                file = new File( new File(srcDir), f );
+            } else {
+                file = new File(f);
+            }
+            return new FileInputStream(file);
         }
         else if ( URI_SOURCE_URL.equals( st )) {
             return new URL( model.getUriSource() ).openStream();

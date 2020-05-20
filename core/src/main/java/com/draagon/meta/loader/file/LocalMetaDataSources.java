@@ -33,6 +33,6 @@ public class LocalMetaDataSources extends MetaDataSources {
 
     /** Returns the class loader */
     public ClassLoader getClassLoader() {
-        return this.getClassLoader();
+        return getClass().getClassLoader();
     }
 }

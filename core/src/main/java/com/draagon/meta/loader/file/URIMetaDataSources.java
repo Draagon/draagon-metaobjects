@@ -7,6 +7,7 @@ import com.draagon.meta.loader.uri.URIModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,21 +36,32 @@ public class URIMetaDataSources extends MetaDataSources {
      */
     protected InputStream getInputStreamForFilename(String filename) throws MetaDataException {
 
+        // Set Source Directory if it's on the Model
+        //String sourceDir = currentModel.getUriArg(URIHelper.URI_ARG_SOURCEDIR);
+        //if ( sourceDir != null ) {
+        //    setSourceDir( sourceDir );
+            // Call the super method
+            //super.getInputStreamForFilename(filename);
+        //}
+        //else {
+        //    setSourceDir(null);
+        //}
+
         // LOAD THE FILE
         if (filename == null) {
             throw new NullPointerException("The MetaData file was null on URI: "+currentModel.toURI());
         }
 
         try {
-            return URIHelper.getInputStream( currentModel );
+            List<ClassLoader> classLoaders = Arrays.asList( getClassLoader(), ClassLoader.getSystemClassLoader());
+            return URIHelper.getInputStream( classLoaders, currentModel );
         } catch (IOException e) {
             throw new MetaDataException( "Could not open InputStream for URI: "+currentModel.toURI());
         }
     }
 
-
     /** Returns the class loader */
     public ClassLoader getClassLoader() {
-        return this.getClassLoader();
+        return getClass().getClassLoader();
     }
 }

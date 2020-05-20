@@ -35,6 +35,11 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
         Document doc = null;
 
         try {
+            /*byte [] b = new byte[40];
+            int i = is.read(b);
+            String s = new String(b);
+            if (true)
+                throw new MetaDataException( "---------- " + s);*/
             doc = XMLUtil.loadFromStream(is);
 
             //////////////////////////////////////////////////////

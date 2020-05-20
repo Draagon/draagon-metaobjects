@@ -32,13 +32,13 @@ public class LoaderParam {
         this.classname = classname;
     }
 
-    //public String getSourceDir() {
-    //    return sourceDir;
-    //}
+    public String getSourceDir() {
+        return sourceDir;
+    }
 
-    //public void setSourceDir(String sourceDir) {
-    //    this.sourceDir = sourceDir;
-    //}
+    public void setSourceDir(String sourceDir) {
+        this.sourceDir = sourceDir;
+    }
 
     public List<String> getSources() {
         return sources;

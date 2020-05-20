@@ -14,7 +14,8 @@ import java.net.URL;
 public class URIHelperTests {
 
     final static String TEST_TYPES_RESOURCE = "com/draagon/meta/loader/simple/simple.types.xml";
-    final static String TEST_TYPES_FILE = "./src/main/resources/" + TEST_TYPES_RESOURCE;
+    final static String TEST_TYPES_BASEDIR = "./src/main/resources";
+    final static String TEST_TYPES_FILE = TEST_TYPES_BASEDIR + "/" + TEST_TYPES_RESOURCE;
 
     @Test
     public void uriValidTypesTest() {
@@ -102,7 +103,6 @@ public class URIHelperTests {
 
         // Fail tests
         assertTrue(roundTrip(false, "sdf", "file", "C:/test"));
-
     }
 
     protected boolean roundTrip(boolean shouldPass, String t, String st, String s) {
@@ -129,10 +129,20 @@ public class URIHelperTests {
         InputStream is = getInputStream(toURI(URI_TYPE_MODEL, f));
         is.close();
 
-        is = getInputStream(toURI( "types:resource:"+ TEST_TYPES_RESOURCE));
+        is = getInputStream(toURI("types:resource:" + TEST_TYPES_RESOURCE));
         is.close();
 
-        is = getInputStream(toURI( "model:url:https://postman-echo.com/get?foo1=bar1&foo2=bar2"));
+        is = getInputStream(toURI("model:url:https://postman-echo.com/get?foo1=bar1&foo2=bar2"));
         is.close();
+    }
+
+    @Test
+    public void uriURIArgTest() throws URISyntaxException {
+
+        String uriString = "types:resource:"+TEST_TYPES_FILE+";sourceDir="+TEST_TYPES_BASEDIR;
+        URIModel m = toURIModel(uriString);
+        assertEquals( TEST_TYPES_BASEDIR, m.getUriArg("sourceDir"));
+        assertEquals( TEST_TYPES_FILE, m.getUriSource());
+        assertEquals( uriString, m.toURI().toString());
     }
 }

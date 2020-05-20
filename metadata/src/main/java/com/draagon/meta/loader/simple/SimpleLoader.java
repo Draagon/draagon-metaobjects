@@ -49,14 +49,25 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
     // MOJO Support Methods
 
     @Override
-    public void mojoSetURISources(List<URI> sourceURIList) {
+    protected void mojoProcessSources( String sourceDir, List<String> sourceList ) {
+
         String name = this.getClass().getSimpleName();
-        if ( sourceURIList == null ) throw new IllegalArgumentException(
+        if ( sourceList == null ) throw new IllegalArgumentException(
                 "sourceURIList was null on setURIList for " + name);
-        if ( sourceURIList.size() > 1 ) throw new IllegalArgumentException( name +
+        if ( sourceList.size() > 1 ) throw new IllegalArgumentException( name +
                 " does not support more than one source file");
 
-        setSourceURI( sourceURIList.get(0));
+        String s = sourceList.get(0);
+        if ( s.indexOf(':') < 0 ) {
+            if ( sourceDir != null ) s = "model:file:" + s + ";"+URIHelper.URI_ARG_SOURCEDIR+"="+sourceDir;
+            else if (new File(s).exists()){
+                s = "model:file:"+s;
+            } else {
+                s = "model:resource:"+s;
+            }
+        }
+
+        setSourceURI( URIHelper.toURI( s ));
     }
 
     @Override

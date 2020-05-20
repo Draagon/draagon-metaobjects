@@ -6,12 +6,16 @@ import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.types.TypesConfigParser;
 import com.draagon.meta.loader.uri.URIHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
 public class SimpleTypesParser extends TypesConfigParser<InputStream> {
+
+    Log log = LogFactory.getLog(this.getClass());
 
     protected SimpleTypesParser( TypesConfigLoader loader, String sourceName) {
         super(loader, sourceName);
@@ -30,7 +34,7 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
         }
         finally {
             try {
-                is.close();
+                if (is != null) is.close();
             } catch( IOException e ) {
                 throw new MetaDataException( "Unable to close URI ["+uri+"]: " + e.getMessage(), e );
             }
