@@ -13,8 +13,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.relation.key.ObjectKey;
-import com.draagon.meta.relation.ref.ObjectReference;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -27,7 +25,7 @@ import java.util.List;
  */
 public class MetaDataUtil {
 
-  public final static String ATTR_OBJECT_REF = "objectRef";
+  public final static String ATTR_OBJECT_REF = MetaObject.ATTR_OBJECT_REF;
   public final static String SEP = MetaDataLoader.PKG_SEPARATOR;
 
   /**
@@ -139,12 +137,12 @@ public class MetaDataUtil {
       if (o == null) {
 
         // Try to find an ObjectReference on a MetaField
-        if ( d instanceof MetaField ) {
-          List<MetaData> refs = ((MetaField) d).getChildrenOfType( ObjectReference.TYPE_OBJECTREF, true );
-          if ( !refs.isEmpty() ) {
-            o = ((ObjectReference) refs.get(0)).getReferencedObject();
-          }
-        }
+        //if ( d instanceof MetaField ) {
+        //  List<MetaData> refs = ((MetaField) d).getChildrenOfType( ObjectReference.TYPE_OBJECTREF, true );
+        //  if ( !refs.isEmpty() ) {
+        //    o = ((ObjectReference) refs.get(0)).getReferencedObject();
+        //  }
+        //}
 
         // If it's an ObjectReference access it directly
         //if ( o == null || d instanceof ObjectReference) {

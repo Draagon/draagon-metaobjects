@@ -10,6 +10,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.io.json.JsonSerializationHandler;
+import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.io.xml.XMLSerializationHandler;
 import com.draagon.meta.util.DataConverter;
 import com.google.gson.stream.JsonReader;
@@ -26,7 +27,7 @@ import java.io.IOException;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ClassField extends MetaField<Double> implements XMLSerializationHandler, JsonSerializationHandler
+public class ClassField extends MetaField<Double> implements StringSerializationHandler // XMLSerializationHandler, JsonSerializationHandler
 {
     public final static String SUBTYPE_DOUBLE   = "double";
 
@@ -77,7 +78,7 @@ public class ClassField extends MetaField<Double> implements XMLSerializationHan
      * Gets the object attribute represented by this MetaField
      */
     @Override
-    protected Object getObjectValue(Object obj) {
+    protected Object getObjectAttribute(Object obj) {
         Object val = getDeclaringObject().getValue(this, obj);
         if ( val != null ) {
             if (!getValueClass().isInstance(val)) {
@@ -108,12 +109,23 @@ public class ClassField extends MetaField<Double> implements XMLSerializationHan
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // String SerializationHandler
+
+    public String getValueAsString(Object o) {
+        return ((Class)getObjectAttribute(o)).getName();
+    }
+
+    public void setValueAsString(Object o, String val) {
+        setObjectAttribute(o, convertToClass( val ));
+    }
+
     //////////////////////////////////////////////////////////////////////////
     // Custom Serialization Handlers
 
-    @Override
+    /*@Override
     public void writeJsonValue(Object o, JsonWriter out) throws IOException {
-        if ( o == null ) return;
+        if ( o == null ) return null;
         o = getObjectValue(o);
         out.value(((Class)o).getName());
     }
@@ -146,5 +158,5 @@ public class ClassField extends MetaField<Double> implements XMLSerializationHan
     public void readXmlValue(Object o, String xmlName, Element e) {
         String val = e.getTextContent();
         setObjectAttribute( o, convertToClass(val));
-    }
+    }*/
 }

@@ -10,7 +10,6 @@ import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.model.pojo.MetaModelPojo;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
-import com.draagon.meta.relation.ref.ObjectReference;
 
 public class MetaModelBuilder {
 
@@ -29,7 +28,7 @@ public class MetaModelBuilder {
                 .addChild(buildStringField(MetaModel.FIELD_NAME,true))
                 .addChild(ObjectArrayField.create(MetaModel.FIELD_CHILDREN)
                         .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_XMLWRAP, false ))
-                        .addChild(ObjectReference.create(MetaModel.OBJREF_CHILDREF, MetaModel.OBJECT_NAME)));
+                        .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MetaModel.OBJECT_NAME)));
 
         return metadata;
     }

@@ -9,7 +9,6 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.relation.ref.ObjectReference;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
@@ -118,9 +117,9 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
     /**
      * Get an ObjectReference for the MetaField
      */
-    public ObjectReference getFirstObjectReference() {
-        return (ObjectReference) getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
-    }
+    //public ObjectReference getFirstObjectReference() {
+    //    return (ObjectReference) getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
+    //}
 
     /**
      * Sets the default field value
@@ -214,8 +213,6 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
 
     /**
      * Gets the object attribute represented by this MetaField
-     *
-     * @deprecated Use getObjectValue
      */
     protected Object getObjectAttribute(Object obj) {
         return getObjectValue(obj);
@@ -224,7 +221,7 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
     /**
      * Gets the object attribute represented by this MetaField
      */
-    protected Object getObjectValue(Object obj) {
+    private Object getObjectValue(Object obj) {
         Object val = getDeclaringObject().getValue(this, obj);
         if (!getValueClass().isInstance(val)) {
             val = DataConverter.toType(dataType, val);

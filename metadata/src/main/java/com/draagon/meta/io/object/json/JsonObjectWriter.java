@@ -6,6 +6,7 @@ import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataWriter;
 import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.object.xml.XMLObjectWriter;
+import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.io.util.IOUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -132,6 +133,8 @@ public class JsonObjectWriter extends JsonMetaDataWriter {
     protected void writeFieldCustom(MetaObject mo, MetaField mf, Object vo) throws IOException {
         if ( mf instanceof JsonSerializationHandler ) {
             ((JsonSerializationHandler)mf).writeJsonValue(vo,out());
+        } else if (mf instanceof StringSerializationHandler ){
+            out().value(((StringSerializationHandler)mf).getValueAsString(vo));
         } else {
             throw new MetaDataIOException(this, "Custom DataType and does not implement JsonSerializationHandler [" + mf + "]");
         }

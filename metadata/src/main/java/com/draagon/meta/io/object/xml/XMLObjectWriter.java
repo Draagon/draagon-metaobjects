@@ -6,6 +6,7 @@ import com.draagon.meta.io.MetaDataIOException;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
 
 import com.draagon.meta.io.json.JsonSerializationHandler;
+import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.io.util.IOUtil;
 import com.draagon.meta.io.xml.XMLMetaDataWriter;
 import com.draagon.meta.io.xml.XMLSerializationHandler;
@@ -102,17 +103,24 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
             case OBJECT_ARRAY:
                 value = mf.getString( vo );
                 break;
-
             case CUSTOM:
-                if ( mf instanceof XMLSerializationHandler) {
-                    value = ((XMLSerializationHandler)mf).getXmlAttr(vo);
-                }
+                value = getCustomFieldAsAttr(mo, mf, vo);
                 break;
             default:
                 throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] not supported [" + mf + "]");
         }
         if ( value != null ) {
             el.setAttribute(getXmlName(mf), value);
+        }
+    }
+
+    protected String getCustomFieldAsAttr( MetaObject mo, MetaField mf, Object vo ) throws MetaDataIOException {
+        if ( mf instanceof XMLSerializationHandler) {
+            return ((XMLSerializationHandler)mf).getXmlAttr(vo);
+        } else if ( mf instanceof StringSerializationHandler ) {
+            return ((StringSerializationHandler)mf).getValueAsString(vo);
+        } else {
+            throw new MetaDataIOException(this, "Cannot get value, as Custom  DataTypes are not supported [" + mf + "]");
         }
     }
 
@@ -139,7 +147,6 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
             case OBJECT_ARRAY:
                 writeFieldObjectArray( el, mo, mf, vo);
                 break;
-
             case CUSTOM:
                 writeFieldCustom( el, mo, mf, vo);
                 break;
@@ -198,6 +205,12 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
             el = drawFieldWrapper( el, mf );
             ((XMLSerializationHandler)mf).writeXmlValue(vo,getXmlName(mf),doc(),el);
         }
-        throw new MetaDataIOException(this, "Custom DataType and does not implement XMLSerializationHandler [" + mf + "]");
+        else if ( mf instanceof StringSerializationHandler) {
+            el = drawFieldWrapper( el, mf );
+            el.appendChild( doc().createTextNode(((StringSerializationHandler)mf).getValueAsString(mo)));
+        }
+        else {
+            throw new MetaDataIOException(this, "Custom DataType and does not implement XMLSerializationHandler [" + mf + "]");
+        }
     }
 }

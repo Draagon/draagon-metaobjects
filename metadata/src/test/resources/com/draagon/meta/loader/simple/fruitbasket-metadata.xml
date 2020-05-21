@@ -19,8 +19,6 @@
     <!-- Basket -->
     <object name="Basket" type="map" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
 
-        <objectKey/>
-
         <!-- Id -->
         <field name="id" super="..::common::id"/>
 
@@ -43,14 +41,10 @@
         </field -->
 
         <!-- Apples -->
-        <field name="apples" type="objectArray" objectRef="::Apple">
-            <objectRef type="oneToMany" reference="::Apple"/>
-        </field>
+        <field name="apples" type="objectArray" objectRef="::Apple"/>
 
         <!-- Oranges -->
-        <field name="oranges" type="objectArray" objectRef="::Orange">
-            <objectRef type="oneToMany" reference="::Orange"/>
-        </field>
+        <field name="oranges" type="objectArray" objectRef="::Orange"/>
 
         <!-- Veggies -->
         <!-- field name="veggies" type="objectArray">
@@ -84,8 +78,6 @@
     <!-- Apple -->
     <object name="Apple" super="map" object="com.draagon.meta.loader.simple.fruitbasket.Apple">
 
-        <objectKey name="key"/>
-
         <!-- attr name="object">com.draagon.meta.loader.simple.fruitbasket.Apple</attr -->
 
         <!-- Orachard -->
@@ -99,16 +91,12 @@
     <!-- Macintosh -->
     <object name="Macintosh" super="Apple">
 
-        <objectKey name="key"/>
-
         <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Macintosh</attr>
 
     </object>
 
     <!-- Orange -->
     <object name="Orange" super="Fruit">
-
-        <objectKey name="key"/>
 
         <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Orange</attr>
 

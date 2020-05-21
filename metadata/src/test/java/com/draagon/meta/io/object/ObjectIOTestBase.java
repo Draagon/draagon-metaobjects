@@ -1,6 +1,7 @@
 package com.draagon.meta.io.object;
 
 import com.draagon.meta.attr.BooleanAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.object.json.JsonObjectReader;
@@ -10,10 +11,8 @@ import com.draagon.meta.io.object.xml.XMLObjectWriter;
 import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.mapped.MappedMetaObject;
 import com.draagon.meta.object.mapped.MappedObject;
-import com.draagon.meta.relation.ref.ObjectReference;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,7 +71,7 @@ public abstract class ObjectIOTestBase {
                             .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
                         .addChild(StringField.create( MD.NAME, null ))
                         .addChild(ObjectArrayField.create( MD.BASKET_FRUITS )
-                            .addChild(ObjectReference.create( MD.BASKET_HOLDS, MD.OBJ_FRUIT)))
+                            .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_FRUIT)))
                 )
                 .addChild(MappedMetaObject.create("fruit")
                         .addChild(IntegerField.create( MD.ID, 1 )
@@ -80,7 +79,7 @@ public abstract class ObjectIOTestBase {
                         .addChild(StringField.create( MD.NAME, null ))
                         .addChild(BooleanField.create( MD.FRUIT_IN_BASKET, false ))
                         .addChild(ObjectField.create(MD.FRUIT_BUG)
-                            .addChild(ObjectReference.create( MD.FRUIT_HAS, MD.OBJ_BUG)))
+                            .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_BUG)))
                 )
                 .addChild(MappedMetaObject.create(MD.OBJ_BUG)
                         .addChild(IntegerField.create( MD.ID, 1 )

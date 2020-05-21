@@ -264,7 +264,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
         for (MetaField f : mo.getMetaFields(includeParentData)) {
 
-            ObjectReference oref = f.getFirstObjectReference();
+            ObjectReference oref = (ObjectReference)f.getFirstChild(ObjectReference.class);
             if ( oref != null ) {
 
                 MetaObject objRef = oref.getReferencedObject();

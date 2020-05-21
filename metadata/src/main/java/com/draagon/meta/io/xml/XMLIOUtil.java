@@ -7,8 +7,6 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIO;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.relation.ref.ObjectReference;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.util.MetaDataUtil;
 import org.w3c.dom.Element;
@@ -97,12 +95,12 @@ public class XMLIOUtil {
     }
 
     public static MetaObject getObjectRef(MetaDataIO io, MetaField mf ) throws MetaDataIOException {
-
-        ObjectReference oref = mf.getFirstObjectReference();
+        return MetaDataUtil.getObjectRef(mf);
+        /*ObjectReference oref = mf.getFirstObjectReference();
         if ( oref == null ) throw new MetaDataIOException( io, "No ObjectReference existed ["+mf+"]" );
         MetaObject refmo = oref.getReferencedObject();
         if ( refmo == null ) throw new MetaDataIOException( io, "No MetaObject reference not found ["+refmo+"]" );
-        return refmo;
+        return refmo;*/
     }
 
     /*public static Element getFirstElementByName(MetaDataIO io, Element e, MetaField mf ) throws MetaDataIOException {

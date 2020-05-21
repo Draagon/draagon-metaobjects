@@ -7,14 +7,12 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.io.json.JsonIOConstants;
 import com.draagon.meta.io.xml.XMLIOConstants;
-import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.types.pojo.ChildConfigPojo;
 import com.draagon.meta.loader.types.pojo.SubTypeConfigPojo;
 import com.draagon.meta.loader.types.pojo.TypeConfigPojo;
 import com.draagon.meta.loader.types.pojo.TypesConfigPojo;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
-import com.draagon.meta.relation.ref.ObjectReference;
 
 public class TypesConfigBuilder {
 
@@ -101,7 +99,7 @@ public class TypesConfigBuilder {
     protected static MetaField createObjectArrayField(String tcFieldTypes, String tcRefType, String tcObjType, boolean xmlWrap ) {
         return ObjectArrayField.create(tcFieldTypes)
                 .addChild(BooleanAttribute.create( XMLIOConstants.ATTR_XMLWRAP, xmlWrap ))
-                .addChild(ObjectReference.create(tcRefType, tcObjType));
+                .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, tcObjType));
     }
 
     protected static MetaField createStringField(String name, boolean asXmlAttr ) {
