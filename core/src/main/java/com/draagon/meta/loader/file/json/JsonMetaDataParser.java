@@ -92,7 +92,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             }
             TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
 
-            if ( type.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName(getValueAsString(type, ATTR_DEFSUBTYPE));
+            if ( type.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubType(getValueAsString(type, ATTR_DEFSUBTYPE));
             if ( type.has( ATTR_DEFNAME)) typeConfig.setDefaultName(getValueAsString(type, ATTR_DEFNAME));
             if ( type.has( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix(getValueAsString(type, ATTR_DEFNAMEPREFIX));
             loadChildren( typeConfig, type ).forEach( c-> typeConfig.addTypeChildConfig(c));
@@ -158,14 +158,14 @@ public class JsonMetaDataParser extends MetaDataParser {
             //if ( Boolean.TRUE.equals( def )) typeConfig.setDefaultSubTypeName( name );
 
             if (name == null && name.isEmpty()) {
-                throw new MetaDataException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
+                throw new MetaDataException("SubType of Type [" + typeConfig.getName() + "] has no 'name' attribute specified");
             }
 
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeConfig.addSubType(name, tcl);
+                typeConfig.addSubTypeConfig(name, tcl);
 
                 // Load subtypes
                 loadChildren( typeConfig, subTypeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
@@ -173,11 +173,11 @@ public class JsonMetaDataParser extends MetaDataParser {
                 // Update info msg if verbose
                 if ( getLoader().getLoaderOptions().isVerbose() ) {
                     // Increment the # of subtypes
-                    info.incType(typeConfig.getTypeName());
+                    info.incType(typeConfig.getName());
                 }
             }
             catch (ClassNotFoundException e) {
-                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" +typeConfig.getName()+":"+name+ "] with invalid class: " + e.getMessage());
             }
         }
     }
@@ -199,7 +199,7 @@ public class JsonMetaDataParser extends MetaDataParser {
             String superName    = getValueAsString(el, ATTR_SUPER);
 
             // See if the specified type exists or not
-            if ( getTypesConfig().getType( typeName ) == null ) {
+            if ( getTypesConfig().getTypeByName( typeName ) == null ) {
 
                 // If we are strict, throw an exception, otheriwse log an error
                 if ( getLoader().getLoaderOptions().isStrict() ) {

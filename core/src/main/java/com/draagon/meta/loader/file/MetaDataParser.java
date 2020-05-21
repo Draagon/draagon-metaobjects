@@ -136,7 +136,7 @@ public abstract class MetaDataParser {
         }
 
         // Get the TypeModel with the specified element name
-        TypeConfig typeConfig = getTypesConfig().getType( typeName );
+        TypeConfig typeConfig = getTypesConfig().getTypeByName( typeName );
 
         // If it doesn't exist, then create it and check for the "class" attribute
         if ( typeConfig == null ) {
@@ -146,7 +146,7 @@ public abstract class MetaDataParser {
 
             try {
                 // Add a new TypeModel and add to the mapping
-                typeConfig = getTypesConfig().createType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
+                typeConfig = getTypesConfig().createAndAddType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
             }
             catch( ClassNotFoundException ex ) {
                 throw new MetaDataException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
@@ -185,7 +185,7 @@ public abstract class MetaDataParser {
         if ( subTypeName != null && subTypeName.equals("*")) subTypeName = null;
 
         // Get the TypeModel map for this element
-        TypeConfig types = getTypesConfig().getType( typeName );
+        TypeConfig types = getTypesConfig().getTypeByName( typeName );
         if ( types == null ) {
             // TODO:  What is the best behavior here?
             throw new MetaDataException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
@@ -340,7 +340,7 @@ public abstract class MetaDataParser {
                 }
 
                 if ( subTypeName == null ) {
-                    subTypeName = typeConfig.getDefaultSubTypeName();
+                    subTypeName = typeConfig.getDefaultSubType();
                     c = typeConfig.getDefaultTypeClass();
                 }
                 else {
@@ -381,10 +381,10 @@ public abstract class MetaDataParser {
 
     protected String getSubTypeFromChildConfigs( String parentType, String parentSubType, TypeConfig typeConfig, String name ) {
 
-        TypeConfig tc = getTypesConfig ().getType( parentType );
+        TypeConfig tc = getTypesConfig ().getTypeByName( parentType );
 
         ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType,
-                typeConfig.getTypeName(), null, name );
+                typeConfig.getName(), null, name );
 
         if ( cc == null ) return null;
 
@@ -394,7 +394,7 @@ public abstract class MetaDataParser {
 
     protected void verifyAcceptableChild( String parentType, String parentSubType, String type, String subType, String name ) {
 
-        TypeConfig tc = getTypesConfig().getType( parentType );
+        TypeConfig tc = getTypesConfig().getTypeByName( parentType );
 
         ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
 
@@ -471,7 +471,7 @@ public abstract class MetaDataParser {
         String parentType = parentMetaData.getTypeName();
         String parentSubType = parentMetaData.getSubTypeName();
 
-        TypeConfig parentTypeConfig = getTypesConfig().getType( parentMetaData.getTypeName() );
+        TypeConfig parentTypeConfig = getTypesConfig().getTypeByName( parentMetaData.getTypeName() );
         ChildConfig cc = findBestChildConfigMatch( parentTypeConfig, parentType, parentSubType,
                 MetaAttribute.TYPE_ATTR, null, attrName );
 

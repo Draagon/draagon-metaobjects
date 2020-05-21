@@ -8,13 +8,14 @@ import com.draagon.meta.field.IntegerField;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueMetaObject;
-import com.draagon.meta.object.value.ValueObject;
+import com.draagon.meta.object.mapped.MappedMetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -31,7 +32,7 @@ public class MetaDataLoaderTest {
                 .init()
                 .register()
                 .addMetaAttr( StringAttribute.create( "hello", "world" ))
-                .addChild( ValueMetaObject.create( "foo")
+                .addChild( MappedMetaObject.create("foo")
                         .addMetaField( IntegerField.create( "bar", 5 )
                                 .addMetaAttr( IntAttribute.create("length", 10))
                                 .addMetaAttr( StringAttribute.create("abc", "def"))))
@@ -59,31 +60,31 @@ public class MetaDataLoaderTest {
         assertEquals( "foo.bar.length=\"10\"", "10", mo.getMetaField("bar").getMetaAttr( "length").getValueAsString() );
         assertEquals( "foo.bar.length=10", 10, (int) mo.getMetaField("bar").getMetaAttr( "length").getValue() );
 
-        ValueObject o = (ValueObject) mo.newInstance();
+        Map o = (Map) mo.newInstance();
         //log.info( "MetaObject: " + o );
 
-        assertEquals( "foo.bar=5", 5, (int) o.getInt( "bar" ));
+        assertEquals( "foo.bar=5", 5, (int) o.get( "bar" ));
     }
 
     @Test
-    public void testValueObject() {
+    public void testMap() {
 
         MetaObject mo = loader.getMetaObjectByName(  "foo" );
 
-        ValueObject o = (ValueObject) mo.newInstance();
-        ValueObject o2 = (ValueObject) mo.newInstance();
+        Map o = (Map) mo.newInstance();
+        Map o2 = (Map) mo.newInstance();
 
         assertEquals( "o == o2", o, o2 );
 
-        o.setInt( "bar", 6 );
+        o.put( "bar", 6 );
         assertNotSame( "o == o2", o, o2 );
 
-        o.setString( "bar", "5" );
-        assertEquals( "o == o2", o, o2 );
+        o.put( "bar", "5" );
+        assertNotSame( "o == o2", o, o2 );
 
         // This setter will get ignored and a warning will be logged
-        o.setString( "bad", "what!" );
-        assertEquals( "o == o2", o, o2 );
+        o.put( "bad", "what!" );
+        assertNotSame( "o == o2", o, o2 );
     }
 
     @Test
@@ -97,7 +98,7 @@ public class MetaDataLoaderTest {
         //         .length = 11
 
         MetaObject mo = loader.getMetaObjectByName( "foo" );
-        MetaObject baby = ValueMetaObject.create("foo-baby").setSuperObject( mo );
+        MetaObject baby = MappedMetaObject.create("foo-baby").setSuperObject( mo );
 
         // Create an overlay for bar and length
         baby.addMetaField(
@@ -106,10 +107,10 @@ public class MetaDataLoaderTest {
                 .addMetaAttr( IntAttribute.create( "length", 11 ))
                 .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
 
-        ValueObject bo = (ValueObject) baby.newInstance();
+        Map bo = (Map) baby.newInstance();
         //log.info( "MetaObject: " + bo );
 
-        assertEquals( "foo-baby.bar=6", 6, (int) bo.getInt( "bar" ));
+        assertEquals( "foo-baby.bar=6", 6, (int) bo.get( "bar" ));
         assertEquals( "foo-baby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
         assertEquals( "foo.bar.length=10", "10", mo.getMetaField("bar").getMetaAttr( "length").getValueAsString());
 
@@ -127,7 +128,7 @@ public class MetaDataLoaderTest {
         //         .length = 11
 
         MetaObject mo = loader.getMetaObjectByName( "foo" );
-        MetaObject baby = ValueMetaObject.create("foo-baby")
+        MetaObject baby = MappedMetaObject.create("foo-baby")
                 .setSuperObject( mo );
 
         // Create an overlay for bar and length
@@ -137,10 +138,10 @@ public class MetaDataLoaderTest {
                 .addMetaAttr( IntAttribute.create( "length", 11 ))
                 .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
 
-        ValueObject bo = (ValueObject) baby.newInstance();
+        Map bo = (Map) baby.newInstance();
         //log.info( "MetaObject: " + bo );
 
-        assertEquals( "foo-baby.bar=6", 6, (int) bo.getInt( "bar" ));
+        assertEquals( "foo-baby.bar=6", 6, bo.get( "bar" ));
         assertEquals( "foo-baby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
         assertEquals( "foo.bar.length=10", "10", mo.getMetaField("bar").getMetaAttr( "length").getValueAsString());
 
@@ -177,7 +178,7 @@ public class MetaDataLoaderTest {
         MetaAttribute defVal = bar.getMetaAttr( MetaField.ATTR_DEFAULT_VALUE );
 
         Exception ex = null;
-        try { foo.addChild( ValueMetaObject.create("foo2")); }  catch( Exception e ) {ex=e;}
+        try { foo.addChild( MappedMetaObject.create("foo2")); }  catch( Exception e ) {ex=e;}
         assertEquals( "Exception on add MetaObject to MetaObject", true, ex.getClass().isAssignableFrom(InvalidMetaDataException.class ));
 
         try { bar.addChild( StringField.create("bar2", "error")); } catch( Exception e ) {ex=e;}

@@ -7,40 +7,19 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.ObjectArrayField;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.io.xml.XMLIOConstants;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.TypesConfig;
+import com.draagon.meta.loader.model.pojo.MetaModelPojo;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueMetaObject;
+import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.relation.ref.ObjectReference;
 
 public class MetaModelBuilder {
 
-    /*public MetaDataLoader createModelLoaderFromTypes( TypesConfig typesConfig ) {
-        MetaDataLoader modelLoader = MetaDataLoader
-                .createManual( false, "metadata-model")
-                .init();
-        buildMetaDataModels( modelLoader, typesConfig );
-        return modelLoader;
-    }
-
-    public MetaDataLoader createStandardModelLoader() {
-        MetaDataLoader modelLoader = MetaDataLoader
-                .createManual( false, "metadata-model")
-                .init();
-        buildDefaultMetaDataModels( modelLoader );
-        return modelLoader;
-    }*/
-
-    public static void buildDefaultMetaDataModels( MetaDataLoader loader ) {
-        buildMetaDataModels( loader, null );
-    }
-
-    public static void buildMetaDataModels( MetaDataLoader loader, TypesConfig typesConfig ) {
+    public static MetaData buildDefaultMetaDataModels() {
 
         // METADATA ROOT
-        MetaObject metadata = ValueMetaObject.create(MetaModel.OBJECT_NAME)
-                .addChild(ClassAttribute.create(ClassAttribute.SUBTYPE_CLASS, MetaModel.class))
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLTYPED, MetaModel.FIELD_TYPE ))
+        MetaObject metadata = PojoMetaObject.create(MetaModel.OBJECT_NAME)
+                .addChild(ClassAttribute.create(ClassAttribute.SUBTYPE_CLASS, MetaModelPojo.class))
+                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLTYPED, MetaModel.FIELD_TYPE))
                 .addChild(buildStringField(MetaModel.FIELD_PACKAGE,true))
                 .addChild(buildStringField(MetaModel.FIELD_SUPER,true))
                 .addChild(buildStringField(MetaModel.FIELD_TYPE,true)
@@ -51,7 +30,8 @@ public class MetaModelBuilder {
                 .addChild(ObjectArrayField.create(MetaModel.FIELD_CHILDREN)
                         .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_XMLWRAP, false ))
                         .addChild(ObjectReference.create(MetaModel.OBJREF_CHILDREF, MetaModel.OBJECT_NAME)));
-        loader.addChild( metadata );
+
+        return metadata;
     }
 
     public static MetaData buildStringField( String name, boolean asAttr ) {

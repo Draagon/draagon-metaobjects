@@ -5,8 +5,10 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
 
+import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.util.IOUtil;
 import com.draagon.meta.io.xml.XMLMetaDataWriter;
+import com.draagon.meta.io.xml.XMLSerializationHandler;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.DataConverter;
@@ -102,6 +104,10 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
                 break;
 
             case CUSTOM:
+                if ( mf instanceof XMLSerializationHandler) {
+                    value = ((XMLSerializationHandler)mf).getXmlAttr(vo);
+                }
+                break;
             default:
                 throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] not supported [" + mf + "]");
         }
@@ -188,6 +194,10 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
     }
 
     protected void writeFieldCustom( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
-        throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
+        if ( mf instanceof XMLSerializationHandler) {
+            el = drawFieldWrapper( el, mf );
+            ((XMLSerializationHandler)mf).writeXmlValue(vo,getXmlName(mf),doc(),el);
+        }
+        throw new MetaDataIOException(this, "Custom DataType and does not implement XMLSerializationHandler [" + mf + "]");
     }
 }

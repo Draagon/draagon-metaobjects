@@ -17,7 +17,7 @@
     </field>
     
     <!-- Basket -->
-    <object name="Basket" type="value" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
+    <object name="Basket" type="map" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
 
         <objectKey/>
 
@@ -60,7 +60,7 @@
     </object>
 
     <!-- Fruit -->
-    <object name="Fruit" type="data" _isAbstract="true">
+    <object name="Fruit" type="map" _isAbstract="true">
 
         <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Fruit</attr>
 

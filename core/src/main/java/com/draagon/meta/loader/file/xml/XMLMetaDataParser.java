@@ -109,7 +109,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             }
 
             TypeConfig typeConfig = getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ));
-            if ( e.hasAttribute( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubTypeName( e.getAttribute( ATTR_DEFSUBTYPE ));
+            if ( e.hasAttribute( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubType( e.getAttribute( ATTR_DEFSUBTYPE ));
             if ( e.hasAttribute( ATTR_DEFNAME)) typeConfig.setDefaultName( e.getAttribute( ATTR_DEFNAME ));
             if ( e.hasAttribute( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix( e.getAttribute( ATTR_DEFNAMEPREFIX ));
             loadChildren( typeConfig, e ).forEach( c-> typeConfig.addTypeChildConfig(c));
@@ -155,14 +155,14 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             String def = typeEl.getAttribute("default");
 
             if (name.length() == 0) {
-                throw new MetaDataException("SubType of Type [" + typeConfig.getTypeName() + "] has no 'name' attribute specified");
+                throw new MetaDataException("SubType of Type [" + typeConfig.getName() + "] has no 'name' attribute specified");
             }
 
             try {
                 Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
 
                 // Add the type class with the specified name
-                typeConfig.addSubType(name, tcl);
+                typeConfig.addSubTypeConfig(name, tcl);
 
                 // Load subtypes
                 loadChildren( typeConfig, typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
@@ -170,11 +170,11 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 // Update info msg if verbose
                 if ( getLoader().getLoaderOptions().isVerbose() ) {
                     // Increment the # of subtypes
-                    info.incType(typeConfig.getTypeName());
+                    info.incType(typeConfig.getName());
                 }
             }
             catch (ClassNotFoundException e) {
-                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getTypeName()+":"+name+ "] with invalid class: " + e.getMessage());
+                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getName()+":"+name+ "] with invalid class: " + e.getMessage());
             }
         }
     }
@@ -193,7 +193,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
-            if ( getTypesConfig().getType( typeName ) == null ) {
+            if ( getTypesConfig().getTypeByName( typeName ) == null ) {
                 if ( getLoader().getLoaderOptions().isStrict() ) {
                     throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                 } else {

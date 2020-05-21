@@ -7,9 +7,11 @@ import com.draagon.meta.io.MetaDataIOException;
 import static com.draagon.meta.io.xml.XMLIOConstants.*;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
 import com.draagon.meta.io.xml.XMLMetaDataReader;
+import com.draagon.meta.io.xml.XMLSerializationHandler;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.Validatable;
+import com.draagon.meta.util.DataConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -111,7 +113,40 @@ public class XMLObjectReader extends XMLMetaDataReader {
         path().inc( name );
         if ( e.hasAttribute( name)) {
             String val = e.getAttribute(name);
-            mf.setString(vo, val);
+            switch (mf.getDataType()) {
+                case BOOLEAN:
+                    mf.setBoolean(vo, DataConverter.toBoolean(val)); break;
+                case BYTE:
+                    mf.setByte(vo, DataConverter.toByte(val)); break;
+                case SHORT:
+                    mf.setShort(vo, DataConverter.toShort(val)); break;
+                case INT:
+                    mf.setInt(vo, DataConverter.toInt(val)); break;
+                case DATE:
+                    mf.setDate(vo, DataConverter.toDate(val)); break;
+                case LONG:
+                    mf.setLong(vo, DataConverter.toLong(val)); break;
+                case FLOAT:
+                    mf.setFloat(vo, DataConverter.toFloat(val)); break;
+                case DOUBLE:
+                    mf.setDouble(vo, DataConverter.toDouble(val)); break;
+                case STRING_ARRAY:
+                    mf.setStringArray(vo, DataConverter.toStringArray(val)); break;
+                case STRING:
+                    mf.setString(vo, val); break;
+                case OBJECT:
+                case OBJECT_ARRAY:
+                    throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] as attribute is not supported [" + mf + "]");
+                case CUSTOM:
+                    if ( mf instanceof XMLSerializationHandler ) {
+                        ((XMLSerializationHandler)mf).setXmlAttr( vo, val);
+                    } else {
+                        throw new MetaDataIOException(this, "Custom DataType and does not implement XMLSerializationHandler [" + mf + "]");
+                    }
+                    break;
+                default:
+                    throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] as attribute is not supported [" + mf + "]");
+            }
         }
         path().dec();
     }
@@ -131,18 +166,13 @@ public class XMLObjectReader extends XMLMetaDataReader {
             case DOUBLE:
             case STRING_ARRAY:  // TODO: Special Handling
             case STRING:
-                // TODO:  Add Helper for this for special cases
-                readFieldAsString( e, xmlName, mf, vo );
-                break;
+                readFieldAsPrimitive( e, xmlName, mf, vo ); break;
             case OBJECT:
-                readFieldObject( e, xmlName, mf, vo);
-                break;
+                readFieldObject( e, xmlName, mf, vo); break;
             case OBJECT_ARRAY:
-                readFieldObjectArray( e, xmlName, mf, vo);
-                break;
+                readFieldObjectArray( e, xmlName, mf, vo); break;
             case CUSTOM:
-                readFieldCustom( e, xmlName, mf, vo);
-                break;
+                readFieldCustom( e, xmlName, mf, vo); break;
 
             default:
                 throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] not supported [" + mf + "]");
@@ -151,15 +181,41 @@ public class XMLObjectReader extends XMLMetaDataReader {
         path().dec();
     }
 
-    protected void readFieldAsString(Element e, String xmlName, MetaField mf, Object vo) throws IOException {
+    protected void readFieldAsPrimitive(Element e, String xmlName, MetaField mf, Object vo) throws IOException {
 
         Element el = getFirstElementOfName( e, xmlName );
         if (el == null) return;
 
         path().inc( el.getNodeName() );
-
         String val = el.getTextContent();
-        mf.setString( vo, val );
+
+        switch (mf.getDataType()) {
+            case BOOLEAN:
+                mf.setBoolean(vo, DataConverter.toBoolean(val)); break;
+            case BYTE:
+                mf.setByte(vo, DataConverter.toByte(val)); break;
+            case SHORT:
+                mf.setShort(vo, DataConverter.toShort(val)); break;
+            case INT:
+                mf.setInt(vo, DataConverter.toInt(val)); break;
+            case DATE:
+                mf.setDate(vo, DataConverter.toDate(val)); break;
+            case LONG:
+                mf.setLong(vo, DataConverter.toLong(val)); break;
+            case FLOAT:
+                mf.setFloat(vo, DataConverter.toFloat(val)); break;
+            case DOUBLE:
+                mf.setDouble(vo, DataConverter.toDouble(val)); break;
+            case STRING_ARRAY:
+                mf.setStringArray(vo, DataConverter.toStringArray(val)); break;
+            case STRING:
+                mf.setString(vo, val); break;
+            case OBJECT:
+            case OBJECT_ARRAY:
+            case CUSTOM:
+            default:
+                throw new MetaDataIOException(this, "DataType [" + mf.getDataType() + "] as primitive is not supported [" + mf + "]");
+        }
 
         path().dec();
     }
@@ -215,6 +271,9 @@ public class XMLObjectReader extends XMLMetaDataReader {
     }
 
     protected void readFieldCustom(Element e, String xmlName, MetaField mf, Object o) throws IOException {
-        throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
+        if ( mf instanceof XMLSerializationHandler) {
+            ((XMLSerializationHandler)mf).readXmlValue(o,xmlName,e);
+        }
+        throw new MetaDataIOException(this, "Custom DataType and does not implement XMLSerializationHandler [" + mf + "]");
     }
 }

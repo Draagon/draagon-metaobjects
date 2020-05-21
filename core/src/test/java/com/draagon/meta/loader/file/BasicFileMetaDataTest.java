@@ -42,7 +42,7 @@ public class BasicFileMetaDataTest extends FileMetaDataLoaderTestBase {
         TypesConfig typesConfig = loader.getTypesConfig();
 
         assertEquals( "object->pojo->[0]->nameAliases=object",
-                typesConfig.getType("object").getSubType("pojo")
+                typesConfig.getTypeByName("object").getSubType("pojo")
                 .getChildConfigs().iterator().next().getNameAliases().iterator().next(), "object");
 
         // Write XML

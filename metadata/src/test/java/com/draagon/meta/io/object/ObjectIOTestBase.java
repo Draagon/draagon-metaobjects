@@ -10,8 +10,9 @@ import com.draagon.meta.io.object.xml.XMLObjectWriter;
 import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueMetaObject;
-import com.draagon.meta.object.value.ValueObject;
+import com.draagon.meta.object.MetaObjectAware;
+import com.draagon.meta.object.mapped.MappedMetaObject;
+import com.draagon.meta.object.mapped.MappedObject;
 import com.draagon.meta.relation.ref.ObjectReference;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,16 +65,16 @@ public abstract class ObjectIOTestBase {
 
     @Before
     public void setup() {
-        loader = MetaDataLoader.createManual( false, "json-valueobject-io-test" )
+        loader = MetaDataLoader.createManual( false, "json-MappedObject-io-test" )
                 .init()
-                .addChild(ValueMetaObject.create(MD.OBJ_BASKET)
+                .addChild(MappedMetaObject.create(MD.OBJ_BASKET)
                         .addChild(IntegerField.create( MD.ID, 1 )
                             .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
                         .addChild(StringField.create( MD.NAME, null ))
                         .addChild(ObjectArrayField.create( MD.BASKET_FRUITS )
                             .addChild(ObjectReference.create( MD.BASKET_HOLDS, MD.OBJ_FRUIT)))
                 )
-                .addChild(ValueMetaObject.create("fruit")
+                .addChild(MappedMetaObject.create("fruit")
                         .addChild(IntegerField.create( MD.ID, 1 )
                                 .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
                         .addChild(StringField.create( MD.NAME, null ))
@@ -81,63 +82,63 @@ public abstract class ObjectIOTestBase {
                         .addChild(ObjectField.create(MD.FRUIT_BUG)
                             .addChild(ObjectReference.create( MD.FRUIT_HAS, MD.OBJ_BUG)))
                 )
-                .addChild(ValueMetaObject.create(MD.OBJ_BUG)
+                .addChild(MappedMetaObject.create(MD.OBJ_BUG)
                         .addChild(IntegerField.create( MD.ID, 1 )
                                 .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
                         .addChild(StringField.create( MD.NAME, null ))
                 );
     }
 
-    protected ValueObject createBasket(int id, String name ) {
-        ValueObject o = (ValueObject) loader.getMetaObjectByName( MD.OBJ_BASKET).newInstance();
-        o.setInt( MD.ID, id );
-        o.setString( MD.NAME, name);
+    protected MappedObject createBasket(int id, String name ) {
+        MappedObject o = (MappedObject) loader.getMetaObjectByName( MD.OBJ_BASKET).newInstance();
+        o.put( MD.ID, id );
+        o.put( MD.NAME, name);
         return o;
     }
 
-    protected ValueObject createFruit(int id, String name ) {
-        ValueObject o = (ValueObject) loader.getMetaObjectByName( MD.OBJ_FRUIT).newInstance();
-        o.setInt( MD.ID, id );
-        o.setString( MD.NAME, name);
+    protected MappedObject createFruit(int id, String name ) {
+        MappedObject o = (MappedObject) loader.getMetaObjectByName( MD.OBJ_FRUIT).newInstance();
+        o.put( MD.ID, id );
+        o.put( MD.NAME, name);
         return o;
     }
 
-    protected ValueObject createBug(int id, String name ) {
-        ValueObject o = (ValueObject) loader.getMetaObjectByName( MD.OBJ_BUG).newInstance();
-        o.setInt( MD.ID, id );
-        o.setString( MD.NAME, name);
+    protected MappedObject createBug(int id, String name ) {
+        MappedObject o = (MappedObject) loader.getMetaObjectByName( MD.OBJ_BUG).newInstance();
+        o.put( MD.ID, id );
+        o.put( MD.NAME, name);
         return o;
     }
 
-    protected void addToBasket(ValueObject b, ValueObject f ) {
-        List<Object> objects = (List<Object>) b.getObject( MD.BASKET_FRUITS);
+    protected void addToBasket(MappedObject b, MappedObject f ) {
+        List<Object> objects = (List<Object>) b.get( MD.BASKET_FRUITS);
         if ( objects == null ) {
             objects = new ArrayList<>();
-            b.setObject( MD.BASKET_FRUITS, objects );
+            b.put( MD.BASKET_FRUITS, objects );
         }
         objects.add( f );
-        f.setBoolean( MD.FRUIT_IN_BASKET, true );
+        f.put( MD.FRUIT_IN_BASKET, true );
     }
 
     @Test
     public void testFruit() throws IOException, MetaDataIOException {
 
-        ValueObject o = createFruit( 1, "apple" );
+        MappedObject o = createFruit( 1, "apple" );
         runTest( o, "fruit");
     }
 
     @Test
     public void testBasket() throws IOException, MetaDataIOException {
 
-        ValueObject o = createBasket( 10, "longaberger" );
+        MappedObject o = createBasket( 10, "longaberger" );
         runTest(o, "basket");
     }
 
     @Test
     public void testFruitInBasket() throws IOException, MetaDataIOException {
 
-        ValueObject a = createFruit( 1, "apple" );
-        ValueObject b = createBasket( 10, "longaberger" );
+        MappedObject a = createFruit( 1, "apple" );
+        MappedObject b = createBasket( 10, "longaberger" );
         addToBasket( b, a );
 
         runTest(b, "inbasket");
@@ -146,7 +147,7 @@ public abstract class ObjectIOTestBase {
     @Test
     public void testFruitInBasket2() throws IOException, MetaDataIOException {
 
-        ValueObject b = createBasket( 10, "longaberger" );
+        MappedObject b = createBasket( 10, "longaberger" );
         addToBasket( b, createFruit( 1, "apple" ) );
         addToBasket( b, createFruit( 2, "orange" ) );
         addToBasket( b, createFruit( 3, "pear" ) );
@@ -157,21 +158,21 @@ public abstract class ObjectIOTestBase {
     @Test
     public void testFruitInBasketWithBugs() throws IOException, MetaDataIOException {
 
-        ValueObject b = createBasket( 10, "longaberger" );
+        MappedObject b = createBasket( 10, "longaberger" );
         addToBasket( b, createFruit( 1, "apple" ) );
         addToBasket( b, createFruit( 2, "orange" ) );
         addToBasket( b, createFruit( 3, "pear" ) );
 
-        ValueObject banana = createFruit( 3, "banana" );
-        banana.setObject( "bug", createBug( 100, "fly"));
+        MappedObject banana = createFruit( 3, "banana" );
+        banana.put( "bug", createBug( 100, "fly"));
         addToBasket( b, banana );
 
         runTest(b, "inbasketbugs");
     }
 
-    protected abstract void runTest(ValueObject o, String name ) throws IOException, MetaDataIOException;
+    protected abstract void runTest(MappedObject o, String name ) throws IOException, MetaDataIOException;
 
-    protected void writeXML( String filename, ValueObject vo ) throws IOException, MetaDataIOException {
+    protected void writeXML( String filename, Object vo ) throws IOException, MetaDataIOException {
 
         XMLObjectWriter writer = new XMLObjectWriter( loader, getTestFileOutputStream( filename ) );
         //writer.withIndent(true);
@@ -179,15 +180,15 @@ public abstract class ObjectIOTestBase {
         writer.close();
     }
 
-    protected ValueObject readXML(String filename, MetaObject mo) throws IOException, MetaDataIOException {
+    protected MappedObject readXML(String filename, MetaObject mo) throws IOException, MetaDataIOException {
 
         XMLObjectReader reader = new XMLObjectReader( loader, getTestFileInputStream( filename ) );
-        ValueObject vo = (ValueObject) reader.read( mo );
+        MappedObject vo = (MappedObject) reader.read( mo );
         reader.close();
         return vo;
     }
 
-    protected void writeJson( String filename, ValueObject vo ) throws IOException, MetaDataIOException {
+    protected void writeJson( String filename, Object vo ) throws IOException, MetaDataIOException {
 
         JsonObjectWriter writer = new JsonObjectWriter( loader, getTestFileWriter( filename ) );
         writer.withIndent("  ");
@@ -195,10 +196,10 @@ public abstract class ObjectIOTestBase {
         writer.close();
     }
 
-    protected ValueObject readJson(String filename ) throws IOException, MetaDataIOException {
+    protected MappedObject readJson(String filename ) throws IOException, MetaDataIOException {
 
         JsonObjectReader reader = new JsonObjectReader( loader, getTestFileReader( filename ) );
-        ValueObject vo = (ValueObject) reader.read();
+        MappedObject vo = (MappedObject) reader.read();
         reader.close();
         return vo;
     }

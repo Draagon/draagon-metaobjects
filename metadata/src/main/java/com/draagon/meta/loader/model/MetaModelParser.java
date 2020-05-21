@@ -35,8 +35,11 @@ public abstract class MetaModelParser<I extends MetaDataLoader,S> extends Parser
 
         TypesConfig typesConfig = intoLoader.getTypesConfig();
         if ( typesConfig == null ) throw new IllegalStateException( "MetaDataLoader did not have a TypesConfig set, loader=["+intoLoader+"]");
-        TypeConfig tc = typesConfig.getType( model.getType() );
-        if ( tc.getTypeName().equals( "metadata" )) {
+        TypeConfig tc = typesConfig.getTypeByName( model.getType() );
+        if ( tc == null ) {
+            throw new IllegalStateException( "TypesConfig did not have a Type ["+model.getType()+"], loader=["+intoLoader+"]");
+        }
+        if ( tc.getName() != null && tc.getName().equals( "metadata" )) {
             String defPkg = model.getPackage();
             if ( defPkg == null ) defPkg = "";
             mergeMetaData( intoLoader, defPkg, model, typesConfig, true );
@@ -60,15 +63,15 @@ public abstract class MetaModelParser<I extends MetaDataLoader,S> extends Parser
                 throw new InvalidValueException( "Type is null, cannot merge MetaDataModel ["+child+"]" );
             }
 
-            TypeConfig tc = typesConfig.getType(type);
+            TypeConfig tc = typesConfig.getTypeByName(type);
             if ( tc == null ) {
                 throw new InvalidValueException( "Type ["+type+"] did not exist in TypesConfig, "+
                         "cannot merge MetaDataModel ["+child+"]" );
             }
 
             SubTypeConfig stc = null;
-            if ( subType == null && tc.getDefaultSubTypeName() != null ) {
-                subType = tc.getDefaultSubTypeName();
+            if ( subType == null && tc.getDefaultSubType() != null ) {
+                subType = tc.getDefaultSubType();
             }
             if ( subType != null ) {
                 stc = tc.getSubType(subType);

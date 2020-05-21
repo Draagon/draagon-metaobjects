@@ -38,7 +38,7 @@
             <subType name="manyToMany"   class="com.draagon.meta.relation.ref.ManyToManyReference" />
         </type>
 
-        <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="value">
+        <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="map">
             <children>
                 <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
                 <child type="attr" subType="boolean" name="isInterface"/> <!-- inlineAttr="required" / -->
@@ -50,20 +50,25 @@
                     <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
                 </children>
             </subType>
-            <subType name="data" class="com.draagon.meta.object.data.DataMetaObject">
+            <subType name="map" class="com.draagon.meta.object.mapped.MappedMetaObject">
                 <children>
-                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- autoCreate="true" inlineAttr="optional" defaultValue="com.draagon.meta.object.value.ValueObject"/ -->
+                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
+                </children>
+            </subType>
+            <!-- subType name="data" class="com.draagon.meta.object.data.DataMetaObject">
+                <children>
+                    <child type="attr" subType="class" name="class" nameAliases="object"/>
                     <child type="attr" subType="boolean" name="allowExtensions" />
                     <child type="attr" subType="boolean" name="isStrict" />
                 </children>
             </subType>
             <subType name="value" class="com.draagon.meta.object.value.ValueMetaObject">
                 <children>
-                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- autoCreate="true" inlineAttr="optional" defaultValue="com.draagon.meta.object.value.ValueObject"/ -->
+                    <child type="attr" subType="class" name="class" nameAliases="object"/>
                     <child type="attr" subType="boolean" name="allowExtensions" />
                     <child type="attr" subType="boolean" name="isStrict" />
                 </children>
-            </subType>
+            </subType -->
         </type>
 
         <type name="field" class="com.draagon.meta.field.MetaField" defaultSubType="string">

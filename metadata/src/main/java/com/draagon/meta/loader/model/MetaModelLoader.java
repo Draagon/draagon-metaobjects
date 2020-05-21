@@ -3,6 +3,7 @@ package com.draagon.meta.loader.model;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.types.TypesConfig;
+import com.draagon.meta.loader.types.TypesConfigLoader;
 
 public class MetaModelLoader extends MetaDataLoader {
 
@@ -26,19 +27,23 @@ public class MetaModelLoader extends MetaDataLoader {
         return this;
     }
 
+    /** Override this for custom MetaDataModels */
+    protected void generatedAndAddMetaModels() {
+        if ( getTypesConfig() == null ) {
+            TypesConfigLoader loader = TypesConfigLoader.create();
+            setTypesConfig( loader.newTypesConfig());
+        }
+        addChild( getTypesConfig().getGeneratedMetaModel() );
+    }
+
     @Override
     public MetaModelLoader init() {
         super.init();
-
-        if ( getTypesConfig() == null )
-            MetaModelBuilder.buildDefaultMetaDataModels( this );
-        else
-            MetaModelBuilder.buildMetaDataModels( this, getTypesConfig() );
-
+        generatedAndAddMetaModels();
         return this;
     }
 
     public MetaModel newMetaDataModel() {
-        return (MetaModel) getMetaObjectByName( MetaModel.OBJECT_NAME ).newInstance();
+        return (MetaModel) getMetaObjectByName( MetaModel.OBJECT_NAME).newInstance();
     }
 }

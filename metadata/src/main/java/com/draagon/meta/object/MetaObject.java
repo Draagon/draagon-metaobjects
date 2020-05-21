@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 
+import com.draagon.meta.object.mapped.MappedMetaObject;
 import com.draagon.meta.relation.key.ObjectKey;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,8 +50,6 @@ public abstract class MetaObject extends MetaData<MetaObject> {
      */
     public MetaObject(String subtype, String name ) {
         super( TYPE_OBJECT, subtype, name );
-        //if ( !type.equals(TYPE_OBJECT)) throw new IllegalArgumentException("MetaObjects can only support type=\""+TYPE_OBJECT+"\" ["+type+"]");
-        //addAttributeDef(new AttributeDef(ATTR_OBJECT, String.class, true, "The object class to instantiate"));
     }
 
     /**
@@ -181,52 +180,41 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     ////////////////////////////////////////////////////
     // OBJECT METHODS
 
+    protected boolean hasObjectClassAttr() {
+        return ( hasMetaAttr(ATTR_OBJECT, true )
+            || hasMetaAttr(ATTR_CLASS, true ));
+    }
+
+    protected Class<?> getObjectClassFromAttr() throws ClassNotFoundException {
+        Class<?> c = null;
+        if (hasMetaAttr(ATTR_OBJECT, false)) {
+            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
+            c = Class.forName(c.getName());
+        } else if (hasMetaAttr(ATTR_CLASS, false)) {
+            c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
+            c = Class.forName(c.getName());
+        } else if (hasMetaAttr(ATTR_OBJECT)) {
+            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
+            c = Class.forName(c.getName());
+        } else if (hasMetaAttr(ATTR_CLASS)) {
+            c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
+            c = Class.forName(c.getName());
+        }
+        return c;
+    }
+
     /**
      * Retrieves the object class of an object, or null if one is not specified
      */
     protected Class<?> getObjectClass() throws ClassNotFoundException {
 
-        Class<?> c;
+        Class<?> c = null;
 
-        if (hasMetaAttr(ATTR_OBJECT, false)) {
-            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
-            c = Class.forName( c.getName() );
-        }
-        else if (hasMetaAttr(ATTR_CLASS, false )) {
-            c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
-            c = Class.forName(c.getName());
-        }
-        else if (hasMetaAttr(ATTR_OBJECT)) {
-            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
-            c = Class.forName( c.getName());
-        }
-        else if (hasMetaAttr(ATTR_CLASS)) {
-            c = (Class) getMetaAttr(ATTR_CLASS, false ).getValue();
-            c = Class.forName( c.getName() );
+        if ( hasObjectClassAttr())
+            c = getObjectClassFromAttr();
 
-            /*String ostr = null;
-            try {
-                ostr = getMetaAttr(ATTR_OBJECT).getValueAsString();
-                ostr = ostr.trim();
-                if (log.isTraceEnabled())
-                    log.trace(String.format("Attr [%s] yields classname [%s]", ATTR_OBJECT, ostr));
-            }
-            catch (MetaAttributeNotFoundException e) {
-                throw new RuntimeException("Attribute was found but could not get it on MetaObject [" + this + "] and attribute [" + ATTR_OBJECT + "]");
-            }
-
-            try {
-                c = Class.forName(ostr);
-            }
-            catch (ClassNotFoundException e) {
-                if (log.isDebugEnabled())
-                    log.debug(String.format("Specified Object Class [%s] not found, trying Loader", ostr));
-                c = getLoader().loadClass(ostr);
-            }*/
-        }
-        else {
+        if (c == null)
             c = createClassFromMetaDataName( true );
-        }
 
         return c;
     }
@@ -325,8 +313,6 @@ public abstract class MetaObject extends MetaData<MetaObject> {
                         break;
                     }
                 }
-                //o = (oc.getDeclaredConstructors()[0]).newInstance();
-                //attachMetaObject(o);
                 if ( o == null ) throw new RuntimeException("Could not instantiate a new Object of Class [" + oc + "] for MetaObject [" + getName() + "]: No empty constructor existed" );
             }
             catch (InvocationTargetException e) {
@@ -335,9 +321,6 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
             // Set the Default Values
             setDefaultValues(o);
-            //if ( o instanceof MetaObjectAware) {
-            //    ((MetaDataAware) o).setMetaData( this );
-            //}
 
             return o;
         } catch (InstantiationException e) {

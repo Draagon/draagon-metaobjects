@@ -34,8 +34,8 @@ public class FileMetaDataLoaderCompareTest extends FileMetaDataLoaderTestBase {
         Assert.assertEquals("Type Names", c1.getTypeNames(), c2.getTypeNames());
 
         for ( String n : c1.getTypeNames() ) {
-            TypeConfig t1 = c1.getType( n );
-            TypeConfig t2 = c2.getType( n );
+            TypeConfig t1 = c1.getTypeByName( n );
+            TypeConfig t2 = c2.getTypeByName( n );
 
             Assert.assertEquals( "Type["+n+"]" , t1.toString(), t2.toString());
             Assert.assertEquals( "Type["+n+"].typeChildConfigs" , t1.getTypeChildConfigs(), t2.getTypeChildConfigs());

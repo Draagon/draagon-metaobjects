@@ -7,6 +7,7 @@ import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataReader;
 import static com.draagon.meta.io.xml.XMLIOUtil.*;
 
+import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.object.xml.XMLObjectReader;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -201,7 +202,11 @@ public class JsonObjectReader extends JsonMetaDataReader {
     }
 
     protected void readFieldCustom(MetaObject mo, MetaField mf, Object vo) throws IOException {
-        throw new MetaDataIOException( this, "Custom DataTypes not yet supported ["+mf+"]");
+        if ( mf instanceof JsonSerializationHandler) {
+            ((JsonSerializationHandler)mf).readJsonValue(vo,in());
+        } else {
+            throw new MetaDataIOException(this, "Custom DataType and does not implement JsonSerializationHandler [" + mf + "]");
+        }
     }
 
     @Override

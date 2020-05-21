@@ -1,11 +1,11 @@
 package com.draagon.meta.loader.model;
 
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
+import com.draagon.meta.object.MetaObjectAware;
+import com.draagon.meta.object.Validatable;
 
 import java.util.List;
 
-public class MetaModel extends ValueObject {
+public interface MetaModel extends MetaObjectAware, Validatable {
 
     public final static String OBJECT_NAME      = "metadata";
     public final static String FIELD_PACKAGE    = "package";
@@ -16,31 +16,21 @@ public class MetaModel extends ValueObject {
     public final static String FIELD_CHILDREN   = "children";
     public final static String OBJREF_CHILDREF  = "childRef";
 
-    public MetaModel(MetaObject mo ) {
-        super(mo);
-    }
+    public String getPackage();
+    public void setPackage(String pkg);
 
-    public String getPackage() {
-        return getString( FIELD_PACKAGE );
-    }
+    public String getType();
+    public void setType(String type);
 
-    public String getType() {
-        return getString( FIELD_TYPE );
-    }
+    public String getSubType();
+    public void setSubType(String subType);
 
-    public String getSubType() {
-        return getString(FIELD_SUBTYPE);
-    }
+    public String getName();
+    public void setName(String name);
 
-    public String getName() {
-        return getString(FIELD_NAME);
-    }
+    public String getSuper();
+    public void setSuper(String superStr);
 
-    public String getSuper() {
-        return getString( FIELD_SUPER );
-    }
-
-    public List<MetaModel> getChildren() {
-        return super.getObjectArray( MetaModel.class, FIELD_CHILDREN );
-    }
+    public List<MetaModel> getChildren();
+    public void setChildren(List<MetaModel> children);
 }

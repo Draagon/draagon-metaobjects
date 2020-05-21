@@ -62,7 +62,7 @@ public class ConfigLoaderTest {
         SimpleLoader simpleLoader = SimpleLoader.createManual( loader.getName(), TEST_METADATA_XML );
 
         MetaModel metadata = buildModelFromLoader(
-                loader.getMetaObjectByName( MetaModel.OBJECT_NAME ), simpleLoader );
+                loader.getMetaObjectByName( MetaModel.OBJECT_NAME), simpleLoader );
 
         roundTripTest(metadata, loader.getName(), TypesConfig.class);
 
@@ -80,18 +80,18 @@ public class ConfigLoaderTest {
     private static void populateModel(MetaModel m, MetaData<?> md, boolean isRoot) {
 
         if (isRoot) {
-            m.setString( MetaModel.FIELD_TYPE, MetaModel.OBJECT_NAME);
+            m.setType(MetaModel.OBJECT_NAME);
         }
         else {
-            m.setString( MetaModel.FIELD_PACKAGE, _trimToNull( md.getPackage() ));
-            m.setString( MetaModel.FIELD_TYPE, md.getTypeName() );
-            m.setString( MetaModel.FIELD_SUBTYPE, md.getSubTypeName() );
-            m.setString( MetaModel.FIELD_NAME, md.getShortName() );
+            m.setPackage( _trimToNull( md.getPackage() ));
+            m.setType( md.getTypeName() );
+            m.setSubType( md.getSubTypeName() );
+            m.setName( md.getShortName() );
 
             if ( md.getSuperData() != null ) {
                 String name = md.getSuperData().getName();
                 if ( md.getPackage().equals( md.getSuperData().getPackage())) name = md.getSuperData().getShortName();
-                m.setString(MetaModel.FIELD_SUPER, name );
+                m.setSuper( name );
             }
         }
 
@@ -100,10 +100,10 @@ public class ConfigLoaderTest {
 
             populateModel( cm, child, false );
 
-            List<MetaModel> mkids = m.getObjectArray( MetaModel.class, MetaModel.FIELD_CHILDREN);
+            List<MetaModel> mkids = m.getChildren();
             if (mkids == null)  {
                 mkids = new ArrayList<>();
-                m.setObjectArray( MetaModel.FIELD_CHILDREN, mkids );
+                m.setChildren( mkids );
             }
             mkids.add(cm);
         }

@@ -74,7 +74,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
         // <xs:element name="attr">
         Element typeEl = doc().createElement( "xs:element");
-        typeEl.setAttribute( "name", tc.getTypeName() );
+        typeEl.setAttribute( "name", tc.getName() );
         el.appendChild( typeEl );
 
         Element ctEl = doc().createElement( "xs:complexType");
@@ -89,18 +89,20 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
         List<String> types = new ArrayList<>();
 
-        if ( !typeChildConfigs.isEmpty() ) {
+        if ( typeChildConfigs == null || !typeChildConfigs.isEmpty() ) {
 
             Element choiceEl = doc().createElement( "xs:choice" );
             choiceEl.setAttribute("maxOccurs", "unbounded");
             el.appendChild( choiceEl );
 
-            for (ChildConfig cc : typeChildConfigs) {
+            if ( typeChildConfigs != null ) {
+                for (ChildConfig cc : typeChildConfigs) {
 
-                if ( !types.contains( cc.getType() )) {
+                    if (!types.contains(cc.getType())) {
 
-                    writeTypeChild( choiceEl, cc );
-                    types.add( cc.getType() );
+                        writeTypeChild(choiceEl, cc);
+                        types.add(cc.getType());
+                    }
                 }
             }
 
@@ -123,16 +125,18 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     protected void writeTypeAttributes(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
 
         writeAttribute( el, "package", "string");
-        if ( !tc.getTypeName().equals("metadata")) {
+        if ( !tc.getName().equals("metadata")) {
             writeAttribute( el, "type", "string");
             writeAttribute( el, "subtype", "string");
             writeAttribute( el, "super", "string");
         }
 
-        for (ChildConfig cc : typeChildConfigs) {
+        if ( typeChildConfigs != null ) {
+            for (ChildConfig cc : typeChildConfigs) {
 
-            if ( MetaAttribute.TYPE_ATTR.equals( cc.getType() )) {
-                writeAttribute( el, cc.getName(), cc.getSubType() );
+                if (MetaAttribute.TYPE_ATTR.equals(cc.getType())) {
+                    writeAttribute(el, cc.getName(), cc.getSubType());
+                }
             }
         }
     }

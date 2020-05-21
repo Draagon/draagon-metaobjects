@@ -1,5 +1,6 @@
 package com.draagon.meta.loader.types;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
 
@@ -16,11 +17,22 @@ public class TypesConfigLoader extends MetaDataLoader {
         return new TypesConfigLoader( SUBTYPE_TYPECONFIG ).init();
     }
 
+    /** Override this for custom MetaDataModels */
+    protected void generatedAndAddTypes() {
+        TypesConfigBuilder.buildDefaultTypesConfig(this);
+    }
+
+
     @Override
     public TypesConfigLoader init() {
         super.init();
-        TypesConfigBuilder.buildTypesConfig( this );
+        generatedAndAddTypes();
         return this;
+    }
+
+    @Override
+    public TypesConfig getTypesConfig() {
+        throw new UnsupportedOperationException("Use newTypesConfig() to get a new TypesConfig on "+getClass().getSimpleName() );
     }
 
     public TypesConfig newTypesConfig() {
