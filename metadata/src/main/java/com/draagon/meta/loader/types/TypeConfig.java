@@ -41,17 +41,17 @@ public interface TypeConfig extends MetaObjectAware, Validatable {
     /////////////////////////////////////////////////////////////////////
     // Helper methods
 
-    public void addTypeChildConfig( ChildConfig config );
+    //public void addTypeChildConfig( ChildConfig config );
 
-    public Collection<String> getSubTypeNames();
+    //public Collection<String> getSubTypeNames();
 
-    public SubTypeConfig getSubType( String name );
+    //public SubTypeConfig getSubType( String name );
 
-    public void addSubTypeConfig( SubTypeConfig subType );
+    //public void addSubTypeConfig( SubTypeConfig subType );
 
-    public void addSubTypeConfig(String subtypeName, Class<? extends MetaData> clazz );
+    //public void addSubTypeConfig(String subtypeName, Class<? extends MetaData> clazz );
 
-    public Class<? extends MetaData> getDefaultTypeClass();
+    //public Class<? extends MetaData> getDefaultTypeClass();
 
 
     /////////////////////////////////////////////////////////////////////
@@ -66,15 +66,15 @@ public interface TypeConfig extends MetaObjectAware, Validatable {
     public String getDefaultSubType();
     public void setDefaultSubType(String subTypeName);
 
-    public void merge(TypeConfig tc);
+    //public void merge(TypeConfig tc);
 
-    public ChildConfig getBestMatchChildConfig( List<ChildConfig> children, String type, String subType, String name );
+    //public ChildConfig getBestMatchChildConfig( List<ChildConfig> children, String type, String subType, String name );
 
-    public List<ChildConfig> getSubTypeChildConfigs( String subType );
+    //public List<ChildConfig> getSubTypeChildConfigs( String subType );
 
-    public void addSubTypeChild( String subTypeName, ChildConfig config );
+    //public void addSubTypeChild( String subTypeName, ChildConfig config );
 
-    public Class<? extends MetaData> getSubTypeClass( String subTypeName );
+    //public Class<? extends MetaData> getSubTypeClass( String subTypeName );
 
-    public ChildConfig createChildConfig(String type, String subType, String name);
+    //public ChildConfig createChildConfig(String type, String subType, String name);
 }

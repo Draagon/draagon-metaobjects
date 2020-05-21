@@ -64,7 +64,6 @@ public class TypesConfigPojo extends PojoObject implements TypesConfig {
         return typeConfig;
     }
 
-    @Override
     public TypeConfig getTypeByName(String name ) {
         if ( getTypes() == null ) return null;
         for ( TypeConfig tc : getTypes() ) {
@@ -73,7 +72,6 @@ public class TypesConfigPojo extends PojoObject implements TypesConfig {
         return null;
     }
 
-    @Override
     public Collection<String> getTypeNames() {
         List<String> names = new ArrayList<>();
         for ( TypeConfig tc : getTypes() ) {

@@ -74,7 +74,6 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
     /////////////////////////////////////////////////////////////////////
     // Helper methods
 
-    @Override
     public void addTypeChildConfig( ChildConfig config ) {
         if ( getTypeChildConfigs() == null) {
             setTypeChildConfigs(new ArrayList<>());
@@ -82,7 +81,6 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
         mergeChildConfig( getTypeChildConfigs(), config );
     }
 
-    @Override
     public SubTypeConfig getSubType(String name ) {
         if ( getSubTypes() != null ) {
             for (SubTypeConfig tc : getSubTypes()) {
@@ -92,7 +90,6 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
         return null;
     }
 
-    @Override
     public Collection<String> getSubTypeNames() {
         List<String> names = new ArrayList<>();
         for ( SubTypeConfig tc : getSubTypes() ) {
@@ -101,7 +98,6 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
         return names;
     }
 
-    @Override
     public void addSubTypeConfig( SubTypeConfig subType ) {
         if ( getSubType( subType.getName() ) != null ) {
             throw new IllegalStateException( "SubType with the same name ["+subType.getName()+"] already "+
@@ -155,7 +151,6 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
     /////////////////////////////////////////////////////////////////////
     // Merge methods
 
-    @Override
     public void merge(TypeConfig tc ) {
 
         // Merge TypeConfig fields

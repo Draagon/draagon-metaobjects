@@ -35,11 +35,11 @@ public interface ChildConfig extends MetaObjectAware, Validatable {
     /////////////////////////////////////////////////////////////////////
     // TODO:  Replace all of these once the new version exists on the core side
 
-    public void setAutoCreatedFromFile( String file );
+    //public void setAutoCreatedFromFile( String file );
 
-    public boolean wasAutoCreated();
+    //public boolean wasAutoCreated();
 
-    public String getCreatedFromFile();
+    //public String getCreatedFromFile();
 
-    public void merge( ChildConfig cc );
+    //public void merge( ChildConfig cc );
 }

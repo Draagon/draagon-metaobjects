@@ -7,12 +7,8 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.io.json.JsonIOConstants;
 import com.draagon.meta.io.xml.XMLIOConstants;
-import com.draagon.meta.loader.types.pojo.ChildConfigPojo;
-import com.draagon.meta.loader.types.pojo.SubTypeConfigPojo;
-import com.draagon.meta.loader.types.pojo.TypeConfigPojo;
-import com.draagon.meta.loader.types.pojo.TypesConfigPojo;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.pojo.PojoMetaObject;
+import com.draagon.meta.object.proxy.ProxyMetaObject;
 
 public class TypesConfigBuilder {
 
@@ -31,12 +27,12 @@ public class TypesConfigBuilder {
     }
 
     protected static MetaObject createTypesConfig() {
-        return createMetaObject( TypesConfig.OBJECT_NAME, TypesConfig.OBJECT_IONAME, TypesConfigPojo.class )
+        return createMetaObject( TypesConfig.OBJECT_NAME, TypesConfig.OBJECT_IONAME, TypesConfig.class )
                 .addChild(createTypeConfigArray());
     }
 
     protected static MetaObject createTypeConfig() {
-        return createMetaObject( TypeConfig.OBJECT_NAME, TypeConfig.OBJECT_IONAME, TypeConfigPojo.class )
+        return createMetaObject( TypeConfig.OBJECT_NAME, TypeConfig.OBJECT_IONAME, TypeConfig.class )
                 .addChild(createStringField(TypeConfig.FIELD_NAME,true))
                 .addChild(createClassFieldIO(TypeConfig.FIELD_BASECLASS, TypeConfig.FIELD_IO_CLASS, true))
                 .addChild(createStringField(TypeConfig.FIELD_DEFSUBTYPE,true))
@@ -47,14 +43,14 @@ public class TypesConfigBuilder {
     }
 
     protected static MetaObject createSubTypeConfig() {
-        return createMetaObject( SubTypeConfig.OBJECT_NAME, SubTypeConfig.OBJECT_IONAME, SubTypeConfigPojo.class )
+        return createMetaObject( SubTypeConfig.OBJECT_NAME, SubTypeConfig.OBJECT_IONAME, SubTypeConfig.class )
                 .addChild(createStringField(SubTypeConfig.FIELD_NAME,true))
                 .addChild(createClassFieldIO(SubTypeConfig.FIELD_BASECLASS, TypeConfig.FIELD_IO_CLASS, true))
                 .addChild(createChildConfigArray(TypeConfig.FIELD_IO_CHILDREN));
     }
 
     protected static MetaObject createChildConfig() {
-        return createMetaObject(ChildConfig.OBJECT_NAME, ChildConfig.OBJECT_IONAME, ChildConfigPojo.class )
+        return createMetaObject(ChildConfig.OBJECT_NAME, ChildConfig.OBJECT_IONAME, ChildConfig.class )
                 //.addChild(createObjectClassAttr(ChildConfig.class))
                 .addChild(createStringField(ChildConfig.FIELD_TYPE,true))
                 .addChild(createStringField(ChildConfig.FIELD_SUBTYPE,true))
@@ -86,7 +82,7 @@ public class TypesConfigBuilder {
     // Generic Builder Methods
 
     protected static MetaObject createMetaObject( String objectName, String ioName, Class clazz ) {
-        return PojoMetaObject.create(objectName)
+        return ProxyMetaObject.create(objectName)
                 .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
                 .addChild(createObjectClassAttr(clazz));

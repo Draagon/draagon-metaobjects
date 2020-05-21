@@ -18,6 +18,10 @@ public class MappedMetaObject extends MetaObject {
         super(OBJECT_SUBTYPE,name);
     }
 
+    protected MappedMetaObject(String subType, String name) {
+        super(subType,name);
+    }
+
     public static MappedMetaObject create( String name ) {
         return new MappedMetaObject( name );
     }
