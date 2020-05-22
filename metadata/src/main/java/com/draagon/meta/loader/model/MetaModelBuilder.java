@@ -5,6 +5,7 @@ import com.draagon.meta.attr.BooleanAttribute;
 import com.draagon.meta.attr.ClassAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.ObjectArrayField;
+import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.model.pojo.MetaModelPojo;
@@ -26,6 +27,7 @@ public class MetaModelBuilder {
                 .addChild(buildStringField(MetaModel.FIELD_SUBTYPE,true)
                         .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, MetaModel.FIELD_TYPE)))
                 .addChild(buildStringField(MetaModel.FIELD_NAME,true))
+                .addChild(buildValueField(MetaModel.FIELD_VALUE))
                 .addChild(ObjectArrayField.create(MetaModel.FIELD_CHILDREN)
                         .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_XMLWRAP, false ))
                         .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MetaModel.OBJECT_NAME)));
@@ -36,5 +38,10 @@ public class MetaModelBuilder {
     public static MetaData buildStringField( String name, boolean asAttr ) {
         return StringField.create(name,null)
                 .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asAttr));
+    }
+
+    public static MetaData buildValueField( String name ) {
+        return StringField.create(name,null)   // TODO: This should be workable as an Object field
+                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_XMLWRAP, false ));
     }
 }

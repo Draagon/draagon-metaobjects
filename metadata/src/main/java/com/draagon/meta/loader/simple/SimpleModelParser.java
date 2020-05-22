@@ -5,13 +5,14 @@ import com.draagon.meta.io.object.xml.XMLObjectReader;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.model.MetaModelParser;
+import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
+public class SimpleModelParser extends MetaModelParser<TypesConfig,SimpleLoader,URI> {
 
     protected SimpleModelParser(MetaModelLoader modelLoader, String sourceName) {
         super(modelLoader, sourceName);

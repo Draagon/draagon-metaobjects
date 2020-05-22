@@ -8,6 +8,8 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.attr.StringArrayAttribute;
+import com.draagon.meta.io.string.StringSerializationHandler;
+import com.draagon.meta.util.DataConverter;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class StringArrayField extends ArrayField<List<String>> {
+public class StringArrayField extends ArrayField<List<String>> implements StringSerializationHandler {
 
     public final static String SUBTYPE_STRING_ARRAY = "stringArray";
 
@@ -38,5 +40,16 @@ public class StringArrayField extends ArrayField<List<String>> {
             f.addMetaAttr(StringArrayAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
         }
         return f;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // String SerializationHandler
+
+    public String getValueAsString(Object o) {
+        return DataConverter.toString(getObjectAttribute(o));
+    }
+
+    public void setValueAsString(Object o, String val) {
+        setObjectAttribute(o, DataConverter.toStringArray( val ));
     }
 }

@@ -27,7 +27,7 @@ import java.io.IOException;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ClassField extends MetaField<Double> implements StringSerializationHandler // XMLSerializationHandler, JsonSerializationHandler
+public class ClassField extends MetaField<Class> implements StringSerializationHandler // XMLSerializationHandler, JsonSerializationHandler
 {
     public final static String SUBTYPE_DOUBLE   = "double";
 

@@ -8,6 +8,7 @@
 package com.draagon.meta.object;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -184,18 +185,23 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
     protected Class<?> getObjectClassFromAttr() throws ClassNotFoundException {
         Class<?> c = null;
+        MetaAttribute attr = null;
         if (hasMetaAttr(ATTR_OBJECT, false)) {
-            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
-            c = Class.forName(c.getName());
+            attr = getMetaAttr(ATTR_OBJECT, false);
         } else if (hasMetaAttr(ATTR_CLASS, false)) {
-            c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
-            c = Class.forName(c.getName());
+            attr = getMetaAttr(ATTR_CLASS, false);
         } else if (hasMetaAttr(ATTR_OBJECT)) {
-            c = (Class) getMetaAttr(ATTR_OBJECT, false).getValue();
-            c = Class.forName(c.getName());
+            attr = getMetaAttr(ATTR_OBJECT);
         } else if (hasMetaAttr(ATTR_CLASS)) {
-            c = (Class) getMetaAttr(ATTR_CLASS, false).getValue();
-            c = Class.forName(c.getName());
+            attr = getMetaAttr(ATTR_CLASS);
+        }
+        if ( attr != null ) {
+            Object val = attr.getValue();
+            if ( val instanceof Class ) {
+                c = (Class<?>) val;
+            } else if ( val instanceof String ) {
+                c = Class.forName((String)val);
+            }
         }
         return c;
     }
@@ -203,7 +209,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     /**
      * Retrieves the object class of an object, or null if one is not specified
      */
-    protected Class<?> getObjectClass() throws ClassNotFoundException {
+    public Class<?> getObjectClass() throws ClassNotFoundException {
 
         Class<?> c = null;
 

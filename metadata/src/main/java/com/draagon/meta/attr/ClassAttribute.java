@@ -43,6 +43,11 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
     }
 
     @Override
+    public void setValue(Class<?> value) {
+        super.setValue(value);
+    }
+
+    @Override
     public void setValueAsObject(Object value) {
         if ( value == null ) {
             setValue( null );
@@ -52,7 +57,9 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
         else if ( value instanceof Class ) {
             setValue( (Class<?>) value );
         }
-        throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
+        else {
+            throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
+        }
     }
 
     @Override

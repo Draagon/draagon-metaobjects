@@ -4,9 +4,9 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.util.DataConverter;
 
-public abstract class PrimitiveMetaField extends MetaField implements StringSerializationHandler {
+public abstract class PrimitiveField<T> extends MetaField<T> implements StringSerializationHandler {
 
-    public PrimitiveMetaField(String subtype, String name, DataTypes dataType) {
+    public PrimitiveField(String subtype, String name, DataTypes dataType) {
         super(subtype, name, dataType);
     }
 
@@ -20,4 +20,5 @@ public abstract class PrimitiveMetaField extends MetaField implements StringSeri
     public void setValueAsString(Object o, String val) {
         setObjectAttribute( o,  DataConverter.toType(getDataType(), val ));
     }
+
 }

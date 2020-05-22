@@ -27,6 +27,7 @@
             <children>
                 <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
                 <child type="attr" subType="boolean" name="isInterface"/> <!-- inlineAttr="required" / -->
+                <child type="attr" subType="boolean" name="isKey"/> <!-- inlineAttr="required" / -->
                 <child type="field" subType="*" name="*"/>
             </children>
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
@@ -35,6 +36,11 @@
                 </children>
             </subType>
             <subType name="map" class="com.draagon.meta.object.mapped.MappedMetaObject">
+                <children>
+                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
+                </children>
+            </subType>
+            <subType name="proxy" class="com.draagon.meta.object.proxy.ProxyMetaObject">
                 <children>
                     <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
                 </children>

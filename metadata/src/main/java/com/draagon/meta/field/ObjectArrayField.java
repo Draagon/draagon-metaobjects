@@ -33,8 +33,12 @@ public class ObjectArrayField extends ArrayField<List<Object>> {
      * @return New ObjectField
      */
     public static ObjectArrayField create( String name ) {
-        ObjectArrayField f = new ObjectArrayField( name );
-        return f;
+        return new ObjectArrayField( name );
+
+    }
+
+    public static ObjectArrayField create( String name, boolean emptyDefault ) {
+        return new ObjectArrayField( name );
     }
 
     /**
@@ -42,5 +46,19 @@ public class ObjectArrayField extends ArrayField<List<Object>> {
      */
     public MetaObject getObjectRef() {
         return MetaDataUtil.getObjectRef(this);
+    }
+
+    /** Return the array item type */
+    public Class getArrayItemClass() {
+
+        if ( getObjectRef() != null ) {
+            MetaObject mo = getObjectRef();
+            try {
+                return mo.getObjectClass();
+            } catch (ClassNotFoundException e) {
+            }
+        }
+
+        return Object.class;
     }
 }

@@ -16,7 +16,7 @@ import com.draagon.meta.attr.IntAttribute;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class LongField extends MetaField<Long> {
+public class LongField extends PrimitiveField<Long> {
 
     public final static String SUBTYPE_LONG = "long";
 

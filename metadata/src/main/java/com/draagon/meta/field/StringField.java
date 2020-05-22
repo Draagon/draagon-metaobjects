@@ -16,7 +16,7 @@ import com.draagon.meta.attr.StringAttribute;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class StringField extends MetaField<String> {
+public class StringField extends PrimitiveField<String> {
 
     public final static String SUBTYPE_STRING   = "string";
 

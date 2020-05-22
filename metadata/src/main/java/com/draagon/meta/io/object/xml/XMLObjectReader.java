@@ -1,6 +1,5 @@
 package com.draagon.meta.io.object.xml;
 
-import com.draagon.meta.MetaDataAware;
 import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.io.MetaDataIOException;
@@ -16,10 +15,10 @@ import com.draagon.meta.object.Validatable;
 import com.draagon.meta.util.DataConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 public class XMLObjectReader extends XMLMetaDataReader {
 
@@ -195,11 +194,25 @@ public class XMLObjectReader extends XMLMetaDataReader {
 
     protected void readFieldAsPrimitive(Element e, String xmlName, MetaField mf, Object vo) throws IOException {
 
-        Element el = getFirstElementOfName( e, xmlName );
+        Element el = e;
+        String val = null;
+        if (xmlWrap(mf)) {
+            el = getFirstChildElementOfName( e, xmlName );
+            val = el.getTextContent();
+        } else {
+            Node next = getFirstChildElementOfName( el, null );
+            if ( next == null ) {
+                String text = el.getTextContent();
+                if ( text.trim().isEmpty()) return;
+                val = text;
+            }
+            else {
+                return;
+            }
+        }
         if (el == null) return;
 
         path().inc( el.getNodeName() );
-        String val = el.getTextContent();
 
         switch (mf.getDataType()) {
             case BOOLEAN:
@@ -230,15 +243,27 @@ public class XMLObjectReader extends XMLMetaDataReader {
     }
 
     protected void readFieldObject(Element e, String xmlName, MetaField mf, Object o) throws IOException {
-        MetaObject refmo = getObjectRef( this, mf );
 
+        // If there is no reference object, then read the field as a primitive
+        if ( hasObjectRef(this, mf)) {
+            readFieldAsObjectRef(e, xmlName, mf, o);
+        }
+        else {
+            readFieldAsPrimitive(e, xmlName,mf,o);
+            return;
+        }
+    }
+
+    protected void readFieldAsObjectRef(Element e, String xmlName, MetaField mf, Object o) throws IOException {
+
+        MetaObject refmo = getObjectRef( this, mf );
         if ( xmlWrap( mf )) {
-            e = getFirstElementOfName(  e, xmlName );
+            e = getFirstChildElementOfName(  e, xmlName );
         }
 
         String name = null;
         if ( !isXmlTyped(refmo)) name = getXmlName(refmo);
-        Element el = getFirstElementOfName(e, name);
+        Element el = getFirstChildElementOfName(e, name);
         if ( el != null ) {
             Object value = readObject(el, refmo);
             mf.setObject(o, value);
@@ -252,7 +277,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         MetaObject refmo = getObjectRef( this, mf );
 
         if ( xmlWrap( mf )) {
-            e = getFirstElementOfName(  e, xmlName );
+            e = getFirstChildElementOfName(  e, xmlName );
         }
 
         if ( e != null ) {
@@ -262,7 +287,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
             String name = null;
             if ( !isXmlTyped(refmo)) name = getXmlName(refmo);
 
-            for (Element el : getElementsOfName(e, name)) {
+            for (Element el : getChildElementsOfName(e, name)) {
 
                 path().inc(refmo);
 
@@ -286,7 +311,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
         }
         else if ( mf instanceof StringSerializationHandler) {
 
-            Element el = getFirstElementOfName( e, xmlName );
+            Element el = getFirstChildElementOfName( e, xmlName );
             if (el == null) return;
 
             path().inc( el.getNodeName() );

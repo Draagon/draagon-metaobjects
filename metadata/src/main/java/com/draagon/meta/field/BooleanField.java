@@ -18,7 +18,7 @@ import com.draagon.meta.attr.BooleanAttribute;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class BooleanField extends MetaField<Boolean> {
+public class BooleanField extends PrimitiveField<Boolean> {
 
     public final static String SUBTYPE_BOOLEAN = "boolean";
 

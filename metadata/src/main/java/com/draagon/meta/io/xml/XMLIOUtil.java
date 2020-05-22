@@ -94,6 +94,10 @@ public class XMLIOUtil {
         return wrap;
     }
 
+    public static boolean hasObjectRef(MetaDataIO io, MetaField mf ) throws MetaDataIOException {
+        return MetaDataUtil.hasObjectRef(mf);
+    }
+
     public static MetaObject getObjectRef(MetaDataIO io, MetaField mf ) throws MetaDataIOException {
         return MetaDataUtil.getObjectRef(mf);
         /*ObjectReference oref = mf.getFirstObjectReference();
@@ -132,9 +136,9 @@ public class XMLIOUtil {
      * Returns a collection of child elements of the given name
      * or all elements if name is null
      */
-    public static Element getFirstElementOfName(Node n, String name) {
+    public static Element getFirstChildElementOfName(Node n, String name) {
         //if ( name == null ) throw new IllegalArgumentException("Name cannot be null");
-        List<Element> els = getElementsOfName( n, name, true );
+        List<Element> els = getChildElementsOfName( n, name, true );
         if ( els.isEmpty() ) return null;
         return els.iterator().next();
     }
@@ -143,16 +147,16 @@ public class XMLIOUtil {
      * Returns a collection of child elements of the given name
      * or all elements if name is null
      */
-    public static List<Element> getElementsOfName(Node n, String name) {
+    public static List<Element> getChildElementsOfName(Node n, String name) {
         //if ( name == null ) throw new IllegalArgumentException("Name cannot be null");
-        return getElementsOfName( n, name, false );
+        return getChildElementsOfName( n, name, false );
     }
 
     /**
      * Returns a collection of child elements of the given name
      * or all elements if name is null
      */
-    public static List<Element> getElementsOfName(Node n, String name, boolean firstOnly) {
+    public static List<Element> getChildElementsOfName(Node n, String name, boolean firstOnly) {
 
         if ( n == null ) throw new IllegalArgumentException("Node cannot be null");
 

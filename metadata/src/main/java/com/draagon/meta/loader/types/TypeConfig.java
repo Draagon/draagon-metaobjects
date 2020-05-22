@@ -7,7 +7,7 @@ import com.draagon.meta.object.Validatable;
 import java.util.*;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public interface TypeConfig extends MetaObjectAware, Validatable {
+public interface TypeConfig extends TypeConfigLogic, Validatable, MetaObjectAware {
     
     public final static String OBJECT_NAME          = "TypeConfig";
     public final static String OBJECT_IONAME        = "type";
@@ -38,21 +38,6 @@ public interface TypeConfig extends MetaObjectAware, Validatable {
     public List<ChildConfig> getTypeChildConfigs();
     public void setTypeChildConfigs(List<ChildConfig> children);
 
-    /////////////////////////////////////////////////////////////////////
-    // Helper methods
-
-    //public void addTypeChildConfig( ChildConfig config );
-
-    //public Collection<String> getSubTypeNames();
-
-    //public SubTypeConfig getSubType( String name );
-
-    //public void addSubTypeConfig( SubTypeConfig subType );
-
-    //public void addSubTypeConfig(String subtypeName, Class<? extends MetaData> clazz );
-
-    //public Class<? extends MetaData> getDefaultTypeClass();
-
 
     /////////////////////////////////////////////////////////////////////
     // TODO:  Replace all of these once the new version exists on the core side
@@ -65,16 +50,4 @@ public interface TypeConfig extends MetaObjectAware, Validatable {
 
     public String getDefaultSubType();
     public void setDefaultSubType(String subTypeName);
-
-    //public void merge(TypeConfig tc);
-
-    //public ChildConfig getBestMatchChildConfig( List<ChildConfig> children, String type, String subType, String name );
-
-    //public List<ChildConfig> getSubTypeChildConfigs( String subType );
-
-    //public void addSubTypeChild( String subTypeName, ChildConfig config );
-
-    //public Class<? extends MetaData> getSubTypeClass( String subTypeName );
-
-    //public ChildConfig createChildConfig(String type, String subType, String name);
 }

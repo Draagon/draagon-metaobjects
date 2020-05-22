@@ -4,9 +4,9 @@ public final class XMLIOConstants {
 
     public static final String XML_ATTYPE = "metaDataType";
 
-    public final static String ATTR_XMLNAME = "xmlName";
-    public final static String ATTR_ISXMLATTR = "isXmlAttr";
-    public final static String ATTR_XMLWRAP = "xmlWrap";
-    public static final String ATTR_XMLTYPED = "xmlTyped";
-    public static final String ATTR_XMLIGNORE = "xmlIgnore";
+    public final static String ATTR_XMLNAME     = "xmlName";
+    public final static String ATTR_ISXMLATTR   = "xmlIsAttr";
+    public final static String ATTR_XMLWRAP     = "xmlWrap";
+    public final static String ATTR_XMLTYPED    = "xmlTyped";
+    public final static String ATTR_XMLIGNORE   = "xmlIgnore";
 }

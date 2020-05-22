@@ -18,7 +18,7 @@ import java.util.Date;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class DateField extends MetaField<Date> {
+public class DateField extends PrimitiveField<Date> {
 
     public final static String SUBTYPE_DATE     = "date";
 

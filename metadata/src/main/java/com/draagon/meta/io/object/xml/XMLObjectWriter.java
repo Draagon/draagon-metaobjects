@@ -184,19 +184,32 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
 
     protected void writeFieldObject( Element el, MetaObject mo, MetaField mf, Object vo) throws IOException {
 
-        // TODO:  Should we worry about the objectRef?
+        if ( hasObjectRef(this,mf )) {
 
-        Object o = mf.getObject( vo );
-        if ( o != null ) {
+            Object o = mf.getObject(vo);
+            if (o != null) {
 
-            el = drawFieldWrapper( el, mf );
+                el = drawFieldWrapper(el, mf);
 
-            // TODO: Attribute to use Field name vs. Object name?
-            writeObject(el, IOUtil.getMetaObjectFor(getLoader(),o), o);
+                // TODO: Attribute to use Field name vs. Object name?
+                writeObject(el, IOUtil.getMetaObjectFor(getLoader(), o), o);
 
-            //Element objEl = doc().createElement( getXmlName( mo ));
-            //el.appendChild( objEl );
-            //writeObjectFields( objEl, mo, voc);
+                //Element objEl = doc().createElement( getXmlName( mo ));
+                //el.appendChild( objEl );
+                //writeObjectFields( objEl, mo, voc);
+            }
+        }
+        else {
+            String val = null;
+            if ( mf instanceof StringSerializationHandler ) {
+                val = ((StringSerializationHandler) mf ).getValueAsString( vo );
+            } else {
+                val = mf.getString( vo );
+            }
+            if ( val != null ) {
+                el = drawFieldWrapper(el, mf);
+                el.appendChild( doc().createTextNode( val ));
+            }
         }
     }
 

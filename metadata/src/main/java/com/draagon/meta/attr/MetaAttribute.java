@@ -15,7 +15,7 @@ import java.util.Objects;
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTypeAware<T> {
+public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTypeAware<T>, MetaDataValueHandler<T> {
     
     //private static Log log = LogFactory.getLog( MetaAttribute.class );
 
@@ -70,9 +70,13 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
         return dataType;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
+    // MetaData Value Handler Methods
+
     /**
      * Sets the value of the MetaAttribute
      */
+    @Override
     public void setValue( T value ) {
         this.value = value;
     }
@@ -80,6 +84,7 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
     /**
      * Returns the value of the MetaAttribute
      */
+    @Override
     public T getValue() {
         return value;
     }
@@ -89,6 +94,7 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
      *
      * @param value String value of the attribute
      */
+    @Override
     public void setValueAsString(String value) {
         setValueAsObject( value );
     }
@@ -96,6 +102,7 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
     /**
      * Returns the value of the MetaAttribute as a String
      */
+    @Override
     public String getValueAsString() {
         return DataConverter.toString( value );
     }
@@ -104,6 +111,7 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
      * Sets the Value with an Object
      * @param value Object value to set
      */
+    @Override
     public void setValueAsObject(Object value) {
         this.value = (T) DataConverter.toType( dataType, value );
     }

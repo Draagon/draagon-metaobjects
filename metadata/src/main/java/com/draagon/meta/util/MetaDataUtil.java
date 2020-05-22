@@ -124,6 +124,9 @@ public class MetaDataUtil {
     }
   }
 
+  public static boolean hasObjectRef( MetaField f ) {
+    return f.hasMetaAttr(ATTR_OBJECT_REF);
+  }
 
   /** Gets the MetaObject referenced by this MetaData using the objectRef attribute */
   public static MetaObject getObjectRef( MetaField d ) {
@@ -136,22 +139,6 @@ public class MetaDataUtil {
 
       if (o == null) {
 
-        // Try to find an ObjectReference on a MetaField
-        //if ( d instanceof MetaField ) {
-        //  List<MetaData> refs = ((MetaField) d).getChildrenOfType( ObjectReference.TYPE_OBJECTREF, true );
-        //  if ( !refs.isEmpty() ) {
-        //    o = ((ObjectReference) refs.get(0)).getReferencedObject();
-        //  }
-        //}
-
-        // If it's an ObjectReference access it directly
-        //if ( o == null || d instanceof ObjectReference) {
-        //  o = ((ObjectReference) d).getReferencedObject();
-        //}
-
-        // Look for the old way with the ATTR_OBJECT_REF
-        if ( o == null ) {
-
           String objectRef = d.getMetaAttr(ATTR_OBJECT_REF).getValueAsString();
           if (objectRef != null) {
 
@@ -163,7 +150,6 @@ public class MetaDataUtil {
               throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaData [" + d + "] does not exist", name);
             }
           }
-        }
 
         d.setCacheValue(KEY, o);
       }

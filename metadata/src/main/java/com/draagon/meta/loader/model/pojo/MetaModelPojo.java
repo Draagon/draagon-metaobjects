@@ -18,6 +18,7 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
     private String subType;
     private String name;
     private String superRef;
+    private String value;
     private List<MetaModel> children;
 
     public MetaModelPojo( MetaObject mo ) {
@@ -29,6 +30,7 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
         return pkg;
     }
 
+    @Override
     public void setPackage(String pkg) {
         this.pkg = pkg;
     }
@@ -38,6 +40,7 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
         return type;
     }
 
+    @Override
     public void setType(String type) {
         this.type = type;
     }
@@ -47,6 +50,7 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
         return subType;
     }
 
+    @Override
     public void setSubType(String subType) {
         this.subType = subType;
     }
@@ -56,6 +60,7 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -65,8 +70,19 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
         return superRef;
     }
 
+    @Override
     public void setSuper(String superRef) {
         this.superRef = superRef;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.value = value;
     }
 
     @Override
@@ -74,6 +90,7 @@ public class MetaModelPojo extends PojoObject implements MetaModel, MetaObjectAw
         return children;
     }
 
+    @Override
     public void setChildren(List<MetaModel> children) {
         this.children = children;
     }

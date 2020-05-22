@@ -9,7 +9,7 @@ import com.draagon.meta.object.Validatable;
 import java.util.List;
 
 /** Used to store the MetaData Type config and respective SubTypes and their classes */
-public interface SubTypeConfig extends MetaObjectAware, Validatable {
+public interface SubTypeConfig extends Validatable, MetaObjectAware {
 
     public final static String OBJECT_NAME              = "SubTypeConfig";
     public final static String OBJECT_IONAME            = "subType";

@@ -16,7 +16,7 @@ import com.draagon.meta.attr.IntAttribute;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class IntegerField extends MetaField<Integer> {
+public class IntegerField extends PrimitiveField<Integer> {
 
     public final static String SUBTYPE_INT = "int";
 

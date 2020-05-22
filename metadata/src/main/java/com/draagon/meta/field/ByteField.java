@@ -16,7 +16,7 @@ import com.draagon.meta.attr.IntAttribute;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ByteField extends MetaField<Byte> {
+public class ByteField extends PrimitiveField<Byte> {
 
     public final static String SUBTYPE_BYTE = "byte";
 

@@ -15,7 +15,7 @@ import com.draagon.meta.*;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class FloatField extends MetaField<Float> {
+public class FloatField extends PrimitiveField<Float> {
 
     public final static String SUBTYPE_FLOAT    = "float";
 

@@ -3,6 +3,7 @@ package com.draagon.meta.loader.simple;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.mojo.MojoSupport;
@@ -10,6 +11,8 @@ import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.*;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,17 +21,23 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
     public final static String SIMPLE_TYPES_XML = "com/draagon/meta/loader/simple/simple.types.xml";
     public final static String SUBTYPE_SIMPLE = "simple";
 
-    private static URI sourceURI = null;
+    private static List<URI> sourceURIs = null;
     private final TypesConfigLoader typesLoader;
 
     public static SimpleLoader createManual( String name, String resource ) {
-        return createManual( name, URIHelper.toURI( "model:resource:"+resource));
+        return createManualURIs( name, Arrays.asList(URIHelper.toURI( "model:resource:"+resource)));
     }
 
-    public static SimpleLoader createManual( String name, URI uri ) {
+    public static SimpleLoader createManual( String name, List<String> resources ) {
+        List<URI> uris = new ArrayList<>();
+        for (String s : resources) uris.add(URIHelper.toURI("model:resource:"+s));
+        return createManualURIs( name, uris);
+    }
+
+    public static SimpleLoader createManualURIs( String name, List<URI> uris ) {
 
         SimpleLoader simpleLoader = new SimpleLoader( name );
-        simpleLoader.setSourceURI( uri );
+        simpleLoader.setSourceURIs(uris);
         simpleLoader.init();
         return simpleLoader;
     }
@@ -41,8 +50,11 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         setTypesConfig( typesLoader.newTypesConfig() );
     }
 
-    public void setSourceURI(URI sourceData ) {
-        this.sourceURI = sourceData;
+    public void setSourceURIs(List<URI> sourceData ) {
+        this.sourceURIs = sourceData;
+    }
+    public List<URI> getSourceURIs() {
+        return this.sourceURIs;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,17 +69,20 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         if ( sourceList.size() > 1 ) throw new IllegalArgumentException( name +
                 " does not support more than one source file");
 
-        String s = sourceList.get(0);
-        if ( s.indexOf(':') < 0 ) {
-            if ( sourceDir != null ) s = "model:file:" + s + ";"+URIHelper.URI_ARG_SOURCEDIR+"="+sourceDir;
-            else if (new File(s).exists()){
-                s = "model:file:"+s;
-            } else {
-                s = "model:resource:"+s;
+        List<URI> sourceURIs = new ArrayList<>();
+        for( String s : sourceList) {
+            if (s.indexOf(':') < 0) {
+                if (sourceDir != null) s = "model:file:" + s + ";" + URIHelper.URI_ARG_SOURCEDIR + "=" + sourceDir;
+                else if (new File(s).exists()) {
+                    s = "model:file:" + s;
+                } else {
+                    s = "model:resource:" + s;
+                }
             }
+            sourceURIs.add(URIHelper.toURI(s));
         }
 
-        setSourceURI( URIHelper.toURI( s ));
+        setSourceURIs(sourceURIs);
     }
 
     @Override
@@ -81,7 +96,7 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
 
     public SimpleLoader init() {
 
-        if ( sourceURI == null ) throw new MetaDataException( "No sourceData was specified" );
+        if ( sourceURIs == null ) throw new MetaDataException( "No sourceData was specified" );
 
         super.init();
 
@@ -91,9 +106,10 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
 
         // Load MetaData
         MetaModelLoader modelLoader = MetaModelLoader.create( "simple", getTypesConfig() );
-        SimpleModelParser simpleModelParser = new SimpleModelParser( modelLoader, sourceURI.toString() );
-        simpleModelParser.loadAndMerge( this, sourceURI);
-        //TODO: Finish me
+        for( URI sourceURI : sourceURIs) {
+            SimpleModelParser simpleModelParser = new SimpleModelParser(modelLoader, sourceURI.toString());
+            simpleModelParser.loadAndMerge(this, sourceURI);
+        }
 
         return this;
     }

@@ -33,7 +33,7 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> implements MojoSupp
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
     private final LoaderOptions loaderOptions;
-    private static TypesConfig typesConfig = null;
+    private TypesConfig typesConfig = null;
 
     private boolean isRegistered = false;
     private boolean isInitialized = false;
@@ -75,11 +75,11 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> implements MojoSupp
         return loaderOptions;
     }
 
-    public TypesConfig getTypesConfig() {
-        return typesConfig;
+    public <T extends TypesConfig> T getTypesConfig() {
+        return (T) typesConfig;
     }
 
-    public MetaDataLoader setTypesConfig(TypesConfig typesConfig ) {
+    public <T extends TypesConfig> MetaDataLoader setTypesConfig(T typesConfig ) {
         this.typesConfig = typesConfig;
         return this;
     }
@@ -255,6 +255,18 @@ public class MetaDataLoader extends MetaData<MetaDataLoader> implements MojoSupp
     public MetaObject getMetaObjectByName(String name ) {
         checkState();
         return (MetaObject) getChildOfType( MetaObject.TYPE_OBJECT, name );
+    }
+
+    /**
+     * Return the matching object instance
+     */
+    public <T> T newObjectInstance(Class<T> clazz) throws ClassNotFoundException {
+        for(MetaObject mo : getMetaObjects()) {
+            if (mo.getObjectClass().equals(clazz)) {
+                return (T) mo.newInstance();
+            }
+        }
+        throw new ClassNotFoundException("Could not find MetaObject for class ["+clazz.getName()+"]");
     }
 
     /**

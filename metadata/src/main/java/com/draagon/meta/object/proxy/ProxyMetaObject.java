@@ -65,6 +65,18 @@ public class ProxyMetaObject extends PojoMetaObject {
         }
     }
 
+    /**
+     * Retrieves the object class of an object, or null if one is not specified
+     */
+    public Class<?> getObjectClass() throws ClassNotFoundException {
+
+        Class<?> c = null;
+
+        if ( hasObjectClassAttr()) c = getObjectClassFromAttr();
+
+        return c;
+    }
+
     @Override
     public boolean produces(Object obj) {
         if ( obj instanceof MetaObjectAware ) {

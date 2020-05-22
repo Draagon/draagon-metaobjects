@@ -7,6 +7,7 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;

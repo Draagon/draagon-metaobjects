@@ -13,6 +13,7 @@ public interface MetaModel extends MetaObjectAware, Validatable {
     public final static String FIELD_SUBTYPE    = "subType";
     public final static String FIELD_NAME       = "name";
     public final static String FIELD_SUPER      = "super";
+    public final static String FIELD_VALUE      = "value";
     public final static String FIELD_CHILDREN   = "children";
     public final static String OBJREF_CHILDREF  = "childRef";
 
@@ -30,6 +31,9 @@ public interface MetaModel extends MetaObjectAware, Validatable {
 
     public String getSuper();
     public void setSuper(String superStr);
+
+    public String getValue();
+    public void setValue(String value);
 
     public List<MetaModel> getChildren();
     public void setChildren(List<MetaModel> children);

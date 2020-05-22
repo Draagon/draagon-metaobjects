@@ -100,7 +100,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     /**
      * Retrieves the object class of an object
      */
-    protected Class<?> getObjectClass() throws ClassNotFoundException {
+    public Class<?> getObjectClass() throws ClassNotFoundException {
         try { 
             return super.getObjectClass();
         } catch( MetaDataException e ) {

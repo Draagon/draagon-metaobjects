@@ -15,6 +15,7 @@ import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.view.MetaView;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -38,7 +39,9 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     private final String shortName;
     private final String pkg;
 
+    private MetaData overloadedMetaData = null;
     private MetaData superData = null;
+
     // TODO:  Is this meant to be a weak reference for MetaDataLoader only...?
     private WeakReference<MetaData> parentRef = null;
     private MetaDataLoader loader = null;
@@ -793,32 +796,33 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
                     try {
                         md = c.getConstructor(String.class).newInstance(fullname);
                     } catch (NoSuchMethodException e3) {
-                        try {
-                            md = c.getConstructor().newInstance();
-                        } catch (NoSuchMethodException e4) {
-                            throw new RuntimeException("Could not create new instance of MetaData class [" + getClass() + "], no valid constructor was found" );
-                        }
+                        md = c.getConstructor().newInstance();
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Could not create new instance of MetaData class "
-                    +"["+ getClass().getName() + "]: " + e.getMessage(), e);
+        } catch (InvocationTargetException | IllegalAccessException | InstantiationException | NoSuchMethodException e) {
+            throw new MetaDataException("Could not create new instance of " +
+                    getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + e.getMessage(), e);
         }
 
         if (!md.getTypeName().equals(typeName))
-            throw new MetaDataException("Expected MetaData type [" + typeName + "],"+
-                    " but MetaData instantiated was of type [" + md.getTypeName() + "]: " + md);
+            throw new MetaDataException("Unexpected type ["+md.getTypeName()+"] after creating new MetaData "+
+                    getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + md);
 
         if (!md.getSubTypeName().equals(subTypeName))
-            throw new MetaDataException("Expected MetaData subType [" + subTypeName + "], "
-                    +"but MetaData instantiated was of subType [" + md.getSubTypeName() + "]: " + md);
+            throw new MetaDataException("Unexpected subType ["+md.getSubTypeName()+"] after creating new MetaData "+
+                    getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + md);
 
         if (!md.getName().equals(fullname))
-            throw new MetaDataException("Expected MetaData name [" + fullname + "], but MetaData "+
-                    "instantiated was of name [" + md.getName() + "]: " + md);
+            throw new MetaDataException("Unexpected name ["+md.getName()+"] after creating new MetaData "+
+                    getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + md);
 
         return md;
+    }
+
+    private String getNewInstanceErrorStr(String typeName, String subTypeName, String fullname) {
+        return "[" + getClass().getName() + "] with type:subType:name [" + typeName + ":" +
+                ":" + subTypeName + ":" + fullname + "]";
     }
 
     /**

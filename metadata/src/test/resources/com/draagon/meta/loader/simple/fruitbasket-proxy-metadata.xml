@@ -15,9 +15,11 @@
             <attr name="max">50</attr>
         </validator>
     </field>
-    
+
     <!-- Basket -->
-    <object name="Basket" type="map" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
+    <object name="Basket" type="proxy">
+
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Basket</attr>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -54,9 +56,9 @@
     </object>
 
     <!-- Fruit -->
-    <object name="Fruit" type="map" _isAbstract="true">
+    <object name="Fruit" type="proxy" _isAbstract="true">
 
-        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Fruit</attr>
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Fruit</attr>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -72,13 +74,13 @@
 
         <!-- In Basket -->
         <field name="inBasket" type="boolean"/>
-        
+
     </object>
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit" object="com.draagon.meta.loader.simple.fruitbasket.Apple">
+    <object name="Apple" super="Fruit">
 
-        <!-- attr name="object">com.draagon.meta.loader.simple.fruitbasket.Apple</attr -->
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Apple</attr>
 
         <!-- Orachard -->
         <field name="orchard" type="string"/>
@@ -91,14 +93,14 @@
     <!-- Macintosh -->
     <object name="Macintosh" super="Apple">
 
-        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Macintosh</attr>
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Macintosh</attr>
 
     </object>
 
     <!-- Orange -->
     <object name="Orange" super="Fruit">
 
-        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Orange</attr>
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Orange</attr>
 
         <field name="pickedDate" type="date"/>
 

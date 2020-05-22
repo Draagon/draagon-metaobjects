@@ -7,7 +7,7 @@ import com.draagon.meta.object.Validatable;
 
 import java.util.List;
 
-public interface ChildConfig extends MetaObjectAware, Validatable {
+public interface ChildConfig extends ChildConfigLogic, Validatable, MetaObjectAware {
 
     public final static String OBJECT_NAME          = "ChildConfig";
     public final static String OBJECT_IONAME        = "child";
@@ -31,15 +31,4 @@ public interface ChildConfig extends MetaObjectAware, Validatable {
     public List<String> getNameAliases();
     public void setNameAliases(List<String> nameAliases);
 
-
-    /////////////////////////////////////////////////////////////////////
-    // TODO:  Replace all of these once the new version exists on the core side
-
-    //public void setAutoCreatedFromFile( String file );
-
-    //public boolean wasAutoCreated();
-
-    //public String getCreatedFromFile();
-
-    //public void merge( ChildConfig cc );
 }

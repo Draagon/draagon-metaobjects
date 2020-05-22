@@ -132,9 +132,9 @@ public class ProxyObject implements InvocationHandler, ProxyAccessor, MetaObject
 
     @Override
     public String toString() {
-        return "MappedObject{" +
-                "metaObject=" + metaObject +
-                "map=" + valueMap.toString() +
+        return getClass().getSimpleName()+"{" +
+                "metaObject=" + metaObject.getName() +
+                ",valueMap=" + valueMap.toString() +
                 '}';
     }
 }

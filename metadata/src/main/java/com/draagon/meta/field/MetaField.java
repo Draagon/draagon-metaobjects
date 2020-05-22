@@ -138,13 +138,6 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         defaultValue = (T) defVal;
     }
 
-    /** Flush the caches and set local flags to false */
-    @Override
-    protected void flushCaches() {
-        lookedForDefault = false;
-        super.flushCaches();
-    }
-
     /**
      * Gets the default field value
      */
@@ -166,6 +159,13 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         }
 
         return defaultValue;
+    }
+
+    /** Flush the caches and set local flags to false */
+    @Override
+    protected void flushCaches() {
+        lookedForDefault = false;
+        super.flushCaches();
     }
 
     /**
