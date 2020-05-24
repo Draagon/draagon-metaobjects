@@ -12,6 +12,12 @@
             </children>
         </type>
 
+        <type name="object" class="com.draagon.meta.object.MetaObject">
+            <children>
+                <child type="attr" subType="boolean" name="isEmbedded"/>
+            </children>
+        </type>
+
         <!-- type name="attr" class="com.draagon.meta.attr.MetaAttribute" defaultSubType="string">
             <subType name="string"       class="com.draagon.meta.attr.StringAttribute" />
             <subType name="stringArray"  class="com.draagon.meta.attr.StringArrayAttribute" />
@@ -19,21 +25,6 @@
             <subType name="class"        class="com.draagon.meta.attr.ClassAttribute" />
             <subType name="boolean"      class="com.draagon.meta.attr.BooleanAttribute" />
             <subType name="int"          class="com.draagon.meta.attr.IntAttribute" />
-        </type>
-
-        <type name="objectKey" class="com.draagon.meta.relation.key.ObjectKey" defaultSubType="primary" defaultName="key">
-            <subType name="primary"      class="com.draagon.meta.relation.key.PrimaryKey" />
-            <subType name="compound"     class="com.draagon.meta.relation.key.CompoundKey" />
-        </type>
-
-        <type name="objectRef"  class="com.draagon.meta.relation.ref.ObjectReference" defaultName="ref">
-            <children>
-                <child type="attr" subType="string" name="reference"/>
-            </children>
-            <subType name="oneToOne"     class="com.draagon.meta.relation.ref.OneToOneReference" />
-            <subType name="oneToMany"    class="com.draagon.meta.relation.ref.OneToManyReference" />
-            <subType name="manyToOne"    class="com.draagon.meta.relation.ref.ManyToOneReference" />
-            <subType name="manyToMany"   class="com.draagon.meta.relation.ref.ManyToManyReference" />
         </type>
 
         <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="value">

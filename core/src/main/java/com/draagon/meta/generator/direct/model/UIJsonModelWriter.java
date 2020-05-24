@@ -6,8 +6,6 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.relation.key.ObjectKey;
-import com.draagon.meta.relation.ref.ObjectReference;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.view.MetaView;
 
@@ -76,9 +74,9 @@ public class UIJsonModelWriter extends JsonModelWriter<UIJsonModelWriter> {
     protected void writeMetaDataGroupedByType( List<MetaData> mds ) throws IOException {
 
         writeMetaDataForType( MetaObject.class, "objects", mds );
-        writeMetaDataForType( ObjectKey.class, "keys", mds );
+        //writeMetaDataForType( ObjectKey.class, "keys", mds );
         writeMetaDataForType( MetaField.class, "fields", mds );
-        writeMetaDataForType( ObjectReference.class, "references", mds );
+        //writeMetaDataForType( ObjectReference.class, "references", mds );
         writeMetaDataForType( MetaView.class, "views", mds );
         writeMetaDataForType( MetaValidator.class, "validators", mds );
     }

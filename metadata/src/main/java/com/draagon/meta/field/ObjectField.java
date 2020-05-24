@@ -21,6 +21,8 @@ public class ObjectField extends MetaField<Object> {
 
     public final static String SUBTYPE_OBJECT       = "object";
 
+    public final static String ATTR_OBJECTREF       = MetaObject.ATTR_OBJECT_REF;
+
     public ObjectField( String name ) {
         super( SUBTYPE_OBJECT, name, DataTypes.OBJECT );
     }

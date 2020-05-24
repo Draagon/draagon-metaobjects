@@ -5,8 +5,6 @@
     <!-- Basket -->
     <object name="Basket" type="value">
 
-        <objectKey/>
-
         <!-- Id -->
         <field name="id" super="..::common::id"/>
 
@@ -14,33 +12,28 @@
         <field name="name" super="..::common::name"/>
 
         <!-- Number of apples -->
-        <field name="numApples" type="int">
-            <validator type="length" min="0" max="10"/>
-        </field>
+        <field name="numApples" type="int"/>
 
         <!-- Number of oranges -->
-        <field name="numOranges" type="int">
-            <validator type="length" min="0" max="10"/>
-        </field>
+        <field name="numOranges" type="int"/>
 
         <!-- Number of oranges -->
-        <field name="numVeggies" type="int">
-            <validator type="length" min="0" max="5"/>
-        </field>
+        <field name="numVeggies" type="int"/>
 
         <!-- Apples -->
         <field name="apples" type="objectArray" objectRef="..::fruit::Apple">
-            <objectRef type="oneToMany" reference="..::fruit::Apple"/>
+            <validator type="array" minSize="0" maxSize="5"/>
         </field>
 
         <!-- Oranges -->
         <field name="oranges" type="objectArray" objectRef="..::fruit::Orange">
-            <objectRef type="oneToMany" reference="..::fruit::Orange"/>
+            <validator type="array" minSize="0" maxSize="3"/>
         </field>
 
         <!-- Veggies -->
-        <field name="veggies" type="objectArray">
-            <objectRef type="oneToMany" reference="..::vegetable::Vegetable"/>
+        <field name="veggies" type="objectArray" objectRef="..::vegetable::Vegetable">
+            <validator type="required"/>
+            <validator type="array" minSize="1" maxSize="2"/>
         </field>
 
     </object>

@@ -24,8 +24,6 @@
     <!-- Tomato -->
     <object name="Tomato" super="Vegetable">
 
-        <objectKey name="key"/>
-
         <attr name="object">com.draagon.meta.test.produce.v1.Tomato</attr>
 
     </object>

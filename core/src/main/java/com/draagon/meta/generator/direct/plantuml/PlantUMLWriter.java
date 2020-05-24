@@ -4,6 +4,8 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
+import com.draagon.meta.field.ObjectArrayField;
+import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.FileDirectWriter;
 import static com.draagon.meta.generator.util.GeneratorUtil.*;
@@ -11,8 +13,10 @@ import static com.draagon.meta.generator.util.GeneratorUtil.*;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.relation.ref.*;
 import com.draagon.meta.util.MetaDataUtil;
+import com.draagon.meta.validator.ArrayValidator;
+import com.draagon.meta.validator.MetaValidator;
+import com.draagon.meta.validator.RequiredValidator;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,8 +25,13 @@ import java.util.stream.Collectors;
 
 public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
-    protected boolean showAttrs = false;
-    protected boolean showAbstracts = true;
+    public final static String ATTR_ISEMBEDDED ="isEmbedded";
+
+    protected Boolean showAttrs = false;
+    protected Boolean showAbstracts = true;
+    protected String embeddedName = null;
+    protected List<String> embeddedValues = null;
+
     protected Collection<MetaObject> filteredObjects;
 
     public PlantUMLWriter( MetaDataLoader loader, PrintWriter pw ) {
@@ -42,6 +51,12 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         return this;
     }
 
+    public PlantUMLWriter useEmbeddedNameAndValues( String name, List<String> values ) {
+        this.embeddedName = name;
+        this.embeddedValues = values;
+        return this;
+    }
+
     protected Collection<MetaObject> objects() {
         if ( filteredObjects == null ) {
             filteredObjects = GeneratorUtil.getFilteredMetaData(getLoader(), MetaObject.class, getFilters() )
@@ -52,11 +67,22 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         return filteredObjects;
     }
 
+    protected void setDefaultOptions() {
+
+        if (showAttrs == null) showAttrs = false;
+        if (showAbstracts == null) showAbstracts = true;
+        if (embeddedName == null) {
+            embeddedName = ATTR_ISEMBEDDED;
+            embeddedValues = Arrays.asList(Boolean.TRUE.toString());
+        }
+    }
 
     //////////////////////////////////////////////////////////////////////
     // UML Write Logic methods
 
     public void writeUML() throws GeneratorIOException {
+
+        setDefaultOptions();
 
         try {
             // Write start of UML file
@@ -78,9 +104,22 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         }
     }
 
+    protected List<String> getUniqueObjectPackages(Collection<MetaObject> filtered ) throws IOException {
+        List<String> pkgs = new ArrayList<>();
+
+        filtered.forEach( md -> {
+            if ( !isEmbedded( md )
+                    && !pkgs.contains( md.getPackage() )) {
+                pkgs.add( md.getPackage() );
+            }
+        });
+
+        return pkgs;
+    }
+
     protected void writeObjectPackages() throws IOException {
 
-        List<String> pkgs = getUniquePackages(objects());
+        List<String> pkgs = getUniqueObjectPackages(objects());
 
         writeEmptyPackageNesting( pkgs );
 
@@ -91,7 +130,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
             // Write MetaObjects
             inc();
             for (MetaObject mo : objects()) {
-                if ( mo.getPackage().equals( p )) {
+                if ( mo.getPackage().equals( p )
+                        && !isEmbedded( mo )) {
                     writeMetaObject( mo );
                 }
             }
@@ -262,42 +302,72 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
         for (MetaField f : mo.getMetaFields(includeParentData)) {
 
-            ObjectReference oref = (ObjectReference)f.getFirstChild(ObjectReference.class);
-            if ( oref != null ) {
+            MetaObject objRef = getMetaObjectRef(f);
+            if (objRef != null) {
 
-                MetaObject objRef = oref.getReferencedObject();
-                if (objRef != null) {
+                String min = getRefMinOrMax( f, false );
+                String max = getRefMinOrMax( f, true );
 
-                    if (isAbstract( objRef ) && !showAbstracts ) {
-                        getDerivedObjects(objRef)
-                                .stream()
-                                .filter( o -> !isAbstract(o) || (isAbstract(o) && !showAbstracts))
-                                .filter( o -> objects().contains( o ))
-                                .forEach( o -> drawObjectKeyReference(mo, f, oref, o));
-                    }
-                    else if (objects().contains( objRef )){
-                        drawObjectKeyReference(mo, f, oref, objRef);
-                    }
+                if ((isAbstract(objRef) && !showAbstracts) || isEmbedded(objRef)) {
+                    getDerivedObjects(objRef)
+                            .stream()
+                            //.filter(o -> isEmbedded(o) || !isAbstract(o) || (isAbstract(o) && !showAbstracts))
+                            .filter(o -> objects().contains(o))
+                            .forEach(o -> drawObjectReference(mo, f, min, max, o));
                 }
-            }
-            else {
-                MetaObject objRef = getMetaObjectRef(f);
-                if ( objRef != null ) {
-
-                    if (isAbstract( objRef ) && !showAbstracts ) {
-                        getDerivedObjects(objRef)
-                                .stream()
-                                .filter( o -> !isAbstract(o) || (isAbstract(o) && !showAbstracts))
-                                .filter( o -> objects().contains( o ))
-                                .forEach( o -> drawObjectReference(mo, f, o));
-                    }
-                    else if (objects().contains( objRef )) {
-                        drawObjectReference(mo, f, objRef);
-                    }
+                else if (objects().contains(objRef)) {
+                    drawObjectReference(mo, f, min, max, objRef);
                 }
             }
         }
     }
+
+    protected String getRefMinOrMax( MetaField<?> f, boolean forMax ) {
+
+        // Objects
+        if ( f instanceof ObjectField ) {
+            RequiredValidator v = getValidatorOfType( f, RequiredValidator.class );
+            if ( v == null && !forMax ) return "0";
+            else return "1";
+        }
+        // Object Arrays
+        else if ( f instanceof ObjectArrayField ) {
+            ArrayValidator v = getValidatorOfType( f, ArrayValidator.class );
+            if (v != null) {
+                if (!forMax)
+                    return String.valueOf(v.getMinSize());
+                else if (v.hasMaxSize())
+                    return String.valueOf(v.getMaxSize());
+            }
+            else if (!forMax) return "0";
+
+            return "*";
+        }
+        else {
+            throw new IllegalStateException("Field must be ObjectField or ObjectArrayField to get Min or Max references");
+        }
+    }
+
+    protected <T extends MetaValidator> T getValidatorOfType( MetaField<?> f, Class<T> clazz ) {
+        for (MetaValidator v : f.getValidators() ) {
+            if ( clazz.isAssignableFrom( v.getClass() )) return (T) v;
+        }
+        return null;
+    }
+
+    protected boolean isEmbedded( MetaObject mo ) {
+        if ( embeddedName != null && mo.hasMetaAttr( embeddedName )) {
+            if ( embeddedValues != null ) {
+                MetaAttribute a = mo.getMetaAttr(embeddedName);
+                // NOTE:  Surround ""'s are to capture null as a string
+                return embeddedValues.contains( ""+a.getValueAsString()+"" );
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     //////////////////////////////////////////////////////////////////////
     // Logic Utility methods
@@ -310,14 +380,14 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     protected MetaObject getMetaObjectRef(MetaField f) {
         try { return MetaDataUtil.getObjectRef( f ); }
-        catch( Exception e ) { return null; }
+        catch( Exception ignore ) { return null; }
     }
 
     protected Collection<MetaObject> getDerivedObjects(MetaObject metaObject) {
         Collection<MetaObject> out = new ArrayList<>();
         for ( MetaObject mo : getLoader().getChildren(MetaObject.class) ) {
             if ( metaObject.equals(mo.getSuperObject())) {
-                if ( isAbstract( mo ) && !showAbstracts )
+                if (( isAbstract( mo ) && !showAbstracts ) || isEmbedded(mo))
                     out.addAll( getDerivedObjects( mo ));
                 else
                     out.add( mo );
@@ -352,8 +422,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
             return null;
         }
         // TODO:  This should be handled differently
-        else if ( attr.getName().equals( ObjectReference.ATTR_REFERENCE)
-                || attr.getName().equals( "objectRef" )) {
+        else if (attr.getName().equals(ObjectField.ATTR_OBJECTREF)) {
             return "\""+MetaDataUtil.expandPackageForPath(MetaDataUtil.findPackageForMetaData( attr ), attr.getValueAsString() )+"\"";
         }
         else if ( attr.getDataType() == DataTypes.STRING_ARRAY ) {
@@ -488,21 +557,15 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         println( _pu(mo, true) +" ..|> " + _pu( parent, true) +" : extends" );
     }
 
-    protected void drawObjectKeyReference(MetaObject mo, MetaField f, ObjectReference oref, MetaObject objRef ) {
+    protected void drawObjectReference(MetaObject mo, MetaField f, String min, String max, MetaObject objRef ) {
         print(true,_pu(mo,true) +" ");
-        if (oref instanceof OneToOneReference) print("\"1\" --> \"1\"");
-        else if (oref instanceof OneToManyReference) print("\"1\" --> \"many\"");
-        else if (oref instanceof ManyToOneReference) print("\"many\" --> \"1\"");
-        else if (oref instanceof ManyToManyReference) print("\"many\" --> \"many\"");
-        else print("-->");
+        print("\""+min+"\" --> \""+max+"\"");
         println(" "+ _pu(objRef,true) +" : "+ _pu(f));
-        //if (oref.getName() == null) println(_pu(f));
-        // else println(_pu(f) + ":" + _pu(oref));
     }
 
-    protected void drawObjectReference(MetaObject mo, MetaField f, MetaObject objRef) {
-        println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(f));
-    }
+    //protected void drawObjectReference(MetaObject mo, MetaField f, MetaObject objRef) {
+    //    println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(f));
+    //}
 
     protected void drawNewLine() {
         println();

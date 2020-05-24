@@ -307,7 +307,7 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
         addChild(validator);
     }
 
-    public Collection<?> getValidators() {
+    public List<MetaValidator> getValidators() {
         return getChildren(MetaValidator.class, true);
     }
 

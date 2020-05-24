@@ -19,33 +19,38 @@
                 {"subType": {"name": "int",         "class": "com.draagon.meta.attr.IntAttribute"}}
             ]}},
 
+        {"type": {"name": "objectKey", "class": "com.draagon.meta.relation.key.ObjectKey", "defaultSubType": "primary", "defaultName": "key",
+            "subTypes": [
+                {"subType": {"name": "primary",     "class": "com.draagon.meta.relation.key.PrimaryKey"}},
+                {"subType": {"name": "compound",    "class": "com.draagon.meta.relation.key.CompoundKey"}}
+            ]}},
+
+        {"type": {"name": "objectRef", "class": "com.draagon.meta.relation.ref.ObjectReference", "defaultName": "ref",
+            "children": [
+                {"child": {"type": "attr", "subType": "string", "name": "reference"}}
+            ],
+            "subTypes": [
+                {"subType": {"name": "oneToOne",    "class": "com.draagon.meta.relation.ref.OneToOneReference"}},
+                {"subType": {"name": "oneToMany",   "class": "com.draagon.meta.relation.ref.OneToManyReference"}},
+                {"subType": {"name": "manyToOne",   "class": "com.draagon.meta.relation.ref.ManyToOneReference"}},
+                {"subType": {"name": "manyToMany",  "class": "com.draagon.meta.relation.ref.ManyToManyReference"}}
+            ]}},
+
         {"type": {"name": "object", "class": "com.draagon.meta.object.MetaObject", "defaultSubType": "value",
             "children": [
                 {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract"}},
                 {"child": {"type": "attr", "subType": "boolean", "name": "isInterface"}},
+                {"child": {"type": "objectKey", "subType": "*", "name": "*"}},
                 {"child": {"type": "field", "subType": "*", "name": "*"}}
             ],
             "subTypes": [
+                {"subType": {"name": "value", "class": "com.draagon.meta.object.value.ValueMetaObject",
+                    "children": [
+                        {"child": {"type": "attr", "subType": "class", "name": "class", "nameAliases": "object"}}
+                    ]}},
                 {"subType": {"name": "pojo",  "class": "com.draagon.meta.object.pojo.PojoMetaObject",
                     "children": [
-                        {"child": {"type": "attr", "subType": "string", "name": "object"}}
-                    ]}},
-                {"subType": {"name": "map", "class": "com.draagon.meta.object.mapped.MappedMetaObject",
-                    "children": [
-                        {"child": {"type": "attr", "subType": "string", "name": "object"}}
-                    ]}},
-                {"subType": {"name": "proxy", "class": "com.draagon.meta.object.proxy.ProxyMetaObject",
-                    "children": [
-                        {"child": {"type": "attr", "subType": "string", "name": "object"}},
-                        {"child": {"type": "attr", "subType": "string", "name": "proxyObject"}}
-                    ]}},
-                {"subType": {"name": "data", "class": "com.draagon.meta.object.data.DataMetaObject",
-                    "children": [
-                        {"child": {"type": "attr", "subType": "string", "name": "object"}}
-                    ]}},
-                {"subType": {"name": "value",  "class": "com.draagon.meta.object.value.ValueMetaObject",
-                    "children": [
-                        {"child": {"type": "attr", "subType": "string", "name": "object"}}
+                        {"child": {"type": "attr", "subType": "class", "name": "class", "nameAliases": "object"}}
                     ]}}
             ]}},
 
@@ -68,8 +73,16 @@
                 {"subType": {"name": "string",      "class": "com.draagon.meta.field.StringField"}},
                 {"subType": {"name": "date",        "class": "com.draagon.meta.field.DateField"}},
                 {"subType": {"name": "stringArray", "class": "com.draagon.meta.field.StringArrayField"}},
-                {"subType": {"name": "object",      "class": "com.draagon.meta.field.ObjectField"}},
-                {"subType": {"name": "objectArray", "class": "com.draagon.meta.field.ObjectArrayField"}}
+                {"subType": {"name": "object",      "class": "com.draagon.meta.field.ObjectField",
+                    "children": [
+                        {"child": {"type": "objectRef", "subType": "oneToOne", "name": "*"}},
+                        {"child": {"type": "objectRef", "subType": "manyToOne", "name": "*"}}
+                    ]}},
+                {"subType": {"name": "objectArray", "class": "com.draagon.meta.field.ObjectArrayField",
+                    "children": [
+                        {"child": {"type": "objectRef", "subType": "oneToMany", "name": "*"}},
+                        {"child": {"type": "objectRef", "subType": "manyToMany", "name": "*"}}
+                    ]}}
             ]}},
 
         {"type": {"name": "validator", "class": "com.draagon.meta.validator.MetaValidator", "defaultSubType": "required", "defaultNamePrefix": "validator",
@@ -84,11 +97,6 @@
                     "children": [
                         {"child": {"type": "attr", "subType": "int", "name": "min"}},
                         {"child": {"type": "attr", "subType": "int", "name": "max"}}
-                    ]}},
-                {"subType": {"name": "array",      "class": "com.draagon.meta.validator.ArrayValidator",
-                    "children": [
-                        {"child": {"type": "attr", "subType": "int", "name": "minSize"}},
-                        {"child": {"type": "attr", "subType": "int", "name": "maxSize"}}
                     ]}}
             ]}}
     ]}

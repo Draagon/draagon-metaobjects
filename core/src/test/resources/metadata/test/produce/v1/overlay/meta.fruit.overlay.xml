@@ -4,7 +4,7 @@
 <metadata package="produce::v1">
 
     <!-- Custom Extension -->
-    <object package="::container::ext" name="ProduceExt">
+    <object package="::container::ext" name="ProduceExt" isEmbedded="true">
 
         <!-- Name -->
         <field name="name" super="..::..::common::name"/>
@@ -29,9 +29,7 @@
         <field name="specialOverlay" type="string"/>
 
         <!-- Special Extension -->
-        <field name="specialExt" type="object" objectRef="::ext::ProduceExt">
-            <objectRef name="special" type="oneToOne" reference="::ext::ProduceExt"/>
-        </field>
+        <field name="specialExt" type="object" objectRef="::ext::ProduceExt"/>
 
     </object>
 

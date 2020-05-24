@@ -31,6 +31,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
 
+    // TODO:  Should we deprecate this one and force ObjectField and ObjectArrayField to be used only?
     public final static String ATTR_OBJECT_REF = "objectRef";
 
     /**

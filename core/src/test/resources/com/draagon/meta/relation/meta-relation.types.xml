@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <typesConfig
-        xmlns="https://www.draagon.com/types/v2"
+        xmlns="https://www.draagon.com"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://www.draagon.com/types/v2 ../types/types-config.xsd">
+        xsi:schemaLocation="https://www.draagon.com/types/v2 types-config.xsd">
 
     <types>
 
@@ -23,27 +23,36 @@
             <subType name="int"          class="com.draagon.meta.attr.IntAttribute" />
         </type>
 
-        <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="map">
+        <type name="objectKey" class="com.draagon.meta.relation.key.ObjectKey" defaultSubType="primary" defaultName="key">
+            <subType name="primary"      class="com.draagon.meta.relation.key.PrimaryKey" />
+            <subType name="compound"     class="com.draagon.meta.relation.key.CompoundKey" />
+        </type>
+
+        <type name="objectRef"  class="com.draagon.meta.relation.ref.ObjectReference" defaultName="ref">
             <children>
-                <child type="attr" subType="boolean" name="_isAbstract"/>
-                <child type="attr" subType="boolean" name="isInterface"/>
-                <child type="attr" subType="boolean" name="isKey"/>
+                <child type="attr" subType="string" name="reference"/> <!-- required="true" inlineAttr="optional"/ -->
+            </children>
+            <subType name="oneToOne"     class="com.draagon.meta.relation.ref.OneToOneReference" />
+            <subType name="oneToMany"    class="com.draagon.meta.relation.ref.OneToManyReference" />
+            <subType name="manyToOne"    class="com.draagon.meta.relation.ref.ManyToOneReference" />
+            <subType name="manyToMany"   class="com.draagon.meta.relation.ref.ManyToManyReference" />
+        </type>
+
+        <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="value">
+            <children>
+                <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
+                <child type="attr" subType="boolean" name="isInterface"/> <!-- inlineAttr="required" / -->
+                <child type="objectKey" subType="*" name="*"/> <!-- autoCreate="true" inlineAttr="optional" inlineAttrName="keyType" inlineAttrValueMap="subType"/ -->
                 <child type="field" subType="*" name="*"/>
             </children>
+            <subType name="value" class="com.draagon.meta.object.value.ValueMetaObject">
+                <children>
+                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- autoCreate="true" inlineAttr="optional" defaultValue="com.draagon.meta.object.value.ValueObject"/ -->
+                </children>
+            </subType>
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
                 <children>
-                    <child type="attr" subType="string" name="object"/>
-                </children>
-            </subType>
-            <subType name="map" class="com.draagon.meta.object.mapped.MappedMetaObject">
-                <children>
-                    <child type="attr" subType="string" name="object"/>
-                </children>
-            </subType>
-            <subType name="proxy" class="com.draagon.meta.object.proxy.ProxyMetaObject">
-                <children>
-                    <child type="attr" subType="string" name="object"/>
-                    <child type="attr" subType="String" name="proxyObject"/>
+                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
                 </children>
             </subType>
         </type>
@@ -51,6 +60,9 @@
         <type name="field" class="com.draagon.meta.field.MetaField" defaultSubType="string">
             <children>
                 <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
+                <child type="attr" subType="boolean" name="isKey"/> <!-- inlineAttr="optional" / -->
+                <child type="attr" subType="boolean" name="foreignKey"/> <!-- inlineAttr="optional" / -->
+                <child type="attr" subType="string" name="objectRef"/> <!-- inlineAttr="optional" / -->
                 <child type="validator" subType="*" name="*"/>
             </children>
             <subType name="boolean"      class="com.draagon.meta.field.BooleanField" />
@@ -62,7 +74,7 @@
             <subType name="double"       class="com.draagon.meta.field.DoubleField" />
             <subType name="string"       class="com.draagon.meta.field.StringField" />
             <subType name="date"         class="com.draagon.meta.field.DateField" />
-            <subType name="class"        class="com.draagon.meta.field.ClassField" />
+
             <!-- subType name="booleanArray" class="com.draagon.meta.field.BooleanArrayField" />
             <subType name="byteArray"    class="com.draagon.meta.field.ByteArrayField" />
             <subType name="intArray"     class="com.draagon.meta.field.IntegerArrayField" />
@@ -71,14 +83,17 @@
             <subType name="doubleArray"  class="com.draagon.meta.field.DoubleArrayField" / -->
             <subType name="stringArray"  class="com.draagon.meta.field.StringArrayField"/>
             <!-- subType name="dateArray"    class="com.draagon.meta.field.DateArrayField" /-->
+
             <subType name="object"       class="com.draagon.meta.field.ObjectField">
                 <children>
-                    <child type="attr" subType="string" name="objectRef"/>
+                    <child type="objectRef" subType="oneToOne" name="*" /> <!-- inlineAttr="optional" inlineAttrName="objectRef" inlineAttrValueMap="reference" / -->
+                    <child type="objectRef" subType="manyToOne" name="*" />
                 </children>
             </subType>
             <subType name="objectArray"  class="com.draagon.meta.field.ObjectArrayField" >
                 <children>
-                    <child type="attr" subType="string" name="objectRef"/>
+                    <child type="objectRef" subType="oneToMany" name="*"/> <!-- inlineAttr="optional" inlineAttrName="objectRef" inlineAttrValueMap="reference" / -->
+                    <child type="objectRef" subType="manyToMany" name="*"/>
                 </children>
             </subType>
         </type>
@@ -97,13 +112,13 @@
                     <child type="attr" subType="int" name="max"/> <!-- inlineAttr="optional" required="true" minValue="0"/-->
                 </children>
             </subType>
-            <subType name="array" class="com.draagon.meta.validator.ArrayValidator" >
-                <children>
-                    <child type="attr" subType="int" name="minSize"/>
-                    <child type="attr" subType="int" name="maxSize"/>
-                </children>
-            </subType>
         </type>
+
     </types>
+
+    <!-- Rules -->
+    <!-- rules>
+        <rule name="todo: add rules"/>
+    </rules -->
 
 </typesConfig>

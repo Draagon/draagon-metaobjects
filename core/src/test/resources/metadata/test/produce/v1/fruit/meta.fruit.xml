@@ -24,8 +24,6 @@
     <!-- Apple -->
     <object name="Apple" super="Fruit" object="com.draagon.meta.test.produce.v1.Apple">
 
-        <objectKey name="key"/>
-
         <!-- attr name="object">com.draagon.meta.test.produce.v1.Apple</attr -->
 
         <!-- Orachard -->
@@ -39,16 +37,12 @@
     <!-- Macintosh -->
     <object name="Macintosh" super="Apple">
 
-        <objectKey name="key"/>
-
         <attr name="object">com.draagon.meta.test.produce.v1.Macintosh</attr>
 
     </object>
 
     <!-- Orange -->
     <object name="Orange" super="Fruit">
-
-        <objectKey name="key"/>
 
         <attr name="object">com.draagon.meta.test.produce.v1.Orange</attr>
 

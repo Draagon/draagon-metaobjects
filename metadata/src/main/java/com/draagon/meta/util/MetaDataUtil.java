@@ -129,7 +129,7 @@ public class MetaDataUtil {
   }
 
   /** Gets the MetaObject referenced by this MetaData using the objectRef attribute */
-  public static MetaObject getObjectRef( MetaField d ) {
+  public static MetaObject getObjectRef( MetaField d ) throws MetaObjectNotFoundException {
 
     synchronized ( d ) {
 

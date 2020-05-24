@@ -7,7 +7,7 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.json.JsonDirectWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.relation.ref.ObjectReference;
+import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 
 import java.io.IOException;
@@ -89,9 +89,7 @@ public class JsonMetaDatalWriter<T extends JsonMetaDatalWriter> extends JsonDire
         if ( val == null ) {
             out().name(name).nullValue();
         }
-        // TODO:  This should be handled differently
-        else if ( attr.getName().equals(  ObjectReference.ATTR_REFERENCE)
-                || attr.getName().equals( "objectRef" )) {
+        else if ( attr.getName().equals(MetaObject.ATTR_OBJECT_REF )) {
             out().name(name).value( MetaDataUtil.expandPackageForPath(MetaDataUtil.findPackageForMetaData( attr ), attr.getValueAsString() ));
         }
         else if ( attr.getDataType() == DataTypes.STRING_ARRAY ) {
