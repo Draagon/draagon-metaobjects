@@ -33,12 +33,16 @@ limitations under the License.
   
 * TypedMetaDataLoader
   - Support for more advanced control over the metadata models using the TypesConfig models.
-  - Automatic naming of MetaData including auto names with prefixes, ex. key1, key2, key3
   
 * MetaData IO Enhancements
   - Potential Support for YAML, HOCON, or TOML for configuration files
   - Support for Plugins in the IO Readers and Writers
   - Support for Namespaces within the XML Serialization
+  
+* MetaObjects Editor Support
+  - Integrated into the MetaObjects Plugin, will be launched off command-line via "mvn metaobjects:editor"
+  - Support for viewing included metadata, editing project metadata, and supporting overlays
+  - Support for running generators after edit and viewing the output within the editor
 
 # Current Releases
 
@@ -49,7 +53,7 @@ is now built before core allowing for code generation of the TypesConfig models 
 features and improves were done, which are listed below.
 
 ### Upgrade Steps
-* If using the XMLMetaDataLoader
+*  Should be backwards compatible,if using XMLFileMetaDataLoader
 
 ### Breaking Changes
 *  Source files that define types must be split into separate XML files with <typeConfig> as the root element and 
@@ -64,22 +68,23 @@ features and improves were done, which are listed below.
   - Post read, the writers call validate() method on objects that implement the new Validatable interface
   - JsonSerializationHandler and XMLSerializationHandler for MetaData classes to support custom serialization
   
-* New MetaObject Types
+* New MetaData Types
   - MappedMetaObject that works with any object with a Map interface
-  - ProxyMetaObject that creates proxied implementations, not requiring any actual implementation
+  - ProxyMetaObject that creates proxied implementations, not requiring any actual implementation, however a 
+    proxyObject can be specified as the underlying object
   - DataMetaObject support for DataObjects intended to be wrapped in code generated objects.  Underlying accessor
     fields are protected, creating a less open dynamic object, unlike ValueObject which has public methods
     exposing getters/setters.  
     <i>Note:ValueObject is more useful when there is very little direct access to the objects
     in custom code, such as services that are completely metadata-driven.</i>
-
-* Class support for Attributes and Fields
-  - ClassAttribute for handling attributes such as "object" and "class" on MetaModel files
-  - ClassField for handling object fields that are Java Classes
+  - ClassAttribute for handling Java class attributes within MetaModel files
+  - ClassField for handling Java class fields
+  - ArrayValidator for validating min and max size of an array
 
 * Generator Package
   - Support for Generators intended to be used for code generation and other outputs
-  - Support for PlantUML diagrams
+  - Support for [PlantUML](https://plantuml.com/) diagrams with various control options; uses ArrayValidator 
+    for relationships when configured with minSize and maxSize
   - Support for XSD Generation based on TypesConfig for MetaModel files used for constructing MetaData
   
 * MetaData Maven Plugin (Mojo)
@@ -90,11 +95,7 @@ features and improves were done, which are listed below.
   - TypesConfigLoader for loading TypesConfig files
   - MetaModelLoader for loading MetaModel files
   - SimpleLoader for loading MetaModel files with a default simple.types.xml
-
-* New Relational MetaData
-  - New ObjectKey and ObjectReference MetaData types
-  - Support for 1:1, 1:*, *:1, and *:* relationship types
-  - Works with the [PlantUML](https://plantuml.com/) generator 
+  - FileMetaDataLoader for parsing both Json or XML configuration files and meta models
 
 ### Bug Fixes
 *  Issues with auto-boxing and unboxing in the PojoMetaObject
@@ -102,7 +103,8 @@ features and improves were done, which are listed below.
 ### Improvements
 *  Cleanup of core MetaData classes
 *  Cleanup of Exception handling
-*  Replaced parsing of metadata (MetaModel) files and types configurations (TypesConfig)
+*  Replaced parsing of metadata (MetaModel) files and types configurations (TypesConfig).  
+   <i>Note: FileMetaDataLoader uses a more sophisticated parser than the SimpleLoader</i>
 *  Refactored how TypesConfig and MetaData are loaded using MetaData themselves and the new IO package
 *  New DataTypes Enum support for MetaAttribute and MetaField replacing old MetaFieldTypes statics
 *  New DataConverter util for auto conversions between DataTypes
