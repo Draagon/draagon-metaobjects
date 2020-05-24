@@ -12,6 +12,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 public class SimpleTypesParser extends TypesConfigParser<InputStream> {
 
@@ -25,7 +27,11 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
 
         InputStream is = null;
         try {
-            is = URIHelper.getInputStream( uri );
+            List<ClassLoader> classLoaders = Arrays.asList(
+                    getClass().getClassLoader(),
+                    ClassLoader.getSystemClassLoader() );
+
+            is = URIHelper.getInputStream( classLoaders, URIHelper.toURIModel( uri ));
             //intoLoader.getResourceInputStream(resource);
             loadAndMerge( simpleLoader.getTypesConfig(), is );
         }

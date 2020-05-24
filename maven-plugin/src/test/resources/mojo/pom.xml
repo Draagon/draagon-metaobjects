@@ -15,7 +15,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.draagon.meta.mojo</groupId>
+                <groupId>com.draagon.</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <configuration>
                     <!-- Specify the Mojo parameter -->

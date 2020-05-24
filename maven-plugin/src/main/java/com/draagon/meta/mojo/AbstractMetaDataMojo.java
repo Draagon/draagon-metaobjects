@@ -4,32 +4,20 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.simple.SimpleLoader;
-import com.draagon.meta.loader.uri.URIHelper;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Execute MetaData maven plugins.
- *
- * @goal touch
- * 
- * @phase generate-sources
- */
-@Mojo(name="generate",
-        requiresDependencyResolution= ResolutionScope.COMPILE_PLUS_RUNTIME,
-        defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
-public class MetaDataMojo extends AbstractMojo
+public abstract class AbstractMetaDataMojo extends AbstractMojo
 {
     /**
      * Location of the file.
@@ -75,6 +63,8 @@ public class MetaDataMojo extends AbstractMojo
 
         MetaDataLoader loader = createLoader();
 
+        List<Generator> generatorImpls = new ArrayList<>();
+
         if ( getGenerators() != null ) {
             for ( GeneratorParam g : getGenerators() ) {
                 try {
@@ -95,14 +85,18 @@ public class MetaDataMojo extends AbstractMojo
                     // Set the scripts
                     if ( g.getScripts() != null ) impl.setScripts(g.getScripts());
 
-                    impl.execute(loader);
+                    generatorImpls.add( impl );
                 }
                 catch( Exception e ) {
                     throw new MetaDataException( "Error running generator ["+g.getClassname()+"]: "+e, e );
                 }
             }
         }
+
+        executeGenerators( loader, generatorImpls );
     }
+
+    protected abstract void executeGenerators(MetaDataLoader loader, List<Generator> generatorImpls);
 
     protected MetaDataLoader createLoader() {
 
@@ -175,6 +169,7 @@ public class MetaDataMojo extends AbstractMojo
         if ( srcDir != null ) {
             sourceDir = new File( loaderConfig.getSourceDir() );
             if ( !sourceDir.exists() ) {
+                getLog().error( "SourceDir ["+srcDir+"] did not exist: "+sourceDir.getPath() );
                 throw new IllegalArgumentException( "SourceDir [" + srcDir + "] does not exist" );
             }
         }

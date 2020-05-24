@@ -124,7 +124,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
         List<FileMetaDataSources> sources = (List<FileMetaDataSources>) getLoaderOptions().getSources();
         sources.forEach( s -> s.getSourceData().forEach( d -> {
 
-            log.warn( "LOADING: " + d.filename );
+            if ( log.isDebugEnabled() ) log.debug( "LOADING: " + d.filename );
             FileMetaDataParser p = getLoaderOptions().getParserForFile( this, d.filename);
             p.loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
             i.getAndIncrement();

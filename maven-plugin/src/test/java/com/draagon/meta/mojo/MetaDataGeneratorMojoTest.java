@@ -14,7 +14,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class MetaDataMojoTest {
+public class MetaDataGeneratorMojoTest {
 
     @Rule
     public MojoRule rule = new MojoRule();
@@ -47,7 +47,7 @@ public class MetaDataMojoTest {
         //System.out.println( "rule: " + pom );
         //System.out.println( "rule: " + rule );
 
-        MetaDataMojo metaDataMojo = (MetaDataMojo) rule.lookupMojo("generate", pom);
+        MetaDataGeneratorMojo metaDataMojo = (MetaDataGeneratorMojo) rule.lookupMojo("generate", pom);
         assertNotNull(metaDataMojo);
 
         //ToDo check output upon execution

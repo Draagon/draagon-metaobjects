@@ -13,7 +13,7 @@
 
     <name>MetaObjects :: Maven Plugin</name>
     <url>https://github.com/Draagon/draagon-metaobjects</url>
-    <description>MetaObjects for Model-driven development - Maven Plugin</description>
+    <description>MetaObjects for Metadata-driven development - Maven Plugin</description>
 
     <build>
         <plugins>
@@ -53,25 +53,13 @@
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
-            <!-- type>test-jar</type>
-            <classifier>tests</classifier>
-            <scope>test</scope -->
         </dependency>
-        <!--dependency>
-            <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-core</artifactId>
-            <version>${project.version}</version>
-        </dependency -->
-        <!--dependency>
-            <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-generators</artifactId>
-            <version>${project.version}</version>
-        </dependency-->
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
-            <version>3.5</version>
+            <version>3.6.0</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
