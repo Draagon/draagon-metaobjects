@@ -4,7 +4,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.generator.GeneratorBase;
 import com.draagon.meta.generator.GeneratorTestBase;
-import com.draagon.meta.generator.direct.json.model.JsonMetaDataGenerator;
+import com.draagon.meta.generator.direct.model.JsonMetaDataGenerator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.LocalMetaDataSources;
 import com.draagon.meta.loader.file.FileLoaderOptions;

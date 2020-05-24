@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.json.model;
+package com.draagon.meta.generator.direct.model;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
@@ -14,9 +14,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter<T> {
+public class JsonMetaDatalWriter<T extends JsonMetaDatalWriter> extends JsonDirectWriter<T> {
 
-    public JsonModelWriter(MetaDataLoader loader, Writer writer ) throws GeneratorIOException {
+    public JsonMetaDatalWriter(MetaDataLoader loader, Writer writer ) throws GeneratorIOException {
         super(loader, writer);
     }
     
@@ -24,15 +24,13 @@ public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter
     public void writeJson() throws GeneratorIOException {
 
         try {
-            out().beginObject();
-            out().name("metadata").beginArray();
+            out().beginObject().name("metadata").beginObject().name("children").beginArray();
 
             for (MetaData md : GeneratorUtil.getFilteredMetaData(getLoader(), getFilters())) {
                 writeMetaData(md);
             }
 
-            out().endArray();
-            out().endObject();
+            out().endArray().endObject().endObject();
         }
         catch (IOException e ) {
             throw new GeneratorIOException( this, "Error writing Json: "+e, e );
@@ -41,9 +39,8 @@ public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter
 
     protected void writeMetaData( MetaData md ) throws IOException {
 
-        out().beginObject();
-        out().name("type").value(md.getTypeName());
-        out().name("subType").value(md.getSubTypeName());
+        out().beginObject().name(md.getTypeName()).beginObject();
+        out().name("type").value(md.getSubTypeName());
         if ( !md.getPackage().isEmpty() ) out().name("package").value(md.getPackage());
         out().name("name").value(md.getShortName());
         if ( md.getSuperData() != null ) out().name("super").value( md.getSuperData().getName() );
@@ -69,7 +66,7 @@ public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter
             }
         }
 
-        out().endObject();
+        out().endObject().endObject();
     }
 
     protected List<MetaData> writeAndFilterAttributes(List<MetaData> mdChildren) throws IOException {

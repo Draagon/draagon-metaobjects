@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.xml.xsd;
+package com.draagon.meta.generator.direct.xsd;
 
 import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.GeneratorIOException;

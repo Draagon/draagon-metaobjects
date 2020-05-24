@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.json.model;
+package com.draagon.meta.generator.direct.model;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.field.MetaField;
