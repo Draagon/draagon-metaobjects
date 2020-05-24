@@ -1,7 +1,5 @@
 package com.draagon.meta.generator.direct.plantuml;
-import com.draagon.meta.generator.MetaDataWriterException;
-import com.draagon.meta.generator.direct.FileDirectWriter;
-import com.draagon.meta.generator.MetaDataFilters;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.SingleFileDirectGeneratorBase;
 import com.draagon.meta.loader.MetaDataLoader;
 
@@ -34,7 +32,7 @@ public class PlantUMLGenerator extends SingleFileDirectGeneratorBase<PlantUMLWri
     }
 
     @Override
-    protected void writeFile(PlantUMLWriter writer) throws MetaDataWriterException {
+    protected void writeFile(PlantUMLWriter writer) throws GeneratorIOException {
         writer.writeUML();
     }
 

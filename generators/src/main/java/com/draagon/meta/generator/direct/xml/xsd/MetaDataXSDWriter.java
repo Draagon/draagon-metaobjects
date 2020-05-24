@@ -1,7 +1,7 @@
 package com.draagon.meta.generator.direct.xml.xsd;
 
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.types.ChildConfig;
@@ -22,7 +22,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
     private String nameSpace;
 
-    public MetaDataXSDWriter( MetaDataLoader loader, OutputStream out ) throws MetaDataWriterException {
+    public MetaDataXSDWriter( MetaDataLoader loader, OutputStream out ) throws GeneratorIOException {
         super(loader,out);
     }
 
@@ -41,17 +41,17 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     ///////////////////////////////////////////////////////////////////////////
     // MetaDataXSD Methods
 
-    protected Document createDocument() throws MetaDataWriterException {
+    protected Document createDocument() throws GeneratorIOException {
         try {
             DocumentBuilder db = XMLUtil.getBuilder();
             DOMImplementation domImpl = db.getDOMImplementation();
             return domImpl.createDocument( "http://www.w3.org/2001/XMLSchema", "xs:schema", null );
         } catch( IOException e ) {
-            throw new MetaDataWriterException( this, "Error creating XML Builder: "+e, e );
+            throw new GeneratorIOException( this, "Error creating XML Builder: "+e, e );
         }
     }
 
-    public void writeXML() throws MetaDataWriterException {
+    public void writeXML() throws GeneratorIOException {
 
         Element rootElement = doc().getDocumentElement();
         rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xs", "http://www.w3.org/2001/XMLSchema");
@@ -64,13 +64,13 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
         writeTypes( rootElement, getLoader().getTypesConfig() );
     }
 
-    protected void writeTypes( Element el, TypesConfig tsc )  throws MetaDataWriterException {
+    protected void writeTypes( Element el, TypesConfig tsc )  throws GeneratorIOException {
         for (TypeConfig tc : tsc.getTypes()) {
             writeType(el, tc);
         }
     }
 
-    protected void writeType( Element el, TypeConfig tc) throws MetaDataWriterException {
+    protected void writeType( Element el, TypeConfig tc) throws GeneratorIOException {
 
         // <xs:element name="attr">
         Element typeEl = doc().createElement( "xs:element");
@@ -85,7 +85,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
         typeEl.appendChild( ctEl );
     }
 
-    protected boolean writeTypeChildren(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
+    protected boolean writeTypeChildren(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws GeneratorIOException {
 
         List<String> types = new ArrayList<>();
 
@@ -113,7 +113,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     }
 
 
-    protected void writeTypeChild(Element el, ChildConfig cc)  throws MetaDataWriterException {
+    protected void writeTypeChild(Element el, ChildConfig cc)  throws GeneratorIOException {
 
         Element ccEl = doc().createElement( "xs:element");
         ccEl.setAttribute( "ref", cc.getType() );
@@ -122,7 +122,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
         el.appendChild( ccEl );
     }
 
-    protected void writeTypeAttributes(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws MetaDataWriterException {
+    protected void writeTypeAttributes(Element el, TypeConfig tc, List<ChildConfig> typeChildConfigs) throws GeneratorIOException {
 
         writeAttribute( el, "package", "string");
         if ( !tc.getName().equals("metadata")) {
@@ -148,7 +148,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
         el.appendChild( attrEl );
     }*/
 
-    protected void writeAttribute(Element el, String name, String type) throws MetaDataWriterException {
+    protected void writeAttribute(Element el, String name, String type) throws GeneratorIOException {
 
         Element attrEl = doc().createElement( "xs:attribute");
         attrEl.setAttribute("name", name );

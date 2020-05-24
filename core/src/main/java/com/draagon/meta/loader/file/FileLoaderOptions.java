@@ -15,16 +15,16 @@ import java.util.regex.Pattern;
  */
 public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOptions<T> {
 
-    /** Holds the array of MetaDataParser filename match patterns */
+    /** Holds the array of FileMetaDataParser filename match patterns */
     protected final class PatternParser {
 
         public final String patternString;
         public final Pattern pattern;
-        public final Class<? extends MetaDataParser> parserClass;
-        public final Constructor<? extends MetaDataParser> parserConstructor;
+        public final Class<? extends FileMetaDataParser> parserClass;
+        public final Constructor<? extends FileMetaDataParser> parserConstructor;
 
-        public PatternParser( String patternString, Class<? extends MetaDataParser> parserClass,
-                              Constructor<? extends MetaDataParser> parserConstructor ) {
+        public PatternParser( String patternString, Class<? extends FileMetaDataParser> parserClass,
+                              Constructor<? extends FileMetaDataParser> parserConstructor ) {
             this.patternString = patternString;
             this.pattern = Pattern.compile( createRegexFromGlob( patternString ));
             this.parserClass = parserClass;
@@ -53,11 +53,11 @@ public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOption
 
     private boolean allowAutoAttrs = false;
     private final List<PatternParser> patternParsers = new ArrayList<>();
-    private final List<MetaDataSources> sources = new ArrayList<>();
+    private final List<FileMetaDataSources> sources = new ArrayList<>();
 
     public FileLoaderOptions() {}
 
-    public static void createFileLoaderConfig( List<MetaDataSources> sources, boolean shouldRegister ) {
+    public static void createFileLoaderConfig(List<FileMetaDataSources> sources, boolean shouldRegister ) {
         FileLoaderOptions config = new FileLoaderOptions()
                 .addParser( "*.xml", XMLMetaDataParser.class )
                 .addParser( "*.json", JsonMetaDataParser.class )
@@ -76,18 +76,18 @@ public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOption
     ///////////////////////////////////////////////////////////////////////////
     // MetaData Sources
 
-    public T setSources( List<MetaDataSources> sourcesList ) {
+    public T setSources( List<FileMetaDataSources> sourcesList ) {
         this.sources.clear();
         this.sources.addAll( sourcesList );
         return (T) this;
     }
 
-    public T addSources( MetaDataSources sources ) {
+    public T addSources( FileMetaDataSources sources ) {
         this.sources.add( sources );
         return (T) this;
     }
 
-    public List<MetaDataSources> getSources() {
+    public List<FileMetaDataSources> getSources() {
         return sources;
     }
 
@@ -98,7 +98,7 @@ public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOption
     ///////////////////////////////////////////////////////////////////////////
     // MetaData Parsers
 
-    public FileLoaderOptions setParsers(Map<String, Class<? extends MetaDataParser>> parserMap ) {
+    public FileLoaderOptions setParsers(Map<String, Class<? extends FileMetaDataParser>> parserMap ) {
         patternParsers.clear();
         for( String matchPattern : parserMap.keySet() ) {
             addParser( matchPattern, parserMap.get( matchPattern ));
@@ -110,32 +110,32 @@ public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOption
         return !patternParsers.isEmpty();
     }
 
-    public T addParser( String matchPattern, Class<? extends MetaDataParser> parserClass ) {
+    public T addParser( String matchPattern, Class<? extends FileMetaDataParser> parserClass ) {
 
         try {
-            Constructor<? extends MetaDataParser> c = parserClass.getConstructor(FileMetaDataLoader.class, String.class);
+            Constructor<? extends FileMetaDataParser> c = parserClass.getConstructor(FileMetaDataLoader.class, String.class);
             patternParsers.add(new PatternParser(matchPattern, parserClass, c));
             return (T) this;
         } catch( NoSuchMethodException e ) {
-            throw new IllegalArgumentException( "MetaDataParser class [" + parserClass.getName() + "] has no Constructor (MetaDataLoader, String)" );
+            throw new IllegalArgumentException( "FileMetaDataParser class [" + parserClass.getName() + "] has no Constructor (MetaDataLoader, String)" );
         }
     }
 
-    /** For the specified filename, return the MetaDataParser than handles it */
-    public MetaDataParser getParserForFile(FileMetaDataLoader loader, String filename ) {
+    /** For the specified filename, return the FileMetaDataParser than handles it */
+    public FileMetaDataParser getParserForFile(FileMetaDataLoader loader, String filename ) {
 
         for ( PatternParser pp : patternParsers ) {
             if ( pp.pattern.matcher( filename ).matches()) {
                 try {
                     return pp.parserConstructor.newInstance( loader, filename );
                 } catch (ReflectiveOperationException e) {
-                    throw new MetaDataException( "Unable to instantiate MetaDataParser [" + pp.parserClass.getName()
+                    throw new MetaDataException( "Unable to instantiate FileMetaDataParser [" + pp.parserClass.getName()
                             + "] for file ["+filename+"] and Loader ["+loader+"]: " + e.getMessage(), e );
                 }
             }
         }
 
-        throw new MetaDataException( "No MetaDataParser was found for file ["+filename+"] on Loader ["+loader+"]" );
+        throw new MetaDataException( "No FileMetaDataParser was found for file ["+filename+"] on Loader ["+loader+"]" );
     }
 
     public boolean allowsAutoAttrs() {

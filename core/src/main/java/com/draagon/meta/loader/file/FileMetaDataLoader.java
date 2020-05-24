@@ -7,7 +7,6 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
@@ -42,7 +41,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
     }
 
     /** Initialize with the metadata source being set */
-    public FileMetaDataLoader init( MetaDataSources sources ) {
+    public FileMetaDataLoader init( FileMetaDataSources sources ) {
         getLoaderOptions().addSources( sources );
         return (FileMetaDataLoader) init();
     }
@@ -122,11 +121,11 @@ public class FileMetaDataLoader extends MetaDataLoader {
         AtomicInteger i = new AtomicInteger();
 
         // Load all the source data
-        List<MetaDataSources> sources = (List<MetaDataSources>) getLoaderOptions().getSources();
+        List<FileMetaDataSources> sources = (List<FileMetaDataSources>) getLoaderOptions().getSources();
         sources.forEach( s -> s.getSourceData().forEach( d -> {
 
             log.warn( "LOADING: " + d.filename );
-            MetaDataParser p = getLoaderOptions().getParserForFile( this, d.filename);
+            FileMetaDataParser p = getLoaderOptions().getParserForFile( this, d.filename);
             p.loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
             i.getAndIncrement();
         }));
@@ -143,7 +142,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
     @Override
     public Class<?> loadClass( String className ) throws ClassNotFoundException {
 
-        for (MetaDataSources s : (List<MetaDataSources>) getLoaderOptions().getSources() ) {
+        for (FileMetaDataSources s : (List<FileMetaDataSources>) getLoaderOptions().getSources() ) {
             try {
                 return s.getClass().getClassLoader().loadClass(className);
             } catch( ClassNotFoundException ignore ) {}

@@ -3,10 +3,10 @@ package com.draagon.meta.loader.file.json;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.loader.file.FileMetaDataParser;
 import com.draagon.meta.loader.types.ChildConfig;
 import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.MetaDataParser;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Json MetaData Loader
  */
-public class JsonMetaDataParser extends MetaDataParser {
+public class JsonMetaDataParser extends FileMetaDataParser {
 
     private static Log log = LogFactory.getLog(JsonMetaDataParser.class);
 

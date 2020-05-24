@@ -1,16 +1,14 @@
 package com.draagon.meta.generator.direct;
 
-import com.draagon.meta.generator.MetaDataFilters;
-import com.draagon.meta.generator.MetaDataWriter;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorIOWriter;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.util.FileIndentor;
 import com.draagon.meta.loader.MetaDataLoader;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 
-public abstract class FileDirectWriter<T extends FileDirectWriter> extends MetaDataWriter<T> {
+public abstract class FileDirectWriter<T extends FileDirectWriter> extends GeneratorIOWriter<T> {
 
     private FileIndentor indentor;
     protected final PrintWriter pw;
@@ -49,9 +47,9 @@ public abstract class FileDirectWriter<T extends FileDirectWriter> extends MetaD
     }
 
     @Override
-    public void close() throws MetaDataWriterException {
+    public void close() throws GeneratorIOException {
         pw.close();
-        if ( indentor != null && indentor.isIndented() ) throw new MetaDataWriterException(this, "The indenting increment is not back to root level, invalid logic");
+        if ( indentor != null && indentor.isIndented() ) throw new GeneratorIOException(this, "The indenting increment is not back to root level, invalid logic");
     }
 
     /////////////////////////////////////////////////////////////////////////

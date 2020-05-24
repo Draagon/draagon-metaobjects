@@ -14,18 +14,18 @@ import java.util.Scanner;
 /**
  * Created by dmealing on 11/30/16.
  */
-public class MetaDataSources {
+public class FileMetaDataSources {
 
-    private static Log log = LogFactory.getLog(MetaDataSources.class);
+    private static Log log = LogFactory.getLog(FileMetaDataSources.class);
 
     /** Holds the SourceData */
     public static class SourceData {
 
         public final String filename;
-        public final Class<? extends MetaDataSources> sourceClass;
+        public final Class<? extends FileMetaDataSources> sourceClass;
         public final String sourceData;
 
-        public SourceData(String filename, Class<? extends MetaDataSources> sourceClass, String sourceData ) {
+        public SourceData(String filename, Class<? extends FileMetaDataSources> sourceClass, String sourceData ) {
             this.filename = filename;
             this.sourceClass = sourceClass;
             this.sourceData = sourceData;
@@ -62,7 +62,7 @@ public class MetaDataSources {
     // Stores the loaded metadata files (in memory)
     private List<SourceData> sourceData = new ArrayList<>();
 
-    protected MetaDataSources() {
+    protected FileMetaDataSources() {
     }
 
     protected void setSourceDir( String sourceDir ) {
@@ -70,7 +70,7 @@ public class MetaDataSources {
     }
 
     /** Add the MetaData from another source */
-    protected MetaDataSources add(MetaDataSources sources ) {
+    protected FileMetaDataSources add(FileMetaDataSources sources ) {
         sourceData.addAll( sources.sourceData );
         return this;
     }
@@ -140,7 +140,7 @@ public class MetaDataSources {
 
             url = ClassLoader.getSystemClassLoader().getResource(filename);
             if (url == null) {
-                throw new MetaDataException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or MetaDataSources ["+this.getClass().getName()+"]");
+                throw new MetaDataException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or FileMetaDataSources ["+this.getClass().getName()+"]");
             }
         }
 
@@ -204,7 +204,7 @@ public class MetaDataSources {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MetaDataSources that = (MetaDataSources) o;
+        FileMetaDataSources that = (FileMetaDataSources) o;
         return Objects.equals(sourceDir, that.sourceDir) &&
                 Objects.equals(sourceData, that.sourceData);
     }

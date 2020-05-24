@@ -1,10 +1,11 @@
 package com.draagon.meta.loader.xml;
 
+import com.draagon.meta.loader.file.FileMetaDataSources;
+
 /**
  * Created by dmealing on 11/30/16.
- * @deprecated Use com.draagon.meta.loader.file.MetaDataSources
  */
-public class MetaDataSources extends com.draagon.meta.loader.file.MetaDataSources {
+public class MetaDataSources extends FileMetaDataSources {
 
     protected MetaDataSources() {}
 }

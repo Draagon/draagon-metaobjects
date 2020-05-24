@@ -1,8 +1,8 @@
 package com.draagon.meta.generator.direct.json;
 
-import com.draagon.meta.generator.GeneratorMetaException;
+import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.MetaDataFilters;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.DirectGeneratorBase;
 import com.draagon.meta.loader.MetaDataLoader;
 
@@ -11,7 +11,7 @@ import java.io.*;
 public abstract class SingleJsonDirectGeneratorBase extends DirectGeneratorBase {
 
     @Override
-    public void execute( MetaDataLoader loader ) throws GeneratorMetaException {
+    public void execute( MetaDataLoader loader ) throws GeneratorException {
 
         File outf = null;
         FileWriter fileWriter = null;
@@ -34,28 +34,28 @@ public abstract class SingleJsonDirectGeneratorBase extends DirectGeneratorBase 
             writeJson(writer, outf.toString());
 
         }
-        catch( MetaDataWriterException e ) {
-            throw new GeneratorMetaException( e.toString(), e );
+        catch( GeneratorIOException e ) {
+            throw new GeneratorException( e.toString(), e );
         }
         catch( IOException e ) {
-            throw new GeneratorMetaException( "Unable to write to Json file [" + outf + "]: " + e, e );
+            throw new GeneratorException( "Unable to write to Json file [" + outf + "]: " + e, e );
         }
         finally {
             try {
                 if (writer != null) writer.close();
                 else if ( fileWriter != null ) fileWriter.close();
 
-            } catch( MetaDataWriterException e ) {
-                throw new GeneratorMetaException( e.toString(), e );
+            } catch( GeneratorIOException e ) {
+                throw new GeneratorException( e.toString(), e );
             } catch( IOException e ) {
                 log.error( "Error closing Json file ["+outf+"]: "+e, e );
             }
         }
     }
 
-    protected abstract JsonDirectWriter getWriter( MetaDataLoader loader, Writer writer ) throws MetaDataWriterException;
+    protected abstract JsonDirectWriter getWriter( MetaDataLoader loader, Writer writer ) throws GeneratorIOException;
 
-    protected void writeJson( JsonDirectWriter writer, String filename ) throws MetaDataWriterException {
+    protected void writeJson( JsonDirectWriter writer, String filename ) throws GeneratorIOException {
         log.info("Writing Json file: " + filename );
 
         writer.writeJson();

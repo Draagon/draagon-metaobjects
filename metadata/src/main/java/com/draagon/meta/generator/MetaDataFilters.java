@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MetaDataFilters {
+
     protected List<String> filters = new ArrayList<>();
 
     public MetaDataFilters() {

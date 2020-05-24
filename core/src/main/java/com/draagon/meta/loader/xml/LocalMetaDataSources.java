@@ -1,15 +1,11 @@
 package com.draagon.meta.loader.xml;
 
-import com.draagon.meta.loader.file.MetaDataSources;
-
 import java.util.List;
 
 /**
  * Handles loading
  *
  * Created by dmealing on 11/30/16.
- *
- * @deprecated Use com.draagon.meta.loader.file.LocalMetaDataSources
  */
 public class LocalMetaDataSources extends com.draagon.meta.loader.xml.MetaDataSources {
 

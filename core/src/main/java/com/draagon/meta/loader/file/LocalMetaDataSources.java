@@ -7,7 +7,7 @@ import java.util.List;
  *
  * Created by dmealing on 11/30/16.
  */
-public class LocalMetaDataSources extends MetaDataSources {
+public class LocalMetaDataSources extends FileMetaDataSources {
 
     public LocalMetaDataSources(String file ) {
         read( file );

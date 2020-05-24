@@ -1,15 +1,11 @@
 package com.draagon.meta.generator.direct.xml.xsd;
 
-import com.draagon.meta.generator.GeneratorMetaException;
-import com.draagon.meta.generator.MetaDataWriter;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorException;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.xml.SingleXMLDirectGeneratorBase;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 
 public class MetaDataXSDGenerator extends SingleXMLDirectGeneratorBase {
@@ -24,7 +20,7 @@ public class MetaDataXSDGenerator extends SingleXMLDirectGeneratorBase {
     @Override
     protected void parseArgs() {
 
-        if ( !hasArg( ARG_NAMESPACE)) throw new GeneratorMetaException( ARG_NAMESPACE+" argument is required" );
+        if ( !hasArg( ARG_NAMESPACE)) throw new GeneratorException( ARG_NAMESPACE+" argument is required" );
 
         nameSpace = getArg( ARG_NAMESPACE);
 
@@ -32,7 +28,7 @@ public class MetaDataXSDGenerator extends SingleXMLDirectGeneratorBase {
     }
 
     @Override
-    protected XMLDirectWriter getWriter(MetaDataLoader loader, OutputStream os ) throws MetaDataWriterException {
+    protected XMLDirectWriter getWriter(MetaDataLoader loader, OutputStream os ) throws GeneratorIOException {
         return new MetaDataXSDWriter(loader, os)
                 .withNamespace(nameSpace);
     }

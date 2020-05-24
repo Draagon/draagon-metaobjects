@@ -22,11 +22,11 @@ import java.util.TreeMap;
 import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 /**
- * Absract MetaDataParser for reading from source files
+ * Absract FileMetaDataParser for reading from source files
  */
-public abstract class MetaDataParser {
+public abstract class FileMetaDataParser {
 
-    private static Log log = LogFactory.getLog(MetaDataParser.class);
+    private static Log log = LogFactory.getLog(FileMetaDataParser.class);
 
     public final static String ATTR_METADATA        = "metadata";
     public final static String ATTR_TYPESCONFIG     = "typesConfig";
@@ -89,8 +89,8 @@ public abstract class MetaDataParser {
 
     protected ParserInfoMsg info = new ParserInfoMsg();
 
-    /** Create the MetaDataParser */
-    protected MetaDataParser(FileMetaDataLoader loader, String filename ) {
+    /** Create the FileMetaDataParser */
+    protected FileMetaDataParser(FileMetaDataLoader loader, String filename ) {
         this.loader = loader;
         this.filename = filename;
     }

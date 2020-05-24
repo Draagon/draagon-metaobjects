@@ -1,4 +1,4 @@
-package com.draagon.meta.generator;
+package com.draagon.meta.generator.util;
 
 import static org.junit.Assert.*;
 

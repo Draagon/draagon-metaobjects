@@ -1,25 +1,21 @@
 package com.draagon.meta.generator;
 
+import com.draagon.meta.io.MetaDataWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-public abstract class MetaDataWriter<T extends MetaDataWriter> {
+public abstract class GeneratorIOWriter<T extends GeneratorIOWriter> extends MetaDataWriter {
 
     protected Log log = LogFactory.getLog( this.getClass() );
 
-    private final MetaDataLoader loader;
     private MetaDataFilters filters;
     private String name;
     private String filename;
 
-    protected MetaDataWriter(MetaDataLoader loader) {
-        this.loader = loader;
-    }
-
-    public MetaDataLoader getLoader() {
-        return loader;
+    protected GeneratorIOWriter(MetaDataLoader loader) {
+        super(loader);
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -55,14 +51,14 @@ public abstract class MetaDataWriter<T extends MetaDataWriter> {
     /////////////////////////////////////////////////////////////////////////
     // MetaDataWriter methods
 
-    public abstract void close() throws MetaDataWriterException;
+    public abstract void close() throws GeneratorIOException;
 
 
     /////////////////////////////////////////////////////////////////////////
     // Misc Methods
 
     protected String getToStringOptions() {
-        return "loader="+loader.getShortName()
+        return "loader="+getLoader().getShortName()
                 + (name != null ? ",name="+name : "")
                 + (filename != null ? ",filename="+filename : "")
                 + (filters != null ? ",filters="+filters : ",filters=no");

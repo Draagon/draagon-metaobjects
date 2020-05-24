@@ -4,12 +4,10 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.generator.GeneratorMetaException;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.FileDirectWriter;
 import static com.draagon.meta.generator.util.GeneratorUtil.*;
 
-import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -58,7 +56,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     //////////////////////////////////////////////////////////////////////
     // UML Write Logic methods
 
-    public void writeUML() throws MetaDataWriterException {
+    public void writeUML() throws GeneratorIOException {
 
         try {
             // Write start of UML file
@@ -76,7 +74,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
             drawFileEnd();
         }
         catch( IOException e ) {
-            throw new MetaDataWriterException( this, "Error writing PlantUML: "+e, e);
+            throw new GeneratorIOException( this, "Error writing PlantUML: "+e, e);
         }
     }
 

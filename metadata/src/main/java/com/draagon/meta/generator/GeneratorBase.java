@@ -28,7 +28,7 @@ public abstract class GeneratorBase implements Generator {
 
     protected String getArg( String name, boolean required ) {
         if ( !hasArg( name )) {
-            throw new GeneratorMetaException( "No argument '"+name+"' was specified in the args map" );
+            throw new GeneratorException( "No argument '"+name+"' was specified in the args map" );
         }
         return getArg( name );
     }
@@ -70,7 +70,7 @@ public abstract class GeneratorBase implements Generator {
         File f = new File( dirPath );
         if (!f.exists()) {
             if ( !f.mkdirs() ) {
-                throw new GeneratorMetaException( "Directory ["+dirPath+"] could not be created for argument [" +name+ "]" );
+                throw new GeneratorException( "Directory ["+dirPath+"] could not be created for argument [" +name+ "]" );
             }
         }
 

@@ -3,28 +3,25 @@ package com.draagon.meta.generator.direct.json.model;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.generator.MetaDataWriterException;
-import com.draagon.meta.generator.MetaDataFilters;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.json.JsonDirectWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.relation.ref.ObjectReference;
 import com.draagon.meta.util.MetaDataUtil;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter<T> {
 
-    public JsonModelWriter(MetaDataLoader loader, Writer writer ) throws MetaDataWriterException {
+    public JsonModelWriter(MetaDataLoader loader, Writer writer ) throws GeneratorIOException {
         super(loader, writer);
     }
     
     @Override
-    public void writeJson() throws MetaDataWriterException {
+    public void writeJson() throws GeneratorIOException {
 
         try {
             out().beginObject();
@@ -38,7 +35,7 @@ public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter
             out().endObject();
         }
         catch (IOException e ) {
-            throw new MetaDataWriterException( this, "Error writing Json: "+e, e );
+            throw new GeneratorIOException( this, "Error writing Json: "+e, e );
         }
     }
 

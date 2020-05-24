@@ -1,8 +1,8 @@
 package com.draagon.meta.generator.direct;
 
-import com.draagon.meta.generator.GeneratorMetaException;
+import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.MetaDataFilters;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.loader.MetaDataLoader;
 
 import java.io.File;
@@ -35,22 +35,22 @@ public abstract class SingleFileDirectGeneratorBase<T extends FileDirectWriter> 
             // Write the UML File
             writeFile(writer);
         }
-        catch( MetaDataWriterException | IOException e ) {
-            throw new GeneratorMetaException( "Unable to write to file [" + outf + "]: " + e, e );
+        catch( IOException e ) {
+            throw new GeneratorException( "Unable to write to file [" + outf + "]: " + e, e );
         }
         finally {
             if ( writer != null ) {
                 try {
                     writer.close();
-                } catch (MetaDataWriterException e) {
-                    throw new GeneratorMetaException( "Unable to close file [" + outf + "]: " + e, e );
+                } catch (IOException e) {
+                    throw new GeneratorException( "Unable to close file [" + outf + "]: " + e, e );
                 }
             }
             else if ( pw != null ) pw.close();
         }
     }
 
-    protected abstract T getWriter( MetaDataLoader loader, PrintWriter pw ) throws MetaDataWriterException;
+    protected abstract T getWriter( MetaDataLoader loader, PrintWriter pw ) throws GeneratorIOException;
 
-    protected abstract void writeFile( T writer ) throws MetaDataWriterException;
+    protected abstract void writeFile( T writer ) throws GeneratorIOException;
 }

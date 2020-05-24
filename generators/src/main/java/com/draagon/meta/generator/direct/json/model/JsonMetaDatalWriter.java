@@ -3,7 +3,7 @@ package com.draagon.meta.generator.direct.json.model;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.generator.MetaDataWriterException;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.json.JsonDirectWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
@@ -16,12 +16,12 @@ import java.util.*;
 
 public class JsonMetaDatalWriter<T extends JsonMetaDatalWriter> extends JsonDirectWriter<T> {
 
-    public JsonMetaDatalWriter(MetaDataLoader loader, Writer writer ) throws MetaDataWriterException {
+    public JsonMetaDatalWriter(MetaDataLoader loader, Writer writer ) throws GeneratorIOException {
         super(loader, writer);
     }
     
     @Override
-    public void writeJson() throws MetaDataWriterException {
+    public void writeJson() throws GeneratorIOException {
 
         try {
             out().beginObject().name("metadata").beginObject().name("children").beginArray();
@@ -33,7 +33,7 @@ public class JsonMetaDatalWriter<T extends JsonMetaDatalWriter> extends JsonDire
             out().endArray().endObject().endObject();
         }
         catch (IOException e ) {
-            throw new MetaDataWriterException( this, "Error writing Json: "+e, e );
+            throw new GeneratorIOException( this, "Error writing Json: "+e, e );
         }
     }
 

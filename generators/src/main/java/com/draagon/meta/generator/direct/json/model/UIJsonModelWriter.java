@@ -2,8 +2,7 @@ package com.draagon.meta.generator.direct.json.model;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.generator.MetaDataWriterException;
-import com.draagon.meta.generator.MetaDataFilters;
+import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -20,12 +19,12 @@ import static com.draagon.meta.generator.util.GeneratorUtil.getUniquePackages;
 
 public class UIJsonModelWriter extends JsonModelWriter<UIJsonModelWriter> {
 
-    public UIJsonModelWriter(MetaDataLoader loader, Writer writer) throws MetaDataWriterException {
+    public UIJsonModelWriter(MetaDataLoader loader, Writer writer) throws GeneratorIOException {
         super(loader, writer);
     }
 
     @Override
-    public void writeJson() throws MetaDataWriterException {
+    public void writeJson() throws GeneratorIOException {
 
         try {
             out().beginObject();
@@ -46,7 +45,7 @@ public class UIJsonModelWriter extends JsonModelWriter<UIJsonModelWriter> {
             out().endObject();
         }
         catch (IOException e ) {
-            throw new MetaDataWriterException( this, "Error writing Json: "+e, e );
+            throw new GeneratorIOException( this, "Error writing Json: "+e, e );
         }
     }
 

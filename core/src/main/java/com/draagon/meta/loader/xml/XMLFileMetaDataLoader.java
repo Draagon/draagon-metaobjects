@@ -14,8 +14,6 @@ import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 /**
  * Meta Class loader for XML files
- *
- * @deprecated Use com.draagon.meta.loader.FileMetaDataLoader
  */
 public class XMLFileMetaDataLoader extends FileMetaDataLoader {
 

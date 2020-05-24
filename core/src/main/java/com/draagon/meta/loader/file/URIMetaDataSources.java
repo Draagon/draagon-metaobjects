@@ -15,7 +15,7 @@ import java.util.List;
  *
  * Created by dmealing on 11/30/16.
  */
-public class URIMetaDataSources extends MetaDataSources {
+public class URIMetaDataSources extends FileMetaDataSources {
 
     private URIModel currentModel = null;
 
