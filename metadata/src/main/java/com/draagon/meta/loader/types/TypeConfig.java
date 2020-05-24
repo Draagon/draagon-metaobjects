@@ -29,8 +29,8 @@ public interface TypeConfig extends TypeConfigLogic, Validatable, MetaObjectAwar
     public String getName();
     public void setName(String name);
 
-    public Class<? extends MetaData> getBaseClass();
-    public void setBaseClass(Class<? extends MetaData> baseClass);
+    public String getBaseClass();
+    public void setBaseClass(String baseClass);
 
     public Collection<SubTypeConfig> getSubTypes();
     public void setSubTypes(List<SubTypeConfig> subTypes);
@@ -41,6 +41,8 @@ public interface TypeConfig extends TypeConfigLogic, Validatable, MetaObjectAwar
 
     /////////////////////////////////////////////////////////////////////
     // TODO:  Replace all of these once the new version exists on the core side
+
+    public Class <? extends MetaData>getMetaDataClass();
 
     public String getDefaultName();
     public void setDefaultName(String name);

@@ -17,7 +17,7 @@ import java.util.Objects;
 public class SubTypeConfigPojo extends PojoObject implements SubTypeConfig {
 
     private String name = null;
-    private Class<? extends MetaData> baseClass = null;
+    private String baseClass = null;
     private List<ChildConfig> children = null;
 
     public SubTypeConfigPojo(MetaObject mo) {
@@ -38,12 +38,12 @@ public class SubTypeConfigPojo extends PojoObject implements SubTypeConfig {
     }
 
     @Override
-    public Class<? extends MetaData> getBaseClass() {
+    public String getBaseClass() {
         return baseClass;
     }
 
     @Override
-    public void setBaseClass( Class<? extends MetaData> baseClass ) {
+    public void setBaseClass( String baseClass ) {
         this.baseClass = baseClass;
     }
 
@@ -67,8 +67,9 @@ public class SubTypeConfigPojo extends PojoObject implements SubTypeConfig {
         if ( getName() == null ) throw new InvalidValueException( "Type name on SubType cannot be null" );
         if ( getBaseClass() == null ) throw new InvalidValueException( "Base class on SubType ["+getName()+"] cannot be null" );
 
-        if ( Modifier.isAbstract( getBaseClass().getModifiers() )) throw new InvalidValueException(
-                "Base class ["+getBaseClass()+"] on SubType ["+getName()+"] cannot be Abstract" );
+        // TODO:  Put this in the Parse logic
+        //if ( Modifier.isAbstract( getMetaDataClass().getModifiers() )) throw new InvalidValueException(
+        //        "Base class ["+getBaseClass()+"] on SubType ["+getName()+"] cannot be Abstract" );
 
         if ( getChildConfigs() != null ) getChildConfigs().forEach( cc -> cc.validate() );
     }
@@ -79,11 +80,23 @@ public class SubTypeConfigPojo extends PojoObject implements SubTypeConfig {
 
     public static SubTypeConfigPojo create(MetaDataLoader loader,
                                            String subtypeName,
-                                           Class<? extends MetaData> baseClass ) {
+                                           String baseClass ) {
         SubTypeConfigPojo c = (SubTypeConfigPojo) loader.getMetaObjectByName( SubTypeConfigPojo.OBJECT_NAME ).newInstance();
         c.setName( subtypeName );
         c.setBaseClass( baseClass );
         return c;
+    }
+
+    private Class<? extends MetaData> toClass( String className )  throws ClassNotFoundException {
+        return (Class<? extends MetaData>) Class.forName( className );
+    }
+
+    public Class <? extends MetaData> getMetaDataClass() {
+        try {
+            return toClass( getBaseClass());
+        } catch (ClassNotFoundException e) {
+            throw new InvalidValueException( "BaseClass ["+getBaseClass()+"] was not found for SubType ["+getName()+"]");
+        }
     }
 
 

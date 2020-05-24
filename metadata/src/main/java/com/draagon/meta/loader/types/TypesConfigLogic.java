@@ -31,5 +31,5 @@ public interface TypesConfigLogic {
     /////////////////////////////////////////////////////////////////////
     // TODO:  Replace all of these once the new version exists on the core side
 
-    public TypeConfig createAndAddType(String typeName, Class<? extends MetaData> clazz);
+    public TypeConfig createAndAddType(String typeName, String baseClass );
 }

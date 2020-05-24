@@ -144,13 +144,8 @@ public abstract class FileMetaDataParser {
             if ( typeClass == null || typeClass.isEmpty() )
                 throw new MetaDataException( "MetaData Type [" + typeName + "] has no 'class' attribute specified in file [" +getFilename()+ "]");
 
-            try {
-                // Add a new TypeModel and add to the mapping
-                typeConfig = getTypesConfig().createAndAddType( typeName, (Class<? extends MetaData>) Class.forName( typeClass ));
-            }
-            catch( ClassNotFoundException ex ) {
-                throw new MetaDataException( "MetaData Type ["+typeName+"] has an invalid class ["+typeClass+"] in file ["+getFilename()+"]: " + ex.getMessage(), ex );
-            }
+            // Add a new TypeModel and add to the mapping
+            typeConfig = getTypesConfig().createAndAddType( typeName, typeClass );
         }
         return typeConfig;
     }
@@ -217,9 +212,9 @@ public abstract class FileMetaDataParser {
         // Check if the metadata described already existed, and if so create and overloaded version
         try {
             if ( isRoot && packageName.length() > 0 ) {
-                md = parent.getChild( packageName + MetaDataLoader.PKG_SEPARATOR + name, types.getBaseClass() );
+                md = parent.getChild( packageName + MetaDataLoader.PKG_SEPARATOR + name, types.getMetaDataClass() );
             } else {
-                md = parent.getChild( name, types.getBaseClass() );
+                md = parent.getChild( name, types.getMetaDataClass() );
 
                 // If it's not a child from the same parent, we need to wrap it
                 if ( md.getParent() != parent ) {
@@ -265,7 +260,7 @@ public abstract class FileMetaDataParser {
             try {
                 if (superName.indexOf(MetaDataLoader.PKG_SEPARATOR) < 0 && packageName.length() > 0) {
 
-                    superData = getLoader().getChild(packageName + MetaDataLoader.PKG_SEPARATOR + superName, types.getBaseClass() );
+                    superData = getLoader().getChild(packageName + MetaDataLoader.PKG_SEPARATOR + superName, types.getMetaDataClass() );
                 }
             } catch (MetaDataNotFoundException e) {
                 // TODO:  Should this throw a real exception
@@ -276,7 +271,7 @@ public abstract class FileMetaDataParser {
             if (superData == null) {
                 String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
                 try {
-                    superData = getLoader().getChild(fullyQualifiedSuperName, types.getBaseClass());
+                    superData = getLoader().getChild(fullyQualifiedSuperName, types.getMetaDataClass());
                 }
                 catch (MetaDataNotFoundException e) {
                     //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())

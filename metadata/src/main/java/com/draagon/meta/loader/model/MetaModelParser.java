@@ -299,7 +299,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     protected <TC extends TypeConfig, T extends SubTypeConfig> MetaData createNewMetaData(
             MetaData parent, TC tc, T stc, String fullname) {
         MetaData merge;
-        Class<? extends MetaData> clazz = stc.getBaseClass();
+        Class<? extends MetaData> clazz = stc.getMetaDataClass();
         merge = (MetaData) parent.newInstanceFromClass( clazz, tc.getName(), stc.getName(), fullname );
         return merge;
     }

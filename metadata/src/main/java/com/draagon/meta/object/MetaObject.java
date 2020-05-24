@@ -30,7 +30,6 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
     /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
-    public final static String ATTR_CLASS = "class";
 
     public final static String ATTR_OBJECT_REF = "objectRef";
 
@@ -178,30 +177,18 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     ////////////////////////////////////////////////////
     // OBJECT METHODS
 
-    protected boolean hasObjectClassAttr() {
-        return ( hasMetaAttr(ATTR_OBJECT, true )
-            || hasMetaAttr(ATTR_CLASS, true ));
+    protected boolean hasObjectAttr() {
+        return ( hasMetaAttr(ATTR_OBJECT, true ));
     }
 
     protected Class<?> getObjectClassFromAttr() throws ClassNotFoundException {
         Class<?> c = null;
         MetaAttribute attr = null;
-        if (hasMetaAttr(ATTR_OBJECT, false)) {
-            attr = getMetaAttr(ATTR_OBJECT, false);
-        } else if (hasMetaAttr(ATTR_CLASS, false)) {
-            attr = getMetaAttr(ATTR_CLASS, false);
-        } else if (hasMetaAttr(ATTR_OBJECT)) {
+        if (hasMetaAttr(ATTR_OBJECT)) {
             attr = getMetaAttr(ATTR_OBJECT);
-        } else if (hasMetaAttr(ATTR_CLASS)) {
-            attr = getMetaAttr(ATTR_CLASS);
         }
         if ( attr != null ) {
-            Object val = attr.getValue();
-            if ( val instanceof Class ) {
-                c = (Class<?>) val;
-            } else if ( val instanceof String ) {
-                c = Class.forName((String)val);
-            }
+            c = Class.forName( attr.getValueAsString() );
         }
         return c;
     }
@@ -213,7 +200,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
         Class<?> c = null;
 
-        if ( hasObjectClassAttr())
+        if ( hasObjectAttr())
             c = getObjectClassFromAttr();
 
         if (c == null)
@@ -231,7 +218,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
         }
         catch (ClassNotFoundException e) {
             if ( throwError ) {
-                throw new MetaDataException("Derived Object Class [" + ostr + "] was not found for MetaObject ["+getName()+"]");
+                throw new InvalidMetaDataException( this, "Derived Object Class [" + ostr + "] was not found");
             }
         }
 

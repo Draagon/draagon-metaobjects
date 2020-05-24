@@ -20,7 +20,7 @@ public interface TypeConfigLogic {
 
     public void addSubTypeConfig( SubTypeConfig subType );
 
-    public void addSubTypeConfig(String subtypeName, Class<? extends MetaData> clazz );
+    public void addSubTypeConfig(String subtypeName, String baseClass );
 
     public Class<? extends MetaData> getDefaultTypeClass();
 

@@ -25,11 +25,16 @@ public interface SubTypeConfig extends Validatable, MetaObjectAware {
 
     public void setName(String name);
 
-    public Class<? extends MetaData> getBaseClass();
+    public String getBaseClass();
 
-    public void setBaseClass( Class<? extends MetaData> clazz ) ;
+    public void setBaseClass( String clazz ) ;
 
     public List<ChildConfig> getChildConfigs();
 
     public void setChildConfigs( List<ChildConfig> children );
+
+    /////////////////////////////////////////////////////////////////////
+    // TODO:  Replace all of these once the new version exists on the core side
+
+    public Class <? extends MetaData>getMetaDataClass();
 }

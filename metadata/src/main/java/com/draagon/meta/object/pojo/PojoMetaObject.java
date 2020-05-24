@@ -6,14 +6,12 @@
  */
 package com.draagon.meta.object.pojo;
 
+import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * MetaObject that supports POJO objects
@@ -211,16 +209,16 @@ public class PojoMetaObject extends MetaObject {
         }
     }
 
-    public boolean hasObjectInstanceAttrs() {
-        return hasMetaAttr(MetaObject.ATTR_OBJECT)|| hasMetaAttr(MetaObject.ATTR_CLASS);
+    public boolean hasObjectInstanceAttr() {
+        return hasMetaAttr(MetaObject.ATTR_OBJECT);
     }
-
 
     @Override
     public void validate() {
-        if ( !hasObjectInstanceAttrs()) {
+        if ( !hasObjectInstanceAttr()) {
             if ( createClassFromMetaDataName( false ) == null ) {
-                throw new MetaDataException( this.getClass().getName()+" requires a 'class' attribute or metadata name that matches the fully qualified Java class: " + getName());
+                throw new InvalidMetaDataException( this, "PojoMetaObject Requires a '"+ATTR_OBJECT+"' attribute "+
+                        "or metadata name that matches the fully qualified Java class: " + getName());
             }
         }
     }

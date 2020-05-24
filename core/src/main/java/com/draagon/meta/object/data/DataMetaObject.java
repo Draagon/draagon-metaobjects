@@ -73,7 +73,7 @@ public class DataMetaObject extends PojoMetaObject
         try { 
             return super.getObjectClass();
         } catch( MetaDataException e ) {
-            if (hasObjectInstanceAttrs()) {
+            if (hasObjectInstanceAttr()) {
                 throw e;
             }
             return getDefaultObjectClass();

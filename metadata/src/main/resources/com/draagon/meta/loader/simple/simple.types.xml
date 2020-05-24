@@ -25,24 +25,25 @@
 
         <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="map">
             <children>
-                <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
-                <child type="attr" subType="boolean" name="isInterface"/> <!-- inlineAttr="required" / -->
-                <child type="attr" subType="boolean" name="isKey"/> <!-- inlineAttr="required" / -->
+                <child type="attr" subType="boolean" name="_isAbstract"/>
+                <child type="attr" subType="boolean" name="isInterface"/>
+                <child type="attr" subType="boolean" name="isKey"/>
                 <child type="field" subType="*" name="*"/>
             </children>
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
                 <children>
-                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
+                    <child type="attr" subType="string" name="object"/>
                 </children>
             </subType>
             <subType name="map" class="com.draagon.meta.object.mapped.MappedMetaObject">
                 <children>
-                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
+                    <child type="attr" subType="string" name="object"/>
                 </children>
             </subType>
             <subType name="proxy" class="com.draagon.meta.object.proxy.ProxyMetaObject">
                 <children>
-                    <child type="attr" subType="class" name="class" nameAliases="object"/> <!-- required="true" inlineAttr="optional" / -->
+                    <child type="attr" subType="string" name="object"/>
+                    <child type="attr" subType="String" name="proxyObject"/>
                 </children>
             </subType>
         </type>
@@ -70,7 +71,6 @@
             <subType name="doubleArray"  class="com.draagon.meta.field.DoubleArrayField" / -->
             <subType name="stringArray"  class="com.draagon.meta.field.StringArrayField"/>
             <!-- subType name="dateArray"    class="com.draagon.meta.field.DateArrayField" /-->
-
             <subType name="object"       class="com.draagon.meta.field.ObjectField">
                 <children>
                     <child type="attr" subType="string" name="objectRef"/>

@@ -38,7 +38,7 @@ public class TypesConfigBuilder {
     protected static MetaObject createTypeConfig() {
         return createMetaObject( TypeConfig.OBJECT_NAME, TypeConfig.OBJECT_IONAME, TypeConfigPojo.class )
                 .addChild(createStringField(TypeConfig.FIELD_NAME,true))
-                .addChild(createClassFieldIO(TypeConfig.FIELD_BASECLASS, TypeConfig.FIELD_IO_CLASS, true))
+                .addChild(createStringFieldIO(TypeConfig.FIELD_BASECLASS, TypeConfig.FIELD_IO_CLASS, true))
                 .addChild(createStringField(TypeConfig.FIELD_DEFSUBTYPE,true))
                 .addChild(createStringField(TypeConfig.FIELD_DEFNAME,true))
                 .addChild(createStringField(TypeConfig.FIELD_DEFPREFIX,true))
@@ -49,13 +49,12 @@ public class TypesConfigBuilder {
     protected static MetaObject createSubTypeConfig() {
         return createMetaObject( SubTypeConfig.OBJECT_NAME, SubTypeConfig.OBJECT_IONAME, SubTypeConfigPojo.class )
                 .addChild(createStringField(SubTypeConfig.FIELD_NAME,true))
-                .addChild(createClassFieldIO(SubTypeConfig.FIELD_BASECLASS, TypeConfig.FIELD_IO_CLASS, true))
+                .addChild(createStringFieldIO(SubTypeConfig.FIELD_BASECLASS, TypeConfig.FIELD_IO_CLASS, true))
                 .addChild(createChildConfigArray(TypeConfig.FIELD_IO_CHILDREN));
     }
 
     protected static MetaObject createChildConfig() {
         return createMetaObject(ChildConfig.OBJECT_NAME, ChildConfig.OBJECT_IONAME, ChildConfigPojo.class )
-                //.addChild(createObjectClassAttr(ChildConfigPojo.class))
                 .addChild(createStringField(ChildConfig.FIELD_TYPE,true))
                 .addChild(createStringField(ChildConfig.FIELD_SUBTYPE,true))
                 .addChild(createStringField(ChildConfig.FIELD_NAME,true))
@@ -92,8 +91,8 @@ public class TypesConfigBuilder {
                 .addChild(createObjectClassAttr(clazz));
     }
 
-    protected static ClassAttribute createObjectClassAttr( Class clazz ) {
-        return ClassAttribute.create(MetaObject.ATTR_CLASS, clazz);
+    protected static StringAttribute createObjectClassAttr( Class clazz ) {
+        return StringAttribute.create(MetaObject.ATTR_OBJECT, clazz.getName());
     }
 
     protected static MetaField createObjectArrayField(String tcFieldTypes, String tcRefType, String tcObjType, boolean xmlWrap ) {

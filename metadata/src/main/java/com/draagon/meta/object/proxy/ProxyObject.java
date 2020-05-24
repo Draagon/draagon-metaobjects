@@ -1,20 +1,17 @@
 package com.draagon.meta.object.proxy;
 
-import com.draagon.meta.DataTypes;
-import com.draagon.meta.MetaDataAware;
 import com.draagon.meta.ValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.Validatable;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class ProxyObject implements InvocationHandler, ProxyAccessor, MetaObjectAware, Validatable {
+public class ProxyObject implements ProxyAccessor, MetaObjectAware, Validatable {
 
     private MetaObject metaObject;
     private Map<String,Object> valueMap = new HashMap<>();
@@ -42,47 +39,6 @@ public class ProxyObject implements InvocationHandler, ProxyAccessor, MetaObject
 
     public void _setValueByName(String name, Object val) {
         valueMap.put(name, val);
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////
-    // Proxy Invocation Handler
-
-    @Override
-    public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
-        String name = method.getName();
-
-        if ( name.equals("toString") && objects == null) {
-            return toString();
-        }
-        else if ( name.equals("validate") && objects == null) {
-            validate();
-        }
-        else if ( name.equals("_getValueByName") && objects != null && objects.length==1) {
-            return _getValueByName((String)objects[0]);
-        }
-        else if ( name.equals("_setValueByName") && objects != null && objects.length==2) {
-            _setValueByName((String)objects[0], objects[1]);
-        }
-        else if ( name.equals("getMetaData") && objects == null) {
-            return metaObject;
-        }
-        else if ( name.equals("setMetaData") && objects != null && objects.length==1) {
-            setMetaData((MetaObject)objects[0]);
-        }
-        else if ( name.equals("equals") && objects != null && objects.length==1) {
-            return equals(objects[0]);
-        }
-        else if ( name.startsWith("get") && objects == null) {
-            return valueMap.get( getField( method, name ));
-        }
-        else if ( name.startsWith("set") && objects != null && objects.length==1) {
-            valueMap.put( getField( method, name ), objects[0] );
-        }
-        else {
-            throw new IllegalArgumentException("Unknown method name ["+method.getName()+"] with ("+objects.length+") args on ProxyObject" );
-        }
-        return null;
     }
 
     protected String getField( Method method, String name ) {

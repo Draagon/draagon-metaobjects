@@ -20,7 +20,7 @@ import java.util.Objects;
 public class TypeConfigPojo extends PojoObject implements TypeConfig {
     
     private String name = null;
-    private Class<? extends MetaData> baseClass = null;
+    private String baseClass = null;
     private List<SubTypeConfig> subTypes = null;
     private List<ChildConfig> children = null;
 
@@ -42,12 +42,12 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
     }
 
     @Override
-    public Class<? extends MetaData> getBaseClass() {
+    public String getBaseClass() {
         return baseClass;
     }
 
     @Override
-    public void setBaseClass(Class<? extends MetaData> baseClass) {
+    public void setBaseClass(String baseClass) {
         this.baseClass=baseClass;
     }
     
@@ -70,9 +70,19 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
     public void setTypeChildConfigs(List<ChildConfig> children) {
         this.children=children;
     }
-    
+
+
     /////////////////////////////////////////////////////////////////////
     // Helper methods
+
+    @Override
+    public Class<? extends MetaData> getMetaDataClass() {
+        try {
+            return (Class<? extends MetaData>) Class.forName( getBaseClass() );
+        } catch (ClassNotFoundException e) {
+            throw new InvalidValueException( "BaseClass ["+getBaseClass()+"] not found on Type ["+getName()+"]");
+        }
+    }
 
     public void addTypeChildConfig( ChildConfig config ) {
         if ( getTypeChildConfigs() == null) {
@@ -303,34 +313,35 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
         }
     }
 
-    public void addSubTypeConfig(String subtypeName, Class<? extends MetaData> clazz ) {
+    public void addSubTypeConfig(String subtypeName, String baseClass ) {
 
-        if ( subtypeName == null ) throw new NullPointerException( "Cannot add subType on type ["+ getName()+"] with a null name and class [" + clazz + "]" );
-        if ( clazz == null ) throw new NullPointerException( "Cannot add subType [" +subtypeName + "] on type ["+ getName()+"] with a null Class" );
+        if ( subtypeName == null ) throw new NullPointerException( "Cannot add subType on type ["+ getName()+"] with a null name and class [" + baseClass + "]" );
+        if ( baseClass == null ) throw new NullPointerException( "Cannot add subType [" +subtypeName + "] on type ["+ getName()+"] with a null Class" );
 
         SubTypeConfig existing = getSubType( subtypeName );
         if ( existing != null ) {
-            Class<? extends MetaData> c = existing.getBaseClass();
-            if ( !c.equals( clazz )) {
+            Class<? extends MetaData> c = getSubTypeClass( subtypeName );
+            if ( !c.getName().equals( baseClass )) {
                 throw new MetaDataException("Cannot add SubType [" + subtypeName + "] to Type [" + getName() + "], "+
-                        "already existed but the classes do not match ["+c.getName()+" != "+clazz.getName() +"]");
+                        "already existed but the classes do not match ["+c.getName()+" != "+baseClass+"]");
             }
         }
         else {
-            SubTypeConfig c = SubTypeConfigPojo.create( getMetaData().getLoader(), subtypeName, clazz );
+            SubTypeConfig c = SubTypeConfigPojo.create( getMetaData().getLoader(), subtypeName, baseClass );
             addSubTypeConfig( c );
         }
     }
 
+
     public Class<? extends MetaData> getSubTypeClass( String subTypeName ) {
         if ( subTypeName == null ) throw new MetaDataException( "Cannot get subType on type ["+ getName()+"] with a null value" );
         if ( getSubType( subTypeName ) == null ) throw new MetaDataException( "SubType ["+subTypeName+"] does not exist on Type ["+ getName()+"]" );
-        return getSubType( subTypeName ).getBaseClass();
+        return getSubType( subTypeName ).getMetaDataClass();
     }
 
 
     public Class<? extends MetaData> getDefaultTypeClass() {
-        return getSubType(getDefaultSubType()).getBaseClass();
+        return getSubTypeClass(getDefaultSubType());
     }
 
     public ChildConfig createChildConfig(String type, String subType, String name) {

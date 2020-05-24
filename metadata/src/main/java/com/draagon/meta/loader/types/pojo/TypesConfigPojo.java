@@ -110,16 +110,16 @@ public class TypesConfigPojo extends PojoObject implements TypesConfig {
     }
 
     @Override
-    public TypeConfig createAndAddType(String typeName, Class<? extends MetaData> clazz) {
+    public TypeConfig createAndAddType(String typeName, String baseClass ) {
 
         if (typeName == null)
-            throw new InvalidValueException("Cannot create a TypeModel with a null name and class [" + clazz + "]");
-        if (clazz == null)
+            throw new InvalidValueException("Cannot create a TypeModel with a null name and class [" + baseClass + "]");
+        if (baseClass == null)
             throw new InvalidValueException("Cannot create TypeModel for type [" + typeName + "] with a null Class");
 
         TypeConfig tc = new TypeConfigPojo(_getLoader().getMetaObjectByName(TypeConfig.OBJECT_NAME));
         tc.setName(typeName);
-        tc.setBaseClass(clazz);
+        tc.setBaseClass(baseClass);
 
         return addType(tc);
     }

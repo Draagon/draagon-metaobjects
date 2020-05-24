@@ -18,7 +18,7 @@ public class MetaModelBuilder {
 
         // METADATA ROOT
         MetaObject metadata = PojoMetaObject.create(MetaModel.OBJECT_NAME)
-                .addChild(ClassAttribute.create(ClassAttribute.SUBTYPE_CLASS, MetaModelPojo.class))
+                .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT, MetaModelPojo.class.getName()))
                 .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLTYPED, MetaModel.FIELD_TYPE))
                 .addChild(buildStringField(MetaModel.FIELD_PACKAGE,true))
                 .addChild(buildStringField(MetaModel.FIELD_SUPER,true))

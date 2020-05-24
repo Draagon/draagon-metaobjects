@@ -158,23 +158,16 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 throw new MetaDataException("SubType of Type [" + typeConfig.getName() + "] has no 'name' attribute specified");
             }
 
-            try {
-                Class<MetaData> tcl = (Class<MetaData>) Class.forName(tclass);
+            // Add the type class with the specified name
+            typeConfig.addSubTypeConfig(name, tclass);
 
-                // Add the type class with the specified name
-                typeConfig.addSubTypeConfig(name, tcl);
+            // Load subtypes
+            loadChildren( typeConfig, typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
 
-                // Load subtypes
-                loadChildren( typeConfig, typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
-
-                // Update info msg if verbose
-                if ( getLoader().getLoaderOptions().isVerbose() ) {
-                    // Increment the # of subtypes
-                    info.incType(typeConfig.getName());
-                }
-            }
-            catch (ClassNotFoundException e) {
-                throw new MetaDataException("MetaData file ["+getFilename()+"] has Type:SubType [" + typeConfig.getName()+":"+name+ "] with invalid class: " + e.getMessage());
+            // Update info msg if verbose
+            if ( getLoader().getLoaderOptions().isVerbose() ) {
+                // Increment the # of subtypes
+                info.incType(typeConfig.getName());
             }
         }
     }
