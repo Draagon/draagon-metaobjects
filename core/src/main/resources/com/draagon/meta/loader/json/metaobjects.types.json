@@ -62,7 +62,7 @@
                 {"subType": {"name": "foreign",    "class": "com.draagon.meta.key.ForeignKey",
                     "children": [
                         {"child": {"type": "attr", "subType": "string", "name": "foreignObjectRef"}},
-                        {"child": {"type": "attr", "subType": "stringArray", "name": "foreignKeys"}}
+                        {"child": {"type": "attr", "subType": "string", "name": "foreignKey"}}
                     ]}}
             ]}},
 

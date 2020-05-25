@@ -57,7 +57,7 @@ public class XMLMetaDataParentTest extends XMLMetaDataLoaderTestBase{
 
     @Test
     public void testOrangeWithParent() {
-        testObjectFieldCount("produce::v1::fruit::Orange", true, 6);
+        testObjectFieldCount("produce::v1::fruit::Orange", true, 7);
     }
 
 }

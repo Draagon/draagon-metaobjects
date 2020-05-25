@@ -64,12 +64,12 @@
             <children>
                 <child type="attr" subType="stringArray" name="keys"/>
             </children>
-            <subType name="primary" class="com.draagon.meta.object.key.PrimaryKey"/>
-            <subType name="secondary" class="com.draagon.meta.object.key.SecondaryKey"/>
-            <subType name="foreign" class="com.draagon.meta.object.key.ForeignKey">
+            <subType name="primary" class="com.draagon.meta.key.PrimaryKey"/>
+            <subType name="secondary" class="com.draagon.meta.key.SecondaryKey"/>
+            <subType name="foreign" class="com.draagon.meta.key.ForeignKey">
                 <children>
                     <child type="attr" subType="string" name="foreignObjectRef"/>
-                    <child type="attr" subType="stringArray" name="foreignKeys"/>
+                    <child type="attr" subType="string" name="foreignKey"/>
                 </children>
             </subType>
         </type>

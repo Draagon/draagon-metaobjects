@@ -4,8 +4,18 @@
 
     {"object": {"name": "Fruit", "type": "pojo",
       "children": [
+        {"key": {"name": "primary", "type":"primary",
+          "children": [
+            {"attr": {"name": "keys", "value": "id"}}
+          ]}},
+        {"key": {"name": "basketKey", "type":"foreign",
+          "children": [
+            {"attr": {"name": "keys", "value": "basketId"}},
+            {"attr": {"name": "foreignObjectRef", "value": "..::container::Basket"}}
+          ]}},
         {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Fruit"}},
         {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "basketId", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "length", "type": "int"}},
         {"field": {"name": "weight", "type": "int"}}

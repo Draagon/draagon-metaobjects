@@ -5,6 +5,9 @@
     <!-- Fruit -->
     <object name="Fruit" type="pojo" _isAbstract="true">
 
+        <key name="primary" keys="id"/>
+        <key type="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
+
         <attr name="object">com.draagon.meta.test.produce.v1.Fruit</attr>
 
         <!-- Id -->
@@ -12,6 +15,9 @@
 
         <!-- Name -->
         <field name="name" super="..::common::name"/>
+
+        <!-- BasketId -->
+        <field name="basketId" super="..::common::id"/>
 
         <!-- Length -->
         <field name="length" type="int"/>

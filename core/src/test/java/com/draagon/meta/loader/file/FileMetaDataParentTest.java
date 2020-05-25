@@ -65,6 +65,6 @@ public class FileMetaDataParentTest extends FileMetaDataLoaderTestBase {
 
     @Test
     public void testOrangeWithParent() {
-        testObjectFieldCount("produce::v1::fruit::Orange", true, 6);
+        testObjectFieldCount("produce::v1::fruit::Orange", true, 7);
     }
 }

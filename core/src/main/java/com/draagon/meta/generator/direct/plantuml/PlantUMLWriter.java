@@ -11,6 +11,8 @@ import com.draagon.meta.generator.direct.FileDirectWriter;
 import static com.draagon.meta.generator.util.GeneratorUtil.*;
 
 import com.draagon.meta.generator.util.GeneratorUtil;
+import com.draagon.meta.key.ForeignKey;
+import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
@@ -338,7 +340,46 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         dec();
     }
 
+    protected List<ForeignKey> getForeignKeys(MetaObject mo, boolean includeParentData) {
+        return mo.getChildren(ForeignKey.class, includeParentData);
+    }
+
     protected void writeObjectRefRelationships(MetaObject mo ) throws IOException {
+
+        // Write Fields
+        boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
+
+        for (ForeignKey foreignKey : getForeignKeys(mo,includeParentData)) {
+
+            MetaObject foreignObject = foreignKey.getForeignObject();
+            if (foreignObject != null) {
+
+                if ( debug ) log.info("writeObjectRef: "+mo.getName()+"  -->  "+foreignObject.getName());
+
+                String min = "0";
+                String max = "many";
+
+                // If it's just skipping abstract, then look for parents
+                //if (isEmbedded(foreignObject)) {
+                //    if ( debug ) log.info("writeObjectRef: find superObject !ignore Embedded! "+mo.getName()+"  -->  "+foreignObject.getName());
+                //}
+                //else
+                if ((isAbstract(foreignObject) && !showAbstracts)) {
+                    getDerivedObjects(foreignObject)
+                            .stream()
+                            //.filter(o -> isEmbedded(o) || !isAbstract(o) || (isAbstract(o) && !showAbstracts))
+                            .filter(o -> objects().contains(o))
+                            .forEach(o -> drawObjectReference(mo, foreignKey, o));
+                }
+                // It's not abstract, so just draw it here
+                else if (objects().contains(foreignObject)) {
+                    drawObjectReference(mo, foreignKey, foreignObject);
+                }
+            }
+        }
+    }
+
+    protected void writeObjectRefRelationshipsViaObjectRef(MetaObject mo ) throws IOException {
 
         // Write Fields
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
@@ -671,9 +712,9 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         println(" "+ _pu(objRef,true) +" : "+ _pu(f));
     }
 
-    //protected void drawObjectReference(MetaObject mo, MetaField f, MetaObject objRef) {
-    //    println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(f));
-    //}
+    protected void drawObjectReference(MetaObject mo, MetaKey key, MetaObject objRef) {
+        println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(key));
+    }
 
     protected void drawNewLine() {
         println();

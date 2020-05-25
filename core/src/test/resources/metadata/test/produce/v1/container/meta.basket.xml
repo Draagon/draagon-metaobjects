@@ -5,6 +5,8 @@
     <!-- Basket -->
     <object name="Basket" type="value">
 
+        <key name="primary" keys="id"/>
+
         <!-- Id -->
         <field name="id" super="..::common::id"/>
 

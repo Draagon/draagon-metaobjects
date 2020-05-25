@@ -60,7 +60,6 @@
                 <children>
                     <child type="attr" subType="string" name="foreignObjectRef"/>
                     <child type="attr" subType="string" name="foreignKey"/>
-                    <child type="attr" subType="properties" name="foreignKeyMap"/>
                 </children>
             </subType>
         </type>

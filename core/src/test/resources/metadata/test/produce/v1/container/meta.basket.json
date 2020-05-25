@@ -2,6 +2,10 @@
     "children": [
         {"object": {"name": "Basket", "type": "value",
             "children": [
+                {"key": {"name": "primary", "type":"primary",
+                    "children": [
+                        {"attr": {"name": "keys", "value": "id"}}
+                    ]}},
                 {"field": {"name": "id", "super": "..::common::id"}},
                 {"field": {"name": "name", "super": "..::common::name"}},
                 {"field": {"name": "numApples", "type": "int"}},

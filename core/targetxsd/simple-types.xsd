@@ -43,6 +43,7 @@
     <xs:complexType>
       <xs:choice maxOccurs="unbounded">
         <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="key"/>
         <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
       </xs:choice>
       <xs:attribute name="package">
@@ -75,9 +76,36 @@
           <xs:restriction base="xs:boolean"/>
         </xs:simpleType>
       </xs:attribute>
-      <xs:attribute name="isKey">
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="key">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+      </xs:choice>
+      <xs:attribute name="package">
         <xs:simpleType>
-          <xs:restriction base="xs:boolean"/>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="subtype">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="super">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="keys">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
         </xs:simpleType>
       </xs:attribute>
     </xs:complexType>
