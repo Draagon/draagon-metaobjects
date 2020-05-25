@@ -25,8 +25,11 @@
 
         <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="value">
             <children>
-                <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
-                <child type="attr" subType="boolean" name="isInterface"/> <!-- inlineAttr="required" / -->
+                <child type="attr" subType="boolean" name="_isAbstract"/>
+                <child type="attr" subType="boolean" name="isInterface"/>
+                <child type="key" subType="primary" name="primary"/>
+                <child type="key" subType="secondary" name="*"/>
+                <child type="key" subType="foreign" name="*"/>
                 <child type="field" subType="*" name="*"/>
             </children>
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
@@ -53,6 +56,20 @@
             <subType name="value" class="com.draagon.meta.object.value.ValueMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/> <!-- autoCreate="true" inlineAttr="optional" defaultValue="com.draagon.meta.object.value.ValueObject"/ -->
+                </children>
+            </subType>
+        </type>
+
+        <type name="key" class="com.draagon.meta.key.MetaKey" defaultSubType="primary">
+            <children>
+                <child type="attr" subType="stringArray" name="keys"/>
+            </children>
+            <subType name="primary" class="com.draagon.meta.object.key.PrimaryKey"/>
+            <subType name="secondary" class="com.draagon.meta.object.key.SecondaryKey"/>
+            <subType name="foreign" class="com.draagon.meta.object.key.ForeignKey">
+                <children>
+                    <child type="attr" subType="string" name="foreignObjectRef"/>
+                    <child type="attr" subType="stringArray" name="foreignKeys"/>
                 </children>
             </subType>
         </type>

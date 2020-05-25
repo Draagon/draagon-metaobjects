@@ -25,8 +25,8 @@ public class ProxyObjectHandler implements InvocationHandler {
         String name = method.getName();
 
         try {
-            Method proxyMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
-            proxyMethod.invoke( o, objects );
+            Method proxyMethod = proxyObject.getClass().getMethod(method.getName(), method.getParameterTypes());
+            return proxyMethod.invoke( proxyObject, objects );
         }
         catch (NoSuchMethodException e) {
 
@@ -44,8 +44,6 @@ public class ProxyObjectHandler implements InvocationHandler {
 
             throw e;
         }
-
-        return null;
     }
 
     protected String getField( String name ) {

@@ -19,14 +19,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MetaData<N extends MetaData> implements Cloneable, Serializable {
+public class MetaData implements Cloneable, Serializable {
 
     public final static String PKG_SEPARATOR = "::";
-
-    /**
-     * Separator for package and class names
-     * @deprecated Use PKG_SEPARATOR
-     */
     public final static String SEPARATOR = PKG_SEPARATOR;
 
     private final Map<Object, Object> cacheValues = Collections.synchronizedMap(new WeakHashMap<Object, Object>());
@@ -139,10 +134,9 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Get the Base Class for the MetaData
      * @return Class The Java class for the metadata
-     * @deprecated Use getTypeName and getSubTypeName for querying child records
      */
-    public Class<? extends MetaData> getMetaDataClass() {
-        return MetaData.class;
+    public <T extends MetaData> Class<T> getMetaDataClass() {
+        return (Class<T>) MetaData.class;
     }
 
     /**
@@ -209,8 +203,8 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * Gets the Super Data
      */
-    public MetaData getSuperData() {
-        return superData;
+    public <T extends MetaData> T getSuperData() {
+        return (T) superData;
     }
 
     /**
@@ -237,26 +231,28 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * @deprecated Use deleteAttr(attr)
      */
     public void deleteAttribute(String name) throws MetaAttributeNotFoundException {
-        deleteAttr(name);
+        deleteMetaAttr(name);
     }
 
     /**
      * Sets an attribute of the MetaClass
      */
-    public N addMetaAttr(MetaAttribute attr) {
-        return addChild(attr);
+    public <T extends MetaData> T addMetaAttr(MetaAttribute attr) {
+        return (T) addChild(attr);
     }
 
     /**
      * Sets an attribute of the MetaClass
+     * @deprecated Use deleteMetaAttr
      */
-    public void deleteAttr(String name) throws MetaAttributeNotFoundException {
+    public void deleteMetaAttr(String name) throws MetaAttributeNotFoundException {
         try {
             deleteChild(name, MetaAttribute.class);
         } catch (MetaDataException e) {
             throw new MetaAttributeNotFoundException("MetaAtribute [" + name + "] not found in [" + toString() + "]", name);
         }
     }
+
 
     /**
      * Sets an attribute value of the MetaData
@@ -425,9 +421,9 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
      */
-    public N addChild(MetaData data) throws InvalidMetaDataException {
+    public <T extends MetaData> T addChild(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
-        return (N) this;
+        return (T) this;
     }
 
     /**
@@ -723,7 +719,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     /**
      * @deprecated Only exists for deprecated support
      */
-    private String getTypeForClass( Class<?> c ) {
+    /*private String getTypeForClass( Class<?> c ) {
         switch( c.getSimpleName() ) {
             case "MetaAttribute": return MetaAttribute.TYPE_ATTR;
             case "MetaField": return MetaField.TYPE_FIELD;
@@ -732,7 +728,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
             case "MetaValidator": return MetaValidator.TYPE_VALIDATOR;
             default: throw new IllegalStateException( "These deprecated methods only support MetaAttribute, MetaField, MetaObject, MetaView, and MetaValidator, not ["+c.getSimpleName() + "]");
         }
-    }
+    }*/
 
     ////////////////////////////////////////////////////
 
@@ -752,8 +748,8 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * Overload the MetaData.  Used with overlays
      * @return The wrapped MetaData
      */
-    public N overload()  {
-        N d = (N) clone();
+    public <T extends MetaData> T overload()  {
+        T d = (T) clone();
         d.clearChildren();
         d.setSuperData(this);
         return d;
@@ -782,9 +778,9 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
      * Create a newInstance of the specified MetaData class given the specified type, subType, and name
      * @return The newly created MetaData instance
      */
-    public MetaData newInstanceFromClass( Class<? extends MetaData> c, String typeName, String subTypeName, String fullname) {
+    public <T extends MetaData> T newInstanceFromClass( Class<T> c, String typeName, String subTypeName, String fullname) {
 
-        MetaData md;
+        T md;
 
         try {
             try {
@@ -821,8 +817,8 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     }
 
     private String getNewInstanceErrorStr(String typeName, String subTypeName, String fullname) {
-        return "[" + getClass().getName() + "] with type:subType:name [" + typeName + ":" +
-                ":" + subTypeName + ":" + fullname + "]";
+        return "[" + getClass().getName() + "] with type:subType:name [" + typeName +
+                    ":" + subTypeName + ":" + fullname + "]";
     }
 
     /**
@@ -859,7 +855,7 @@ public class MetaData<N extends MetaData> implements Cloneable, Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MetaData<?> metaData = (MetaData<?>) o;
+        MetaData metaData = (MetaData) o;
         return Objects.equals(children, metaData.children) &&
                 type.equals(metaData.type) &&
                 subType.equals(metaData.subType) &&

@@ -15,7 +15,7 @@ import java.util.Objects;
  * An attribute of a MetaClass, MetaField, or MetaView
  */
 @SuppressWarnings("serial")
-public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTypeAware<T>, MetaDataValueHandler<T> {
+public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, MetaDataValueHandler<T> {
     
     //private static Log log = LogFactory.getLog( MetaAttribute.class );
 
@@ -37,29 +37,29 @@ public class MetaAttribute<T> extends MetaData<MetaAttribute> implements DataTyp
      * Gets the primary MetaAttribute class
      */
     @Override
-    public Class<? extends MetaData> getMetaDataClass() {
+    public Class<MetaAttribute> getMetaDataClass() {
         return MetaAttribute.class;
     }
 
     /**
      * Sets an attribute of the MetaClass
      */
-    @Override
-    public MetaAttribute addMetaAttr(MetaAttribute attr) {
-        return addChild(attr);
-    }
+    //@Override
+    //public MetaAttribute addMetaAttr(MetaAttribute attr) {
+    //    return addChild(attr);
+    //}
 
     /** Add Child to the Field */
-    @Override
-    public MetaAttribute addChild(MetaData data) throws InvalidMetaDataException {
-        return super.addChild( data );
-    }
+    //@Override
+    //public MetaAttribute addChild(MetaData data) throws InvalidMetaDataException {
+    //    return super.addChild( data );
+    //}
 
     /** Wrap the MetaAttribute */
-    @Override
-    public MetaAttribute overload() {
-        return super.overload();
-    }
+    //@Override
+    //public MetaAttribute overload() {
+    //    return super.overload();
+    //}
 
     /**
      * Returns the DataType for the value

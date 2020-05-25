@@ -9,6 +9,7 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
@@ -27,12 +28,10 @@ import java.util.*;
  * @version 2.0
  */
 @SuppressWarnings("serial")
-public abstract class MetaField<T extends Object> extends MetaData<MetaField>  implements DataTypeAware<T>, MetaFieldTypes {
-    //private static Log log = LogFactory.getLog( MetaField.class );
+public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>, MetaFieldTypes {
 
     public final static String TYPE_FIELD = "field";
 
-    //public final static String ATTR_LEN = "length";
     public final static String ATTR_VALIDATION = "validation";
     public final static String ATTR_DEFAULT_VIEW = "defaultView";
     public final static String ATTR_DEFAULT_VALUE = "defaultValue";
@@ -79,7 +78,7 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
      * Gets the primary MetaData class
      */
     @Override
-    public final Class<? extends MetaData> getMetaDataClass() {
+    public final Class<MetaField> getMetaDataClass() {
         return MetaField.class;
     }
 
@@ -90,7 +89,10 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
      * @return The declaring MetaClass
      */
     public MetaObject getDeclaringObject() {
-        return (MetaObject) getParent();
+        if ( getParent() instanceof MetaDataLoader) return null;
+        if ( getParent() instanceof MetaObject ) return (MetaObject) getParent();
+        throw new InvalidMetaDataException(this, "MetaFields can only be attached to MetaObjects " +
+                "or MetaDataLoaders as abstracts");
     }
 
     /**
@@ -110,9 +112,9 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
     /**
      * Sets an attribute of the MetaClass
      */
-    public MetaField addMetaAttr(MetaAttribute attr) {
-        return addChild(attr);
-    }
+    //public MetaField addMetaAttr(MetaAttribute attr) {
+    //    return addChild(attr);
+    //}
 
     /**
      * Get an ObjectReference for the MetaField
@@ -184,16 +186,16 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
     }
 
     /** Add Child to the Field */
-    @Override
-    public MetaField addChild(MetaData data) throws InvalidMetaDataException {
-        return super.addChild( data );
-    }
+    //@Override
+    //public MetaField addChild(MetaData data) throws InvalidMetaDataException {
+    //    return super.addChild( data );
+    //}
 
     /** Wrap the MetaField */
-    @Override
-    public MetaField overload() {
-        return super.overload();
-    }
+    //@Override
+    //public MetaField overload() {
+    //    return super.overload();
+    //}
 
     /**
      * Sets the object attribute represented by this MetaField
@@ -249,8 +251,9 @@ public abstract class MetaField<T extends Object> extends MetaData<MetaField>  i
      *
      * @param view MetaView to add
      */
-    public void addMetaView(MetaView view) {
+    public <T extends MetaField> T addMetaView(MetaView view) {
         addChild(view);
+        return (T) this;
     }
 
     /**

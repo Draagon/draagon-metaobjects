@@ -7,7 +7,6 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.Validatable;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 
 import java.lang.reflect.Constructor;

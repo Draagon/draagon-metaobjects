@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  *  MetaDataLoader with common functions for all MetaDataLoaders
  */
-public class MetaDataLoader extends MetaData<MetaDataLoader> implements MojoSupport {
+public class MetaDataLoader extends MetaData implements MojoSupport {
 
     private final static Log log = LogFactory.getLog(MetaDataLoader.class);
 

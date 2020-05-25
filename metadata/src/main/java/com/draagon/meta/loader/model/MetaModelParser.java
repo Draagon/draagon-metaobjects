@@ -49,7 +49,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
 
     /** Merge the MetaModels into the parent MetaData */
     protected <M extends MetaModel> void mergeMetaData(
-            MetaData<?> parent, String pkgDef, TSC typesConfig, M model) {
+            MetaData parent, String pkgDef, TSC typesConfig, M model) {
 
         List<M> children = (List<M>) model.getChildren();
         if ( children == null ) return;
@@ -71,7 +71,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <T extends TypeConfig, M extends MetaModel> void mergeAdditionalModelData(
-            MetaData<?> parent, MetaData<?> merge, TypeConfig tc, M model) {
+            MetaData parent, MetaData merge, TypeConfig tc, M model) {
 
         // Merge the Value for MetaDataValueHandlers like MetaAttribute
         if ( merge instanceof MetaDataValueHandler && model.getValue() != null ) {
@@ -80,7 +80,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <M extends MetaModel> MetaData createOrOverloadMetaData(
-            MetaData<?> parent, String pkgDef, TypeConfig tc, M model) {
+            MetaData parent, String pkgDef, TypeConfig tc, M model) {
 
         String superName = getFullSuperName(parent, tc, pkgDef, model);
 
@@ -92,7 +92,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <T extends TypeConfig, M extends MetaModel> String getFullSuperName(
-            MetaData<?> parent, T tc, String pkgDef, M model) {
+            MetaData parent, T tc, String pkgDef, M model) {
 
         if (model.getSuper() == null) return null;
 
@@ -114,7 +114,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
             return superPkgDef + MetaDataLoader.PKG_SEPARATOR + model.getSuper();
     }
 
-    protected <M extends MetaModel> String getPackage(MetaData<?> parent, String pkgDef, M model) {
+    protected <M extends MetaModel> String getPackage(MetaData parent, String pkgDef, M model) {
 
         String pkg = model.getPackage();
         // NOTE:  Should it always be that you only fully qualify names when the parent
@@ -127,7 +127,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <T extends TypeConfig, M extends MetaModel> String getFullname(
-            MetaData<?> parent, T tc, String pkgDef, M model ) {
+            MetaData parent, T tc, String pkgDef, M model ) {
 
         String pkg = getPackage(parent, pkgDef, model);
 
@@ -142,7 +142,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <T extends TypeConfig, M extends MetaModel> String autoCreateNameFromTypeConfig(
-            MetaData<?> parent, T tc, M model ) {
+            MetaData parent, T tc, M model ) {
 
         String name = null;
         if ( tc.getDefaultName() != null ) {
@@ -170,7 +170,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <T extends TypeConfig, M extends MetaModel> MetaData createOrOverloadMetaDataWithName(
-            MetaData<?> parent, T tc, M model, String superName, String fullname) {
+            MetaData parent, T tc, M model, String superName, String fullname) {
 
         MetaData merge = findExistingMetaData(parent, tc, fullname);
 
@@ -185,7 +185,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     }
 
     protected <T extends TypeConfig, M extends MetaModel> MetaData createNewMetaData(
-            MetaData<?> parent, T tc, M model, String superName, String fullname, MetaData merge) {
+            MetaData parent, T tc, M model, String superName, String fullname, MetaData merge) {
 
         String subType = null;
 
@@ -220,7 +220,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         return merge;
     }
 
-    protected <T extends TypeConfig> MetaData findExistingMetaData(MetaData<?> parent, T tc, String fullname) {
+    protected <T extends TypeConfig> MetaData findExistingMetaData(MetaData parent, T tc, String fullname) {
 
         MetaData merge = null;
         try {
@@ -304,7 +304,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         return merge;
     }
 
-    protected void validateSuperDataOnNew(MetaData<?> merge, MetaData<?> superData ) {
+    protected void validateSuperDataOnNew(MetaData merge, MetaData superData ) {
 
         // TODO: Ensure the new superData has the same underlying superData overloads
         if (merge.getSuperData() != null && !merge.getSuperData().isSameTypeSubType(superData)) {
@@ -313,10 +313,10 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         }
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> MetaData<?> getSuperData(
-            MetaData<?> parent, T tc, M model, String superName ) {
+    protected <T extends TypeConfig, M extends MetaModel> MetaData getSuperData(
+            MetaData parent, T tc, M model, String superName ) {
 
-        MetaData<?> superData;
+        MetaData superData;
         try {
             MetaDataLoader loader = parent.getLoader();
             superData = loader.getChildOfType(tc.getName(),superName);

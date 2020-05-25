@@ -77,7 +77,7 @@ public class ConfigLoaderTest {
         return m;
     }
 
-    private static void populateModel(MetaModel m, MetaData<?> md, boolean isRoot) {
+    private static void populateModel(MetaModel m, MetaData md, boolean isRoot) {
 
         if (isRoot) {
             m.setType(MetaModel.OBJECT_NAME);

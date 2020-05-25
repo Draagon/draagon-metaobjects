@@ -11,13 +11,15 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.object.MetaObject;
 
 /**
  * MetaValidator that performs validations on a MetaField
  */
 @SuppressWarnings("serial")
-public abstract class MetaValidator extends MetaData<MetaValidator> {
+public abstract class MetaValidator extends MetaData {
 
     public final static String TYPE_VALIDATOR = "validator";
 
@@ -35,21 +37,21 @@ public abstract class MetaValidator extends MetaData<MetaValidator> {
     }
 
     /** Add Child to the MetaValidator */
-    public MetaValidator addChild(MetaData data) throws InvalidMetaDataException {
-        return super.addChild( data );
-    }
+    //public MetaValidator addChild(MetaData data) throws InvalidMetaDataException {
+    //    return super.addChild( data );
+    //}
 
     /** Wrap the MetaValidator */
-    public MetaValidator overload() {
-        return super.overload();
-    }
+    //public MetaValidator overload() {
+    //    return super.overload();
+    //}
 
     /**
      * Sets an attribute of the MetaClass
      */
-    public MetaValidator addMetaAttr(MetaAttribute attr) {
-        return addChild(attr);
-    }
+    //public MetaValidator addMetaAttr(MetaAttribute attr) {
+    //    return addChild(attr);
+    //}
 
     /**
      * Gets the declaring meta field.<br>
@@ -57,7 +59,10 @@ public abstract class MetaValidator extends MetaData<MetaValidator> {
      * was retrieved, so be careful!
      */
     public MetaField getDeclaringMetaField() {
-        return (MetaField) getParent();
+        if ( getParent() instanceof MetaDataLoader) return null;
+        if ( getParent() instanceof MetaField ) return (MetaField) getParent();
+        throw new InvalidMetaDataException(this, "MetaValidators can only be attached to MetaFields " +
+                "or MetaDataLoaders as abstracts");
     }
 
     /**
@@ -65,7 +70,15 @@ public abstract class MetaValidator extends MetaData<MetaValidator> {
      * with the specified object.
      */
     public MetaField getMetaField(Object obj) {
-        return MetaDataRegistry.findMetaObject(obj).getMetaField(getParent().getName());
+        MetaObject mo = MetaDataRegistry.findMetaObject(obj);
+        MetaField mf = getDeclaringMetaField();
+        if ( mo != null ) {
+            return mo.getMetaField(mf.getName());
+        }
+        else if ( mf != null ) {
+            return mf;
+        }
+        return null;
     }
 
     /**
@@ -79,7 +92,7 @@ public abstract class MetaValidator extends MetaData<MetaValidator> {
      * Gets the Super Validator
      */
     protected MetaValidator getSuperValidator() {
-        return (MetaValidator) getSuperData();
+        return getSuperData();
     }
 
     /////////////////////////////////////////////////////////////

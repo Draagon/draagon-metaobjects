@@ -21,8 +21,11 @@
 
         {"type": {"name": "object", "class": "com.draagon.meta.object.MetaObject", "defaultSubType": "value",
             "children": [
-                {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract"}},
-                {"child": {"type": "attr", "subType": "boolean", "name": "isInterface"}},
+                {"child": {"type": "attr", "subType": "boolean",   "name": "_isAbstract"}},
+                {"child": {"type": "attr", "subType": "boolean",   "name": "isInterface"}},
+                {"child": {"type": "key",  "subType": "primary",   "name": "primary"}},
+                {"child": {"type": "key",  "subType": "secondary", "name": "*"}},
+                {"child": {"type": "key",  "subType": "foreign",   "name": "*"}},
                 {"child": {"type": "field", "subType": "*", "name": "*"}}
             ],
             "subTypes": [
@@ -46,6 +49,20 @@
                 {"subType": {"name": "value",  "class": "com.draagon.meta.object.value.ValueMetaObject",
                     "children": [
                         {"child": {"type": "attr", "subType": "string", "name": "object"}}
+                    ]}}
+            ]}},
+
+        {"type": {"name": "key", "class": "com.draagon.meta.key.MetaKey", "defaultSubType": "primary",
+            "children": [
+                {"child": {"type": "attr", "subType": "stringArray", "name": "keys"}}
+            ],
+            "subTypes": [
+                {"subType": {"name": "primary",    "class": "com.draagon.meta.key.PrimaryKey"}},
+                {"subType": {"name": "secondary",  "class": "com.draagon.meta.key.SecondaryKey"}},
+                {"subType": {"name": "foreign",    "class": "com.draagon.meta.key.ForeignKey",
+                    "children": [
+                        {"child": {"type": "attr", "subType": "string", "name": "foreignObjectRef"}},
+                        {"child": {"type": "attr", "subType": "stringArray", "name": "foreignKeys"}}
                     ]}}
             ]}},
 

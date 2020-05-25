@@ -27,7 +27,9 @@
             <children>
                 <child type="attr" subType="boolean" name="_isAbstract"/>
                 <child type="attr" subType="boolean" name="isInterface"/>
-                <child type="attr" subType="boolean" name="isKey"/>
+                <child type="key" subType="primary" name="primary"/>
+                <child type="key" subType="secondary" name="*"/>
+                <child type="key" subType="foreign" name="*"/>
                 <child type="field" subType="*" name="*"/>
             </children>
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
@@ -44,6 +46,21 @@
                 <children>
                     <child type="attr" subType="string" name="object"/>
                     <child type="attr" subType="String" name="proxyObject"/>
+                </children>
+            </subType>
+        </type>
+
+        <type name="key" class="com.draagon.meta.key.MetaKey" defaultSubType="primary">
+            <children>
+                <child type="attr" subType="stringArray" name="keys"/>
+            </children>
+            <subType name="primary" class="com.draagon.meta.key.PrimaryKey"/>
+            <subType name="secondary" class="com.draagon.meta.key.SecondaryKey"/>
+            <subType name="foreign" class="com.draagon.meta.key.ForeignKey">
+                <children>
+                    <child type="attr" subType="string" name="foreignObjectRef"/>
+                    <child type="attr" subType="string" name="foreignKey"/>
+                    <child type="attr" subType="properties" name="foreignKeyMap"/>
                 </children>
             </subType>
         </type>

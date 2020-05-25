@@ -1,27 +1,25 @@
-/*
- * Copyright (c) 2002-2012 Blue Gnosis, LLC
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- */
 package com.draagon.meta.object;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
+import com.draagon.meta.key.ForeignKey;
+import com.draagon.meta.key.MetaKey;
+import com.draagon.meta.key.PrimaryKey;
+import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.loader.MetaDataRegistry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 @SuppressWarnings("serial")
-public abstract class MetaObject extends MetaData<MetaObject> {
+public abstract class MetaObject extends MetaData {
 
     private static Log log = LogFactory.getLog(MetaObject.class);
 
@@ -322,6 +320,56 @@ public abstract class MetaObject extends MetaData<MetaObject> {
     }
 
     ////////////////////////////////////////////////////
+    // KEY METHODS
+
+    public PrimaryKey getPrimaryKey() {
+        return getKeyByName(PrimaryKey.NAME, PrimaryKey.class );
+    }
+
+    protected <T extends MetaKey> T getKeyByName(String keyName, Class<T> clazz ) {
+        return getChild( keyName, clazz );
+    }
+
+    public SecondaryKey getSecondaryKeyByName(String keyName) {
+        return getKeyByName( keyName, SecondaryKey.class );
+    }
+
+    public Collection<SecondaryKey> getSecondaryKeys() {
+        return getKeysOfSubType(SecondaryKey.SUBTYPE, SecondaryKey.class);
+    }
+
+    public ForeignKey getForeignKeyByName(String keyName) {
+        return getKeyByName( keyName, ForeignKey.class );
+    }
+
+    public Collection<ForeignKey> getForeignKeys() {
+        return getKeysOfSubType(ForeignKey.SUBTYPE, ForeignKey.class);
+    }
+
+    //public <T extends MetaKey> Collection<T> getKeysOfSubType( String subType ) {
+    //    return (Collection<T>) getKeysOfSubType( subType, MetaKey.class );
+    //}
+
+    /** Null for clazz means just look by subtype */
+    protected <T extends MetaKey> Collection<T> getKeysOfSubType( String subType, Class<T> clazz ) {
+        final String CACHE_KEY = "getKeysOfSubType("+subType+","+clazz+")";
+        Collection<T> keys = (Collection<T>) getCacheValue(CACHE_KEY);
+        if ( keys == null ) {
+            keys = new ArrayList<>();
+            for (T key : getChildren( clazz )) {
+                if ( key.getSubTypeName().equals( subType )) keys.add(key);
+            }
+            setCacheValue(CACHE_KEY, keys);
+        }
+        return keys;
+    }
+
+    public Collection<MetaKey> getAllKeys() {
+        return getChildren( MetaKey.class );
+    }
+
+
+    ////////////////////////////////////////////////////
     // ABSTRACT METHODS
 
     /**
@@ -339,6 +387,7 @@ public abstract class MetaObject extends MetaData<MetaObject> {
 
     @Override
     public void validate() {
+        super.validate();
     }
 
     ////////////////////////////////////////////////////

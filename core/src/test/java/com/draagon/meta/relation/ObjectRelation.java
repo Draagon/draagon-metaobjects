@@ -2,7 +2,7 @@ package com.draagon.meta.relation;
 
 import com.draagon.meta.MetaData;
 
-public abstract class ObjectRelation extends MetaData<ObjectRelation> {
+public abstract class ObjectRelation extends MetaData {
 
     /**
      * Constructs the MetaData

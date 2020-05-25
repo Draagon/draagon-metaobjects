@@ -111,6 +111,9 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
             simpleModelParser.loadAndMerge(this, sourceURI);
         }
 
+        // Validate the MetaData
+        validate();
+
         return this;
     }
 

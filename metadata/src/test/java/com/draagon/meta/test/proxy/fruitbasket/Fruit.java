@@ -7,6 +7,9 @@ import com.draagon.meta.test.proxy.common.FieldName;
 
 public interface Fruit extends FieldId, FieldName, MetaObjectAware, Validatable {
 
+    public Long getBasketId();
+    public void setBasketId(Long basketId);
+
     public Integer getLength();
     public void setLength(Integer length);
 

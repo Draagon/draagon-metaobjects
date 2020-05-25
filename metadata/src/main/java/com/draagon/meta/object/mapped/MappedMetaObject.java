@@ -34,17 +34,16 @@ public class MappedMetaObject extends MetaObject {
         this.metaObjectKey = metaObjectKey;
     }
 
-    @Override
+    /*@Override
     public Object newInstance()  {
 
-        final String KEY = "newInstance-isMap";
         Object o = null;
 
         // See if we have this cached already
         Boolean isMap = (Boolean) getCacheValue( KEY );
         if ( isMap == null ) {
             try {
-                if (getObjectClass() != null) o = super.newInstance();
+                if (getObjectClass() != null) o = newInstance();
             } catch(MetaDataException | ClassNotFoundException ignore) {}
 
             setCacheValue( KEY, isMap );
@@ -58,6 +57,22 @@ public class MappedMetaObject extends MetaObject {
             setDefaultValues(o);
         }
         return o;
+    }*/
+
+    /**
+     * Retrieves the object class of an object, or MappedObject if one is not specified
+     */
+    public Class<?> getObjectClass() throws ClassNotFoundException {
+
+        Class<?> c = null;
+
+        if ( hasObjectAttr())
+            c = getObjectClassFromAttr();
+
+        if (c == null)
+            return MappedObject.class;
+
+        return c;
     }
 
     @Override

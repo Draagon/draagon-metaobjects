@@ -8,6 +8,9 @@
 
 package com.draagon.meta;
 
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.util.MetaDataUtil;
+
 @SuppressWarnings("serial")
 public class InvalidMetaDataException extends MetaDataException {
 
@@ -20,6 +23,9 @@ public class InvalidMetaDataException extends MetaDataException {
 
     protected static String prefix( MetaData md ) {
         if ( md == null ) return "[null] ";
-        return "["+md.toString()+"] ";
+        String pkg = md.getPackage();
+        if (pkg.isEmpty() && !(md instanceof MetaDataLoader)) pkg = MetaDataUtil.findPackageForMetaData(md);
+        if (!pkg.isEmpty()) pkg+=MetaData.PKG_SEPARATOR;
+        return "["+md.getClass().getSimpleName()+":"+pkg+md.getShortName()+"] ";
     }
 }
