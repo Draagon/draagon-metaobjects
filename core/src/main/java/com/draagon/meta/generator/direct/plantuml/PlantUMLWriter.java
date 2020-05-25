@@ -17,6 +17,8 @@ import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.validator.ArrayValidator;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.RequiredValidator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,12 +27,16 @@ import java.util.stream.Collectors;
 
 public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
+    protected Log log = LogFactory.getLog( getClass().getName() );
+
     public final static String ATTR_ISEMBEDDED ="isEmbedded";
 
-    protected Boolean showAttrs = false;
-    protected Boolean showAbstracts = true;
+    protected Boolean showAttrs = null;
+    protected Boolean showFields = null;
+    protected Boolean showAbstracts = null;
     protected String embeddedName = null;
     protected List<String> embeddedValues = null;
+    protected Boolean debug = null;
 
     protected Collection<MetaObject> filteredObjects;
 
@@ -46,8 +52,18 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         return this;
     }
 
+    public PlantUMLWriter showFields( boolean showFields ) {
+        this.showFields = showFields;
+        return this;
+    }
+
     public PlantUMLWriter showAbstracts( boolean showAbstracts ) {
         this.showAbstracts = showAbstracts;
+        return this;
+    }
+
+    public PlantUMLWriter setDebug( boolean debug ) {
+        this.debug = debug;
         return this;
     }
 
@@ -70,11 +86,13 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     protected void setDefaultOptions() {
 
         if (showAttrs == null) showAttrs = false;
+        if (showFields == null) showFields = true;
         if (showAbstracts == null) showAbstracts = true;
         if (embeddedName == null) {
             embeddedName = ATTR_ISEMBEDDED;
             embeddedValues = Arrays.asList(Boolean.TRUE.toString());
         }
+        if ( debug == null) debug=false;
     }
 
     //////////////////////////////////////////////////////////////////////
@@ -83,6 +101,14 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     public void writeUML() throws GeneratorIOException {
 
         setDefaultOptions();
+
+        if ( debug ) {
+            log.info("Writing PlantUML for file: " + getFilename() );
+            log.info("showAttrs:      " + showAttrs );
+            log.info("showAbstracts:  " + showAbstracts );
+            log.info("embeddedName:   " + embeddedName );
+            log.info("embeddedValues: " + embeddedValues );
+        }
 
         try {
             // Write start of UML file
@@ -125,13 +151,14 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
         for ( String p : pkgs ) {
 
+            if ( debug ) log.info("writingObjectPackage: " + p );
+
             if (!p.isEmpty()) drawNamespaceStart( p );
 
             // Write MetaObjects
             inc();
             for (MetaObject mo : objects()) {
-                if ( mo.getPackage().equals( p )
-                        && !isEmbedded( mo )) {
+                if ( mo.getPackage().equals( p )) {
                     writeMetaObject( mo );
                 }
             }
@@ -182,6 +209,13 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
         for (MetaObject mo : objects()) {
 
+            if ( isEmbedded( mo )) {
+                if ( debug ) log.info("writingRelationship: (skipEmbedded)" + mo.getName() );
+                continue;
+            }
+
+            if ( debug ) log.info("writingRelationship: " + mo.getName() );
+
             writeObjectParentRelationships(mo);
 
             // Write ObjectRef relationships
@@ -201,6 +235,13 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected void writeMetaObject(MetaObject mo ) throws IOException {
+
+        if ( isEmbedded( mo )) {
+            if ( debug ) log.info("writingObject: (skipEmbedded)" + mo.getName() );
+            return;
+        }
+
+        if ( debug ) log.info("writingObject: " + mo.getName() );
 
         drawObjectStart(mo);
 
@@ -245,7 +286,9 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected void writeObjectFieldSection(MetaObject mo) {
-        iterateWriteObjectFieldSection(mo, true);
+        if ( showFields ) {
+            iterateWriteObjectFieldSection(mo, true);
+        }
     }
 
     protected void iterateWriteObjectFieldSection(MetaObject mo, boolean primary ) {
@@ -305,16 +348,42 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
             MetaObject objRef = getMetaObjectRef(f);
             if (objRef != null) {
 
+                if ( debug ) log.info("writeObjectRef: "+mo.getName()+"  -->  "+objRef.getName());
+
                 String min = getRefMinOrMax( f, false );
                 String max = getRefMinOrMax( f, true );
 
-                if ((isAbstract(objRef) && !showAbstracts) || isEmbedded(objRef)) {
+                // If it's just skipping abstract, then look for parents
+                if (isEmbedded(objRef)) {
+                    if ( debug ) log.info("writeObjectRef: find superObject !ignore Embedded! "+mo.getName()+"  -->  "+objRef.getName());
+                    /*MetaObject superObject = objRef.getSuperObject();
+                    while ( superObject != null ) {
+                        if ((isAbstract(superObject) && !showAbstracts) || isEmbedded( superObject)) {
+                            superObject = superObject.getSuperObject();
+                        } else {
+                            break;
+                        }
+                    }
+                    if ( superObject != null ) {
+                        drawObjectReference(mo, f, min, max, superObject);
+                        //getDerivedObjects(superObject)
+                        //        .stream()
+                                //.filter(o -> isEmbedded(o) || !isAbstract(o) || (isAbstract(o) && !showAbstracts))
+                        //        .filter(o -> objects().contains(o))
+                        //        .forEach(o -> drawObjectReference(mo, f, min, max, o));
+                    }
+                    else {
+                        if ( debug ) log.info("writeObjectRef: find superObject !Not Found! "+mo.getName()+"  -->  "+objRef.getName());
+                    }*/
+                }
+                else if ((isAbstract(objRef) && !showAbstracts)) {
                     getDerivedObjects(objRef)
                             .stream()
                             //.filter(o -> isEmbedded(o) || !isAbstract(o) || (isAbstract(o) && !showAbstracts))
                             .filter(o -> objects().contains(o))
                             .forEach(o -> drawObjectReference(mo, f, min, max, o));
                 }
+                // If it's Embedded, then find the first valid super parent
                 else if (objects().contains(objRef)) {
                     drawObjectReference(mo, f, min, max, objRef);
                 }
@@ -324,14 +393,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     protected String getRefMinOrMax( MetaField<?> f, boolean forMax ) {
 
-        // Objects
-        if ( f instanceof ObjectField ) {
-            RequiredValidator v = getValidatorOfType( f, RequiredValidator.class );
-            if ( v == null && !forMax ) return "0";
-            else return "1";
-        }
         // Object Arrays
-        else if ( f instanceof ObjectArrayField ) {
+        if ( f instanceof ObjectArrayField ) {
             ArrayValidator v = getValidatorOfType( f, ArrayValidator.class );
             if (v != null) {
                 if (!forMax)
@@ -343,9 +406,15 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
             return "*";
         }
+        // Other fields
         else {
-            throw new IllegalStateException("Field must be ObjectField or ObjectArrayField to get Min or Max references");
+            RequiredValidator v = getValidatorOfType( f, RequiredValidator.class );
+            if ( v == null && !forMax ) return "0";
+            else return "1";
         }
+        //else {
+        //    throw new IllegalStateException("Field must be ObjectField or ObjectArrayField to get Min or Max references");
+        //}
     }
 
     protected <T extends MetaValidator> T getValidatorOfType( MetaField<?> f, Class<T> clazz ) {
@@ -384,17 +453,54 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected Collection<MetaObject> getDerivedObjects(MetaObject metaObject) {
+        if ( debug ) log.info("-- derivedObjects: metaObject="+metaObject);
         Collection<MetaObject> out = new ArrayList<>();
         for ( MetaObject mo : getLoader().getChildren(MetaObject.class) ) {
             if ( metaObject.equals(mo.getSuperObject())) {
-                if (( isAbstract( mo ) && !showAbstracts ) || isEmbedded(mo))
+                if (isEmbedded(mo)) {
+                    // Do nothing
+                }
+                else if (( isAbstract( mo ) && !showAbstracts ))
                     out.addAll( getDerivedObjects( mo ));
                 else
                     out.add( mo );
             }
         }
+        if ( debug ) log.info("-----[] "+out);
         return out;
     }
+
+    /*
+    protected Collection<MetaObject> getDerivedObjects(MetaObject metaObject) {
+        List<MetaObject> out = new ArrayList<>();
+        List<String> lineage = new ArrayList<>();
+        lineage.add( metaObject.getName() );
+        getDerivedObjects( out, lineage );
+        return out;
+    }
+
+    protected void getDerivedObjects( List<MetaObject> out, List<String> lineage ) {
+
+        if ( debug ) log.info("-- derivedObjects: lineage="+lineage);
+
+        for ( MetaObject mo : getLoader().getChildren(MetaObject.class) ) {
+
+            if ( mo.getSuperObject() != null && lineage.contains(mo.getSuperObject().getName())) {
+
+                if (( isAbstract( mo ) && !showAbstracts ) || isEmbedded(mo)) {
+
+                    //if ( !lineage.contains( mo.getName())) lineage.add( mo.getName() );
+                    //getDerivedObjects( out, lineage );
+                }
+                else if ( !out.contains( mo )) {
+                    out.add(mo);
+                }
+            }
+        }
+
+        if ( debug ) log.info("-----[] "+out);
+    }
+     */
 
     //////////////////////////////////////////////////////////////////////
     // Draw Helper methods
@@ -558,6 +664,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected void drawObjectReference(MetaObject mo, MetaField f, String min, String max, MetaObject objRef ) {
+        if ( debug ) log.info("-- drawObjectRef: "+mo.getName()+"  -->  "+objRef.getName());
+
         print(true,_pu(mo,true) +" ");
         print("\""+min+"\" --> \""+max+"\"");
         println(" "+ _pu(objRef,true) +" : "+ _pu(f));

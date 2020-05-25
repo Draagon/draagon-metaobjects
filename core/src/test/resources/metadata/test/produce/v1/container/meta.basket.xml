@@ -40,7 +40,6 @@
 
     <!-- Add an overlay for the basket for all fruit -->
     <object package="..::fruit" name="Fruit">
-        <objectKey/>
         <field name="inBasket" type="boolean"/>
     </object>
 
