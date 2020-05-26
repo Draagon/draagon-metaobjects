@@ -2,6 +2,8 @@
 Latest update: May 22nd 2020
 
 ## Introduction
+This contains the list of past releases as well as an update on the planned features for a coming release.  Nothing
+planned is guaranteed as is subject to change.
 
 ## License
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,20 +28,20 @@ limitations under the License.
 ## Version 4.4.0 
 
 ### Planned Features
-* Native support for Abstract and Interface MetaData
+* <b>Native support for Abstract and Interface MetaData</b>
   - Enforcement of rules around how abstract metadata and interfaces can be used
   - Interfaces implemented on metadata will pull over the associated metadata from the interface
   - Code generation support for abstracts and interfaces
   
-* TypedMetaDataLoader
+* <b>TypedMetaDataLoader</b>
   - Support for more advanced control over the metadata models using the TypesConfig models.
   
-* MetaData IO Enhancements
+* <b>MetaData IO Enhancements</b>
   - Potential Support for YAML, HOCON, or TOML for configuration files
   - Support for Plugins in the IO Readers and Writers
   - Support for Namespaces within the XML Serialization
   
-* MetaObjects Editor Support
+* <b>MetaObjects Editor Support</b>
   - Integrated into the MetaObjects Plugin, will be launched off command-line via "mvn metaobjects:editor"
   - Support for viewing included metadata, editing project metadata, and supporting overlays
   - Support for running generators after edit and viewing the output within the editor
@@ -56,47 +58,51 @@ features and improves were done, which are listed below.
 *  Should be backwards compatible,if using XMLFileMetaDataLoader
 
 ### Breaking Changes
-*  Source files that define types must be split into separate XML files with <typeConfig> as the root element and 
-   identified using a uri. Ex. types:resource:/example/path/example-types.xml
 *  If using the XMLMetaDataLoader, everything should work as before.  If you extended the core MetaDataLoader some
    changes will need to be made.
 
 ### New Features
-* MetaData IO Package
-  - IO package for reading/writing based on metadata models - XML & Json support
-  - IO Object readers/writers for object models based on the metadata models - XML & Json versions
-  - Post read, the writers call validate() method on objects that implement the new Validatable interface
-  - JsonSerializationHandler and XMLSerializationHandler for MetaData classes to support custom serialization
+* <b>MetaData IO Package</b>
+  - <b>IO package</b> for reading/writing based on metadata models - XML & Json support
+  - <b>IO Object readers/writers</b> for object models based on the metadata models - XML & Json versions
+  - <b>JsonSerializationHandler</b> and <b>XMLSerializationHandler</b> for MetaData classes to support 
+    custom serialization
   
-* New MetaData Types
-  - MappedMetaObject that works with any object with a Map interface
-  - ProxyMetaObject that creates proxied implementations, not requiring any actual implementation, however a 
-    proxyObject can be specified as the underlying object
-  - DataMetaObject support for DataObjects intended to be wrapped in code generated objects.  Underlying accessor
+* <b>New MetaData Types</b>
+  - <b>MappedMetaObject</b> that works with any object with a Map interface
+  - <b>ProxyMetaObject</b> that creates proxied implementations, not requiring any actual implementation, however a 
+    baseObject attribute can be used to specify the underlying object
+  - <b>DataMetaObject</b> support for DataObjects intended to be wrapped in code generated objects.  Underlying accessor
     fields are protected, creating a less open dynamic object, unlike ValueObject which has public methods
     exposing getters/setters.  
     <i>Note:ValueObject is more useful when there is very little direct access to the objects
     in custom code, such as services that are completely metadata-driven.</i>
-  - ClassAttribute for handling Java class attributes within MetaModel files
-  - ClassField for handling Java class fields
-  - ArrayValidator for validating min and max size of an array
+  - <b>MetaKey</b> for defining key relationships between objects by their fields.  
+  - <b>PrimaryKey</b>, <b>SecondaryKey</b>, and <b>ForeignKey</b>
+    are the 3 types of MetaKey.  These are used by PlantUML for generating UML diagrams and will also be used by the
+    upcoming release of the revised ObjectManager.  They would also be useful for JPA code generated objects.
+  - <b>ClassAttribute</b> for handling Java class attributes within MetaModel files
+  - <b>ClassField</b> for handling Java class fields
+  - <b>ArrayValidator</b> for validating min and max size of an array
 
-* Generator Package
-  - Support for Generators intended to be used for code generation and other outputs
-  - Support for [PlantUML](https://plantuml.com/) diagrams with various control options; uses ArrayValidator 
+* <b>Generator Package</b>
+  - Support for <b>Generators</b> intended to be used for code generation and other outputs
+  - Support for <b>[PlantUML](https://plantuml.com/) </b> diagrams with various control options; uses ArrayValidator 
     for relationships when configured with minSize and maxSize
-  - Support for XSD Generation based on TypesConfig for MetaModel files used for constructing MetaData
+  - Support for <b>XSD Generation</b> based on TypesConfig for MetaModel files used for constructing MetaData
   
-* MetaData Maven Plugin (Mojo)
-  - Maven plugin that executes Generators for use in Maven pom.xml files
-  - MojoSupport interface for MetaDataLoaders to work with the Maven Plugin
+* <b>MetaData Maven Plugin (Mojo)</b>
+  - <b>Maven plugin</b> that executes Generators for use in Maven pom.xml files
+  - <b>MojoSupport interface</b> for MetaDataLoaders to work with the Maven Plugin
   
-* New MetaDataLoaders
-  - TypesConfigLoader for loading TypesConfig files
-  - MetaModelLoader for loading MetaModel files
-  - SimpleLoader for loading MetaModel files with a default simple.types.xml
-  - FileMetaDataLoader for parsing both Json or XML configuration files and meta models
-
+* <b>New MetaDataLoaders</b>
+  - <b>FileMetaDataLoader</b> for parsing both <b>Json</b> or XML configuration files and meta models.  This currently 
+    uses backwards compatible parsing of TypesConfig and MetaModel files allowing for inline attributes.  SimpleLoader 
+    does not.
+  - <b>SimpleLoader</b> for loading MetaModel files using the new TypesLoader and MetaModelLoader
+  - <b>MetaModelLoader</b> for loading MetaModel files
+  - <b>TypesConfigLoader</b> for loading TypesConfig files
+  
 ### Bug Fixes
 *  Issues with auto-boxing and unboxing in the PojoMetaObject
 
@@ -106,10 +112,10 @@ features and improves were done, which are listed below.
 *  Replaced parsing of metadata (MetaModel) files and types configurations (TypesConfig).  
    <i>Note: FileMetaDataLoader uses a more sophisticated parser than the SimpleLoader</i>
 *  Refactored how TypesConfig and MetaData are loaded using MetaData themselves and the new IO package
-*  New DataTypes Enum support for MetaAttribute and MetaField replacing old MetaFieldTypes statics
-*  New DataConverter util for auto conversions between DataTypes
-*  URI Support for identifying TypesConfig vs MetaModel files for loading and parsing
-*  Support for URL loading of metadata files
-*  MetaDataLoaders now have specific LoaderOptions for configuring options on behavior
+*  New <b>DataTypes Enum</b> support for MetaAttribute and MetaField replacing old MetaFieldTypes statics
+*  New <b>DataConverter</b> util for auto conversions between DataTypes
+*  <b>URI Support</b> for identifying TypesConfig vs MetaModel files for loading and parsing
+*  Support for <b>URL loading</b> of metadata (typesConfig & meta model) files
+*  MetaDataLoaders now have specific <b>LoaderOptions</b> for configuring options on behavior
 *  New LoaderOption modes for strict rule enforcement, verbose output, and whether to register themselves in 
    the MetaDataRegistry
