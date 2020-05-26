@@ -32,7 +32,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     protected final TypesConfigLoader typesLoader;
 
-    public FileMetaDataLoader(String name ) {
+    public FileMetaDataLoader(String name) {
         this( new FileLoaderOptions(), name );
     }
 
