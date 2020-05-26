@@ -71,9 +71,7 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
                     Generator impl = (Generator) Class.forName(g.getClassname()).newInstance();
 
                     // Merge generator args and global args
-                    Map<String,String> allargs = new HashMap<>();
-                    if ( g.getArgs() != null ) allargs.putAll(g.getArgs());
-                    if ( globals != null ) allargs.putAll(globals);
+                    Map<String, String> allargs = mergeAndOverwriteArgs(g);
                     impl.setArgs(allargs);
 
                     // Merge loader filters and generator filters
@@ -94,6 +92,21 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
         }
 
         executeGenerators( loader, generatorImpls );
+    }
+
+    public Map<String, String> mergeAndOverwriteArgs(GeneratorParam g) {
+        Map<String,String> allargs = new HashMap<>();
+        if ( globals != null ) allargs.putAll(globals);
+        if ( g.getArgs() != null ) allargs.putAll(g.getArgs());
+
+        // Dump the args to debug
+        getLog().debug( "-- Generator ["+g.getClass().getSimpleName()+"] merged Args");
+        for ( String key : allargs.keySet()) {
+            getLog().debug( "    "+key+" = '"+allargs.get(key) +
+                    ((globals!=null && allargs.get(key).equals(globals.get(key)))?"  #GLOBAL#":""));
+        }
+
+        return allargs;
     }
 
     protected abstract void executeGenerators(MetaDataLoader loader, List<Generator> generatorImpls);

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
-<metadata
-        xmlns="https://draagon.com/schema/metamodel/produce/v1"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+<metadata xmlns="http://draagon.com/schema/metamodel/v3"
         package="produce::v1::vegetable">
 
     <!-- Vegetable -->

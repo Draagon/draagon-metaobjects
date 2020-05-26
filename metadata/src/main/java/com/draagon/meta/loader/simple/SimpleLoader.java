@@ -103,20 +103,41 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         super.init();
 
         // Load TypesConfig
-        SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, SIMPLE_TYPES_XML );
-        simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
+        //SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, SIMPLE_TYPES_XML );
+        //simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
 
+        boolean typesLoaded = false;
         // Load MetaData
         MetaModelLoader modelLoader = MetaModelLoader.create( "simple", getTypesConfig() );
         for( URI sourceURI : sourceURIs) {
-            SimpleModelParser simpleModelParser = new SimpleModelParser(modelLoader, sourceURI.toString());
-            simpleModelParser.loadAndMerge(this, sourceURI);
+
+            if (URIHelper.isTypesURI(sourceURI)) {
+                SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, sourceURI.toString() );
+                simpleTypesParser.loadAndMerge( this, sourceURI);
+                typesLoaded = true;
+            }
+            else {
+                if ( !typesLoaded ) {
+                    loadDefaultSimpleTypes();
+                    typesLoaded = true;
+                }
+
+                SimpleModelParser simpleModelParser = new SimpleModelParser(modelLoader, sourceURI.toString());
+                simpleModelParser.loadAndMerge(this, sourceURI);
+            }
         }
+
+        if ( !typesLoaded ) loadDefaultSimpleTypes();
 
         // Validate the MetaData
         validate();
 
         return this;
+    }
+
+    protected void loadDefaultSimpleTypes() {
+        SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, SIMPLE_TYPES_XML );
+        simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
     }
 
     /*protected InputStream getResourceInputStream(String resource) throws FileNotFoundException {

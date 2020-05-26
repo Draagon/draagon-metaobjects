@@ -30,7 +30,14 @@
           </xs:attribute>
           <xs:attribute name="type">
             <xs:simpleType>
-              <xs:restriction base="xs:string"/>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="string"/>
+                <xs:enumeration value="stringArray"/>
+                <xs:enumeration value="properties"/>
+                <xs:enumeration value="class"/>
+                <xs:enumeration value="boolean"/>
+                <xs:enumeration value="int"/>
+              </xs:restriction>
             </xs:simpleType>
           </xs:attribute>
           <xs:attribute name="super">
@@ -61,7 +68,11 @@
       </xs:attribute>
       <xs:attribute name="type">
         <xs:simpleType>
-          <xs:restriction base="xs:string"/>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="pojo"/>
+            <xs:enumeration value="map"/>
+            <xs:enumeration value="proxy"/>
+          </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="super">
@@ -108,7 +119,11 @@
       </xs:attribute>
       <xs:attribute name="type">
         <xs:simpleType>
-          <xs:restriction base="xs:string"/>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="primary"/>
+            <xs:enumeration value="secondary"/>
+            <xs:enumeration value="foreign"/>
+          </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="super">
@@ -151,7 +166,21 @@
       </xs:attribute>
       <xs:attribute name="type">
         <xs:simpleType>
-          <xs:restriction base="xs:string"/>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="byte"/>
+            <xs:enumeration value="short"/>
+            <xs:enumeration value="int"/>
+            <xs:enumeration value="long"/>
+            <xs:enumeration value="float"/>
+            <xs:enumeration value="double"/>
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="date"/>
+            <xs:enumeration value="class"/>
+            <xs:enumeration value="stringArray"/>
+            <xs:enumeration value="object"/>
+            <xs:enumeration value="objectArray"/>
+          </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="super">
@@ -188,7 +217,13 @@
       </xs:attribute>
       <xs:attribute name="type">
         <xs:simpleType>
-          <xs:restriction base="xs:string"/>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="required"/>
+            <xs:enumeration value="regex"/>
+            <xs:enumeration value="numeric"/>
+            <xs:enumeration value="length"/>
+            <xs:enumeration value="array"/>
+          </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="super">
@@ -203,22 +238,22 @@
       </xs:attribute>
       <xs:attribute name="min">
         <xs:simpleType>
-          <xs:restriction/>
+          <xs:restriction base="xs:integer"/>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="max">
         <xs:simpleType>
-          <xs:restriction/>
+          <xs:restriction base="xs:integer"/>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="minSize">
         <xs:simpleType>
-          <xs:restriction/>
+          <xs:restriction base="xs:integer"/>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="maxSize">
         <xs:simpleType>
-          <xs:restriction/>
+          <xs:restriction base="xs:integer"/>
         </xs:simpleType>
       </xs:attribute>
     </xs:complexType>

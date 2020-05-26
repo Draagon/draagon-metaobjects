@@ -34,20 +34,46 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
+                        <id>gen-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <loader>
+                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                                <name>gen-resources</name>
+                                <sources>types:file:${project.basedir}/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml</sources>
+                            </loader>
+                            <generators>
+                                <generator>
+                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <args>
+                                        <nameSpace>http://draagon.com/schema/metamodel/v3</nameSpace>
+                                        <outputDir>${project.build.outputDirectory}/metamodel/v3</outputDir>
+                                        <outputFilename>metaobjectsv3.xsd</outputFilename>
+                                    </args>
+                                </generator>
+                            </generators>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.draagon</groupId>
+                <artifactId>metaobjects-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>gen-test-resources</id>
                         <phase>generate-test-resources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <!--loader>
-                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
-                                <name>${project.artifactId}</name>
-                                <sources>
-                                </sources>
-                            </loader-->
                             <loader>
                                 <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
-                                <name>${project.artifactId}</name>
+                                <name>gen-test-resources</name>
                                 <sourceDir>${project.basedir}/src/test/resources</sourceDir>
                                 <sources>
                                     <source>types:resource:com/draagon/meta/loader/xml/metaobjects.types.xml</source>
@@ -63,7 +89,7 @@
                                         <outputFilename>produce-v1-model.xsd</outputFilename>
                                     </args>
                                     <filters>
-                                        <filter>produce::v1::*</filter>
+                                        <filter>!produce::v1::*</filter>
                                     </filters>
                                 </generator>
                             </generators>

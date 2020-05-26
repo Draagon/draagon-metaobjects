@@ -1,6 +1,6 @@
 package com.draagon.meta.generator.direct.xsd;
 
-import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.*;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
@@ -17,9 +17,13 @@ import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
+
+    private static final String METADATA_TYPE_ENUM = "typeEnum";
 
     private String nameSpace;
 
@@ -153,7 +157,7 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
         writeAttribute( el, "package", "string");
         if ( !tc.getName().equals("metadata")) {
             writeAttribute( el, "name", "string");
-            writeAttribute( el, "type", "string");
+            writeAttribute( el, "type", METADATA_TYPE_ENUM, tc.getSubTypeNames());
             writeAttribute( el, "super", "string");
         }
 
@@ -178,29 +182,58 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     }*/
 
     protected void writeAttribute(Element el, String name, String type) throws GeneratorIOException {
+        writeAttribute(el, name, type, null);
+    }
+
+    protected void writeAttribute(Element el, String name, String type, Collection<String> enumVals ) throws GeneratorIOException {
 
         Element attrEl = doc().createElement( "xs:attribute");
         attrEl.setAttribute("name", name );
 
-        if ( type.equals("string")
-                || type.equals("stringArray")
-                || type.equals("int")
-                || type.equals("boolean")) {
+        boolean found = true;
+        Element rEl = doc().createElement("xs:restriction");
 
+        // TODO:  Use Types Config to load the MetaData and then get the DataType
+
+        if ( type.equals(METADATA_TYPE_ENUM)) {
+            rEl.setAttribute("base", "xs:string");
+            if ( enumVals != null ) {
+                //<xs:enumeration value = "boolean" / >
+                for (String val : enumVals ) {
+                    Element enumEl = doc().createElement("xs:enumeration");
+                    enumEl.setAttribute("value", val );
+                    rEl.appendChild( enumEl );
+                }
+            }
+        }
+        else if ( type.equals(StringAttribute.SUBTYPE_STRING)
+                || type.equals(StringArrayAttribute.SUBTYPE_STRING_ARRAY)) {
+            rEl.setAttribute("base", "xs:string");
+        }
+        else if ( type.equals(LongAttribute.SUBTYPE_LONG)) {
+            rEl.setAttribute("base", "xs:long");
+        }
+        else if ( type.equals(PropertiesAttribute.SUBTYPE_PROPERTIES)) {
+            // TODO: Use regex pattern for properties
+            rEl.setAttribute("base", "xs:string");
+        }
+        else if ( type.equals(ClassAttribute.SUBTYPE_CLASS)) {
+            // TODO: Use regex pattern for class
+            rEl.setAttribute("base", "xs:string");
+        }
+        else if ( type.equals(IntAttribute.SUBTYPE_INT)) {
+            rEl.setAttribute("base", "xs:integer");
+        }
+        else if ( type.equals(BooleanAttribute.SUBTYPE_BOOLEAN)) {
+            rEl.setAttribute("base", "xs:boolean");
+        }
+        else {
+            found = false;
+        }
+
+        if ( found ) {
             Element stEl = doc().createElement("xs:simpleType");
             attrEl.appendChild(stEl);
-            Element rEl = doc().createElement("xs:restriction");
-
-            if ( type.equals("string") || type.equals("stringArray")) {
-                rEl.setAttribute("base", "xs:string");
-            }
-            else if ( type.equals("integer")) {
-                rEl.setAttribute("base", "xs:integer");
-            }
-            else if ( type.equals("boolean")) {
-                rEl.setAttribute("base", "xs:boolean");
-            }
-
             stEl.appendChild(rEl);
         }
 
