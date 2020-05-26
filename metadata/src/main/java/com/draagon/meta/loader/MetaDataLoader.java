@@ -124,6 +124,8 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
 
     protected void mojoInitArgs( Map<String, String> args ) {
 
+        if ( args == null ) return;
+
         if ( args.get( MojoSupport.ARG_REGISTER ) != null ) {
             getLoaderOptions().setShouldRegister( Boolean.parseBoolean( args.get( MojoSupport.ARG_REGISTER ) ));
         }

@@ -32,37 +32,51 @@
                 <groupId>com.draagon</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
-                <configuration>
-                    <loader>
-                        <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
-                        <name>${project.artifactId}</name>
-                        <!--sourceDir>${project.basedir}/src/main/resources</sourceDir-->
-                        <sources>
-                            <!--source>types:file:${project.basedir}/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml</source-->
-                        </sources>
-                    </loader>
-                    <generators>
-                        <generator>
-                            <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
-                            <args>
-                                <nameSpace>https://draagon.com/schema/metamodel/simple</nameSpace>
-                                <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
-                                <outputFilename>metaobjects-model.xsd</outputFilename>
-                            </args>
-                            <filters>
-                                <filter>produce::v1::*</filter>
-                            </filters>
-                        </generator>
-                    </generators>
-                </configuration>
                 <executions>
                     <execution>
-                        <phase>generate-resources</phase>
+                        <phase>generate-test-resources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <!--loader>
+                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                                <name>${project.artifactId}</name>
+                                <sources>
+                                </sources>
+                            </loader-->
+                            <loader>
+                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+                                <name>${project.artifactId}</name>
+                                <sourceDir>${project.basedir}/src/test/resources</sourceDir>
+                                <sources>
+                                    <source>types:resource:com/draagon/meta/loader/xml/metaobjects.types.xml</source>
+                                    <source>metadata/test/produce/v1/produce-v1.bundle</source>
+                                </sources>
+                            </loader>
+                            <generators>
+                                <generator>
+                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <args>
+                                        <nameSpace>https://draagon.com/schema/metamodel/produce/v1</nameSpace>
+                                        <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
+                                        <outputFilename>produce-v1-model.xsd</outputFilename>
+                                    </args>
+                                    <filters>
+                                        <filter>produce::v1::*</filter>
+                                    </filters>
+                                </generator>
+                            </generators>
+                        </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.draagon</groupId>
+                        <artifactId>metaobjects-core</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -71,7 +85,7 @@
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-metadata</artifactId>
-            <version>4.3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
                     

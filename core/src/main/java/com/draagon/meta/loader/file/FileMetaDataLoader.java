@@ -32,6 +32,10 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     protected final TypesConfigLoader typesLoader;
 
+    public FileMetaDataLoader(String name ) {
+        this( new FileLoaderOptions(), name );
+    }
+
     public FileMetaDataLoader(FileLoaderOptions fileConfig, String name ) {
         super( fileConfig, SUBTYPE_FILE, name );
 

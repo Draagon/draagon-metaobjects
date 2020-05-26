@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="https://draagon.com/schema/metamodel/simple" elementFormDefault="qualified" targetNamespace="https://draagon.com/schema/metamodel/simple">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="https://draagon.com/schema/metamodel/produce/v1" elementFormDefault="qualified" targetNamespace="https://draagon.com/schema/metamodel/produce/v1">
   <xs:element name="metadata">
     <xs:complexType>
       <xs:choice maxOccurs="unbounded">
         <xs:element maxOccurs="unbounded" minOccurs="0" ref="object"/>
         <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
         <xs:element maxOccurs="unbounded" minOccurs="0" ref="validator"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
       </xs:choice>
       <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="farmName">
         <xs:simpleType>
           <xs:restriction base="xs:string"/>
         </xs:simpleType>
@@ -75,6 +81,11 @@
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="isInterface">
+        <xs:simpleType>
+          <xs:restriction base="xs:boolean"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="isEmbedded">
         <xs:simpleType>
           <xs:restriction base="xs:boolean"/>
         </xs:simpleType>
@@ -164,6 +175,16 @@
           <xs:restriction base="xs:boolean"/>
         </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="isKey">
+        <xs:simpleType>
+          <xs:restriction base="xs:boolean"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="foreignKey">
+        <xs:simpleType>
+          <xs:restriction base="xs:boolean"/>
+        </xs:simpleType>
+      </xs:attribute>
       <xs:attribute name="objectRef">
         <xs:simpleType>
           <xs:restriction base="xs:string"/>
@@ -196,11 +217,7 @@
           <xs:restriction base="xs:string"/>
         </xs:simpleType>
       </xs:attribute>
-      <xs:attribute name="mask">
-        <xs:simpleType>
-          <xs:restriction base="xs:string"/>
-        </xs:simpleType>
-      </xs:attribute>
+      <xs:attribute name="mask"/>
       <xs:attribute name="min">
         <xs:simpleType>
           <xs:restriction/>
