@@ -32,36 +32,22 @@
                 <groupId>com.draagon</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <!-- Specify the Mojo parameter -->
                     <loader>
                         <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
                         <name>${project.artifactId}</name>
-                        <sourceDir>${project.basedir}/src/test/resources</sourceDir>
+                        <!--sourceDir>${project.basedir}/src/main/resources</sourceDir-->
                         <sources>
-                            <source>metadata/test/produce/v1/common/meta.common.xml</source>
-                            <!--source>metadata/test/produce/v1/fruit/meta.fruit.xml</source>
-                            <source>metadata/test/produce/v1/vegetable/meta.vegetable.xml</source>
-                            <source>metadata/test/produce/v1/container/meta.basket.xm</source-->
+                            <!--source>types:file:${project.basedir}/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml</source-->
                         </sources>
                     </loader>
-                    <globals>
-                        <output>target/generated-sources</output>
-                    </globals>
                     <generators>
                         <generator>
                             <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
                             <args>
-                                <nameSpace>https://draagon.com/schema/simple/types</nameSpace>
-                                <outputDir>${project.build.directory}xsd</outputDir>
-                                <outputFilename>simple-types.xsd</outputFilename>
+                                <nameSpace>https://draagon.com/schema/metamodel/simple</nameSpace>
+                                <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
+                                <outputFilename>metaobjects-model.xsd</outputFilename>
                             </args>
                             <filters>
                                 <filter>produce::v1::*</filter>
@@ -69,6 +55,14 @@
                         </generator>
                     </generators>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

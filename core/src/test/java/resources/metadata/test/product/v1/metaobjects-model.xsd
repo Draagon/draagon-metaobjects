@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="https://draagon.com/schema/simple/model" elementFormDefault="qualified" targetNamespace="https://draagon.com/schema/simple/model">
+  <xs:element name="metadata">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="object"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="validator"/>
+      </xs:choice>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="attr">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded"/>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="subtype">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="super">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="object">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="key"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
+      </xs:choice>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="subtype">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="super">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="_isAbstract">
+        <xs:simpleType>
+          <xs:restriction base="xs:boolean"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="isInterface">
+        <xs:simpleType>
+          <xs:restriction base="xs:boolean"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="key">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+      </xs:choice>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="subtype">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="super">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="keys">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="field">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="validator"/>
+      </xs:choice>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="subtype">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="super">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="_isAbstract">
+        <xs:simpleType>
+          <xs:restriction base="xs:boolean"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="validator">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded"/>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="subtype">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="super">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

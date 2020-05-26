@@ -9,18 +9,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-public class SimpleLoaderTest {
+public class SimpleLoaderTest extends SimpleLoaderTestBase {
 
     @Test
     public void testLoadSimpleTypes() throws URISyntaxException {
 
-        //TypesConfig tc = TypesConfigLoader.create().newTypesConfig();
-        //String s = tc.toString();
-
-        SimpleLoader loader = new SimpleLoader("test1" );
-        loader.setSourceURIs(Arrays.asList(
+        initLoader(Arrays.asList(
                 URIHelper.toURI( "model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.xml" )
         ));
-        loader.init();
     }
 }

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="">
+
+  <xs:element name="metadata">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="object"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="object-map"/>
+      </xs:choice>
+      <xs:attribute name="package">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="object" type="object-pojo-def"/>
+  <xs:element name="object-map" substitutionGroup="object" type="object-map-def"/>
+
+    <xs:complexType name="object-def">
+      <xs:choice maxOccurs="unbounded">
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
+      </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="object-pojo-def">
+      <xs:complexContent>
+        <xs:extension base="object-def">
+          <xs:choice maxOccurs="unbounded">
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
+          </xs:choice>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="object-map-def">
+      <xs:complexContent>
+        <xs:extension base="object-def">
+          <xs:choice maxOccurs="unbounded">
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="attr"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" ref="field"/>
+          </xs:choice>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+
+  <xs:element name="attr">
+  </xs:element>
+  <xs:element name="field">
+  </xs:element>
+
+</xs:schema>

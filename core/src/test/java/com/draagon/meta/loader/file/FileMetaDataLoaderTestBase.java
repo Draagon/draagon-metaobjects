@@ -42,7 +42,7 @@ public class FileMetaDataLoaderTestBase {
                                     //"src/test/resources",
                                     Arrays.asList(
                                             "metadata/test/produce/v1/produce-v1-json.bundle",
-                                            "metadata/test/produce/v1/overlay/meta.fruit.overlay.json")
+                                            "metadata/test/produce/v1/meta.fruit.overlay.json")
                             ))
                             .setShouldRegister(true)
                             .setStrict(true)
@@ -60,7 +60,7 @@ public class FileMetaDataLoaderTestBase {
                                     Arrays.asList(
                                             "com/draagon/meta/loader/xml/metaobjects.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle",
-                                            "metadata/test/produce/v1/overlay/meta.fruit.overlay.xml")
+                                            "metadata/test/produce/v1/meta.fruit.overlay.xml")
                             ))
                             .setShouldRegister(true)
                             .setStrict(false)

@@ -50,8 +50,9 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         setTypesConfig( typesLoader.newTypesConfig() );
     }
 
-    public void setSourceURIs(List<URI> sourceData ) {
+    public SimpleLoader setSourceURIs(List<URI> sourceData ) {
         this.sourceURIs = sourceData;
+        return this;
     }
     public List<URI> getSourceURIs() {
         return this.sourceURIs;
@@ -65,17 +66,18 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
 
         String name = this.getClass().getSimpleName();
         if ( sourceList == null ) throw new IllegalArgumentException(
-                "sourceURIList was null on setURIList for " + name);
-        if ( sourceList.size() > 1 ) throw new IllegalArgumentException( name +
-                " does not support more than one source file");
+                "sourceList was null on setURIList for " + name);
 
         List<URI> sourceURIs = new ArrayList<>();
         for( String s : sourceList) {
             if (s.indexOf(':') < 0) {
-                if (sourceDir != null) s = "model:file:" + s + ";" + URIHelper.URI_ARG_SOURCEDIR + "=" + sourceDir;
+                if (sourceDir != null) {
+                    s = "model:file:" + s + ";" + URIHelper.URI_ARG_SOURCEDIR + "=" + sourceDir;
+                }
                 else if (new File(s).exists()) {
                     s = "model:file:" + s;
-                } else {
+                }
+                else {
                     s = "model:resource:" + s;
                 }
             }
@@ -87,7 +89,7 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
 
     @Override
     public void mojoInit( Map<String, String> args ) {
-        mojoInitArgs( args );
+        if ( args != null ) mojoInitArgs( args );
         init();
     }
 

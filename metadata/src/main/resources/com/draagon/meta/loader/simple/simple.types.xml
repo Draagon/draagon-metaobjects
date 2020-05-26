@@ -45,7 +45,7 @@
             <subType name="proxy" class="com.draagon.meta.object.proxy.ProxyMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/>
-                    <child type="attr" subType="String" name="proxyObject"/>
+                    <child type="attr" subType="string" name="proxyObject"/>
                 </children>
             </subType>
         </type>
@@ -103,7 +103,7 @@
             <subType name="required" class="com.draagon.meta.validator.RequiredValidator"/>
             <subType name="regex" class="com.draagon.meta.validator.RegexValidator">
                 <children>
-                    <child type="attr" subType="regex" name="mask"/> <!-- inlineAttr="optional" required="true"/ -->
+                    <child type="attr" subType="string" name="mask"/> <!-- inlineAttr="optional" required="true"/ -->
                 </children>
             </subType>
             <subType name="numeric" class="com.draagon.meta.validator.NumericValidator" />

@@ -37,7 +37,7 @@ public class XMLMetaDataLoaderTestBase {
             XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader("test");
             List<String> list = new ArrayList<String>();
             list.add("metadata/test/produce/v1/produce-v1.bundle");
-            list.add("metadata/test/produce/v1/overlay/meta.fruit.overlay.xml");
+            list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
             xl.init(new LocalMetaDataSources(list));
             xl.register();
 

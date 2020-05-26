@@ -5,6 +5,7 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.types.ChildConfig;
+import com.draagon.meta.loader.types.SubTypeConfig;
 import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.util.XMLUtil;
@@ -53,6 +54,8 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
     public void writeXML() throws GeneratorIOException {
 
+        if (nameSpace == null) throw new GeneratorIOException(this, "No nameSpace was set for generating XSD file ["+getFilename()+"]");
+
         Element rootElement = doc().getDocumentElement();
         rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xs", "http://www.w3.org/2001/XMLSchema");
         rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", nameSpace);
@@ -78,9 +81,32 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
         el.appendChild( typeEl );
 
         Element ctEl = doc().createElement( "xs:complexType");
+        Element intoEl = ctEl;
 
-        writeTypeChildren( ctEl, tc, tc.getTypeChildConfigs() );
-        writeTypeAttributes( ctEl, tc, tc.getTypeChildConfigs() );
+        if ( tc.getName().equals("attr")) {
+            //<xs:simpleContent>
+            //<xs:extension base="xs:string">
+            Element scEl = doc().createElement("xs:simpleContent");
+            ctEl.appendChild(scEl);
+
+            Element extEl = doc().createElement("xs:extension");
+            extEl.setAttribute("base", "xs:string");
+            scEl.appendChild(extEl);
+
+            intoEl = extEl;
+        }
+
+        List<ChildConfig> kids = new ArrayList<>();
+        if ( tc.getTypeChildConfigs() != null ) kids.addAll( tc.getTypeChildConfigs() );
+        if ( tc.getSubTypes() != null ) {
+            for (SubTypeConfig stc : tc.getSubTypes()) {
+                if ( stc.getChildConfigs() != null ) {
+                    kids.addAll( stc.getChildConfigs() );
+                }
+            }
+        }
+        writeTypeChildren( intoEl, tc, kids );
+        writeTypeAttributes( intoEl, tc, kids );
 
         typeEl.appendChild( ctEl );
     }
@@ -126,16 +152,19 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
 
         writeAttribute( el, "package", "string");
         if ( !tc.getName().equals("metadata")) {
+            writeAttribute( el, "name", "string");
             writeAttribute( el, "type", "string");
-            writeAttribute( el, "subtype", "string");
             writeAttribute( el, "super", "string");
         }
+
+        List<String> names = new ArrayList<>();
 
         if ( typeChildConfigs != null ) {
             for (ChildConfig cc : typeChildConfigs) {
 
-                if (MetaAttribute.TYPE_ATTR.equals(cc.getType())) {
+                if (MetaAttribute.TYPE_ATTR.equals(cc.getType()) && !names.contains(cc.getName())) {
                     writeAttribute(el, cc.getName(), cc.getSubType());
+                    names.add(cc.getName());
                 }
             }
         }

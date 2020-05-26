@@ -1,4 +1,8 @@
-<metadata package="produce::v1::common">
+<metadata
+        xmlns="https://draagon.com/schema/metamodel/simple"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://draagon.com/schema/metamodel/simple metaobjects-model.xsd"
+        package="produce::v1::common">
 
     <attr name="farmName">Big Bob's Farm</attr>
 

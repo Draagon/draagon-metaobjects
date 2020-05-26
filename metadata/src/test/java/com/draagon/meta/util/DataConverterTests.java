@@ -53,7 +53,7 @@ public class DataConverterTests {
                                     fail("Convert should fail");
                                 } catch (NumberFormatException e5) {
                                     try {
-                                        DataConverter.toByte(new LoaderOptions<>());
+                                        DataConverter.toByte(new LoaderOptions());
                                         fail("Convert should fail");
                                     } catch (Exception ex) {
                                         assertTrue(ex instanceof NumberFormatException);
@@ -107,7 +107,7 @@ public class DataConverterTests {
                                 fail("Convert should fail");
                             } catch (NumberFormatException e5) {
                                 try {
-                                    DataConverter.toShort(new LoaderOptions<>());
+                                    DataConverter.toShort(new LoaderOptions());
                                     fail("Convert should fail");
                                 } catch (Exception ex) {
                                     assertTrue(ex instanceof NumberFormatException);
@@ -156,7 +156,7 @@ public class DataConverterTests {
                             fail( "Convert should fail" );
                         } catch( NumberFormatException e5 ) {
                             try {
-                                DataConverter.toInt( new LoaderOptions<>());
+                                DataConverter.toInt( new LoaderOptions());
                                 fail( "Convert should fail" );
                             } catch( Exception e6 ) {
                                 assertTrue( e6 instanceof NumberFormatException );
@@ -203,7 +203,7 @@ public class DataConverterTests {
                 fail("Convert should fail");
             } catch (NumberFormatException e5) {
                 try {
-                    DataConverter.toLong(new LoaderOptions<>());
+                    DataConverter.toLong(new LoaderOptions());
                     fail("Convert should fail");
                 } catch (Exception e6) {
                     assertTrue(e6 instanceof NumberFormatException);
@@ -237,7 +237,7 @@ public class DataConverterTests {
             fail( "Convert should fail" );
         } catch( NumberFormatException e5 ) {
             try {
-                DataConverter.toFloat( new LoaderOptions<>());
+                DataConverter.toFloat( new LoaderOptions());
                 fail( "Convert should fail" );
             } catch( Exception e6 ) {
                 assertTrue( e6 instanceof NumberFormatException );
@@ -270,7 +270,7 @@ public class DataConverterTests {
                 fail("Convert should fail");
             } catch (NumberFormatException e5) {
                 try {
-                    DataConverter.toDate(new LoaderOptions<>());
+                    DataConverter.toDate(new LoaderOptions());
                     fail("Convert should fail");
                 } catch (Exception e6) {
                     assertTrue(e6 instanceof NumberFormatException);

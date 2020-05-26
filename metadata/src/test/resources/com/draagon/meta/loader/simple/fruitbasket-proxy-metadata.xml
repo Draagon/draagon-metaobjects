@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
-<metadata package="simple::fruitbasket">
+<metadata
+        xmlns="https://draagon.com/schema/metamodel/simple"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://draagon.com/schema/metamodel/simple simple-model.xsd"
+        package="simple::fruitbasket">
 
     <!-- Id -->
     <field package="simple::common" name="id" type="long" _isAbstract="true">

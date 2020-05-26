@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * FileMetaDataLoader Configuration Settings
  */
-public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOptions<T> {
+public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOptions {
 
     /** Holds the array of FileMetaDataParser filename match patterns */
     protected final class PatternParser {

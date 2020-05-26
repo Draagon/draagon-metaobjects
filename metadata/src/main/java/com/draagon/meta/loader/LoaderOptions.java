@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * FileMetaDataLoader Configuration Settings
  */
-public class LoaderOptions<T extends LoaderOptions> {
+public class LoaderOptions {
 
     private boolean shouldRegister = false;
     private boolean verbose = true;
@@ -25,7 +25,7 @@ public class LoaderOptions<T extends LoaderOptions> {
     ///////////////////////////////////////////////////////////////////////////
     // Flags
 
-    public T setShouldRegister(boolean shouldRegister ) {
+    public <T extends LoaderOptions> T setShouldRegister(boolean shouldRegister ) {
         this.shouldRegister = shouldRegister;
         return (T) this;
     }
@@ -34,7 +34,7 @@ public class LoaderOptions<T extends LoaderOptions> {
         return shouldRegister;
     }
 
-    public T setVerbose(boolean verbose) {
+    public <T extends LoaderOptions>T setVerbose(boolean verbose) {
         this.verbose = verbose;
         return (T) this;
     }
@@ -43,7 +43,7 @@ public class LoaderOptions<T extends LoaderOptions> {
         return verbose;
     }
 
-    public T setStrict(boolean strict) {
+    public <T extends LoaderOptions>T setStrict(boolean strict) {
         this.strict = strict;
         return (T) this;
     }
@@ -59,7 +59,7 @@ public class LoaderOptions<T extends LoaderOptions> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LoaderOptions<?> that = (LoaderOptions<?>) o;
+        LoaderOptions that = (LoaderOptions) o;
         return shouldRegister == that.shouldRegister &&
                 verbose == that.verbose &&
                 strict == that.strict;
