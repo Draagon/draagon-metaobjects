@@ -47,10 +47,11 @@ public class JsonObjectReader extends JsonMetaDataReader {
             throw new MetaDataIOException( this, "Error reading MetaObject ["+mo+"]: "+e, e );
         }
 
-        return validate( readObject( mo ));
+        return readObject( mo );
+        //return validate( readObject( mo ));
     }
 
-    protected Object validate( Object o ) throws IOException {
+    /*protected Object validate( Object o ) throws IOException {
         if ( o != null && o instanceof Validatable ) {
             try {
                 ((Validatable) o).validate();
@@ -59,7 +60,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
             }
         }
         return o;
-    }
+    }*/
 
     protected Object readObject(MetaObject mo ) throws IOException {
 

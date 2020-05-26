@@ -47,10 +47,11 @@ public class XMLObjectReader extends XMLMetaDataReader {
 
         Element e = doc.getDocumentElement();
 
-        return validate( readObject( e, mo ));
+        return readObject( e, mo );
+        //return validate( readObject( e, mo ));
     }
 
-    protected Object validate( Object o ) throws IOException {
+    /*protected Object validate( Object o ) throws IOException {
         if ( o != null && o instanceof Validatable ) {
             try {
                 ((Validatable) o).validate();
@@ -59,7 +60,7 @@ public class XMLObjectReader extends XMLMetaDataReader {
             }
         }
         return o;
-    }
+    }*/
 
     protected Object readObject(Element e, MetaObject mo) throws IOException {
 
