@@ -16,9 +16,8 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.test.Apple;
-import com.draagon.meta.test.Orange;
-import org.junit.After;
+import com.draagon.meta.test.produce.v1.Apple;
+import com.draagon.meta.test.produce.v1.Orange;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,10 +40,10 @@ public class XMLMetaDataLoaderTest2 {
         // Initialize the loader
         XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test" );
         List<String> list = new ArrayList<String>();
-        list.add( "metadata/test/produce/v1/produce-v1.bundle" );
-        list.add( "metadata/test/produce/v1/meta.fruit.overlay.xml" );
-        xl.init(new LocalMetaDataSources( "src/test/resources", list));
-        xl.register();
+        list.add("metadata/test/produce/v1/produce-v1.bundle");
+        list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
+        xl.init(new LocalMetaDataSources( /*"src/test/resources",*/ list));
+        //xl.register();
 
         this.loader = xl;
     }
@@ -75,7 +74,7 @@ public class XMLMetaDataLoaderTest2 {
         
         assertEquals( "id field", id, apple.getId() );
         
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).toString() );
+        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
     }
 
     @Test
@@ -127,7 +126,7 @@ public class XMLMetaDataLoaderTest2 {
 
         MetaObject extMo = ((ObjectField) extField ).getObjectRef();
         assertNotNull( "Extension Object exists", extMo );
-        assertEquals( "Extension Object name == ProduceExt", "produce::v1::ext::ProduceExt", extMo.getName() );
+        assertEquals( "Extension Object name == ProduceExt", "produce::v1::container::ext::ProduceExt", extMo.getName() );
     }
 
 

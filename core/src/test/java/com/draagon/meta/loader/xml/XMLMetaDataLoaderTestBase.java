@@ -10,14 +10,6 @@
  */
 package com.draagon.meta.loader.xml;
 
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.ObjectField;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.test.Apple;
-import com.draagon.meta.test.Orange;
 import org.junit.*;
 
 import java.util.ArrayList;
@@ -33,9 +25,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class XMLMetaDataLoaderTestBase {
 
-    protected static MetaDataLoader loaderStatic = null;
+    protected static XMLFileMetaDataLoader loaderStatic = null;
 
-    protected MetaDataLoader loader = null;
+    protected XMLFileMetaDataLoader loader = null;
 
     @BeforeClass
     public synchronized static void initLoaderStatic() {

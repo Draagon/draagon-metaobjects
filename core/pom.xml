@@ -7,7 +7,6 @@
         <version>4.3.0-SNAPSHOT</version>
     </parent>
   
-    <groupId>com.draagon</groupId>
     <artifactId>metaobjects-core</artifactId>
     <packaging>bundle</packaging>
 
@@ -15,30 +14,105 @@
     <url>https://github.com/Draagon/draagon-metaobjects</url>
     <description>MetaObjects for Model-driven development - Core Libraries</description>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${jar.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.draagon</groupId>
+                <artifactId>metaobjects-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>gen-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <loader>
+                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                                <name>gen-resources</name>
+                                <sources>types:file:${project.basedir}/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml</sources>
+                            </loader>
+                            <generators>
+                                <generator>
+                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <args>
+                                        <nameSpace>http://draagon.com/schema/metamodel/v3</nameSpace>
+                                        <outputDir>${project.build.outputDirectory}/metamodel/v3</outputDir>
+                                        <outputFilename>metaobjectsv3.xsd</outputFilename>
+                                    </args>
+                                </generator>
+                            </generators>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- This will not work until the SimpleLoader can handle inline attributes.  Can not use MetaDataLoader -->
+            <!--plugin>
+                <groupId>com.draagon</groupId>
+                <artifactId>metaobjects-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>gen-test-resources</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <loader>
+                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+                                <name>gen-test-resources</name>
+                                <sourceDir>${project.basedir}/src/test/resources</sourceDir>
+                                <sources>
+                                    <source>types:resource:com/draagon/meta/loader/xml/metaobjects.types.xml</source>
+                                    <source>metadata/test/produce/v1/produce-v1.bundle</source>
+                                </sources>
+                            </loader>
+                            <generators>
+                                <generator>
+                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <args>
+                                        <nameSpace>https://draagon.com/schema/metamodel/produce/v1</nameSpace>
+                                        <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
+                                        <outputFilename>produce-v1-model.xsd</outputFilename>
+                                    </args>
+                                    <filters>
+                                        <filter>!produce::v1::*</filter>
+                                    </filters>
+                                </generator>
+                            </generators>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.draagon</groupId>
+                        <artifactId>metaobjects-core</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin -->
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
-            <groupId>commons-validator</groupId>
-            <artifactId>commons-validator</artifactId>
-            <version>${commons.validator.version}</version>
-            <type>jar</type>
-        </dependency>
-        <!-- dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>draagon-cache</artifactId>
-            <version>${draagon.cache.version}</version>
-            <type>jar</type>
-        </dependency -->
-        <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>${xml.apis.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>${xerces.version}</version>
-            <type>jar</type>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
                     

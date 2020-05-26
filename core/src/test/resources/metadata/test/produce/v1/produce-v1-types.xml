@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<typesConfig
+        xmlns="https://www.draagon.com"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://www.draagon.com/xml types-config.xsd">
+
+    <types>
+
+        <type name="metadata" class="com.draagon.meta.MetaData" >
+            <children>
+                <child type="attr" subType="string" name="farmName"/>
+            </children>
+        </type>
+
+        <type name="object" class="com.draagon.meta.object.MetaObject">
+            <children>
+                <child type="attr" subType="boolean" name="isEmbedded"/>
+            </children>
+        </type>
+
+        <!-- type name="attr" class="com.draagon.meta.attr.MetaAttribute" defaultSubType="string">
+            <subType name="string"       class="com.draagon.meta.attr.StringAttribute" />
+            <subType name="stringArray"  class="com.draagon.meta.attr.StringArrayAttribute" />
+            <subType name="properties"   class="com.draagon.meta.attr.PropertiesAttribute" />
+            <subType name="class"        class="com.draagon.meta.attr.ClassAttribute" />
+            <subType name="boolean"      class="com.draagon.meta.attr.BooleanAttribute" />
+            <subType name="int"          class="com.draagon.meta.attr.IntAttribute" />
+        </type>
+
+        <type name="object" class="com.draagon.meta.object.MetaObject" defaultSubType="value">
+            <children>
+                <child type="attr" subType="boolean" name="_isAbstract"/>
+                <child type="attr" subType="boolean" name="isInterface"/>
+                <child type="objectKey" subType="*" name="*"/>
+                <child type="field" subType="*" name="*"/>
+            </children>
+            <subType name="value" class="com.draagon.meta.object.value.ValueMetaObject">
+                <children>
+                    <child type="attr" subType="class" name="class" nameAliases="object"/>
+                </children>
+            </subType>
+            <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
+                <children>
+                    <child type="attr" subType="class" name="class" nameAliases="object"/>
+                </children>
+            </subType>
+        </type>
+
+        <type name="field" class="com.draagon.meta.field.MetaField" defaultSubType="string">
+            <children>
+                <child type="attr" subType="boolean" name="_isAbstract"/>
+                <child type="attr" subType="boolean" name="isKey"/>
+                <child type="attr" subType="boolean" name="foreignKey"/>
+                <child type="attr" subType="string" name="objectRef"/>
+                <child type="validator" subType="*" name="*"/>
+                <child type="view" subType="*" name="*"/>
+            </children>
+            <subType name="boolean"      class="com.draagon.meta.field.BooleanField" />
+            <subType name="byte"         class="com.draagon.meta.field.ByteField" />
+            <subType name="short"        class="com.draagon.meta.field.ShortField" />
+            <subType name="int"          class="com.draagon.meta.field.IntegerField" />
+            <subType name="long"         class="com.draagon.meta.field.LongField" />
+            <subType name="float"        class="com.draagon.meta.field.FloatField" />
+            <subType name="double"       class="com.draagon.meta.field.DoubleField" />
+            <subType name="string"       class="com.draagon.meta.field.StringField" />
+            <subType name="date"         class="com.draagon.meta.field.DateField" />
+            <subType name="stringArray"  class="com.draagon.meta.field.StringArrayField"/>
+
+            <subType name="object"       class="com.draagon.meta.field.ObjectField">
+                <children>
+                    <child type="objectRef" subType="oneToOne" name="*" />
+                    <child type="objectRef" subType="manyToOne" name="*" />
+                </children>
+            </subType>
+            <subType name="objectArray"  class="com.draagon.meta.field.ObjectArrayField" >
+                <children>
+                    <child type="objectRef" subType="oneToMany" name="*"/>
+                    <child type="objectRef" subType="manyToMany" name="*"/>
+                </children>
+            </subType>
+        </type>
+
+        <type name="validator"  class="com.draagon.meta.validator.MetaValidator" defaultSubType="required" defaultNamePrefix="validator">
+            <subType name="required" class="com.draagon.meta.validator.RequiredValidator"/>
+            <subType name="regex" class="com.draagon.meta.validator.RegexValidator">
+                <children>
+                    <child type="attr" subType="regex" name="mask"/>
+                </children>
+            </subType>
+            <subType name="numeric" class="com.draagon.meta.validator.NumericValidator" />
+            <subType name="length" class="com.draagon.meta.validator.LengthValidator" >
+                <children>
+                    <child type="attr" subType="int" name="min"/>
+                    <child type="attr" subType="int" name="max"/>
+                </children>
+            </subType>
+        </type -->
+
+    </types>
+
+</typesConfig>

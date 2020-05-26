@@ -5,18 +5,25 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.2.2-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
     </parent>
-  
-    <groupId>com.draagon</groupId>
+
     <artifactId>metaobjects-om</artifactId>
     <packaging>bundle</packaging>
 
-    <name>MetaObjects :: OM</name>
+    <name>MetaObjects :: ObjectManager</name>
     <url>https://github.com/Draagon/draagon-metaobjects</url>
     <description>MetaObjects for Model-driven development - ObjectManager</description>
 
     <dependencies>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-core</artifactId>

@@ -7,7 +7,7 @@
 
 package com.draagon.meta.manager;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.exp.SortOrder;
@@ -34,14 +34,14 @@ public class ObjectComparator implements Comparator<Object>
     try {
       return performCompare( a, b, mSort );
     }
-    catch( MetaException e ) {
+    catch( MetaDataException e ) {
       log.error( e.getMessage(), e );
       return 0;
     }
   }
 
   private int performCompare( Object a, Object b, SortOrder sort )
-    throws MetaException
+    throws MetaDataException
   {
     int rc = 0;
 
@@ -51,7 +51,7 @@ public class ObjectComparator implements Comparator<Object>
     MetaObject mb = MetaDataRegistry.findMetaObject( b );
 
     if ( !ma.equals( mb ))
-      throw new MetaException( "Objects are not of the same MetaClass: [" + ma + "] != [" + mb + "]" );
+      throw new MetaDataException( "Objects are not of the same MetaClass: [" + ma + "] != [" + mb + "]" );
 
     MetaField mf = ma.getMetaField( sort.getField() );
 
@@ -69,28 +69,28 @@ public class ObjectComparator implements Comparator<Object>
       else
       {
         if ( !aVal.getClass().equals( bVal.getClass() ))
-          throw new MetaException( "Object data values are not of the same type" );
+          throw new MetaDataException( "Object data values are not of the same type" );
 
-        switch( mf.getType() )
+        switch( mf.getDataType() )
         {
-          case MetaField.BOOLEAN:
+          case BOOLEAN:
           {
             if ( !((Boolean) aVal ).booleanValue() && ((Boolean) bVal ).booleanValue() ) rc = -1;
             else if ( ((Boolean) aVal ).booleanValue() == ((Boolean) bVal ).booleanValue() ) rc = 0;
             else if ( ((Boolean) aVal ).booleanValue() && !((Boolean) bVal ).booleanValue() ) rc = 1;
             break;
           }
-          case MetaField.BYTE:    rc = ((Byte) aVal ).compareTo( (Byte) bVal ); break;
-          case MetaField.SHORT:   rc = ((Short) aVal ).compareTo( (Short) bVal ); break;
-          case MetaField.INT:     rc = ((Integer) aVal ).compareTo( (Integer) bVal ); break;
-          case MetaField.LONG:    rc = ((Long) aVal ).compareTo( (Long) bVal ); break;
-          case MetaField.FLOAT:   rc = ((Float) aVal ).compareTo( (Float) bVal ); break;
-          case MetaField.DOUBLE:  rc = ((Double) aVal ).compareTo( (Double) bVal ); break;
-          case MetaField.STRING:  rc = ((String) aVal ).compareToIgnoreCase( (String) bVal ); break;
-          case MetaField.DATE:    rc = ((Date) aVal ).compareTo( (Date) bVal ); break;
+          case BYTE:    rc = ((Byte) aVal ).compareTo( (Byte) bVal ); break;
+          case SHORT:   rc = ((Short) aVal ).compareTo( (Short) bVal ); break;
+          case INT:     rc = ((Integer) aVal ).compareTo( (Integer) bVal ); break;
+          case LONG:    rc = ((Long) aVal ).compareTo( (Long) bVal ); break;
+          case FLOAT:   rc = ((Float) aVal ).compareTo( (Float) bVal ); break;
+          case DOUBLE:  rc = ((Double) aVal ).compareTo( (Double) bVal ); break;
+          case STRING:  rc = ((String) aVal ).compareToIgnoreCase( (String) bVal ); break;
+          case DATE:    rc = ((Date) aVal ).compareTo( (Date) bVal ); break;
 
           // WARN:  Maybe try some reflection here or something for a compareTo operator
-          case MetaField.OBJECT:  rc = aVal.toString().compareTo( bVal.toString() ); break;
+          case OBJECT:  rc = aVal.toString().compareTo( bVal.toString() ); break;
         }
       }
     //}

@@ -10,39 +10,30 @@ package com.draagon.meta.manager;
 import com.draagon.meta.*;
 
 @SuppressWarnings("serial")
-public class ObjectNotFoundException extends MetaException
-{
-	private Object object = null;
-	
-  public ObjectNotFoundException( String msg ) {
-    super( msg );
-  }
+public class ObjectNotFoundException extends MetaDataException {
 
-  public ObjectNotFoundException( Object o ) {
-    super();
-    object = o;
-  }
+    private Object object = null;
 
-  /*public ObjectNotFoundException( String msg, Throwable cause )
-  {
-    super( msg, cause );
-  }*/
+    public ObjectNotFoundException(String msg) {
+        super(msg);
+    }
 
-  public ObjectNotFoundException() {
-    super( "Object Not Found Exception" );
-  }
-  
-  public Object getObject() {
-	  return object;
-  }
-  
-  @Override
-  public String toString() {
-	  if ( object == null ) {
-		  return super.toString();
-	  } else {
-		  return "[" + object.toString() + "]" + super.toString();
-	  }
-  }
+    public ObjectNotFoundException(Object o) {
+        super("Object Not Found [" + o + "]");
+        object = o;
+    }
+
+    public Object getObject() {
+        return object;
+    }
+
+    @Override
+    public String toString() {
+        if (object == null) {
+            return super.toString();
+        } else {
+            return "[" + object.toString() + "]" + super.toString();
+        }
+    }
 }
 

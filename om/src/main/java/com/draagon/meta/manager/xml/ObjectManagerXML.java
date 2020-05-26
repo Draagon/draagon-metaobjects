@@ -7,7 +7,7 @@
 
 package com.draagon.meta.manager.xml;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -16,7 +16,7 @@ import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.manager.exp.Range;
 import com.draagon.meta.manager.exp.SortOrder;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.util.xml.XMLFileReader;
+import com.draagon.meta.util.XMLUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -70,13 +70,13 @@ public class ObjectManagerXML extends ObjectManager
    * Retrieves a connection object representing the datastore
    */
   public ObjectConnection getConnection()
-    throws MetaException
+    throws MetaDataException
     {
         return new ObjectConnectionXML( tables );
     }
 
   public void releaseConnection( ObjectConnection oc ) 
-  	throws MetaException
+  	throws MetaDataException
   	{
 	  oc.close();
   	}
@@ -186,7 +186,7 @@ public class ObjectManagerXML extends ObjectManager
       return true;
     }
 
-    protected String getNextFieldId( ObjectConnection c, MetaObject mc, MetaField f ) throws MetaException
+    protected String getNextFieldId( ObjectConnection c, MetaObject mc, MetaField f ) throws MetaDataException
     {
         long id = 0;
         List<Object> list = getObjectsFromTable( c, mc );
@@ -203,7 +203,7 @@ public class ObjectManagerXML extends ObjectManager
     }
 
   public void handleAutoField( ObjectConnection c, MetaObject mc, MetaField mf, Object obj, Object auto, int state, int action )
-    throws MetaException
+    throws MetaDataException
   {
     if ( "id".equals( auto ) && action == CREATE && state == AUTO_PRIOR ) {
       mf.setString( obj, getNextFieldId( c, mc, mf ));
@@ -217,7 +217,7 @@ public class ObjectManagerXML extends ObjectManager
    * Gets the object by the id; throws exception if it did not exist
    */
   public Object getObjectByRef( ObjectConnection c, String refStr )
-    throws MetaException
+    throws MetaDataException
     {
         ObjectRef ref = getObjectRef( refStr );
         MetaObject mc = ref.getMetaClass();
@@ -233,7 +233,7 @@ public class ObjectManagerXML extends ObjectManager
    * Get all objects of the specified kind from the datastore
    */
   public Collection<Object> getObjects( ObjectConnection c, MetaObject mc, QueryOptions options )
-    throws MetaException
+    throws MetaDataException
     {
         Collection<Object> objs = getObjectsFromTable( c, mc );
 
@@ -284,7 +284,7 @@ public class ObjectManagerXML extends ObjectManager
    * Load the specified object from the XML source
    */
   public void loadObject( ObjectConnection c, Object obj )
-    throws MetaException
+    throws MetaDataException
     {
         String ref = getObjectRef( obj ).toString();
 
@@ -301,13 +301,13 @@ public class ObjectManagerXML extends ObjectManager
    * Add the specified object to the datastore
    */
   public void createObject( ObjectConnection c, Object obj )
-    throws MetaException
+    throws MetaDataException
     {
         MetaObject mc = MetaDataRegistry.findMetaObject( obj );
         List<Object> list = getObjectsFromTable( c, mc );
 
         if ( !isCreateableClass( mc ))
-          throw new MetaException( "Object of class [" + mc + "] is not persistable" );
+          throw new MetaDataException( "Object of class [" + mc + "] is not persistable" );
 
         prePersistence( c, mc, obj, CREATE );
 
@@ -320,17 +320,17 @@ public class ObjectManagerXML extends ObjectManager
    * Update the specified object in the datastore
    */
   public void updateObject( ObjectConnection c, Object obj )
-    throws MetaException
+    throws MetaDataException
   {
     MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     List<Object> list = getObjectsFromTable( c, mc );
 
     int i = list.indexOf( obj );
     if ( i < 0 )
-      throw new MetaException( "Object [" + obj + "] did not exist in table for class [" + mc + "]" );
+      throw new MetaDataException( "Object [" + obj + "] did not exist in table for class [" + mc + "]" );
 
     if ( !isUpdateableClass( mc ))
-      throw new MetaException( "Object of class [" + mc + "] is not persistable" );
+      throw new MetaDataException( "Object of class [" + mc + "] is not persistable" );
 
     prePersistence( c, mc, obj, UPDATE );
 
@@ -343,17 +343,17 @@ public class ObjectManagerXML extends ObjectManager
    * Delete the specified object from the datastore
    */
   public void deleteObject( ObjectConnection c, Object obj )
-    throws MetaException
+    throws MetaDataException
   {
     MetaObject mc = MetaDataRegistry.findMetaObject( obj );
     List<Object> list = getObjectsFromTable( c, mc );
 
     int i = list.indexOf( obj );
     if ( i < 0 )
-      throw new MetaException( "Object [" + obj + "] did not exist in table for class [" + mc + "]" );
+      throw new MetaDataException( "Object [" + obj + "] did not exist in table for class [" + mc + "]" );
 
     if ( !isDeleteableClass( mc ))
-      throw new MetaException( "Object of class [" + mc + "] is not persistable" );
+      throw new MetaDataException( "Object of class [" + mc + "] is not persistable" );
 
     prePersistence( c, mc, obj, DELETE );
 
@@ -367,7 +367,7 @@ public class ObjectManagerXML extends ObjectManager
    * Stores the specified object by adding, updating, or deleting
    */
   public void storeObject( ObjectConnection c, Object obj )
-    throws MetaException
+    throws MetaDataException
     {
         StateAwareMetaObject pmc = getStatefulMetaClass( obj );
 
@@ -383,7 +383,7 @@ public class ObjectManagerXML extends ObjectManager
 
     @SuppressWarnings("unchecked")
 	private synchronized List<Object> getObjectsFromTable( ObjectConnection c, MetaObject mc )
-        throws MetaException
+        throws MetaDataException
     {
         Map<MetaObject,List<Object>> map = (Map<MetaObject,List<Object>>) c.getDatastoreConnection();
 
@@ -403,7 +403,7 @@ public class ObjectManagerXML extends ObjectManager
     protected String getFileRef( MetaObject mc )
     {
         try {
-            return (String) mc.getAttribute( "fileRef" );
+            return (String) mc.getMetaAttr( "fileRef" ).getValueAsString();
         }
         catch( MetaAttributeNotFoundException e ) { }
 
@@ -431,7 +431,7 @@ public class ObjectManagerXML extends ObjectManager
     }
 
     private InputStream getSourceStream( MetaObject mc )
-        throws MetaException
+        throws MetaDataException
     {
         String file = "";
         if ( getLocation() != null ) file += getLocation();
@@ -441,7 +441,7 @@ public class ObjectManagerXML extends ObjectManager
         if ( is == null )
         {
             log.error( "Meta XML file [" + file + "] does not exist" );
-            throw new MetaException( "The Meta XML item file [" + file + "] was not found" );
+            throw new MetaDataException( "The Meta XML item file [" + file + "] was not found" );
         }
 
         return is;
@@ -449,7 +449,7 @@ public class ObjectManagerXML extends ObjectManager
 
     @SuppressWarnings("unchecked")
 	private List<Object> loadObjectsFromFile( ObjectConnection c, MetaObject mc )
-        throws MetaException
+        throws MetaDataException
     {
         ///////////////////////////////////////////////////////////
         // Load the XML document
@@ -460,12 +460,12 @@ public class ObjectManagerXML extends ObjectManager
         InputStream is = null;
         try {
           is = getSourceStream( mc );
-          doc = XMLFileReader.loadFromStream( is );
+          doc = XMLUtil.loadFromStream( is );
         }
         catch( IOException e )
         {
           log.error( "Meta XML file for MetaClass [" + mc + "] cannot be parsed: " + e.getMessage() );
-          throw new MetaException( "The Meta XML file for MetaClass [" + mc + "] was not parsable", e );
+          throw new MetaDataException( "The Meta XML file for MetaClass [" + mc + "] was not parsable", e );
         }
         finally {
           try { if ( is != null ) is.close(); }
@@ -480,7 +480,7 @@ public class ObjectManagerXML extends ObjectManager
             // Look for the <items> element
             NodeList itemdocList = doc.getElementsByTagName( "objects" );
             if ( itemdocList == null || itemdocList.getLength() == 0 )
-                throw new MetaException( "The root 'objects' element was not found" );
+                throw new MetaDataException( "The root 'objects' element was not found" );
 
             Element itemdocElement = (Element) itemdocList.item( 0 );
 
@@ -499,12 +499,12 @@ public class ObjectManagerXML extends ObjectManager
         }
         catch( SAXException e )
         {
-            throw new MetaException( "Unable to load Objects for MetaClass [" + mc + "]", e );
+            throw new MetaDataException( "Unable to load Objects for MetaClass [" + mc + "]", e );
         }
     }
 
     private List<Object> parseObjects( ObjectConnection c, MetaObject mc, Element element )
-        throws MetaException, SAXException
+        throws MetaDataException, SAXException
     {
         String nameRef = getNameRef( mc );
 
@@ -557,12 +557,12 @@ public class ObjectManagerXML extends ObjectManager
     // OBJECT QUERY LANGUAGE METHODS
     //
 
-    public int execute( ObjectConnection c, String query, Collection<?> arguments ) throws MetaException
+    public int execute( ObjectConnection c, String query, Collection<?> arguments ) throws MetaDataException
     {
     	throw new UnsupportedOperationException( "execute is not support by the XML manager" );
     }
 
-    public Collection<?> executeQuery( ObjectConnection c, String query, Collection<?> arguments ) throws MetaException
+    public Collection<?> executeQuery( ObjectConnection c, String query, Collection<?> arguments ) throws MetaDataException
     {
     	throw new UnsupportedOperationException( "executeQuery is not support by the XML manager" );
     }

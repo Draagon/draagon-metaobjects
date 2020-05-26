@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<metadata xmlns="http://draagon.com/schema/metamodel/v3"
+        package="produce::v1::vegetable">
+
+    <!-- Vegetable -->
+    <object name="Vegetable" type="pojo" _isAbstract="true">
+
+        <key name="primary" keys="id"/>
+        <key type="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
+
+        <attr name="object">com.draagon.meta.test.produce.v1.Vegetable</attr>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- BasketId -->
+        <field name="basketId" super="..::common::id"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
+
+    </object>
+
+    <!-- Tomato -->
+    <object name="Tomato" super="Vegetable">
+
+        <attr name="object">com.draagon.meta.test.produce.v1.Tomato</attr>
+
+    </object>
+
+</metadata>

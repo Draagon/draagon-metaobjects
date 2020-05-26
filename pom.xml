@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>draagon-parent</artifactId>
-        <version>3.9.0</version>
+        <version>4.0.0</version>
     </parent>
   
     <artifactId>metaobjects</artifactId>
@@ -28,11 +28,14 @@
     </organization>
 
     <modules>
+        <module>metadata</module>
+        <module>maven-plugin</module>
         <module>core</module>
-        <!-- module>om</module>
-        <module>omdb</module -->
-        <!-- module>web</module -->
-        <!-- module>demo</module -->
+        <!-- module>docs</module>
+        <module>om</module>
+        <module>omdb</module>
+        <module>web</module>
+        <module>demo</module -->
     </modules>
 
     <developers>
@@ -173,7 +176,6 @@
         </extensions>
 
         <plugins>
-
             <!-- Maven Core Plugins -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -225,9 +227,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${release.plugin.version}</version>
-                <configuration>
-                    <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
-                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.scm</groupId>
@@ -235,19 +234,6 @@
                         <version>1.11.2</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-
-            <!-- Sonatype Support -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
             </plugin>
 
             <!-- OSGi Bundle Support -->
@@ -286,9 +272,66 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
-
     </build>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!use-nexus</name>
+                </property>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>draagon-snapshots</id>
+                    <name>draagon-snapshots</name>
+                    <url>http://build.draagon.com:8081/artifactory/libs-snapshot-local</url>
+                </snapshotRepository>
+                <repository>
+                    <id>draagon-central</id>
+                    <name>draagon-releases</name>
+                    <url>http://build.draagon.com:8081/artifactory/libs-release-local</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>nexus</id>
+            <activation>
+                <property>
+                    <name>use-nexus</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Sonatype Support -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
+                    </url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 
 </project>

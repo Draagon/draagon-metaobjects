@@ -1,0 +1,32 @@
+{"metadata": {"package": "produce::v1::container",
+    "children": [
+        {"object": {"name": "Basket", "type": "value",
+            "children": [
+                {"key": {"name": "primary", "type":"primary",
+                    "children": [
+                        {"attr": {"name": "keys", "value": "id"}}
+                    ]}},
+                {"field": {"name": "id", "super": "..::common::id"}},
+                {"field": {"name": "name", "super": "..::common::name"}},
+                {"field": {"name": "numApples", "type": "int"}},
+                {"field": {"name": "numOranges", "type": "int"}},
+                {"field": {"name": "numVeggies", "type": "int"}},
+                {"field": {"name": "apples", "type": "objectArray", "objectRef":"..::fruit::Apple",
+                    "children": [
+                        {"validator": {"type": "array", "minSize": "0", "minSize": "5"}}
+                        ]}},
+                {"field": {"name": "oranges",  "type": "objectArray", "objectRef":"..::fruit::Orange",
+                    "children": [
+                        {"validator": {"type": "array", "minSize": "0", "minSize": "3"}}
+                    ]}},
+                {"field": {"name": "veggies",  "type": "objectArray", "objectRef":"..::fruit::Vegetable",
+                    "children": [
+                        {"validator": {"type": "array", "minSize": "1", "minSize": "2"}}
+                    ]}}
+            ]}},
+        {"object": {"package": "..::fruit", "name": "Fruit",
+            "children": [
+                {"field": {"name": "inBasket", "type": "boolean"}}
+            ]}}
+    ]}
+}

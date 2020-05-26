@@ -14,22 +14,22 @@ public interface ObjectConnection
   public Object getDatastoreConnection();
 
   public void setReadOnly( boolean state )
-    throws MetaException;
+    throws MetaDataException;
   public boolean isReadOnly()
-    throws MetaException;
+    throws MetaDataException;
 
   public void setAutoCommit( boolean state )
-    throws MetaException;
+    throws MetaDataException;
   public boolean getAutoCommit()
-    throws MetaException;
+    throws MetaDataException;
 
   public void commit()
-    throws MetaException;
+    throws MetaDataException;
   public void rollback()
-    throws MetaException;
+    throws MetaDataException;
 
   public void close()
-    throws MetaException;
+    throws MetaDataException;
   public boolean isClosed()
-    throws MetaException;
+    throws MetaDataException;
 }

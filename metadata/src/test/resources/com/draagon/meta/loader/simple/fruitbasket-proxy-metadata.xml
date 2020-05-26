@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<metadata
+        xmlns="https://draagon.com/schema/metamodel/simple"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://draagon.com/schema/metamodel/simple simple-model.xsd"
+        package="simple::fruitbasket">
+
+    <!-- Id -->
+    <field package="simple::common" name="id" type="long" _isAbstract="true">
+        <attr type="boolean" name="isKey">true</attr>
+    </field>
+
+    <!-- Name -->
+    <field package="simple::common" name="name" type="string" _isAbstract="true">
+        <validator type="required"/>
+        <validator type="length">
+            <attr type="int" name="min">1</attr>
+            <attr name="max">50</attr>
+        </validator>
+    </field>
+
+    <!-- Basket -->
+    <object name="Basket" type="proxy">
+
+        <key name="primary">
+            <attr type="stringArray" name="keys">id</attr>
+        </key>
+
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Basket</attr>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Number of apples -->
+        <field name="numApples" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
+
+        <!-- Number of oranges -->
+        <field name="numOranges" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
+
+        <!-- Number of veggies -->
+        <!-- field name="numVeggies" type="int">
+            <validator type="length" min="0" max="5"/>
+        </field -->
+
+        <!-- Apples -->
+        <field name="fruitIds" type="objectArray" objectRef="::Apple"/>
+
+        <!-- Apples -->
+        <field name="apples" type="objectArray" objectRef="::Apple"/>
+
+        <!-- Oranges -->
+        <field name="oranges" type="objectArray" objectRef="::Orange"/>
+
+        <!-- Veggies -->
+        <!-- field name="veggies" type="objectArray">
+            <objectRef type="oneToMany" reference="..::vegetable::Vegetable"/>
+        </field -->
+    </object>
+
+    <!-- Basket To Fruit -->
+    <object name="BasketToFruit" type="proxy">
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.BasketToFruit</attr>
+        <key name="primary">
+            <attr type="stringArray" name="keys">basketId,fruitId</attr>
+        </key>
+        <key type="foreign" name="basketKey">
+            <attr type="stringArray" name="keys">basketId</attr>
+            <attr name="foreignObjectRef">::Basket</attr>
+        </key>
+        <key type="foreign" name="fruitKey">
+            <attr type="stringArray" name="keys">fruitId</attr>
+            <attr name="foreignObjectRef">::Fruit</attr>
+        </key>
+
+        <field name="basketId" super="..::common::id"/>
+        <field name="fruitId" super="..::common::id"/>
+    </object>
+
+    <!-- Basket To Vegetable -->
+    <!-- object name="BasketToVegetable" type="proxy">
+        <key name="primary" keys="basketId,fruitId"/>
+        <key name="foreign" keys="basketId" foreignObjectRef="::Basket"/>
+        <key name="foreign" keys="vegetableId" foreignObjectRef="::Vegetable"/>
+        <field name="basketId" super="..::common::id"/>
+        <field name="vegetableId" super="..::common::id"/>
+    </object -->
+
+    <!-- Fruit -->
+    <object name="Fruit" type="proxy" _isAbstract="true">
+
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Fruit</attr>
+
+        <key name="primary">
+            <attr type="stringArray" name="keys">id</attr>
+        </key>
+        <key type="foreign" name="basketKey">
+            <attr type="stringArray" name="keys">basketId</attr>
+            <attr name="foreignObjectRef">::Basket</attr>
+        </key>
+
+        <!-- Id -->
+        <field name="id" super="..::common::id"/>
+
+        <!-- Name -->
+        <field name="name" super="..::common::name"/>
+
+        <!-- Basket Id -->
+        <field name="basketId" super="..::common::id"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
+
+        <!-- In Basket -->
+        <field name="inBasket" type="boolean"/>
+
+    </object>
+
+    <!-- Apple -->
+    <object name="Apple" super="Fruit">
+
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Apple</attr>
+
+        <!-- Orachard -->
+        <field name="orchard" type="string"/>
+
+        <!-- Worms -->
+        <field name="worms" type="short"/>
+
+    </object>
+
+    <!-- Macintosh -->
+    <object name="Macintosh" super="Apple">
+
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Macintosh</attr>
+
+    </object>
+
+    <!-- Orange -->
+    <object name="Orange" super="Fruit">
+
+        <attr name="object">com.draagon.meta.test.proxy.fruitbasket.Orange</attr>
+
+        <field name="pickedDate" type="date"/>
+
+    </object>
+
+</metadata>

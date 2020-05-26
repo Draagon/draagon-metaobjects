@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
-
-<metadata package="produce::v1::container">
-
+<metadata xmlns="http://draagon.com/schema/metamodel/v3"
+        package="produce::v1::container">
 
     <!-- Basket -->
     <object name="Basket" type="value">
+
+        <key name="primary" keys="id"/>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -18,11 +19,24 @@
         <!-- Number of oranges -->
         <field name="numOranges" type="int"/>
 
+        <!-- Number of oranges -->
+        <field name="numVeggies" type="int"/>
+
         <!-- Apples -->
-        <field name="apples" type="objectArray" objectRef="..::fruit::Apple"/>
+        <field name="apples" type="objectArray" objectRef="..::fruit::Apple">
+            <validator type="array" minSize="0" maxSize="5"/>
+        </field>
 
         <!-- Oranges -->
-        <field name="numOranges" type="objectArray" objectRef="..::fruit::Orange"/>
+        <field name="oranges" type="objectArray" objectRef="..::fruit::Orange">
+            <validator type="array" minSize="0" maxSize="3"/>
+        </field>
+
+        <!-- Veggies -->
+        <field name="veggies" type="objectArray" objectRef="..::vegetable::Vegetable">
+            <validator type="required"/>
+            <validator type="array" minSize="1" maxSize="2"/>
+        </field>
 
     </object>
 

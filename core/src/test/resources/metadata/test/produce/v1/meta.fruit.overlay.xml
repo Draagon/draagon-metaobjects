@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <!-- Sample Overlay Example -->
-<metadata package="produce::v1">
+<metadata
+        xmlns="https://draagon.com/schema/metamodel/produce/v1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+        package="produce::v1">
 
     <!-- Custom Extension -->
-    <object package="::ext" name="ProduceExt">
+    <object package="::container::ext" name="ProduceExt" isEmbedded="true">
 
         <!-- Name -->
-        <field name="name" super="..::common::name"/>
+        <field name="name" super="..::..::common::name"/>
 
         <!-- Foo Double -->
         <field name="foo" type="double"/>
@@ -29,7 +33,7 @@
         <field name="specialOverlay" type="string"/>
 
         <!-- Special Extension -->
-        <field name="specialExt" type="object" objectRef="..::ext::ProduceExt"/>
+        <field name="specialExt" type="object" objectRef="::ext::ProduceExt"/>
 
     </object>
 

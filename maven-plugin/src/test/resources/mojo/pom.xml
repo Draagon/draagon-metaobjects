@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.draagon.</groupId>
+                <artifactId>metaobjects-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Specify the Mojo parameter -->
+                    <loader>
+                        <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                        <name>mojo-test-pom</name>
+                        <sourceDir>./src/test/resources</sourceDir>
+                        <sources>
+                            <!--source>types:com/draagon/meta/loader/xml/metaobjects.types.xml</source-->
+                            <!--source>model:resource:mojo/mojo-test-metadata.xml</source -->
+                            <source>mojo/mojo-test-metadata.xml</source>
+                        </sources>
+                    </loader>
+                    <globals>
+                        <output>target/generated-sources</output>
+                    </globals>
+                    <generators>
+                        <generator>
+                            <classname>com.draagon.meta.mojo.test.GeneratorTest</classname>
+                            <args>
+                                <basePkg>src/main/java</basePkg>
+                            </args>
+                            <filters>
+                                <filter>test::v1:produce::*</filter>
+                            </filters>
+                            <scripts>
+                                <script>test-produce.groovy</script>
+                            </scripts>
+                        </generator>
+                    </generators>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

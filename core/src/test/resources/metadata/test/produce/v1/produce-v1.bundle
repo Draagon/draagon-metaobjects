@@ -1,3 +1,5 @@
+metadata/test/produce/v1/produce-v1-types.xml
 metadata/test/produce/v1/meta.common.xml
 metadata/test/produce/v1/meta.fruit.xml
+metadata/test/produce/v1/meta.vegetable.xml
 metadata/test/produce/v1/meta.basket.xml

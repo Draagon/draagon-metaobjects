@@ -1,0 +1,28 @@
+{"metadata": {"package": "produce::v1::vegetable",
+  "children": [
+
+    {"object": {"name": "Vegetable", "type": "pojo",
+      "children": [
+        {"key": {"name": "primary", "type":"primary",
+          "children": [
+            {"attr": {"name": "keys", "value": "id"}}
+          ]}},
+        {"key": {"name": "basketKey", "type":"foreign",
+          "children": [
+            {"attr": {"name": "keys", "value": "basketId"}},
+            {"attr": {"name": "foreignObjectRef", "value": "..::container::Basket"}}
+          ]}},
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Vegetable"}},
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "basketId", "super": "..::common::id"}},
+        {"field": {"name": "length", "type": "int"}},
+        {"field": {"name": "weight", "type": "int"}}
+      ]}},
+
+    {"object": {"name": "Tomato", "super": "Vegetable",
+      "children": [
+        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Tomato"}}
+      ]}}
+  ]}
+}

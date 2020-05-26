@@ -202,17 +202,17 @@ public class ExpressionParser
     // The value could be NULL
     if ( name != null ) {
       try {
-        switch( mf.getType() ) {
-        case MetaField.STRING: value = name; break;
-        case MetaField.DOUBLE: value = new Double( name ); break;
-        case MetaField.FLOAT: value = new Float( name ); break;
-        case MetaField.LONG: value = new Long( name ); break;
-        case MetaField.INT: value = new Integer( name ); break;
-        case MetaField.SHORT: value = new Short( name ); break;
-        case MetaField.BYTE: value = new Byte( name ); break;
-        case MetaField.BOOLEAN: value = new Boolean( name ); break;
+        switch( mf.getDataType() ) {
+        case STRING: value = name; break;
+        case DOUBLE: value = new Double( name ); break;
+        case FLOAT: value = new Float( name ); break;
+        case LONG: value = new Long( name ); break;
+        case INT: value = new Integer( name ); break;
+        case SHORT: value = new Short( name ); break;
+        case BYTE: value = new Byte( name ); break;
+        case BOOLEAN: value = new Boolean( name ); break;
         // TODO: Handle date processing properly
-        case MetaField.DATE:
+        case DATE:
         	{
         		value = DateFormat.getDateTimeInstance().format( name ); break;
         	}

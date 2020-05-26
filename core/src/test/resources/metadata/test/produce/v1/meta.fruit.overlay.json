@@ -1,0 +1,23 @@
+{"metadata": {"package": "produce::v1",
+    "types" : [],
+    "shortcuts" : [],
+    "rules" : [],
+    "children": [
+        {"object": {"package": "::container::ext", "name": "ProduceExt", "isEmbedded": true,
+            "children": [
+                {"field": {"name": "name", "super": "..::..::common::name"}},
+                {"field": {"name": "foo", "type": "double"}}
+            ]
+        }},
+        {"object": {"package": "::fruit", "name": "Apple",
+            "children": [
+                {"field": {"name": "specialOverlay", "type": "string"}}
+            ]
+        }},
+        {"object": {"package": "::container", "name": "Basket",
+            "children": [
+                {"field": {"name": "specialOverlay", "type": "string"}},
+                {"field": {"name": "specialExt", "type": "object", "objectRef": "::ext::ProduceExt"}}
+                ]}
+        }]
+}}

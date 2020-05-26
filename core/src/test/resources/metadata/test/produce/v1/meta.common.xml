@@ -1,14 +1,23 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<metadata
+        xmlns="https://draagon.com/schema/metamodel/produce/v1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+        package="produce::v1::common">
 
-<metadata package="produce::v1::common">
+    <attr name="farmName">Big Bob's Farm</attr>
 
     <!-- Id -->
-    <field name="id" type="long" isKey="true"/>
+    <field name="id" type="long">
+        <attr type="boolean" name="isKey">true</attr>
+    </field>
 
     <!-- Name -->
     <field name="name" type="string">
-        <validator name="required" type="required"/>
-        <attr name="len">50</attr>
+        <validator type="required"/>
+        <validator type="length">
+            <attr type="int" name="min">1</attr>
+            <attr name="max">50</attr>
+        </validator>
     </field>
 
 </metadata>

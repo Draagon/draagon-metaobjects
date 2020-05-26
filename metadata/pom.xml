@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.draagon</groupId>
+        <artifactId>metaobjects</artifactId>
+        <version>4.3.0-SNAPSHOT</version>
+    </parent>
+  
+    <artifactId>metaobjects-metadata</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>MetaObjects :: MetaData</name>
+    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <description>MetaObjects for Model-driven development - MetaData Libraries</description>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${jar.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${commons.validator.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>${xml.apis.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+                    
+</project>
