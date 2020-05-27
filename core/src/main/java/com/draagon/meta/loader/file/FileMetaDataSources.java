@@ -124,8 +124,15 @@ public class FileMetaDataSources {
 
         // Try to load from the file system if a Source Directory was specified
         if ( sourceDir != null ) {
-            return getFileInputStream(filename);
-
+            try {
+                return getFileInputStream(filename);
+            } catch (MetaDataException ex ) {
+                try {
+                    return getResourceInputStream(filename);
+                } catch (MetaDataException ex2 ) {
+                    throw new MetaDataException("Failed to find on file system or resources: "+ ex.getMessage(), ex );
+                }
+            }
         }
         // Otherise, try to load as a resource instead
         else {
