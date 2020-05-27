@@ -62,7 +62,18 @@ public class FileMetaDataSources {
     // Stores the loaded metadata files (in memory)
     private List<SourceData> sourceData = new ArrayList<>();
 
-    protected FileMetaDataSources() {
+    protected ClassLoader loaderClassLoader;
+
+    protected FileMetaDataSources(ClassLoader loaderClassLoader) {
+        this.loaderClassLoader=loaderClassLoader;
+    }
+
+    public void setLoaderClassLoader(ClassLoader loaderClassLoader) {
+        this.loaderClassLoader=loaderClassLoader;
+    }
+
+    public ClassLoader getLoaderClassLoader() {
+        return loaderClassLoader;
     }
 
     protected void setSourceDir( String sourceDir ) {
@@ -92,6 +103,9 @@ public class FileMetaDataSources {
      */
     protected void loadFromBundleFile(String filename) throws MetaDataException {
 
+        if ( log.isDebugEnabled())
+            log.debug( "Loading files from bundle: "+filename);
+
         try {
             LineNumberReader in = new LineNumberReader( new InputStreamReader( getInputStreamForFilename( filename )));
 
@@ -100,6 +114,10 @@ public class FileMetaDataSources {
             while( (line = in.readLine()) != null ) {
                 if (!line.trim().isEmpty()
                         && !line.trim().startsWith("#")) {
+
+                    if ( log.isDebugEnabled())
+                        log.debug( "Attempting to read ["+line.trim()+"] from bundle: "+filename);
+
                     read( line.trim() );
                 }
             }
@@ -117,6 +135,9 @@ public class FileMetaDataSources {
      */
     protected InputStream getInputStreamForFilename(String filename) throws MetaDataException {
 
+        if ( log.isDebugEnabled())
+            log.debug( "Getting InputStream for file: "+filename);
+
         // LOAD THE FILE
         if (filename == null) {
             throw new NullPointerException("The MetaData file was null");
@@ -124,14 +145,14 @@ public class FileMetaDataSources {
 
         // Try to load from the file system if a Source Directory was specified
         if ( sourceDir != null ) {
-            try {
+
+            // Attempt to fetch it as a resource first
+            if (getResourceViaClassLoaderChain(filename) != null) {
+                return getResourceInputStream(filename);
+            }
+            // Otherwise, get it as an actual File using the SourceDir
+            else {
                 return getFileInputStream(filename);
-            } catch (MetaDataException ex ) {
-                try {
-                    return getResourceInputStream(filename);
-                } catch (MetaDataException ex2 ) {
-                    throw new MetaDataException("Failed to find on file system or resources: "+ ex.getMessage(), ex );
-                }
             }
         }
         // Otherise, try to load as a resource instead
@@ -140,15 +161,40 @@ public class FileMetaDataSources {
         }
     }
 
+    protected URL getResourceViaClassLoaderChain(String filename) {
+
+        // Attempt to fetch via the local class (this is useful for OSGI where the MetaDataSources is
+        // actually the correct ClassLoader to use to find the appropriate files
+        URL url = getClass().getClassLoader().getResource(filename);
+        if ( url != null && log.isDebugEnabled())
+            log.debug( "Retrieved from Source "+getClass().getName()+"'s ClassLoader: "+filename);
+
+        // Fetch using the passed in ClassLoader, which is useful when the resources are specified in a specific
+        // ClassLoader, usually from the MetaData Plugin (MOJO)
+        if (url == null && getLoaderClassLoader() != null) {
+            url = getLoaderClassLoader().getResource(filename);
+            if ( url != null && log.isDebugEnabled())
+                log.debug( "Retrieved Loader specified ClassLoader: "+filename);
+        }
+
+        // If it's still not found, use the SystemClassLoader, for a final attempt
+        if (url == null) {
+            url = ClassLoader.getSystemClassLoader().getResource(filename);
+            if ( url != null && log.isDebugEnabled())
+                log.debug( "Retrieved from System ClassLoader: "+filename);
+        }
+
+        if ( url == null && log.isDebugEnabled())
+            log.debug( "Could not find resource on any ClassLoader: "+filename);
+
+        return url;
+    }
+
     private InputStream getResourceInputStream(String filename) {
 
-        URL url = getClass().getClassLoader().getResource( filename);
+        URL url = getResourceViaClassLoaderChain(filename);
         if (url == null) {
-
-            url = ClassLoader.getSystemClassLoader().getResource(filename);
-            if (url == null) {
-                throw new MetaDataException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or FileMetaDataSources ["+this.getClass().getName()+"]");
-            }
+            throw new MetaDataException("MetaData file [" + filename + "] was not found on the ClassLoader for the System or FileMetaDataSources ["+this.getClass().getName()+"]");
         }
 
         // Construct URI and return the File
@@ -226,6 +272,7 @@ public class FileMetaDataSources {
         return getClass().getSimpleName() +"{" +
                 "sourceDir='" + sourceDir + '\'' +
                 ", sourceData=" + sourceData +
+                ", loaderClassLoader=" + loaderClassLoader +
                 '}';
     }
 }

@@ -487,7 +487,11 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware, V
                 }
                 else if (o instanceof String) {
                     try {
-                        out = (Class<T>) Class.forName(o.toString());
+                        if ( hasMetaDataAttached() ) {
+                            out = getMetaData().loadClass( clazz, o.toString());
+                        } else {
+                            out = (Class<T>) Class.forName(o.toString());
+                        }
                     } catch (ClassNotFoundException e) {
                         throw new InvalidValueException("ClassNotFoundException for value ["+o+"]"
                                 +" on MetaObject ["+getMetaData().getName()+"]: ");

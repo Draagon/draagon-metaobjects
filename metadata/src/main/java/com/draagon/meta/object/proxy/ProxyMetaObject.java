@@ -105,7 +105,7 @@ public class ProxyMetaObject extends PojoMetaObject {
                 String proxyObject = proxyObjectAttr.getValueAsString();
 
                 try {
-                    oc = Class.forName( proxyObject );
+                    oc = loadClass( proxyObject );
 
                     if ( oc.isInterface() ) {
                         throw new InvalidMetaDataException( proxyObjectAttr, "ProxyObject Class ["+proxyObject+"] "+

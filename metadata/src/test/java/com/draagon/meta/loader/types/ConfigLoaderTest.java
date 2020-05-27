@@ -25,7 +25,7 @@ public class ConfigLoaderTest {
     @Test
     public void testConfigLoader() throws IOException, MetaDataIOException {
 
-        TypesConfigLoader loader = TypesConfigLoader.create();
+        TypesConfigLoader loader = TypesConfigLoader.create(getClass().getClassLoader());
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream( SimpleLoader.SIMPLE_TYPES_XML );
         MetaDataAware<MetaObject> tc1 = (MetaDataAware<MetaObject>) XMLObjectReader.readObject( TypesConfig.class,
@@ -39,7 +39,7 @@ public class ConfigLoaderTest {
     @Test
     public void testMetaDataLoader() throws IOException, MetaDataIOException {
 
-        MetaModelLoader loader = MetaModelLoader.create( "test-model-roundtrip");
+        MetaModelLoader loader = MetaModelLoader.create( getClass().getClassLoader(), "test-model-roundtrip");
 
         final String TEST_METADATA_XML = "com/draagon/meta/loader/simple/fruitbasket-metadata.xml";
 
@@ -55,7 +55,7 @@ public class ConfigLoaderTest {
     @Test
     public void testSimpleLoader() throws IOException, MetaDataIOException {
 
-        MetaModelLoader loader = MetaModelLoader.create( "test-simple-roundtrip");
+        MetaModelLoader loader = MetaModelLoader.create( getClass().getClassLoader(), "test-simple-roundtrip");
 
         final String TEST_METADATA_XML = "com/draagon/meta/loader/simple/fruitbasket-metadata.xml";
 

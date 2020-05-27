@@ -70,14 +70,19 @@ public class DataMetaObject extends PojoMetaObject
      */
     @Override
     public Class<?> getObjectClass() throws ClassNotFoundException {
-        try { 
-            return super.getObjectClass();
-        } catch( MetaDataException e ) {
-            if (hasObjectInstanceAttr()) {
-                throw e;
-            }
-            return getDefaultObjectClass();
-        }
+
+        Class<?> c = null;
+
+        if (hasObjectAttr())
+            c = getObjectClassFromAttr();
+
+        if (c == null)
+            c = createClassFromMetaDataName( false );
+
+        if ( c == null )
+            c = getDefaultObjectClass();
+
+        return c;
     }
 
     public boolean allowExtensions() {

@@ -11,12 +11,12 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.mojo.MojoSupport;
+import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.object.MetaObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +33,7 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
     private final LoaderOptions loaderOptions;
+    private TypesConfigLoader<?> typesLoader = null;
     private TypesConfig typesConfig = null;
 
     private boolean isRegistered = false;
@@ -79,9 +80,18 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
         return (T) typesConfig;
     }
 
-    public <T extends TypesConfig> MetaDataLoader setTypesConfig(T typesConfig ) {
-        this.typesConfig = typesConfig;
+    public <T extends TypesConfig> MetaDataLoader setTypesLoader(TypesConfigLoader<T> typesLoader ) {
+        this.typesLoader = typesLoader;
+        typesConfig = typesLoader.newTypesConfig();
+        if (typesConfig == null ) {
+            throw new MetaDataNotFoundException( "No TypesConfig was found (was it not initialized?) in "+
+                    "TypesConfigLoader: "+typesLoader, TypesConfig.OBJECT_NAME);
+        }
         return this;
+    }
+
+    public <T extends TypesConfig> TypesConfigLoader<T> getTypesLoader() {
+        return (TypesConfigLoader<T>) typesLoader;
     }
 
     /**
@@ -92,20 +102,27 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
         if ( isDestroyed ) throw new IllegalStateException( "MetaDataLoader [" + getName() + "] is destroyed" );
     }
 
-
     ////////////////////////////////////////////////////////////////////////////////////////////
     // MOJO Support Methods
     private String mojoSourceDir=null;
 
     @Override
-    public void mojoSetSourceDir( String sourceDir ) {
+    public final void mojoSetClassLoader( ClassLoader classLoader ) {
+        if ( classLoader == null ) throw new IllegalArgumentException( "You cannot set null for the mojoClassLoader" );
+        if (log.isDebugEnabled()) log.debug( "Setting MojoClassLoader: " + classLoader );
+        setMetaDataClassLoader(classLoader);
+    }
+
+    @Override
+    public final void mojoSetSourceDir( String sourceDir ) {
         File sd = new File(sourceDir);
         if ( !sd.exists() ) throw new IllegalStateException( "MojoSourceDir ["+sourceDir+"] does not exist");
+        if (log.isDebugEnabled()) log.debug( "Setting MojoSourceDir: " + sourceDir );
         mojoSourceDir = sourceDir;
     }
 
     @Override
-    public void mojoSetSources(List<String> sourceList) {
+    public final void mojoSetSources( List<String> sourceList) {
 
         if ( sourceList == null ) throw new IllegalArgumentException(
                 "sourceURIList was null on setURIList for Loader: " + toString());
@@ -114,12 +131,14 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
     }
 
     protected void mojoProcessSources( String sourceDir, List<String> sourceList ) {
+        throw new UnsupportedOperationException( getClass().getName()+" does not support the MetaData Plugin "+
+                "(you must implement mojoProcessSources or the direct MojoSupport interface methods)");
 
-        String name = this.getClass().getSimpleName();
-        if ( sourceList == null ) throw new IllegalArgumentException(
-                "sourceURIList was null on setURIList for " + name);
-        if ( sourceList.size() > 0  ) throw new IllegalArgumentException( name +
-                " does not support URI sources");
+        //String name = this.getClass().getSimpleName();
+        //if ( sourceList == null ) throw new IllegalArgumentException(
+        //        "sourceURIList was null on setURIList for " + name);
+        //if ( sourceList.size() > 0  ) throw new IllegalArgumentException( name +
+        //        " does not support URI sources");
     }
 
     protected void mojoInitArgs( Map<String, String> args ) {
@@ -145,6 +164,12 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
     ////////////////////////////////////////////////////////////////////////////////////////////
     // Initialization Methods
 
+    protected void initDefaultTypesConfig() {
+        // Create the TypesConfigLoader and set a new TypesConfig
+        TypesConfigLoader typesLoader = TypesConfigLoader.create( getMetaDataClassLoader() );
+        setTypesLoader(typesLoader);
+    }
+
     /**
      * Initialize the MetaDataLoader.  It will prevent a second init call.
      * @return This MetaDataLoader
@@ -155,6 +180,11 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
 
         if ( loaderOptions.isVerbose() ) {
             log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]" );
+        }
+
+        // Initialize the Default TypesConfig if one did not exist
+        if ( getTypesLoader() == null ) {
+            initDefaultTypesConfig();
         }
 
         isInitialized = true;

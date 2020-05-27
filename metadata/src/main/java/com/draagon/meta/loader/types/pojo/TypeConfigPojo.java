@@ -78,7 +78,7 @@ public class TypeConfigPojo extends PojoObject implements TypeConfig {
     @Override
     public Class<? extends MetaData> getMetaDataClass() {
         try {
-            return (Class<? extends MetaData>) Class.forName( getBaseClass() );
+            return getMetaData().loadClass( MetaData.class, getBaseClass() );
         } catch (ClassNotFoundException e) {
             throw new InvalidValueException( "BaseClass ["+getBaseClass()+"] not found on Type ["+getName()+"]");
         }

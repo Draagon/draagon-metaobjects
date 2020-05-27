@@ -4,7 +4,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
 
-public class TypesConfigLoader extends MetaDataLoader {
+public class TypesConfigLoader<T extends TypesConfig> extends MetaDataLoader {
 
     public final static String SUBTYPE_TYPECONFIG = "typesConfig";
 
@@ -13,8 +13,11 @@ public class TypesConfigLoader extends MetaDataLoader {
                 SUBTYPE_TYPECONFIG, name );
     }
 
-    public static TypesConfigLoader create() {
-        return new TypesConfigLoader( SUBTYPE_TYPECONFIG ).init();
+    public static TypesConfigLoader create( ClassLoader classLoader ) {
+        TypesConfigLoader loader = new TypesConfigLoader( SUBTYPE_TYPECONFIG );
+        loader.setMetaDataClassLoader( classLoader );
+        loader.init();
+        return loader;
     }
 
     /** Override this for custom MetaDataModels */
@@ -22,6 +25,9 @@ public class TypesConfigLoader extends MetaDataLoader {
         TypesConfigBuilder.buildDefaultTypesConfig(this);
     }
 
+    protected void initDefaultTypesConfig() {
+        // Do Nothing
+    }
 
     @Override
     public TypesConfigLoader init() {
@@ -31,11 +37,11 @@ public class TypesConfigLoader extends MetaDataLoader {
     }
 
     @Override
-    public TypesConfig getTypesConfig() {
+    public T getTypesConfig() {
         throw new UnsupportedOperationException("Use newTypesConfig() to get a new TypesConfig on "+getClass().getSimpleName() );
     }
 
-    public TypesConfig newTypesConfig() {
-        return (TypesConfig) getMetaObjectByName( TypesConfig.OBJECT_NAME ).newInstance();
+    public <T extends TypesConfig> T newTypesConfig() {
+        return (T) getMetaObjectByName( TypesConfig.OBJECT_NAME ).newInstance();
     }
 }

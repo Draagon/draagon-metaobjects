@@ -19,8 +19,8 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
 
     Log log = LogFactory.getLog(this.getClass());
 
-    protected SimpleTypesParser( TypesConfigLoader loader, String sourceName) {
-        super(loader, sourceName);
+    protected SimpleTypesParser( TypesConfigLoader loader, ClassLoader classLoader, String sourceName) {
+        super(loader, classLoader, sourceName);
     }
 
     public void loadAndMerge( SimpleLoader simpleLoader, URI uri ) {
@@ -28,7 +28,7 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
         InputStream is = null;
         try {
             List<ClassLoader> classLoaders = Arrays.asList(
-                    getClass().getClassLoader(),
+                    getClassLoader(),
                     ClassLoader.getSystemClassLoader() );
 
             is = URIHelper.getInputStream( classLoaders, URIHelper.toURIModel( uri ));

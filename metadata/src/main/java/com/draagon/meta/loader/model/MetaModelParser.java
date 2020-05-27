@@ -16,8 +16,8 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
 
     private String defaultPackageName = null;
 
-    protected MetaModelParser(MetaModelLoader modelLoader, String sourceName) {
-        super(modelLoader, sourceName);
+    protected MetaModelParser(MetaModelLoader loader, ClassLoader classLoader, String sourceName) {
+        super(loader, classLoader, sourceName);
     }
 
     /* Load MetaDataModel Stream */

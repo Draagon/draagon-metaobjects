@@ -38,7 +38,7 @@ public class XMLMetaDataSuperTest extends XMLMetaDataLoaderTestBase {
                         ((null != mo.getSuperObject()) ? mo.getSuperObject().getName() : "root"), mo.getName()));
             }
 
-            log.info( mo.toString() );
+            //log.info( mo.toString() );
         }
 
         assertEquals("children", 3, result.size());

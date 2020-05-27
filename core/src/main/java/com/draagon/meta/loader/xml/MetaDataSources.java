@@ -7,5 +7,11 @@ import com.draagon.meta.loader.file.FileMetaDataSources;
  */
 public class MetaDataSources extends FileMetaDataSources {
 
-    protected MetaDataSources() {}
+    protected MetaDataSources() {
+        super( null );
+    }
+
+    protected MetaDataSources( ClassLoader classLoader ) {
+        super( classLoader );
+    }
 }

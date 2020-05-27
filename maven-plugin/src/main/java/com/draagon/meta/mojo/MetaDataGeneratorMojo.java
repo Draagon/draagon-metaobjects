@@ -17,6 +17,7 @@ public class MetaDataGeneratorMojo extends AbstractMetaDataMojo
     protected void executeGenerators(MetaDataLoader loader, List<Generator> generatorImpls) {
 
         for( Generator gen : generatorImpls ) {
+            getLog().info("MetaData Mojo > Executing Generator: " + gen.getClass().getName() );
             gen.execute( loader );
         }
     }

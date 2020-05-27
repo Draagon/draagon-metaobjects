@@ -1,13 +1,7 @@
-/*
- * Copyright 2003 Draagon Software LLC. All Rights Reserved.
- *
- * This software is the proprietary information of Draagon Software LLC.
- * Use is subject to license terms.
- */
 package com.draagon.meta.loader.file;
 
+import com.draagon.meta.MetaData;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
@@ -30,28 +24,34 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     public final static String SUBTYPE_FILE = "file";
 
-    protected final TypesConfigLoader typesLoader;
-
     public FileMetaDataLoader(String name) {
         this( new FileLoaderOptions(), name );
     }
 
     public FileMetaDataLoader(FileLoaderOptions fileConfig, String name ) {
         super( fileConfig, SUBTYPE_FILE, name );
-
-        // Create the TypesConfigLoader and set a new TypesConfig
-        typesLoader = TypesConfigLoader.create();
-        setTypesConfig( typesLoader.newTypesConfig() );
     }
 
     /** Initialize with the metadata source being set */
     public FileMetaDataLoader init( FileMetaDataSources sources ) {
         getLoaderOptions().addSources( sources );
-        return (FileMetaDataLoader) init();
+        return init();
     }
 
     public FileLoaderOptions getLoaderOptions() {
         return (FileLoaderOptions) super.getLoaderOptions();
+    }
+
+    @Override
+    public FileMetaDataLoader setMetaDataClassLoader(ClassLoader classLoader ) {
+        return super.setMetaDataClassLoader(classLoader);
+    }
+
+    @Override
+    protected ClassLoader getDefaultMetaDataClassLoader() {
+        if ( log.isWarnEnabled() && !getName().toLowerCase().contains("test"))
+            log.warn("A MetaDataClassLoader should have been set on loader: " + toString() );
+        return super.getDefaultMetaDataClassLoader();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,15 +74,16 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
         // Set URI Souces
         if (!uriSourceList.isEmpty()) {
-            URIMetaDataSources uriSources = new URIMetaDataSources(uriSourceList);
+            URIFileMetaDataSources uriSources = new URIFileMetaDataSources(getMetaDataClassLoader(), uriSourceList);
             getLoaderOptions().addSources(uriSources);
         }
 
         // Set Local Sources
         if (!localSourceList.isEmpty()) {
-            LocalMetaDataSources localSources = null;
-            if ( sourceDir != null ) localSources = new LocalMetaDataSources(sourceDir,localSourceList);
-            else localSources = new LocalMetaDataSources(localSourceList);
+            LocalFileMetaDataSources localSources = null;
+            if ( sourceDir != null ) localSources = new LocalFileMetaDataSources(
+                    getMetaDataClassLoader(), sourceDir,localSourceList);
+            else localSources = new LocalFileMetaDataSources(getMetaDataClassLoader(), localSourceList);
             getLoaderOptions().addSources(localSources);
         }
     }

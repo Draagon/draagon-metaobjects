@@ -7,7 +7,7 @@
 package com.draagon.meta.loader.xml;
 
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.LocalMetaDataSources;
+import com.draagon.meta.loader.file.LocalFileMetaDataSources;
 import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
@@ -52,15 +52,6 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
         getLoaderOptions().addSources( sources );
     }
 
-    /*public void setTypesRef(String types) {
-        if ( types.isEmpty() ) types = null;
-        typesRef = types;
-    }
-
-    public String getTypesRef() {
-        return typesRef;
-    }*/
-
     /** Initialize with the metadata source being set */
     public XMLFileMetaDataLoader init( MetaDataSources sources ) {
         return init( sources, false );
@@ -69,14 +60,18 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
     /** Initialize with the metadata source being set */
     public XMLFileMetaDataLoader init( MetaDataSources sources, boolean shouldRegister ) {
 
-        FileLoaderOptions config = getLoaderOptions();
-        config.setShouldRegister( shouldRegister );
+        FileLoaderOptions options = getLoaderOptions();
+        options.setShouldRegister( shouldRegister );
 
         // Prepend the Types XML to load using the default behavior of the original XMLFileMetaDataLoader
         if ( getDefaultTypesRef() != null ) {
-            config.addSources( new LocalMetaDataSources( getDefaultTypesRef()) );
+            options.addSources( new LocalFileMetaDataSources( getMetaDataClassLoader(), getDefaultTypesRef()) );
         }
 
+        // Add the Loader's ClassLoader source, which includes what is set by the MojoSupport
+        sources.setLoaderClassLoader( getMetaDataClassLoader() );
+
+        // Initialize with the specified sources
         return (XMLFileMetaDataLoader) super.init( sources );
     }
 }

@@ -6,7 +6,7 @@ import com.draagon.meta.generator.GeneratorBase;
 import com.draagon.meta.generator.GeneratorTestBase;
 import com.draagon.meta.generator.direct.model.JsonMetaDataGenerator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.LocalMetaDataSources;
+import com.draagon.meta.loader.file.LocalFileMetaDataSources;
 import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
@@ -56,9 +56,9 @@ public class JsonMetaDataTest extends GeneratorTestBase {
                 new FileLoaderOptions()
                         .addParser("*.xml", XMLMetaDataParser.class)
                         .addParser("*.json", JsonMetaDataParser.class)
-                        .addSources(new LocalMetaDataSources(
+                        .addSources(new LocalFileMetaDataSources(getClass().getClassLoader(),
                                 "com/draagon/meta/loader/json/metaobjects.types.json"))
-                        .addSources(new LocalMetaDataSources(
+                        .addSources(new LocalFileMetaDataSources(getClass().getClassLoader(),
                                 getGeneratedTestSourcesPath(),
                                 TESTFILE)
                         )

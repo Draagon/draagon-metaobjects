@@ -3,7 +3,6 @@ package com.draagon.meta.loader.simple;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.mojo.MojoSupport;
@@ -22,7 +21,10 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
     public final static String SUBTYPE_SIMPLE = "simple";
 
     private static List<URI> sourceURIs = null;
-    private final TypesConfigLoader typesLoader;
+
+    public SimpleLoader(String name) {
+        super(LoaderOptions.create( false, false, true), SUBTYPE_SIMPLE, name );
+    }
 
     public static SimpleLoader createManual( String name, String resource ) {
         return createManualURIs( name, Arrays.asList(URIHelper.toURI( "model:resource:"+resource)));
@@ -42,18 +44,24 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         return simpleLoader;
     }
 
-    public SimpleLoader(String name) {
-        super(LoaderOptions.create( false, false, true), SUBTYPE_SIMPLE, name );
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    // Set ClassLoader and Sources
 
-        // Set the TypesConfigLoader and a new TypesConfig
-        typesLoader = TypesConfigLoader.create();
-        setTypesConfig( typesLoader.newTypesConfig() );
+    @Override
+    protected ClassLoader getDefaultMetaDataClassLoader() {
+        return super.getDefaultMetaDataClassLoader();
     }
 
-    public SimpleLoader setSourceURIs(List<URI> sourceData ) {
+    @Override
+    public SimpleLoader setMetaDataClassLoader( ClassLoader classLoader ) {
+        return super.setMetaDataClassLoader( classLoader );
+    }
+
+    public SimpleLoader setSourceURIs( List<URI> sourceData ) {
         this.sourceURIs = sourceData;
         return this;
     }
+
     public List<URI> getSourceURIs() {
         return this.sourceURIs;
     }
@@ -107,12 +115,19 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         //simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
 
         boolean typesLoaded = false;
+
         // Load MetaData
-        MetaModelLoader modelLoader = MetaModelLoader.create( "simple", getTypesConfig() );
+        MetaModelLoader modelLoader = MetaModelLoader.create(
+                getMetaDataClassLoader(),
+                "simple",
+                getTypesLoader() );
         for( URI sourceURI : sourceURIs) {
 
             if (URIHelper.isTypesURI(sourceURI)) {
-                SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, sourceURI.toString() );
+                SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
+                        getTypesLoader(),
+                        getMetaDataClassLoader(),
+                        sourceURI.toString() );
                 simpleTypesParser.loadAndMerge( this, sourceURI);
                 typesLoaded = true;
             }
@@ -122,11 +137,13 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
                     typesLoaded = true;
                 }
 
-                SimpleModelParser simpleModelParser = new SimpleModelParser(modelLoader, sourceURI.toString());
+                SimpleModelParser simpleModelParser = new SimpleModelParser(
+                        modelLoader, getMetaDataClassLoader(), sourceURI.toString());
                 simpleModelParser.loadAndMerge(this, sourceURI);
             }
         }
 
+        // Only occurs if no sourceURIs were loaded
         if ( !typesLoaded ) loadDefaultSimpleTypes();
 
         // Validate the MetaData
@@ -136,7 +153,10 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
     }
 
     protected void loadDefaultSimpleTypes() {
-        SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, SIMPLE_TYPES_XML );
+        SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
+                getTypesLoader(),
+                getMetaDataClassLoader(),
+                SIMPLE_TYPES_XML );
         simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
     }
 

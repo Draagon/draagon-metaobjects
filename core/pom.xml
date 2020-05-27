@@ -35,15 +35,21 @@
                 <executions>
                     <execution>
                         <id>gen-resources</id>
-                        <phase>generate-resources</phase>
+                        <phase>generate-test-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <globals>
+                                <verbose>false</verbose>
+                                <strict>true</strict>
+                            </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
                                 <name>gen-resources</name>
-                                <sources>types:file:${project.basedir}/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml</sources>
+                                <sources>
+                                    <source>com/draagon/meta/loader/xml/metaobjects.types.xml</source>
+                                </sources>
                             </loader>
                             <generators>
                                 <generator>
@@ -57,14 +63,6 @@
                             </generators>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <!-- This will not work until the SimpleLoader can handle inline attributes.  Can not use MetaDataLoader -->
-            <!--plugin>
-                <groupId>com.draagon</groupId>
-                <artifactId>metaobjects-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <executions>
                     <execution>
                         <id>gen-test-resources</id>
                         <phase>generate-test-resources</phase>
@@ -72,6 +70,10 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <globals>
+                                <verbose>false</verbose>
+                                <strict>true</strict>
+                            </globals>
                             <loader>
                                 <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
                                 <name>gen-test-resources</name>
@@ -89,22 +91,12 @@
                                         <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
                                         <outputFilename>produce-v1-model.xsd</outputFilename>
                                     </args>
-                                    <filters>
-                                        <filter>!produce::v1::*</filter>
-                                    </filters>
                                 </generator>
                             </generators>
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.draagon</groupId>
-                        <artifactId>metaobjects-core</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin -->
+            </plugin>
         </plugins>
     </build>
 

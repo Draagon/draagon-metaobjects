@@ -1,18 +1,11 @@
-/*
- * Copyright 2002 Draagon Software LLC. All Rights Reserved.
- *
- * This software is the proprietary information of Draagon Software LLC.
- * Use is subject to license terms.
- */
 package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
-import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.validator.MetaValidator;
-import com.draagon.meta.view.MetaView;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +13,8 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MetaData implements Cloneable, Serializable {
+
+    protected final Log log = LogFactory.getLog( this.getClass().getName() );
 
     public final static String PKG_SEPARATOR = "::";
     public final static String SEPARATOR = PKG_SEPARATOR;
@@ -40,6 +35,7 @@ public class MetaData implements Cloneable, Serializable {
     // TODO:  Is this meant to be a weak reference for MetaDataLoader only...?
     private WeakReference<MetaData> parentRef = null;
     private MetaDataLoader loader = null;
+    private ClassLoader metaDataClassLoader=null;
 
     /**
      * Constructs the MetaData
@@ -127,6 +123,67 @@ public class MetaData implements Cloneable, Serializable {
     public boolean isSameTypeSubTypeName( MetaData md ) {
         return isTypeSubTypeName( md.type, md.subType, md.name);
     }
+
+    /////////////////////////////////////////////////////
+    // Object Instantiation Helpers
+
+    public <T extends MetaData> T setMetaDataClassLoader( ClassLoader classLoader ) {
+        metaDataClassLoader = classLoader;
+        return (T) this;
+    }
+
+    protected ClassLoader getDefaultMetaDataClassLoader() {
+        return getClass().getClassLoader();
+    }
+
+    public ClassLoader getMetaDataClassLoader() {
+
+        if (metaDataClassLoader != null) {
+            return metaDataClassLoader;
+        }
+        else if (!(this instanceof MetaDataLoader)) {
+            if ( getLoader() != null ) {
+                return getLoader().getMetaDataClassLoader();
+            }
+        }
+
+        return getDefaultMetaDataClassLoader();
+    }
+
+    // Loads the specified Class using the proper ClassLoader
+    public <T> Class<T> loadClass( Class<T> clazz, String name ) throws ClassNotFoundException {
+        try {
+            Class c = getMetaDataClassLoader().loadClass(name);
+            if (!clazz.isAssignableFrom(c)) {
+                throw new InvalidValueException("Class [" + c.getName() + "] is not assignable from [" + clazz.getName() + "]");
+            }
+            return (Class<T>) c;
+        }
+        catch (ClassNotFoundException e ) {
+            log.error( "Could not find class ["+name+"] in MetaDataClassLoader: "+getMetaDataClassLoader());
+            throw e;
+        }
+    }
+
+    // Loads the specified Class using the proper ClassLoader
+    public Class loadClass( String name ) throws ClassNotFoundException {
+        return loadClass(name, true);
+    }
+
+        // Loads the specified Class using the proper ClassLoader
+    public Class loadClass( String name, boolean throwError ) throws ClassNotFoundException {
+        try {
+            return getMetaDataClassLoader().loadClass(name);
+        }
+        catch (ClassNotFoundException e ) {
+            if ( throwError ) {
+                log.error("Could not find class [" + name + "] in MetaDataClassLoader: " + getMetaDataClassLoader());
+                throw e;
+            }
+        }
+        return null;
+    }
+
 
     ////////////////////////////////////////////////////
     // SETTER / GETTER METHODS
@@ -766,6 +823,8 @@ public class MetaData implements Cloneable, Serializable {
         v.superData = superData;
         v.parentRef = parentRef;
         v.loader = loader;
+        // Used to provide support for OSGi and Maven Mojos
+        v.metaDataClassLoader = metaDataClassLoader;
 
         for (MetaData md : getChildren()) {
             v.addChild((MetaData) md.clone());

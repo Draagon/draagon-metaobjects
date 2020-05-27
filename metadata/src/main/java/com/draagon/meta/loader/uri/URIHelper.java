@@ -315,8 +315,10 @@ public class URIHelper implements URIConstants {
 
             if (classLoaders != null ) {
                 for (ClassLoader classLoader : classLoaders) {
-                    url = classLoader.getResource(model.getUriSource());
-                    if ( url !=null ) break;
+                    if (classLoader != null ) {
+                        url = classLoader.getResource(model.getUriSource());
+                        if (url != null) break;
+                    }
                 }
             }
             if ( url == null ) url = ClassLoader.getSystemClassLoader().getResource(model.getUriSource());

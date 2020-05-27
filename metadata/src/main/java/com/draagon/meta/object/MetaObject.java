@@ -187,7 +187,7 @@ public abstract class MetaObject extends MetaData {
             attr = getMetaAttr(ATTR_OBJECT);
         }
         if ( attr != null ) {
-            c = Class.forName( attr.getValueAsString() );
+            c = loadClass( attr.getValueAsString() );
         }
         return c;
     }
@@ -211,9 +211,8 @@ public abstract class MetaObject extends MetaData {
     protected Class createClassFromMetaDataName( boolean throwError ) {
 
         String ostr = getName().replaceAll(PKG_SEPARATOR, ".");
-
         try {
-            return Class.forName(ostr);
+            return loadClass(ostr,throwError);
         }
         catch (ClassNotFoundException e) {
             if ( throwError ) {

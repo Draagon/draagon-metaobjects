@@ -14,8 +14,8 @@ import java.net.URI;
 
 public class SimpleModelParser extends MetaModelParser<TypesConfig,SimpleLoader,URI> {
 
-    protected SimpleModelParser(MetaModelLoader modelLoader, String sourceName) {
-        super(modelLoader, sourceName);
+    protected SimpleModelParser(MetaModelLoader modelLoader, ClassLoader classLoader, String sourceName) {
+        super(modelLoader, classLoader, sourceName);
     }
 
     @Override

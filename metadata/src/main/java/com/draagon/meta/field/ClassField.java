@@ -84,7 +84,7 @@ public class ClassField extends MetaField<Class> implements StringSerializationH
             if (!getValueClass().isInstance(val)) {
                 if (val instanceof String) {
                     try {
-                        val = Class.forName((String) val);
+                        val = loadClass((String) val);
                     } catch (ClassNotFoundException e) {
                         throw new InvalidValueException("Cannot find class for "
                                 + "[" + val.getClass().getName() + "] on MetaField [" + this + "]: " + e.getMessage(), e);
@@ -102,7 +102,7 @@ public class ClassField extends MetaField<Class> implements StringSerializationH
 
     public Class convertToClass( String val ) {
         try {
-            return Class.forName(val);
+            return loadClass(val);
         } catch (ClassNotFoundException e) {
             throw new InvalidValueException("Cannot find class for "
                     + "[" + val + "] on MetaField [" + this + "]: " + e.getMessage(), e);

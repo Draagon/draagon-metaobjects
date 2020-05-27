@@ -15,16 +15,20 @@ import java.util.List;
  *
  * Created by dmealing on 11/30/16.
  */
-public class URIMetaDataSources extends FileMetaDataSources {
+public class URIFileMetaDataSources extends FileMetaDataSources {
 
     private URIModel currentModel = null;
 
-    public URIMetaDataSources(URI uri) {
+    public URIFileMetaDataSources(ClassLoader classLoader, URI uri) {
+        super(classLoader);
+
         currentModel = URIHelper.toURIModel( uri );
         read( currentModel.getUriSource() );
     }
 
-    public URIMetaDataSources(List<URI> uriSources ) {
+    public URIFileMetaDataSources(ClassLoader classLoader, List<URI> uriSources ) {
+        super(classLoader);
+
         for ( URI uri : uriSources ) {
             currentModel = URIHelper.toURIModel( uri );
             read( currentModel.getUriSource() );
@@ -34,18 +38,8 @@ public class URIMetaDataSources extends FileMetaDataSources {
     /**
      * Loads all the classes specified in the Filename
      */
+    @Override
     protected InputStream getInputStreamForFilename(String filename) throws MetaDataException {
-
-        // Set Source Directory if it's on the Model
-        //String sourceDir = currentModel.getUriArg(URIHelper.URI_ARG_SOURCEDIR);
-        //if ( sourceDir != null ) {
-        //    setSourceDir( sourceDir );
-            // Call the super method
-            //super.getInputStreamForFilename(filename);
-        //}
-        //else {
-        //    setSourceDir(null);
-        //}
 
         // LOAD THE FILE
         if (filename == null) {
@@ -53,15 +47,15 @@ public class URIMetaDataSources extends FileMetaDataSources {
         }
 
         try {
-            List<ClassLoader> classLoaders = Arrays.asList( getClassLoader(), ClassLoader.getSystemClassLoader());
+            List<ClassLoader> classLoaders = Arrays.asList(
+                    getClass().getClassLoader(),
+                    getLoaderClassLoader(),
+                    ClassLoader.getSystemClassLoader());
+
             return URIHelper.getInputStream( classLoaders, currentModel );
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new MetaDataException( "Could not open InputStream for URI: "+currentModel.toURI());
         }
-    }
-
-    /** Returns the class loader */
-    public ClassLoader getClassLoader() {
-        return getClass().getClassLoader();
     }
 }

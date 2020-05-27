@@ -6,8 +6,8 @@ import java.util.List;
 
 public abstract class TypesConfigParser<S> extends ParserBase<TypesConfigLoader,TypesConfig,S> {
 
-    protected TypesConfigParser(TypesConfigLoader loader, String sourceName) {
-        super(loader, sourceName);
+    protected TypesConfigParser(TypesConfigLoader loader, ClassLoader classLoader, String sourceName) {
+        super(loader, classLoader, sourceName);
     }
 
     @Override

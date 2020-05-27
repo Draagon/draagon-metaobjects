@@ -14,25 +14,20 @@ public class MetaModelLoader extends MetaDataLoader {
                 SUBTYPE_METADATAMODEL, name );
     }
 
-    public static MetaModelLoader create(String name ) {
-        return new MetaModelLoader( name ).init();
+    public static MetaModelLoader create( ClassLoader classLoader, String name ) {
+        return create( classLoader, name, null );
     }
 
-    public static MetaModelLoader create(String name, TypesConfig typesConfig ) {
-        return new MetaModelLoader( name ).setTypesConfig( typesConfig ).init();
-    }
-
-    public MetaModelLoader setTypesConfig(TypesConfig typesConfig ) {
-        super.setTypesConfig( typesConfig );
-        return this;
+    public static MetaModelLoader create( ClassLoader classLoader, String name, TypesConfigLoader typesLoader ) {
+        MetaModelLoader loader = new MetaModelLoader( name );
+        loader.setMetaDataClassLoader( classLoader );
+        if (typesLoader != null) loader.setTypesLoader( typesLoader );
+        loader.init();
+        return loader;
     }
 
     /** Override this for custom MetaDataModels */
     protected void generatedAndAddMetaModels() {
-        if ( getTypesConfig() == null ) {
-            TypesConfigLoader loader = TypesConfigLoader.create();
-            setTypesConfig( loader.newTypesConfig());
-        }
         addChild( getTypesConfig().getGeneratedMetaModel() );
     }
 

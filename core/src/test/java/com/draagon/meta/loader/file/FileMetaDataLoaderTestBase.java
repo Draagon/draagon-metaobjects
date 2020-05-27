@@ -36,9 +36,9 @@ public class FileMetaDataLoaderTestBase {
                     new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addParser("*.json", JsonMetaDataParser.class)
-                            .addSources(new LocalMetaDataSources(
+                            .addSources(new LocalFileMetaDataSources( getClass().getClassLoader(),
                                     "com/draagon/meta/loader/json/metaobjects.types.json"))
-                            .addSources(new LocalMetaDataSources(
+                            .addSources(new LocalFileMetaDataSources( getClass().getClassLoader(),
                                     //"src/test/resources",
                                     Arrays.asList(
                                             "metadata/test/produce/v1/produce-v1-json.bundle",
@@ -56,7 +56,7 @@ public class FileMetaDataLoaderTestBase {
                     new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
                             .addParser("*.json", JsonMetaDataParser.class)
-                            .addSources(new LocalMetaDataSources(
+                            .addSources(new LocalFileMetaDataSources( getClass().getClassLoader(),
                                     Arrays.asList(
                                             "com/draagon/meta/loader/xml/metaobjects.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle",

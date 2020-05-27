@@ -7,24 +7,32 @@ import java.util.List;
  *
  * Created by dmealing on 11/30/16.
  */
-public class LocalMetaDataSources extends com.draagon.meta.loader.xml.MetaDataSources {
+public class LocalMetaDataSources extends MetaDataSources {
 
-    public LocalMetaDataSources(String file ) {
+    public LocalMetaDataSources(ClassLoader classLoader, String file ) {
+        super(classLoader);
+
         read( file );
     }
 
-    public LocalMetaDataSources(List<String> files ) {
+    public LocalMetaDataSources(ClassLoader classLoader, List<String> files ) {
+        super(classLoader);
+
         for ( String file : files ) {
             read( file );
         }
     }
 
-    public LocalMetaDataSources(String baseDir, String file ) {
+    public LocalMetaDataSources(ClassLoader classLoader, String baseDir, String file ) {
+        super(classLoader);
+
         setSourceDir( baseDir );
         read( file );
     }
 
-    public LocalMetaDataSources(String baseDir, List<String> files ) {
+    public LocalMetaDataSources(ClassLoader classLoader, String baseDir, List<String> files ) {
+        super(classLoader);
+
         setSourceDir( baseDir );
         for ( String file : files ) {
             read( file );
@@ -32,7 +40,7 @@ public class LocalMetaDataSources extends com.draagon.meta.loader.xml.MetaDataSo
     }
 
     /** Returns the class loader */
-    public ClassLoader getClassLoader() {
-        return this.getClassLoader();
-    }
+    //public ClassLoader getClassLoader() {
+    //    return this.getClassLoader();
+    //}
 }

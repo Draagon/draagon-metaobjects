@@ -3,8 +3,10 @@ package com.draagon.meta.mojo;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.mojo.MojoSupport;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -12,6 +14,8 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +23,11 @@ import java.util.Map;
 
 public abstract class AbstractMetaDataMojo extends AbstractMojo
 {
+    public final static String PHASE_GENERATE_SOURCES        = "generate-sources";
+    public final static String PHASE_GENERATE_RESOURCES      = "generate-resources";
+    public final static String PHASE_GENERATE_TEST_SOURCES   = "generate-test-sources";
+    public final static String PHASE_GENERATE_TEST_RESOURCES = "generate-test-resources";
+
     /**
      * Location of the file.
      */
@@ -27,6 +36,9 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
 
     @Parameter( defaultValue = "${project}", readonly = true, required = true )
     protected MavenProject project;
+
+    @Parameter( defaultValue = "${mojoExecution}", readonly = true, required = true )
+    protected MojoExecution execution;
 
     @Parameter(name="loader")
     private LoaderParam loaderConfig = null;
@@ -60,15 +72,17 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
         if ( getLoader() == null ) {
             throw new MojoExecutionException( "No <loader> element was defined");
         }
+        ClassLoader projectClassLoader = createProjectClassLoader();
 
-        MetaDataLoader loader = createLoader();
+        MetaDataLoader loader = createLoader(projectClassLoader);
 
         List<Generator> generatorImpls = new ArrayList<>();
 
         if ( getGenerators() != null ) {
             for ( GeneratorParam g : getGenerators() ) {
                 try {
-                    Generator impl = (Generator) Class.forName(g.getClassname()).newInstance();
+                    // TODO: Change this not to use newInstance()
+                    Generator impl = (Generator) projectClassLoader.loadClass(g.getClassname()).newInstance();
 
                     // Merge generator args and global args
                     Map<String, String> allargs = mergeAndOverwriteArgs(g);
@@ -95,6 +109,7 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
     }
 
     public Map<String, String> mergeAndOverwriteArgs(GeneratorParam g) {
+
         Map<String,String> allargs = new HashMap<>();
         if ( globals != null ) allargs.putAll(globals);
         if ( g.getArgs() != null ) allargs.putAll(g.getArgs());
@@ -111,70 +126,150 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
 
     protected abstract void executeGenerators(MetaDataLoader loader, List<Generator> generatorImpls);
 
-    protected MetaDataLoader createLoader() {
+    protected MetaDataLoader createLoader(ClassLoader projectClassLoader) {
 
-        MetaDataLoader loader = null;
+        MojoSupport mojoSupport = null;
+        String loaderClass = loaderConfig.getClassname();
+        String loaderName = loaderConfig.getName();
 
-        if ( loaderConfig.getClassname() != null ) {
-
-            // TODO:  Clean this up
-            Constructor<MetaDataLoader> c = null;
-            try {
-                c = (Constructor<MetaDataLoader>) Class.forName( loaderConfig.getClassname() )
-                        .getConstructor(String.class);
-                loader = c.newInstance( loaderConfig.getName() );
-            }
-            catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException
-                    | InvocationTargetException ex) {
-                throw new MetaDataException( "Could not create MetaDataLoader(name) with class "+
-                        "[" + loaderConfig.getClassname() + "]: " + ex.getMessage(), ex );
-            }
+        if (loaderClass != null) {
+            mojoSupport = getConfiguredLoader( projectClassLoader, loaderClass, loaderName);
         }
         else {
-            loader = new SimpleLoader( loaderConfig.getName() );
+            mojoSupport = new SimpleLoader( loaderName );
         }
 
         // Get the Source Directory if it is specified
         File srcDir = getSourceDir();
-        if ( srcDir != null ) loader.mojoSetSourceDir( loaderConfig.getSourceDir() );
-        loader.mojoSetSources( loaderConfig.getSources() );
-        loader.mojoInit( getGlobals() );
+        if ( srcDir != null ) mojoSupport.mojoSetSourceDir( loaderConfig.getSourceDir() );
+        //getLog().info( "Setting MojoClassLoader: " + getProjectClassLoader() );
+        mojoSupport.mojoSetClassLoader( projectClassLoader );
+        mojoSupport.mojoSetSources( loaderConfig.getSources() );
+        mojoSupport.mojoInit( getGlobals() );
+
+        MetaDataLoader loader = mojoSupport.getLoader();
+
+        getLog().info("MetaData Mojo > Create Loader: " + loader.toString());
 
         return loader;
     }
 
-    public static final String URI_FILE = "file";
-    public static final String URI_FILE_PREFIX = URI_FILE+"//";
-    public static final String URI_CLASSPATH = "classpath";
-    public static final String URI_CLASSPATH_PREFIX = URI_CLASSPATH+":";
+    private MojoSupport getConfiguredLoader(ClassLoader projectClassLoader, String loaderClass, String loaderName) {
 
-    /*protected String toSourceUri( File srcDir, String s ) {
-
-        if ( s.contains(":")) {
-            if ( s.startsWith( URI_FILE_PREFIX )) {
-                s = fileToSourceUri( new File( s.substring( URI_FILE_PREFIX.length() )));
+        MojoSupport mojoSupport;
+        try {
+            // Attempt to load the loader by classname
+            Class c;
+            try {
+                c = projectClassLoader.loadClass(loaderClass);
             }
-        }
-        else if ( srcDir != null ) {
-            s = fileToSourceUri( new File( srcDir, s ));
-        }
-        else {
+            catch ( ClassNotFoundException ex ) {
+                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
+                        "[" + loaderClass + "] as it was not found on the Project ClassLoader" );
+            }
 
+            // See if it's an interface
+            if ( c.isInterface() ) {
+                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
+                        "[" + loaderClass + "] as it is an interface" );
+            }
+
+            // See if it implements MojoSupport
+            if (!MojoSupport.class.isAssignableFrom( c )) {
+                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
+                        "[" + loaderClass + "] as it does not implement MojoSupport" );
+            }
+
+            // Try for a constructor with a String for the loaderName
+            Constructor cc = null;
+            try {
+                cc = c.getDeclaredConstructor(String.class);
+            }
+            catch( NoSuchMethodException | SecurityException ex ) {
+                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
+                        "[" + loaderClass + "] as the Constructor was not found or had security issues: "+
+                        ex.getMessage(), ex );
+            }
+
+            mojoSupport = (MojoSupport) cc.newInstance( loaderName );
+        }
+        catch ( InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            throw new MetaDataException( "Could not instantiate MetaDataLoader("+loaderName+") with class "+
+                    "[" + loaderConfig.getClassname() + "]: " + ex.getMessage(), ex );
         }
 
-        return s;
+        return mojoSupport;
     }
 
-    protected String fileToSourceUri( File f ) {
-        if (!f.exists()) {
-            throw new IllegalArgumentException("Source file [" + f.getName() + "] does not exist");
-        }
-        else if (!f.canRead()) {
-            throw new IllegalArgumentException("Source file [" + f.getName() + "] cannot be read");
+    protected ClassLoader createProjectClassLoader()
+    {
+        ClassLoader thisLoader = getClass().getClassLoader(); //ClassLoader.getSystemClassLoader();
+
+        if ( execution != null ) {
+            try {
+                String lifeCyclePhase = execution.getLifecyclePhase();
+                getLog().info("MetaData Mojo > LifeCycle Phase: " + execution.getLifecyclePhase());
+
+                //List<String> runTimeClasspath   = project.getRuntimeClasspathElements();
+                //List<String> compileClasspath   = project.getCompileClasspathElements();
+                //List<String> compileSources     = project.getCompileSourceRoots();
+                //List<String> testClasspath      = project.getTestClasspathElements();
+                //List<String> testCompileSources = project.getTestCompileSourceRoots();
+                //getLog().info( "runTimeClasspath: " + compileClasspath );
+                //getLog().info( "compileClasspath: " + compileClasspath );
+                //getLog().info( "compileSources: " + compileSources );
+                //getLog().info( "testClasspath: " + compileClasspath );
+                //getLog().info( "testSources: " + testCompileSources );
+
+                List<String> classpathElements = new ArrayList<>();
+
+                if ( lifeCyclePhase.equals(PHASE_GENERATE_SOURCES)) {
+                    //classpathElements.add(project.getBuild().getOutputDirectory());
+                }
+                else if ( lifeCyclePhase.equals(PHASE_GENERATE_RESOURCES)) {
+                    //classpathElements.add(project.getBuild().getOutputDirectory());
+                    addDirIfExists( classpathElements, "generated-resources" );
+                }
+                else if (lifeCyclePhase.equals(PHASE_GENERATE_TEST_SOURCES)) {
+                    // Get the processed resources and compiled classes
+                    classpathElements.add(project.getBuild().getOutputDirectory());
+                    addDirIfExists( classpathElements, "generated-resources" );
+                }
+                else if (lifeCyclePhase.equals(PHASE_GENERATE_TEST_RESOURCES)) {
+                    // Get the processed resources and compiled classes
+                    // Also get any generated-test-resources
+                    classpathElements.add(project.getBuild().getOutputDirectory());
+                    addDirIfExists( classpathElements, "generated-resources" );
+                    addDirIfExists( classpathElements, "generated-test-resources" );
+                }
+
+                if ( classpathElements.size() > 0 ) {
+                    URL urls[] = new URL[classpathElements.size()];
+                    for (int i = 0; i < classpathElements.size(); ++i) {
+                        urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
+                        getLog().info("MetaData Mojo > Adding Classpath URL: " + urls[i]);
+                    }
+
+                    thisLoader =  new URLClassLoader(urls, thisLoader );
+                }
+            }
+            catch (Exception e) {
+                //getLog().error("Error getting ProjectClassLoader, using SystemClassLoader: "+e.getMessage(), e);
+                throw new MetaDataException( "Error getting ProjectClassLoader, using SystemClassLoader: "
+                        + e.getMessage(), e);
+            }
+        } else {
+            getLog().warn("Could not get phase from MojoExecution" );
         }
 
-        return URI_FILE_PREFIX + f.getName();
-    }*/
+        return thisLoader;
+    }
+
+    protected void addDirIfExists(List<String> classpathElements, String s) {
+        File f = new File( project.getBasedir()+"/target/"+s);
+        //getLog().info( "Looking for: " + f.getPath());
+        if ( f.exists() ) classpathElements.add( f.getPath() );
+    }
 
     protected File getSourceDir() {
         String srcDir = loaderConfig.getSourceDir();

@@ -88,7 +88,7 @@ public class SubTypeConfigPojo extends PojoObject implements SubTypeConfig {
     }
 
     private Class<? extends MetaData> toClass( String className )  throws ClassNotFoundException {
-        return (Class<? extends MetaData>) Class.forName( className );
+        return getMetaData().loadClass( MetaData.class, className );
     }
 
     public Class <? extends MetaData> getMetaDataClass() {
