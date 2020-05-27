@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.3.1-SNAPSHOT</version>
+        <version>4.3.1</version>
     </parent>
   
     <artifactId>metaobjects-metadata</artifactId>
