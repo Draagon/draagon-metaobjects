@@ -208,12 +208,14 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
         if ( execution != null ) {
             try {
                 String lifeCyclePhase = execution.getLifecyclePhase();
+                if ( lifeCyclePhase == null ) lifeCyclePhase = "cli";
+
                 getLog().info("MetaData Mojo > LifeCycle Phase: " + execution.getLifecyclePhase());
 
-                //List<String> runTimeClasspath   = project.getRuntimeClasspathElements();
-                //List<String> compileClasspath   = project.getCompileClasspathElements();
+                List<String> runTimeClasspath   = project.getRuntimeClasspathElements();
+                List<String> compileClasspath   = project.getCompileClasspathElements();
                 //List<String> compileSources     = project.getCompileSourceRoots();
-                //List<String> testClasspath      = project.getTestClasspathElements();
+                List<String> testClasspath      = project.getTestClasspathElements();
                 //List<String> testCompileSources = project.getTestCompileSourceRoots();
                 //getLog().info( "runTimeClasspath: " + compileClasspath );
                 //getLog().info( "compileClasspath: " + compileClasspath );
@@ -222,6 +224,10 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
                 //getLog().info( "testSources: " + testCompileSources );
 
                 List<String> classpathElements = new ArrayList<>();
+
+                // Add runtime and compile time classes
+                classpathElements.addAll(runTimeClasspath);
+                classpathElements.addAll(compileClasspath);
 
                 if ( lifeCyclePhase.equals(PHASE_GENERATE_SOURCES)) {
                     //classpathElements.add(project.getBuild().getOutputDirectory());
@@ -232,22 +238,32 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
                 }
                 else if (lifeCyclePhase.equals(PHASE_GENERATE_TEST_SOURCES)) {
                     // Get the processed resources and compiled classes
+                    classpathElements.addAll(testClasspath);
                     classpathElements.add(project.getBuild().getOutputDirectory());
                     addDirIfExists( classpathElements, "generated-resources" );
                 }
-                else if (lifeCyclePhase.equals(PHASE_GENERATE_TEST_RESOURCES)) {
+                else if (lifeCyclePhase.equals(PHASE_GENERATE_TEST_RESOURCES) ||
+                        lifeCyclePhase.equals("cli")) {
                     // Get the processed resources and compiled classes
                     // Also get any generated-test-resources
+                    classpathElements.addAll(testClasspath);
                     classpathElements.add(project.getBuild().getOutputDirectory());
                     addDirIfExists( classpathElements, "generated-resources" );
                     addDirIfExists( classpathElements, "generated-test-resources" );
+
+                    //if ( lifeCyclePhase.equals("cli")) {
+                    //    classpathElements.addAll(runTimeClasspath);
+                    //    classpathElements.addAll(compileClasspath);
+                    //}
                 }
 
                 if ( classpathElements.size() > 0 ) {
                     URL urls[] = new URL[classpathElements.size()];
                     for (int i = 0; i < classpathElements.size(); ++i) {
                         urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
-                        getLog().info("MetaData Mojo > Adding Classpath URL: " + urls[i]);
+                        
+                        if (getLog().isDebugEnabled())
+                            getLog().debug("MetaData Mojo > Adding Classpath URL: " + urls[i]);
                     }
 
                     thisLoader =  new URLClassLoader(urls, thisLoader );
