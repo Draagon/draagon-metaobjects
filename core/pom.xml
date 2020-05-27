@@ -60,7 +60,7 @@
                 </executions>
             </plugin>
             <!-- This will not work until the SimpleLoader can handle inline attributes.  Can not use MetaDataLoader -->
-            <!--plugin>
+            <plugin>
                 <groupId>com.draagon</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
@@ -77,7 +77,7 @@
                                 <name>gen-test-resources</name>
                                 <sourceDir>${project.basedir}/src/test/resources</sourceDir>
                                 <sources>
-                                    <source>types:resource:com/draagon/meta/loader/xml/metaobjects.types.xml</source>
+                                    <source>com/draagon/meta/loader/xml/metaobjects.types.xml</source>
                                     <source>metadata/test/produce/v1/produce-v1.bundle</source>
                                 </sources>
                             </loader>
@@ -104,7 +104,7 @@
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin -->
+            </plugin>
         </plugins>
     </build>
 
