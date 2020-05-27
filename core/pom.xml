@@ -60,7 +60,7 @@
                 </executions>
             </plugin>
             <!-- This will not work until the SimpleLoader can handle inline attributes.  Can not use MetaDataLoader -->
-            <plugin>
+            <!--plugin>
                 <groupId>com.draagon</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
@@ -104,7 +104,7 @@
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
+            </plugin -->
         </plugins>
     </build>
 
