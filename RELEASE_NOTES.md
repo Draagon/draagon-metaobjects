@@ -48,6 +48,24 @@ limitations under the License.
 
 # Current Releases
 
+## Version 4.3.3 
+Revamped Classloader support for MetaData and MetaDataLoaders to support OSGi and Maven Plugins.  The
+MetaData Mojo now supports loading the runtime, compile, and test classpaths depending on the lifecycle
+phase.  Versions 4.3.1 and 4.3.2 were attempts to fix this, but it needed a revamp.
+
+### Upgrade Steps
+*  FileMetaDataLoader and URI/Local/FileMetaDataSources now require a Classloader to be set, so change any dependencies
+   on these as needed.
+
+### Bug Fixes
+*  Fixed issues with FileMetaDataSources not attempting to load from the classpath in addition to the file system.
+
+### Improvements
+*  Fully revamped support for Classpaths on MetaData and MetaDataLoader to support OSGi and Maven Plugins.
+*  MetaData Mojo now supports loading the runtime, compile, and test classpaths as well as pointing to target/classes, 
+   target/generated-resources, target/generated-test-resources depending on the lifecycle phase.  When run from the
+   command-line via 'mvn metaobjects:generate' it will add everything.
+
 ## Version 4.3.0 
 Release 4.3.0 is a major refactoring of core codebase, extracting out a separate metadata module in order to have the
 more advanced capabilities in the core module that can be meta modelled themselves.  The maven metadata plugin module
