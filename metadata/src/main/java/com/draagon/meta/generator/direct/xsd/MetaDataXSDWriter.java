@@ -72,8 +72,13 @@ public class MetaDataXSDWriter extends XMLDirectWriter<MetaDataXSDWriter> {
     }
 
     protected void writeTypes( Element el, TypesConfig tsc )  throws GeneratorIOException {
-        for (TypeConfig tc : tsc.getTypes()) {
-            writeType(el, tc);
+        if ( tsc.getTypes() != null && !tsc.getTypes().isEmpty()) {
+            for (TypeConfig tc : tsc.getTypes()) {
+                writeType(el, tc);
+            }
+        }
+        else {
+            log.warn("There are no Type Configurations defined in MetaDataLoader: " + getLoader());
         }
     }
 
