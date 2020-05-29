@@ -8,13 +8,13 @@
 
     <!-- Id -->
     <field name="id" type="long" validation="required">
-        <validator type="required"/>
+        <validator name="required" type="required"/>
     </field>
 
     <!-- Name -->
     <field name="name" type="string" validation="required,length">
-        <validator type="required"/>
-        <validator type="length">
+        <validator name="required" type="required"/>
+        <validator name="length" type="length">
             <attr type="int" name="min">1</attr>
             <attr name="max">50</attr>
         </validator>

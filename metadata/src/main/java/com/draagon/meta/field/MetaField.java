@@ -291,7 +291,16 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     ////////////////////////////////////////////////////
     // VALIDATOR METHODS
 
+    public void performValidation(Object obj) {
+        if ( obj != null ) {
+            performValidation(obj, getObjectAttribute(obj));
+        } else {
+            throw new InvalidValueException("Cannot perform validation on a null object: "+toString());
+        }
+    }
+
     protected void performValidation(Object obj, Object val)  {
+        // TODO: Add Caching!!!
         // Run any defined validators
         if (hasMetaAttr(ATTR_VALIDATION)) {
             getValidatorList(getMetaAttr(ATTR_VALIDATION).getValueAsString()).forEach(v -> v.validate(obj, val));

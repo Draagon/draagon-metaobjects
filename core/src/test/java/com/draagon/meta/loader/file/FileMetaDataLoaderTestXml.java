@@ -10,6 +10,7 @@
  */
 package com.draagon.meta.loader.file;
 
+import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -83,6 +84,33 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
 
         assertEquals( "id field isKey=true", "id", ((MetaObject)idField.getParent())
                 .getPrimaryKey().getKeyFields().iterator().next().getName());
+
+        // See if it's valid
+        try {
+            mo.performValidation(orange);
+        } catch( InvalidValueException e ) {
+            String msg = e.getMessage();
+            assertTrue(msg.endsWith("field id"));
+        }
+
+        orange.setId(1L);
+        orange.setName("testg sd;flkgjs;dlfkgjs;dlkfgjs;ldkfjgs;lkdfjgs;ldkfjgs;ldkfjgs;lkdfjgs;ldkfgjs;ldkfjgs;ldkfgjs;ldkfgjs;ldkfjgs;ldkfj");
+
+        try {
+            mo.performValidation(orange);
+        } catch( InvalidValueException e ) {
+            assertTrue(e.getMessage().contains("1 and 50"));
+        }
+
+        orange.setName("");
+
+        try {
+            mo.performValidation(orange);
+        } catch( InvalidValueException e ) {
+            assertTrue(e.getMessage().contains("required on field name"));
+        }
+
+        orange.setName("orange");
     }
 
     @Test

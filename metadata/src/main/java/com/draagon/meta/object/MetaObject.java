@@ -384,6 +384,17 @@ public abstract class MetaObject extends MetaData {
     ////////////////////////////////////////////////////
     // Validation Methods
 
+    public void performValidation(Object obj) {
+        if ( obj != null ) {
+            for(MetaField mf : getMetaFields()) {
+                mf.performValidation(obj);
+            }
+        } else {
+            throw new InvalidValueException("Cannot perform validation on a null object: "+toString());
+        }
+    }
+
+
     @Override
     public void validate() {
         super.validate();

@@ -27,7 +27,7 @@ public class RequiredValidator extends MetaValidator {
      */
     public void validate(Object object, Object value) {
 
-        String msg = getMessage("A value is required");
+        String msg = getMessage("A value is required on field "+getParent().getShortName());
         String val = (value == null) ? null : value.toString();
 
         if (GenericValidator.isBlankOrNull(val)) {
