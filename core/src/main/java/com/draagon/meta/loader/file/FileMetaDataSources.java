@@ -64,6 +64,10 @@ public class FileMetaDataSources {
 
     protected ClassLoader loaderClassLoader;
 
+    protected FileMetaDataSources() {
+        this.loaderClassLoader=getClass().getClassLoader();
+    }
+
     protected FileMetaDataSources(ClassLoader loaderClassLoader) {
         this.loaderClassLoader=loaderClassLoader;
     }

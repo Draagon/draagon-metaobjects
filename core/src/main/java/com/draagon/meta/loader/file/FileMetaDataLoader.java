@@ -74,17 +74,18 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
         // Set URI Souces
         if (!uriSourceList.isEmpty()) {
-            URIFileMetaDataSources uriSources = new URIFileMetaDataSources(getMetaDataClassLoader(), uriSourceList);
+            URIFileMetaDataSources uriSources = new URIFileMetaDataSources(uriSourceList);
             getLoaderOptions().addSources(uriSources);
+            uriSources.setLoaderClassLoader( getMetaDataClassLoader() );
         }
 
         // Set Local Sources
         if (!localSourceList.isEmpty()) {
             LocalFileMetaDataSources localSources = null;
-            if ( sourceDir != null ) localSources = new LocalFileMetaDataSources(
-                    getMetaDataClassLoader(), sourceDir,localSourceList);
-            else localSources = new LocalFileMetaDataSources(getMetaDataClassLoader(), localSourceList);
+            if ( sourceDir != null ) localSources = new LocalFileMetaDataSources(sourceDir,localSourceList);
+            else localSources = new LocalFileMetaDataSources(localSourceList);
             getLoaderOptions().addSources(localSources);
+            localSources.setLoaderClassLoader( getMetaDataClassLoader() );
         }
     }
 

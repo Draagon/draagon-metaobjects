@@ -9,30 +9,22 @@ import java.util.List;
  */
 public class LocalMetaDataSources extends MetaDataSources {
 
-    public LocalMetaDataSources(ClassLoader classLoader, String file ) {
-        super(classLoader);
-
+    public LocalMetaDataSources(String file ) {
         read( file );
     }
 
-    public LocalMetaDataSources(ClassLoader classLoader, List<String> files ) {
-        super(classLoader);
-
+    public LocalMetaDataSources(List<String> files ) {
         for ( String file : files ) {
             read( file );
         }
     }
 
-    public LocalMetaDataSources(ClassLoader classLoader, String baseDir, String file ) {
-        super(classLoader);
-
+    public LocalMetaDataSources(String baseDir, String file ) {
         setSourceDir( baseDir );
         read( file );
     }
 
-    public LocalMetaDataSources(ClassLoader classLoader, String baseDir, List<String> files ) {
-        super(classLoader);
-
+    public LocalMetaDataSources(String baseDir, List<String> files ) {
         setSourceDir( baseDir );
         for ( String file : files ) {
             read( file );

@@ -148,6 +148,10 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
         mojoSupport.mojoInit( getGlobals() );
 
         MetaDataLoader loader = mojoSupport.getLoader();
+        getLog().info("projectClassLoader: " + projectClassLoader);
+        getLog().info("loader.getClass():  " + mojoSupport.getClass().getClassLoader());
+        getLog().info("loader.getMDCP():   " + mojoSupport.getLoader().getMetaDataClassLoader());
+        getLog().info("loader.Options():   " + mojoSupport.getLoader().getLoaderOptions().getClass().getClassLoader());
 
         getLog().info("MetaData Mojo > Create Loader: " + loader.toString());
 

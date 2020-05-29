@@ -8,7 +8,7 @@ import com.draagon.meta.loader.file.FileMetaDataSources;
 public class MetaDataSources extends FileMetaDataSources {
 
     protected MetaDataSources() {
-        super( null );
+        super();
     }
 
     protected MetaDataSources( ClassLoader classLoader ) {

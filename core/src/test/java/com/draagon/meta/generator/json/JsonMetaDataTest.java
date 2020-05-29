@@ -56,9 +56,9 @@ public class JsonMetaDataTest extends GeneratorTestBase {
                 new FileLoaderOptions()
                         .addParser("*.xml", XMLMetaDataParser.class)
                         .addParser("*.json", JsonMetaDataParser.class)
-                        .addSources(new LocalFileMetaDataSources(getClass().getClassLoader(),
+                        .addSources(new LocalFileMetaDataSources(
                                 "com/draagon/meta/loader/json/metaobjects.types.json"))
-                        .addSources(new LocalFileMetaDataSources(getClass().getClassLoader(),
+                        .addSources(new LocalFileMetaDataSources(
                                 getGeneratedTestSourcesPath(),
                                 TESTFILE)
                         )

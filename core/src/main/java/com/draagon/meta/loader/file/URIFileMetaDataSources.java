@@ -19,16 +19,22 @@ public class URIFileMetaDataSources extends FileMetaDataSources {
 
     private URIModel currentModel = null;
 
+    public URIFileMetaDataSources(URI uri) {
+        this(null,uri);
+    }
+
     public URIFileMetaDataSources(ClassLoader classLoader, URI uri) {
         super(classLoader);
-
         currentModel = URIHelper.toURIModel( uri );
         read( currentModel.getUriSource() );
     }
 
+    public URIFileMetaDataSources(List<URI> uriSources ) {
+        this(null,uriSources);
+    }
+
     public URIFileMetaDataSources(ClassLoader classLoader, List<URI> uriSources ) {
         super(classLoader);
-
         for ( URI uri : uriSources ) {
             currentModel = URIHelper.toURIModel( uri );
             read( currentModel.getUriSource() );

@@ -42,7 +42,7 @@ public class XMLMetaDataLoaderTest2 {
         List<String> list = new ArrayList<String>();
         list.add("metadata/test/produce/v1/produce-v1.bundle");
         list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
-        xl.init(new LocalMetaDataSources( getClass().getClassLoader(),/*"src/test/resources",*/ list));
+        xl.init(new LocalMetaDataSources(/*"src/test/resources",*/ list));
         //xl.register();
 
         this.loader = xl;

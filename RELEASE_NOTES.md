@@ -21,7 +21,7 @@ limitations under the License.
 [Apache License 2.0](LICENSE)
 
 # Known Issues
-* None
+* NullPointer on the MetaDataXSDWriter if no TypesConfig entries were loaded.
 
 # Upcoming Releases
 
@@ -51,7 +51,8 @@ limitations under the License.
 ## Version 4.3.3 
 Revamped Classloader support for MetaData and MetaDataLoaders to support OSGi and Maven Plugins.  The
 MetaData Mojo now supports loading the runtime, compile, and test classpaths depending on the lifecycle
-phase.  Versions 4.3.1 and 4.3.2 were attempts to fix this, but it needed a revamp.
+phase.  Versions 4.3.1 was an attempt to fix this, but it needed a revamp.  4.3.2 was skipped to address
+the major change in Classpaths.  
 
 ### Upgrade Steps
 *  FileMetaDataLoader and URI/Local/FileMetaDataSources now require a Classloader to be set, so change any dependencies

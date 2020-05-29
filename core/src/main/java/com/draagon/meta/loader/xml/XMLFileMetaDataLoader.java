@@ -65,7 +65,7 @@ public class XMLFileMetaDataLoader extends FileMetaDataLoader {
 
         // Prepend the Types XML to load using the default behavior of the original XMLFileMetaDataLoader
         if ( getDefaultTypesRef() != null ) {
-            options.addSources( new LocalFileMetaDataSources( getMetaDataClassLoader(), getDefaultTypesRef()) );
+            options.addSources( new LocalFileMetaDataSources( getDefaultTypesRef()) );
         }
 
         // Add the Loader's ClassLoader source, which includes what is set by the MojoSupport
