@@ -55,8 +55,9 @@ public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
         Long id = idField.getLong( apple );
         
         assertEquals( "id field", id, apple.getId() );
-        
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+
+        assertEquals( "id field isKey=true", "id", ((MetaObject)idField.getParent())
+                .getPrimaryKey().getKeyFields().iterator().next().getName());
     }
 
     @Test
@@ -68,8 +69,9 @@ public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
         assertEquals( "produce::v1::fruit::Orange", mo.getName() );
 
         MetaField idField = mo.getMetaField( "id" );
-        
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+
+        assertEquals( "id field isKey=true", "id", ((MetaObject)idField.getParent())
+                .getPrimaryKey().getKeyFields().iterator().next().getName());
     }
 
     @Test
@@ -79,8 +81,9 @@ public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
         ValueObject basket = (ValueObject) mo.newInstance();
         
         MetaField idField = mo.getMetaField( "id" );
-        
-        assertEquals( "id field isKey=false", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+
+        assertEquals( "id field isKey=true", "id", ((MetaObject)idField.getParent())
+                .getPrimaryKey().getKeyFields().iterator().next().getName());
         
         basket.setLong( "id", 1L );
         basket.setInt( "numOranges", 3 );

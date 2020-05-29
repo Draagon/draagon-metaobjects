@@ -21,6 +21,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
+
 import static org.junit.Assert.*;
 
 /**
@@ -62,8 +64,10 @@ public class FileMetaDataLoaderTestJson extends FileMetaDataLoaderTestBase {
         Long id = idField.getLong( apple );
         
         assertEquals( "id field", id, apple.getId() );
-        
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+
+        //assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+        assertEquals( "id field isKey=true", "id", ((MetaObject)idField.getParent())
+                .getPrimaryKey().getKeyFields().iterator().next().getName());
     }
 
     @Test
@@ -76,7 +80,8 @@ public class FileMetaDataLoaderTestJson extends FileMetaDataLoaderTestBase {
 
         MetaField idField = mo.getMetaField( "id" );
         
-        assertEquals( "id field isKey=true", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+        assertEquals( "id field isKey=true", "id", mo.getPrimaryKey().getKeyFields()
+                .iterator().next().getName());
     }
 
     @Test
@@ -86,8 +91,9 @@ public class FileMetaDataLoaderTestJson extends FileMetaDataLoaderTestBase {
         ValueObject basket = (ValueObject) mo.newInstance();
         
         MetaField idField = mo.getMetaField( "id" );
-        
-        assertEquals( "id field isKey=false", "true", idField.getMetaAttr( "isKey" ).getValueAsString() );
+
+        assertEquals( "id field isKey=true", "id", mo.getPrimaryKey()
+                .getKeyFields().iterator().next().getName());
         
         basket.setLong( "id", 1L );
         basket.setInt( "numOranges", 3 );

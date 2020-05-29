@@ -76,10 +76,10 @@
 
         <type name="field" class="com.draagon.meta.field.MetaField" defaultSubType="string">
             <children>
-                <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
-                <child type="attr" subType="boolean" name="isKey"/> <!-- inlineAttr="optional" / -->
-                <child type="attr" subType="boolean" name="foreignKey"/> <!-- inlineAttr="optional" / -->
-                <child type="attr" subType="string" name="objectRef"/> <!-- inlineAttr="optional" / -->
+                <child type="attr" subType="boolean" name="_isAbstract"/>
+                <child type="attr" subType="string" name="objectRef"/>
+                <child type="attr" subType="stringArray" name="validation"/>
+                <child type="attr" subType="string" name="defaultValue"/>
                 <child type="validator" subType="*" name="*"/>
             </children>
             <subType name="boolean"      class="com.draagon.meta.field.BooleanField" />

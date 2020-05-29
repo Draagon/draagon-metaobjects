@@ -66,7 +66,9 @@
 
         <type name="field" class="com.draagon.meta.field.MetaField" defaultSubType="string">
             <children>
-                <child type="attr" subType="boolean" name="_isAbstract"/> <!-- inlineAttr="required" / -->
+                <child type="attr" subType="boolean" name="_isAbstract"/>
+                <child type="attr" subType="stringArray" name="validation"/>
+                <child type="attr" subType="string" name="defaultValue"/>
                 <child type="validator" subType="*" name="*"/>
             </children>
             <subType name="boolean"      class="com.draagon.meta.field.BooleanField" />

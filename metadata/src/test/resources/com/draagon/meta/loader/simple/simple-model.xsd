@@ -193,6 +193,16 @@
           <xs:restriction base="xs:boolean"/>
         </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="validation">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="defaultValue">
+        <xs:simpleType>
+          <xs:restriction base="xs:string"/>
+        </xs:simpleType>
+      </xs:attribute>
       <xs:attribute name="objectRef">
         <xs:simpleType>
           <xs:restriction base="xs:string"/>

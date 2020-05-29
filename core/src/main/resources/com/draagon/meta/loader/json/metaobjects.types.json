@@ -69,9 +69,9 @@
         {"type": {"name": "field", "class": "com.draagon.meta.field.MetaField", "defaultSubType": "string",
             "children": [
                 {"child": {"type": "attr", "subType": "boolean", "name": "_isAbstract"}},
-                {"child": {"type": "attr", "subType": "boolean", "name": "isKey"}},
-                {"child": {"type": "attr", "subType": "boolean", "name": "foreignKey"}},
                 {"child": {"type": "attr", "subType": "string", "name": "objectRef"}},
+                {"child": {"type": "attr", "subType": "stringArray", "name": "validation"}},
+                {"child": {"type": "attr", "subType": "string", "name": "defaultValue"}},
                 {"child": {"type": "validator", "subType": "*", "name": "*"}}
             ],
             "subTypes": [
