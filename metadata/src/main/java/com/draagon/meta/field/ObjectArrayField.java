@@ -19,7 +19,7 @@ import java.util.List;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class ObjectArrayField extends ArrayField<List<Object>> {
+public class ObjectArrayField extends ArrayField<Object,List<Object>> {
 
     public final static String SUBTYPE_OBJECT_ARRAY = "objectArray";
 

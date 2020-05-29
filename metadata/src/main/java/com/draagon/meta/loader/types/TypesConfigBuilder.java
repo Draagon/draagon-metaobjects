@@ -62,21 +62,25 @@ public class TypesConfigBuilder {
     }
 
     protected static MetaField createTypeConfigArray() {
-        return createObjectArrayField(TypesConfig.FIELD_TYPES, TypesConfig.OBJREF_TYPE, TypeConfig.OBJECT_NAME, true);
+        return createObjectArrayField(TypesConfig.FIELD_TYPES, TypesConfig.OBJREF_TYPE, TypeConfig.OBJECT_NAME, true)
+                .addChild(StringAttribute.create(MetaField.ATTR_DEFAULT_VALUE, "[]"));
     }
 
     protected static MetaField createSubTypeConfigArray() {
-        return createObjectArrayField(TypeConfig.FIELD_SUBTYPES, TypeConfig.OBJREF_SUBTYPE, SubTypeConfig.OBJECT_NAME, false);
+        return createObjectArrayField(TypeConfig.FIELD_SUBTYPES, TypeConfig.OBJREF_SUBTYPE, SubTypeConfig.OBJECT_NAME, false)
+                .addChild(StringAttribute.create(MetaField.ATTR_DEFAULT_VALUE, "[]"));
     }
 
     protected static MetaField createTypeChildConfigArray(String ioName) {
         return createObjectArrayField(TypeConfig.FIELD_TYPECHILDREN, TypeConfig.OBJREF_CHILD, ChildConfig.OBJECT_NAME, true )
+                .addChild(StringAttribute.create(MetaField.ATTR_DEFAULT_VALUE, "[]"))
                 .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName));
     }
 
     protected static MetaField createChildConfigArray(String ioName) {
         return createObjectArrayField(SubTypeConfig.FIELD_SUBTYPECHILDREN, SubTypeConfig.OBJREF_CHILD, ChildConfig.OBJECT_NAME, true )
+                .addChild(StringAttribute.create(MetaField.ATTR_DEFAULT_VALUE, "[]"))
                 .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName));
     }

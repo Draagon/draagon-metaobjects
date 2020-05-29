@@ -14,26 +14,26 @@
         <field name="name" super="..::common::name"/>
 
         <!-- Number of apples -->
-        <field name="numApples" type="int"/>
+        <field name="numApples" type="int" defaultValue="0"/>
 
         <!-- Number of oranges -->
-        <field name="numOranges" type="int"/>
+        <field name="numOranges" type="int" defaultValue="0"/>
 
         <!-- Number of oranges -->
-        <field name="numVeggies" type="int"/>
+        <field name="numVeggies" type="int" defaultValue="0"/>
 
         <!-- Apples -->
-        <field name="apples" type="objectArray" objectRef="..::fruit::Apple">
-            <validator type="array" minSize="0" maxSize="5"/>
+        <field name="apples" type="objectArray" objectRef="..::fruit::Apple" defaultValue="[]">
+            <validator type="array" minSize="0" maxSize="5" />
         </field>
 
         <!-- Oranges -->
-        <field name="oranges" type="objectArray" objectRef="..::fruit::Orange">
-            <validator type="array" minSize="0" maxSize="3"/>
+        <field name="oranges" type="objectArray" objectRef="..::fruit::Orange" defaultValue="[]">
+            <validator type="array" minSize="0" maxSize="3" />
         </field>
 
         <!-- Veggies -->
-        <field name="veggies" type="objectArray" objectRef="..::vegetable::Vegetable">
+        <field name="veggies" type="objectArray" objectRef="..::vegetable::Vegetable" defaultValue="[]">
             <validator type="required"/>
             <validator type="array" minSize="1" maxSize="2"/>
         </field>
@@ -42,7 +42,7 @@
 
     <!-- Add an overlay for the basket for all fruit -->
     <object package="..::fruit" name="Fruit">
-        <field name="inBasket" type="boolean"/>
+        <field name="inBasket" type="boolean"  defaultValue="false"/>
     </object>
 
 </metadata>

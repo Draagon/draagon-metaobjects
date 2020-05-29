@@ -71,9 +71,13 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
     public void testOrange()  {
         
         Orange orange = new Orange();
-        
+
         MetaObject mo = MetaDataRegistry.findMetaObject( orange );
         assertEquals( "produce::v1::fruit::Orange", mo.getName() );
+
+        // Test DefaultValues
+        mo.setDefaultValues(orange);
+        assertEquals( Boolean.FALSE, orange.getInBasket());
 
         MetaField idField = mo.getMetaField( "id" );
 
@@ -91,6 +95,10 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
 
         assertEquals( "id field isKey=true", "id", ((MetaObject)idField.getParent())
                 .getPrimaryKey().getKeyFields().iterator().next().getName());
+
+        // Test DefaultValues
+        assertEquals( Integer.valueOf(0), basket.getInt("numApples"));
+        assertEquals( 0, basket.getObjectArray(Object.class,"apples").size());
         
         basket.setLong( "id", 1L );
         basket.setInt( "numOranges", 3 );

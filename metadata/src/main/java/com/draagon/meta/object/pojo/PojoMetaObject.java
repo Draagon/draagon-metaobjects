@@ -83,7 +83,7 @@ public class PojoMetaObject extends MetaObject {
      */
     protected Method retrieveGetterMethod(MetaField f, Class<?> objClass) //throws MetaException
     {
-        synchronized (f) {
+        //synchronized (f) {
             Method method = (Method) f.getCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName());
             if (method == null) {
                 String name = getGetterName(f);
@@ -99,7 +99,7 @@ public class PojoMetaObject extends MetaObject {
             }
 
             return method;
-        }
+        //}
     }
 
     /**

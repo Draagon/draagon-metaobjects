@@ -20,7 +20,7 @@ import java.util.List;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class StringArrayField extends ArrayField<List<String>> implements StringSerializationHandler {
+public class StringArrayField extends ArrayField<String,List<String>> implements StringSerializationHandler {
 
     public final static String SUBTYPE_STRING_ARRAY = "stringArray";
 

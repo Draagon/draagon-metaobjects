@@ -149,18 +149,22 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
             if (hasMetaAttr(MetaField.ATTR_DEFAULT_VALUE)) {
                 Object o = getMetaAttr(MetaField.ATTR_DEFAULT_VALUE).getValue();
-                if (!getValueClass().isInstance(o)) {
-                    // Convert as needed
-                    defaultValue = (T) DataConverter.toType(getDataType(), o);
-                } else {
-                    defaultValue = (T) o;
-                }
-
-                lookedForDefault = true;
+                defaultValue = convertDefaultValue(o);
             }
+
+            lookedForDefault = true;
         }
 
         return defaultValue;
+    }
+
+    protected T convertDefaultValue(Object o) {
+        if (!getValueClass().isInstance(o)) {
+            // Convert as needed
+            return (T) DataConverter.toType(getDataType(), o);
+        } else {
+            return (T) o;
+        }
     }
 
     /** Flush the caches and set local flags to false */
