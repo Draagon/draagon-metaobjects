@@ -1,12 +1,17 @@
 package com.draagon.meta.generator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.File;
 import java.util.*;
 
 public abstract class GeneratorBase implements Generator {
 
-    public static String ARG_OUTPUTDIR = "outputDir";
-    public static String ARG_OUTPUTFILENAME = "outputFilename";
+    protected final Log log = LogFactory.getLog(getClass());
+
+    public static String ARG_OUTPUTDIR       = "outputDir";
+    public static String ARG_OUTPUTFILENAME  = "outputFilename";
 
     private Map<String,String> args = new HashMap<>();
     private MetaDataFilters filters = new MetaDataFilters();
@@ -25,6 +30,12 @@ public abstract class GeneratorBase implements Generator {
     protected String getArg( String name ) {
         return args.get( name );
     }
+    protected String getArg( String name, String defValue ) {
+        if ( !hasArg( name )) {
+            return defValue;
+        }
+        return getArg( name );
+    }
 
     protected String getArg( String name, boolean required ) {
         if ( !hasArg( name )) {
@@ -41,6 +52,10 @@ public abstract class GeneratorBase implements Generator {
     public GeneratorBase setFilters(List<String> filters) {
         this.filters.addFilters( filters );
         return this;
+    }
+
+    protected MetaDataFilters getMetaDataFilters() {
+        return filters;
     }
 
     protected List<String> getFilters() {

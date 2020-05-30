@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<metadata package="simple::fruitbasket">
+
+    <!-- Id -->
+    <field package="::common" name="id" type="long" _isAbstract="true">
+        <attr type="boolean" name="isKey">true</attr>
+    </field>
+
+    <!-- Name -->
+    <field package="::common" name="name" type="string" _isAbstract="true">
+        <validator type="required"/>
+        <validator type="length">
+            <attr type="int" name="min">1</attr>
+            <attr name="max">50</attr>
+        </validator>
+    </field>
+
+    <!-- Entity -->
+    <object package="::common" name="Entity" type="map" _isAbstract="true">
+        <!-- Id -->
+        <field name="id" super="::id"/>
+
+        <!-- Name -->
+        <field name="name" super="name"/>
+    </object>
+
+    <!-- Entity Container -->
+    <object package="::container" name="Entity" super="..::common::Entity" _isAbstract="true">
+        <!-- Related Entities -->
+        <field name="relatedEntities" type="objectArray">
+            <attr name="objectRef">..::common::Entity</attr>
+        </field>
+    </object>
+
+    <!-- Container -->
+    <object package="::container" name="Container" super="Entity" _isAbstract="true">
+        <!-- Brand -->
+        <field name="brand" super="..::common::name"/>
+    </object>
+
+    <!-- Basket -->
+    <object package="::container" name="Basket" super="Container">
+
+        <!-- Number of apples -->
+        <field name="numApples" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
+
+        <!-- Number of oranges -->
+        <field name="numOranges" type="int">
+            <validator type="length" min="0" max="10"/>
+        </field>
+
+        <!-- Number of veggies -->
+        <!-- field name="numVeggies" type="int">
+            <validator type="length" min="0" max="5"/>
+        </field -->
+
+        <!-- Apples -->
+        <field name="apples" type="objectArray">
+            <attr name="objectRef">..::fruit::Apple</attr>
+        </field>
+
+        <!-- Oranges -->
+        <field name="oranges" type="objectArray">
+            <attr name="objectRef">..::fruit::Orange</attr>
+        </field>
+
+        <!-- Veggies -->
+        <!-- field name="veggies" type="objectArray">
+            <objectRef type="oneToMany" reference="..::vegetable::Vegetable"/>
+        </field -->
+
+    </object>
+
+    <!-- Fruit -->
+    <object package="::fruit" name="Fruit" super="..::common::Entity" _isAbstract="true">
+
+        <!-- Type -->
+        <field name="type"/>
+
+        <!-- Length -->
+        <field name="length" type="int"/>
+
+        <!-- Weight -->
+        <field name="weight" type="int"/>
+
+        <!-- In Container -->
+        <field name="inContainer" type="boolean"/>
+
+        <!-- Container -->
+        <field name="container" type="object">
+            <attr name="objectRef">..::container::Container</attr>
+        </field>
+
+    </object>
+
+    <!-- Apple -->
+    <object package="::fruit" name="Apple" super="Fruit">
+
+        <!-- Orachard -->
+        <field name="orchard" type="string"/>
+
+        <!-- Worms -->
+        <field name="worms" type="short"/>
+
+    </object>
+
+    <!-- Macintosh -->
+    <object package="::fruit" name="Macintosh" super="Apple">
+
+    </object>
+
+    <!-- Orange -->
+    <object package="::fruit" name="Orange" super="Fruit">
+
+        <field name="pickedDate" type="date"/>
+
+    </object>
+
+</metadata>

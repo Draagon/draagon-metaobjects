@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class XSDGeneratorTest extends GeneratorTestBase {
+public class XSDWriterTest extends GeneratorTestBase {
 
     public final static String ROOT_DIR = "./src/test/resources/com/draagon/meta/loader/simple";
     protected SimpleLoader loader = null;

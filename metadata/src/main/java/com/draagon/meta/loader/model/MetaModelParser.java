@@ -82,10 +82,11 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     protected <M extends MetaModel> MetaData createOrOverloadMetaData(
             MetaData parent, String pkgDef, TypeConfig tc, M model) {
 
-        String superName = getFullSuperName(parent, tc, pkgDef, model);
-
-        // If the name is null, then try to set it
+        // Get the fullname for the model
         String fullname = getFullname(parent, tc, pkgDef, model);
+
+        // Get the fullname for the supername
+        String superName = getFullSuperName(parent, tc, pkgDef, model);
 
         // Create or Overload MetaData from Model with specified superName and fullname
         return createOrOverloadMetaDataWithName(parent, tc, model, superName, fullname);
@@ -96,13 +97,22 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
 
         if (model.getSuper() == null) return null;
 
-        // If the parent is not the MetaDataLoader, then see if the parent package is different
-        // and if so, use that to reference the superData
         String superPkgDef = pkgDef;
-        if (!(parent instanceof MetaDataLoader)) {
-            String p = MetaDataUtil.findPackageForMetaData(parent);
-            if (!p.isEmpty()) { //&& !p.equals( pkgDef ))  {
-                superPkgDef = p;
+
+        // If the model overrides the package, use that for the relative path
+        if (model.getPackage() != null && !model.getPackage().isEmpty()) {
+            superPkgDef = getPackage(parent,pkgDef, model);
+        }
+
+        // Otherwise, grab the parent package for the relative path
+        else {
+            // If the parent is not the MetaDataLoader, then see if the parent package is different
+            // and if so, use that to reference the superData
+            if (!(parent instanceof MetaDataLoader)) {
+                String p = MetaDataUtil.findPackageForMetaData(parent);
+                if (!p.isEmpty()) { //&& !p.equals( pkgDef ))  {
+                    superPkgDef = p;
+                }
             }
         }
 
@@ -117,12 +127,19 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
     protected <M extends MetaModel> String getPackage(MetaData parent, String pkgDef, M model) {
 
         String pkg = model.getPackage();
-        // NOTE:  Should it always be that you only fully qualify names when the parent
-        // is the MetaDataLoader?
-        if (pkg == null && parent instanceof MetaDataLoader)  {
-            pkg = pkgDef;
+
+        if (parent instanceof MetaDataLoader) {
+            if (pkg == null) {
+                pkg = pkgDef;
+            }
+            else {
+                pkg = MetaDataUtil.expandPackageForMetaDataRef(pkgDef,pkg);
+            }
         }
-        if ( pkg == null ) pkg="";
+        else if ( pkg == null ) {
+            pkg="";
+        }
+
         return pkg;
     }
 
@@ -130,6 +147,7 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
             MetaData parent, T tc, String pkgDef, M model ) {
 
         String pkg = getPackage(parent, pkgDef, model);
+        //if (pkg.isEmpty()) pkg=pkgDef;
 
         String name = model.getName();
         if ( name == null ) {

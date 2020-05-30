@@ -14,7 +14,7 @@ public abstract class SingleFileDirectGeneratorBase<T extends FileDirectWriter> 
     @Override
     public void execute( MetaDataLoader loader ) {
 
-        File outf = null;
+        String filename = null;
         PrintWriter pw = null;
         T writer = null;
 
@@ -22,7 +22,8 @@ public abstract class SingleFileDirectGeneratorBase<T extends FileDirectWriter> 
 
         try {
             // Create output file
-            outf = new File(getOutputDir(), getOutputFilename());
+            filename = getOutputFilename();
+            File outf = new File(getOutputDir(), filename );
             outf.createNewFile();
 
             // Get the printwriter
@@ -36,14 +37,14 @@ public abstract class SingleFileDirectGeneratorBase<T extends FileDirectWriter> 
             writeFile(writer);
         }
         catch( IOException e ) {
-            throw new GeneratorException( "Unable to write to file [" + outf + "]: " + e, e );
+            throw new GeneratorException( "Unable to write to file [" + filename + "]: " + e, e );
         }
         finally {
             if ( writer != null ) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    throw new GeneratorException( "Unable to close file [" + outf + "]: " + e, e );
+                    throw new GeneratorException( "Unable to close file [" + filename + "]: " + e, e );
                 }
             }
             else if ( pw != null ) pw.close();
