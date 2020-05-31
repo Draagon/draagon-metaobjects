@@ -13,11 +13,27 @@ import java.util.Collection;
 
 public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends DirectGeneratorBase {
 
+    public static String ARG_FINALOUTPUTDIR = "finalOutputDir";
+
+    protected File outDir = null;
+    protected File finalOutDir = null;
+
+    @Override
+    protected void parseArgs() {
+        super.parseArgs();
+
+        outDir = getOutputDir();
+        if (hasArg(ARG_FINALOUTPUTDIR)) {
+            finalOutDir = getFinalOutputDir();
+        } else {
+            finalOutDir = outDir;
+        }
+    }
+
     @Override
     public void execute( MetaDataLoader loader ) {
 
         String filename = null;
-        File outDir = null;
         OutputStream out = null;
         GeneratorIOWriter<?> writer = null;
 
@@ -52,7 +68,7 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
 
                 writer = getSingleWriter(loader, md, pw);
                 writer.withFilters(MetaDataFilters.create( getFilters() ))
-                        .withFilename( f.toString() );
+                        .withFilename( fn );
 
                 writeSingleFile( md, writer);
                 writer.close();
@@ -63,10 +79,11 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
 
             // Write any final files if specified
             if ( hasArg(ARG_OUTPUTFILENAME)) {
+
                 filename = getOutputFilename();
 
                 // Create output file
-                File outf = new File(getOutputDir(), getOutputFilename());
+                File outf = new File(finalOutDir, getOutputFilename());
                 outf.createNewFile();
 
                 // Get the printwriter
@@ -76,7 +93,7 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
                 if ( writer != null ) {
 
                     writer.withFilters(MetaDataFilters.create(getFilters()))
-                            .withFilename(outf.toString());
+                            .withFilename(getOutputFilename());
 
                     writeFinalFile(metadata, writer);
                 }
@@ -106,6 +123,10 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
                 }
             }
         }
+    }
+
+    protected File getFinalOutputDir() {
+        return getAndCreateDir( ARG_FINALOUTPUTDIR, getArg(ARG_FINALOUTPUTDIR, true ));
     }
 
     protected abstract Class<M> getFilterClass();

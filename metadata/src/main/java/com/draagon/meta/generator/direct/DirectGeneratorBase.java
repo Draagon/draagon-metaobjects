@@ -16,5 +16,9 @@ public abstract class DirectGeneratorBase extends GeneratorBase {
         throw new GeneratorException( "A Direct Generator does not support specifying scripts");
     }
 
-    protected void parseArgs() { }
+    /** Override this to handle argument parsing and validation */
+    protected void parseArgs() {
+        if (!hasArg(ARG_OUTPUTDIR)) throw new GeneratorException(
+                "You must set a valid output directory with arg '"+ARG_OUTPUTDIR+"'");
+    }
 }

@@ -1,6 +1,5 @@
 package com.draagon.meta.generator.direct.javacode.simple;
 
-import com.draagon.meta.generator.GeneratorBase;
 import com.draagon.meta.generator.GeneratorTestBase;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.uri.URIHelper;
@@ -14,7 +13,9 @@ import java.util.Map;
 
 public class SimpleJavaCodeGeneratorTest extends GeneratorTestBase {
 
-    public final static String ROOT_DIR = "./target/tests/javacode";
+    public final static String OUT_DIR = "./target/tests/javacode";
+    public final static String FINAL_OUT_DIR = "./target/tests/javacode/metadata";
+
     protected SimpleLoader loader = null;
 
     @Before
@@ -28,7 +29,8 @@ public class SimpleJavaCodeGeneratorTest extends GeneratorTestBase {
     public void testSimpleInterface1() throws IOException {
 
         Map<String,String> argMap = new HashMap<>();
-        argMap.put(SimpleJavaCodeGenerator.ARG_OUTPUTDIR, ROOT_DIR);
+        argMap.put(SimpleJavaCodeGenerator.ARG_OUTPUTDIR, OUT_DIR);
+        argMap.put(SimpleJavaCodeGenerator.ARG_FINALOUTPUTDIR, FINAL_OUT_DIR);
         argMap.put(SimpleJavaCodeGenerator.ARG_OUTPUTFILENAME, "test1-overlay-model.xml");
         argMap.put(SimpleJavaCodeGenerator.ARG_TYPE, SimpleJavaCodeGenerator.TYPE_INTERFACE);
         argMap.put(SimpleJavaCodeGenerator.ARG_PKGPREFIX, "com.draagon.meta.test1");
@@ -48,7 +50,8 @@ public class SimpleJavaCodeGeneratorTest extends GeneratorTestBase {
     public void testSimpleInterface2() throws IOException {
 
         Map<String,String> argMap = new HashMap<>();
-        argMap.put(SimpleJavaCodeGenerator.ARG_OUTPUTDIR, ROOT_DIR);
+        argMap.put(SimpleJavaCodeGenerator.ARG_OUTPUTDIR, OUT_DIR);
+        argMap.put(SimpleJavaCodeGenerator.ARG_FINALOUTPUTDIR, FINAL_OUT_DIR);
         argMap.put(SimpleJavaCodeGenerator.ARG_OUTPUTFILENAME, "test2-overlay-model.xml");
         argMap.put(SimpleJavaCodeGenerator.ARG_TYPE, SimpleJavaCodeGenerator.TYPE_INTERFACE);
         argMap.put(SimpleJavaCodeGenerator.ARG_PKGPREFIX, "com.draagon.meta.test2");

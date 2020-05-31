@@ -37,11 +37,14 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
 
     @Override
     protected void parseArgs() {
-
+        if ( hasArg(ARG_OUTPUTFILENAME) && !hasArg(ARG_FINALOUTPUTDIR)) throw new GeneratorException(
+                ARG_FINALOUTPUTDIR+" argument is required when a "+ARG_OUTPUTFILENAME+" is specified" );
         if ( !hasArg( ARG_TYPE)) throw new GeneratorException(
                 ARG_TYPE+" argument is required, valid values=["+TYPE_INTERFACE+"]" );
         if ( !getArg( ARG_TYPE).equals(TYPE_INTERFACE)) throw new GeneratorException(
                 ARG_TYPE+" argument only supports the following values: ["+TYPE_INTERFACE+"]" );
+
+        super.parseArgs();
 
         if ( log.isDebugEnabled() ) log.debug("ParseArgs: "+toString());
     }
@@ -97,6 +100,8 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
 
     @Override
     protected void writeSingleFile(MetaObject mo, GeneratorIOWriter<?> writer) throws GeneratorIOException {
+        log.info("Writing JavaCode ["+getType()+"] to file: " + writer.getFilename() );
+
         String className = ((SimpleJavaCodeWriter)writer).writeObject(mo);
         objectNameMap.put(mo, className);
     }
@@ -110,6 +115,7 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
 
     @Override
     protected void writeFinalFile(Collection<MetaObject> metadata, GeneratorIOWriter<?> writer) throws GeneratorIOException {
+        log.info("Writing JavaCode Overlay XML to file: " + writer.getFilename() );
         ((JavaCodeOverlayXMLWriter)writer).writeXML();
     }
 

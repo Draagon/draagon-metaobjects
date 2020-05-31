@@ -119,10 +119,7 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
 
     public String writeObject( MetaObject mo ) throws GeneratorIOException {
 
-        log.info("Writing JavaCode ["+type+"] to file: " + getFilename() );
-
         initVariables(mo);
-
 
         try {
             List<String> docs = Arrays.asList(
