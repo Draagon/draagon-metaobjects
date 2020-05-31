@@ -8,9 +8,7 @@ import com.draagon.meta.generator.MetaDataFilters;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Collection;
 
 public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends DirectGeneratorBase {
@@ -20,8 +18,8 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
 
         String filename = null;
         File outDir = null;
-        PrintWriter pw = null;
-        FileDirectWriter<?> writer = null;
+        OutputStream out = null;
+        GeneratorIOWriter<?> writer = null;
 
         parseArgs();
 
@@ -49,7 +47,8 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
                 f.createNewFile();
 
                 // Get the printwriter
-                pw = new PrintWriter(f);
+                out = new FileOutputStream(f);
+                PrintWriter pw = new PrintWriter(new OutputStreamWriter(out));
 
                 writer = getSingleWriter(loader, md, pw);
                 writer.withFilters(MetaDataFilters.create( getFilters() ))
@@ -71,9 +70,9 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
                 outf.createNewFile();
 
                 // Get the printwriter
-                pw = new PrintWriter(outf);
+                out = new FileOutputStream(outf);
 
-                writer = getFinalWriter(loader, pw);
+                writer = getFinalWriter(loader, out);
                 if ( writer != null ) {
 
                     writer.withFilters(MetaDataFilters.create(getFilters()))
@@ -82,7 +81,9 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
                     writeFinalFile(metadata, writer);
                 }
                 else {
-                    pw.close();
+                    OutputStream out2 = out;
+                    out = null;
+                    out2.close();
                 }
             }
         }
@@ -97,17 +98,23 @@ public abstract class MultiFileDirectGeneratorBase<M extends MetaData> extends D
                     throw new GeneratorException( "Unable to close file [" + filename + "]: " + e, e );
                 }
             }
-            else if ( pw != null ) pw.close();
+            else if ( out != null ) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    log.error("Error closing output stream for file [" + filename + "]: " + e, e );
+                }
+            }
         }
     }
 
     protected abstract Class<M> getFilterClass();
 
-    protected abstract <T extends FileDirectWriter> T getSingleWriter( MetaDataLoader loader, M md, PrintWriter pw ) throws GeneratorIOException;
+    protected abstract <T extends GeneratorIOWriter> T getSingleWriter( MetaDataLoader loader, M md, PrintWriter pw ) throws GeneratorIOException;
 
-    protected abstract <T extends GeneratorIOWriter> T getFinalWriter(MetaDataLoader loader, PrintWriter pw ) throws GeneratorIOException;
+    protected abstract <T extends GeneratorIOWriter> T getFinalWriter(MetaDataLoader loader, OutputStream out ) throws GeneratorIOException;
 
-    protected abstract void writeSingleFile( M md, FileDirectWriter<?> writer ) throws GeneratorIOException;
+    protected abstract void writeSingleFile( M md, GeneratorIOWriter<?> writer ) throws GeneratorIOException;
 
     protected abstract void writeFinalFile( Collection<M> metadata, GeneratorIOWriter<?>  writer ) throws GeneratorIOException;
 

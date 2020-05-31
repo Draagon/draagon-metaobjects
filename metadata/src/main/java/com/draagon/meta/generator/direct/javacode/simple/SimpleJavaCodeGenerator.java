@@ -1,20 +1,23 @@
-package com.draagon.meta.generator.direct.java.simple;
+package com.draagon.meta.generator.direct.javacode.simple;
 
 import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.GeneratorIOWriter;
-import com.draagon.meta.generator.direct.FileDirectWriter;
 import com.draagon.meta.generator.direct.MultiFileDirectGeneratorBase;
+import com.draagon.meta.generator.direct.javacode.overlay.JavaCodeOverlayXMLWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import org.apache.logging.log4j.util.Strings;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class JavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> {
+public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> {
 
     public final static String ARG_TYPE        = "type";      // [interface]
     public final static String TYPE_INTERFACE  = "interface";
@@ -26,6 +29,8 @@ public class JavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> 
 
     public final static String ARG_OPTARRAYS   = "optArrays";
     public final static String ARG_OPTKEYS     = "optKeys";      // [true|f]
+
+    protected Map<MetaObject,String> objectNameMap = new LinkedHashMap<>();
 
     //////////////////////////////////////////////////////////////////////
     // Argument Methods
@@ -78,8 +83,8 @@ public class JavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> 
     }
 
     @Override
-    protected JavaCodeWriter getSingleWriter(MetaDataLoader loader, MetaObject md, PrintWriter pw) throws GeneratorIOException {
-        return new JavaCodeWriter(loader, pw)
+    protected SimpleJavaCodeWriter getSingleWriter(MetaDataLoader loader, MetaObject md, PrintWriter pw) throws GeneratorIOException {
+        return new SimpleJavaCodeWriter(loader, pw)
                 .forType(getType())
                 .withPkgPrefix(getPkgPrefix())
                 .withPkgSuffix(getPkgSuffix())
@@ -91,19 +96,21 @@ public class JavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> 
     }
 
     @Override
-    protected void writeSingleFile(MetaObject md, FileDirectWriter<?> writer) throws GeneratorIOException {
-        ((JavaCodeWriter)writer).writeObject(md);
+    protected void writeSingleFile(MetaObject mo, GeneratorIOWriter<?> writer) throws GeneratorIOException {
+        String className = ((SimpleJavaCodeWriter)writer).writeObject(mo);
+        objectNameMap.put(mo, className);
     }
 
 
     @Override
-    protected FileDirectWriter getFinalWriter(MetaDataLoader loader, PrintWriter pw) throws GeneratorIOException {
-        return null;
+    protected GeneratorIOWriter getFinalWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
+        return new JavaCodeOverlayXMLWriter( loader, out )
+                .forObjects(objectNameMap);
     }
 
     @Override
     protected void writeFinalFile(Collection<MetaObject> metadata, GeneratorIOWriter<?> writer) throws GeneratorIOException {
-        // Do nothing for now
+        ((JavaCodeOverlayXMLWriter)writer).writeXML();
     }
 
     protected String getSingleOutputFilePath(MetaObject md) {

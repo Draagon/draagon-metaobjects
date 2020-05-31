@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.java.simple;
+package com.draagon.meta.generator.direct.javacode.simple;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.field.MetaField;
@@ -15,7 +15,7 @@ import org.apache.logging.log4j.util.Strings;
 import java.io.PrintWriter;
 import java.util.*;
 
-public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
+public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter> {
 
     protected Log log = LogFactory.getLog( getClass().getName() );
 
@@ -25,7 +25,7 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
 
     protected Collection<MetaObject> filteredObjects;
 
-    public JavaCodeWriter( MetaDataLoader loader, PrintWriter pw ) {
+    public SimpleJavaCodeWriter(MetaDataLoader loader, PrintWriter pw ) {
         super( loader, pw );
     }
 
@@ -40,37 +40,37 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
     protected boolean addArrays=false;
     protected boolean addKeys=false;
 
-    public JavaCodeWriter forType( String type ) {
+    public SimpleJavaCodeWriter forType(String type ) {
         this.type = type;
         return this;
     }
 
-    public JavaCodeWriter withPkgPrefix( String pkgPrefix) {
+    public SimpleJavaCodeWriter withPkgPrefix(String pkgPrefix) {
         this.pkgPrefix = pkgPrefix;
         return this;
     }
 
-    public JavaCodeWriter withPkgSuffix(String pkgSuffix) {
+    public SimpleJavaCodeWriter withPkgSuffix(String pkgSuffix) {
         this.pkgSuffix = pkgSuffix;
         return this;
     }
 
-    public JavaCodeWriter withNamePrefix(String namePrefix) {
+    public SimpleJavaCodeWriter withNamePrefix(String namePrefix) {
         this.namePrefix = namePrefix;
         return this;
     }
 
-    public JavaCodeWriter withNameSuffix(String nameSuffix) {
+    public SimpleJavaCodeWriter withNameSuffix(String nameSuffix) {
         this.nameSuffix = nameSuffix;
         return this;
     }
 
-    public JavaCodeWriter addArrayMethods( boolean addArrays) {
+    public SimpleJavaCodeWriter addArrayMethods(boolean addArrays) {
         this.addArrays = addArrays;
         return this;
     }
 
-    public JavaCodeWriter addKeyMethods(boolean addKeys) {
+    public SimpleJavaCodeWriter addKeyMethods(boolean addKeys) {
         this.addKeys = addKeys;
         return this;
     }
@@ -117,7 +117,7 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
     //////////////////////////////////////////////////////////////////////
     // Java Write Logic methods
 
-    public void writeObject( MetaObject mo ) throws GeneratorIOException {
+    public String writeObject( MetaObject mo ) throws GeneratorIOException {
 
         log.info("Writing JavaCode ["+type+"] to file: " + getFilename() );
 
@@ -142,6 +142,8 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
 
             // Write end of Java file
             drawObjectEnd();
+
+            return (pkg != null && !pkg.isEmpty()) ? pkg+"."+name : name;
         }
         catch( Exception e ) {
             throw new GeneratorIOException( this, "Error writing Java: "+e, e);
@@ -360,7 +362,7 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
         // Print Java Type Declaration
         print("public "+type+" "+name);
         if ( fullSuperName != null ) {
-            if ( type.equals(JavaCodeGenerator.TYPE_INTERFACE)) print( " extends "+fullSuperName);
+            if ( type.equals(SimpleJavaCodeGenerator.TYPE_INTERFACE)) print( " extends "+fullSuperName);
             else throw new UnsupportedOperationException("Cannot draw object start for type ["+type+"]");
         }
         println(" {");
@@ -371,7 +373,7 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
     }
 
     protected void drawGetter(String getterName, String valueClass) {
-        if ( !type.equals(JavaCodeGenerator.TYPE_INTERFACE))
+        if ( !type.equals(SimpleJavaCodeGenerator.TYPE_INTERFACE))
             throw new UnsupportedOperationException("Cannot draw method ["+getterName+"] for type ["+type+"]");
 
         // Print JavaDocs
@@ -385,7 +387,7 @@ public class JavaCodeWriter extends FileDirectWriter<JavaCodeWriter> {
     }
 
     protected void drawSetter(String setterName, String valueName, String valueClass) {
-        if ( !type.equals(JavaCodeGenerator.TYPE_INTERFACE))
+        if ( !type.equals(SimpleJavaCodeGenerator.TYPE_INTERFACE))
             throw new UnsupportedOperationException("Cannot draw method ["+setterName+"] for type ["+type+"]");
 
         // Print JavaDocs
