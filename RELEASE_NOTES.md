@@ -21,7 +21,6 @@ limitations under the License.
 [Apache License 2.0](LICENSE)
 
 # Known Issues
-* NullPointer on the MetaDataXSDWriter if no TypesConfig entries were loaded.
 
 # Upcoming Releases
 
@@ -47,6 +46,34 @@ limitations under the License.
   - Support for running generators after edit and viewing the output within the editor
 
 # Current Releases
+
+## Version 4.3.4 
+Improvements to Code Generation, Default field Values, MetaValidator validations on objects, and IO Json Serialization.  
+
+### Upgrade Steps
+*  Eased ClassLoader enforcement, as it was unnecessarily needed, so if you made changes in your
+   custom MetaDataLoader from 4.3.3, you can reverse those.  
+
+### Bug Fixes
+* NullPointer on the MetaDataXSDWriter if no TypesConfig entries were loaded.
+* mvn metaobjects:generate fails when loader configuration is in <execution> block 
+
+### Improvements
+*  <b>Support for Validators</b> to be used for validating the state of an Object.  On the MetaObject for the object, you can
+   call performValidation(object) or on the MetaField to validate a specific field's value on an object
+*  All validators defined on a MetaField are used by default, but you can also specify a 'validation' attribute as a
+   stringArray with a list of specified Validators to use as a subset.
+*  <b>Support for Default Field Values</b> with the 'defaultValue' attribute on MetaFields used in the Meta Model.  On the 
+   creation of an Object using the MetaObject.newInstance().  This will populate new objects with all configured 
+   default values.
+*  <b>Code Generation of Java interfaces</b> that can be used for the ProxyMetaObject, allowing for concreate objects as
+   interfaces, but no need to create implementations of them.   There is the ability to add an implementation using
+   the 'proxyObject' attribute on the 'object' definition in MetaModel
+*  <b>Code Generation of XML Object Overlay</b> file with the object attributes specifying the code generated
+   interfaces to use for MetaObject instantiation.
+*  Revamped the Json Writer/Readers to use <b>Gson with MetaObject TypeAdapters</b> for each MetaObject in the Loader, 
+   allowing for standard Gson serialization to work seamlessly, including mixed POJOs and MetaObject aware objects.  
+   <i>NOTE: This will allow for support in <b>Spring Boot</b> if you switch from Jackson to GSon for Json serialization.</i>
 
 ## Version 4.3.3 
 Revamped Classloader support for MetaData and MetaDataLoaders to support OSGi and Maven Plugins.  The
