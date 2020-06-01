@@ -17,7 +17,7 @@ public class JsonObjectIOTest extends ObjectIOTestBase {
         String filename = PRE+name+".json";
 
         writeJson(filename, o);
-        Object o2 = readJson(filename);
+        Object o2 = readJson(filename,o.getMetaData());
 
         Assert.assertEquals(name+"-json", o, o2);
     }

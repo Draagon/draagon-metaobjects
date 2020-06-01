@@ -190,15 +190,15 @@ public abstract class ObjectIOTestBase {
     protected void writeJson( String filename, Object vo ) throws IOException, MetaDataIOException {
 
         JsonObjectWriter writer = new JsonObjectWriter( loader, getTestFileWriter( filename ) );
-        writer.withIndent("  ");
+        writer.withPrettyPrint();
         writer.write( vo );
         writer.close();
     }
 
-    protected MappedObject readJson(String filename ) throws IOException, MetaDataIOException {
+    protected MappedObject readJson(String filename, MetaObject mo ) throws IOException, MetaDataIOException {
 
         JsonObjectReader reader = new JsonObjectReader( loader, getTestFileReader( filename ) );
-        MappedObject vo = (MappedObject) reader.read();
+        MappedObject vo = (MappedObject) reader.read(mo);
         reader.close();
         return vo;
     }

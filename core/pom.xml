@@ -96,7 +96,7 @@
                                     <classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-test-sources</outputDir>
-                                        <!--finalOutputDir>${project.basedir}/target/generated-test-resources</finalOutputDir-->
+                                        <finalOutputDir>${project.basedir}/target/generated-test-resources</finalOutputDir>
                                         <outputFilename>produce-v1-object-model.xml</outputFilename>
                                         <type>interface</type>
                                         <pkgPrefix>com.draagon.meta.test</pkgPrefix>

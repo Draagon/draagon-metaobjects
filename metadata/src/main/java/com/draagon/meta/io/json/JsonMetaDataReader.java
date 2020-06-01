@@ -4,45 +4,75 @@ import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.MetaDataReader;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.text.DateFormat;
 
 public abstract class JsonMetaDataReader extends MetaDataReader {
 
-    private final Gson gson;
     private final Reader reader;
-    private final JsonReader in;
+    private final GsonBuilder builder;
+
+    private Gson gson;
+    private JsonReader in;
 
     protected JsonMetaDataReader(MetaDataLoader loader, Reader reader ) {
         super(loader);
-        this.gson = new Gson();
+        this.builder = new GsonBuilder();
         this.reader = reader;
-        this.in = gson.newJsonReader( reader );
+    }
+
+    protected GsonBuilder builder() {
+        return builder;
+    }
+
+    public <T extends JsonMetaDataReader> T withDeserializer( Class<?> type, JsonDeserializer<?> deserializer) {
+        builder().registerTypeAdapter(type, deserializer);
+        return (T) this;
+    }
+
+    public <T extends JsonMetaDataReader> T withDateFormat(String pattern) {
+        builder().setDateFormat(pattern);
+        return (T) this;
+    }
+
+    protected void setDefaultDateFormat() {
+        builder.setDateFormat(DateFormat.FULL, DateFormat.FULL);
+    }
+
+    protected Gson gson() {
+        if ( gson == null ) {
+            gson = builder.create();
+        }
+        return gson;
     }
 
     protected JsonReader in() {
+        if (in == null) {
+            in = gson().newJsonReader( reader );
+        }
         return in;
     }
 
     @Override
     public void close() throws IOException {
 
-        if ( in!=null ) {
+        if (in != null) {
             try {
                 in.close();
-            }
-            catch (IOException e) {
-                /*if ( reader != null ) {
-                    try {
-                        reader.close();
-                    } catch (IOException ignore) {}
-                }*/
+            } catch (IOException e) {
                 throw new MetaDataIOException(this, e.toString(), e);
             }
+        }
+        else if (reader != null ) {
+            reader.close();
         }
     }
 }

@@ -4,52 +4,49 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataReader;
+import static com.draagon.meta.io.xml.XMLIOUtil.*;
+
 import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.object.gson.MetaObjectGsonInitializer;
 import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.google.gson.JsonIOException;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.draagon.meta.io.xml.XMLIOUtil.getObjectRef;
-
-public class JsonObjectReader extends JsonMetaDataReader {
+public class RawJsonObjectReader extends JsonMetaDataReader {
 
     public final static String TYPE_FIELD = "@type";
 
-    private final Reader reader;
-
-    public JsonObjectReader(MetaDataLoader loader, Reader reader ) {
+    public RawJsonObjectReader(MetaDataLoader loader, Reader reader ) {
         super(loader, reader);
-        this.reader = reader;
     }
 
     public static <T> T readObject( Class<T> clazz, MetaObject mo, Reader reader ) throws IOException {
-        JsonObjectReader writer = new JsonObjectReader(mo.getLoader(), reader);
+        RawJsonObjectReader writer = new RawJsonObjectReader(mo.getLoader(), reader);
         Object o = writer.read( mo);
         writer.close();
         return (T) o;
     }
 
-    //public Object read() throws IOException {
-    //    return read( null );
-    //}
+    public Object read() throws IOException {
+        return read( null );
+    }
 
     public Object read(MetaObject mo ) throws IOException {
 
         MetaObjectGsonInitializer.addSerializersToBuilder( getLoader(), builder());
 
         try {
-            Class c = mo.getObjectClass();
-            return gson().fromJson( reader, c);
-        } catch (ClassNotFoundException e) {
-            throw new MetaDataIOException( this, "Could not get ObjectClass for MetaObject: "+mo);
+            if ( !in().hasNext() ) return null;
+        } catch (IOException e) {
+            throw new MetaDataIOException( this, "Error reading MetaObject ["+mo+"]: "+e, e );
         }
+
+        return readObject( mo );
     }
 
     /*protected Object validate( Object o ) throws IOException {
