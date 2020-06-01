@@ -2,6 +2,7 @@ package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -880,16 +881,44 @@ public class MetaData implements Cloneable, Serializable {
                     ":" + subTypeName + ":" + fullname + "]";
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////
+    // Cache Methods
+
+    public interface GetValueForCache<T> {
+        T get();
+    };
+
+    protected final Object CACHE_NULL = new Object();
+
+    public <T> T useCache( String cacheKey, GetValueForCache<T> getter ) {
+        Object o = getCacheValue( cacheKey );
+        if ( o != null && o == CACHE_NULL ) return null;
+        T cacheValue = (T) o;
+        if ( cacheValue == null ) {
+            cacheValue = getter.get();
+            setCacheValue( cacheKey, cacheValue );
+        }
+        return cacheValue;
+    }
+
+    public interface GetValueForCacheWithArg<T,A> {
+        T get(A arg);
+    };
+
     /**
-     * This is called when the MetaData is modified
+     * The arg.toString() is appended to the CacheKeyPrefix
      */
-    protected void flushCaches() {
-
-        // Clear the local cache
-        cacheValues.clear();
-
-        // Clear the super data caches
-        if ( getSuperData() != null ) getSuperData().flushCaches();
+    public <T,A> T useCache( String cacheKeyPrefix, A arg, GetValueForCacheWithArg<T,A> getter ) {
+        final String CACHE_KEY = cacheKeyPrefix+"{"+arg+"}";
+        Object o = getCacheValue( CACHE_KEY );
+        if ( o != null && o == CACHE_NULL ) return null;
+        T cacheValue = (T) o;
+        if ( cacheValue == null ) {
+            cacheValue = getter.get(arg);
+            setCacheValue( CACHE_KEY, cacheValue );
+        }
+        return cacheValue;
     }
 
     /**
@@ -905,6 +934,18 @@ public class MetaData implements Cloneable, Serializable {
      */
     public Object getCacheValue(Object key) {
         return cacheValues.get(key);
+    }
+
+    /**
+     * This is called when the MetaData is modified
+     */
+    protected void flushCaches() {
+
+        // Clear the local cache
+        cacheValues.clear();
+
+        // Clear the super data caches
+        if ( getSuperData() != null ) getSuperData().flushCaches();
     }
 
     //////////////////////////////////////////////////////////////////////////////
