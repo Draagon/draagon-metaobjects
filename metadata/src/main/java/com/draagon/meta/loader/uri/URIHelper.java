@@ -22,7 +22,9 @@ public class URIHelper implements URIConstants {
             URI_SOURCE_FILE, URI_SOURCE_RESOURCE, URI_SOURCE_URL);
 
     public static URI toURI( String uriType, File f ) {
-        return constructURI( uriType, URI_SOURCE_FILE, f.toString() );
+        String in = f.getPath();
+        in = in.replace(File.separatorChar,'/');
+        return constructURI( uriType, URI_SOURCE_FILE, in );
     }
 
     public static URI toURI( String uriType, URL url ) {
@@ -237,7 +239,13 @@ public class URIHelper implements URIConstants {
             if ( i == 0 ) {
                 uriSource = tail.substring(2);
             } else {
-                uriSource = tail;
+                //i = tail.indexOf("/");
+                //if ( i == 0 && tail.indexOf(':')==2) {
+                //    uriSource = tail.substring(1);
+                //}
+                //else {
+                    uriSource = tail;
+                //}
             }
         }
         else if (token.startsWith("url")) {

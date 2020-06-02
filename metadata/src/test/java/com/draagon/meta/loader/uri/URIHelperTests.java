@@ -56,13 +56,20 @@ public class URIHelperTests {
     @Test
     public void uriValidFileSourceTest() throws URISyntaxException {
 
-        assertTrue(isValidUriSource(URI_SOURCE_FILE, "\\/\\/\\/\\/"));
+        // Windows
+        if ( File.pathSeparatorChar=='\\') {
+            assertFalse(isValidUriSource(URI_SOURCE_FILE, "\\/\\/\\/\\/"));
+        }
+        // Unix/Mac
+        else if ( File.pathSeparatorChar=='/') {
+            assertTrue(isValidUriSource(URI_SOURCE_FILE, "\\/\\/\\/\\/"));
+        }
 
         validateUriSource(URI_SOURCE_FILE, TEST_TYPES_FILE);
 
         URL url = getClass().getClassLoader().getResource(TEST_TYPES_RESOURCE);
 
-        validateUriSource(URI_SOURCE_FILE, url.toURI().toString());
+        validateUriSource(URI_SOURCE_FILE, url.toURI().getPath());
 
         File f = new File(url.toURI());
         validateUriSource(URI_SOURCE_FILE, f.toString());
@@ -79,7 +86,7 @@ public class URIHelperTests {
     public void uriModelTests() throws URISyntaxException {
 
         URL url = getClass().getClassLoader().getResource(TEST_TYPES_RESOURCE);
-        String in = url.toURI().toString();
+        String in = url.getPath();
         URIModel uriModel = toURIModel(URIConstants.URI_TYPE_TYPES + ":" + URIConstants.URI_SOURCE_FILE + ":" + in);
 
         assertEquals(URI_TYPE_TYPES, uriModel.getUriType());
