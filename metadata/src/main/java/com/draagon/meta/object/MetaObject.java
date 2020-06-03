@@ -137,13 +137,10 @@ public abstract class MetaObject extends MetaData {
     /**
      * Return the specified MetaField of the MetaObject
      */
-    public MetaField getMetaField(String name) {
+    public MetaField getMetaField(String fieldName) {
 
-        final String KEY = "getMetaField(" + name + ")";
-
-        MetaField f = (MetaField) getCacheValue(KEY);
-
-        if (f == null) {
+        return useCache( "getMetaField()", fieldName, name -> {
+            MetaField f = null;
             try {
                 f = (MetaField) getChild(name, MetaField.class);
             } catch (MetaDataNotFoundException e) {
@@ -153,14 +150,10 @@ public abstract class MetaObject extends MetaData {
                     } catch (MetaFieldNotFoundException ex) {
                     }
                 }
-
                 throw new MetaFieldNotFoundException("MetaField [" + name + "] does not exist in MetaObject [" + toString() + "]", name);
             }
-
-            setCacheValue(KEY, f);
-        }
-
-        return f;
+            return f;
+        });
     }
 
     /**
@@ -197,14 +190,21 @@ public abstract class MetaObject extends MetaData {
      */
     public Class<?> getObjectClass() throws ClassNotFoundException {
 
-        Class<?> c = null;
+        final String CACHE_KEY = "getObjectClass()";
+        Class<?> c = (Class<?>) getCacheValue(CACHE_KEY );
+        if ( c == null ) {
 
-        if ( hasObjectAttr())
-            c = getObjectClassFromAttr();
+            c = null;
 
-        if (c == null)
-            c = createClassFromMetaDataName( true );
+            if (hasObjectAttr()) {
+                c = getObjectClassFromAttr();
+            }
 
+            if (c == null)
+                c = createClassFromMetaDataName(true);
+
+            setCacheValue( CACHE_KEY, c );
+        }
         return c;
     }
 
@@ -256,7 +256,7 @@ public abstract class MetaObject extends MetaData {
      */
     public Object newInstance()  {
 
-        final String KEY = "ObjectClass";
+        final String KEY = "ObjectClassForNewInstance";
 
         // See if we have this cached already
         Class<?> oc = (Class<?>) getCacheValue( KEY );

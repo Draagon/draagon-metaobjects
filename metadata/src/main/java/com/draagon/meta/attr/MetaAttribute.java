@@ -1,9 +1,3 @@
-/*
- * Copyright 2002 Draagon Software LLC. All Rights Reserved.
- *
- * This software is the proprietary information of Draagon Software LLC.
- * Use is subject to license terms.
- */
 package com.draagon.meta.attr;
 
 import com.draagon.meta.*;
@@ -12,7 +6,7 @@ import com.draagon.meta.util.DataConverter;
 import java.util.Objects;
 
 /**
- * An attribute of a MetaClass, MetaField, or MetaView
+ * An attribute of any MetaDAta
  */
 @SuppressWarnings("serial")
 public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, MetaDataValueHandler<T> {

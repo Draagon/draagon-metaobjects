@@ -1,14 +1,6 @@
-/*
- * Copyright 2003 Draagon Software LLC. All Rights Reserved.
- *
- * This software is the proprietary information of Draagon Software LLC.
- * Use is subject to license terms.
- */
-
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
-import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
@@ -300,11 +292,32 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     protected void performValidation(Object obj, Object val)  {
-        // TODO: Add Caching!!!
-        // Run any defined validators
-        if (hasMetaAttr(ATTR_VALIDATION)) {
-            getValidatorList(getMetaAttr(ATTR_VALIDATION).getValueAsString()).forEach(v -> v.validate(obj, val));
-        }
+        // Run the default
+        getDefaultValidatorList().forEach(v -> v.validate(obj, val));
+    }
+
+    /**
+     * Returns validators specified in a 'validation' attribute stringArray
+     *  or returns all the validators attached to this MetaField
+     * @return List of validators to use for default validation checks
+     */
+    public List<MetaValidator> getDefaultValidatorList() {
+
+        return useCache( "getDefaultValidatorList()", () -> {
+
+                List<MetaValidator> validators = new ArrayList<MetaValidator>();
+
+                // See if there is a specified list of validators
+                if (hasMetaAttr(ATTR_VALIDATION)) {
+                    validators = getValidatorList(getMetaAttr(ATTR_VALIDATION).getValueAsString());
+                }
+                // Otherwise grab all the validators
+                else {
+                    validators = getValidators();
+                }
+
+                return validators;
+            });
     }
 
     /**
@@ -320,6 +333,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     public void addMetaValidator(MetaValidator validator) {
+        flushCaches();
         addChild(validator);
     }
 
@@ -331,38 +345,36 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * This method returns the list of validators based on the
      * comma delimited string name provided
      */
-    public List<MetaValidator> getValidatorList(String list)
-    //throws MetaValidatorNotFoundException
+    public List<MetaValidator> getValidatorList(String listAttr)
     {
-        ArrayList<MetaValidator> validators = new ArrayList<MetaValidator>();
+        return useCache( "getValidatorList()", listAttr, list -> {
 
-        while (list != null) {
+            List<MetaValidator> validators = new ArrayList<MetaValidator>();
+            while (list != null) {
 
-            String validator = null;
+                String validator = null;
 
-            int i = list.indexOf(',');
-            if (i >= 0) {
-                validator = list.substring(0, i).trim();
-                list = list.substring(i + 1);
-            } else {
-                validator = list.trim();
-                list = null;
+                int i = list.indexOf(',');
+                if (i >= 0) {
+                    validator = list.substring(0, i).trim();
+                    list = list.substring(i + 1);
+                } else {
+                    validator = list.trim();
+                    list = null;
+                }
+
+                if (validator.length() > 0)
+                    validators.add(getValidator(validator));
             }
-
-            if (validator.length() > 0)
-                validators.add(getValidator(validator));
-        }
-
-        return validators;
+            return validators;
+        });
     }
 
 
-    public MetaValidator getValidator(String name) {
-        try {
+    public MetaValidator getValidator(String validatorName) {
+        return useCache( "getValidator()", validatorName, name -> {
             return (MetaValidator) getChild(name, MetaValidator.class);
-        } catch (MetaDataNotFoundException e) {
-            throw new MetaValidatorNotFoundException("MetaValidator with name [" + name + "] not found in MetaField [" + toString() + "]", name);
-        }
+        });
     }
 
     public void validate() {
