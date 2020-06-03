@@ -8,7 +8,7 @@
     </parent>
   
     <artifactId>metaobjects</artifactId>
-    <version>4.3.4-SNAPSHOT</version>
+    <version>4.3.4</version>
     <packaging>pom</packaging>
 
     <name>MetaObjects</name>
@@ -19,7 +19,7 @@
         <connection>scm:git:git://github.com/Draagon/draagon-metaobjects.git</connection>
         <developerConnection>scm:git:git@github.com:Draagon/draagon-metaobjects.git</developerConnection>
         <url>https://github.com/Draagon/draagonmetaobjects</url>
-        <tag>HEAD</tag>
+        <tag>metaobjects-4.3.4</tag>
     </scm>
 
     <organization>
