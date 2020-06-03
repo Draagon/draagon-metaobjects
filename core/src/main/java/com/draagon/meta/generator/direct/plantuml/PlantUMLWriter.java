@@ -36,6 +36,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     protected Boolean showAttrs = null;
     protected Boolean showFields = null;
     protected Boolean showAbstracts = null;
+    protected Boolean drawKeys = null;
+    protected Boolean drawRefs = null;
     protected String embeddedName = null;
     protected List<String> embeddedValues = null;
     protected Boolean debug = null;
@@ -61,6 +63,16 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     public PlantUMLWriter showAbstracts( boolean showAbstracts ) {
         this.showAbstracts = showAbstracts;
+        return this;
+    }
+
+    public PlantUMLWriter drawKeys( boolean keys ) {
+        this.drawKeys = keys;
+        return this;
+    }
+
+    public PlantUMLWriter drawRefs( boolean refs ) {
+        this.drawRefs = refs;
         return this;
     }
 
@@ -90,6 +102,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         if (showAttrs == null) showAttrs = false;
         if (showFields == null) showFields = true;
         if (showAbstracts == null) showAbstracts = true;
+        if (drawKeys == null) drawKeys = true;
+        if (drawRefs == null) drawRefs = true;
         if (embeddedName == null) {
             embeddedName = ATTR_ISEMBEDDED;
             embeddedValues = Arrays.asList(Boolean.TRUE.toString());
@@ -105,11 +119,14 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         setDefaultOptions();
 
         if ( debug ) {
-            log.info("Writing PlantUML for file: " + getFilename() );
-            log.info("showAttrs:      " + showAttrs );
-            log.info("showAbstracts:  " + showAbstracts );
-            log.info("embeddedName:   " + embeddedName );
-            log.info("embeddedValues: " + embeddedValues );
+            log.info("Writing PlantUML for file: " + getFilename() +"\n"+
+                    "showAttrs:      " + showAttrs +"\n"+
+                    "showFields:     " + showFields +"\n"+
+                    "showAbstracts:  " + showAbstracts +"\n"+
+                    "drawKeys:       " + drawKeys +"\n"+
+                    "drawRefs:       " + drawRefs +"\n"+
+                    "embeddedName:   " + embeddedName +"\n"+
+                    "embeddedValues: " + embeddedValues );
         }
 
         try {
@@ -221,7 +238,12 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
             writeObjectParentRelationships(mo);
 
             // Write ObjectRef relationships
-            writeObjectRefRelationships(mo);
+            if ( drawKeys) {
+                writeObjectKeyRelationships(mo);
+            }
+            if ( drawRefs) {
+                writeObjectRefRelationships(mo);
+            }
         }
     }
 
@@ -344,7 +366,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         return mo.getChildren(ForeignKey.class, includeParentData);
     }
 
-    protected void writeObjectRefRelationships(MetaObject mo ) throws IOException {
+    protected void writeObjectKeyRelationships(MetaObject mo ) throws IOException {
 
         // Write Fields
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
@@ -379,7 +401,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         }
     }
 
-    protected void writeObjectRefRelationshipsViaObjectRef(MetaObject mo ) throws IOException {
+    protected void writeObjectRefRelationships(MetaObject mo ) throws IOException {
 
         // Write Fields
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
@@ -489,8 +511,9 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected MetaObject getMetaObjectRef(MetaField f) {
-        try { return MetaDataUtil.getObjectRef( f ); }
-        catch( Exception ignore ) { return null; }
+        if ( MetaDataUtil.hasObjectRef( f ))
+            return MetaDataUtil.getObjectRef( f );
+        return null;
     }
 
     protected Collection<MetaObject> getDerivedObjects(MetaObject metaObject) {
@@ -708,7 +731,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         if ( debug ) log.info("-- drawObjectRef: "+mo.getName()+"  -->  "+objRef.getName());
 
         print(true,_pu(mo,true) +" ");
-        print("\""+min+"\" --> \""+max+"\"");
+        print("\""+min+"\" --* \""+max+"\"");
         println(" "+ _pu(objRef,true) +" : "+ _pu(f));
     }
 

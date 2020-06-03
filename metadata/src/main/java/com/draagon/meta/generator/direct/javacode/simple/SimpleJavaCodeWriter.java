@@ -276,7 +276,7 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
             String vn = getClassName(mo);
             String pre = pkgPrefixMap.get(mo);
             if (pre != null) vn = pre+vn;
-            if ( mf.getDataType().isArray()) vn = "List<"+vn+">";
+            if ( mf.getDataType().isArray()) vn = "java.util.List<"+vn+">";
             return vn;
         }
 
@@ -291,9 +291,9 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
             case DOUBLE: return "Double";
             case DATE: return "java.lang.Date";
             case STRING: return "String";
-            case STRING_ARRAY: return "List<String>";
+            case STRING_ARRAY: return "java.util.List<String>";
             case OBJECT: return "Object";
-            case OBJECT_ARRAY: return "List<Object>";
+            case OBJECT_ARRAY: return "java.util.List<Object>";
 
             // TODO: Handle other types and Custom
             default: return "Object";
@@ -394,7 +394,7 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
         println(true," */");
 
         // Print Method declaration
-        println( true, "public "+setterName+"("+valueClass+" "+valueName+");");
+        println( true, "public void "+setterName+"("+valueClass+" "+valueName+");");
     }
 
     protected void drawNewLine() {

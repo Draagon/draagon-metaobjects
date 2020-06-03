@@ -113,6 +113,7 @@ public class PlantUMLTest extends GeneratorTestBase {
 
         Map<String,String> args = new HashMap<>();
         args.put( "showAttrs", "false" );
+        args.put( "showFields", "true" );
         args.put( "showAbstracts", "true" );
         args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-7.pu" );
 
