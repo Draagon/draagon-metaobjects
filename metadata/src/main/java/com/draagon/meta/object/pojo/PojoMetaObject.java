@@ -64,18 +64,32 @@ public class PojoMetaObject extends MetaObject {
         b.append(name.substring(1));
     }
 
+    protected String getGetterName( MetaField f, String prefix ) {
+        // Create the getter name
+        StringBuilder m = new StringBuilder();
+        m.append( prefix);
+        uppercase( m, f.getName() );
+        return m.toString();
+    }
+
     /**
      * Get the getter method name for the object for this MetaField
      * @param f MetaField to get the getter for
      * @return Name of getter method
      */
-    protected String getGetterName(MetaField f) {
+    protected Method findGetterName(Class objClass, MetaField f) {
 
-        // Create the getter name
-        StringBuilder m = new StringBuilder();
-        m.append("get");
-        uppercase( m, f.getName() );
-        return m.toString();
+        Method method = null;
+        try {
+            method = objClass.getMethod( getGetterName(f,"get"));
+        } catch (NoSuchMethodException e) {
+            try {
+                method = objClass.getMethod( getGetterName(f,"is"));
+            } catch (NoSuchMethodException e2) {
+                throw new NoSuchMethodError("No getter exists named [get/is" +f.getName()+ "] on object [" +objClass.getName()+ "]");
+            }
+        }
+        return method;
     }
 
     /**
@@ -83,23 +97,14 @@ public class PojoMetaObject extends MetaObject {
      */
     protected Method retrieveGetterMethod(MetaField f, Class<?> objClass) //throws MetaException
     {
-        //synchronized (f) {
-            Method method = (Method) f.getCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName());
-            if (method == null) {
-                String name = getGetterName(f);
-                if ( name != null ) {
-                    try {
-                        method = objClass.getMethod(name); //, new Class[0]);
-                    } catch (NoSuchMethodException e) {
-                        throw new NoSuchMethodError("No getter exists named [" + name + "] on object [" + objClass.getName() + "]");
-                    }
-                }
+        Method method = (Method) f.getCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName());
+        if (method == null) {
+            method = findGetterName(objClass, f);
 
-                f.setCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName(), method);
-            }
+            f.setCacheValue(CACHE_PARAM_GETTER_METHOD + "." + objClass.getName(), method);
+        }
 
-            return method;
-        //}
+        return method;
     }
 
     /**

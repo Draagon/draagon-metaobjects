@@ -35,11 +35,10 @@ public class DataMetaObject extends PojoMetaObject
     public final static List<String> ignoreGetterFieldNames = Arrays.asList( "class", "metaData" );
 
     @Override
-    protected String getGetterName( MetaField mf ) {
+    protected Method retrieveGetterMethod(MetaField mf, Class<?> objClass) {
         if ( ignoreGetterFieldNames.contains( mf.getName() )) return null;
-        return super.getGetterName( mf );
+        return super.retrieveGetterMethod( mf, objClass );
     }
-
 
     /**
      * Constructs the MetaClassObject for MetaObjects

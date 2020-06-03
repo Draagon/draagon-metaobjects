@@ -1,5 +1,6 @@
 package com.draagon.meta.object.proxy;
 
+import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 
@@ -33,10 +34,12 @@ public class ProxyObjectHandler implements InvocationHandler {
             if ( proxyObject instanceof ProxyAccessor ) {
                 ProxyAccessor access = (ProxyAccessor) proxyObject;
 
-                if ( name.startsWith("get") && objects == null) {
+                if (( name.startsWith("get") || name.startsWith("is"))
+                        && objects == null) {
                     return access._getValueByName(getField(name));
                 }
-                else if ( name.startsWith("set") && objects != null && objects.length==1) {
+                else if (name.startsWith("set")
+                        && objects != null && objects.length==1) {
                     access._setValueByName(getField(name), objects[0]);
                     return null;
                 }
@@ -47,7 +50,12 @@ public class ProxyObjectHandler implements InvocationHandler {
     }
 
     protected String getField( String name ) {
-        String f = name.substring(3);
+
+        int index = 3;
+        if ( name.startsWith("set") || name.startsWith("get")) index = 3;
+        else if (name.startsWith("is")) index = 2;
+
+        String f = name.substring(index);
         f = f.substring(0,1).toLowerCase() + f.substring(1);
         if ( metaObject.getMetaField(f) == null ) {
             throw new IllegalArgumentException("MetaField["+f+"] did not exist for method name ["+name+"] "+

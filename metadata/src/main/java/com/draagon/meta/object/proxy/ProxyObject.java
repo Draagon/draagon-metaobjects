@@ -42,7 +42,12 @@ public class ProxyObject implements ProxyAccessor, MetaObjectAware, Validatable 
     }
 
     protected String getField( Method method, String name ) {
-        String f = name.substring(3);
+
+        int index = 3;
+        if ( name.startsWith("set") || name.startsWith("get")) index = 3;
+        else if (name.startsWith("is")) index = 2;
+
+        String f = name.substring(index);
         f = f.substring(0,1).toLowerCase() + f.substring(1);
         if ( metaObject.getMetaField(f) == null ) {
             throw new IllegalArgumentException("MetaField["+f+"] did not exist for method name ["+method.getName()+"] on ProxyObject" );
