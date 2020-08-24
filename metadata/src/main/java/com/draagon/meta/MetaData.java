@@ -774,9 +774,6 @@ public class MetaData implements Cloneable, Serializable {
     ////////////////////////////////////////////////////
     // DEPRECATED CHILDREN METHODS
 
-    /**
-     * @deprecated Only exists for deprecated support
-     */
     /*private String getTypeForClass( Class<?> c ) {
         switch( c.getSimpleName() ) {
             case "MetaAttribute": return MetaAttribute.TYPE_ATTR;

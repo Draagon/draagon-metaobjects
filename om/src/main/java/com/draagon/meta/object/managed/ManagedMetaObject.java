@@ -1,9 +1,3 @@
-/*
- * Copyright 2002 Draagon Software LLC. All Rights Reserved.
- *
- * This software is the proprietary information of Draagon Software LLC.
- * Use is subject to license terms.
- */
 package com.draagon.meta.object.managed;
 
 import com.draagon.meta.MetaDataException;
@@ -12,7 +6,8 @@ import com.draagon.meta.manager.ManagerAwareMetaObject;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.manager.StateAwareMetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
-import com.draagon.meta.util.Converter;
+import com.draagon.meta.util.DataConverter;
+
 import java.lang.reflect.Method;
 
 @SuppressWarnings("serial")
@@ -265,7 +260,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
 
         // Convert the value to the appropriate type
         if (value != null && f.getValueClass() != value.getClass()) {
-            value = Converter.toType(f.getType(), value);
+            value = DataConverter.toType(f.getDataType(), value);
         }
 
         if (hasSetterMethod(f, obj.getClass())) {

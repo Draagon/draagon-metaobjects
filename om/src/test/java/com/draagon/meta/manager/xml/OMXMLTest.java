@@ -12,7 +12,7 @@ package com.draagon.meta.manager.xml;
 
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import com.draagon.meta.loader.file.LocalMetaDataSources;
+import com.draagon.meta.loader.file.LocalFileMetaDataSources;
 import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.manager.ObjectConnection;
@@ -46,7 +46,7 @@ public class OMXMLTest {
             loader = new FileMetaDataLoader(
                     new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
-                            .addSources(new LocalMetaDataSources(
+                            .addSources(new LocalFileMetaDataSources(
                                     Arrays.asList(
                                             "com/draagon/meta/loader/xml/metaobjects.types.xml",
                                             "metadata/test/produce/v1/produce-v1.bundle")

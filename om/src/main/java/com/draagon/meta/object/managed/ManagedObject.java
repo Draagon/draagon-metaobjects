@@ -1,9 +1,3 @@
-/*
- * Copyright 2003 Draagon Software LLC. All Rights Reserved.
- *
- * This software is the proprietary information of Draagon Software LLC.
- * Use is subject to license terms.
- */
 package com.draagon.meta.object.managed;
 
 import com.draagon.meta.MetaDataException;
@@ -14,7 +8,7 @@ import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.MetaObjectNotFoundException;
-import com.draagon.meta.util.Converter;
+import com.draagon.meta.util.DataConverter;
 
 import java.io.Serializable;
 import java.util.*;
@@ -176,22 +170,22 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
         Value v = (Value) getObjectAttributeValue(name);                      
 
         // Convert to the proper object type       
-        attr = Converter.toType(getMetaField(name).getType(), attr);
+        attr = DataConverter.toType(getMetaField(name).getDataType(), attr);
 
         // Set the value
         v.setValue(attr);
     }
     
     protected MetaField getMetaField( String name ) {
-        return MetaObject.forObject(this).getMetaField(name);
+        return getMetaData().getMetaField(name);
     }
 
     public Collection<MetaField> getMetaFields() {
-        return MetaObject.forObject(this).getMetaFields();
+        return getMetaData().getMetaFields();
     }
     
     public boolean hasMetaField( String name ) {
-        return MetaObject.forObject(this).hasMetaField(name);
+        return getMetaData().hasMetaField(name);
     }
             
     /**
@@ -349,13 +343,13 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
 
     public Short getShort(String name) //throws MetaException
     {
-        return Converter.toShort(getObjectAttribute(name));
+        return DataConverter.toShort(getObjectAttribute(name));
         //return getMetaField( name ).getShort( this );
     }
 
     public Integer getInt(String name) //throws MetaException
     {
-        return Converter.toInt(getObjectAttribute(name));
+        return DataConverter.toInt(getObjectAttribute(name));
         //return getMetaField( name ).getInt( this );
     }
 
@@ -367,31 +361,31 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
 
     public Long getLong(String name) //throws MetaException
     {
-        return Converter.toLong(getObjectAttribute(name));
+        return DataConverter.toLong(getObjectAttribute(name));
         //return getMetaField( name ).getLong( this );
     }
 
     public Float getFloat(String name) //throws MetaException
     {
-        return Converter.toFloat(getObjectAttribute(name));
+        return DataConverter.toFloat(getObjectAttribute(name));
         //return getMetaField( name ).getFloat( this );
     }
 
     public Double getDouble(String name) //throws MetaException
     {
-        return Converter.toDouble(getObjectAttribute(name));
+        return DataConverter.toDouble(getObjectAttribute(name));
         //return getMetaField( name ).getDouble( this );
     }
 
     public String getString(String name) //throws MetaException
     {
-        return Converter.toString(getObjectAttribute(name));
+        return DataConverter.toString(getObjectAttribute(name));
         //return getMetaField( name ).getString( this );
     }
 
     public Date getDate(String name) //throws MetaException
     {
-        return Converter.toDate(getObjectAttribute(name));
+        return DataConverter.toDate(getObjectAttribute(name));
         //return getMetaField( name ).getDate( this );
     }
 

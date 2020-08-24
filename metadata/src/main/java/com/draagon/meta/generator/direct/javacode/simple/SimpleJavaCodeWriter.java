@@ -289,7 +289,7 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
             case LONG: return "Long";
             case FLOAT: return "Float";
             case DOUBLE: return "Double";
-            case DATE: return "java.lang.Date";
+            case DATE: return "java.util.Date";
             case STRING: return "String";
             case STRING_ARRAY: return "java.util.List<String>";
             case OBJECT: return "Object";

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
+import com.draagon.meta.DataTypes;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.MetaData;
@@ -176,7 +177,8 @@ public class SimpleMappingHandlerDB implements MappingHandler {
 			ColumnDef colDef = new ColumnDef( col, getSQLType( mf ));
 			
 			// Set the length of the varchar field
-			colDef.setLength( mf.getLength() );
+			// TODO:  Length should be an attribute
+			colDef.setLength( getSQLLength( mf ));
 			
 			// Is it a primary key?
 			String key = getPersistenceAttribute( mf , ObjectManager.IS_KEY );
@@ -235,19 +237,37 @@ public class SimpleMappingHandlerDB implements MappingHandler {
 	}
 	
 	protected int getSQLType( MetaField mf ) {
-		switch( mf.getType() )
+		switch( mf.getDataType() )
 		{
-		case MetaField.BOOLEAN: return Types.BIT;
-		case MetaField.BYTE: return Types.TINYINT;
-		case MetaField.SHORT: return Types.SMALLINT;
-		case MetaField.INT: return Types.INTEGER;
-		case MetaField.DATE:  return Types.TIMESTAMP;
-		case MetaField.LONG: return Types.BIGINT;
-		case MetaField.FLOAT: return Types.FLOAT;
-		case MetaField.DOUBLE: return Types.DOUBLE;
-		case MetaField.STRING: return Types.VARCHAR;
-		case MetaField.OBJECT: return Types.BLOB;
+		case BOOLEAN: return Types.BIT;
+		case BYTE: return Types.TINYINT;
+		case SHORT: return Types.SMALLINT;
+		case INT: return Types.INTEGER;
+		case DATE:  return Types.TIMESTAMP;
+		case LONG: return Types.BIGINT;
+		case FLOAT: return Types.FLOAT;
+		case DOUBLE: return Types.DOUBLE;
+		case STRING: return Types.VARCHAR;
+		case OBJECT: return Types.BLOB;
 		default: throw new IllegalArgumentException( "Unable to get SQL type for MetaField [" + mf + "] with type (" + mf.getType() + ")" );
+		}
+	}
+
+	protected int getSQLLength( MetaField mf ) {
+		// TODO:  Support length on metafield as validator or attribute
+		switch( mf.getDataType() )
+		{
+			case BOOLEAN: return 1;
+			case BYTE: return 2;
+			case SHORT: return 4;
+			case INT:
+			case DATE:
+			case LONG:
+			case FLOAT:
+			case DOUBLE: return 8;
+			case STRING: return 50;
+			case OBJECT: return 100;
+			default: throw new IllegalArgumentException( "Unable to get SQL type for MetaField [" + mf + "] with type (" + mf.getType() + ")" );
 		}
 	}
 
@@ -260,9 +280,9 @@ public class SimpleMappingHandlerDB implements MappingHandler {
 
 		InheritanceRef def = (InheritanceRef) mc.getCacheValue( INHERITANCE_REF );
 		if ( def == null ) {
-			if ( !mc.hasAttribute( INHERITANCE_REF )) return null;
+			if ( !mc.hasMetaAttr( INHERITANCE_REF )) return null;
 
-			Properties props = (Properties) mc.getAttribute( INHERITANCE_REF );
+			Properties props = (Properties) mc.getMetaAttr( INHERITANCE_REF ).getValue();
 			if ( props == null ) return null;
 
 			def = new InheritanceRef( mc, props );

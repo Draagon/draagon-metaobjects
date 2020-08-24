@@ -18,6 +18,7 @@ public class Apple extends Fruit {
 
     private short worms;
     private String orchard;
+    private Long basketId;
 
     public Apple() {
     }
@@ -36,5 +37,13 @@ public class Apple extends Fruit {
 
     public void setOrchard(String orchard) {
         this.orchard = orchard;
+    }
+
+    public Long getBasketId() {
+        return basketId;
+    }
+
+    public void setBasketId( Long basketId ) {
+        this.basketId = basketId;
     }
 }

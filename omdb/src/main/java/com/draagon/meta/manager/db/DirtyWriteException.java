@@ -17,7 +17,7 @@ public class DirtyWriteException extends PersistenceException {
     }
 
     public DirtyWriteException( Object o ) {
-        super();
+        super("DirtyWriteException");
     	object = o;
     }
         

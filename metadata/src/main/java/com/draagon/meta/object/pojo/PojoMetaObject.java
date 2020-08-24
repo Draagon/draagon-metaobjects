@@ -86,7 +86,7 @@ public class PojoMetaObject extends MetaObject {
             try {
                 method = objClass.getMethod( getGetterName(f,"is"));
             } catch (NoSuchMethodException e2) {
-                throw new NoSuchMethodError("No getter exists named [get/is" +f.getName()+ "] on object [" +objClass.getName()+ "]");
+                throw new NoSuchMethodError("No getter exists named [(get/is)" +f.getName()+ "] on object [" +objClass.getName()+ "]");
             }
         }
         return method;

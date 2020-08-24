@@ -15,7 +15,7 @@ import com.draagon.meta.object.value.ValueMetaObject;
 import com.draagon.meta.manager.*;
 import com.draagon.meta.manager.db.driver.*;
 //import com.draagon.util.InitializationException;
-import com.draagon.cache.Cache;
+//import com.draagon.cache.Cache;
 import com.draagon.meta.manager.exp.Expression;
 
 import org.apache.commons.logging.Log;
@@ -54,7 +54,7 @@ public class ObjectManagerDB extends ObjectManager {
     private DatabaseDriver mDriver = null;
     private DataSource mSource = null;
     private boolean enforceTransaction = false;
-    private static Cache<String, MetaObject> templateCache = new Cache<String, MetaObject>(true, 3000, 1500);
+    //private static Cache<String, MetaObject> templateCache = new Cache<String, MetaObject>(true, 3000, 1500);
 
     //private ArrayList mValidatedClasses = new ArrayList();
     //private boolean autoCreateTables = false;
@@ -1270,7 +1270,7 @@ public class ObjectManagerDB extends ObjectManager {
             MetaObject resultClass = null;
 
             query = query.trim();
-            if (query.startsWith("[{")) {
+            /*if (query.startsWith("[{")) {
                 int i = query.indexOf("}]");
                 if (i <= 0) {
                     throw new MetaException("OQL does not contain a closing '}]': [" + query + "]");
@@ -1286,7 +1286,8 @@ public class ObjectManagerDB extends ObjectManager {
                     resultClass = ValueMetaObject.createFromTemplate(templateClassname, classTemplate);
                     templateCache.put(templateClassname, resultClass);
                 }
-            } else if (query.startsWith("[")) {
+            } else*/
+            if (query.startsWith("[")) {
                 int i = query.indexOf("]");
                 if (i <= 0) {
                     throw new MetaException("OQL does not contain a closing ']': [" + query + "]");
