@@ -15,13 +15,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public abstract class MetaObject extends MetaData {
 
-    private static Log log = LogFactory.getLog(MetaObject.class);
+    private static final Logger log = LoggerFactory.getLogger(MetaObject.class);
 
     /** Object TYPE */
     public final static String TYPE_OBJECT = "object";

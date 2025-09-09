@@ -2,8 +2,8 @@ package com.draagon.meta.generator.direct.plantuml;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.SingleFileDirectGeneratorBase;
 import com.draagon.meta.loader.MetaDataLoader;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -12,7 +12,7 @@ import static com.draagon.meta.generator.util.GeneratorUtil.getFilteredMetaData;
 
 public class PlantUMLGenerator extends SingleFileDirectGeneratorBase<PlantUMLWriter> {
 
-    protected Log log = LogFactory.getLog( this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(PlantUMLGenerator.class);
 
     public final static String ARG_SHOW_ATTRS = "showAttrs";
     public final static String ARG_SHOW_FIELDS = "showFields";

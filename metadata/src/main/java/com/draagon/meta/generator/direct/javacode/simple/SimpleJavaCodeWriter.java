@@ -8,16 +8,15 @@ import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.util.*;
 
 public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter> {
 
-    protected Log log = LogFactory.getLog( getClass().getName() );
+    private static final Logger log = LoggerFactory.getLogger(SimpleJavaCodeWriter.class);
 
     public final static String ATTR_JAVANAME ="javaName";
 
@@ -246,11 +245,11 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
 
     protected String getJavaPkg(MetaObject mo) {
         String path = mo.getPackage().replaceAll( "::", ".");
-        if ( Strings.isNotBlank(pkgPrefix)) {
+        if ( isNotBlank(pkgPrefix)) {
             if ( pkgPrefix.endsWith(".")) path = pkgPrefix+path;
             else path = pkgPrefix +"."+path;
         }
-        if ( Strings.isNotBlank(pkgSuffix)) {
+        if ( isNotBlank(pkgSuffix)) {
             if ( pkgSuffix.startsWith(".")) path = path+pkgSuffix;
             else path = path+"."+pkgSuffix;
         }
@@ -259,8 +258,8 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
 
     protected String getClassName(MetaObject md) {
         String name = md.getShortName();
-        if ( Strings.isNotBlank(namePrefix)) name = namePrefix+"-"+name;
-        if ( Strings.isNotBlank(nameSuffix)) name = name+"-"+nameSuffix;
+        if ( isNotBlank(namePrefix)) name = namePrefix+"-"+name;
+        if ( isNotBlank(nameSuffix)) name = name+"-"+nameSuffix;
         name = name.replaceAll("--","-");
         return GeneratorUtil.toCamelCase( name, true );
     }
@@ -399,5 +398,9 @@ public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter>
 
     protected void drawNewLine() {
         println();
+    }
+
+    private boolean isNotBlank(String str) {
+        return str != null && !str.trim().isEmpty();
     }
 }

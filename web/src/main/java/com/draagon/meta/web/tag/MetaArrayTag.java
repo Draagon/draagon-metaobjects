@@ -7,8 +7,8 @@
 
 package com.draagon.meta.web.tag;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -18,7 +18,7 @@ import javax.servlet.jsp.tagext.*;
 
 public class MetaArrayTag extends TagSupport
 {
-  private static Log log = LogFactory.getLog( MetaArrayTag.class );
+  private static final Logger log = LoggerFactory.getLogger(MetaArrayTag.class);
 
   private String name = null;
 

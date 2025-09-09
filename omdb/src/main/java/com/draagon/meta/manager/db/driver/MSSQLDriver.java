@@ -19,8 +19,8 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.manager.db.defs.ColumnDef;
 import com.draagon.meta.manager.db.defs.TableDef;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Object Manager Base is able to add, update, delete,
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class MSSQLDriver extends GenericSQLDriver
 {
-	private static Log log = LogFactory.getLog(MSSQLDriver.class);
+	private static final Logger log = LoggerFactory.getLogger(MSSQLDriver.class);
 
 	public MSSQLDriver() {
 	}

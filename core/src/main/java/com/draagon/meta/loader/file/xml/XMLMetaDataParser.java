@@ -8,8 +8,8 @@ import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
 import com.draagon.meta.util.XMLUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
@@ -20,7 +20,7 @@ import java.util.*;
 
 public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
-    private static Log log = LogFactory.getLog(XMLMetaDataParser.class);
+    private static final Logger log = LoggerFactory.getLogger(XMLMetaDataParser.class);
 
     public XMLMetaDataParser(FileMetaDataLoader loader, String filename ) {
         super( loader, filename );
@@ -183,6 +183,9 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             String name         = el.getAttribute(ATTR_NAME);
             String packageName  = el.getAttribute(ATTR_PACKAGE);
             String superName    = el.getAttribute(ATTR_SUPER);
+            Boolean isAbstract  = Boolean.parseBoolean( el.getAttribute(ATTR_ISABSTRACT));
+            Boolean isInterface = Boolean.parseBoolean( el.getAttribute(ATTR_ISINTERFACE));
+            String implementsArray = el.getAttribute(ATTR_IMPLEMENTS);
 
             // NOTE:  This exists for backwards compatibility
             // TODO:  Handle this based on a configuration of the level of error messages
@@ -199,7 +202,10 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             }
 
             // Create MetaData
-            MetaData md = createOrOverlayMetaData( isRoot, parent, typeName, subTypeName, name, packageName, superName);
+            MetaData md = createOrOverlayMetaData( isRoot,
+                    parent, typeName, subTypeName,
+                    name, packageName, superName,
+                    isAbstract, isInterface, implementsArray);
 
             // Update info msg if verbose
             if ( getLoader().getLoaderOptions().isVerbose() ) {

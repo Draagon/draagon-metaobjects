@@ -5,8 +5,8 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class FileMetaDataLoader extends MetaDataLoader {
 
-    private static Log log = LogFactory.getLog(FileMetaDataLoader.class);
+    private static final Logger log = LoggerFactory.getLogger(FileMetaDataLoader.class);
 
     public final static String SUBTYPE_FILE = "file";
 

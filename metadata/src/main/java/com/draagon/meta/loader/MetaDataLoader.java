@@ -13,8 +13,8 @@ import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.mojo.MojoSupport;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.object.MetaObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class MetaDataLoader extends MetaData implements MojoSupport {
 
-    private final static Log log = LogFactory.getLog(MetaDataLoader.class);
+    private static final Logger log = LoggerFactory.getLogger(MetaDataLoader.class);
 
     public final static String TYPE_LOADER = "loader";
     public final static String SUBTYPE_MANUAL = "manual";

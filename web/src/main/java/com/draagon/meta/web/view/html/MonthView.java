@@ -11,8 +11,8 @@ import com.draagon.meta.*;
 import com.draagon.util.Param;
 import com.draagon.meta.web.view.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import javax.servlet.jsp.*;
 
 public class MonthView extends HtmlView
 {
-  private static Log log = LogFactory.getLog( MonthView.class );
+  private static final Logger log = LoggerFactory.getLogger(MonthView.class);
 
   protected static List<String> months = null;
   

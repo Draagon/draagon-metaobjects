@@ -2,12 +2,12 @@ package com.draagon.meta.io;
 
 import com.draagon.meta.io.util.PathTracker;
 import com.draagon.meta.loader.MetaDataLoader;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class MetaDataWriter implements MetaDataIO {
 
-    protected Log log = LogFactory.getLog( this.getClass() );
+    private static final Logger log = LoggerFactory.getLogger(MetaDataWriter.class);
 
     private final MetaDataLoader loader;
     private final PathTracker path = new PathTracker();

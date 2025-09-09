@@ -12,8 +12,8 @@ import com.draagon.meta.*;
 import com.draagon.util.Param;
 import com.draagon.meta.web.view.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import javax.servlet.jsp.*;
 
 public class DateView extends MonthView {
 
-    private static Log log = LogFactory.getLog(DateView.class);
+    private static final Logger log = LoggerFactory.getLogger(DateView.class);
     private final static String ATTR_MINRANGE = "min.range";
     private final static String ATTR_MAXRANGE = "max.range";
     private final static String ATTR_EMPTYVALUE = "empty.value";

@@ -5,8 +5,6 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.xml.SingleXMLDirectGeneratorBase;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.OutputStream;
 

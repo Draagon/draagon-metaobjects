@@ -12,15 +12,15 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.exp.SortOrder;
 import com.draagon.meta.object.MetaObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 import java.util.Date;
 
 public class ObjectComparator implements Comparator<Object>
 {
-  private static Log log = LogFactory.getLog( ObjectComparator.class );
+  private static final Logger log = LoggerFactory.getLogger(ObjectComparator.class);
 
   private SortOrder mSort = null;
 

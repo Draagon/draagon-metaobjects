@@ -8,7 +8,6 @@ import com.draagon.meta.generator.direct.javacode.overlay.JavaCodeOverlayXMLWrit
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import org.apache.logging.log4j.util.Strings;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -122,12 +121,12 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
     protected String getSingleOutputFilePath(MetaObject md) {
 
         String path = md.getPackage().replaceAll( "::", ".");
-        if ( Strings.isNotBlank(getPkgPrefix())) {
+        if ( isNotBlank(getPkgPrefix())) {
             String pre = getPkgPrefix();
             if ( pre.endsWith(".")) path = pre+path;
             else path = pre+"."+path;
         }
-        if ( Strings.isNotBlank(getPkgSuffix())) {
+        if ( isNotBlank(getPkgSuffix())) {
             String suf = getPkgSuffix();
             if ( suf.startsWith(".")) path = path+suf;
             else path = path+"."+suf;
@@ -138,10 +137,14 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
 
     protected String getSingleOutputFilename(MetaObject md) {
         String name = md.getShortName();
-        if ( Strings.isNotBlank(getNamePrefix())) name = getNamePrefix()+"-"+name;
-        if ( Strings.isNotBlank(getNameSuffix())) name = name+"-"+getNameSuffix();
+        if ( isNotBlank(getNamePrefix())) name = getNamePrefix()+"-"+name;
+        if ( isNotBlank(getNameSuffix())) name = name+"-"+getNameSuffix();
         name = name.replaceAll("--","-");
         name = GeneratorUtil.toCamelCase( name, true )+".java";
         return name;
+    }
+
+    private boolean isNotBlank(String str) {
+        return str != null && !str.trim().isEmpty();
     }
 }

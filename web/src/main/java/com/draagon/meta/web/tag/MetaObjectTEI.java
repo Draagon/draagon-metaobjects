@@ -7,14 +7,14 @@
 
 package com.draagon.meta.web.tag;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.jsp.tagext.*;
 
 public class MetaObjectTEI extends TagExtraInfo
 {
-  private static Log log = LogFactory.getLog( MetaObjectTEI.class );
+  private static final Logger log = LoggerFactory.getLogger(MetaObjectTEI.class);
 
   public MetaObjectTEI()
   {

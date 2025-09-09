@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.draagon.meta.manager.db.defs.ColumnDef;
 import com.draagon.meta.manager.db.defs.TableDef;
@@ -25,7 +25,7 @@ import com.draagon.meta.manager.db.defs.TableDef;
  */
 public class MySQLDriver extends GenericSQLDriver {
 
-    private static Log log = LogFactory.getLog( MySQLDriver.class );
+    private static final Logger log = LoggerFactory.getLogger(MySQLDriver.class);
 
     /**
      *

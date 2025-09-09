@@ -1,14 +1,14 @@
 package com.draagon.meta.generator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
 
 public abstract class GeneratorBase implements Generator {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    private static final Logger log = LoggerFactory.getLogger(GeneratorBase.class);
 
     public static String ARG_OUTPUTDIR       = "outputDir";
     public static String ARG_OUTPUTFILENAME  = "outputFilename";

@@ -10,8 +10,8 @@ import com.draagon.meta.loader.types.ChildConfig;
 import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.util.MetaDataUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
  */
 public abstract class FileMetaDataParser {
 
-    private static Log log = LogFactory.getLog(FileMetaDataParser.class);
+    private static final Logger log = LoggerFactory.getLogger(FileMetaDataParser.class);
 
     public final static String ATTR_METADATA        = "metadata";
     public final static String ATTR_TYPESCONFIG     = "typesConfig";
@@ -44,6 +44,9 @@ public abstract class FileMetaDataParser {
     public final static String ATTR_DEFSUBTYPE      = "defaultSubType";
     public final static String ATTR_SUPER           = "super";
     public final static String ATTR_VALUE           = "value";
+    public final static String ATTR_ISABSTRACT      = "_isAbstract";
+    public final static String ATTR_ISINTERFACE     = "isInterface";
+    public final static String ATTR_IMPLEMENTS      = "implements";
 
     protected static List<String> reservedAttributes = new ArrayList<>();
     static {
@@ -57,6 +60,9 @@ public abstract class FileMetaDataParser {
         reservedAttributes.add( ATTR_SUBTYPES );
         reservedAttributes.add( ATTR_SUPER );
         reservedAttributes.add( ATTR_VALUE );
+        reservedAttributes.add( ATTR_ISABSTRACT );
+        reservedAttributes.add( ATTR_ISINTERFACE );
+        reservedAttributes.add( ATTR_IMPLEMENTS );
     }
 
     private FileMetaDataLoader loader;
@@ -175,7 +181,10 @@ public abstract class FileMetaDataParser {
     }
 
     /** Create or Overlay the MetaData */
-    protected MetaData createOrOverlayMetaData( boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, String superName) {
+    protected MetaData createOrOverlayMetaData( boolean isRoot,
+                                                MetaData parent, String typeName, String subTypeName,
+                                                String name, String packageName, String superName,
+                                                Boolean isAbstract, Boolean isInterface, String implementsArray ) {
 
         if ( subTypeName != null && subTypeName.equals("*")) subTypeName = null;
 
@@ -492,8 +501,10 @@ public abstract class FileMetaDataParser {
         }
 
         if ( attr == null && cc != null ) {
-            attr = (MetaAttribute) createOrOverlayMetaData(parentType.equals(MetaDataLoader.TYPE_LOADER), parentMetaData,
-                    cc.getType(), cc.getSubType(), attrName /*cc.getName()*/, null, null);
+            attr = (MetaAttribute) createOrOverlayMetaData(parentType.equals(MetaDataLoader.TYPE_LOADER),
+                    parentMetaData, cc.getType(), cc.getSubType(),
+                    attrName /*cc.getName()*/, null, null,
+                    null, null, null );
         }
 
         if ( attr != null ) {

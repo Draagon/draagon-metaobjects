@@ -19,8 +19,8 @@ import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.validator.ArrayValidator;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.RequiredValidator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
-    protected Log log = LogFactory.getLog( getClass().getName() );
+    private static final Logger log = LoggerFactory.getLogger(PlantUMLWriter.class);
 
     public final static String ATTR_ISEMBEDDED ="isEmbedded";
 

@@ -17,8 +17,8 @@ import com.draagon.meta.*;
 import com.draagon.meta.web.view.*;
 //import com.draagon.meta.web.view.html.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ import javax.servlet.jsp.tagext.*;
 
 public class MetaViewTag extends TagSupport
 {
-    private static Log log = LogFactory.getLog( MetaViewTag.class );
+    private static final Logger log = LoggerFactory.getLogger(MetaViewTag.class);
 
     public final static String READ = "read";
     public final static String EDIT = "edit";

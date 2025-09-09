@@ -18,8 +18,8 @@ import com.draagon.meta.manager.db.driver.*;
 //import com.draagon.cache.Cache;
 import com.draagon.meta.manager.exp.Expression;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Date;
@@ -38,7 +38,7 @@ import javax.sql.DataSource;
  */
 public class ObjectManagerDB extends ObjectManager {
 
-    private static Log log = LogFactory.getLog(ObjectManagerDB.class);
+    private static final Logger log = LoggerFactory.getLogger(ObjectManagerDB.class);
     private final static String CREATE_MAP_ATTR = "dbCreateMap";
     private final static String READ_MAP_ATTR = "dbReadMap";
     private final static String UPDATE_MAP_ATTR = "dbUpdateMap";
