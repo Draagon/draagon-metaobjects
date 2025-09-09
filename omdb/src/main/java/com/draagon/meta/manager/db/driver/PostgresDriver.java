@@ -14,8 +14,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.draagon.meta.MetaException;
 import com.draagon.meta.manager.db.defs.ColumnDef;
@@ -33,7 +33,7 @@ import com.draagon.meta.manager.exp.Range;
  */
 public class PostgresDriver extends GenericSQLDriver {
 
-	private static Log log = LogFactory.getLog( PostgresDriver.class );
+	private static final Logger log = LoggerFactory.getLogger(PostgresDriver.class);
 
 	/**
 	 *

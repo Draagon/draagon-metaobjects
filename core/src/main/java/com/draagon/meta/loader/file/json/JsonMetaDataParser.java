@@ -11,8 +11,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class JsonMetaDataParser extends FileMetaDataParser {
 
-    private static Log log = LogFactory.getLog(JsonMetaDataParser.class);
+    private static final Logger log = LoggerFactory.getLogger(JsonMetaDataParser.class);
 
     public JsonMetaDataParser(FileMetaDataLoader loader, String filename ) {
         super( loader, filename );
@@ -189,6 +189,9 @@ public class JsonMetaDataParser extends FileMetaDataParser {
             String name         = getValueAsString(el, ATTR_NAME);
             String packageName  = getValueAsString(el, ATTR_PACKAGE);
             String superName    = getValueAsString(el, ATTR_SUPER);
+            Boolean isAbstract  = getValueAsBoolean(el, ATTR_ISABSTRACT);
+            Boolean isInterface = getValueAsBoolean(el, ATTR_ISINTERFACE);
+            String implementsArray = getValueAsString(el, ATTR_IMPLEMENTS);
 
             // See if the specified type exists or not
             if ( getTypesConfig().getTypeByName( typeName ) == null ) {
@@ -203,13 +206,16 @@ public class JsonMetaDataParser extends FileMetaDataParser {
             }
 
             // Create MetaData
-            MetaData md = createOrOverlayMetaData( isRoot, parent, typeName, subTypeName, name, packageName, superName);
+            MetaData md = createOrOverlayMetaData( isRoot,
+                    parent, typeName, subTypeName,
+                    name, packageName, superName,
+                    isAbstract, isInterface, implementsArray );
 
             // Different behavior if it's a MetaAttribute
             if ( md instanceof MetaAttribute) {
                 parseMetaAttributeValue( (MetaAttribute) md, el );
             }
-            // otherwide, parse as normal recursively
+            // otherwise, parse as normal recursively
             else {
                 // Parse any extra attributes
                 parseAttributes( md, el );

@@ -9,8 +9,8 @@ package com.draagon.meta.object.value;
 import com.draagon.meta.ValueException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.DataConverter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -24,7 +24,7 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
 
     private static final long serialVersionUID = 6888178049723946186L;
 
-    static final Log log = LogFactory.getLog( ValueObject.class );
+    static final Logger log = LoggerFactory.getLogger(ValueObject.class);
 
     /**
      * Create a generic value object that supports extensions by default

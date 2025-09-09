@@ -11,8 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.MetaException;
@@ -29,7 +29,7 @@ import com.draagon.meta.manager.db.defs.ColumnDef;
  */
 public class OracleDriver extends GenericSQLDriver {
 
-  private static Log log = LogFactory.getLog( OracleDriver.class );
+  private static final Logger log = LoggerFactory.getLogger(OracleDriver.class);
 
   public OracleDriver()
   {

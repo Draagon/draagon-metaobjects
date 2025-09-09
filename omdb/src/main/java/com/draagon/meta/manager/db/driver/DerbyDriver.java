@@ -5,8 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.draagon.meta.manager.db.defs.ColumnDef;
 import com.draagon.meta.manager.db.defs.TableDef;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class DerbyDriver extends GenericSQLDriver 
 {
-	private static Log log = LogFactory.getLog( DerbyDriver.class );
+	private static final Logger log = LoggerFactory.getLogger(DerbyDriver.class);
 
 	/**
 	 * Creates a table in the database

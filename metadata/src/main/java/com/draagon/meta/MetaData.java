@@ -4,8 +4,8 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MetaData implements Cloneable, Serializable {
 
-    protected final Log log = LogFactory.getLog( this.getClass().getName() );
+    private static final Logger log = LoggerFactory.getLogger(MetaData.class);
 
     public final static String PKG_SEPARATOR = "::";
     public final static String SEPARATOR = PKG_SEPARATOR;

@@ -16,8 +16,8 @@ import com.draagon.meta.web.view.ViewHelper;
 import com.draagon.meta.web.view.WebView;
 import com.draagon.meta.web.view.WebViewException;
 import com.draagon.util.web.URLConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public class HotLinkView extends HtmlView {
 
-    private static Log log = LogFactory.getLog(HotLinkView.class);
+    private static final Logger log = LoggerFactory.getLogger(HotLinkView.class);
     public final static String ATTR_LINKCLASS = "linkClass";
     public final static String ATTR_URL = "url";
 

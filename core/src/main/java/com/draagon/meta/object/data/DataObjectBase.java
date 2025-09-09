@@ -17,8 +17,8 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.Validatable;
 import com.draagon.meta.util.DataConverter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
@@ -30,7 +30,7 @@ import java.util.*;
  */
 public abstract class DataObjectBase implements Serializable, MetaObjectAware, Validatable {
 
-    static final Log log = LogFactory.getLog( DataObjectBase.class );
+    static final Logger log = LoggerFactory.getLogger(DataObjectBase.class);
 
     /** Holds a Value for the DataObject.
      * Used to know if null was explicitly set or the Value didn't exist.  Can also be enhanced to support the last

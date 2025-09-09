@@ -17,8 +17,8 @@ import com.draagon.meta.manager.exp.Range;
 import com.draagon.meta.manager.exp.SortOrder;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.XMLUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,7 +42,7 @@ import java.util.*;
  */
 public class ObjectManagerXML extends ObjectManager
 {
-  private static Log log = LogFactory.getLog( ObjectManagerXML.class );
+  private static final Logger log = LoggerFactory.getLogger(ObjectManagerXML.class);
 
   private Map<MetaObject,List<Object>> tables = new Hashtable<MetaObject,List<Object>>();
   private String mRoot = null;

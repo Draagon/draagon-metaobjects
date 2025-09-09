@@ -1,8 +1,8 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaDataException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -16,7 +16,7 @@ import java.util.Scanner;
  */
 public class FileMetaDataSources {
 
-    private static Log log = LogFactory.getLog(FileMetaDataSources.class);
+    private static final Logger log = LoggerFactory.getLogger(FileMetaDataSources.class);
 
     /** Holds the SourceData */
     public static class SourceData {

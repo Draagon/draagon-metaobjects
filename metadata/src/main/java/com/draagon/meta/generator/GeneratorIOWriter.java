@@ -2,13 +2,13 @@ package com.draagon.meta.generator;
 
 import com.draagon.meta.io.MetaDataWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class GeneratorIOWriter<T extends GeneratorIOWriter> extends MetaDataWriter {
 
-    protected Log log = LogFactory.getLog( this.getClass() );
+    protected static final Logger log = LoggerFactory.getLogger(GeneratorIOWriter.class);
 
     private MetaDataFilters filters;
     private String name;

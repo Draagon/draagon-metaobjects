@@ -10,8 +10,8 @@ package com.draagon.meta.util;
 
 import java.io.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -31,7 +31,7 @@ import javax.xml.transform.stream.StreamResult;
  */
 public class XMLUtil
 {
-    private static Log log = LogFactory.getLog( XMLUtil.class );
+    private static final Logger log = LoggerFactory.getLogger(XMLUtil.class);
 
     /**
      * Loads all the classes specified in the Filename

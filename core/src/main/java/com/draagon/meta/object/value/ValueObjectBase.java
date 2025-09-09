@@ -3,14 +3,14 @@ package com.draagon.meta.object.value;
 
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.data.DataObjectBase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public abstract class ValueObjectBase extends DataObjectBase implements Map<String, Object> {
 
-    static final Log log = LogFactory.getLog( ValueObjectBase.class );
+    static final Logger log = LoggerFactory.getLogger(ValueObjectBase.class);
 
     /**
      * Create a generic value object that supports extensions by default

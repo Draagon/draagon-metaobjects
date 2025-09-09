@@ -18,8 +18,8 @@ import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.exp.*;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 //import javax.servlet.*;
@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class ObjectManager
 {
-	private static Log log = LogFactory.getLog( ObjectManager.class );
+	private static final Logger log = LoggerFactory.getLogger(ObjectManager.class);
 
 	public final static String IS_KEY       = "isKey";
 	public final static String IS_READONLY  = "isReadOnly";

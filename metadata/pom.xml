@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.3.5-SNAPSHOT</version>
+        <version>4.5.0-SNAPSHOT</version>
     </parent>
   
     <artifactId>metaobjects-metadata</artifactId>
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.9</version>
+            <version>2.13.1</version>
         </dependency>
         <dependency>
             <groupId>xml-apis</groupId>

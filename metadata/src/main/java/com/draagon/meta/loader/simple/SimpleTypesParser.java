@@ -6,8 +6,8 @@ import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.types.TypesConfigParser;
 import com.draagon.meta.loader.uri.URIHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class SimpleTypesParser extends TypesConfigParser<InputStream> {
 
-    Log log = LogFactory.getLog(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(SimpleTypesParser.class);
 
     protected SimpleTypesParser( TypesConfigLoader loader, ClassLoader classLoader, String sourceName) {
         super(loader, classLoader, sourceName);
