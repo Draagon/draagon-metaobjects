@@ -132,8 +132,8 @@ public class RawJsonObjectReader extends JsonMetaDataReader {
 
         MetaObject mo2 = getLoader().getMetaObjectByName( objectName );
 
-        // TODO: Do a check to handle if mo2 is derivated from mo
-        if ( mo != null && !mo2.isSameTypeSubTypeName( mo )) {
+        // Check if mo2 is compatible with mo (same type or derived from mo)
+        if ( mo != null && !mo2.isSameTypeSubTypeName( mo ) && !isInheritanceCompatible(mo2, mo)) {
             throw new MetaDataIOException( this, "Specified MetaObject ["+mo2+"] is not "+
                     "compatible with ["+mo+"]");
         }
@@ -209,6 +209,20 @@ public class RawJsonObjectReader extends JsonMetaDataReader {
         } else {
             throw new MetaDataIOException(this, "Custom DataType and does not implement JsonSerializationHandler [" + mf + "]");
         }
+    }
+
+    /**
+     * Check if child is compatible with parent through inheritance hierarchy
+     */
+    private boolean isInheritanceCompatible(MetaObject child, MetaObject parent) {
+        MetaObject current = child;
+        while (current != null) {
+            if (current.isSameTypeSubTypeName(parent)) {
+                return true;
+            }
+            current = current.getSuperObject();
+        }
+        return false;
     }
 
     @Override

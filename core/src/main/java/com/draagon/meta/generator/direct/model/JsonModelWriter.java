@@ -9,12 +9,16 @@ import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
 public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(JsonModelWriter.class);
 
     public JsonModelWriter(MetaDataLoader loader, Writer writer ) throws GeneratorIOException {
         super(loader, writer);
@@ -51,7 +55,8 @@ public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter
         if ( md instanceof MetaAttribute ) {
             MetaAttribute attr = (MetaAttribute) md;
             if ( !writeAttrNameValue( "value", attr )) {
-                // TODO:  Log an error or throw a warning here?
+                log.warn("Unable to serialize attribute value of type {} for attribute {}, falling back to string representation", 
+                         attr.getValue() != null ? attr.getValue().getClass().getName() : "null", attr.getName());
                 out().name("value").value( attr.getValueAsString() );
             }
         }

@@ -229,7 +229,7 @@ public abstract class FileMetaDataParser {
         // Get the TypeModel map for this element
         TypeConfig types = getTypesConfig().getTypeByName( typeName );
         if ( types == null ) {
-            // TODO:  What is the best behavior here?
+            // Throw exception for unknown types to ensure metadata integrity
             throw new MetaDataException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
         }
 

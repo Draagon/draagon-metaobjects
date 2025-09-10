@@ -177,6 +177,8 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
 
     @Override
     public void validate() throws ValueException {
-        // TODO: Do nothing?
+        // ValueObject can exist without MetaData (generic value objects)
+        // This is different from DataObject which requires MetaData
+        // No validation needed for ValueObjects without MetaData
     }
 }

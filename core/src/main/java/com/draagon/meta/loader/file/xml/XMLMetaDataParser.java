@@ -188,7 +188,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             String implementsArray = el.getAttribute(ATTR_IMPLEMENTS);
 
             // NOTE:  This exists for backwards compatibility
-            // TODO:  Handle this based on a configuration of the level of error messages
+            // Handle unknown types based on strict mode configuration
             if ( getTypesConfig().getTypeByName( typeName ) == null ) {
                 if ( getLoader().getLoaderOptions().isStrict() ) {
                     throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");

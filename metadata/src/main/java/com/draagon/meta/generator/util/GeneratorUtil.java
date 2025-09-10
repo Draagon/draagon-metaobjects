@@ -80,27 +80,39 @@ public class GeneratorUtil {
     }
 
     public static boolean filterByMetaData(MetaData md, String metaDataFilter) {
+        if (metaDataFilter == null || metaDataFilter.trim().isEmpty()) {
+            return false;
+        }
 
-        // TODO:  Add better error handling
-        String [] v1 = metaDataFilter.split( "=");
-        if ( v1.length > 0 ) {
+        try {
+            String [] v1 = metaDataFilter.split( "=");
+            if ( v1.length > 0 ) {
 
-            String[] attrs = v1[0].split(":");
-            if ( attrs.length == 2 && attrs[0].equals("[attr")) {
+                String[] attrs = v1[0].split(":");
+                if ( attrs.length == 2 && attrs[0].equals("[attr")) {
 
-                String an = attrs[1].substring( 0, attrs[1].length()-1);
-                if ( md.hasMetaAttr( an ) ) {
-                    if (v1.length > 1) {
-                        String[] vals = v1[1].split("\"");
-                        if ( vals.length > 0 ) {
-                            return vals[0].equals( md.getMetaAttr(an).getValueAsString() );
-                        }
+                    String attrName = attrs[1];
+                    if (attrName.length() < 2 || !attrName.endsWith("]")) {
+                        return false; // Malformed attribute syntax
                     }
-                    else {
-                        return true;
+                    
+                    String an = attrName.substring( 0, attrName.length()-1);
+                    if ( md.hasMetaAttr( an ) ) {
+                        if (v1.length > 1) {
+                            String[] vals = v1[1].split("\"");
+                            if ( vals.length > 0 ) {
+                                return vals[0].equals( md.getMetaAttr(an).getValueAsString() );
+                            }
+                        }
+                        else {
+                            return true;
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            // Return false for any malformed filter syntax
+            return false;
         }
 
         return false;

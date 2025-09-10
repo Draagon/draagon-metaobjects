@@ -84,9 +84,10 @@ public class ArrayValidator extends MetaValidator {
                 }
             }
             else {
-                // TODO: Decide on whether to just error out when it's not an array.  Or use the "strict" flag
+                // For non-array values, only validate if minimum size constraint would be violated
+                // This allows single values to pass when minSize <= 1
                 if ( getMinSize() > 1 ) {
-                    throw new InvalidValueException( "The value was not an array and the size must be less than "+ getMinSize());
+                    throw new InvalidValueException( "The value was not an array and the size must be at least "+ getMinSize());
                 }
             }
         }

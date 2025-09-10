@@ -93,7 +93,6 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware, V
      * @param name Name of the object
      */
     public DataObjectBase(String name ) {
-        // TODO:  Do we force a MetaObject attached in the future to have the same name...?
         objectName = name;
     }
 
@@ -131,6 +130,12 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware, V
     
     @Override
     public void setMetaData(MetaObject mo) {
+        // Validate name consistency if both objectName and MetaObject name are present
+        if (objectName != null && mo != null && mo.getName() != null 
+            && !objectName.equals(mo.getName())) {
+            throw new IllegalArgumentException(
+                "MetaObject name [" + mo.getName() + "] does not match object name [" + objectName + "]");
+        }
 
         metaObject = mo;
 

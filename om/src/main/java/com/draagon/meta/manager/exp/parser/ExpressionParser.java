@@ -211,10 +211,9 @@ public class ExpressionParser
         case SHORT: value = new Short( name ); break;
         case BYTE: value = new Byte( name ); break;
         case BOOLEAN: value = new Boolean( name ); break;
-        // TODO: Handle date processing properly
         case DATE:
         	{
-        		value = DateFormat.getDateTimeInstance().format( name ); break;
+        		value = DateFormat.getDateTimeInstance().parse( name ); break;
         	}
         // TODO: Add support for other types
         default: value = name; break;
