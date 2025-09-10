@@ -24,7 +24,7 @@ limitations under the License.
 
 # Upcoming Releases
 
-## Version 4.4.0 
+## Version 4.5.1 
 
 ### Planned Features
 * <b>Native support for Abstract and Interface MetaData</b>
