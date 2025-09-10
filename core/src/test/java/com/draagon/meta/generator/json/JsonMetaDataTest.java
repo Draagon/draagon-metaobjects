@@ -73,7 +73,6 @@ public class JsonMetaDataTest extends GeneratorTestBase {
             MetaData md2 = loader.getMetaDataByName( MetaData.class, md.getName() );
             Assert.assertEquals( md.getName(), md, md2);
             Assert.assertTrue( md.getName(), md.equals(md2));
-            //System.out.println( "MATCH: " +md+ " == " + md2 );
         }
     }
 }

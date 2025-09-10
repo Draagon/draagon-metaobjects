@@ -28,6 +28,11 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
 
     public final static String ARG_OPTARRAYS   = "optArrays";
     public final static String ARG_OPTKEYS     = "optKeys";      // [true|f]
+    
+    // Error message constants
+    private static final String ERROR_FINALOUTPUTDIR_REQUIRED = " argument is required when a " + ARG_OUTPUTFILENAME + " is specified";
+    private static final String ERROR_TYPE_REQUIRED = " argument is required, valid values=[" + TYPE_INTERFACE + "]";
+    private static final String ERROR_TYPE_INVALID = " argument only supports the following values: [" + TYPE_INTERFACE + "]";
 
     protected Map<MetaObject,String> objectNameMap = new LinkedHashMap<>();
 
@@ -37,11 +42,11 @@ public class SimpleJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaOb
     @Override
     protected void parseArgs() {
         if ( hasArg(ARG_OUTPUTFILENAME) && !hasArg(ARG_FINALOUTPUTDIR)) throw new GeneratorException(
-                ARG_FINALOUTPUTDIR+" argument is required when a "+ARG_OUTPUTFILENAME+" is specified" );
+                ARG_FINALOUTPUTDIR + ERROR_FINALOUTPUTDIR_REQUIRED );
         if ( !hasArg( ARG_TYPE)) throw new GeneratorException(
-                ARG_TYPE+" argument is required, valid values=["+TYPE_INTERFACE+"]" );
+                ARG_TYPE + ERROR_TYPE_REQUIRED );
         if ( !getArg( ARG_TYPE).equals(TYPE_INTERFACE)) throw new GeneratorException(
-                ARG_TYPE+" argument only supports the following values: ["+TYPE_INTERFACE+"]" );
+                ARG_TYPE + ERROR_TYPE_INVALID );
 
         super.parseArgs();
 

@@ -52,7 +52,7 @@ public class ExpressionParseError extends MetaDataException
 
   public String toString()
   {
-    StringBuffer b = new StringBuffer( msgKey );
+    StringBuilder b = new StringBuilder( msgKey );
     if ( arg1 != null ) {
       b.append( '(' );
       b.append( arg1 );

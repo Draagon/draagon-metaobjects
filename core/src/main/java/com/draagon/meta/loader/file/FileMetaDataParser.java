@@ -22,7 +22,22 @@ import java.util.TreeMap;
 import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 /**
- * Absract FileMetaDataParser for reading from source files
+ * Abstract FileMetaDataParser for reading metadata from source files.
+ * 
+ * <p>This base class provides common functionality for parsing metadata from various
+ * file formats (JSON, XML, etc.) and converting them into MetaData objects. Subclasses
+ * implement the specific parsing logic for their respective file formats.</p>
+ * 
+ * <p>Key responsibilities:</p>
+ * <ul>
+ *   <li>Managing file parsing context and configuration</li>
+ *   <li>Handling type configuration and metadata creation</li>
+ *   <li>Providing common parsing utilities and error handling</li>
+ *   <li>Tracking parsing statistics and information</li>
+ * </ul>
+ * 
+ * @author Draagon Software
+ * @since 4.4.0
  */
 public abstract class FileMetaDataParser {
 
@@ -97,6 +112,12 @@ public abstract class FileMetaDataParser {
 
     /** Create the FileMetaDataParser */
     protected FileMetaDataParser(FileMetaDataLoader loader, String filename ) {
+        if (loader == null) {
+            throw new IllegalArgumentException("FileMetaDataLoader cannot be null");
+        }
+        if (filename == null || filename.trim().isEmpty()) {
+            throw new IllegalArgumentException("Filename cannot be null or empty");
+        }
         this.loader = loader;
         this.filename = filename;
     }
@@ -111,17 +132,34 @@ public abstract class FileMetaDataParser {
         return filename;
     }
 
-    /** Set default package name */
+    /**
+     * Sets the default package name for metadata objects parsed from this file.
+     * 
+     * @param defPkg the default package name to use, may be null or empty
+     */
     protected void setDefaultPackageName(String defPkg ) {
-        this.defaultPackageName = defPkg;
+        this.defaultPackageName = (defPkg != null) ? defPkg.trim() : "";
     }
 
-    /** Set default package name */
+    /**
+     * Gets the default package name for metadata objects parsed from this file.
+     * 
+     * @return the default package name, may be null or empty
+     */
     protected String getDefaultPackageName() {
         return defaultPackageName;
     }
 
-    /** Load the metadata models from the inputstream */
+    /**
+     * Loads and parses metadata models from the provided input stream.
+     * 
+     * <p>This is the main parsing method that subclasses must implement to handle
+     * their specific file format. The implementation should read from the stream
+     * and populate the loader with parsed metadata objects.</p>
+     * 
+     * @param is the input stream containing the metadata to parse
+     * @throws MetaDataException if parsing fails due to invalid format or content
+     */
     public abstract void loadFromStream( InputStream is );
 
     /** Get the MetaDataTypes from the loader's MetaDataConfig */

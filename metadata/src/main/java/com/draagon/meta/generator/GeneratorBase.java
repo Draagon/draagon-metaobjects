@@ -6,6 +6,24 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.*;
 
+/**
+ * Base implementation for all metadata generators.
+ * 
+ * <p>Provides common functionality for code/configuration generators including
+ * argument handling, filtering, and output management. Subclasses implement
+ * specific generation logic for different output formats and targets.</p>
+ * 
+ * <p>Core features:</p>
+ * <ul>
+ *   <li>Argument parsing and validation</li>
+ *   <li>Metadata filtering and selection</li>
+ *   <li>Output directory and file management</li>
+ *   <li>Script execution support</li>
+ * </ul>
+ * 
+ * @author Draagon Software  
+ * @since 4.4.0
+ */
 public abstract class GeneratorBase implements Generator {
 
     private static final Logger log = LoggerFactory.getLogger(GeneratorBase.class);
@@ -19,7 +37,9 @@ public abstract class GeneratorBase implements Generator {
 
     @Override
     public GeneratorBase setArgs(Map<String, String> argMap) {
-         args.putAll( argMap );
+        if (argMap != null) {
+            args.putAll( argMap );
+        }
         return this;
     }
 
@@ -28,6 +48,9 @@ public abstract class GeneratorBase implements Generator {
     }
 
     protected String getArg( String name ) {
+        if (name == null) {
+            return null;
+        }
         return args.get( name );
     }
     protected String getArg( String name, String defValue ) {
@@ -45,7 +68,7 @@ public abstract class GeneratorBase implements Generator {
     }
 
     protected boolean hasArg( String name ) {
-        return args.containsKey( name );
+        return name != null && args.containsKey( name );
     }
 
     @Override
@@ -97,7 +120,7 @@ public abstract class GeneratorBase implements Generator {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer(this.getClass().getSimpleName()+"{");
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName()+"{");
         sb.append("args=").append(getArgs());
         sb.append(", filters=").append(getFilters());
         sb.append(", scripts=").append(getScripts());

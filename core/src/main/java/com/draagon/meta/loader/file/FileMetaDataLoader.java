@@ -23,6 +23,10 @@ public class FileMetaDataLoader extends MetaDataLoader {
     private static final Logger log = LoggerFactory.getLogger(FileMetaDataLoader.class);
 
     public final static String SUBTYPE_FILE = "file";
+    
+    // File extension constants
+    public static final String XML_EXTENSION = "*.xml";
+    public static final String JSON_EXTENSION = "*.json";
 
     public FileMetaDataLoader(String name) {
         this( new FileLoaderOptions(), name );
@@ -95,8 +99,8 @@ public class FileMetaDataLoader extends MetaDataLoader {
         mojoInitArgs( args );
 
         FileLoaderOptions options = getLoaderOptions()
-                .addParser( "*.xml", XMLMetaDataParser.class)
-                .addParser( "*.json", JsonMetaDataParser.class);
+                .addParser( XML_EXTENSION, XMLMetaDataParser.class)
+                .addParser( JSON_EXTENSION, JsonMetaDataParser.class);
 
         init();
     }

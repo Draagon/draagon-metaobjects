@@ -93,10 +93,9 @@ public class PlantUMLGenerator extends SingleFileDirectGeneratorBase<PlantUMLWri
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer(this.getClass().getSimpleName()+"{");
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName()+"{");
         sb.append("args=").append(getArgs());
         sb.append(", filters=").append(getFilters());
-        //sb.append(", scripts=").append(getScripts());
         sb.append(", showAttrs=").append(showAttrs);
         sb.append(", showFields=").append(showFields);
         sb.append(", showAbstracts=").append(showAbstracts);

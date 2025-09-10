@@ -177,12 +177,6 @@ public class DataConverterTests {
         assertEquals( Long.valueOf(5), DataConverter.toLong((float)5));
         assertEquals( Long.valueOf(5), DataConverter.toLong((double)5));
         //assertEquals( Double.valueOf(Double.MAX_VALUE), Double.valueOf( (double) DataConverter.toLong(Double.MAX_VALUE)));
-        //System.out.println( "1 " + Double.MIN_VALUE );
-        //System.out.println( "2 " + (double) Long.MIN_VALUE );
-        //System.out.println( "3 " + Double.compare( Double.MIN_VALUE, (double) Long.MIN_VALUE ));
-        //System.out.println( "4 " + (Double.MIN_VALUE < (double) Long.MIN_VALUE ));
-        //System.out.println( "5 " + (double) (long) Double.MIN_VALUE );
-        //System.out.println( "6 " + (Double.MIN_VALUE - (double) (long) Double.MIN_VALUE ));
         assertEquals( Float.valueOf((float)Long.MIN_VALUE+1f), Float.valueOf( (float) DataConverter.toLong(Float.valueOf((float)Long.MIN_VALUE+1f))));
         assertEquals( Float.valueOf((float)Long.MIN_VALUE-1f), Float.valueOf( (float) DataConverter.toLong(Float.valueOf((float)Long.MIN_VALUE-1f))));
         assertEquals( Double.valueOf((double)Long.MIN_VALUE-1d), Double.valueOf( (double) DataConverter.toLong(Double.valueOf((double)Long.MIN_VALUE-1d))));

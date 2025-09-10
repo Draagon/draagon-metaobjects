@@ -38,10 +38,9 @@ public class MetaDataXSDGenerator extends SingleXMLDirectGeneratorBase {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer(this.getClass().getSimpleName()+"{");
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName()+"{");
         sb.append("args=").append(getArgs());
         sb.append(", filters=").append(getFilters());
-        //sb.append(", scripts=").append(getScripts());
         sb.append(", nameSpace=").append(nameSpace);
         sb.append('}');
         return sb.toString();

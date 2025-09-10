@@ -42,7 +42,7 @@ public class HtmlViewHelper
 
   public static String getStyle( Map params )
   {
-    StringBuffer html = new StringBuffer();
+    StringBuilder html = new StringBuilder();
 
     String style = (String) params.get( "styleClass" );
     if ( style != null && !style.equals( "" ))
@@ -65,7 +65,7 @@ public class HtmlViewHelper
 
   private static String getStyleAttributes( Map params )
   {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     appendStyleAttribute( buf, params, "width" );
     appendStyleAttribute( buf, params, "height" );
@@ -73,7 +73,7 @@ public class HtmlViewHelper
     return buf.toString();
   }
 
-  private static void appendStyleAttribute( StringBuffer buf, Map params, String attr )
+  private static void appendStyleAttribute( StringBuilder buf, Map params, String attr )
   {
     String attrVal = (String) params.get( attr );
     if ( attrVal != null && attrVal.length() > 0 )
@@ -285,7 +285,7 @@ public class HtmlViewHelper
   public static String textToHtml( String text )
   {
     if ( text == null ) return "";
-    StringBuffer b = new StringBuffer();
+    StringBuilder b = new StringBuilder();
     for( int i = 0; i < text.length(); i++ )
     {
       int c = text.charAt( i );

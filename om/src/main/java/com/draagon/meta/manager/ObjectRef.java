@@ -86,7 +86,7 @@ public class ObjectRef {
   public String toString() {
     if ( mRef != null ) return mRef;
 
-    StringBuffer b = new StringBuffer();
+    StringBuilder b = new StringBuilder();
     b.append( OBJECTREF_PREFIX );
     b.append( getMetaClass().getName() );
     b.append( OBJECTREF_SEP );

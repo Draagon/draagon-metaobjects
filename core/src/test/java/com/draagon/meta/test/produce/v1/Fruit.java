@@ -102,7 +102,7 @@ public abstract class Fruit implements MetaObjectAware {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("Fruit{");
+        final StringBuilder sb = new StringBuilder("Fruit{");
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
         if ( length != null ) sb.append(", length=").append(length);
