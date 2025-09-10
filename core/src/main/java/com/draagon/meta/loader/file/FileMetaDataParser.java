@@ -310,7 +310,7 @@ public abstract class FileMetaDataParser {
                     superData = getLoader().getChild(packageName + MetaDataLoader.PKG_SEPARATOR + superName, types.getMetaDataClass() );
                 }
             } catch (MetaDataNotFoundException e) {
-                // TODO:  Should this throw a real exception
+                // This is expected behavior - try fallback to fully qualified name resolution
                 log.debug("Could not find MetaData [" + packageName + MetaDataLoader.PKG_SEPARATOR + superName + "], assuming fully qualified");
             }
 

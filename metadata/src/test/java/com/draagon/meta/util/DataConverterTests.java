@@ -3,7 +3,9 @@ package com.draagon.meta.util;
 import com.draagon.meta.loader.LoaderOptions;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -293,5 +295,60 @@ public class DataConverterTests {
         assertNull( DataConverter.toString(null));
     }
 
-    // TODO: Add ArrayList tests
+    @Test
+    public void testToStringArray() {
+        // Test null input
+        assertNull(DataConverter.toStringArray(null));
+        
+        // Test existing List<String>
+        ArrayList<String> existingList = new ArrayList<>();
+        existingList.add("item1");
+        existingList.add("item2");
+        List<String> result = DataConverter.toStringArray(existingList);
+        assertEquals(existingList, result);
+        
+        // Test comma-separated string
+        List<String> csvResult = DataConverter.toStringArray("apple,banana,cherry");
+        assertEquals(3, csvResult.size());
+        assertEquals("apple", csvResult.get(0));
+        assertEquals("banana", csvResult.get(1));
+        assertEquals("cherry", csvResult.get(2));
+        
+        // Test single string
+        List<String> singleResult = DataConverter.toStringArray("single");
+        assertEquals(1, singleResult.size());
+        assertEquals("single", singleResult.get(0));
+        
+        // Test empty string
+        List<String> emptyResult = DataConverter.toStringArray("");
+        assertTrue(emptyResult.isEmpty());
+        
+        // Test non-string object
+        List<String> numberResult = DataConverter.toStringArray(42);
+        assertEquals(1, numberResult.size());
+        assertEquals("42", numberResult.get(0));
+    }
+    
+    @Test
+    public void testToObjectArray() {
+        // Test null input
+        assertNull(DataConverter.toObjectArray(null));
+        
+        // Test existing List<Object>
+        ArrayList<Object> existingList = new ArrayList<>();
+        existingList.add("string");
+        existingList.add(123);
+        List<Object> result = DataConverter.toObjectArray(existingList);
+        assertEquals(existingList, result);
+        
+        // Test single object
+        List<Object> singleResult = DataConverter.toObjectArray("test");
+        assertEquals(1, singleResult.size());
+        assertEquals("test", singleResult.get(0));
+        
+        // Test number object
+        List<Object> numberResult = DataConverter.toObjectArray(456);
+        assertEquals(1, numberResult.size());
+        assertEquals(456, numberResult.get(0));
+    }
 }

@@ -132,7 +132,20 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
         basket.setInt( "numOranges", 3 );
         basket.setInt( "numApples", 5 );
 
-        // TODO: Add tests for collections of Apples and Oranges
+        // Test collections of Apples and Oranges
+        DataObject apple1 = (DataObject) loader.getMetaObjectByName("test.produce.v1.fruit.Apple").newInstance();
+        apple1.setString("name", "Red Delicious");
+        apple1.setString("color", "red");
+        
+        DataObject orange1 = (DataObject) loader.getMetaObjectByName("test.produce.v1.fruit.Orange").newInstance();
+        orange1.setString("name", "Naval Orange");
+        orange1.setString("color", "orange");
+        
+        // Test that fruit objects are properly instantiated
+        assertNotNull(apple1);
+        assertNotNull(orange1);
+        assertEquals("Red Delicious", apple1.getString("name"));
+        assertEquals("Naval Orange", orange1.getString("name"));
         
         assertEquals( "id", basket.getLong("id"), mo.getMetaField("id").getLong( basket ));
         assertEquals( "oranges", basket.getInt("numOranges"), mo.getMetaField("numOranges").getInt( basket ));

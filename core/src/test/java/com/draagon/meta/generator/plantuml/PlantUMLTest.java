@@ -134,7 +134,16 @@ public class PlantUMLTest extends GeneratorTestBase {
 
         generator.execute( loader );
 
-        // TODO: add tests
+        // Verify the output file was generated
+        String outputPath = getGeneratedTestSourcesPath();
+        String filename = args.get(GeneratorBase.ARG_OUTPUTFILENAME);
+        if (filename != null) {
+            java.io.File outputFile = new java.io.File(outputPath, filename);
+            assertTrue("Generated PlantUML file should exist: " + outputFile.getAbsolutePath(), 
+                      outputFile.exists());
+            assertTrue("Generated PlantUML file should not be empty", 
+                      outputFile.length() > 0);
+        }
     }
 
 }

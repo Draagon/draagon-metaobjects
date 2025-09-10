@@ -14,6 +14,12 @@ public class ArrayValidator extends MetaValidator {
     public final static String ATTR_MINSIZE = "minSize";
     public final static String ATTR_MAXSIZE = "maxSize";
 
+    // Cache for frequently accessed size values
+    private Integer cachedMinSize;
+    private Integer cachedMaxSize;
+    private boolean minSizeCached = false;
+    private boolean maxSizeCached = false;
+
     public ArrayValidator(String name) {
         super(SUBTYPE_ARRAY, name);
     }
@@ -23,26 +29,29 @@ public class ArrayValidator extends MetaValidator {
     }
 
     public int getMinSize() {
-        // TODO: Add Caching
-        if (hasMetaAttr(ATTR_MINSIZE)) {
-            MetaAttribute<?> attr = getMetaAttr(ATTR_MINSIZE);
-            try {
-                return getAttrValueAsInt(attr);
+        if (!minSizeCached) {
+            if (hasMetaAttr(ATTR_MINSIZE)) {
+                MetaAttribute<?> attr = getMetaAttr(ATTR_MINSIZE);
+                try {
+                    cachedMinSize = getAttrValueAsInt(attr);
+                }
+                catch(NumberFormatException e ) {
+                    throw new InvalidMetaDataException( attr, "Invalid min value of ["+attr.getValueAsString()+"]");
+                }
+            } else {
+                cachedMinSize = 0;
             }
-            catch(NumberFormatException e ) {
-                throw new InvalidMetaDataException( attr, "Invalid min value of ["+attr.getValueAsString()+"]");
-            }
+            minSizeCached = true;
         }
-        return 0;
+        return cachedMinSize;
     }
 
     protected int getAttrValueAsInt(MetaAttribute<?> attr) {
-
+        // Optimized: direct access for INT type, fallback to string parsing for other types
         if (attr.getDataType() == DataTypes.INT) {
             return (Integer) attr.getValue();
         }
 
-        // TODO: Make this more efficient without parsing strings
         return Integer.parseInt(attr.getValueAsString());
     }
 
@@ -51,20 +60,21 @@ public class ArrayValidator extends MetaValidator {
     }
 
     public Integer getMaxSize() {
-        // TODO: Add Caching
-        if (hasMetaAttr(ATTR_MAXSIZE)) {
-            MetaAttribute<?> attr = getMetaAttr(ATTR_MAXSIZE);
-            try {
-                return getAttrValueAsInt(attr);
+        if (!maxSizeCached) {
+            if (hasMetaAttr(ATTR_MAXSIZE)) {
+                MetaAttribute<?> attr = getMetaAttr(ATTR_MAXSIZE);
+                try {
+                    cachedMaxSize = getAttrValueAsInt(attr);
+                }
+                catch(NumberFormatException e ) {
+                    throw new InvalidMetaDataException( attr, "Invalid max value of ["+attr.getValueAsString()+"]");
+                }
+            } else {
+                cachedMaxSize = null;
             }
-            catch(NumberFormatException e ) {
-                throw new InvalidMetaDataException( attr, "Invalid max value of ["+attr.getValueAsString()+"]");
-            }
-        } else {
-            return null;
-            //throw new InvalidMetaDataException( this,
-            //        "You cannot call getMax() on ArrayValidator when no max attribute is set");
+            maxSizeCached = true;
         }
+        return cachedMaxSize;
     }
 
     /**

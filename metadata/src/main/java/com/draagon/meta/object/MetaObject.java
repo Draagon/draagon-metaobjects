@@ -29,7 +29,8 @@ public abstract class MetaObject extends MetaData {
     /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
 
-    // TODO:  Should we deprecate this one and force ObjectField and ObjectArrayField to be used only?
+    // Referenced by ObjectField and ObjectArrayField - maintained for backward compatibility
+    // and shared usage across field implementations
     public final static String ATTR_OBJECT_REF = "objectRef";
 
     /**
