@@ -3,7 +3,7 @@
 ## Project Overview
 MetaObjects is a Java-based suite of tools for metadata-driven development, providing sophisticated control over applications beyond traditional model-driven development techniques.
 
-- **Current Version**: 4.5.0-SNAPSHOT (latest stable: 4.5.0)
+- **Current Version**: 5.0.0 (latest stable: 5.0.0)
 - **License**: Apache License 2.0
 - **Java Version**: Java 21 (upgraded from Java 1.8)
 - **Build Tool**: Maven
@@ -68,7 +68,7 @@ mvn metaobjects:editor
 - **PlantUML diagram generation** from metadata definitions
 - **Maven plugin integration** for build-time code generation
 
-## Recent Major Changes (v4.5.0)
+## Recent Major Changes (v5.0.0)
 
 ### Java Modernization
 - Upgraded from Java 1.8 to Java 21

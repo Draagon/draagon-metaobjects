@@ -4,14 +4,29 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.type.MetaDataTypeDefinition;
+import com.draagon.meta.type.MetaDataTypeRegistry;
+import com.draagon.meta.cache.CacheStrategy;
+import com.draagon.meta.cache.HybridCache;
+import com.draagon.meta.collections.IndexedMetaDataCollection;
+import com.draagon.meta.event.*;
+import com.draagon.meta.metrics.MetaDataMetrics;
+import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.Validator;
+import com.draagon.meta.validation.MetaDataValidators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class MetaData implements Cloneable, Serializable {
 
@@ -20,8 +35,20 @@ public class MetaData implements Cloneable, Serializable {
     public final static String PKG_SEPARATOR = "::";
     public final static String SEPARATOR = PKG_SEPARATOR;
 
-    private final Map<Object, Object> cacheValues = Collections.synchronizedMap(new WeakHashMap<Object, Object>());
-    private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<>();
+    // Unified caching strategy
+    private final CacheStrategy cache = new HybridCache();
+    
+    // Indexed collection for O(1) child lookups
+    private final IndexedMetaDataCollection children = new IndexedMetaDataCollection();
+    
+    // Event system
+    private volatile MetaDataEventPublisher eventPublisher;
+    
+    // Metrics collection
+    private final MetaDataMetrics metrics;
+    
+    // Validation chain
+    private volatile ValidationChain validationChain;
 
     private final String type;
     private final String subType;
@@ -29,6 +56,9 @@ public class MetaData implements Cloneable, Serializable {
 
     private final String shortName;
     private final String pkg;
+    
+    // Type system integration
+    private volatile MetaDataTypeDefinition typeDefinition;
 
     private MetaData overloadedMetaData = null;
     private MetaData superData = null;
@@ -39,7 +69,7 @@ public class MetaData implements Cloneable, Serializable {
     private ClassLoader metaDataClassLoader=null;
 
     /**
-     * Constructs the MetaData
+     * Constructs the MetaData with enhanced type system integration
      */
     public MetaData(String type, String subType, String name ) {
 
@@ -51,6 +81,13 @@ public class MetaData implements Cloneable, Serializable {
         this.subType = subType;
         this.name = name;
 
+        // Initialize type definition (lazy loading to avoid circular dependencies)
+        this.typeDefinition = null;
+        
+        // Initialize metrics
+        this.metrics = new MetaDataMetrics(name);
+        this.metrics.recordCreation();
+
         // Cache the shortName and packageName
         int i = name.lastIndexOf(PKG_SEPARATOR);
         if (i >= 0) {
@@ -60,6 +97,275 @@ public class MetaData implements Cloneable, Serializable {
             shortName = name;
             pkg = "";
         }
+
+        log.debug("Created MetaData: {}:{}:{}", type, subType, name);
+    }
+
+    // ========== ENHANCED TYPE SYSTEM METHODS ==========
+
+    /**
+     * Get the type definition for this MetaData (modern approach)
+     */
+    public Optional<MetaDataTypeDefinition> getTypeDefinition() {
+        if (typeDefinition == null) {
+            synchronized (this) {
+                if (typeDefinition == null) {
+                    try {
+                        typeDefinition = MetaDataTypeRegistry.getInstance()
+                            .getType(type)
+                            .orElse(null);
+                    } catch (Exception e) {
+                        log.debug("Could not load type definition for {}: {}", type, e.getMessage());
+                    }
+                }
+            }
+        }
+        return Optional.ofNullable(typeDefinition);
+    }
+
+    /**
+     * Check if this MetaData type is registered in the type system
+     */
+    public boolean hasRegisteredType() {
+        return getTypeDefinition().isPresent();
+    }
+
+    /**
+     * Validate this MetaData using the enhanced validation framework
+     */
+    public ValidationResult validateEnhanced() {
+        Instant start = Instant.now();
+        
+        try {
+            ValidationResult result = getValidationChain().validate(this);
+            
+            // Record metrics
+            Duration duration = Duration.between(start, Instant.now());
+            metrics.recordValidation(duration, result.isValid());
+            
+            // Publish validation event
+            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
+            
+            return result;
+        } catch (Exception e) {
+            // Record error metrics
+            Duration duration = Duration.between(start, Instant.now());
+            metrics.recordValidation(duration, false);
+            metrics.recordError();
+            
+            log.error("Validation failed for {}: {}", getName(), e.getMessage(), e);
+            
+            return ValidationResult.builder()
+                .addError("Validation failed: " + e.getMessage())
+                .build();
+        }
+    }
+    
+    /**
+     * Get the validation chain (lazy initialization)
+     */
+    private ValidationChain getValidationChain() {
+        if (validationChain == null) {
+            synchronized (this) {
+                if (validationChain == null) {
+                    validationChain = ValidationChain.<MetaData>builder()
+                        .addValidator(MetaDataValidators.typeSystemValidator())
+                        .addValidator(MetaDataValidators.childrenValidator())
+                        .addValidator(MetaDataValidators.legacyValidator())
+                        .build();
+                }
+            }
+        }
+        return validationChain;
+    }
+
+    // ========== MODERN COLLECTION APIS ==========
+
+    /**
+     * Get children as a Stream for functional operations
+     */
+    public Stream<MetaData> getChildrenStream() {
+        return children.stream();
+    }
+
+    /**
+     * Find children matching a predicate
+     */
+    public Stream<MetaData> findChildren(Predicate<MetaData> predicate) {
+        return children.findMatching(predicate);
+    }
+
+    /**
+     * Find children of a specific type
+     */
+    public <T extends MetaData> Stream<T> findChildren(Class<T> type) {
+        return children.findByClass(type).stream();
+    }
+
+    /**
+     * Find child by name (modern Optional-based API) - O(1) operation
+     */
+    public Optional<MetaData> findChild(String name) {
+        return children.findByName(name);
+    }
+
+    /**
+     * Find child by name and type - O(1) operation
+     */
+    public <T extends MetaData> Optional<T> findChild(String name, Class<T> type) {
+        return children.findByName(name)
+            .filter(type::isInstance)
+            .map(type::cast);
+    }
+
+    /**
+     * Require child by name (throws if not found)
+     */
+    public MetaData requireChild(String name) {
+        return findChild(name)
+            .orElseThrow(() -> new MetaDataNotFoundException("Child not found: " + name, name));
+    }
+
+    /**
+     * Require child by name and type
+     */
+    public <T extends MetaData> T requireChild(String name, Class<T> type) {
+        return findChild(name, type)
+            .orElseThrow(() -> new MetaDataNotFoundException(
+                "Child of type " + type.getSimpleName() + " not found: " + name, name));
+    }
+
+    // ========== UNIFIED CACHING ==========
+
+    /**
+     * Get cached value with type safety
+     */
+    public <T> Optional<T> getCacheValue(String key, Class<T> type) {
+        return cache.get(key, type);
+    }
+
+    /**
+     * Set cache value
+     */
+    public void setCacheValue(String key, Object value) {
+        cache.put(key, value);
+    }
+
+    /**
+     * Compute cache value if absent
+     */
+    public <T> T computeCacheValue(String key, Class<T> type, java.util.function.Supplier<T> supplier) {
+        return cache.computeIfAbsent(key, type, supplier);
+    }
+
+    /**
+     * Check if cache contains key
+     */
+    public boolean hasCacheValue(String key) {
+        return cache.containsKey(key);
+    }
+
+    /**
+     * Remove cached value
+     */
+    public Object removeCacheValue(String key) {
+        return cache.remove(key);
+    }
+
+    /**
+     * Get cache statistics
+     */
+    public Optional<Object> getCacheStats() {
+        return cache.getStats().map(stats -> (Object) stats);
+    }
+
+    // ========== EVENT SYSTEM ==========
+
+    /**
+     * Get the event publisher (lazy initialization)
+     */
+    public MetaDataEventPublisher getEventPublisher() {
+        if (eventPublisher == null) {
+            synchronized (this) {
+                if (eventPublisher == null) {
+                    eventPublisher = new MetaDataEventPublisher();
+                }
+            }
+        }
+        return eventPublisher;
+    }
+
+    /**
+     * Publish an event
+     */
+    protected void publishEvent(MetaDataEvent<?> event) {
+        try {
+            getEventPublisher().publishEvent(event);
+        } catch (Exception e) {
+            log.warn("Failed to publish event {}: {}", event.getClass().getSimpleName(), e.getMessage());
+        }
+    }
+
+    /**
+     * Add event listener
+     */
+    public void addEventListener(MetaDataEventListener listener) {
+        getEventPublisher().addListener(listener);
+    }
+
+    /**
+     * Remove event listener
+     */
+    public void removeEventListener(MetaDataEventListener listener) {
+        getEventPublisher().removeListener(listener);
+    }
+
+    // ========== METRICS ==========
+
+    /**
+     * Get metrics for this MetaData
+     */
+    public MetaDataMetrics getMetrics() {
+        return metrics;
+    }
+
+    /**
+     * Get metrics snapshot
+     */
+    public MetaDataMetrics.MetricsSnapshot getMetricsSnapshot() {
+        return metrics.getSnapshot();
+    }
+
+    // ========== ENHANCED ATTRIBUTE MANAGEMENT ==========
+
+    /**
+     * Modern attribute access with Optional
+     */
+    public Optional<MetaAttribute> findAttribute(String name) {
+        return findChild(name, MetaAttribute.class);
+    }
+
+    /**
+     * Require attribute (throws if not found)
+     */
+    public MetaAttribute requireAttribute(String name) {
+        return findAttribute(name)
+            .orElseThrow(() -> new MetaAttributeNotFoundException(
+                "MetaAttribute '" + name + "' not found in '" + toString() + "'", name));
+    }
+
+    /**
+     * Get all attributes as stream
+     */
+    public Stream<MetaAttribute> getAttributesStream() {
+        return findChildren(MetaAttribute.class);
+    }
+
+    /**
+     * Check if attribute exists (enhanced version)
+     */
+    public boolean hasAttributeEnhanced(String name) {
+        return findAttribute(name).isPresent();
     }
 
     /**
@@ -523,8 +829,18 @@ public class MetaData implements Cloneable, Serializable {
         }
         
         data.attachParent(this);
-        children.add(data);
-        flushCaches();
+        
+        // Use indexed collection for O(1) operations
+        if (children.add(data)) {
+            // Record metrics
+            metrics.recordChildAddition();
+            
+            // Publish event
+            publishEvent(new MetaDataEvent.ChildAdded(this, data));
+            
+            // Flush caches
+            flushCaches();
+        }
     }
 
     /**
@@ -533,8 +849,15 @@ public class MetaData implements Cloneable, Serializable {
     public void deleteChildOfType(String type, String name ) {
         MetaData d = getChildOfType(type, name);
         if (d.getParent() == this) {
-            children.remove(d);
-            flushCaches();
+            if (children.remove(d)) {
+                // Record metrics
+                metrics.recordChildRemoval();
+                
+                // Publish event
+                publishEvent(new MetaDataEvent.ChildRemoved(this, d));
+                
+                flushCaches();
+            }
         } else {
             throw new MetaDataNotFoundException("You cannot delete MetaData with type [" + type +"] and name [" + name + "] from SuperData of [" + toString() + "]", name );
         }
@@ -546,8 +869,15 @@ public class MetaData implements Cloneable, Serializable {
     public void deleteChild(String name, Class<? extends MetaData> c) {
         MetaData d = getChild(name, c);
         if (d.getParent() == this) {
-            children.remove(d);
-            flushCaches();
+            if (children.remove(d)) {
+                // Record metrics
+                metrics.recordChildRemoval();
+                
+                // Publish event
+                publishEvent(new MetaDataEvent.ChildRemoved(this, d));
+                
+                flushCaches();
+            }
         } else {
             throw new MetaDataNotFoundException("You cannot delete MetaData with name [" + name + "] from a SuperData of [" + toString() + "]", name );
         }
@@ -561,15 +891,22 @@ public class MetaData implements Cloneable, Serializable {
             throw new IllegalArgumentException("MetaData [" + data.toString() + "] is not a child of [" + toString() + "]");
         }
         
-        children.remove(data);
-        flushCaches();
+        if (children.remove(data)) {
+            // Record metrics
+            metrics.recordChildRemoval();
+            
+            // Publish event
+            publishEvent(new MetaDataEvent.ChildRemoved(this, data));
+            
+            flushCaches();
+        }
     }
     
     /**
      * Returns all MetaData children
      */
     public List<MetaData> getChildren() {
-        return getChildren(null, true);
+        return children.getAll();
     }
 
     /**
@@ -615,7 +952,7 @@ public class MetaData implements Cloneable, Serializable {
     private <T extends MetaData> void addChildren( List<String> keys, List<T> items, String type, Class<T> c, boolean includeParentData, boolean isParent, boolean firstOnly ) {
 
         // Get all the local children
-        children.forEach( d -> {
+        children.stream().forEach( d -> {
 
             // If only getting the first one, then exit
             if ( firstOnly && items.size() > 0 ) return;
@@ -711,7 +1048,7 @@ public class MetaData implements Cloneable, Serializable {
 
     private final <T extends MetaData> T getChildOfTypeOrClass( String type, String name, Class<T> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
 
-        for (MetaData d : children) {
+        for (MetaData d : children.getAll()) {
 
             // Make sure the types match if not null
             if ( type != null && !d.isType(type)) continue;
@@ -759,16 +1096,42 @@ public class MetaData implements Cloneable, Serializable {
      * Clears all children of the specified type
      */
     public void clearChildrenOfType( String type ) {
-        if ( children.removeIf(d -> type == null || d.isType( type )))
-            flushCaches();
+        boolean removed = false;
+        List<MetaData> toRemove = children.stream()
+            .filter(d -> type == null || d.isType(type))
+            .toList();
+        
+        for (MetaData child : toRemove) {
+            if (children.remove(child)) {
+                removed = true;
+                // Record metrics and publish event
+                metrics.recordChildRemoval();
+                publishEvent(new MetaDataEvent.ChildRemoved(this, child));
+            }
+        }
+        
+        if (removed) flushCaches();
     }
 
     /**
      * Clears all children of the specified MetaData class
      */
     public void clearChildren(Class<? extends MetaData> c) {
-        if (children.removeIf(d -> c == null || c.isInstance(d)))
-            flushCaches();
+        boolean removed = false;
+        List<MetaData> toRemove = children.stream()
+            .filter(d -> c == null || c.isInstance(d))
+            .toList();
+        
+        for (MetaData child : toRemove) {
+            if (children.remove(child)) {
+                removed = true;
+                // Record metrics and publish event
+                metrics.recordChildRemoval();
+                publishEvent(new MetaDataEvent.ChildRemoved(this, child));
+            }
+        }
+        
+        if (removed) flushCaches();
     }
 
     ////////////////////////////////////////////////////
@@ -919,18 +1282,17 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     /**
-     * Sets a cache value for this piece of MetaData
+     * Sets a cache value for this piece of MetaData (legacy method)
      */
     public void setCacheValue(Object key, Object value) {
-        //ystem.out.println( "SET [" + key + "] = " + value );
-        cacheValues.put(key, value);
+        cache.put(key, value);
     }
 
     /**
-     * Retrieves a cache value for this piece of MetaData
+     * Retrieves a cache value for this piece of MetaData (legacy method)
      */
     public Object getCacheValue(Object key) {
-        return cacheValues.get(key);
+        return cache.get(key);
     }
 
     /**
@@ -938,8 +1300,8 @@ public class MetaData implements Cloneable, Serializable {
      */
     protected void flushCaches() {
 
-        // Clear the local cache
-        cacheValues.clear();
+        // Clear unified cache
+        cache.clear();
 
         // Clear the super data caches
         if ( getSuperData() != null ) getSuperData().flushCaches();
