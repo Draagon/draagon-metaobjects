@@ -15,6 +15,7 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.data.DataObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.produce.v1.Apple;
 import com.draagon.meta.test.produce.v1.Orange;
@@ -133,11 +134,11 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
         basket.setInt( "numApples", 5 );
 
         // Test collections of Apples and Oranges
-        DataObject apple1 = (DataObject) loader.getMetaObjectByName("test.produce.v1.fruit.Apple").newInstance();
+        ValueObject apple1 = (ValueObject) loader.getMetaObjectByName("test.produce.v1.fruit.Apple").newInstance();
         apple1.setString("name", "Red Delicious");
         apple1.setString("color", "red");
         
-        DataObject orange1 = (DataObject) loader.getMetaObjectByName("test.produce.v1.fruit.Orange").newInstance();
+        ValueObject orange1 = (ValueObject) loader.getMetaObjectByName("test.produce.v1.fruit.Orange").newInstance();
         orange1.setString("name", "Naval Orange");
         orange1.setString("color", "orange");
         

@@ -82,7 +82,7 @@ public class MetaDataTypeSystemTest {
         assertFalse(child.isPresent());
         
         // Test modern caching
-        md.setModernCacheValue("key1", "value1");
+        md.setCacheValue("key1", "value1");
         Optional<String> cachedValue = md.getCacheValue("key1", String.class);
         assertTrue(cachedValue.isPresent());
         assertEquals("value1", cachedValue.get());
