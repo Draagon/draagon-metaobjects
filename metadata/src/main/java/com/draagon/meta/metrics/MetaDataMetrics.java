@@ -101,6 +101,20 @@ public class MetaDataMetrics {
         lastErrorTime.set(System.currentTimeMillis());
     }
     
+    public void recordPropertyChange() {
+        // General property change - could be extended with specific metrics
+        // For now, just count as general events
+    }
+    
+    public void recordInstanceCreation(Duration duration, boolean success) {
+        // Record instance creation with timing
+        if (success) {
+            // Could add specific instance creation metrics here
+        } else {
+            recordError();
+        }
+    }
+    
     // ========== QUERY METHODS ==========
     
     public String getName() {

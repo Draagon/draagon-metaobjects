@@ -36,7 +36,7 @@ import javax.sql.DataSource;
  * The Object Manager Base is able to add, update, delete, and retrieve objects
  * of those types from a datastore.
  */
-public class ObjectManagerDB extends ObjectManager {
+public class ObjectManagerDB extends ObjectManager implements DBOperations {
 
     private static final Logger log = LoggerFactory.getLogger(ObjectManagerDB.class);
     private final static String CREATE_MAP_ATTR = "dbCreateMap";
@@ -65,6 +65,7 @@ public class ObjectManagerDB extends ObjectManager {
     /**
      * Handles enforcing transactions on SQL queries
      */
+    @Override
     public void setEnforceTransaction(boolean enforce) {
         enforceTransaction = enforce;
     }
@@ -72,6 +73,7 @@ public class ObjectManagerDB extends ObjectManager {
     /**
      * Returns whether to enforce transactions
      */
+    @Override
     public boolean enforceTransaction() {
         return enforceTransaction;
     }
@@ -98,35 +100,55 @@ public class ObjectManagerDB extends ObjectManager {
     // CONNECTION HANDLING METHODS
     //
     /**
-     * Retrieves a connection object representing the datastore
+     * Retrieves a connection object representing the datastore with enhanced error handling
      */
-    public ObjectConnection getConnection() {
+    @Override
+    public ObjectConnection getConnection() throws MetaDataException {
         DataSource ds = getDataSource();
         if (ds == null) {
             throw new IllegalArgumentException("No DataSource was specified for this ObjectManager, cannot request connection");
         }
 
-        Connection c;
         try {
-            c = ds.getConnection();
+            Connection c = ds.getConnection();
+            if (c == null) {
+                throw new MetaDataException("DataSource returned null connection");
+            }
+            
+            // Verify connection is valid
+            if (!c.isValid(5)) { // 5 second timeout
+                c.close();
+                throw new MetaDataException("Connection is not valid");
+            }
+            
+            return new ObjectConnectionDB(c);
         } catch (SQLException e) {
-            throw new RuntimeException("Could not retrieve a connection from the datasource: " + e.getMessage(), e);
+            throw new MetaDataException("Could not retrieve a connection from the datasource: " + e.getMessage(), e);
         }
-
-        return new ObjectConnectionDB(c);
     }
 
     /**
-     * Release the Database Connection
+     * Release the Database Connection with improved error handling
      */
-    public void releaseConnection(ObjectConnection oc)
-            throws MetaException {
-        oc.close();
+    @Override
+    public void releaseConnection(ObjectConnection oc) throws MetaDataException {
+        if (oc == null) {
+            log.warn("Attempting to release null connection");
+            return;
+        }
+        
+        try {
+            oc.close();
+        } catch (Exception e) {
+            log.error("Error releasing database connection", e);
+            throw new MetaDataException("Failed to release connection properly", e);
+        }
     }
 
     /**
      * Sets the Data Source to use for database connections
      */
+    @Override
     public void setDataSource(DataSource ds) {
         mSource = ds;
     }
@@ -134,6 +156,7 @@ public class ObjectManagerDB extends ObjectManager {
     /**
      * Retrieves the data source
      */
+    @Override
     public DataSource getDataSource() {
         return mSource;
     }
@@ -152,17 +175,20 @@ public class ObjectManagerDB extends ObjectManager {
     ///////////////////////////////////////////////////////
     // DATABASE DRIVER METHODS
     //
+    @Override
     public void setDriverClass(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Class<?> c = Class.forName(className);
         setDatabaseDriver((DatabaseDriver) c.newInstance());
     }
 
-    public void setDatabaseDriver(DatabaseDriver dd) {
-        mDriver = dd;
+    @Override
+    public void setDatabaseDriver(Object dd) {
+        mDriver = (DatabaseDriver) dd;
         mDriver.setManager(this);
     }
 
-    public synchronized DatabaseDriver getDatabaseDriver() {
+    @Override
+    public synchronized Object getDatabaseDriver() {
         if (mDriver == null) {
             mDriver = new GenericSQLDriver();
             mDriver.setManager(this);
@@ -171,17 +197,27 @@ public class ObjectManagerDB extends ObjectManager {
         return mDriver;
     }
 
+    /**
+     * Internal method to get the typed database driver
+     */
+    protected DatabaseDriver getTypedDatabaseDriver() {
+        return (DatabaseDriver) getDatabaseDriver();
+    }
+
     ///////////////////////////////////////////////////////
     // PERSISTENCE METHODS
     //
+    @Override
     public MappingHandler getDefaultMappingHandler() {
         return new SimpleMappingHandlerDB();
     }
 
+    @Override
     public void setMappingHandler(MappingHandler handler) {
         mMappingHandler = handler;
     }
 
+    @Override
     public MappingHandler getMappingHandler() {
         if (mMappingHandler == null) {
             mMappingHandler = getDefaultMappingHandler();
@@ -374,7 +410,7 @@ public class ObjectManagerDB extends ObjectManager {
     /**
      * Parses an Object returned from the database
      */
-    public void parseObject(ResultSet rs, Collection<MetaField> fields, MetaObject mc, Object o) throws SQLException, MetaException {
+    protected void parseObject(ResultSet rs, Collection<MetaField> fields, MetaObject mc, Object o) throws SQLException, MetaException {
         if (!isReadableClass(mc)) {
             throw new MetaException("MetaClass [" + mc + "] is not readable");
         }
@@ -393,96 +429,60 @@ public class ObjectManagerDB extends ObjectManager {
         }
     }
 
+    /**
+     * Enhanced field parsing with better type handling and null safety
+     */
     protected void parseField(Object o, MetaField f, ResultSet rs, int j) throws SQLException {
         switch (f.getType()) {
-            case MetaField.BOOLEAN: {
+            case MetaField.BOOLEAN -> {
                 boolean bv = rs.getBoolean(j);
-                if (rs.wasNull()) {
-                    f.setBoolean(o, null);
-                } else {
-                    f.setBoolean(o, new Boolean(bv));
-                }
+                f.setBoolean(o, rs.wasNull() ? null : bv);
             }
-            break;
 
-            case MetaField.BYTE: {
+            case MetaField.BYTE -> {
                 byte bv = rs.getByte(j);
-                if (rs.wasNull()) {
-                    f.setByte(o, null);
-                } else {
-                    f.setByte(o, new Byte(bv));
-                }
+                f.setByte(o, rs.wasNull() ? null : bv);
             }
-            break;
 
-            case MetaField.SHORT: {
+            case MetaField.SHORT -> {
                 short sv = rs.getShort(j);
-                if (rs.wasNull()) {
-                    f.setShort(o, null);
-                } else {
-                    f.setShort(o, new Short(sv));
-                }
+                f.setShort(o, rs.wasNull() ? null : sv);
             }
-            break;
 
-            case MetaField.INT: {
+            case MetaField.INT -> {
                 int iv = rs.getInt(j);
-                if (rs.wasNull()) {
-                    f.setInt(o, null);
-                } else {
-                    f.setInt(o, new Integer(iv));
-                }
+                f.setInt(o, rs.wasNull() ? null : iv);
             }
-            break;
 
 
-            case MetaField.DATE: {
+            case MetaField.DATE -> {
                 Timestamp tv = rs.getTimestamp(j);
-                if (rs.wasNull()) {
-                    f.setDate(o, null);
-                } else {
-                    f.setDate(o, new java.util.Date(tv.getTime()));
-                }
+                f.setDate(o, rs.wasNull() ? null : new java.util.Date(tv.getTime()));
             }
-            break;
 
-            case MetaField.LONG: {
+            case MetaField.LONG -> {
                 long lv = rs.getLong(j);
-                if (rs.wasNull()) {
-                    f.setLong(o, null);
-                } else {
-                    f.setLong(o, new Long(lv));
-                }
+                f.setLong(o, rs.wasNull() ? null : lv);
             }
-            break;
 
-            case MetaField.FLOAT: {
+            case MetaField.FLOAT -> {
                 float fv = rs.getFloat(j);
-                if (rs.wasNull()) {
-                    f.setFloat(o, null);
-                } else {
-                    f.setFloat(o, new Float(fv));
-                }
+                f.setFloat(o, rs.wasNull() ? null : fv);
             }
-            break;
 
-            case MetaField.DOUBLE: {
+            case MetaField.DOUBLE -> {
                 double dv = rs.getDouble(j);
-                if (rs.wasNull()) {
-                    f.setDouble(o, null);
-                } else {
-                    f.setDouble(o, new Double(dv));
-                }
+                f.setDouble(o, rs.wasNull() ? null : dv);
             }
-            break;
 
-            case MetaField.STRING:
-                f.setString(o, rs.getString(j));
-                break;
+            case MetaField.STRING -> f.setString(o, rs.getString(j));
 
-            case MetaField.OBJECT:
+            case MetaField.OBJECT -> f.setObject(o, rs.getObject(j));
+            
+            default -> {
+                log.warn("Unknown field type {} for field {}", f.getType(), f.getName());
                 f.setObject(o, rs.getObject(j));
-                break;
+            }
         }
     }
 
@@ -563,7 +563,7 @@ public class ObjectManagerDB extends ObjectManager {
             qo.setRange(1, 1);
 
             // Read the objects from the database driver
-            Collection<Object> objects = getDatabaseDriver().readMany(conn, mc, readMap, qo);
+            Collection<Object> objects = getTypedDatabaseDriver().readMany(conn, mc, readMap, qo);
 
             // Reset the object persistence states
             resetObjects(mc, objects);
@@ -606,7 +606,7 @@ public class ObjectManagerDB extends ObjectManager {
         //while( true )
         //{
         try {
-            return getDatabaseDriver().deleteMany(conn, mc, mapping, exp);
+            return getTypedDatabaseDriver().deleteMany(conn, mc, mapping, exp);
         } catch (SQLException e) {
             //log.error( "Unable to delete objects of class [" + mc.getName() + "] with expression [" + exp + "]: " + e.getMessage() );
             //if ( ++failures > 5 )
@@ -637,7 +637,7 @@ public class ObjectManagerDB extends ObjectManager {
 
         try {
             // Read the objects
-            return getDatabaseDriver().getCount(conn, mc, mapping, exp);
+            return getTypedDatabaseDriver().getCount(conn, mc, mapping, exp);
         } catch (SQLException e) {
             throw new PersistenceException("Unable to get objects count of class [" + mc.getName() + "] with expression [" + exp + "]: " + e.getMessage(), e);
         }
@@ -664,7 +664,7 @@ public class ObjectManagerDB extends ObjectManager {
         //{
         try {
             // Read the objects
-            Collection<Object> objects = getDatabaseDriver().readMany(conn, mc, mapping, options);
+            Collection<Object> objects = getTypedDatabaseDriver().readMany(conn, mc, mapping, options);
 
             // Reset the object persistence states
             resetObjects(mc, objects);
@@ -730,7 +730,7 @@ public class ObjectManagerDB extends ObjectManager {
         // Try to read the object
         try {
             // Read the object from the mapping
-            boolean found = getDatabaseDriver().read(conn, mc, mapping, o, exp);
+            boolean found = getTypedDatabaseDriver().read(conn, mc, mapping, o, exp);
 
             // If not found throw an exception
             if (!found) {
@@ -773,7 +773,7 @@ public class ObjectManagerDB extends ObjectManager {
         }
 
         try {
-            if (!getDatabaseDriver().create(conn, mc, mapping, obj)) {
+            if (!getTypedDatabaseDriver().create(conn, mc, mapping, obj)) {
                 throw new PersistenceException("Now rows created for object [" + obj + "] of class [" + mc + "]");
             }
 
@@ -840,7 +840,7 @@ public class ObjectManagerDB extends ObjectManager {
 
         try {
             // Update the object
-            if (!getDatabaseDriver().update(conn, mc, mapping, obj, fields, getPrimaryKeys(mc), dirtyField, dirtyFieldValue)) {
+            if (!getTypedDatabaseDriver().update(conn, mc, mapping, obj, fields, getPrimaryKeys(mc), dirtyField, dirtyFieldValue)) {
 
                 // If no dirty writes, see if that was the issue
                 if (!allowsDirtyWrites) {
@@ -862,7 +862,7 @@ public class ObjectManagerDB extends ObjectManager {
                         throw new PersistenceException("MetaClass [" + mc + "] has no primary keys defined to update object [" + obj + "]");
                     }
 
-                    Collection<Object> results = getDatabaseDriver().readMany(conn, mc, mapping, new QueryOptions(exp));
+                    Collection<Object> results = getTypedDatabaseDriver().readMany(conn, mc, mapping, new QueryOptions(exp));
                     if (results.size() > 0) {
                         throw new DirtyWriteException(obj);
                     }
@@ -917,7 +917,7 @@ public class ObjectManagerDB extends ObjectManager {
         }
 
         try {
-            boolean success = getDatabaseDriver().delete(conn, mc, mapping, obj, getPrimaryKeys(mc));
+            boolean success = getTypedDatabaseDriver().delete(conn, mc, mapping, obj, getPrimaryKeys(mc));
 
             if (!success) {
 
@@ -939,7 +939,7 @@ public class ObjectManagerDB extends ObjectManager {
                         throw new PersistenceException("MetaClass [" + mc + "] has no primary keys defined to delete object [" + obj + "]");
                     }
 
-                    Collection<Object> results = getDatabaseDriver().readMany(conn, mc, mapping, new QueryOptions(exp));
+                    Collection<Object> results = getTypedDatabaseDriver().readMany(conn, mc, mapping, new QueryOptions(exp));
                     if (results.size() > 0) {
                         throw new DirtyWriteException(obj);
                     }
@@ -1098,6 +1098,7 @@ public class ObjectManagerDB extends ObjectManager {
     /**
      * Returns whether a MetaClass allows dirty writes
      */
+    @Override
     public boolean allowsDirtyWrites(MetaObject mc) {
         if (!mc.hasAttribute(ALLOW_DIRTY_WRITE)
                 || !("false".equals(mc.getAttribute(ALLOW_DIRTY_WRITE)))) {
@@ -1195,6 +1196,7 @@ public class ObjectManagerDB extends ObjectManager {
         return s;
     }
 
+    @Override
     public int execute(ObjectConnection c, String query, Collection<?> arguments) throws MetaException {
         Connection conn = (Connection) c.getDatastoreConnection();
 
@@ -1259,6 +1261,7 @@ public class ObjectManagerDB extends ObjectManager {
      * min, MAX({extra2}) AS max, COUNT(1) AS num" + " FROM [" +
      * Product.CLASSNAME + "]";
      */
+    @Override
     public Collection<?> executeQuery(ObjectConnection c, String query, Collection<?> arguments) throws MetaException {
         Connection conn = (Connection) c.getDatastoreConnection();
 
@@ -1344,7 +1347,107 @@ public class ObjectManagerDB extends ObjectManager {
     }
 
     ///////////////////////////////////////////////////////
+    // BULK OPERATIONS OPTIMIZATION
+    //
+    
+    /**
+     * Enhanced bulk object creation using database-specific batch operations
+     */
+    @Override
+    public void createObjectsBulk(ObjectConnection c, MetaObject mc, Collection<Object> objects) throws MetaDataException {
+        if (!isCreateableClass(mc)) {
+            throw new PersistenceException("Object of class [" + mc + "] is not createable");
+        }
+        
+        Connection conn = (Connection) c.getDatastoreConnection();
+        checkTransaction(conn, true);
+        
+        ObjectMappingDB mapping = (ObjectMappingDB) getCreateMapping(mc);
+        
+        try {
+            // Use database driver for bulk creation if supported
+            if (getDatabaseDriver() instanceof BulkOperationSupport bulkDriver) {
+                bulkDriver.createBulk(conn, mc, mapping, objects);
+            } else {
+                // Fallback to individual creates with better batching
+                createObjectsBatchFallback(conn, mc, mapping, objects);
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Unable to bulk create objects of class [" + mc + "]: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Enhanced bulk object updates using database-specific batch operations
+     */
+    @Override
+    public void updateObjectsBulk(ObjectConnection c, MetaObject mc, Collection<Object> objects) throws MetaDataException {
+        if (!isUpdateableClass(mc)) {
+            throw new PersistenceException("Object of class [" + mc + "] is not updateable");
+        }
+        
+        Connection conn = (Connection) c.getDatastoreConnection();
+        checkTransaction(conn, true);
+        
+        ObjectMappingDB mapping = (ObjectMappingDB) getUpdateMapping(mc);
+        
+        try {
+            // Use database driver for bulk updates if supported
+            if (getDatabaseDriver() instanceof BulkOperationSupport bulkDriver) {
+                bulkDriver.updateBulk(conn, mc, mapping, objects);
+            } else {
+                // Fallback to individual updates
+                for (Object obj : objects) {
+                    updateObject(c, obj);
+                }
+            }
+        } catch (SQLException e) {
+            throw new PersistenceException("Unable to bulk update objects of class [" + mc + "]: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Batch fallback for create operations when bulk support is not available
+     */
+    private void createObjectsBatchFallback(Connection conn, MetaObject mc, ObjectMappingDB mapping, Collection<Object> objects) throws SQLException {
+        // Disable auto-commit for better performance
+        boolean originalAutoCommit = conn.getAutoCommit();
+        if (originalAutoCommit) {
+            conn.setAutoCommit(false);
+        }
+        
+        try {
+            int batchCount = 0;
+            for (Object obj : objects) {
+                prePersistence(null, mc, obj, CREATE);
+                
+                if (!getTypedDatabaseDriver().create(conn, mc, mapping, obj)) {
+                    throw new PersistenceException("No rows created for object [" + obj + "] of class [" + mc + "]");
+                }
+                
+                postPersistence(null, mc, obj, CREATE);
+                
+                // Commit in batches of 1000 for memory management
+                if (++batchCount % 1000 == 0) {
+                    conn.commit();
+                }
+            }
+            
+            // Commit any remaining
+            if (batchCount % 1000 != 0) {
+                conn.commit();
+            }
+        } finally {
+            // Restore original auto-commit
+            if (originalAutoCommit) {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////
     // TO STRING METHOD
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName())

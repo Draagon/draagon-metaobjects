@@ -63,7 +63,7 @@ public class MetaClassDBValidatorService
       createdDefs = new ArrayList<BaseDef>();
 
       MappingHandler mh = getObjectManager().getMappingHandler();
-      DatabaseDriver dd = getObjectManager().getDatabaseDriver();
+      DatabaseDriver dd = (DatabaseDriver) getObjectManager().getDatabaseDriver();
       
       // Validate all Writeable (TABLE) MetaClasses
       for( MetaDataLoader loader : MetaDataRegistry.getDataLoaders() )

@@ -22,6 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 //import javax.servlet.*;
 
 
@@ -50,9 +55,45 @@ public abstract class ObjectManager
 	public static final int AUTO_POST    =  3;
 
 	//private MappingHandler mMappingHandler = null;
+	
+	// Enhanced caching and performance
+	private final Map<String, List<MetaField>> autoFieldsCache = new ConcurrentHashMap<>();
+	private final Map<String, Collection<MetaField>> primaryKeysCache = new ConcurrentHashMap<>();
+	private final Map<String, Collection<MetaField>> modifiedFieldsCache = new ConcurrentHashMap<>();
+	
+	// Event system
+	private final List<PersistenceEventListener> eventListeners = new ArrayList<>();
+	
+	// Async executor
+	private Executor asyncExecutor = ForkJoinPool.commonPool();
 
 	public ObjectManager()
 	{
+	}
+	
+	/**
+	 * Sets the executor for asynchronous operations
+	 */
+	public void setAsyncExecutor(Executor executor) {
+		this.asyncExecutor = Objects.requireNonNull(executor, "Executor cannot be null");
+	}
+	
+	/**
+	 * Adds a persistence event listener
+	 */
+	public void addPersistenceEventListener(PersistenceEventListener listener) {
+		synchronized (eventListeners) {
+			eventListeners.add(Objects.requireNonNull(listener, "Listener cannot be null"));
+		}
+	}
+	
+	/**
+	 * Removes a persistence event listener
+	 */
+	public void removePersistenceEventListener(PersistenceEventListener listener) {
+		synchronized (eventListeners) {
+			eventListeners.remove(listener);
+		}
 	}
 
 	///////////////////////////////////////////////////////
@@ -181,26 +222,16 @@ public abstract class ObjectManager
 	// DEFAULT IMPEMENTATIONS
 	// May be overridden for enhanced performance
 
-	@SuppressWarnings("unchecked")
-	protected List<MetaField> getAutoFields( MetaObject mc )
-	{
-		final String KEY = "getAutoFields()";
-
-		ArrayList<MetaField> auto = (ArrayList<MetaField>) mc.getCacheValue( KEY );
-		if ( auto == null )
-		{
-			auto = new ArrayList<MetaField>();
-
-			for( MetaField f : mc.getMetaFields() )
-			{
-				if ( f.hasAttribute( AUTO ))
-					auto.add( f );
-			}
-
-			mc.setCacheValue( KEY, auto );
-		}
-
-		return auto;
+	/**
+	 * Gets auto fields for a MetaObject with improved caching
+	 */
+	protected List<MetaField> getAutoFields(MetaObject mc) {
+		String cacheKey = mc.getName() + ":autoFields";
+		return autoFieldsCache.computeIfAbsent(cacheKey, key -> 
+			mc.getMetaFields().stream()
+				.filter(f -> f.hasAttribute(AUTO))
+				.collect(Collectors.toList())
+		);
 	}
 
 	protected void handleAutoFields( ObjectConnection c, MetaObject mc, Object obj, int state, int action ) throws MetaDataException
@@ -212,51 +243,83 @@ public abstract class ObjectManager
 		}
 	}
 
-	public void handleAutoField( ObjectConnection c, MetaObject mc, MetaField mf, Object obj, Object auto, int state, int action ) throws MetaDataException
-	{
-		if ( state == AUTO_PRIOR )
-		{
-			if ( AUTO_CREATE.equals( auto ) && action == CREATE ) {
-				mf.setLong( obj, new Long( System.currentTimeMillis() ));
-			}
-			else if ( AUTO_UPDATE.equals( auto )) {
-				mf.setLong( obj, new Long( System.currentTimeMillis() ));
+	/**
+	 * Handles auto field processing with improved logic
+	 */
+	public void handleAutoField(ObjectConnection c, MetaObject mc, MetaField mf, Object obj, Object auto, int state, int action) throws MetaDataException {
+		if (state == AUTO_PRIOR) {
+			long currentTime = System.currentTimeMillis();
+			
+			if (AUTO_CREATE.equals(auto) && action == CREATE) {
+				mf.setLong(obj, currentTime);
+			} else if (AUTO_UPDATE.equals(auto)) {
+				mf.setLong(obj, currentTime);
 			}
 		}
 	}
 
-	public void prePersistence( ObjectConnection c, MetaObject mc, Object obj, int action ) throws MetaDataException
-	{
-		handleAutoFields( c, mc, obj, AUTO_PRIOR , action);
+	public void prePersistence(ObjectConnection c, MetaObject mc, Object obj, int action) throws MetaDataException {
+		handleAutoFields(c, mc, obj, AUTO_PRIOR, action);
+		
+		// Fire pre-persistence events
+		synchronized (eventListeners) {
+			try {
+				switch (action) {
+					case CREATE -> eventListeners.forEach(listener -> listener.onBeforeCreate(mc, obj));
+					case UPDATE -> {
+						Collection<MetaField> modifiedFields = getModifiedFields(mc, obj);
+						eventListeners.forEach(listener -> listener.onBeforeUpdate(mc, obj, modifiedFields));
+					}
+					case DELETE -> eventListeners.forEach(listener -> listener.onBeforeDelete(mc, obj));
+				}
+			} catch (Exception e) {
+				log.warn("Error firing pre-persistence events", e);
+			}
+		}
 	}
 
-	public void postPersistence( ObjectConnection c, MetaObject mc, Object obj, int action ) throws MetaDataException
-	{
-		handleAutoFields( c, mc, obj, AUTO_POST , action);
+	public void postPersistence(ObjectConnection c, MetaObject mc, Object obj, int action) throws MetaDataException {
+		handleAutoFields(c, mc, obj, AUTO_POST, action);
 
-		if ( action == CREATE ) {
-			if ( mc instanceof StateAwareMetaObject )
-			{
-				// Update the state of the Object
-				((StateAwareMetaObject) mc ).setNew( obj, false );
-				((StateAwareMetaObject) mc ).setModified( obj, false );
-				((StateAwareMetaObject) mc ).setDeleted( obj, false );
+		// Update state for StateAwareMetaObject
+		if (mc instanceof StateAwareMetaObject stateAware) {
+			switch (action) {
+				case CREATE, UPDATE -> {
+					stateAware.setNew(obj, false);
+					stateAware.setModified(obj, false);
+					stateAware.setDeleted(obj, false);
+				}
+				case DELETE -> stateAware.setDeleted(obj, true);
 			}
 		}
-		else if ( action == UPDATE ) {
-			// Update the state of the Object
-			if ( mc instanceof StateAwareMetaObject )
-			{
-				((StateAwareMetaObject) mc).setNew( obj, false );
-				((StateAwareMetaObject) mc).setModified( obj, false );
-				((StateAwareMetaObject) mc).setDeleted( obj, false );
+		
+		// Fire post-persistence events
+		synchronized (eventListeners) {
+			try {
+				switch (action) {
+					case CREATE -> eventListeners.forEach(listener -> listener.onAfterCreate(mc, obj));
+					case UPDATE -> {
+						Collection<MetaField> modifiedFields = getModifiedFields(mc, obj);
+						eventListeners.forEach(listener -> listener.onAfterUpdate(mc, obj, modifiedFields));
+					}
+					case DELETE -> eventListeners.forEach(listener -> listener.onAfterDelete(mc, obj));
+				}
+			} catch (Exception e) {
+				log.warn("Error firing post-persistence events", e);
 			}
 		}
-		else if ( action == DELETE ) {
-			if ( mc instanceof StateAwareMetaObject ) {
-				((StateAwareMetaObject) mc).setDeleted( obj, true );
-			}
+	}
+	
+	/**
+	 * Gets modified fields for state-aware objects
+	 */
+	private Collection<MetaField> getModifiedFields(MetaObject mc, Object obj) {
+		if (mc instanceof StateAwareMetaObject stateAware) {
+			return mc.getMetaFields().stream()
+				.filter(field -> stateAware.isFieldModified(field, obj))
+				.collect(Collectors.toList());
 		}
+		return Collections.emptyList();
 	}
 
 	/**
@@ -315,33 +378,15 @@ public abstract class ObjectManager
 	}
 
 	/**
-	 * Retrieves the fields of a MetaClass which are keys
+	 * Retrieves the fields of a MetaObject which are primary keys with improved caching
 	 */
-	@SuppressWarnings("unchecked")
-	public Collection<MetaField> getPrimaryKeys( MetaObject mc )
-	//throws MetaException
-	{
-		final String KEY = "getPrimaryKeys()";
-
-		ArrayList<MetaField> fields = (ArrayList<MetaField>) mc.getCacheValue( KEY );
-
-		if ( fields == null )
-		{
-			fields = new ArrayList<MetaField>();
-
-			for( Iterator i = mc.getMetaFields().iterator(); i.hasNext(); )
-			{
-				MetaField f = (MetaField) i.next();
-				if ( isPrimaryKey( f )) fields.add( f );
-			}
-
-			mc.setCacheValue( KEY, fields );
-		}
-
-		//if ( fields.size() == 0 )
-			//  throw new RuntimeException( "No keys found for MetaClass [" + mc + "]" );
-
-		return fields;
+	public Collection<MetaField> getPrimaryKeys(MetaObject mc) {
+		String cacheKey = mc.getName() + ":primaryKeys";
+		return primaryKeysCache.computeIfAbsent(cacheKey, key ->
+			mc.getMetaFields().stream()
+				.filter(this::isPrimaryKey)
+				.collect(Collectors.toList())
+		);
 	}
 
 	/**
@@ -416,6 +461,124 @@ public abstract class ObjectManager
 	 * Get all objects of the specified kind from the datastore
 	 */
 	public abstract Collection<?> getObjects( ObjectConnection c, MetaObject mc, QueryOptions options ) throws MetaDataException;
+	
+	///////////////////////////////////////////////////////
+	// ASYNCHRONOUS OPERATIONS
+	//
+	
+	/**
+	 * Asynchronously retrieves objects from the datastore
+	 */
+	public CompletableFuture<Collection<?>> getObjectsAsync(MetaObject mc) {
+		return getObjectsAsync(mc, new QueryOptions());
+	}
+	
+	/**
+	 * Asynchronously retrieves objects from the datastore with options
+	 */
+	public CompletableFuture<Collection<?>> getObjectsAsync(MetaObject mc, QueryOptions options) {
+		return CompletableFuture.supplyAsync(() -> {
+			try (var connection = getConnection()) {
+				return getObjects(connection, mc, options);
+			} catch (Exception e) {
+				throw new RuntimeException("Error retrieving objects asynchronously", e);
+			}
+		}, asyncExecutor);
+	}
+	
+	/**
+	 * Asynchronously creates an object
+	 */
+	public CompletableFuture<Void> createObjectAsync(Object obj) {
+		return CompletableFuture.runAsync(() -> {
+			try (var connection = getConnection()) {
+				createObject(connection, obj);
+			} catch (Exception e) {
+				MetaObject mc = getMetaObjectFor(obj);
+				fireErrorEvent(mc, obj, "create", e);
+				throw new RuntimeException("Error creating object asynchronously", e);
+			}
+		}, asyncExecutor);
+	}
+	
+	/**
+	 * Asynchronously updates an object
+	 */
+	public CompletableFuture<Void> updateObjectAsync(Object obj) {
+		return CompletableFuture.runAsync(() -> {
+			try (var connection = getConnection()) {
+				updateObject(connection, obj);
+			} catch (Exception e) {
+				MetaObject mc = getMetaObjectFor(obj);
+				fireErrorEvent(mc, obj, "update", e);
+				throw new RuntimeException("Error updating object asynchronously", e);
+			}
+		}, asyncExecutor);
+	}
+	
+	/**
+	 * Asynchronously deletes an object
+	 */
+	public CompletableFuture<Void> deleteObjectAsync(Object obj) {
+		return CompletableFuture.runAsync(() -> {
+			try (var connection = getConnection()) {
+				deleteObject(connection, obj);
+			} catch (Exception e) {
+				MetaObject mc = getMetaObjectFor(obj);
+				fireErrorEvent(mc, obj, "delete", e);
+				throw new RuntimeException("Error deleting object asynchronously", e);
+			}
+		}, asyncExecutor);
+	}
+	
+	/**
+	 * Batch creates multiple objects asynchronously
+	 */
+	public CompletableFuture<Void> createObjectsAsync(Collection<?> objects) {
+		return CompletableFuture.runAsync(() -> {
+			try (var connection = getConnection()) {
+				createObjects(connection, objects);
+			} catch (Exception e) {
+				throw new RuntimeException("Error creating objects in batch asynchronously", e);
+			}
+		}, asyncExecutor);
+	}
+	
+	/**
+	 * Fires error events to listeners
+	 */
+	private void fireErrorEvent(MetaObject mc, Object obj, String operation, Exception error) {
+		synchronized (eventListeners) {
+			try {
+				eventListeners.forEach(listener -> listener.onError(mc, obj, operation, error));
+			} catch (Exception e) {
+				log.warn("Error firing error events", e);
+			}
+		}
+	}
+	
+	///////////////////////////////////////////////////////
+	// QUERY BUILDER PATTERN
+	//
+	
+	/**
+	 * Creates a query builder for the specified MetaObject
+	 */
+	public QueryBuilder query(MetaObject metaObject) {
+		return new QueryBuilder(this, metaObject);
+	}
+	
+	/**
+	 * Creates a query builder for the specified class name
+	 */
+	public QueryBuilder query(String className) throws MetaDataException {
+		try {
+			MetaObject metaObject = MetaObject.forName(className);
+			return new QueryBuilder(this, metaObject);
+		} catch (Exception e) {
+			throw new MetaDataException("Could not find MetaObject for class: " + className, e);
+		}
+	}
 	/*  {
         Collection fields = null;
 
@@ -489,23 +652,98 @@ public abstract class ObjectManager
 	}
 
 	/**
-	 * Add the specified objects to the datastore
+	 * Add the specified objects to the datastore with enhanced bulk processing
 	 */
-	public void createObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaDataException
-	{
-		for( Iterator<?> i = objs.iterator(); i.hasNext(); )
-			createObject( c, i.next() );
+	public void createObjects(ObjectConnection c, Collection<?> objs) throws MetaDataException {
+		if (objs == null || objs.isEmpty()) {
+			return;
+		}
+		
+		log.debug("Creating {} objects in bulk", objs.size());
+		
+		// Group objects by MetaObject type for better performance
+		var objectsByType = objs.stream()
+			.collect(Collectors.groupingBy(obj -> getMetaObjectFor(obj)));
+		
+		for (var entry : objectsByType.entrySet()) {
+			MetaObject mc = entry.getKey();
+			@SuppressWarnings("unchecked")
+			List<Object> objectsOfType = (List<Object>) entry.getValue();
+			
+			// Fire bulk pre-create events
+			synchronized (eventListeners) {
+				for (Object obj : objectsOfType) {
+					eventListeners.forEach(listener -> listener.onBeforeCreate(mc, obj));
+				}
+			}
+			
+			// Process bulk creation (can be overridden in implementations for true bulk operations)
+			createObjectsBulk(c, mc, objectsOfType);
+			
+			// Fire bulk post-create events
+			synchronized (eventListeners) {
+				for (Object obj : objectsOfType) {
+					eventListeners.forEach(listener -> listener.onAfterCreate(mc, obj));
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Template method for bulk object creation - can be overridden for database-specific bulk operations
+	 */
+	protected void createObjectsBulk(ObjectConnection c, MetaObject mc, Collection<Object> objects) throws MetaDataException {
+		// Default implementation - individual creates
+		for (Object obj : objects) {
+			createObject(c, obj);
+		}
 	}
 
 	/**
-	 * Update the specified objects in the datastore
+	 * Update the specified objects in the datastore with enhanced bulk processing
 	 */
-	public void updateObjects( ObjectConnection c, Collection<?> objs )
-	throws MetaDataException
-	{
-		for( Iterator<?> i = objs.iterator(); i.hasNext(); )
-			updateObject( c, i.next() );
+	public void updateObjects(ObjectConnection c, Collection<?> objs) throws MetaDataException {
+		if (objs == null || objs.isEmpty()) {
+			return;
+		}
+		
+		log.debug("Updating {} objects in bulk", objs.size());
+		
+		// Group objects by MetaObject type for better performance
+		var objectsByType = objs.stream()
+			.collect(Collectors.groupingBy(obj -> getMetaObjectFor(obj)));
+		
+		for (var entry : objectsByType.entrySet()) {
+			MetaObject mc = entry.getKey();
+			@SuppressWarnings("unchecked")
+			List<Object> objectsOfType = (List<Object>) entry.getValue();
+			
+			// Filter to only modified objects if state-aware
+			List<Object> modifiedObjects = objectsOfType;
+			if (mc instanceof StateAwareMetaObject stateAware) {
+				modifiedObjects = objectsOfType.stream()
+					.filter(obj -> stateAware.isModified(obj))
+					.collect(Collectors.toList());
+			}
+			
+			if (modifiedObjects.isEmpty()) {
+				log.debug("No modified objects found for {}", mc.getName());
+				continue;
+			}
+			
+			// Process bulk update (can be overridden in implementations)
+			updateObjectsBulk(c, mc, modifiedObjects);
+		}
+	}
+	
+	/**
+	 * Template method for bulk object updates - can be overridden for database-specific bulk operations
+	 */
+	protected void updateObjectsBulk(ObjectConnection c, MetaObject mc, Collection<Object> objects) throws MetaDataException {
+		// Default implementation - individual updates
+		for (Object obj : objects) {
+			updateObject(c, obj);
+		}
 	}
 
 	/**

@@ -32,8 +32,9 @@
         <module>maven-plugin</module>
         <module>core</module>
         <module>om</module>
-        <!-- module>omdb</module>
-        <module>web</module>
+        <module>omdb</module>
+        <module>omnosql</module>
+        <!-- module>web</module>
         <module>demo</module -->
         <!-- module>docs</module -->
     </modules>

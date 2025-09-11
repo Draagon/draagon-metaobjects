@@ -46,6 +46,7 @@ public class AbstractOMDBTest {
 
             // Initialize the loader
             XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test-db" );
+            
             xl.init(new LocalMetaDataSources( "meta.fruit.xml" ), true);
 
             loader = xl;
@@ -118,6 +119,9 @@ public class AbstractOMDBTest {
     
     /** Returns a new database Connection for the Derby test database */
     protected static Connection getConnection() throws SQLException {
+        if (dbFile == null) {
+            throw new SQLException("Database not initialized - dbFile is null");
+        }
         return DriverManager.getConnection("jdbc:derby:memory:"+dbFile+";create=true");
     }
     
@@ -149,12 +153,16 @@ public class AbstractOMDBTest {
     @AfterClass
     public static synchronized void destroyEntityManager() throws Exception {
 
-        try {
-            DriverManager.getConnection("jdbc:derby:memory:"+dbFile+";drop=true");
-        } catch( SQLNonTransientConnectionException ex ) {}
-        System.out.println( "DB Destroyed!" );
+        if (dbFile != null) {
+            try {
+                DriverManager.getConnection("jdbc:derby:memory:"+dbFile+";drop=true");
+            } catch( SQLNonTransientConnectionException ex ) {}
+            System.out.println( "DB Destroyed!" );
+        }
 
-        loader.destroy();
+        if (loader != null) {
+            loader.destroy();
+        }
     }
 
     @Before

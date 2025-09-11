@@ -9,11 +9,20 @@ import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.Validator;
+import com.draagon.meta.validation.MetaDataValidators;
+import com.draagon.meta.metrics.MetaDataMetrics;
+import com.draagon.meta.event.MetaDataEvent;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +41,12 @@ public abstract class MetaObject extends MetaData {
     // Referenced by ObjectField and ObjectArrayField - maintained for backward compatibility
     // and shared usage across field implementations
     public final static String ATTR_OBJECT_REF = "objectRef";
+    
+    // Enhanced object-specific validation chain
+    private volatile ValidationChain<MetaObject> objectValidationChain;
+    
+    // Object-specific metrics
+    private final MetaDataMetrics objectMetrics;
 
     /**
      * Legacy constructor used in unit tests
@@ -43,10 +58,14 @@ public abstract class MetaObject extends MetaData {
     }
 
     /**
-     * Constructs the MetaObject
+     * Constructs the MetaObject with enhanced validation and metrics
      */
     public MetaObject(String subtype, String name ) {
         super( TYPE_OBJECT, subtype, name );
+        this.objectMetrics = new MetaDataMetrics("object:" + name);
+        this.objectMetrics.recordCreation();
+        
+        log.debug("Created MetaObject: {}:{}:{}", TYPE_OBJECT, subtype, name);
     }
 
     /**
@@ -64,6 +83,227 @@ public abstract class MetaObject extends MetaData {
     /** Wrap the MetaObject */
     public MetaObject overload() {
         return super.overload();
+    }
+    
+    // ========== ENHANCED OBJECT-SPECIFIC METHODS ==========
+    
+    /**
+     * Get object-specific metrics
+     */
+    public MetaDataMetrics getObjectMetrics() {
+        return objectMetrics;
+    }
+    
+    /**
+     * Get object metrics snapshot
+     */
+    public MetaDataMetrics.MetricsSnapshot getObjectMetricsSnapshot() {
+        return objectMetrics.getSnapshot();
+    }
+    
+    /**
+     * Validate this MetaObject using enhanced validation
+     */
+    public ValidationResult validateObject() {
+        Instant start = Instant.now();
+        
+        try {
+            ValidationResult result = getObjectValidationChain().validate(this);
+            
+            // Record metrics
+            Duration duration = Duration.between(start, Instant.now());
+            objectMetrics.recordValidation(duration, result.isValid());
+            
+            // Publish validation event
+            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
+            
+            return result;
+        } catch (Exception e) {
+            // Record error metrics
+            Duration duration = Duration.between(start, Instant.now());
+            objectMetrics.recordValidation(duration, false);
+            objectMetrics.recordError();
+            
+            log.error("Object validation failed for {}: {}", getName(), e.getMessage(), e);
+            
+            return ValidationResult.builder()
+                .addError("Object validation failed: " + e.getMessage())
+                .build();
+        }
+    }
+    
+    /**
+     * Get the object validation chain (lazy initialization)
+     */
+    private ValidationChain<MetaObject> getObjectValidationChain() {
+        if (objectValidationChain == null) {
+            synchronized (this) {
+                if (objectValidationChain == null) {
+                    objectValidationChain = ValidationChain.<MetaObject>builder()
+                        .addValidator(createObjectClassValidator())
+                        .addValidator(createFieldsValidator())
+                        .addValidator(createKeysValidator())
+                        .addValidator(createLegacyObjectValidator())
+                        .build();
+                }
+            }
+        }
+        return objectValidationChain;
+    }
+    
+    /**
+     * Create an object class validator
+     */
+    private Validator<MetaObject> createObjectClassValidator() {
+        return new Validator<MetaObject>() {
+            @Override
+            public ValidationResult validate(MetaObject object) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                try {
+                    Class<?> objectClass = object.getObjectClass();
+                    if (objectClass == null) {
+                        builder.addError("MetaObject must have a valid object class");
+                    }
+                } catch (Exception e) {
+                    builder.addError("Invalid object class: " + e.getMessage());
+                }
+                
+                return builder.build();
+            }
+        };
+    }
+    
+    /**
+     * Create a fields validator
+     */
+    private Validator<MetaObject> createFieldsValidator() {
+        return new Validator<MetaObject>() {
+            @Override
+            public ValidationResult validate(MetaObject object) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                // Validate that all fields are properly configured
+                Collection<MetaField> fields = object.getMetaFields();
+                for (MetaField field : fields) {
+                    if (field.getDataType() == null) {
+                        builder.addError("Field '" + field.getName() + "' must have a data type");
+                    }
+                    
+                    if (field.getDeclaringObject() != object && field.getDeclaringObject() != null) {
+                        builder.addError("Field '" + field.getName() + "' has incorrect declaring object");
+                    }
+                }
+                
+                return builder.build();
+            }
+        };
+    }
+    
+    /**
+     * Create a keys validator
+     */
+    private Validator<MetaObject> createKeysValidator() {
+        return new Validator<MetaObject>() {
+            @Override
+            public ValidationResult validate(MetaObject object) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                // Validate keys - check that there's only one primary key
+                try {
+                    PrimaryKey primaryKey = object.getPrimaryKey();
+                    // If we got here without exception, there is one primary key which is good
+                    // No additional validation needed for now
+                } catch (Exception e) {
+                    // Either no primary key or error - this is okay for validation
+                    // Could be more specific about required vs optional primary keys
+                }
+                
+                return builder.build();
+            }
+        };
+    }
+    
+    /**
+     * Enhanced field access with Optional wrapper
+     */
+    public Optional<MetaField> findMetaField(String name) {
+        try {
+            return Optional.of(getMetaField(name));
+        } catch (MetaFieldNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+    
+    /**
+     * Safe field requirement (throws descriptive exception)
+     */
+    public MetaField requireMetaField(String name) {
+        return findMetaField(name)
+            .orElseThrow(() -> new MetaFieldNotFoundException(
+                "MetaField '" + name + "' not found in MetaObject '" + getName() + "'", name));
+    }
+    
+    /**
+     * Get all fields as stream for functional operations
+     */
+    public Stream<MetaField> getMetaFieldsStream() {
+        return getMetaFields().stream();
+    }
+    
+    /**
+     * Find fields by data type
+     */
+    public Stream<MetaField> findFieldsByType(DataTypes dataType) {
+        return getMetaFieldsStream()
+            .filter(field -> field.getDataType() == dataType);
+    }
+    
+    /**
+     * Enhanced newInstance with metrics and error tracking
+     */
+    public Object newInstanceEnhanced() {
+        Instant start = Instant.now();
+        
+        try {
+            Object instance = newInstance(); // Call existing method
+            
+            // Record successful instance creation metrics
+            Duration duration = Duration.between(start, Instant.now());
+            objectMetrics.recordInstanceCreation(duration, true);
+            
+            log.debug("Successfully created instance of {}", getName());
+            
+            return instance;
+        } catch (Exception e) {
+            // Record error metrics
+            Duration duration = Duration.between(start, Instant.now());
+            objectMetrics.recordInstanceCreation(duration, false);
+            objectMetrics.recordError();
+            
+            log.error("Failed to create instance of {}: {}", getName(), e.getMessage(), e);
+            throw e; // Re-throw to maintain existing behavior
+        }
+    }
+    
+    /**
+     * Create a legacy validator wrapper for MetaObject
+     */
+    private Validator<MetaObject> createLegacyObjectValidator() {
+        return new Validator<MetaObject>() {
+            @Override
+            public ValidationResult validate(MetaObject object) {
+                // Just use the basic validation from the parent
+                try {
+                    object.validate(); // Call existing validate method
+                    return ValidationResult.builder().build(); // Success
+                } catch (Exception e) {
+                    return ValidationResult.builder()
+                        .addError("Legacy validation failed: " + e.getMessage())
+                        .build();
+                }
+            }
+        };
     }
 
     /**

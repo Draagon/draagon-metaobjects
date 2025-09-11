@@ -8,8 +8,18 @@ import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.view.MetaViewNotFoundException;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.Validator;
+import com.draagon.meta.validation.MetaDataValidators;
+import com.draagon.meta.metrics.MetaDataMetrics;
+import com.draagon.meta.event.MetaDataEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
+import java.util.Optional;
 
 /**
  * A MetaField represents a field of an object and is contained within a MetaClass.
@@ -21,6 +31,8 @@ import java.util.*;
  */
 @SuppressWarnings("serial")
 public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>, MetaFieldTypes {
+
+    private static final Logger log = LoggerFactory.getLogger(MetaField.class);
 
     public final static String TYPE_FIELD = "field";
 
@@ -34,6 +46,12 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     private int length = -1;
 
     private DataTypes dataType;
+    
+    // Enhanced field-specific validation chain
+    private volatile ValidationChain<MetaField<T>> fieldValidationChain;
+    
+    // Field-specific metrics
+    private final MetaDataMetrics fieldMetrics;
 
     /**
      * Legacy constructor used in unit tests
@@ -45,7 +63,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     /**
-     * Construct a MetaField
+     * Construct a MetaField with enhanced validation and metrics
      * @param subtype SubType name for the MetaField
      * @param name Name of the MetaField
      * @param dataType The DataTypes enum used for values
@@ -53,6 +71,10 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     public MetaField(String subtype, String name, DataTypes dataType) {
         super(TYPE_FIELD, subtype, name);
         this.dataType = dataType;
+        this.fieldMetrics = new MetaDataMetrics("field:" + name);
+        this.fieldMetrics.recordCreation();
+        
+        log.debug("Created MetaField: {}:{}:{} with dataType: {}", TYPE_FIELD, subtype, name, dataType);
         //addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
         //addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
         //addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
@@ -179,6 +201,198 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     public Class<?> getValueClass() {
         return getDataType().getValueClass();
+    }
+    
+    // ========== ENHANCED FIELD-SPECIFIC METHODS ==========
+    
+    /**
+     * Get field-specific metrics
+     */
+    public MetaDataMetrics getFieldMetrics() {
+        return fieldMetrics;
+    }
+    
+    /**
+     * Get field metrics snapshot
+     */
+    public MetaDataMetrics.MetricsSnapshot getFieldMetricsSnapshot() {
+        return fieldMetrics.getSnapshot();
+    }
+    
+    /**
+     * Validate this MetaField using enhanced validation
+     */
+    public ValidationResult validateField() {
+        Instant start = Instant.now();
+        
+        try {
+            ValidationResult result = getFieldValidationChain().validate(this);
+            
+            // Record metrics
+            Duration duration = Duration.between(start, Instant.now());
+            fieldMetrics.recordValidation(duration, result.isValid());
+            
+            // Publish validation event
+            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
+            
+            return result;
+        } catch (Exception e) {
+            // Record error metrics
+            Duration duration = Duration.between(start, Instant.now());
+            fieldMetrics.recordValidation(duration, false);
+            fieldMetrics.recordError();
+            
+            log.error("Field validation failed for {}: {}", getName(), e.getMessage(), e);
+            
+            return ValidationResult.builder()
+                .addError("Field validation failed: " + e.getMessage())
+                .build();
+        }
+    }
+    
+    /**
+     * Get the field validation chain (lazy initialization)
+     */
+    private ValidationChain<MetaField<T>> getFieldValidationChain() {
+        if (fieldValidationChain == null) {
+            synchronized (this) {
+                if (fieldValidationChain == null) {
+                    fieldValidationChain = ValidationChain.<MetaField<T>>builder()
+                        .addValidator(createDataTypeFieldValidator())
+                        .addValidator(createDefaultValueValidator())
+                        .addValidator(createDeclaringObjectValidator())
+                        .addValidator(createLegacyFieldValidator())
+                        .build();
+                }
+            }
+        }
+        return fieldValidationChain;
+    }
+    
+    /**
+     * Create a data type validator for this field
+     */
+    private Validator<MetaField<T>> createDataTypeFieldValidator() {
+        return new Validator<MetaField<T>>() {
+            @Override
+            public ValidationResult validate(MetaField<T> field) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                if (field.getDataType() == null) {
+                    builder.addError("MetaField must have a data type");
+                }
+                
+                return builder.build();
+            }
+        };
+    }
+    
+    /**
+     * Create a default value validator for this field
+     */
+    private Validator<MetaField<T>> createDefaultValueValidator() {
+        return new Validator<MetaField<T>>() {
+            @Override
+            public ValidationResult validate(MetaField<T> field) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                // Validate default value against data type if present
+                T defaultVal = field.getDefaultValue();
+                if (defaultVal != null && field.getDataType() != null) {
+                    try {
+                        // Attempt to convert default value to validate compatibility
+                        DataConverter.toType(field.getDataType(), defaultVal);
+                    } catch (Exception e) {
+                        builder.addError("Default value '" + defaultVal + 
+                                       "' is not compatible with data type " + field.getDataType());
+                    }
+                }
+                
+                return builder.build();
+            }
+        };
+    }
+    
+    /**
+     * Create a declaring object validator for this field
+     */
+    private Validator<MetaField<T>> createDeclaringObjectValidator() {
+        return new Validator<MetaField<T>>() {
+            @Override
+            public ValidationResult validate(MetaField<T> field) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                // Validate that field has proper parent relationship
+                if (field.getParent() != null && 
+                    !(field.getParent() instanceof MetaDataLoader) &&
+                    !(field.getParent() instanceof MetaObject)) {
+                    builder.addError("MetaField must be attached to MetaObject or MetaDataLoader");
+                }
+                
+                return builder.build();
+            }
+        };
+    }
+    
+    /**
+     * Safe default value getter with Optional wrapper
+     */
+    public Optional<T> getDefaultValueSafe() {
+        return Optional.ofNullable(getDefaultValue());
+    }
+    
+    /**
+     * Check if this field has a default value
+     */
+    public boolean hasDefaultValue() {
+        return getDefaultValue() != null;
+    }
+    
+    /**
+     * Enhanced setDefaultValue with validation and tracking
+     */
+    public void setDefaultValueEnhanced(T defVal) {
+        Instant start = Instant.now();
+        T oldValue = this.defaultValue;
+        
+        try {
+            setDefaultValue(defVal); // Call existing method
+            
+            // Record metrics
+            fieldMetrics.recordPropertyChange();
+            
+            // Publish property change event
+            publishEvent(new MetaDataEvent.PropertyChanged(this, "defaultValue", oldValue, defVal));
+            
+            log.debug("MetaField {} default value changed from {} to {}", getName(), oldValue, defVal);
+            
+        } catch (Exception e) {
+            // Record error metrics
+            fieldMetrics.recordError();
+            
+            log.error("Failed to set default value for MetaField {}: {}", getName(), e.getMessage(), e);
+            throw e; // Re-throw to maintain existing behavior
+        }
+    }
+    
+    /**
+     * Create a legacy validator wrapper for MetaField
+     */
+    private Validator<MetaField<T>> createLegacyFieldValidator() {
+        return new Validator<MetaField<T>>() {
+            @Override
+            public ValidationResult validate(MetaField<T> field) {
+                // Just use the basic validation from the parent
+                try {
+                    field.validate(); // Call existing validate method
+                    return ValidationResult.builder().build(); // Success
+                } catch (Exception e) {
+                    return ValidationResult.builder()
+                        .addError("Legacy validation failed: " + e.getMessage())
+                        .build();
+                }
+            }
+        };
     }
 
     /** Add Child to the Field */

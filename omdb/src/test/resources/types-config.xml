@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<typesConfig xmlns="https://www.draagon.com" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <types>
+        <type name="object" class="com.draagon.meta.object.MetaObject">
+            <subType name="managed" class="com.draagon.meta.object.managed.ManagedMetaObject" />
+            <subType name="value" class="com.draagon.meta.object.value.ValueMetaObject" />
+            <subType name="data" class="com.draagon.meta.object.data.DataMetaObject" />
+            <subType name="proxy" class="com.draagon.meta.object.proxy.ProxyMetaObject" />
+        </type>
+    </types>
+    
+</typesConfig>

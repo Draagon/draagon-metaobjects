@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <metadata package="produce">
-    
-    <types>
-        <object><type name="managed" class="com.draagon.meta.object.managed.ManagedMetaObject"/></object>
-    </types>
 
     <!-- Id -->
     <field name="id" type="long" isKey="true" dbColumn="id" auto="last" />
     
     <!-- Fruit -->
-    <object name="Fruit" type="managed" dbTable="FRUIT">
+    <object name="Fruit" type="value" dbTable="FRUIT">
     
       <attr name="object">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
       
@@ -34,7 +30,7 @@
     </object>  
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit" dbTable="APPLE" dbView="APPLE_VIEW"
+    <object name="Apple" super="Fruit" type="value" dbTable="APPLE" dbView="APPLE_VIEW"
         dbViewSQL="SELECT F.*, A.* FROM FRUIT F, APPLE A WHERE F.id=A.fruit_id AND F.kind=1">
     
       <attr name="object">com.draagon.meta.manager.db.test.fruit.Apple</attr>
@@ -83,7 +79,7 @@
     </object>
     
     <!-- Basket -->
-    <object name="Basket" type="managed" package="container" dbTable="BASKET">
+    <object name="Basket" type="value" package="container" dbTable="BASKET">
           
       <!-- Id -->
       <field name="id" type="long" dbColumn="id" auto="last">
