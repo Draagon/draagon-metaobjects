@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>metaobjects-omnosql</artifactId>
-    <name>MetaObjects :: ObjectManager :: NoSQL Object Manager</name>
+    <name>MetaObjects :: ObjectManager :: NoSQL</name>
     <description>NoSQL Object Manager Extensions for MetaObjects</description>
     <packaging>bundle</packaging>
 
