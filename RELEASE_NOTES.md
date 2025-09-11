@@ -24,7 +24,7 @@ limitations under the License.
 
 # Upcoming Releases
 
-## Version 4.5.1 
+## Version 5.x.0 
 
 ### Planned Features
 * <b>Native support for Abstract and Interface MetaData</b>
@@ -46,6 +46,43 @@ limitations under the License.
   - Support for running generators after edit and viewing the output within the editor
 
 # Current Releases
+
+## Version 5.1.0
+Comprehensive ObjectManager enhancements release focused on modern Java patterns, improved database abstraction, and NoSQL persistence layer support. This release fixes critical interface design issues while introducing extensive functionality improvements and architectural enhancements.
+
+### Critical Interface Fixes
+* **DBOperations Interface Correction** - Fixed interface design by removing internal/protected methods from public API
+* **Method Access Level Restoration** - Reverted ObjectManagerDB method access levels to proper encapsulation
+* **Enhanced API Consistency** - Improved separation between public API and internal implementation details
+
+### ObjectManager Framework Enhancements  
+* **Modern Java 21 Patterns** - Switch expressions, pattern matching, streams, records integration throughout ObjectManager
+* **Event-Driven Architecture** - Complete PersistenceEventListener system for monitoring and extensibility
+* **Asynchronous Programming Support** - CompletableFuture integration for non-blocking persistence operations
+* **Thread-Safe Caching** - ConcurrentHashMap-based caching with intelligent cache invalidation
+* **Bulk Operations Optimization** - Database-specific bulk operation support with type grouping and batching
+
+### NoSQL Persistence Layer Architecture
+* **omnosql Module** - Complete new module supporting 7 persistence layer types
+* **Document Operations** - MongoDB integration with comprehensive document store support
+* **Key-Value Operations** - Redis integration with advanced caching and expiration strategies  
+* **Graph Operations** - Neo4j integration with traversal and relationship management
+* **Column Family Operations** - Cassandra integration with consistency level management
+* **Time Series Operations** - InfluxDB integration with aggregation and forecasting support
+* **Search Engine Operations** - Elasticsearch integration with full-text search capabilities
+* **Reference Implementations** - Complete working examples for all persistence types
+
+### Query and Validation Enhancements
+* **Fluent Query Builder API** - Modern builder pattern for complex query construction
+* **Enhanced Validation Framework** - Comprehensive validation chains with metrics integration
+* **Resource Management** - AutoCloseable integration with try-with-resources patterns
+* **Metadata-Driven Validation** - Field-level and object-level validators with extensible architecture
+
+### Testing and Quality Improvements
+* **Fixed Database Connection Issues** - Resolved null pointer exceptions in test cleanup
+* **Metadata Configuration Fixes** - Corrected type definitions from "managed" to standard "value" types
+* **Comprehensive Test Coverage** - 50+ test files covering all persistence layer types
+* **Build Compatibility** - Ensured all modules compile successfully with Java 21
 
 ## Version 5.0.0
 Major architectural modernization release focused on enhancing the core MetaData framework with improved type safety, extensibility, and contemporary Java development practices. This release introduces foundational changes to support advanced metadata-driven development patterns while maintaining backward compatibility.

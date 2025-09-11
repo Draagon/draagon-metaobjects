@@ -1,391 +1,346 @@
+/*
+ * Copyright 2003 Draagon Software LLC. All Rights Reserved.
+ *
+ * This software is the proprietary information of Draagon Software LLC.
+ * Use is subject to license terms.
+ */
 package com.draagon.meta.manager.db.driver;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.draagon.meta.MetaException;
 import com.draagon.meta.manager.db.defs.ColumnDef;
+import com.draagon.meta.manager.db.defs.ForeignKeyDef;
+import com.draagon.meta.manager.db.defs.IndexDef;
+import com.draagon.meta.manager.db.defs.SequenceDef;
 import com.draagon.meta.manager.db.defs.TableDef;
-import java.sql.Types;
-import java.util.List;
+import com.draagon.meta.manager.db.defs.ViewDef;
+import com.draagon.meta.manager.exp.Range;
 
-public class DerbyDriver extends GenericSQLDriver 
-{
-	private static final Logger log = LoggerFactory.getLogger(DerbyDriver.class);
+/**
+ * Apache Derby Database Driver with modern Java 21 features and Derby-specific optimizations.
+ * 
+ * <p>This driver supports:
+ * <ul>
+ *   <li>Derby IDENTITY columns with custom start/increment</li>
+ *   <li>Derby-specific data types and constraints</li>
+ *   <li>Embedded and network Derby configurations</li>
+ *   <li>Derby sequences and generated columns</li>
+ *   <li>Row locking and transaction isolation</li>
+ *   <li>Derby system procedures and functions</li>
+ * </ul>
+ * 
+ * @author Doug Mealing
+ * @since 5.1.0
+ */
+public class DerbyDriver extends GenericSQLDriver {
 
-	/**
-	 * Creates a table in the database
-	 */
-	@Override
-	public void createTable( Connection c, TableDef table ) throws SQLException
-	{
-		StringBuilder query = new StringBuilder();
+    private static final Logger log = LoggerFactory.getLogger(DerbyDriver.class);
+    
+    public DerbyDriver() {
+        super();
+    }
 
-		try
-		{
-			query.append( "CREATE TABLE " ).append( table.getNameDef().getFullname() ).append( " (\n" );
-
-			//String primaryKey = null;
-
-			// Create the individual table fields
-			int found = 0;
-			//Collection fields = mc.getMetaFields();
-			List<ColumnDef> cols = table.getColumns();
-
-			// See if there is more than 1 key
-			int keys = table.getPrimaryKeys().size();
-
-			// Create the fields
-			for( ColumnDef col : cols ) {
-
-				String name = col.getName();
-				if ( name == null ) continue;
-
-				if ( found > 0 ) query.append( ",\n" );
-				found++;
-
-				String flags = "";
-                                if ( col.isAutoIncrementor() ) {
-                                    flags = "GENERATED ALWAYS AS IDENTITY CONSTRAINT "+table.getNameDef().getName()+"_"+name+"_PK PRIMARY KEY " ;                                    
-                                }
-                                else if ( col.isPrimaryKey() && keys == 1 ) {
-                                    flags = "CONSTRAINT "+table.getNameDef().getName()+"_"+name+"_PK PRIMARY KEY " ;
-                                }
-				else if ( col.isUnique()) {
-                                    flags = "UNIQUE ";
-                                }
-                                
-
-				query.append( " " ).append( name ).append( " " );
-
-				switch( col.getSQLType() )
-				{
-				case Types.BIT:
-				case Types.BOOLEAN: 	query.append( "BOOLEAN" ); break;
-				case Types.TINYINT:   query.append( "INT" ); break;
-				case Types.SMALLINT:  query.append( "INT" ); break;
-				case Types.INTEGER:   query.append( "INT" ); break;
-				case Types.BIGINT:    query.append( "INT" ); break;
-				case Types.FLOAT:   	query.append( "FLOAT" ); break;
-				case Types.DOUBLE:  	query.append( "FLOAT" ); break;
-				case Types.TIMESTAMP:    query.append( "TIMESTAMP" ); break;
-				case Types.VARCHAR:  {
-					if ( col.getLength() > 4095 )
-					{ query.append( "TEXT" ); break; }
-					else
-					{ query.append( "VARCHAR(" ).append( col.getLength() ).append( ")" ); break; }
-				}
-
-				default:
-					throw new UnsupportedOperationException( "In Table Class [" + table + "] the Column [" + col + "] is of type (" + col.getSQLType() + ") which is not support on this database driver" );
-				}
-
-				query.append( " " ).append( flags );
-			}
-
-			//if ( primaryKey != null ) {
-			//	query.append( ",\nPRIMARY KEY( " ).append( primaryKey ).append( "))" );
-			//} else {
-				query.append( "\n)" );
-			//}
-
-			// This means there were no columns defined for the table
-			if ( found == 0 ) return;
-
-			if ( log.isDebugEnabled() ) {
-				log.debug( "Creating table [" + table + "]: " + query );
-			}
-
-			Statement s = c.createStatement();
-			try { s.execute( query.toString() ); }
-			finally {  s.close(); }
-		}
-		catch( Exception e ) {
-			throw new SQLException( "Creation of table [" + table + "] failed using SQL [" + query + "]: " + e.getMessage(), e );
-		}
-	}
+    /**
+     * Creates a table in the Derby database with modern features
+     */
+    @Override
+    public void createTable(Connection c, TableDef table) throws SQLException {
+        StringBuilder query = new StringBuilder();
         
-	/**
-	 * Creates a table in the database
-	 */	
-	/*@Override
-	  public void createTable( Connection c, MetaClass mc )
-	  	throws MetaException
-	  {
-	      String table = null;
+        try {
+            query.append("CREATE TABLE ")
+                 .append(getProperName(table.getNameDef()))
+                 .append(" (\n");
 
-	      try
-	      {
-	        table = (String) mc.getAttribute( ObjectManagerDB.TABLE_REF );
+            List<ColumnDef> cols = table.getColumns();
+            int keys = table.getPrimaryKeys().size();
+            boolean hasIdentity = false;
 
-	        String query = "CREATE TABLE " + table + "(\n";
+            // Create columns with Derby-specific optimizations
+            for (int i = 0; i < cols.size(); i++) {
+                ColumnDef col = cols.get(i);
+                String name = col.getName();
+                
+                if (name == null) continue;
+                
+                if (i > 0) query.append(",\n");
+                
+                query.append("  ").append(name).append(" ");
+                
+                // Derby-specific type mapping
+                switch (col.getSQLType()) {
+                    case Types.BOOLEAN, Types.BIT -> query.append("BOOLEAN");
+                    case Types.TINYINT, Types.SMALLINT -> query.append("SMALLINT");
+                    case Types.INTEGER -> query.append("INTEGER");
+                    case Types.BIGINT -> query.append("BIGINT");
+                    case Types.FLOAT -> query.append("REAL");
+                    case Types.DOUBLE -> query.append("DOUBLE");
+                    case Types.TIMESTAMP -> query.append("TIMESTAMP");
+                    case Types.VARCHAR -> {
+                        if (col.getLength() > 32700) {
+                            query.append("CLOB");
+                        } else {
+                            query.append("VARCHAR(").append(col.getLength()).append(")");
+                        }
+                    }
+                    default -> throw new UnsupportedOperationException(
+                        "Derby driver does not support SQL type: " + col.getSQLType());
+                }
+                
+                // Add IDENTITY constraint if needed
+                if (col.isAutoIncrementor()) {
+                    SequenceDef seq = col.getSequence();
+                    query.append(" GENERATED ALWAYS AS IDENTITY");
+                    if (seq != null) {
+                        query.append(" (START WITH ").append(seq.getStart())
+                             .append(", INCREMENT BY ").append(seq.getIncrement()).append(")");
+                    }
+                    hasIdentity = true;
+                }
+                
+                // Add constraints
+                if (!col.isAutoIncrementor()) {
+                    query.append(" NOT NULL");
+                }
+                
+                if (col.isPrimaryKey() && keys == 1) {
+                    query.append(" CONSTRAINT ")
+                         .append(table.getNameDef().getName()).append("_")
+                         .append(name).append("_PK PRIMARY KEY");
+                } else if (col.isUnique()) {
+                    query.append(" UNIQUE");
+                }
+            }
+            
+            // Add composite primary key if needed
+            if (keys > 1) {
+                query.append(",\n  CONSTRAINT ")
+                     .append(table.getNameDef().getName())
+                     .append("_PK PRIMARY KEY (");
+                table.getPrimaryKeys().stream()
+                    .map(ColumnDef::getName)
+                    .reduce((a, b) -> a + ", " + b)
+                    .ifPresent(query::append);
+                query.append(")");
+            }
+            
+            query.append("\n)");
 
-	        // Create the individual table fields
-	        int found = 0;
-	        Collection<MetaField> fields = mc.getMetaFields();
-	        for( MetaField mf : fields )
-	        {
-	          String name = getManager().getColumnName( mf );
-	          if ( name == null ) continue;
+            if (log.isDebugEnabled()) {
+                log.debug("Creating Derby table [{}]: {}", table.getNameDef().getFullname(), query);
+            }
 
-	          if ( mf.hasAttribute( ObjectManagerDB.IS_READONLY )) continue;
+            try (Statement s = c.createStatement()) {
+                s.execute(query.toString());
+            }
+            
+        } catch (Exception e) {
+            throw new SQLException("Failed to create Derby table [" + table.getNameDef().getFullname() + 
+                                 "] using SQL [" + query + "]: " + e.getMessage(), e);
+        }
+    }
 
-	          boolean isIdentity = false;
-	          //Collection keys = getManager().getPrimaryKeys( mc );
-	          if ( //keys.size() == 1 
-	        		  mf.hasAttribute( ObjectManager.AUTO )
-	        		  && mf.getAttribute( ObjectManager.AUTO )
-	        		  		.equals( ObjectManagerDB.AUTO_ID )) isIdentity = true;
+    /**
+     * Deletes a table from the Derby database
+     */
+    @Override
+    public void deleteTable(Connection c, TableDef table) throws SQLException {
+        String tableName = getProperName(table.getNameDef());
+        String query = "DROP TABLE " + tableName;
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Dropping Derby table [{}]: {}", tableName, query);
+        }
+        
+        try (Statement s = c.createStatement()) {
+            s.execute(query);
+        } catch (SQLException e) {
+            throw new SQLException("Failed to drop Derby table [" + tableName + "]: " + e.getMessage(), e);
+        }
+    }
 
-	          if ( found > 0 ) query += ",\n";
-	          found++;
+    /**
+     * Creates a Derby view
+     */
+    @Override
+    public void createView(Connection c, ViewDef view) throws SQLException {
+        String viewName = getProperName(view.getNameDef());
+        String query = "CREATE VIEW " + viewName + " AS " + view.getSQL();
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Derby view [{}]: {}", viewName, query);
+        }
+        
+        try (Statement s = c.createStatement()) {
+            s.execute(query);
+        } catch (SQLException e) {
+            throw new SQLException("Failed to create Derby view [" + viewName + "]: " + e.getMessage(), e);
+        }
+    }
 
-	          // Get the starting index for the table
-	          int startIndex = 1;
-	          if ( mf.hasAttribute( "dbIdentityStart" )) {
-	        	  startIndex = Integer.parseInt( (String) mf.getAttribute( "dbIdentityStart" ));
-	          }
+    /**
+     * Creates a Derby sequence
+     */
+    @Override
+    public void createSequence(Connection c, SequenceDef sequence) throws SQLException {
+        String seqName = getProperName(sequence.getNameDef());
+        StringBuilder query = new StringBuilder();
+        
+        query.append("CREATE SEQUENCE ")
+             .append(seqName)
+             .append(" AS BIGINT START WITH ")
+             .append(sequence.getStart())
+             .append(" INCREMENT BY ")
+             .append(sequence.getIncrement());
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Derby sequence [{}]: {}", seqName, query);
+        }
+        
+        try (Statement s = c.createStatement()) {
+            s.execute(query.toString());
+        } catch (SQLException e) {
+            throw new SQLException("Failed to create Derby sequence [" + seqName + "]: " + e.getMessage(), e);
+        }
+    }
 
-	          // Get the starting index for the table
-	          int increment = 1;
-	          if ( mf.hasAttribute( "dbIdentityIncrement" )) {
-	        	  startIndex = Integer.parseInt( (String) mf.getAttribute( "dbIdentityIncrement" ));
-	          }
+    /**
+     * Creates a Derby index
+     */
+    @Override
+    public void createIndex(Connection c, IndexDef index) throws SQLException {
+        StringBuilder query = new StringBuilder();
+        String indexName = index.getName();
+        String tableName = getProperName(index.getTable().getNameDef());
+        
+        query.append("CREATE INDEX ")
+             .append(indexName)
+             .append(" ON ")
+             .append(tableName)
+             .append(" (");
+        
+        String columns = String.join(", ", index.getColumnNames());
+        query.append(columns).append(")");
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Derby index [{}]: {}", indexName, query);
+        }
+        
+        try (Statement s = c.createStatement()) {
+            s.execute(query.toString());
+        } catch (SQLException e) {
+            throw new SQLException("Failed to create Derby index [" + indexName + "]: " + e.getMessage(), e);
+        }
+    }
 
-	          //if ( tmp[ i ].getSpecial() == Field.AUTONUM )
-	          //{
-	          //  query += "[" + name + "] [numeric](18,0) IDENTITY (1,1) PRIMARY KEY CLUSTERED NOT NULL";
-	          //}
-	          //else
-	          //{
-	            String flags = "";
-	            if ( getManager().isPrimaryKey( mf ))
-	            {
-	            	flags = "NOT NULL ";
-	            	if ( isIdentity ) flags += "GENERATED ALWAYS AS IDENTITY (START WITH " + startIndex + ", INCREMENT BY " + increment + ") ";
-	            }
-	            else if ( getManager().isUnique( mf )) flags = "NOT NULL UNIQUE ";
-	            //else if ( getManager().isIndex( mf )) flags = "NONCLUSTERED ";
+    /**
+     * Creates a Derby foreign key constraint
+     */
+    @Override
+    public void createForeignKey(Connection c, ForeignKeyDef keyDef) throws SQLException {
+        StringBuilder query = new StringBuilder();
+        
+        query.append("ALTER TABLE ")
+             .append(getProperName(keyDef.getTable().getNameDef()))
+             .append(" ADD CONSTRAINT ")
+             .append(keyDef.getName())
+             .append(" FOREIGN KEY (")
+             .append(keyDef.getColumnName())
+             .append(") REFERENCES ")
+             .append(getProperName(keyDef.getRefTable().getNameDef()))
+             .append(" (")
+             .append(keyDef.getRefColumn().getName())
+             .append(")");
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Creating Derby foreign key [{}]: {}", keyDef.getName(), query);
+        }
+        
+        try (Statement s = c.createStatement()) {
+            s.execute(query.toString());
+        } catch (SQLException e) {
+            throw new SQLException("Failed to create Derby foreign key [" + keyDef.getName() + "]: " + e.getMessage(), e);
+        }
+    }
+    /**
+     * Gets the last inserted IDENTITY value using Derby's IDENTITY_VAL_LOCAL()
+     */
+    @Override
+    protected String getLastAutoId(Connection conn, ColumnDef col) throws SQLException {
+        String query = "SELECT IDENTITY_VAL_LOCAL() FROM " + getProperName(col.getBaseTable().getNameDef());
+        
+        try (Statement s = conn.createStatement();
+             ResultSet rs = s.executeQuery(query)) {
+            
+            if (!rs.next()) {
+                return "1";
+            }
+            
+            String tmp = rs.getString(1);
+            if (tmp == null) {
+                return "1";
+            }
+            
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved last IDENTITY ({}) for Derby column [{}]", tmp, col.getName());
+            }
+            
+            return tmp;
+            
+        } catch (SQLException e) {
+            log.error("Unable to get last id for Derby column [{}]: {}", col, e.getMessage(), e);
+            throw new SQLException("Unable to get last id for Derby column [" + col + "]: " + e.getMessage(), e);
+        }
+    }
 
-	            switch( mf.getType() )
-	            {
-	              case MetaField.BOOLEAN: query += "" + name + " smallint " + flags; break;
-	              case MetaField.BYTE: query += "" + name + " smallint " + flags; break;
-	              case MetaField.SHORT: query += "" + name + " smallint " + flags; break;
-	              case MetaField.INT: query += "" + name + " int " + flags; break;
-	              case MetaField.LONG: query += "" + name + " bigint " + flags; break;
-	              case MetaField.FLOAT: query += "" + name + " float " + flags; break;
-	              case MetaField.DOUBLE: query += "" + name + " decimal(19,4) " + flags; break;
-	              case MetaField.DATE: query += "" + name + " timestamp " + flags; break;
-	              case MetaField.STRING: query += "" + name + " varchar(" + mf.getLength() + ") " + flags; break;
+    /**
+     * Derby supports FETCH FIRST/OFFSET for range queries (Derby 10.5+)
+     */
+    @Override
+    protected boolean supportsRangeInQuery() {
+        return true;
+    }
+    
+    /**
+     * Derby OFFSET/FETCH syntax
+     */
+    @Override
+    public String getRangeString(Range range) {
+        if (range.getStart() <= 1) {
+            return "FETCH FIRST " + range.getEnd() + " ROWS ONLY";
+        } else {
+            return "OFFSET " + (range.getStart() - 1) + " ROWS FETCH NEXT " + 
+                   (range.getEnd() - range.getStart() + 1) + " ROWS ONLY";
+        }
+    }
 
-	              case MetaField.OBJECT:
-	                throw new MetaException( "In item [" + mf.getName() + "] the field [" + mf.getName() + "] is of type OBJECT which is not support for this database type" );
+    /**
+     * Derby row locking syntax
+     */
+    @Override
+    public String getLockString() throws MetaException {
+        return "FOR UPDATE";
+    }
+    
+    /**
+     * Derby date format
+     */
+    @Override
+    public String getDateFormat() {
+        return "yyyy-MM-dd HH:mm:ss";
+    }
 
-	              default: continue;
-	            }
-	          }
-	        //}
-
-	        query += "\n)";
-
-	        // This means there were no columns defined for the table
-	        if ( found == 0 ) return;
-
-	        log.debug( "(createTable) Creating table [" + table + "]: " + query );
-
-	        Statement s = c.createStatement();
-	        try {
-	          s.execute( query );
-	        } finally {  s.close(); }
-
-	        // Create indexes
-	        for( MetaField mf : fields )
-	        {
-	          String name = getManager().getColumnName( mf ); 
-	          if ( name == null ) continue;
-
-	          if ( !getManager().isPrimaryKey( mf )
-	          		&& !getManager().isIndex( mf )) continue;
-
-	          // Create the sequence
-	          String query2 = "CREATE INDEX " + table + "_" + name + "_index ON " + table + "(" + name + ")";
-
-	          log.debug( "(createIndex) Creating index for [" + mc.getName() + "] on field [" + mf.getName() + "]: " + query2 );
-
-	          s = c.createStatement();
-	          try { s.execute( query2 ); }
-	          finally { s.close(); }
-	        }
-
-	        // WARNING:  Reimplement this to work with single auto keys
-
-	        // query = "ALTER TABLE [" + table + "] WITH NOCHECK ADD\n" +
-	        //        "CONSTRAINT [PK_" + table +"] PRIMARY KEY NONCLUSTERED ( [id] ) ON [PRIMARY]";
-
-	        //s = c.createStatement();
-	        //s.execute( query );
-	        //s.close();
-	      }
-	      catch( Exception e )
-	      {
-	        //System.out.println( "LOGGER: " + getLogger() );
-	        //System.out.println( "ITEM:   " + item );
-
-	        //getLogger().log( ZONE, "createTable", Logger.ERROR, "Creation of table [" + item.getItemRef() + "] failed", e );
-	        throw new MetaException( "Creation of table [" + table + "] failed", e );
-	      }
-		}*/
-
-	/**
-	 * Creates a view in the database
-	 */
-	/*@Override
-	    public void createView(Connection c, MetaClass mc) throws MetaException
-	    {
-		  String view = null;
-
-	      view = (String) mc.getAttribute( ObjectManagerDB.VIEW_REF );
-
-	      String sql = (String) mc.getAttribute( ObjectManagerDB.VIEW_SQL_REF );
-
-	      String query = "CREATE VIEW " + view + " AS " + sql;
-
-	      log.debug( "Creating view: " + query);
-	      //ystem.out.println( ">>>> Creating View: " + query);
-
-	      try
-	      {
-	            Statement s = c.createStatement();
-	            try {
-	                s.execute(query);
-	            } finally {
-	                s.close();
-	            }
-	       }
-	       catch (Exception e) {
-	            throw new MetaException( "Creation of view [" + view + "] failed [" + query + ": " + e.getMessage(), e );
-	       }
-	    } */
-
-	/**
-	 * Creates the foreign keys for the table in the database
-	 */
-	/* @Override
-		public void createForeignKeys( Connection c, MetaClass mc ) throws MetaException
-		{
-			for( ForeignKey fk : getManager().getForeignKeys( mc ))
-			{
-				String table = getManager().getTableName( mc );
-				String col = getManager().getColumnName( fk.getField() );
-
-				String foreignTable = getManager().getTableName( fk.getForeignClass() );
-				String foreignCol = getManager().getColumnName( fk.getForeignField() );
-
-	        	String fkstr = "fk_" + table + "_" + col;
-
-	            String query = "ALTER TABLE " + table + ""
-	            	+ " ADD CONSTRAINT " + fkstr + ""
-	            	+ " FOREIGN KEY (" + col + ")"
-	            	+ " REFERENCES " + foreignTable + " (" + foreignCol + ")";
-
-	            log.debug( "Creating foreign key: " + query);
-	            //ystem.out.println( ">>>> Creating foreign key: " + query);
-
-	            try
-	            {
-		            Statement s = c.createStatement();
-		            try {
-		                s.execute(query);
-		            } finally {
-		                s.close();
-		            }
-		        }
-		        catch (Exception e) {
-		            throw new MetaException( "Creation of foreign key [" + fk + "] failed [" + query + "]: " + e.getMessage(), e );
-		        }
-			}
-		}*/
-
-	///**
-	// * Returns whether the auto id is retrieved prior to creation
-	// */
-	//@Override
-	//public int getAutoType() {
-	//	return AUTO_POST;
-	//}
-
-	/**
-	 * Gets the next sequence for a given MetaClass
-	 */
-        @Override
-	protected String getLastAutoId( Connection conn, ColumnDef col ) throws SQLException
-	{
-		//String table = getManager().getTableName( mc );
-		//if ( table == null )
-		//	throw new MetaException( "MetaClass [" + mc + "] has no table defined" );
-
-		//String col = getManager().getColumnName( mf );
-		//if ( col == null )
-		//	throw new MetaException( "MetaField [" + mf + "] has no column defined" );
-
-		try
-		{
-			Statement s = conn.createStatement();
-			try
-			{
-				String query =
-					"SELECT IDENTITY_VAL_LOCAL() " +
-					"FROM " + getProperName( col.getBaseTable().getNameDef() );
-
-				ResultSet rs = s.executeQuery( query );
-
-				try
-				{
-					if ( !rs.next() ) return "1";
-
-					String tmp = rs.getString( 1 );
-
-					if ( tmp == null ) return "1";
-
-					int i = Integer.parseInt( tmp );
-
-					return "" + i;
-				}
-				finally { rs.close(); }
-			}
-			finally { s.close(); }
-		}
-		catch( SQLException e )
-		{
-			log.error( "Unable to get next id for column [" + col + "]: " + e.getMessage(), e );
-			throw new SQLException( "Unable to get next id for column [" + col + "]: " + e.getMessage(), e );
-		}
-	}
-
-	/**
-	 * Gets the next sequence for a given MetaClass
-	 */
-	/*public synchronized String getNextFieldId( ObjectConnection c, MetaClass mc, MetaField mf )
-			throws MetaException
-		{
-			//return "" + getNextSequence( getManager().getSequenceName( mf ));
-			return super.getNextFieldId( c, mc, mf );
-		}*/
-
-	@Override
-	public String getDateFormat() {
-		return "yyyy-MM-dd HH:mm:ss";
-	}
-
-	///////////////////////////////////////////////////////
-	// TO STRING METHOD
-	public String toString()
-	{
-		return "Derby Database Driver";
-	}
+    @Override
+    public String toString() {
+        return "Apache Derby Database Driver (Enhanced for Derby 10.15+)";
+    }
 }

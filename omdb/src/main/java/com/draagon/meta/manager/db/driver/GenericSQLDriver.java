@@ -1900,96 +1900,59 @@ public class GenericSQLDriver implements DatabaseDriver {
          */
     }
 
-    protected void parseField(Object o, MetaField f, ResultSet rs, int j)
-            throws SQLException {
+    /**
+     * Enhanced field parsing with modern Java patterns and proper null handling
+     */
+    protected void parseField(Object o, MetaField f, ResultSet rs, int j) throws SQLException {
         switch (f.getType()) {
-            case MetaField.BOOLEAN: {
+            case MetaField.BOOLEAN -> {
                 boolean bv = rs.getBoolean(j);
-                if (rs.wasNull()) {
-                    f.setBoolean(o, null);
-                } else {
-                    f.setBoolean(o, new Boolean(bv));
-                }
+                f.setBoolean(o, rs.wasNull() ? null : bv);
             }
-            break;
-
-            case MetaField.BYTE: {
+            
+            case MetaField.BYTE -> {
                 byte bv = rs.getByte(j);
-                if (rs.wasNull()) {
-                    f.setByte(o, null);
-                } else {
-                    f.setByte(o, new Byte(bv));
-                }
+                f.setByte(o, rs.wasNull() ? null : bv);
             }
-            break;
-
-            case MetaField.SHORT: {
+            
+            case MetaField.SHORT -> {
                 short sv = rs.getShort(j);
-                if (rs.wasNull()) {
-                    f.setShort(o, null);
-                } else {
-                    f.setShort(o, new Short(sv));
-                }
+                f.setShort(o, rs.wasNull() ? null : sv);
             }
-            break;
-
-            case MetaField.INT: {
+            
+            case MetaField.INT -> {
                 int iv = rs.getInt(j);
-                if (rs.wasNull()) {
-                    f.setInt(o, null);
-                } else {
-                    f.setInt(o, new Integer(iv));
-                }
+                f.setInt(o, rs.wasNull() ? null : iv);
             }
-            break;
-
-            case MetaField.DATE: {
+            
+            case MetaField.DATE -> {
                 Timestamp tv = rs.getTimestamp(j);
-                if (rs.wasNull()) {
-                    f.setDate(o, null);
-                } else {
-                    f.setDate(o, new java.util.Date(tv.getTime()));
-                }
+                f.setDate(o, rs.wasNull() ? null : new Date(tv.getTime()));
             }
-            break;
-
-            case MetaField.LONG: {
+            
+            case MetaField.LONG -> {
                 long lv = rs.getLong(j);
-                if (rs.wasNull()) {
-                    f.setLong(o, null);
-                } else {
-                    f.setLong(o, new Long(lv));
-                }
+                f.setLong(o, rs.wasNull() ? null : lv);
             }
-            break;
-
-            case MetaField.FLOAT: {
+            
+            case MetaField.FLOAT -> {
                 float fv = rs.getFloat(j);
-                if (rs.wasNull()) {
-                    f.setFloat(o, null);
-                } else {
-                    f.setFloat(o, new Float(fv));
-                }
+                f.setFloat(o, rs.wasNull() ? null : fv);
             }
-            break;
-
-            case MetaField.DOUBLE: {
+            
+            case MetaField.DOUBLE -> {
                 double dv = rs.getDouble(j);
-                if (rs.wasNull()) {
-                    f.setDouble(o, null);
-                } else {
-                    f.setDouble(o, new Double(dv));
-                }
+                f.setDouble(o, rs.wasNull() ? null : dv);
             }
-            break;
-
-            case MetaField.STRING:
-                f.setString(o, rs.getString(j));
-                break;
-
-            case MetaField.OBJECT:
+            
+            case MetaField.STRING -> f.setString(o, rs.getString(j));
+            
+            case MetaField.OBJECT -> f.setObject(o, rs.getObject(j));
+            
+            default -> {
+                log.warn("Unknown field type {} for field {}, defaulting to Object", f.getType(), f.getName());
                 f.setObject(o, rs.getObject(j));
-                break;
+            }
         }
     }
 
