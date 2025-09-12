@@ -8,7 +8,7 @@
 package com.draagon.meta.web.tag;
 
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.*;
 
@@ -49,7 +49,7 @@ public class MetaObjectTag extends TagSupport
 
             //log.debug( "(doStartTag) Meta Object found with id [" + mo.getId() + "]" );
 
-            MetaObject mc = MetaDataLoader.findMetaObject( o );
+            MetaObject mc = MetaDataRegistry.findMetaObject( o );
 
             if ( mc == null )
             {

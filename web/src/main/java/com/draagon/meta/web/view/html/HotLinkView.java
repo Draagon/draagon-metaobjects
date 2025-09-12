@@ -6,16 +6,15 @@
  */
 package com.draagon.meta.web.view.html;
 
-import com.draagon.meta.attr.AttributeDef;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.*;
 import com.draagon.meta.web.view.ViewHelper;
 import com.draagon.meta.web.view.WebView;
 import com.draagon.meta.web.view.WebViewException;
-import com.draagon.util.web.URLConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +43,8 @@ public class HotLinkView extends HtmlView {
 
     public HotLinkView(String name) {
         super(name);
-        addAttributeDef(new AttributeDef(ATTR_LINKCLASS, String.class, false, "HTML style class for the link"));
-        addAttributeDef(new AttributeDef(ATTR_URL, String.class, true, "The url for the hotlink"));
+        addMetaAttr(StringAttribute.create(ATTR_LINKCLASS, null));
+        addMetaAttr(StringAttribute.create(ATTR_URL, null));
     }
 
     public void doView(PageContext page, Object o, String label, int mode, Map<String, String> params)
@@ -136,7 +135,7 @@ public class HotLinkView extends HtmlView {
             url = context + url;
         }
 
-        MetaObject mc = MetaDataLoader.findMetaObject(o);
+        MetaObject mc = MetaDataRegistry.findMetaObject(o);
 
         HashMap map = new HashMap();
 
@@ -171,7 +170,18 @@ public class HotLinkView extends HtmlView {
         }//while
 
         // Construct the HotLink URL and return it
-        return URLConstructor.constructURL(url, map);
+        // TODO: Replace URLConstructor with proper URL construction
+        StringBuilder urlBuilder = new StringBuilder(url);
+        if (!map.isEmpty()) {
+            urlBuilder.append(url.contains("?") ? "&" : "?");
+            boolean first = true;
+            for (Object key : map.keySet()) {
+                if (!first) urlBuilder.append("&");
+                urlBuilder.append(key).append("=").append(map.get(key));
+                first = false;
+            }
+        }
+        return urlBuilder.toString();
     }
 
     /**

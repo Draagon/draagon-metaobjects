@@ -8,7 +8,7 @@
 package com.draagon.meta.web.tag;
 
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.*;
 
@@ -75,7 +75,7 @@ public class MetaIfValueTag extends TagSupport
         return Tag.SKIP_BODY;
         // throw new JspException( "No object with id [" + id + "] was found" );
 
-      MetaObject mc = MetaDataLoader.findMetaObject( o );
+      MetaObject mc = MetaDataRegistry.findMetaObject( o );
       if ( mc == null )
       {
           log.error( "Cannot find MetaClass for object [" + o + "]" );

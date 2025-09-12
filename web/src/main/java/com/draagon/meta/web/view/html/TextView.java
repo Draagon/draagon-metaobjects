@@ -38,7 +38,7 @@ public class TextView extends HtmlView
 
     try
     {
-      int maxlength = mf.getLength();
+      int maxlength = 255; // Default length since MetaField.getLength() is no longer available
       int size = ViewHelper.getIntParam( params, "size", ViewHelper.getIntAttribute( this, "size", maxlength ));
 
       String value = mf.getString( o );

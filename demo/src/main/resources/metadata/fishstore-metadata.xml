@@ -6,7 +6,7 @@ are made available under the terms of the Eclipse Public License v1.0
 which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
 -->
-<metadata package="fishstore">
+<metadata xmlns="http://draagon.com/schema/metamodel/v3" package="fishstore">
     
     <types>
         <object><type name="managed" class="com.draagon.meta.object.managed.ManagedMetaObject"/></object>

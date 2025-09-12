@@ -20,7 +20,7 @@ public abstract class WebView extends MetaView
 
   public WebView( String name )
   {
-      super( name );
+      super( "web", name );
   }
 
   /**

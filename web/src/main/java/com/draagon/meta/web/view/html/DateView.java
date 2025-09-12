@@ -6,11 +6,12 @@
  */
 package com.draagon.meta.web.view.html;
 
-import com.draagon.meta.attr.AttributeDef;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
-import com.draagon.util.Param;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.web.view.*;
+import com.draagon.meta.web.util.Param;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +36,9 @@ public class DateView extends MonthView {
 
     public DateView(String name) {
         super(name);
-        addAttributeDef(new AttributeDef(ATTR_MINRANGE, String.class, false, "Minimum year value"));
-        addAttributeDef(new AttributeDef(ATTR_MAXRANGE, String.class, false, "Maximum year value"));
-        addAttributeDef(new AttributeDef(ATTR_EMPTYVALUE, String.class, false, "Default in empty value"));
+        addMetaAttr(StringAttribute.create(ATTR_MINRANGE, null));
+        addMetaAttr(StringAttribute.create(ATTR_MAXRANGE, null));
+        addMetaAttr(StringAttribute.create(ATTR_EMPTYVALUE, null));
     }
 
     public void getValue(HttpServletRequest request, Object o, String label)
@@ -80,10 +81,10 @@ public class DateView extends MonthView {
             if (c.get(Calendar.YEAR) != year
                     || c.get(Calendar.MONTH) != (mon - 1)
                     || c.get(Calendar.DAY_OF_MONTH) != day) {
-                throw new ValueException("Invalid date");
+                throw new InvalidValueException("Invalid date");
             }
         } catch (Exception e) {
-            throw new ValueException("Invalid date");
+            throw new InvalidValueException("Invalid date");
         }
 
         // Validate the value before setting

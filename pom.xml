@@ -34,8 +34,8 @@
         <module>om</module>
         <module>omdb</module>
         <module>omnosql</module>
-        <!-- module>web</module>
-        <module>demo</module -->
+        <module>web</module>
+        <module>demo</module>
         <!-- module>docs</module -->
     </modules>
 

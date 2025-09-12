@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
   
     <groupId>com.draagon</groupId>
@@ -17,86 +17,54 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <template>${project.basedir}/src/main/resources/codegen/objectCodegen.gtm</template>
-                                <sourceDir>${project.basedir}/src/main/resources/</sourceDir>
-                                <input>metadata/fishstore-metadata.xml</input>
-                                <output>${project.build.sourceDirectory}/com/draagon/meta/demo/fishstore/model/</output>
-                                <!-- prefix></prefix -->
-                                <suffix>.java</suffix>
-                                <package>com.draagon.meta.demo.fishstore</package>
-                            </properties>
-                            <source>${project.basedir}/src/main/resources/codegen/objectCodegen.groovy</source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- TODO: Add MetaObjects Maven Plugin when it supports proper code generation -->
         </plugins>
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.codehaus.gmaven.runtime</groupId>
-            <artifactId>gmaven-runtime-1.7</artifactId>
-            <version>1.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-all</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>2.4.21</version>
-        </dependency>
+        <!-- MetaObjects Dependencies -->
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-omdb</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- Spring Framework - Use consistent version -->
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>5.2.22.RELEASE</version>
-            <type>jar</type>
+            <version>5.3.31</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <type>jar</type>
+            <version>5.3.31</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <type>jar</type>
+            <version>5.3.31</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>5.2.20.RELEASE</version>
-            <type>jar</type>
+            <version>5.3.31</version>
         </dependency>
+        
+        <!-- Java EE API -->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>${javaee.api.version}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <!-- Database -->
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
