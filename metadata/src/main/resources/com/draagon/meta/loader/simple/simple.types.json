@@ -1,4 +1,4 @@
-{"types":[
+{"$schema": "../types/types-config.schema.json","types":[
     {"name":"metadata","class":"com.draagon.meta.MetaData","children":[
         {"type":"object","subType":"*","name":"*"},
         {"type":"field","subType":"*","name":"*"},
