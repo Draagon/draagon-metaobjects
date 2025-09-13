@@ -1,6 +1,7 @@
 package com.draagon.meta.generator.direct.xsd;
 
 import com.draagon.meta.generator.GeneratorTestBase;
+import com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDWriter;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.junit.Before;

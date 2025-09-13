@@ -5,7 +5,7 @@ import com.draagon.meta.generator.GeneratorIOWriter;
 import com.draagon.meta.generator.direct.object.BaseObjectCodeGenerator;
 import com.draagon.meta.generator.direct.object.BaseObjectCodeWriter;
 import com.draagon.meta.generator.direct.GenerationContext;
-import com.draagon.meta.generator.direct.javacode.overlay.JavaCodeOverlayXMLWriter;
+import com.draagon.meta.generator.direct.metadata.overlay.JavaCodeOverlayXMLWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;

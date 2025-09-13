@@ -1,8 +1,8 @@
-package com.draagon.meta.generator.direct.javacode.overlay;
+package com.draagon.meta.generator.direct.metadata.overlay;
 
 import com.draagon.meta.attr.*;
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
+import com.draagon.meta.generator.direct.metadata.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.object.MetaObject;

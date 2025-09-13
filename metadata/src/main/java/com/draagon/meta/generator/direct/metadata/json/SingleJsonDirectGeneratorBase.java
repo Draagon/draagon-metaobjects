@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.json;
+package com.draagon.meta.generator.direct.metadata.json;
 
 import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.MetaDataFilters;

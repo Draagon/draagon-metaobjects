@@ -1,9 +1,9 @@
-package com.draagon.meta.generator.direct.xsd;
+package com.draagon.meta.generator.direct.metadata.xsd;
 
 import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.direct.xml.SingleXMLDirectGeneratorBase;
-import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
+import com.draagon.meta.generator.direct.metadata.xml.SingleXMLDirectGeneratorBase;
+import com.draagon.meta.generator.direct.metadata.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 
 import java.io.OutputStream;

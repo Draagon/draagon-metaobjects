@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.xml;
+package com.draagon.meta.generator.direct.metadata.xml;
 
 import com.draagon.meta.generator.GeneratorIOWriter;
 import com.draagon.meta.generator.GeneratorIOException;

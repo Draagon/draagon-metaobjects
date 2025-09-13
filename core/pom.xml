@@ -53,7 +53,7 @@
                             </loader>
                             <generators>
                                 <generator>
-                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <classname>com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDGenerator</classname>
                                     <args>
                                         <nameSpace>http://draagon.com/schema/metamodel/v5</nameSpace>
                                         <outputDir>${project.build.outputDirectory}/metamodel/v5</outputDir>
@@ -85,7 +85,7 @@
                             </loader>
                             <generators>
                                 <generator>
-                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <classname>com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDGenerator</classname>
                                     <args>
                                         <nameSpace>https://draagon.com/schema/metamodel/produce/v1</nameSpace>
                                         <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>

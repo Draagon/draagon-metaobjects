@@ -1,8 +1,8 @@
 package com.draagon.meta.generator.direct.model;
 
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.direct.json.JsonDirectWriter;
-import com.draagon.meta.generator.direct.json.SingleJsonDirectGeneratorBase;
+import com.draagon.meta.generator.direct.metadata.json.JsonDirectWriter;
+import com.draagon.meta.generator.direct.metadata.json.SingleJsonDirectGeneratorBase;
 import com.draagon.meta.loader.MetaDataLoader;
 
 import java.io.Writer;

@@ -3,7 +3,7 @@ package com.draagon.meta.generator.xsd;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.generator.GeneratorBase;
 import com.draagon.meta.generator.GeneratorTestBase;
-import com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator;
+import com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDGenerator;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import org.junit.After;
 import org.junit.Before;

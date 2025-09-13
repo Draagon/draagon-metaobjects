@@ -1,8 +1,8 @@
-package com.draagon.meta.generator.direct.xsd;
+package com.draagon.meta.generator.direct.metadata.xsd;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
+import com.draagon.meta.generator.direct.metadata.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.types.ChildConfig;

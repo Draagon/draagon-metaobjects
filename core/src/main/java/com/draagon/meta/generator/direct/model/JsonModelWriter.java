@@ -4,7 +4,7 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.direct.json.JsonDirectWriter;
+import com.draagon.meta.generator.direct.metadata.json.JsonDirectWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
