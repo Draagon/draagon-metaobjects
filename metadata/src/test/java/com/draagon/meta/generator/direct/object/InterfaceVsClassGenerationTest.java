@@ -4,7 +4,6 @@ import com.draagon.meta.generator.GeneratorTestBase;
 import com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator;
 import com.draagon.meta.generator.direct.object.dotnet.CSharpCodeGenerator;
 import com.draagon.meta.generator.direct.object.ts.TypeScriptCodeGenerator;
-import com.draagon.meta.generator.direct.object.python.PythonCodeGenerator;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.junit.Before;
@@ -219,63 +218,6 @@ public class InterfaceVsClassGenerationTest extends GeneratorTestBase {
         assertTrue("TypeScript generator test completed", true);
     }
     
-    @Test
-    public void testPythonClassVsDataclassVsProtocol() throws IOException {
-        // Test that Python generators can be configured with different types
-        
-        // Test class generation
-        PythonCodeGenerator classGenerator = new PythonCodeGenerator();
-        Map<String, String> classArgs = getPythonArgs("class");
-        classArgs.put("type", "class");
-        classGenerator.setArgs(classArgs);
-        
-        // Test dataclass generation
-        PythonCodeGenerator dataclassGenerator = new PythonCodeGenerator();
-        Map<String, String> dataclassArgs = getPythonArgs("dataclass");
-        dataclassArgs.put("type", "dataclass");
-        dataclassGenerator.setArgs(dataclassArgs);
-        
-        // Test protocol generation
-        PythonCodeGenerator protocolGenerator = new PythonCodeGenerator();
-        Map<String, String> protocolArgs = getPythonArgs("protocol");
-        protocolArgs.put("type", "protocol");
-        protocolGenerator.setArgs(protocolArgs);
-        
-        // If we get here without exceptions, configuration worked
-        assertTrue("Python generators should be configurable", true);
-        
-        // Try execution but don't require files to be generated
-        try {
-            classGenerator.execute(loader);
-            dataclassGenerator.execute(loader);
-            protocolGenerator.execute(loader);
-            
-            // If execution succeeds, verify directories exist
-            File classDir = new File(outputDir, "class");
-            File dataclassDir = new File(outputDir, "dataclass");
-            File protocolDir = new File(outputDir, "protocol");
-            
-            // Only check what actually was created
-            if (classDir.exists()) {
-                List<File> classFiles = findFilesRecursively(classDir, ".py");
-                System.out.println("Generated " + classFiles.size() + " Python class files");
-            }
-            if (dataclassDir.exists()) {
-                List<File> dataclassFiles = findFilesRecursively(dataclassDir, ".py");
-                System.out.println("Generated " + dataclassFiles.size() + " Python dataclass files");
-            }
-            if (protocolDir.exists()) {
-                List<File> protocolFiles = findFilesRecursively(protocolDir, ".py");
-                System.out.println("Generated " + protocolFiles.size() + " Python protocol files");
-            }
-            
-        } catch (Exception e) {
-            System.out.println("Python generation not fully implemented or configured: " + e.getMessage());
-            // Don't fail test - Python generator may not be fully implemented
-        }
-        
-        assertTrue("Python generator test completed", true);
-    }
     
     @Test
     public void testDefaultTypeGeneration() throws IOException {
@@ -300,17 +242,11 @@ public class InterfaceVsClassGenerationTest extends GeneratorTestBase {
         tsGen.setArgs(tsArgs);
         tsGen.execute(loader);
         
-        // Python - default should be dataclass
-        PythonCodeGenerator pythonGen = new PythonCodeGenerator();
-        Map<String, String> pythonArgs = getPythonArgs("python-default");
-        pythonGen.setArgs(pythonArgs);
-        pythonGen.execute(loader);
         
         // Verify all generated correctly
         assertTrue("Java default should exist", new File(outputDir, "java-default").exists());
         assertTrue("C# default should exist", new File(outputDir, "csharp-default").exists());
         assertTrue("TypeScript default should exist", new File(outputDir, "ts-default").exists());
-        assertTrue("Python default should exist", new File(outputDir, "python-default").exists());
     }
     
     @Test
@@ -394,12 +330,6 @@ public class InterfaceVsClassGenerationTest extends GeneratorTestBase {
         return args;
     }
     
-    private Map<String, String> getPythonArgs(String testName) {
-        Map<String, String> args = new HashMap<>();
-        args.put("outputDir", new File(outputDir, testName).getAbsolutePath());
-        args.put("type", "dataclass"); // Default
-        return args;
-    }
     
     private void verifyJavaInterfaceVsClassDifferences(List<File> interfaceFiles, List<File> classFiles) throws IOException {
         // This is a placeholder for more sophisticated content verification

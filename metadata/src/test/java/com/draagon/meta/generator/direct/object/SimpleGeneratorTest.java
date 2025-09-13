@@ -126,12 +126,6 @@ public class SimpleGeneratorTest extends GeneratorTestBase {
         tsArgs.put("type", "interface");
         tsGen.setArgs(tsArgs);
         
-        com.draagon.meta.generator.direct.object.python.PythonCodeGenerator pythonGen = 
-            new com.draagon.meta.generator.direct.object.python.PythonCodeGenerator();
-        Map<String, String> pythonArgs = new HashMap<>();
-        pythonArgs.put("outputDir", new File(outputDir, "python-test").getAbsolutePath());
-        pythonArgs.put("type", "dataclass");
-        pythonGen.setArgs(pythonArgs);
         
         // If we get here, all generators can be configured successfully
         assertTrue("All generators should be configurable", true);

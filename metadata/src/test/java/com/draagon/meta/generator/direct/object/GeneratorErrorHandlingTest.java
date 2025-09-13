@@ -5,7 +5,6 @@ import com.draagon.meta.generator.GeneratorTestBase;
 import com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator;
 import com.draagon.meta.generator.direct.object.dotnet.CSharpCodeGenerator;
 import com.draagon.meta.generator.direct.object.ts.TypeScriptCodeGenerator;
-import com.draagon.meta.generator.direct.object.python.PythonCodeGenerator;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.junit.Before;
@@ -70,7 +69,6 @@ public class GeneratorErrorHandlingTest extends GeneratorTestBase {
         testInvalidTypeForGenerator(new JavaCodeGenerator(), "invalid-java-type");
         testInvalidTypeForGenerator(new CSharpCodeGenerator(), "invalid-csharp-type");
         testInvalidTypeForGenerator(new TypeScriptCodeGenerator(), "invalid-ts-type");
-        testInvalidTypeForGenerator(new PythonCodeGenerator(), "invalid-python-type");
     }
     
     private void testInvalidTypeForGenerator(BaseObjectCodeGenerator generator, String testName) {

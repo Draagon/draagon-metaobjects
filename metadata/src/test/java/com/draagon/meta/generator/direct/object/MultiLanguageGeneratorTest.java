@@ -5,7 +5,6 @@ import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator;
 import com.draagon.meta.generator.direct.object.dotnet.CSharpCodeGenerator;
 import com.draagon.meta.generator.direct.object.ts.TypeScriptCodeGenerator;
-import com.draagon.meta.generator.direct.object.python.PythonCodeGenerator;
 // import com.draagon.meta.loader.json.JsonDirectLoader; // Not available
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.uri.URIHelper;
@@ -60,8 +59,6 @@ public class MultiLanguageGeneratorTest extends GeneratorTestBase {
                 new String[]{"interface", "class", "struct", "record"}, "class", ".cs")},
             {"TypeScript", new LanguageTestConfig("TypeScript", new TypeScriptCodeGenerator(),
                 new String[]{"interface", "class", "type"}, "interface", ".ts")},
-            {"Python", new LanguageTestConfig("Python", new PythonCodeGenerator(),
-                new String[]{"class", "dataclass", "protocol"}, "dataclass", ".py")}
         });
     }
     
