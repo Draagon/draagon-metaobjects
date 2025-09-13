@@ -11,7 +11,6 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.string.StringSerializationHandler;
-import com.draagon.meta.io.xml.XMLSerializationHandler;
 import com.draagon.meta.util.DataConverter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

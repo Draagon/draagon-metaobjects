@@ -5,7 +5,6 @@ import com.draagon.meta.generator.GeneratorIOWriter;
 import com.draagon.meta.generator.direct.object.BaseObjectCodeGenerator;
 import com.draagon.meta.generator.direct.object.BaseObjectCodeWriter;
 import com.draagon.meta.generator.direct.GenerationContext;
-import com.draagon.meta.generator.direct.metadata.overlay.JavaCodeOverlayXMLWriter;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -63,13 +62,14 @@ public class JavaCodeGenerator extends BaseObjectCodeGenerator {
 
     @Override
     protected GeneratorIOWriter getFinalWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
-        return new JavaCodeOverlayXMLWriter(loader, out)
-                .forObjects(objectNameMap);
+        return null;
+        //return new JavaCodeOverlayXMLWriter(loader, out)
+        //        .forObjects(objectNameMap);
     }
 
     @Override
     protected void writeFinalFile(Collection<MetaObject> metadata, GeneratorIOWriter<?> writer) throws GeneratorIOException {
-        log.info("Writing Java Code Overlay XML to file: " + writer.getFilename());
-        ((JavaCodeOverlayXMLWriter)writer).writeXML();
+        // No final file needed for Java generation - each MetaObject generates its own file
+        // This method is required by the abstract base class but intentionally left empty
     }
 }

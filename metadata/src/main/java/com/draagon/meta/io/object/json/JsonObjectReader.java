@@ -182,7 +182,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
         path().inc("[]");
         in().beginArray();
 
-        MetaObject refmo = getObjectRef( this, mf );
+        MetaObject refmo = MetaDataUtil.getObjectRef( mf );
 
         List<Object> objects = new ArrayList<>();
         mf.setObject( vo, objects );
@@ -198,7 +198,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
 
     protected void readFieldObject(MetaObject mo, MetaField mf, Object vo) throws IOException {
 
-        MetaObject refmo = getObjectRef( this, mf );
+        MetaObject refmo = MetaDataUtil.getObjectRef( mf );
 
         Object voc = readObject( refmo );
         mf.setObject( vo, voc );

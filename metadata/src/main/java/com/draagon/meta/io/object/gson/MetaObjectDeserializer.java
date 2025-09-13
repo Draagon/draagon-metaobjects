@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.draagon.meta.io.json.JsonIOUtil.*;
-import static com.draagon.meta.io.xml.XMLIOUtil.getObjectRef;
 
 public class MetaObjectDeserializer implements JsonDeserializer<Object> {
 

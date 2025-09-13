@@ -101,23 +101,23 @@ public class TypesConfigBuilder {
 
     protected static MetaField createStringField(String name, boolean asXmlAttr ) {
         return StringField.create(name,null)
-                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
+;
     }
 
     protected static MetaField createStringFieldIO( String name, String ioName, boolean asXmlAttr ) {
         return StringField.create(name,null)
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
-                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
+;
     }
 
     protected static MetaField createClassFieldIO( String name, String ioName, boolean asXmlAttr ) {
         return ClassField.create(name)
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
-                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
+;
     }
 
     protected static MetaData createStringArrayField(String name, boolean asXmlAttr ) {
         return StringArrayField.create(name,null)
-                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
+;
     }
 }
