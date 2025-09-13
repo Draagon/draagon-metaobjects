@@ -7,7 +7,6 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.ObjectArrayField;
 import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.field.StringField;
-import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.model.pojo.MetaModelPojo;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
@@ -19,13 +18,12 @@ public class MetaModelBuilder {
         // METADATA ROOT
         MetaObject metadata = PojoMetaObject.create(MetaModel.OBJECT_NAME)
                 .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT, MetaModelPojo.class.getName()))
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLTYPED, MetaModel.FIELD_TYPE))
                 .addChild(buildStringField(MetaModel.FIELD_PACKAGE,true))
                 .addChild(buildStringField(MetaModel.FIELD_SUPER,true))
                 .addChild(buildStringField(MetaModel.FIELD_TYPE,true)
-                        .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_XMLIGNORE, true)))
+)
                 .addChild(buildStringField(MetaModel.FIELD_SUBTYPE,true)
-                        .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, MetaModel.FIELD_TYPE)))
+)
                 .addChild(buildStringField(MetaModel.FIELD_NAME,true))
                 .addChild(buildValueField(MetaModel.FIELD_VALUE))
                 .addChild(ObjectArrayField.create(MetaModel.FIELD_CHILDREN)

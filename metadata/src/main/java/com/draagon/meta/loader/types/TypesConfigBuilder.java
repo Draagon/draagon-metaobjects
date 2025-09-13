@@ -5,7 +5,6 @@ import com.draagon.meta.attr.BooleanAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.io.json.JsonIOConstants;
-import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.types.pojo.ChildConfigPojo;
 import com.draagon.meta.loader.types.pojo.SubTypeConfigPojo;
 import com.draagon.meta.loader.types.pojo.TypeConfigPojo;
@@ -73,14 +72,12 @@ public class TypesConfigBuilder {
     protected static MetaField createTypeChildConfigArray(String ioName) {
         return createObjectArrayField(TypeConfig.FIELD_TYPECHILDREN, TypeConfig.OBJREF_CHILD, ChildConfig.OBJECT_NAME, true )
                 .addChild(StringAttribute.create(MetaField.ATTR_DEFAULT_VALUE, "[]"))
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName));
     }
 
     protected static MetaField createChildConfigArray(String ioName) {
         return createObjectArrayField(SubTypeConfig.FIELD_SUBTYPECHILDREN, SubTypeConfig.OBJREF_CHILD, ChildConfig.OBJECT_NAME, true )
                 .addChild(StringAttribute.create(MetaField.ATTR_DEFAULT_VALUE, "[]"))
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName));
     }
 
@@ -89,7 +86,6 @@ public class TypesConfigBuilder {
 
     protected static MetaObject createMetaObject( String objectName, String ioName, Class clazz ) {
         return PojoMetaObject.create(objectName)
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
                 .addChild(createObjectClassAttr(clazz));
     }
@@ -100,7 +96,6 @@ public class TypesConfigBuilder {
 
     protected static MetaField createObjectArrayField(String tcFieldTypes, String tcRefType, String tcObjType, boolean xmlWrap ) {
         return ObjectArrayField.create(tcFieldTypes)
-                .addChild(BooleanAttribute.create( XMLIOConstants.ATTR_XMLWRAP, xmlWrap ))
                 .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, tcObjType));
     }
 
@@ -111,14 +106,12 @@ public class TypesConfigBuilder {
 
     protected static MetaField createStringFieldIO( String name, String ioName, boolean asXmlAttr ) {
         return StringField.create(name,null)
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
                 .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
     }
 
     protected static MetaField createClassFieldIO( String name, String ioName, boolean asXmlAttr ) {
         return ClassField.create(name)
-                .addChild(StringAttribute.create(XMLIOConstants.ATTR_XMLNAME, ioName))
                 .addChild(StringAttribute.create(JsonIOConstants.ATTR_JSONNAME, ioName))
                 .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR,asXmlAttr));
     }

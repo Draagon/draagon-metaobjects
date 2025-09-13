@@ -16,7 +16,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.draagon.meta.io.xml.XMLIOUtil.getObjectRef;
+import com.draagon.meta.util.MetaDataUtil;
 
 public class JsonObjectReader extends JsonMetaDataReader {
 
