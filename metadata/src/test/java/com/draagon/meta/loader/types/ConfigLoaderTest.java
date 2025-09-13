@@ -11,7 +11,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.simple.SimpleLoader;
-import com.draagon.meta.loader.simple.xml.SimpleLoaderXML;
 import com.draagon.meta.object.MetaObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,19 +37,6 @@ public class ConfigLoaderTest {
         loader.destroy();
     }
 
-    @Test
-    public void testConfigLoaderXML() throws IOException, MetaDataIOException {
-
-        TypesConfigLoader loader = TypesConfigLoader.create(getClass().getClassLoader());
-
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( SimpleLoaderXML.SIMPLE_TYPES_XML );
-        MetaDataAware<MetaObject> tc1 = (MetaDataAware<MetaObject>) XMLObjectReader.readObject( TypesConfig.class,
-                loader.getMetaObjectByName(TypesConfig.OBJECT_NAME), inputStream );
-
-        roundTripTest(tc1, "test-config-xml", TypesConfig.class);
-
-        loader.destroy();
-    }
 
     @Test
     public void testMetaDataLoader() throws IOException, MetaDataIOException {
@@ -85,23 +71,6 @@ public class ConfigLoaderTest {
         loader.destroy();
     }
 
-    
-    @Test
-    public void testSimpleLoaderXML() throws IOException, MetaDataIOException {
-
-        MetaModelLoader loader = MetaModelLoader.create( getClass().getClassLoader(), "test-simple-xml-roundtrip");
-
-        final String TEST_METADATA_XML = "com/draagon/meta/loader/simple/fruitbasket-metadata.xml";
-
-        SimpleLoaderXML simpleLoader = SimpleLoaderXML.createManual( loader.getName(), TEST_METADATA_XML );
-
-        MetaModel metadata = buildModelFromLoader(
-                loader.getMetaObjectByName( MetaModel.OBJECT_NAME), simpleLoader );
-
-        roundTripTest(metadata, loader.getName(), TypesConfig.class);
-
-        loader.destroy();
-    }
 
     public static MetaModel buildModelFromLoader(MetaObject modelMetaObject, MetaDataLoader loader) {
 

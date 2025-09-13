@@ -16,11 +16,4 @@ public class SimpleLoaderTest extends SimpleLoaderTestBase {
         ));
     }
 
-    @Test
-    public void testXMLLoadSimpleTypes() throws URISyntaxException {
-
-        initLoaderXML(Arrays.asList(
-                URIHelper.toURI( "model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.xml" )
-        ));
-    }
 }

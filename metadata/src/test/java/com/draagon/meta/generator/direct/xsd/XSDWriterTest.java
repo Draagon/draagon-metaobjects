@@ -2,7 +2,7 @@ package com.draagon.meta.generator.direct.xsd;
 
 import com.draagon.meta.generator.GeneratorTestBase;
 import com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDWriter;
-import com.draagon.meta.loader.simple.xml.SimpleLoaderXML;
+import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,12 +15,12 @@ import java.util.Arrays;
 public class XSDWriterTest extends GeneratorTestBase {
 
     public final static String ROOT_DIR = "./src/test/resources/com/draagon/meta/loader/simple";
-    protected SimpleLoaderXML loader = null;
+    protected SimpleLoader loader = null;
 
     @Before
     public void setup() {
-        loader = initLoaderXML(Arrays.asList(
-                URIHelper.toURI( "model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.xml" )
+        loader = initLoader(Arrays.asList(
+                URIHelper.toURI( "model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.json" )
         ));
     }
 

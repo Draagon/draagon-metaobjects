@@ -10,7 +10,6 @@
  */
 package com.draagon.meta.loader.simple;
 
-import com.draagon.meta.loader.simple.xml.SimpleLoaderXML;
 
 import java.net.URI;
 import java.util.List;
@@ -38,17 +37,5 @@ public class SimpleLoaderTestBase {
         return loader;
     }
 
-    protected SimpleLoaderXML initLoaderXML(List<URI> sources) {
-
-        SimpleLoaderXML loader = null;
-
-            // Initialize the loader
-            loader = new SimpleLoaderXML(
-                    getClass().getSimpleName() + "-" + i.incrementAndGet())
-                    .setSourceURIs(sources)
-                    .init();
-
-        return loader;
-    }
 
 }
