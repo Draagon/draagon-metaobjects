@@ -55,9 +55,9 @@
                                 <generator>
                                     <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
                                     <args>
-                                        <nameSpace>http://draagon.com/schema/metamodel/v3</nameSpace>
-                                        <outputDir>${project.build.outputDirectory}/metamodel/v3</outputDir>
-                                        <outputFilename>metaobjectsv3.xsd</outputFilename>
+                                        <nameSpace>http://draagon.com/schema/metamodel/v5</nameSpace>
+                                        <outputDir>${project.build.outputDirectory}/metamodel/v5</outputDir>
+                                        <outputFilename>metaobjectsv5.xsd</outputFilename>
                                     </args>
                                 </generator>
                             </generators>
@@ -93,7 +93,8 @@
                                     </args>
                                 </generator>
                                 <generator>
-                                    <classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname>
+                                    <!-- classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname -->
+                                    <classname>com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-test-sources</outputDir>
                                         <finalOutputDir>${project.basedir}/target/generated-test-resources</finalOutputDir>

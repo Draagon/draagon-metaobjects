@@ -5,15 +5,10 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.model.MetaModel;
-import com.draagon.meta.loader.model.MetaModelBuilder;
-import com.draagon.meta.loader.types.*;
 import com.draagon.meta.object.MetaObject;
 import org.w3c.dom.Element;
 
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public class JavaCodeOverlayXMLWriter extends XMLDirectWriter<JavaCodeOverlayXMLWriter> {

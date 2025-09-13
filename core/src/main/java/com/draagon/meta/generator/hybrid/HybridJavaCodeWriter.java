@@ -2,7 +2,7 @@ package com.draagon.meta.generator.hybrid;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.direct.javacode.simple.EnhancedJavaCodeWriter;
+import com.draagon.meta.generator.direct.object.javacode.JavaCodeWriter;
 import com.draagon.meta.generator.direct.GenerationContext;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Hybrid Java Code Writer that extends EnhancedJavaCodeWriter with script execution capabilities
+ * Hybrid Java Code Writer that extends JavaCodeWriter with script execution capabilities
  */
-public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
+public class HybridJavaCodeWriter extends JavaCodeWriter {
     
     private static final Logger log = LoggerFactory.getLogger(HybridJavaCodeWriter.class);
     
@@ -30,10 +30,17 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
     }
     
     public HybridJavaCodeWriter(MetaDataLoader loader, PrintWriter pw, ScriptContext context) {
-        super(loader, pw, context);
-        this.scriptContext = context instanceof ScriptContext ? 
-                            (ScriptContext) context : 
-                            new ScriptContext(context);
+        super(loader, pw, createCompatibilityContext(loader, context));
+        this.scriptContext = context;
+    }
+    
+    private static GenerationContext createCompatibilityContext(MetaDataLoader loader, ScriptContext context) {
+        GenerationContext genContext = new GenerationContext(loader);
+        genContext.setCurrentObject(context.getCurrentObject());
+        genContext.setCurrentField(context.getCurrentField());
+        genContext.setCurrentPackage(context.getCurrentPackage());
+        genContext.setCurrentClassName(context.getCurrentClassName());
+        return genContext;
     }
     
     // Configuration methods
@@ -54,8 +61,13 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
     
     public HybridJavaCodeWriter withScriptContext(ScriptContext context) {
         this.scriptContext = context;
-        // Also update the base context
-        super.withContext(context);
+        // Create a GenerationContext wrapper for compatibility
+        GenerationContext genContext = new GenerationContext(context.getLoader());
+        genContext.setCurrentObject(context.getCurrentObject());
+        genContext.setCurrentField(context.getCurrentField());
+        genContext.setCurrentPackage(context.getCurrentPackage());
+        genContext.setCurrentClassName(context.getCurrentClassName());
+        super.withContext(genContext);
         return this;
     }
     
@@ -97,8 +109,14 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
             executeScripts("beforeField", mo, mf);
             
             // Notify plugins before field generation (from parent)
-            for (com.draagon.meta.generator.direct.GenerationPlugin plugin : context.getPlugins()) {
-                plugin.beforeFieldGeneration(mf, context, this);
+            for (com.draagon.meta.generator.direct.BaseGenerationPlugin<com.draagon.meta.object.MetaObject> plugin : context.getPlugins()) {
+                if (plugin instanceof com.draagon.meta.generator.direct.GenerationPlugin) {
+                    // Cast context to GenerationContext for plugin compatibility
+                    com.draagon.meta.generator.direct.GenerationContext genContext = new com.draagon.meta.generator.direct.GenerationContext(context.getLoader());
+                    genContext.setCurrentObject(context.getCurrentObject());
+                    genContext.setCurrentField(context.getCurrentField());
+                    ((com.draagon.meta.generator.direct.GenerationPlugin) plugin).beforeFieldGeneration(mf, genContext, this);
+                }
             }
 
             // Check if scripts want to completely override field generation
@@ -110,16 +128,23 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
                 boolean generateSetters = context.getBooleanProperty("generate.setters", true);
 
                 if (generateGetters || generateSetters) {
-                    String getterName = getGetterOrSetterName(mf, true);
-                    String setterName = getGetterOrSetterName(mf, false);
-                    String valueName = getValueName(mf);
-                    String valueClass = getValueClass(mf);
+                    String getterName = getGetterMethodName(mf);
+                    String setterName = getSetterMethodName(mf);
+                    String valueName = getParameterName(mf);
+                    String valueClass = getLanguageType(mf);
 
                     // Allow plugins to customize method names and types
-                    for (com.draagon.meta.generator.direct.GenerationPlugin plugin : context.getPlugins()) {
-                        getterName = plugin.customizeMethodName(mf, "getter", getterName, context);
-                        setterName = plugin.customizeMethodName(mf, "setter", setterName, context);
-                        valueClass = plugin.customizeFieldType(mf, valueClass, context);
+                    for (com.draagon.meta.generator.direct.BaseGenerationPlugin<com.draagon.meta.object.MetaObject> plugin : context.getPlugins()) {
+                        if (plugin instanceof com.draagon.meta.generator.direct.GenerationPlugin) {
+                            com.draagon.meta.generator.direct.GenerationPlugin gp = (com.draagon.meta.generator.direct.GenerationPlugin) plugin;
+                            // Create compatible GenerationContext for plugin calls
+                            com.draagon.meta.generator.direct.GenerationContext genContext = new com.draagon.meta.generator.direct.GenerationContext(context.getLoader());
+                            genContext.setCurrentObject(context.getCurrentObject());
+                            genContext.setCurrentField(context.getCurrentField());
+                            getterName = gp.customizeMethodName(mf, "getter", getterName, genContext);
+                            setterName = gp.customizeMethodName(mf, "setter", setterName, genContext);
+                            valueClass = gp.customizeFieldType(mf, valueClass, genContext);
+                        }
                     }
 
                     // Allow scripts to customize as well
@@ -127,26 +152,26 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
                     setterName = executeScriptFunction("customizeSetterName", setterName, mf, setterName);
                     valueClass = executeScriptFunction("customizeFieldType", valueClass, mf, valueClass);
 
-                    drawNewLine();
-                    drawComment("////////////////////////////////////////////////////////////////////////////////////" );
-                    drawComment("Methods for MetaField: " + mf.getName());
+                    writeNewLine();
+                    writeComment("////////////////////////////////////////////////////////////////////////////////////" );
+                    writeComment("Methods for MetaField: " + mf.getName());
                     
                     // Execute field-specific scripts
                     executeScripts("fieldComment", mo, mf);
                     
-                    drawNewLine();
+                    writeNewLine();
                     
                     if (generateGetters) {
                         // Execute pre-getter scripts
                         executeScripts("beforeGetter", mo, mf);
-                        drawGetter(getterName, valueClass, mf);
+                        writeGetter(getterName, valueClass, mf);
                         executeScripts("afterGetter", mo, mf);
                     }
                     
                     if (generateSetters) {
                         // Execute pre-setter scripts
                         executeScripts("beforeSetter", mo, mf);
-                        drawSetter(setterName, valueName, valueClass, mf);
+                        writeSetter(setterName, valueName, valueClass, mf);
                         executeScripts("afterSetter", mo, mf);
                     }
                 }
@@ -156,8 +181,14 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
             executeScripts("afterField", mo, mf);
             
             // Notify plugins after field generation (from parent)
-            for (com.draagon.meta.generator.direct.GenerationPlugin plugin : context.getPlugins()) {
-                plugin.afterFieldGeneration(mf, context, this);
+            for (com.draagon.meta.generator.direct.BaseGenerationPlugin<com.draagon.meta.object.MetaObject> plugin : context.getPlugins()) {
+                if (plugin instanceof com.draagon.meta.generator.direct.GenerationPlugin) {
+                    // Create compatible GenerationContext for plugin calls
+                    com.draagon.meta.generator.direct.GenerationContext genContext = new com.draagon.meta.generator.direct.GenerationContext(context.getLoader());
+                    genContext.setCurrentObject(context.getCurrentObject());
+                    genContext.setCurrentField(context.getCurrentField());
+                    ((com.draagon.meta.generator.direct.GenerationPlugin) plugin).afterFieldGeneration(mf, genContext, this);
+                }
             }
             
             // Reset skip flag for next field
@@ -259,7 +290,7 @@ public class HybridJavaCodeWriter extends EnhancedJavaCodeWriter {
      * Allow scripts to add custom comments
      */
     public void addScriptComment(String comment) {
-        drawComment(comment);
+        writeComment(comment);
     }
     
     /**

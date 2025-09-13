@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-public class JsonMetaDatalWriter<T extends JsonMetaDatalWriter> extends JsonDirectWriter<T> {
+public class JsonMetaDatalWriter extends JsonDirectWriter<JsonMetaDatalWriter> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonMetaDatalWriter.class);
 

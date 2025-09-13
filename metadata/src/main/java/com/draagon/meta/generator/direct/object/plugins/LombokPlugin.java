@@ -1,8 +1,9 @@
-package com.draagon.meta.generator.direct.plugins;
+package com.draagon.meta.generator.direct.object.plugins;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.generator.GeneratorIOWriter;
+import com.draagon.meta.generator.direct.BaseGenerationContext;
 import com.draagon.meta.generator.direct.GenerationContext;
 import com.draagon.meta.generator.direct.GenerationPlugin;
 import com.draagon.meta.generator.direct.FileDirectWriter;
@@ -12,10 +13,12 @@ import java.util.HashSet;
 
 /**
  * Plugin that adds Lombok annotations to reduce boilerplate code
+ * Object-specific implementation for MetaObject code generation
  */
 public class LombokPlugin implements GenerationPlugin {
     
     private final Set<String> enabledFeatures = new HashSet<>();
+    private boolean applied = false;
     
     public LombokPlugin() {
         // Default features
@@ -51,7 +54,7 @@ public class LombokPlugin implements GenerationPlugin {
     }
     
     @Override
-    public void initialize(GenerationContext context) {
+    public void initialize(BaseGenerationContext<MetaObject> context) {
         context.setProperty("lombok.enabled", true);
         context.setProperty("lombok.features", enabledFeatures);
         
@@ -60,6 +63,7 @@ public class LombokPlugin implements GenerationPlugin {
         context.setProperty("generate.setters", !enabledFeatures.contains("setter"));
         context.setProperty("generate.toString", !enabledFeatures.contains("toString"));
         context.setProperty("generate.equalsHashCode", !enabledFeatures.contains("equalsAndHashCode"));
+        this.applied = true;
     }
     
     @Override
@@ -153,6 +157,13 @@ public class LombokPlugin implements GenerationPlugin {
     
     @Override
     public String getVersion() {
-        return "1.0.0";
+        return "2.0.0";
+    }
+    
+    /**
+     * Check if this plugin has been applied (for testing)
+     */
+    public boolean wasApplied() {
+        return applied;
     }
 }

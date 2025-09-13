@@ -1,9 +1,9 @@
 package com.draagon.meta.generator.hybrid;
 
-import com.draagon.meta.generator.direct.javacode.simple.EnhancedJavaCodeGenerator;
-import com.draagon.meta.generator.direct.plugins.ValidationPlugin;
-import com.draagon.meta.generator.direct.plugins.LombokPlugin;
-import com.draagon.meta.generator.direct.plugins.JsonSerializationPlugin;
+import com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator;
+import com.draagon.meta.generator.direct.object.plugins.ValidationPlugin;
+import com.draagon.meta.generator.direct.object.plugins.LombokPlugin;
+import com.draagon.meta.generator.direct.object.plugins.JsonSerializationPlugin;
 import com.draagon.meta.generator.direct.GenerationContext;
 import com.draagon.meta.generator.direct.CodeFragment;
 import com.draagon.meta.loader.MetaDataLoader;
@@ -45,7 +45,7 @@ public class HybridGeneratorExample {
         log.info("=== Enhanced Direct Generation Example ===");
         
         try {
-            EnhancedJavaCodeGenerator generator = new EnhancedJavaCodeGenerator();
+            JavaCodeGenerator generator = new JavaCodeGenerator();
             
             // Configure basic generation
             Map<String, String> args = new HashMap<>();
@@ -91,7 +91,7 @@ public class HybridGeneratorExample {
         log.info("=== Hybrid Generation with Custom Fragments Example ===");
         
         try {
-            EnhancedJavaCodeGenerator generator = new EnhancedJavaCodeGenerator();
+            JavaCodeGenerator generator = new JavaCodeGenerator();
             
             // Configure generation  
             Map<String, String> args = new HashMap<>();

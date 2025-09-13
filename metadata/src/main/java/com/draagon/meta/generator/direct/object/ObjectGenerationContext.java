@@ -1,24 +1,27 @@
-package com.draagon.meta.generator.direct;
+package com.draagon.meta.generator.direct.object;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.generator.direct.BaseGenerationContext;
+import com.draagon.meta.generator.direct.CodeFragment;
+import java.util.List;
 
 /**
  * Object-specific generation context for MetaObject code generation
  * Contains state and utilities specific to object/field generation patterns
  */
-public class GenerationContext extends BaseGenerationContext<MetaObject> {
+public class ObjectGenerationContext extends BaseGenerationContext<MetaObject> {
     
     // Object-specific state
     private MetaField currentField;
     
-    public GenerationContext(MetaDataLoader loader) {
+    public ObjectGenerationContext(MetaDataLoader loader) {
         super(loader);
     }
     
     // Object-specific state management
-    public GenerationContext setCurrentObject(MetaObject object) {
+    public ObjectGenerationContext setCurrentObject(MetaObject object) {
         setCurrentItem(object);
         return this;
     }
@@ -27,7 +30,7 @@ public class GenerationContext extends BaseGenerationContext<MetaObject> {
         return getCurrentItem(); 
     }
     
-    public GenerationContext setCurrentField(MetaField field) {
+    public ObjectGenerationContext setCurrentField(MetaField field) {
         this.currentField = field;
         return this;
     }
@@ -115,46 +118,46 @@ public class GenerationContext extends BaseGenerationContext<MetaObject> {
         ));
     }
     
-    // Convenience methods for fluent interface
-    @Override
-    public GenerationContext setProperty(String key, Object value) {
+    // Convenience methods for backward compatibility
+    public ObjectGenerationContext setProperty(String key, Object value) {
         super.setProperty(key, value);
         return this;
     }
     
-    @Override 
-    public GenerationContext addCodeFragment(String name, CodeFragment fragment) {
+    public ObjectGenerationContext addCodeFragment(String name, CodeFragment fragment) {
         super.addCodeFragment(name, fragment);
         return this;
     }
     
-    @Override
-    public GenerationContext addPlugin(BaseGenerationPlugin<MetaObject> plugin) {
+    public ObjectGenerationContext addPlugin(ObjectGenerationPlugin plugin) {
         super.addPlugin(plugin);
         return this;
     }
     
-    @Override
-    public GenerationContext setCurrentPackage(String packageName) {
+    public ObjectGenerationContext setCurrentPackage(String packageName) {
         super.setCurrentPackage(packageName);
         return this;
     }
     
-    @Override
-    public GenerationContext setCurrentClassName(String className) {
+    public ObjectGenerationContext setCurrentClassName(String className) {
         super.setCurrentClassName(className);
         return this;
     }
     
-    @Override
-    public GenerationContext addImport(String importName) {
+    public ObjectGenerationContext addImport(String importName) {
         super.addImport(importName);
         return this;
     }
     
-    @Override
-    public GenerationContext putCache(String key, Object value) {
+    public ObjectGenerationContext putCache(String key, Object value) {
         super.putCache(key, value);
         return this;
+    }
+    
+    // Convenience method to return plugins with correct type for ObjectGenerationContext
+    public List<ObjectGenerationPlugin> getObjectPlugins() {
+        return super.getPlugins().stream()
+                .map(plugin -> (ObjectGenerationPlugin) plugin)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

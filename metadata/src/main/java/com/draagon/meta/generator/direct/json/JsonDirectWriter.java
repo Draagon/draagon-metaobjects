@@ -8,7 +8,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.*;
 
-public abstract class JsonDirectWriter<T extends JsonDirectWriter> extends GeneratorIOWriter<T> {
+public abstract class JsonDirectWriter<T extends JsonDirectWriter<?>> extends GeneratorIOWriter<T> {
 
     private final Gson gson;
     private final Writer writer;

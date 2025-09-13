@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.javacode.simple;
+package com.draagon.meta.generator.direct.object;
 
 import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.GeneratorIOException;
@@ -6,13 +6,9 @@ import com.draagon.meta.generator.GeneratorIOWriter;
 import com.draagon.meta.generator.direct.MultiFileDirectGeneratorBase;
 import com.draagon.meta.generator.direct.GenerationContext;
 import com.draagon.meta.generator.direct.GenerationPlugin;
-import com.draagon.meta.generator.direct.javacode.overlay.JavaCodeOverlayXMLWriter;
-import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
-import java.io.File;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -21,30 +17,26 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Enhanced Java Code Generator that supports plugins and configurable code fragments
+ * Base class for Object Code Generators that support plugins and configurable code fragments.
+ * This provides language-agnostic functionality for generating code from MetaObjects.
  */
-public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> {
+public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> {
 
-    // Same constants as SimpleJavaCodeGenerator
+    // Common argument constants
     public final static String ARG_TYPE        = "type";
-    public final static String TYPE_INTERFACE  = "interface";
-
     public final static String ARG_PKGPREFIX   = "pkgPrefix";
     public final static String ARG_PKGSUFFIX   = "pkgSuffix";
     public final static String ARG_NAMEPREFIX  = "namePrefix";
     public final static String ARG_NAMESUFFIX  = "nameSuffix";
-
     public final static String ARG_OPTARRAYS   = "optArrays";
     public final static String ARG_OPTKEYS     = "optKeys";
-    
-    // New arguments for enhanced functionality
     public final static String ARG_PLUGINS     = "plugins";
     public final static String ARG_DEBUG       = "debug";
     
     // Error message constants
-    private static final String ERROR_FINALOUTPUTDIR_REQUIRED = " argument is required when a " + ARG_OUTPUTFILENAME + " is specified";
-    private static final String ERROR_TYPE_REQUIRED = " argument is required, valid values=[" + TYPE_INTERFACE + "]";
-    private static final String ERROR_TYPE_INVALID = " argument only supports the following values: [" + TYPE_INTERFACE + "]";
+    protected static final String ERROR_FINALOUTPUTDIR_REQUIRED = " argument is required when a " + ARG_OUTPUTFILENAME + " is specified";
+    protected static final String ERROR_TYPE_REQUIRED = " argument is required";
+    protected static final String ERROR_TYPE_INVALID = " argument has invalid value";
 
     protected Map<MetaObject,String> objectNameMap = new LinkedHashMap<>();
     protected GenerationContext globalContext;
@@ -52,14 +44,37 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
     protected MetaDataLoader currentLoader = null;
 
     //////////////////////////////////////////////////////////////////////
+    // Abstract methods for language-specific implementation
+
+    /**
+     * Get the supported object types for this language (e.g., "interface", "class", "struct")
+     */
+    protected abstract String[] getSupportedTypes();
+    
+    /**
+     * Get the default type for this language
+     */
+    protected abstract String getDefaultType();
+    
+    /**
+     * Create a language-specific writer instance
+     */
+    protected abstract BaseObjectCodeWriter createWriter(MetaDataLoader loader, MetaObject md, PrintWriter pw, GenerationContext context);
+    
+    /**
+     * Get the file extension for this language (e.g., ".java", ".cs", ".ts", ".py")
+     */
+    protected abstract String getFileExtension();
+
+    //////////////////////////////////////////////////////////////////////
     // Configuration Methods
 
-    public EnhancedJavaCodeGenerator() {
+    public BaseObjectCodeGenerator() {
         // Initialize with a default context - will be replaced during parseArgs
         this.globalContext = new GenerationContext(null);
     }
     
-    public EnhancedJavaCodeGenerator addPlugin(GenerationPlugin plugin) {
+    public BaseObjectCodeGenerator addPlugin(GenerationPlugin plugin) {
         plugins.add(plugin);
         if (globalContext != null) {
             globalContext.addPlugin(plugin);
@@ -67,7 +82,7 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
         return this;
     }
     
-    public EnhancedJavaCodeGenerator withGlobalContext(GenerationContext context) {
+    public BaseObjectCodeGenerator withGlobalContext(GenerationContext context) {
         this.globalContext = context;
         // Add any previously registered plugins
         for (GenerationPlugin plugin : plugins) {
@@ -81,12 +96,26 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
 
     @Override
     protected void parseArgs() {
-        if ( hasArg(ARG_OUTPUTFILENAME) && !hasArg(ARG_FINALOUTPUTDIR)) throw new GeneratorException(
-                ARG_FINALOUTPUTDIR + ERROR_FINALOUTPUTDIR_REQUIRED );
-        if ( !hasArg( ARG_TYPE)) throw new GeneratorException(
-                ARG_TYPE + ERROR_TYPE_REQUIRED );
-        if ( !getArg( ARG_TYPE).equals(TYPE_INTERFACE)) throw new GeneratorException(
-                ARG_TYPE + ERROR_TYPE_INVALID );
+        if ( hasArg(ARG_OUTPUTFILENAME) && !hasArg(ARG_FINALOUTPUTDIR)) {
+            throw new GeneratorException(ARG_FINALOUTPUTDIR + ERROR_FINALOUTPUTDIR_REQUIRED);
+        }
+        if ( !hasArg( ARG_TYPE)) {
+            throw new GeneratorException(ARG_TYPE + ERROR_TYPE_REQUIRED);
+        }
+        
+        // Validate type is supported
+        String type = getArg(ARG_TYPE);
+        String[] supportedTypes = getSupportedTypes();
+        boolean typeSupported = false;
+        for (String supportedType : supportedTypes) {
+            if (supportedType.equals(type)) {
+                typeSupported = true;
+                break;
+            }
+        }
+        if (!typeSupported) {
+            throw new GeneratorException(ARG_TYPE + ERROR_TYPE_INVALID + ". Supported: " + String.join(", ", supportedTypes));
+        }
 
         super.parseArgs();
         
@@ -96,9 +125,9 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
         if ( log.isDebugEnabled() ) log.debug("Enhanced ParseArgs: "+toString());
     }
 
-    // Getters for arguments (same as SimpleJavaCodeGenerator)
+    // Getters for arguments
     public String getType() {
-        return getArg(ARG_TYPE,TYPE_INTERFACE);
+        return getArg(ARG_TYPE, getDefaultType());
     }
 
     public String getPkgPrefix() {
@@ -134,21 +163,14 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
     }
 
     @Override
-    protected EnhancedJavaCodeWriter getSingleWriter(MetaDataLoader loader, MetaObject md, PrintWriter pw) throws GeneratorIOException {
+    protected GeneratorIOWriter getSingleWriter(MetaDataLoader loader, MetaObject md, PrintWriter pw) throws GeneratorIOException {
         // Initialize global context with loader if not already done
         if (currentLoader == null) {
             currentLoader = loader;
             globalContext = new GenerationContext(loader);
             
-            // Re-configure context with arguments now that we have the loader
-            globalContext.setProperty("generator.type", getType())
-                        .setProperty("package.prefix", getPkgPrefix())
-                        .setProperty("package.suffix", getPkgSuffix())
-                        .setProperty("name.prefix", getNamePrefix())
-                        .setProperty("name.suffix", getNameSuffix())
-                        .setProperty("generate.arrayMethods", addArrayMethods())
-                        .setProperty("generate.keyMethods", addKeyMethods())
-                        .setProperty("debug", hasArg(ARG_DEBUG));
+            // Configure context with arguments now that we have the loader
+            configureGlobalContext();
             
             // Add plugins to context
             for (GenerationPlugin plugin : plugins) {
@@ -160,49 +182,56 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
         GenerationContext fileContext = new GenerationContext(loader);
         
         // Copy global settings
-        globalContext.getPlugins().forEach(fileContext::addPlugin);
+        copyContextSettings(globalContext, fileContext);
+        
+        return createWriter(loader, md, pw, fileContext);
+    }
+    
+    /**
+     * Configure the global context with common settings
+     */
+    protected void configureGlobalContext() {
+        globalContext.setProperty("generator.type", getType())
+                    .setProperty("package.prefix", getPkgPrefix())
+                    .setProperty("package.suffix", getPkgSuffix())
+                    .setProperty("name.prefix", getNamePrefix())
+                    .setProperty("name.suffix", getNameSuffix())
+                    .setProperty("generate.arrayMethods", addArrayMethods())
+                    .setProperty("generate.keyMethods", addKeyMethods())
+                    .setProperty("debug", hasArg(ARG_DEBUG));
+    }
+    
+    /**
+     * Copy settings from global context to file context
+     */
+    protected void copyContextSettings(GenerationContext source, GenerationContext target) {
+        // Copy plugins
+        source.getPlugins().forEach(target::addPlugin);
         
         // Copy properties
         for (String key : List.of("generator.type", "package.prefix", "package.suffix", 
                                   "name.prefix", "name.suffix", "generate.arrayMethods", 
                                   "generate.keyMethods", "debug")) {
-            if (globalContext.getProperty(key, null) != null) {
-                fileContext.setProperty(key, globalContext.getProperty(key, null));
+            if (source.getProperty(key, null) != null) {
+                target.setProperty(key, source.getProperty(key, null));
             }
         }
-        
-        return new EnhancedJavaCodeWriter(loader, pw, fileContext)
-                .forType(getType())
-                .withPkgPrefix(getPkgPrefix())
-                .withPkgSuffix(getPkgSuffix())
-                .withNamePrefix(getNamePrefix())
-                .withNameSuffix(getNameSuffix())
-                .addArrayMethods(addArrayMethods())
-                .addKeyMethods(addKeyMethods())
-                .withIndentor("    ");
     }
 
     @Override
     protected void writeSingleFile(MetaObject mo, GeneratorIOWriter<?> writer) throws GeneratorIOException {
-        log.info("Writing Enhanced JavaCode ["+getType()+"] to file: " + writer.getFilename() );
+        log.info("Writing " + getLanguageName() + " Code [" + getType() + "] to file: " + writer.getFilename());
 
-        String className = ((EnhancedJavaCodeWriter)writer).writeObject(mo);
+        String className = ((BaseObjectCodeWriter)writer).writeObject(mo);
         objectNameMap.put(mo, className);
     }
+    
+    /**
+     * Get the name of the target language for logging purposes
+     */
+    protected abstract String getLanguageName();
 
-    @Override
-    protected GeneratorIOWriter getFinalWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
-        return new JavaCodeOverlayXMLWriter( loader, out )
-                .forObjects(objectNameMap);
-    }
-
-    @Override
-    protected void writeFinalFile(Collection<MetaObject> metadata, GeneratorIOWriter<?> writer) throws GeneratorIOException {
-        log.info("Writing Enhanced JavaCode Overlay XML to file: " + writer.getFilename() );
-        ((JavaCodeOverlayXMLWriter)writer).writeXML();
-    }
-
-    // File path and naming methods (same as SimpleJavaCodeGenerator)
+    // File path and naming methods
     protected String getSingleOutputFilePath(MetaObject md) {
         String path = md.getPackage().replaceAll( "::", ".");
         if ( isNotBlank(getPkgPrefix())) {
@@ -215,8 +244,15 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
             if ( suf.startsWith(".")) path = path+suf;
             else path = path+"."+suf;
         }
-        path=path.replace('.', File.separatorChar);
+        path=path.replace('.', getPathSeparator());
         return path;
+    }
+    
+    /**
+     * Get the path separator for this target language/platform
+     */
+    protected char getPathSeparator() {
+        return java.io.File.separatorChar;
     }
 
     protected String getSingleOutputFilename(MetaObject md) {
@@ -224,11 +260,16 @@ public class EnhancedJavaCodeGenerator extends MultiFileDirectGeneratorBase<Meta
         if ( isNotBlank(getNamePrefix())) name = getNamePrefix()+"-"+name;
         if ( isNotBlank(getNameSuffix())) name = name+"-"+getNameSuffix();
         name = name.replaceAll("--","-");
-        name = GeneratorUtil.toCamelCase( name, true )+".java";
+        name = convertToLanguageNaming(name) + getFileExtension();
         return name;
     }
+    
+    /**
+     * Convert name to language-specific naming conventions (e.g., PascalCase, camelCase, snake_case)
+     */
+    protected abstract String convertToLanguageNaming(String name);
 
-    private boolean isNotBlank(String str) {
+    protected boolean isNotBlank(String str) {
         return str != null && !str.trim().isEmpty();
     }
     

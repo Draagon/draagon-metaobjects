@@ -1,5 +1,6 @@
 package com.draagon.meta.generator.hybrid;
 
+import com.draagon.meta.generator.direct.object.ObjectGenerationContext;
 import com.draagon.meta.generator.direct.GenerationContext;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.field.MetaField;
@@ -11,7 +12,7 @@ import java.util.*;
 /**
  * Extended context for hybrid generators that includes script-specific functionality
  */
-public class ScriptContext extends GenerationContext {
+public class ScriptContext extends ObjectGenerationContext {
     
     private final Map<String, Object> scriptVariables = new HashMap<>();
     private final Map<String, ScriptFunction> scriptFunctions = new HashMap<>();
@@ -40,7 +41,7 @@ public class ScriptContext extends GenerationContext {
         }
         
         baseContext.getImports().forEach(this::addImport);
-        baseContext.getPlugins().forEach(this::addPlugin);
+        // Note: plugins will be handled by the new architecture
         
         initializeScriptUtilities();
     }

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-public class JsonModelWriter<T extends JsonModelWriter> extends JsonDirectWriter<T> {
+public class JsonModelWriter extends JsonDirectWriter<JsonModelWriter> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonModelWriter.class);
 

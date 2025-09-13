@@ -3,10 +3,8 @@ package com.draagon.meta.generator.hybrid;
 import com.draagon.meta.generator.GeneratorException;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.GeneratorIOWriter;
-import com.draagon.meta.generator.direct.javacode.simple.EnhancedJavaCodeGenerator;
-import com.draagon.meta.generator.direct.javacode.simple.EnhancedJavaCodeWriter;
-import com.draagon.meta.generator.direct.GenerationContext;
-import com.draagon.meta.generator.direct.GenerationPlugin;
+import com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator;
+import com.draagon.meta.generator.direct.BaseGenerationContext;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
@@ -19,10 +17,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Hybrid Java Code Generator that extends the enhanced direct generator 
+ * Hybrid Java Code Generator that extends the object Java code generator 
  * with Groovy scripting capabilities
  */
-public class HybridJavaCodeGenerator extends EnhancedJavaCodeGenerator {
+public class HybridJavaCodeGenerator extends JavaCodeGenerator {
     
     private static final Logger log = LoggerFactory.getLogger(HybridJavaCodeGenerator.class);
     
@@ -88,7 +86,7 @@ public class HybridJavaCodeGenerator extends EnhancedJavaCodeGenerator {
         
         // Initialize script context if not already set
         if (globalScriptContext == null) {
-            globalScriptContext = new ScriptContext(globalContext);
+            globalScriptContext = new ScriptContext((MetaDataLoader) null);
         }
         
         // Parse script-related arguments
@@ -202,8 +200,8 @@ public class HybridJavaCodeGenerator extends EnhancedJavaCodeGenerator {
         // Create enhanced writer first
         HybridJavaCodeWriter writer = new HybridJavaCodeWriter(loader, pw, globalScriptContext);
         
-        // Configure the writer - these methods return EnhancedJavaCodeWriter, so we need to cast
-        ((EnhancedJavaCodeWriter) writer).forType(getType())
+        // Configure the writer using methods from BaseObjectCodeWriter
+        writer.forType(getType())
                 .withPkgPrefix(getPkgPrefix())
                 .withPkgSuffix(getPkgSuffix())
                 .withNamePrefix(getNamePrefix())
