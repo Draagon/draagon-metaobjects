@@ -1,0 +1,235 @@
+{
+  "metadata": {
+    "package": "simple::entities",
+    "objects": [
+      {
+        "name": "Person",
+        "package": "::model",
+        "type": "map",
+        "fields": [
+          {
+            "name": "id",
+            "type": "long",
+            "attributes": [
+              {
+                "type": "boolean",
+                "name": "isKey",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "name": "firstName",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              },
+              {
+                "type": "length",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min",
+                    "value": "1"
+                  },
+                  {
+                    "type": "int", 
+                    "name": "max",
+                    "value": "50"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "lastName",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              },
+              {
+                "type": "length",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min", 
+                    "value": "1"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max",
+                    "value": "50"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "validators": [
+              {
+                "type": "email"
+              }
+            ]
+          },
+          {
+            "name": "age",
+            "type": "int",
+            "validators": [
+              {
+                "type": "range",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min",
+                    "value": "0"
+                  },
+                  {
+                    "type": "int", 
+                    "name": "max",
+                    "value": "150"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "isActive",
+            "type": "boolean",
+            "defaultValue": "true"
+          }
+        ]
+      },
+      {
+        "name": "Address",
+        "package": "::model",
+        "type": "map",
+        "fields": [
+          {
+            "name": "id",
+            "type": "long",
+            "attributes": [
+              {
+                "type": "boolean",
+                "name": "isKey",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "name": "street",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              }
+            ]
+          },
+          {
+            "name": "city",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              }
+            ]
+          },
+          {
+            "name": "state",
+            "type": "string",
+            "validators": [
+              {
+                "type": "length",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min",
+                    "value": "2"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max",
+                    "value": "2"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "zipCode",
+            "type": "string",
+            "validators": [
+              {
+                "type": "pattern",
+                "attributes": [
+                  {
+                    "type": "string",
+                    "name": "regex",
+                    "value": "\\d{5}(-\\d{4})?"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "country",
+            "type": "string",
+            "defaultValue": "USA"
+          }
+        ]
+      },
+      {
+        "name": "Company",
+        "package": "::model",
+        "type": "map",
+        "fields": [
+          {
+            "name": "id",
+            "type": "long",
+            "attributes": [
+              {
+                "type": "boolean", 
+                "name": "isKey",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              }
+            ]
+          },
+          {
+            "name": "employees",
+            "type": "objectArray",
+            "attributes": [
+              {
+                "type": "string",
+                "name": "objectRef",
+                "value": "Person"
+              }
+            ]
+          },
+          {
+            "name": "headquarters",
+            "type": "object",
+            "attributes": [
+              {
+                "type": "string",
+                "name": "objectRef", 
+                "value": "Address"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

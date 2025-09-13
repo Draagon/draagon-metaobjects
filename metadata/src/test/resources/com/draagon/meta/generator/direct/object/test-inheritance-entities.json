@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "package": "inheritance::test",
+    "objects": [
+      {
+        "name": "BaseEntity",
+        "package": "::common",
+        "type": "map",
+        "_isAbstract": "true",
+        "fields": [
+          {
+            "name": "id",
+            "type": "long",
+            "attributes": [
+              {
+                "type": "boolean",
+                "name": "isKey",
+                "value": "true"
+              }
+            ]
+          },
+          {
+            "name": "createdAt",
+            "type": "date"
+          },
+          {
+            "name": "updatedAt", 
+            "type": "date"
+          },
+          {
+            "name": "version",
+            "type": "int",
+            "defaultValue": "1"
+          }
+        ]
+      },
+      {
+        "name": "NamedEntity",
+        "package": "::common",
+        "type": "map",
+        "super": "BaseEntity",
+        "_isAbstract": "true",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              },
+              {
+                "type": "length",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min",
+                    "value": "1"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max", 
+                    "value": "100"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "description",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "name": "Vehicle",
+        "package": "::model",
+        "type": "map",
+        "super": "..::common::NamedEntity",
+        "_isAbstract": "true",
+        "fields": [
+          {
+            "name": "make",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              }
+            ]
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              }
+            ]
+          },
+          {
+            "name": "year",
+            "type": "int",
+            "validators": [
+              {
+                "type": "range",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min",
+                    "value": "1900"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max",
+                    "value": "2030"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "vin",
+            "type": "string",
+            "validators": [
+              {
+                "type": "required"
+              },
+              {
+                "type": "length",
+                "attributes": [
+                  {
+                    "type": "int", 
+                    "name": "min",
+                    "value": "17"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max",
+                    "value": "17"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Car",
+        "package": "::model",
+        "type": "map",
+        "super": "Vehicle",
+        "fields": [
+          {
+            "name": "numberOfDoors",
+            "type": "int",
+            "validators": [
+              {
+                "type": "range",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min", 
+                    "value": "2"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max",
+                    "value": "5"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fuelType",
+            "type": "string",
+            "defaultValue": "GASOLINE"
+          },
+          {
+            "name": "isElectric", 
+            "type": "boolean",
+            "defaultValue": "false"
+          }
+        ]
+      },
+      {
+        "name": "Motorcycle",
+        "package": "::model",
+        "type": "map",
+        "super": "Vehicle",
+        "fields": [
+          {
+            "name": "engineSize",
+            "type": "int",
+            "validators": [
+              {
+                "type": "range",
+                "attributes": [
+                  {
+                    "type": "int",
+                    "name": "min",
+                    "value": "50"
+                  },
+                  {
+                    "type": "int",
+                    "name": "max",
+                    "value": "2000"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "hasSidecar",
+            "type": "boolean",
+            "defaultValue": "false"
+          }
+        ]
+      },
+      {
+        "name": "Truck",
+        "package": "::model",
+        "type": "map",
+        "super": "Vehicle",
+        "fields": [
+          {
+            "name": "payloadCapacity",
+            "type": "double",
+            "validators": [
+              {
+                "type": "range",
+                "attributes": [
+                  {
+                    "type": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  },
+                  {
+                    "type": "double",
+                    "name": "max", 
+                    "value": "50000.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "towingCapacity",
+            "type": "double"
+          },
+          {
+            "name": "isFourWheelDrive",
+            "type": "boolean",
+            "defaultValue": "false"
+          }
+        ]
+      }
+    ]
+  }
+}
