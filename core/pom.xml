@@ -116,6 +116,15 @@
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <!-- Groovy for hybrid script generators -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>4.0.15</version>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
                     
 </project>

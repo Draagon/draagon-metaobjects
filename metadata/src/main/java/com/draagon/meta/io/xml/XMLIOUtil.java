@@ -34,7 +34,7 @@ public class XMLIOUtil {
 
     public static boolean isXmlTyped( MetaObject mo ) {
         if (mo.hasMetaAttr(ATTR_XMLTYPED)) {
-            MetaAttribute a = mo.getMetaAttr(ATTR_XMLTYPED);
+            MetaAttribute<?> a = mo.getMetaAttr(ATTR_XMLTYPED);
             if (a.getValue() == null) return false;
             return true;
         }
@@ -43,36 +43,36 @@ public class XMLIOUtil {
 
     public static String getXmlTypedField( MetaObject mo ) {
         if (mo.hasMetaAttr(ATTR_XMLTYPED)) {
-            MetaAttribute a = mo.getMetaAttr(ATTR_XMLTYPED);
+            MetaAttribute<?> a = mo.getMetaAttr(ATTR_XMLTYPED);
             if (a.getValue() == null) return null;
             return a.getValueAsString();
         }
         return null;
     }
 
-    public static boolean ifXmlIgnore( MetaField mf ) {
+    public static boolean ifXmlIgnore( MetaField<?> mf ) {
         return xmlBoolean(mf, ATTR_XMLIGNORE);
     }
 
-    public static boolean xmlBoolean(MetaField mf, String attrName) {
+    public static boolean xmlBoolean(MetaField<?> mf, String attrName) {
         if (mf.hasMetaAttr(attrName)) {
-            MetaAttribute a = mf.getMetaAttr(attrName);
+            MetaAttribute<?> a = mf.getMetaAttr(attrName);
             if (a.getValue() == null) return false;
             return DataConverter.toBoolean(a.getValue());
         }
         return false;
     }
 
-    public static boolean isXmlAttr( MetaField mf ) {
+    public static boolean isXmlAttr( MetaField<?> mf ) {
         return xmlBoolean(mf, ATTR_ISXMLATTR);
     }
 
-    public static boolean xmlWrap( MetaField mf ) {
+    public static boolean xmlWrap( MetaField<?> mf ) {
 
         boolean wrap = true;
 
         if ( mf.hasMetaAttr( ATTR_XMLWRAP )) {
-            MetaAttribute isXml = mf.getMetaAttr( ATTR_XMLWRAP );
+            MetaAttribute<?> isXml = mf.getMetaAttr( ATTR_XMLWRAP );
             wrap = DataConverter.toBoolean( isXml.getValue() );
         }
         else if ( mf.getDataType() == DataTypes.OBJECT ) {
@@ -94,11 +94,11 @@ public class XMLIOUtil {
         return wrap;
     }
 
-    public static boolean hasObjectRef(MetaDataIO io, MetaField mf ) throws MetaDataIOException {
+    public static boolean hasObjectRef(MetaDataIO io, MetaField<?> mf ) throws MetaDataIOException {
         return MetaDataUtil.hasObjectRef(mf);
     }
 
-    public static MetaObject getObjectRef(MetaDataIO io, MetaField mf ) throws MetaDataIOException {
+    public static MetaObject getObjectRef(MetaDataIO io, MetaField<?> mf ) throws MetaDataIOException {
         return MetaDataUtil.getObjectRef(mf);
         /*ObjectReference oref = mf.getFirstObjectReference();
         if ( oref == null ) throw new MetaDataIOException( io, "No ObjectReference existed ["+mf+"]" );
@@ -161,7 +161,6 @@ public class XMLIOUtil {
         if ( n == null ) throw new IllegalArgumentException("Node cannot be null");
 
         ArrayList<Element> elements = new ArrayList<>();
-        if (n == null) return elements;
 
         NodeList list = n.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {

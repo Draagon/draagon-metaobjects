@@ -1,6 +1,5 @@
 package com.draagon.meta.io;
 
-import com.draagon.meta.MetaData;
 import com.draagon.meta.io.util.PathTracker;
 import com.draagon.meta.loader.MetaDataLoader;
 import org.slf4j.Logger;
@@ -8,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class MetaDataReader implements MetaDataIO {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MetaDataReader.class);
 
     private final MetaDataLoader loader;

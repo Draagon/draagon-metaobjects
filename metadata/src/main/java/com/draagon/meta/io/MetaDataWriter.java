@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class MetaDataWriter implements MetaDataIO {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MetaDataWriter.class);
 
     private final MetaDataLoader loader;

@@ -39,12 +39,12 @@ public class ObjectReference extends ObjectRelation {
         return ref;
     }
 
-    public MetaField getParentField() {
+    public MetaField<?> getParentField() {
         MetaData parent = getParent();
         if ( !( parent instanceof MetaField )) throw new MetaDataException(
                 "getParentField() called, but parent is NOT a MetaField: objectRef="
                         + getName() +", parent=" + parent.toString() );
-        return (MetaField) parent;
+        return (MetaField<?>) parent;
     }
 
     /** Gets the MetaObject referenced by this ObjectReference using the reference attribute */

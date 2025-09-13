@@ -16,6 +16,7 @@ import java.util.*;
 
 public class SimpleJavaCodeWriter extends FileDirectWriter<SimpleJavaCodeWriter> {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SimpleJavaCodeWriter.class);
 
     public final static String ATTR_JAVANAME ="javaName";
