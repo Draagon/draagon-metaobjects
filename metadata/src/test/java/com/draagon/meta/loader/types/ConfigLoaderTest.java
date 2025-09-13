@@ -10,6 +10,7 @@ import com.draagon.meta.io.object.xml.XMLObjectWriter;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.simple.SimpleLoader;
+import com.draagon.meta.loader.simple.xml.SimpleLoaderXML;
 import com.draagon.meta.object.MetaObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,11 +28,25 @@ public class ConfigLoaderTest {
 
         TypesConfigLoader loader = TypesConfigLoader.create(getClass().getClassLoader());
 
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( SimpleLoader.SIMPLE_TYPES_XML );
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( SimpleLoader.SIMPLE_TYPES_JSON );
+        MetaDataAware<MetaObject> tc1 = (MetaDataAware<MetaObject>) JsonObjectReader.readObject( TypesConfig.class,
+                loader.getMetaObjectByName(TypesConfig.OBJECT_NAME), new InputStreamReader( inputStream ));
+
+        roundTripTest(tc1, "test-config", TypesConfig.class);
+
+        loader.destroy();
+    }
+
+    @Test
+    public void testConfigLoaderXML() throws IOException, MetaDataIOException {
+
+        TypesConfigLoader loader = TypesConfigLoader.create(getClass().getClassLoader());
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream( SimpleLoaderXML.SIMPLE_TYPES_XML );
         MetaDataAware<MetaObject> tc1 = (MetaDataAware<MetaObject>) XMLObjectReader.readObject( TypesConfig.class,
                 loader.getMetaObjectByName(TypesConfig.OBJECT_NAME), inputStream );
 
-        roundTripTest(tc1, "test-config", TypesConfig.class);
+        roundTripTest(tc1, "test-config-xml", TypesConfig.class);
 
         loader.destroy();
     }

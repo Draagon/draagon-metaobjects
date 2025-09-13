@@ -2,7 +2,6 @@ package com.draagon.meta.loader.types;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.BooleanAttribute;
-import com.draagon.meta.attr.ClassAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.io.json.JsonIOConstants;

@@ -1,7 +1,7 @@
 package com.draagon.meta.loader.simple;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.io.object.xml.XMLObjectReader;
+import com.draagon.meta.io.object.json.JsonObjectReader;
 import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.types.TypesConfigParser;
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -51,12 +52,12 @@ public class SimpleTypesParser extends TypesConfigParser<InputStream> {
     public void loadAndMerge(TypesConfig intoConfig, InputStream is ) {
 
         TypesConfig loadedConfig = null;
-        XMLObjectReader reader = null;
+        JsonObjectReader reader = null;
         IOException ioEx = null;
 
         // Read the TypesConfig
         try {
-            reader = new XMLObjectReader( getLoader(), is );
+            reader = new JsonObjectReader( getLoader(), new InputStreamReader( is ));
             loadedConfig = (TypesConfig) reader.read( getLoader().getMetaObjectByName(TypesConfig.OBJECT_NAME));
         } catch (IOException e) {
             ioEx = e;

@@ -3,9 +3,7 @@ package com.draagon.meta.loader.simple;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.loader.model.MetaModelLoader;
-import com.draagon.meta.loader.mojo.MojoSupport;
 import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.*;
@@ -15,9 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleLoader extends MetaDataLoader implements MojoSupport {
+public class SimpleLoader extends MetaDataLoader {
 
-    public final static String SIMPLE_TYPES_XML = "com/draagon/meta/loader/simple/simple.types.xml";
+    public final static String SIMPLE_TYPES_JSON = "com/draagon/meta/loader/simple/simple.types.json";
     public final static String SUBTYPE_SIMPLE = "simple";
 
     private static List<URI> sourceURIs = null;
@@ -156,8 +154,8 @@ public class SimpleLoader extends MetaDataLoader implements MojoSupport {
         SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
                 getTypesLoader(),
                 getMetaDataClassLoader(),
-                SIMPLE_TYPES_XML );
-        simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
+                SIMPLE_TYPES_JSON );
+        simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_JSON));
     }
 
     /*protected InputStream getResourceInputStream(String resource) throws FileNotFoundException {

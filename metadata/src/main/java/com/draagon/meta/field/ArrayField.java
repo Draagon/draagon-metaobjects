@@ -69,6 +69,7 @@ public abstract class ArrayField<A,T extends List> extends MetaField<T> {
     }
 
     /** Return the array item type */
+    @SuppressWarnings("unchecked")
     public Class<A> getArrayItemClass() {
         return (Class<A>) getDataType().getArrayItemClass();
     }

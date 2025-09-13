@@ -10,12 +10,9 @@
  */
 package com.draagon.meta.loader.simple;
 
-import com.draagon.meta.MetaDataException;
-import com.draagon.meta.loader.LoaderOptions;
-import com.draagon.meta.loader.types.TypesConfig;
+import com.draagon.meta.loader.simple.xml.SimpleLoaderXML;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,4 +37,18 @@ public class SimpleLoaderTestBase {
 
         return loader;
     }
+
+    protected SimpleLoaderXML initLoaderXML(List<URI> sources) {
+
+        SimpleLoaderXML loader = null;
+
+            // Initialize the loader
+            loader = new SimpleLoaderXML(
+                    getClass().getSimpleName() + "-" + i.incrementAndGet())
+                    .setSourceURIs(sources)
+                    .init();
+
+        return loader;
+    }
+
 }
