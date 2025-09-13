@@ -41,7 +41,7 @@ public class JavaObjectDirectGeneratorTest extends GeneratorTestBase {
     @Before
     public void setUp() {
         loader = initLoader(Arrays.asList(URIHelper.toURI(
-            "model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml"
+            "model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json"
         )));
         
         outputDir = new File(OUT_DIR);

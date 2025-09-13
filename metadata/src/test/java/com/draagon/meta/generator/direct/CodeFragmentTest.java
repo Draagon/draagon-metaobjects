@@ -24,7 +24,7 @@ public class CodeFragmentTest {
         // Create a minimal loader for testing
         SimpleLoader loader = new SimpleLoader("test-loader")
                 .setSourceURIs(Arrays.asList(URIHelper.toURI(
-                    "model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml"
+                    "model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json"
                 )))
                 .init();
         context = new ObjectGenerationContext(loader);

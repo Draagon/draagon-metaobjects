@@ -31,7 +31,7 @@ public class GeneratorPluginIntegrationTest extends GeneratorTestBase {
     @Before
     public void setUp() {
         loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml")
+            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json")
         ));
         
         outputDir = new File(OUT_DIR);
@@ -286,7 +286,7 @@ public class GeneratorPluginIntegrationTest extends GeneratorTestBase {
     public void testPluginLifecycleWithComplexInheritance() throws IOException {
         // Load inheritance data
         SimpleLoader inheritanceLoader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml")
+            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json")
         ));
         
         ValidationPlugin plugin = new ValidationPlugin()

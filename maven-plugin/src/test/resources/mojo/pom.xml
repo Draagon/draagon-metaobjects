@@ -26,7 +26,7 @@
                         <sources>
                             <!--source>types:com/draagon/meta/loader/xml/metaobjects.types.xml</source-->
                             <!--source>model:resource:mojo/mojo-test-metadata.xml</source -->
-                            <source>mojo/mojo-test-metadata.xml</source>
+                            <source>mojo/mojo-test-metadata.json</source>
                         </sources>
                     </loader>
                     <globals>

@@ -1,0 +1,84 @@
+{"$schema": "simple-model.schema.json",
+ "type": "metadata", "package": "simple::fruitbasket",
+  "children": [
+
+    {"type": "field", "package": "::common", "name": "id", "subType": "long", "_isAbstract": "true",
+      "children": [
+        {"type": "attr", "subType": "boolean", "name": "isKey", "value": "true"}
+      ]},
+
+    {"type": "field", "package": "::common", "name": "name", "subType": "string", "_isAbstract": "true",
+      "children": [
+        {"type": "validator", "subType": "required"},
+        {"type": "validator", "subType": "length",
+          "children": [
+            {"type": "attr", "subType": "int", "name": "min", "value": "1"},
+            {"type": "attr", "subType": "int", "name": "max", "value": "50"}
+          ]}
+      ]},
+
+    {"type": "object", "package": "::common", "name": "Entity", "subType": "map", "_isAbstract": "true",
+      "children": [
+        {"type": "field", "name": "id", "super": "::id"},
+        {"type": "field", "name": "name", "super": "name"}
+      ]},
+
+    {"type": "object", "package": "::container", "name": "Entity", "super": "..::common::Entity", "_isAbstract": "true",
+      "children": [
+        {"type": "field", "name": "relatedEntities", "subType": "objectArray",
+          "children": [
+            {"type": "attr", "subType": "string", "name": "objectRef", "value": "..::common::Entity"}
+          ]}
+      ]},
+
+    {"type": "object", "package": "::container", "name": "Container", "super": "Entity", "_isAbstract": "true",
+      "children": [
+        {"type": "field", "name": "brand", "super": "..::common::name"}
+      ]},
+
+    {"type": "object", "package": "::container", "name": "Basket", "super": "Container",
+      "children": [
+        {"type": "field", "name": "numApples", "subType": "int",
+          "children": [
+            {"type": "validator", "subType": "length", "min": "0", "max": "10"}
+          ]},
+        {"type": "field", "name": "numOranges", "subType": "int",
+          "children": [
+            {"type": "validator", "subType": "length", "min": "0", "max": "10"}
+          ]},
+        {"type": "field", "name": "apples", "subType": "objectArray",
+          "children": [
+            {"type": "attr", "subType": "string", "name": "objectRef", "value": "..::fruit::Apple"}
+          ]},
+        {"type": "field", "name": "oranges", "subType": "objectArray",
+          "children": [
+            {"type": "attr", "subType": "string", "name": "objectRef", "value": "..::fruit::Orange"}
+          ]}
+      ]},
+
+    {"type": "object", "package": "::fruit", "name": "Fruit", "super": "..::common::Entity", "_isAbstract": "true",
+      "children": [
+        {"type": "field", "name": "type"},
+        {"type": "field", "name": "length", "subType": "int"},
+        {"type": "field", "name": "weight", "subType": "int"},
+        {"type": "field", "name": "inContainer", "subType": "boolean"},
+        {"type": "field", "name": "container", "subType": "object",
+          "children": [
+            {"type": "attr", "subType": "string", "name": "objectRef", "value": "..::container::Container"}
+          ]}
+      ]},
+
+    {"type": "object", "package": "::fruit", "name": "Apple", "super": "Fruit",
+      "children": [
+        {"type": "field", "name": "orchard", "subType": "string"},
+        {"type": "field", "name": "worms", "subType": "short"}
+      ]},
+
+    {"type": "object", "package": "::fruit", "name": "Macintosh", "super": "Apple"},
+
+    {"type": "object", "package": "::fruit", "name": "Orange", "super": "Fruit",
+      "children": [
+        {"type": "field", "name": "pickedDate", "subType": "date"}
+      ]}
+  ]
+}

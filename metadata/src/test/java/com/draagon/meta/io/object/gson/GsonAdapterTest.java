@@ -28,7 +28,7 @@ public class GsonAdapterTest {
     @Before
     public void initLoader() throws ClassNotFoundException {
         loader = SimpleLoader.createManual("proxytest", Arrays.asList(
-                "com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.xml"
+                "com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.json"
         ));
 
         builder = MetaObjectGsonInitializer.getBuilderWithAdapters(loader);

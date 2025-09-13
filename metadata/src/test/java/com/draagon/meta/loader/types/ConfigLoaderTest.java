@@ -7,6 +7,7 @@ import com.draagon.meta.io.object.json.JsonObjectReader;
 import com.draagon.meta.io.object.json.JsonObjectWriter;
 import com.draagon.meta.io.object.xml.XMLObjectReader;
 import com.draagon.meta.io.object.xml.XMLObjectWriter;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.simple.SimpleLoader;
@@ -72,9 +73,9 @@ public class ConfigLoaderTest {
 
         MetaModelLoader loader = MetaModelLoader.create( getClass().getClassLoader(), "test-simple-roundtrip");
 
-        final String TEST_METADATA_XML = "com/draagon/meta/loader/simple/fruitbasket-metadata.xml";
+        final String TEST_METADATA_JSON = "com/draagon/meta/loader/simple/fruitbasket-metadata.json";
 
-        SimpleLoader simpleLoader = SimpleLoader.createManual( loader.getName(), TEST_METADATA_XML );
+        SimpleLoader simpleLoader = SimpleLoader.createManual( loader.getName(), TEST_METADATA_JSON );
 
         MetaModel metadata = buildModelFromLoader(
                 loader.getMetaObjectByName( MetaModel.OBJECT_NAME), simpleLoader );
@@ -84,10 +85,28 @@ public class ConfigLoaderTest {
         loader.destroy();
     }
 
-    public static MetaModel buildModelFromLoader(MetaObject modelMetaObject, SimpleLoader simpleLoader) {
+    
+    @Test
+    public void testSimpleLoaderXML() throws IOException, MetaDataIOException {
+
+        MetaModelLoader loader = MetaModelLoader.create( getClass().getClassLoader(), "test-simple-xml-roundtrip");
+
+        final String TEST_METADATA_XML = "com/draagon/meta/loader/simple/fruitbasket-metadata.xml";
+
+        SimpleLoaderXML simpleLoader = SimpleLoaderXML.createManual( loader.getName(), TEST_METADATA_XML );
+
+        MetaModel metadata = buildModelFromLoader(
+                loader.getMetaObjectByName( MetaModel.OBJECT_NAME), simpleLoader );
+
+        roundTripTest(metadata, loader.getName(), TypesConfig.class);
+
+        loader.destroy();
+    }
+
+    public static MetaModel buildModelFromLoader(MetaObject modelMetaObject, MetaDataLoader loader) {
 
         MetaModel m = (MetaModel) modelMetaObject.newInstance();
-        populateModel( m, simpleLoader, true );
+        populateModel( m, loader, true );
 
         return m;
     }

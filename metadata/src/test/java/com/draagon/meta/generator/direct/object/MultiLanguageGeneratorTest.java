@@ -74,7 +74,7 @@ public class MultiLanguageGeneratorTest extends GeneratorTestBase {
         // Load simple entities for testing
         // Use XML metadata for now since JSON loader is not available
         loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml")
+            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json")
         ));
         
         outputDir = new File(OUT_DIR + "/" + config.language.toLowerCase());
@@ -112,7 +112,7 @@ public class MultiLanguageGeneratorTest extends GeneratorTestBase {
         assertNotNull("Should have generated files", generatedFiles);
         assertTrue("Should have generated at least one file", generatedFiles.size() > 0);
         
-        // Verify specific entities were generated (from test-interface-metadata.xml)
+        // Verify specific entities were generated (from test-interface-metadata.json)
         boolean foundEntity = false, foundBasket = false, foundFruit = false;
         for (File file : generatedFiles) {
             if (file.getName().contains("Entity")) foundEntity = true;
@@ -167,7 +167,7 @@ public class MultiLanguageGeneratorTest extends GeneratorTestBase {
     public void testInheritanceGeneration() throws IOException {
         // Load inheritance test data - use existing XML for now
         SimpleLoader inheritanceLoader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml")
+            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json")
         ));
         
         String testName = "inheritance";
@@ -213,7 +213,7 @@ public class MultiLanguageGeneratorTest extends GeneratorTestBase {
     public void testComplexRelationships() throws IOException {
         // Load complex relationship test data - use existing XML for now
         SimpleLoader relationshipLoader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml")
+            URIHelper.toURI("model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.json")
         ));
         
         String testName = "relationships";
