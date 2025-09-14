@@ -6,13 +6,14 @@ import com.draagon.meta.field.*;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.object.json.JsonObjectReader;
 import com.draagon.meta.io.object.json.JsonObjectWriter;
-import com.draagon.meta.io.object.xml.XMLObjectReader;
-import com.draagon.meta.io.object.xml.XMLObjectWriter;
-import com.draagon.meta.io.xml.XMLIOConstants;
+//import com.draagon.meta.io.object.xml.XMLObjectReader;
+//import com.draagon.meta.io.object.xml.XMLObjectWriter;
+//import com.draagon.meta.io.xml.XMLIOConstants;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.mapped.MappedMetaObject;
 import com.draagon.meta.object.mapped.MappedObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,26 +67,33 @@ public abstract class ObjectIOTestBase {
     public void setup() {
         loader = MetaDataLoader.createManual( false, "json-MappedObject-io-test" )
                 .init()
+                .register()
                 .addChild(MappedMetaObject.create(MD.OBJ_BASKET)
-                        .addChild(IntegerField.create( MD.ID, 1 )
-                            .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
+                        .addChild(IntegerField.create( MD.ID, 1 ))
                         .addChild(StringField.create( MD.NAME, null ))
                         .addChild(ObjectArrayField.create( MD.BASKET_FRUITS )
                             .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_FRUIT)))
                 )
                 .addChild(MappedMetaObject.create("fruit")
-                        .addChild(IntegerField.create( MD.ID, 1 )
-                                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
+                        .addChild(IntegerField.create( MD.ID, 1 ))
                         .addChild(StringField.create( MD.NAME, null ))
                         .addChild(BooleanField.create( MD.FRUIT_IN_BASKET, false ))
                         .addChild(ObjectField.create(MD.FRUIT_BUG)
                             .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_BUG)))
                 )
                 .addChild(MappedMetaObject.create(MD.OBJ_BUG)
-                        .addChild(IntegerField.create( MD.ID, 1 )
-                                .addChild(BooleanAttribute.create(XMLIOConstants.ATTR_ISXMLATTR, true )))
+                        .addChild(IntegerField.create( MD.ID, 1 ))
                         .addChild(StringField.create( MD.NAME, null ))
-                );
+                )
+                .getLoader();
+    }
+
+    @After
+    public void tearDown() {
+        if (loader != null) {
+            loader.destroy();
+            loader = null;
+        }
     }
 
     protected MappedObject createBasket(int id, String name ) {
@@ -171,7 +179,7 @@ public abstract class ObjectIOTestBase {
 
     protected abstract void runTest(MappedObject o, String name ) throws IOException, MetaDataIOException;
 
-    protected void writeXML( String filename, Object vo ) throws IOException, MetaDataIOException {
+    /*protected void writeXML( String filename, Object vo ) throws IOException, MetaDataIOException {
 
         XMLObjectWriter writer = new XMLObjectWriter( loader, getTestFileOutputStream( filename ) );
         //writer.withIndent(true);
@@ -185,7 +193,7 @@ public abstract class ObjectIOTestBase {
         MappedObject vo = (MappedObject) reader.read( mo );
         reader.close();
         return vo;
-    }
+    }*/
 
     protected void writeJson( String filename, Object vo ) throws IOException, MetaDataIOException {
 

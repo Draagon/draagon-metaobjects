@@ -51,16 +51,7 @@
                                     <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
                                 </sources>
                             </loader>
-                            <generators>
-                                <generator>
-                                    <classname>com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDGenerator</classname>
-                                    <args>
-                                        <nameSpace>http://draagon.com/schema/metamodel/v5</nameSpace>
-                                        <outputDir>${project.build.outputDirectory}/metamodel/v5</outputDir>
-                                        <outputFilename>metaobjectsv5.xsd</outputFilename>
-                                    </args>
-                                </generator>
-                            </generators>
+                            <!-- No generators needed for JSON-first build -->
                         </configuration>
                     </execution>
                     <execution>
@@ -84,14 +75,6 @@
                                 </sources>
                             </loader>
                             <generators>
-                                <generator>
-                                    <classname>com.draagon.meta.generator.direct.metadata.xsd.MetaDataXSDGenerator</classname>
-                                    <args>
-                                        <nameSpace>https://draagon.com/schema/metamodel/produce/v1</nameSpace>
-                                        <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
-                                        <outputFilename>produce-v1-model.xsd</outputFilename>
-                                    </args>
-                                </generator>
                                 <generator>
                                     <!-- classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname -->
                                     <classname>com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator</classname>
