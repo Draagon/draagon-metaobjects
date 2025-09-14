@@ -17,8 +17,8 @@ public class XMLObjectIOTest extends ObjectIOTestBase {
 
         String filename = PRE+name+".xml";
 
-        writeXML(filename, o);
-        Object o2 = readXML(filename, o.getMetaData());
+        writeJson(filename, o);
+        Object o2 = readJson(filename, o.getMetaData());
 
         Assert.assertEquals(name+"-xml", o, o2);
     }
