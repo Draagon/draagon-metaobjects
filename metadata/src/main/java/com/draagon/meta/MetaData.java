@@ -796,13 +796,13 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     /** Retrieve the first matching child metadata */
-    private <T extends MetaData> T firstChild( String type, Class<T> c, boolean includeParentData ) {
+    /*private <T extends MetaData> T firstChild( String type, Class<T> c, boolean includeParentData ) {
 
         List<String> keys = new ArrayList<>();
         List<T> items = new ArrayList<>();
         addChildren( keys, items, type, c, includeParentData, false, true );
         return items.iterator().next();
-    }
+    }*/
 
     /** Retrieve all matching child metadata */
     private <T extends MetaData> List<T> addChildren( String type, Class<T> c, boolean includeParentData ) {

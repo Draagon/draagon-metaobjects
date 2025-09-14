@@ -137,18 +137,33 @@ public abstract class MetaObject extends MetaData {
     }
     
     /**
-     * Enhanced field access with Optional wrapper
+     * Find a MetaField by name using modern Optional-based API.
+     * 
+     * <p>This method provides safe, null-free access to fields defined in this MetaObject.
+     * Fields represent the structure and behavior of object properties, including data types,
+     * validation rules, and display preferences.</p>
+     * 
+     * @param name the name of the field to find
+     * @return Optional containing the MetaField if found, empty Optional otherwise
+     * @since 5.1.0
+     * @see #requireMetaField(String)
+     * @see #hasMetaField(String)
      */
     public Optional<MetaField> findMetaField(String name) {
-        try {
-            return Optional.of(getMetaField(name));
-        } catch (MetaFieldNotFoundException e) {
-            return Optional.empty();
-        }
+        return findChild(name, MetaField.class);
     }
     
     /**
-     * Safe field requirement (throws descriptive exception)
+     * Require a MetaField by name, throwing an exception if not found.
+     * 
+     * <p>This method is useful when you know a field must exist and want to fail fast
+     * if it's missing. Use {@link #findMetaField(String)} for safer optional access.</p>
+     * 
+     * @param name the name of the field to retrieve
+     * @return the MetaField with the specified name
+     * @throws MetaFieldNotFoundException if no field with the given name exists
+     * @since 5.1.0
+     * @see #findMetaField(String)
      */
     public MetaField requireMetaField(String name) {
         return findMetaField(name)
@@ -157,7 +172,17 @@ public abstract class MetaObject extends MetaData {
     }
     
     /**
-     * Get all fields as stream for functional operations
+     * Get all fields as a Stream for functional operations.
+     * 
+     * <p>This method enables functional programming patterns for working with fields,
+     * such as filtering by type, collecting specific fields, or applying transformations.</p>
+     * 
+     * <p><b>Example usage:</b><br>
+     * {@code object.getMetaFieldsStream().filter(f -> f.isRequired()).collect(toList())}</p>
+     * 
+     * @return Stream of all MetaField objects defined in this MetaObject
+     * @since 5.1.0
+     * @see #getMetaFields()
      */
     public Stream<MetaField> getMetaFieldsStream() {
         return getMetaFields().stream();

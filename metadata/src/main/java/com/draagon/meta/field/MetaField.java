@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * A MetaField represents a field of an object and is contained within a MetaClass.
@@ -321,12 +322,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * Whether the named MetaView exists
      */
     public boolean hasView(String name) {
-        try {
-            getView(name);
-            return true;
-        } catch (MetaViewNotFoundException e) {
-            return false;
-        }
+        return findView(name).isPresent();
     }
 
     /**
@@ -377,6 +373,57 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         }
     }
 
+    /**
+     * Find a MetaView by name using modern Optional-based API.
+     * 
+     * <p>This method provides safe, null-free access to views associated with this field.
+     * Views control how field values are displayed, formatted, or rendered in different contexts.</p>
+     * 
+     * @param name the name of the view to find
+     * @return Optional containing the MetaView if found, empty Optional otherwise
+     * @since 5.1.0
+     * @see #requireView(String)
+     * @see #hasView(String)
+     */
+    public Optional<MetaView> findView(String name) {
+        return findChild(name, MetaView.class);
+    }
+
+    /**
+     * Require a MetaView by name, throwing an exception if not found.
+     * 
+     * <p>This method is useful when you know a view must exist and want to fail fast
+     * if it's missing. Use {@link #findView(String)} for safer optional access.</p>
+     * 
+     * @param name the name of the view to retrieve
+     * @return the MetaView with the specified name
+     * @throws MetaViewNotFoundException if no view with the given name exists
+     * @since 5.1.0
+     * @see #findView(String)
+     */
+    public MetaView requireView(String name) {
+        return findView(name)
+            .orElseThrow(() -> new MetaViewNotFoundException(
+                "MetaView '" + name + "' not found in MetaField '" + getName() + "'", name));
+    }
+
+    /**
+     * Get all views associated with this field as a Stream for functional operations.
+     * 
+     * <p>This method enables functional programming patterns like filtering, mapping,
+     * and collecting views based on various criteria.</p>
+     * 
+     * <p><b>Example usage:</b><br>
+     * {@code field.getViewsStream().filter(v -> v.isType("html")).collect(toList())}</p>
+     * 
+     * @return Stream of all MetaView objects associated with this field
+     * @since 5.1.0
+     * @see #getViews()
+     */
+    public Stream<MetaView> getViewsStream() {
+        return findChildren(MetaView.class);
+    }
+
     ////////////////////////////////////////////////////
     // VALIDATOR METHODS
 
@@ -421,12 +468,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * Whether the named MetaValidator exists
      */
     public boolean hasValidator(String name) {
-        try {
-            getValidator(name);
-            return true;
-        } catch (MetaValidatorNotFoundException e) {
-            return false;
-        }
+        return findValidator(name).isPresent();
     }
 
     public void addMetaValidator(MetaValidator validator) {
@@ -472,6 +514,57 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         return useCache( "getValidator()", validatorName, name -> {
             return (MetaValidator) getChild(name, MetaValidator.class);
         });
+    }
+
+    /**
+     * Find a MetaValidator by name using modern Optional-based API.
+     * 
+     * <p>This method provides safe, null-free access to validators associated with this field.
+     * Validators are used to enforce business rules and data integrity constraints on field values.</p>
+     * 
+     * @param name the name of the validator to find
+     * @return Optional containing the MetaValidator if found, empty Optional otherwise
+     * @since 5.1.0
+     * @see #requireValidator(String)
+     * @see #hasValidator(String)
+     */
+    public Optional<MetaValidator> findValidator(String name) {
+        return findChild(name, MetaValidator.class);
+    }
+
+    /**
+     * Require a MetaValidator by name, throwing an exception if not found.
+     * 
+     * <p>This method is useful when you know a validator must exist and want to fail fast
+     * if it's missing. Use {@link #findValidator(String)} for safer optional access.</p>
+     * 
+     * @param name the name of the validator to retrieve
+     * @return the MetaValidator with the specified name
+     * @throws MetaValidatorNotFoundException if no validator with the given name exists
+     * @since 5.1.0
+     * @see #findValidator(String)
+     */
+    public MetaValidator requireValidator(String name) {
+        return findValidator(name)
+            .orElseThrow(() -> new MetaValidatorNotFoundException(
+                "MetaValidator '" + name + "' not found in MetaField '" + getName() + "'", name));
+    }
+
+    /**
+     * Get all validators associated with this field as a Stream for functional operations.
+     * 
+     * <p>This method enables functional programming patterns for working with validators,
+     * such as filtering by type, collecting specific validators, or applying transformations.</p>
+     * 
+     * <p><b>Example usage:</b><br>
+     * {@code field.getValidatorsStream().filter(v -> v.isRequired()).count()}</p>
+     * 
+     * @return Stream of all MetaValidator objects associated with this field
+     * @since 5.1.0
+     * @see #getValidators()
+     */
+    public Stream<MetaValidator> getValidatorsStream() {
+        return findChildren(MetaValidator.class);
     }
 
     /**

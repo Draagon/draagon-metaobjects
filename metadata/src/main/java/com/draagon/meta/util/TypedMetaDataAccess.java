@@ -13,8 +13,35 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Type-safe access utilities for MetaData objects.
- * Provides compile-time type validation and consistent API patterns.
+ * Type-safe access utilities for MetaData objects with compile-time validation.
+ * 
+ * <p>This utility class provides strongly-typed access methods for common MetaData
+ * operations, ensuring type safety at compile time and providing consistent API patterns
+ * across the framework. It serves as a facade for the most common access patterns.</p>
+ * 
+ * <p><b>Key Features:</b></p>
+ * <ul>
+ *   <li>Type-safe field access with {@link #findField(MetaObject, String)}</li>
+ *   <li>Type-safe attribute access with {@link #findAttribute(MetaData, String)}</li>
+ *   <li>Consistent Optional-based return patterns</li>
+ *   <li>Fail-fast require* methods for guaranteed access</li>
+ *   <li>Collection access with proper generic types</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>{@code
+ * // Safe field access
+ * Optional<MetaField> nameField = TypedMetaDataAccess.findField(userObject, "name");
+ * 
+ * // Required field access
+ * MetaField requiredField = TypedMetaDataAccess.requireField(userObject, "id");
+ * 
+ * // Attribute access
+ * Optional<MetaAttribute> displayAttr = TypedMetaDataAccess.findAttribute(field, "display");
+ * }</pre>
+ * 
+ * @since 5.1.0
+ * @author MetaObjects Framework
  */
 public final class TypedMetaDataAccess {
     

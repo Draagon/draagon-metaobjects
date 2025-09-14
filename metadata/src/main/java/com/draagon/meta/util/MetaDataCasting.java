@@ -7,8 +7,36 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * Type-safe casting utilities for MetaData objects.
- * Provides centralized safe casting with better error messages.
+ * Type-safe casting utilities for MetaData objects with enhanced error handling.
+ * 
+ * <p>This utility class provides centralized, safe casting operations for MetaData objects
+ * with comprehensive error messages and debugging support. It eliminates the need for
+ * unsafe casts throughout the codebase and provides consistent error handling patterns.</p>
+ * 
+ * <p><b>Key Features:</b></p>
+ * <ul>
+ *   <li>Safe Optional-based casting with {@link #safeCast(MetaData, Class)}</li>
+ *   <li>Fail-fast casting with {@link #requireCast(MetaData, Class)}</li>
+ *   <li>Stream filtering support with {@link #filterByType(Stream, Class)}</li>
+ *   <li>Detailed error context with metadata path information</li>
+ * </ul>
+ * 
+ * <p><b>Example usage:</b></p>
+ * <pre>{@code
+ * // Safe casting
+ * Optional<MetaField> field = MetaDataCasting.safeCast(child, MetaField.class);
+ * 
+ * // Required casting (throws if fails)
+ * MetaObject object = MetaDataCasting.requireCast(metadata, MetaObject.class);
+ * 
+ * // Stream filtering
+ * List<MetaField> fields = MetaDataCasting.filterByType(
+ *     metaObject.getChildrenStream(), MetaField.class
+ * ).collect(toList());
+ * }</pre>
+ * 
+ * @since 5.1.0
+ * @author MetaObjects Framework
  */
 public final class MetaDataCasting {
     
