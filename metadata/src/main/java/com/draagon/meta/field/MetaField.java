@@ -435,6 +435,16 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     /**
+     * Adds a MetaView to this MetaField (type-safe version)
+     * @param view MetaView to add
+     * @return This MetaField instance for method chaining
+     */
+    public MetaField<T> addMetaViewSafe(MetaView view) {
+        addChild(view);
+        return this;
+    }
+
+    /**
      * Adds a MetaView to this MetaField
      *
      * @param view MetaView to add

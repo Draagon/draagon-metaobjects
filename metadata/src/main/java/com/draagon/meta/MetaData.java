@@ -521,6 +521,15 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     /**
+     * Gets the Super Data with type safety - returns Optional to avoid ClassCastException
+     * @param type The expected type of the super data
+     * @return Optional containing the super data if it matches the expected type
+     */
+    public <T extends MetaData> Optional<T> getSuperDataSafe(Class<T> type) {
+        return type.isInstance(superData) ? Optional.of(type.cast(superData)) : Optional.empty();
+    }
+
+    /**
      * Returns whether this MetaData has a Super MetaData
      * @return SuperData exists
      */
@@ -538,6 +547,16 @@ public class MetaData implements Cloneable, Serializable {
     public <T extends MetaData> T addMetaAttr(MetaAttribute attr) {
         addChild(attr);
         return (T) this;
+    }
+
+    /**
+     * Sets an attribute of the MetaClass and returns this MetaData (type-safe version)
+     * @param attr The attribute to add
+     * @return This MetaData instance for method chaining
+     */
+    public MetaData addMetaAttrSafe(MetaAttribute attr) {
+        addChild(attr);
+        return this;
     }
 
     /**
@@ -650,6 +669,16 @@ public class MetaData implements Cloneable, Serializable {
     public <T extends MetaData> T addChild(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
         return (T) this;
+    }
+
+    /**
+     * Adds a child MetaData object and returns this MetaData (type-safe version)
+     * @param data The child MetaData to add
+     * @return This MetaData instance for method chaining
+     */
+    public MetaData addChildSafe(MetaData data) throws InvalidMetaDataException {
+        addChild(data, true);
+        return this;
     }
 
     /**

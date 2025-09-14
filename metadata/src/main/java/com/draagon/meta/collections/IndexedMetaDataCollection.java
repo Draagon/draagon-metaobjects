@@ -162,6 +162,20 @@ public class IndexedMetaDataCollection {
         List<MetaData> found = classIndex.getOrDefault(clazz, Collections.emptyList());
         return (List<T>) found;
     }
+
+    /**
+     * Find children by class with type safety - filters and casts safely
+     * 
+     * @param clazz The class to search for
+     * @return List of children guaranteed to be of the specified class
+     */
+    public <T extends MetaData> List<T> findByClassSafe(Class<T> clazz) {
+        List<MetaData> found = classIndex.getOrDefault(clazz, Collections.emptyList());
+        return found.stream()
+            .filter(clazz::isInstance)
+            .map(clazz::cast)
+            .collect(java.util.stream.Collectors.toList());
+    }
     
     /**
      * Find children matching a predicate

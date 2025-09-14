@@ -207,6 +207,25 @@ public class ValidationChain<T> implements Validator<T> {
     }
     
     /**
+     * Create a type-hinted builder for cleaner type inference
+     * @param type The class of objects this chain will validate
+     * @return A builder with proper type inference
+     */
+    public static <T> Builder<T> builder(Class<T> type) {
+        return new Builder<>();
+    }
+    
+    /**
+     * Create a named, type-hinted builder for cleaner type inference
+     * @param type The class of objects this chain will validate
+     * @param chainName The name for this validation chain
+     * @return A builder with proper type inference
+     */
+    public static <T> Builder<T> builder(Class<T> type, String chainName) {
+        return new Builder<T>().withName(chainName);
+    }
+    
+    /**
      * Builder class for fluent ValidationChain construction
      */
     public static class Builder<T> {
