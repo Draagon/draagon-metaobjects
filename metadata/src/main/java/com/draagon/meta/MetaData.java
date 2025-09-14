@@ -2,7 +2,6 @@ package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
-import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.type.MetaDataTypeDefinition;
 import com.draagon.meta.type.MetaDataTypeRegistry;
@@ -12,7 +11,6 @@ import com.draagon.meta.collections.IndexedMetaDataCollection;
 import com.draagon.meta.event.*;
 import com.draagon.meta.metrics.MetaDataMetrics;
 import com.draagon.meta.validation.ValidationChain;
-import com.draagon.meta.validation.Validator;
 import com.draagon.meta.validation.MetaDataValidators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
