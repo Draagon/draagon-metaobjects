@@ -143,7 +143,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     protected T convertDefaultValue(Object o) {
         if (!getValueClass().isInstance(o)) {
             // Convert as needed
-            return (T) DataConverter.toType(getDataType(), o);
+            return DataConverter.toTypeSafe(getDataType(), o, (Class<T>) getValueClass());
         } else {
             return (T) o;
         }
@@ -326,7 +326,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             
             if (defVal != null && !getValueClass().isInstance(defVal)) {
                 // Convert as needed
-                this.defaultValue = (T) DataConverter.toType(getDataType(), defVal);
+                this.defaultValue = DataConverter.toTypeSafe(getDataType(), defVal, (Class<T>) getValueClass());
             }
             
             // Record metrics

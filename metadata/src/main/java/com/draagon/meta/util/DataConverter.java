@@ -57,6 +57,44 @@ public final class DataConverter
 		}
 	}
 
+	/**
+	 * Type-safe conversion with runtime validation - eliminates unsafe casting
+	 * @param dataType The target data type
+	 * @param val The value to convert
+	 * @param expectedType The expected class type for validation
+	 * @return The converted value, guaranteed to be of expectedType
+	 * @throws ClassCastException if the converted value is not assignable to expectedType
+	 */
+	public static <T> T toTypeSafe(DataTypes dataType, Object val, Class<T> expectedType) {
+		Object result = toType(dataType, val);
+		if (result == null) return null;
+		
+		if (!expectedType.isInstance(result)) {
+			throw new ClassCastException("Converted value " + result + 
+				" (" + result.getClass().getSimpleName() + ") is not assignable to " + expectedType.getName());
+		}
+		return expectedType.cast(result);
+	}
+
+	/**
+	 * Type-safe conversion with Optional return - never throws ClassCastException
+	 * @param dataType The target data type
+	 * @param val The value to convert
+	 * @param expectedType The expected class type for validation
+	 * @return Optional containing the converted value if successful and type-compatible
+	 */
+	public static <T> java.util.Optional<T> toTypeOptional(DataTypes dataType, Object val, Class<T> expectedType) {
+		try {
+			Object result = toType(dataType, val);
+			return result != null && expectedType.isInstance(result) 
+				? java.util.Optional.of(expectedType.cast(result)) 
+				: java.util.Optional.empty();
+		} catch (Exception e) {
+			log.debug("Type conversion failed for value {} to {}: {}", val, expectedType.getName(), e.getMessage());
+			return java.util.Optional.empty();
+		}
+	}
+
 	/** Convert to an Object, if a list returns null if empty, or object if length of 1, otherwise an exception */
 	public static List<String> toStringArray( Object val ) {
 
@@ -66,6 +104,42 @@ public final class DataConverter
 		else if (val instanceof List<?>) {
 			// TODO: Fix this to map to an actual object array
 			return (List<String>) val;
+		}
+		else if ( val instanceof String ) {
+			List<String> list = new ArrayList<>();
+			if ( !((String) val).isEmpty()) {
+				String s= (String) val;
+				if (s.contains(",")) {
+					Collections.addAll(list, ((String) val).split(","));
+				} else {
+					list.add( s );
+				}
+			}
+			return list;
+		}
+		else {
+			List<String> l = new ArrayList<String>();
+			l.add( toString( val ));
+			return l;
+		}
+	}
+
+	/**
+	 * Type-safe string array conversion - eliminates unsafe List<?> to List<String> cast
+	 * @param val The value to convert to string array
+	 * @return List of strings, with each element safely converted to String
+	 */
+	public static List<String> toStringArraySafe( Object val ) {
+
+		if ( val == null ) {
+			return null;
+		}
+		else if (val instanceof List<?>) {
+			List<?> list = (List<?>) val;
+			// Stream-based safe conversion - each element becomes a String
+			return list.stream()
+				.map(item -> item != null ? item.toString() : null)
+				.collect(java.util.stream.Collectors.toList());
 		}
 		else if ( val instanceof String ) {
 			List<String> list = new ArrayList<>();
@@ -97,6 +171,26 @@ public final class DataConverter
 		}
 		else {
 			List<Object> l = new ArrayList<Object>();
+			l.add( val );
+			return l;
+		}
+	}
+
+	/**
+	 * Type-safe object array conversion - eliminates unsafe List<?> to List<Object> cast
+	 * @param val The value to convert to object array
+	 * @return List of objects, safely created from input without unsafe casting
+	 */
+	public static List<Object> toObjectArraySafe( Object val ) {
+		if ( val == null ) {
+			return null;
+		}
+		else if (val instanceof List<?>) {
+			// Create new ArrayList to avoid unsafe cast - safe but creates copy
+			return new ArrayList<>((List<?>) val);
+		}
+		else {
+			List<Object> l = new ArrayList<>();
 			l.add( val );
 			return l;
 		}
@@ -449,12 +543,16 @@ public final class DataConverter
 	{
 	    if ( val == null ) {
 	    	return null;
-		} else if ( val instanceof List ) {
-			return String.join(",", (List) val );
+		} else if ( val instanceof List<?> ) {
+			List<?> list = (List<?>) val;
+			// Safe stream-based conversion - eliminates raw List usage
+			return list.stream()
+				.map(item -> item != null ? item.toString() : "null")
+				.collect(java.util.stream.Collectors.joining(","));
 		} else if ( val instanceof Date ) {
 	        return String.valueOf(((Date) val ).getTime());
-		} else if ( val instanceof Class ) {
-			return String.valueOf(((Class) val ).getName());
+		} else if ( val instanceof Class<?> ) {
+			return ((Class<?>) val ).getName();
 	    } else {
 			return val.toString();
 		}

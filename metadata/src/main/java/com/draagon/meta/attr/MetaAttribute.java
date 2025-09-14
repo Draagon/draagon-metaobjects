@@ -4,7 +4,6 @@ import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
-import com.draagon.meta.validation.MetaDataValidators;
 import com.draagon.meta.metrics.MetaDataMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ import java.util.Optional;
 /**
  * An attribute of any MetaDAta with enhanced validation, metrics, and type safety
  */
-@SuppressWarnings("serial")
+//@SuppressWarnings("serial")
 public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, MetaDataValueHandler<T> {
     
     private static final Logger log = LoggerFactory.getLogger(MetaAttribute.class);
@@ -281,7 +280,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         T oldValue = this.value;
         
         try {
-            this.value = (T) DataConverter.toType( dataType, value );
+            this.value = DataConverter.toTypeSafe( dataType, value, (Class<T>) dataType.getValueClass() );
             
             // Record successful conversion metrics
             Duration duration = Duration.between(start, Instant.now());
