@@ -8,10 +8,8 @@ import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
-import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
-import com.draagon.meta.validation.MetaDataValidators;
 import com.draagon.meta.metrics.MetaDataMetrics;
 
 import java.lang.reflect.Constructor;

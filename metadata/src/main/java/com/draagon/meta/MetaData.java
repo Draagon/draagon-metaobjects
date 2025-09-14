@@ -41,7 +41,7 @@ public class MetaData implements Cloneable, Serializable {
     private final MetaDataMetrics metrics;
     
     // Validation chain
-    private volatile ValidationChain validationChain;
+    private volatile ValidationChain<MetaData> validationChain;
 
     private final String type;
     private final String subType;
