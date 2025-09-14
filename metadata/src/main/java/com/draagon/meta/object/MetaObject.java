@@ -10,7 +10,6 @@ import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
-import com.draagon.meta.metrics.MetaDataMetrics;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -42,8 +41,6 @@ public abstract class MetaObject extends MetaData {
     // Enhanced object-specific validation chain
     private volatile ValidationChain<MetaObject> objectValidationChain;
     
-    // Object-specific metrics
-    private final MetaDataMetrics objectMetrics;
 
 
     /**
@@ -51,8 +48,6 @@ public abstract class MetaObject extends MetaData {
      */
     public MetaObject(String subtype, String name ) {
         super( TYPE_OBJECT, subtype, name );
-        this.objectMetrics = new MetaDataMetrics("object:" + name);
-        this.objectMetrics.recordCreation();
         
         log.debug("Created MetaObject: {}:{}:{}", TYPE_OBJECT, subtype, name);
     }
@@ -76,19 +71,6 @@ public abstract class MetaObject extends MetaData {
     
     // ========== ENHANCED OBJECT-SPECIFIC METHODS ==========
     
-    /**
-     * Get object-specific metrics
-     */
-    public MetaDataMetrics getObjectMetrics() {
-        return objectMetrics;
-    }
-    
-    /**
-     * Get object metrics snapshot
-     */
-    public MetaDataMetrics.MetricsSnapshot getObjectMetricsSnapshot() {
-        return objectMetrics.getSnapshot();
-    }
     
     /**
      * Validate this MetaObject using enhanced validation
@@ -99,16 +81,9 @@ public abstract class MetaObject extends MetaData {
         try {
             ValidationResult result = getObjectValidationChain().validate(this);
             
-            // Record metrics
-            Duration duration = Duration.between(start, Instant.now());
-            objectMetrics.recordValidation(duration, result.isValid());
             
             return result;
         } catch (Exception e) {
-            // Record error metrics
-            Duration duration = Duration.between(start, Instant.now());
-            objectMetrics.recordValidation(duration, false);
-            objectMetrics.recordError();
             
             log.error("Object validation failed for {}: {}", getName(), e.getMessage(), e);
             
@@ -254,18 +229,11 @@ public abstract class MetaObject extends MetaData {
         try {
             Object instance = newInstance(); // Call existing method
             
-            // Record successful instance creation metrics
-            Duration duration = Duration.between(start, Instant.now());
-            objectMetrics.recordInstanceCreation(duration, true);
             
             log.debug("Successfully created instance of {}", getName());
             
             return instance;
         } catch (Exception e) {
-            // Record error metrics
-            Duration duration = Duration.between(start, Instant.now());
-            objectMetrics.recordInstanceCreation(duration, false);
-            objectMetrics.recordError();
             
             log.error("Failed to create instance of {}: {}", getName(), e.getMessage(), e);
             throw e; // Re-throw to maintain existing behavior

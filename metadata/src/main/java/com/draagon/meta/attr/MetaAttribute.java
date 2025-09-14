@@ -4,7 +4,6 @@ import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
-import com.draagon.meta.metrics.MetaDataMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +28,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     // Enhanced validation chain for attribute-specific validation
     private volatile ValidationChain<MetaAttribute<T>> attributeValidationChain;
     
-    // Attribute-specific metrics
-    private final MetaDataMetrics attributeMetrics;
 
     /**
      * Constructs the MetaAttribute with enhanced validation and metrics
@@ -38,8 +35,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     public MetaAttribute(String subtype, String name, DataTypes dataType ) {
         super( TYPE_ATTR, subtype, name );
         this.dataType = dataType;
-        this.attributeMetrics = new MetaDataMetrics("attr:" + name);
-        this.attributeMetrics.recordCreation();
         
         log.debug("Created MetaAttribute: {}:{}:{} with dataType: {}", TYPE_ATTR, subtype, name, dataType);
     }
@@ -83,19 +78,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     
     // ========== ENHANCED ATTRIBUTE-SPECIFIC METHODS ==========
     
-    /**
-     * Get attribute-specific metrics
-     */
-    public MetaDataMetrics getAttributeMetrics() {
-        return attributeMetrics;
-    }
-    
-    /**
-     * Get attribute metrics snapshot
-     */
-    public MetaDataMetrics.MetricsSnapshot getAttributeMetricsSnapshot() {
-        return attributeMetrics.getSnapshot();
-    }
     
     /**
      * Validate this MetaAttribute using enhanced validation
@@ -106,16 +88,9 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         try {
             ValidationResult result = getAttributeValidationChain().validate(this);
             
-            // Record metrics
-            Duration duration = Duration.between(start, Instant.now());
-            attributeMetrics.recordValidation(duration, result.isValid());
             
             return result;
         } catch (Exception e) {
-            // Record error metrics
-            Duration duration = Duration.between(start, Instant.now());
-            attributeMetrics.recordValidation(duration, false);
-            attributeMetrics.recordError();
             
             log.error("Attribute validation failed for {}: {}", getName(), e.getMessage(), e);
             
@@ -238,8 +213,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         T oldValue = this.value;
         this.value = value;
         
-        // Record metrics
-        attributeMetrics.recordPropertyChange();
         
         log.debug("MetaAttribute {} value changed from {} to {}", getName(), oldValue, value);
     }
@@ -282,16 +255,10 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         try {
             this.value = DataConverter.toTypeSafe( dataType, value, (Class<T>) dataType.getValueClass() );
             
-            // Record successful conversion metrics
-            Duration duration = Duration.between(start, Instant.now());
-            attributeMetrics.recordPropertyChange();
             
             log.debug("MetaAttribute {} value converted and set from {} to {}", getName(), oldValue, this.value);
             
         } catch (Exception e) {
-            // Record error metrics
-            Duration duration = Duration.between(start, Instant.now());
-            attributeMetrics.recordError();
             
             log.error("Failed to convert value for MetaAttribute {}: {}", getName(), e.getMessage(), e);
             throw e; // Re-throw to maintain existing behavior

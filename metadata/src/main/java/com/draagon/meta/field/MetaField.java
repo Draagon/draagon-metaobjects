@@ -11,7 +11,6 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
 import com.draagon.meta.validation.MetaDataValidators;
-import com.draagon.meta.metrics.MetaDataMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +48,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     // Enhanced field-specific validation chain
     private volatile ValidationChain<MetaField<T>> fieldValidationChain;
     
-    // Field-specific metrics
-    private final MetaDataMetrics fieldMetrics;
 
 
     /**
@@ -62,8 +59,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     public MetaField(String subtype, String name, DataTypes dataType) {
         super(TYPE_FIELD, subtype, name);
         this.dataType = dataType;
-        this.fieldMetrics = new MetaDataMetrics("field:" + name);
-        this.fieldMetrics.recordCreation();
         
         log.debug("Created MetaField: {}:{}:{} with dataType: {}", TYPE_FIELD, subtype, name, dataType);
         //addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
@@ -173,19 +168,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     // ========== ENHANCED FIELD-SPECIFIC METHODS ==========
     
-    /**
-     * Get field-specific metrics
-     */
-    public MetaDataMetrics getFieldMetrics() {
-        return fieldMetrics;
-    }
-    
-    /**
-     * Get field metrics snapshot
-     */
-    public MetaDataMetrics.MetricsSnapshot getFieldMetricsSnapshot() {
-        return fieldMetrics.getSnapshot();
-    }
     
     /**
      * Validate this MetaField using enhanced validation
@@ -196,16 +178,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         try {
             ValidationResult result = getFieldValidationChain().validate(this);
             
-            // Record metrics
-            Duration duration = Duration.between(start, Instant.now());
-            fieldMetrics.recordValidation(duration, result.isValid());
             
             return result;
         } catch (Exception e) {
-            // Record error metrics
-            Duration duration = Duration.between(start, Instant.now());
-            fieldMetrics.recordValidation(duration, false);
-            fieldMetrics.recordError();
             
             log.error("Field validation failed for {}: {}", getName(), e.getMessage(), e);
             
@@ -329,14 +304,10 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 this.defaultValue = DataConverter.toTypeSafe(getDataType(), defVal, (Class<T>) getValueClass());
             }
             
-            // Record metrics
-            fieldMetrics.recordPropertyChange();
             
             log.debug("MetaField {} default value changed from {} to {}", getName(), oldValue, defVal);
             
         } catch (Exception e) {
-            // Record error metrics
-            fieldMetrics.recordError();
             
             log.error("Failed to set default value for MetaField {}: {}", getName(), e.getMessage(), e);
             throw e; // Re-throw to maintain existing behavior

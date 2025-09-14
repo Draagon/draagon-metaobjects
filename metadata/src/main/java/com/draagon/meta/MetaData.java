@@ -8,7 +8,6 @@ import com.draagon.meta.type.MetaDataTypeRegistry;
 import com.draagon.meta.cache.CacheStrategy;
 import com.draagon.meta.cache.HybridCache;
 import com.draagon.meta.collections.IndexedMetaDataCollection;
-import com.draagon.meta.metrics.MetaDataMetrics;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.MetaDataValidators;
 import org.slf4j.Logger;
@@ -37,8 +36,6 @@ public class MetaData implements Cloneable, Serializable {
     private final IndexedMetaDataCollection children = new IndexedMetaDataCollection();
     
     
-    // Metrics collection
-    private final MetaDataMetrics metrics;
     
     // Validation chain
     private volatile ValidationChain<MetaData> validationChain;
@@ -77,9 +74,6 @@ public class MetaData implements Cloneable, Serializable {
         // Initialize type definition (lazy loading to avoid circular dependencies)
         this.typeDefinition = null;
         
-        // Initialize metrics
-        this.metrics = new MetaDataMetrics(name);
-        this.metrics.recordCreation();
 
         // Cache the shortName and packageName
         int i = name.lastIndexOf(PKG_SEPARATOR);
@@ -132,16 +126,9 @@ public class MetaData implements Cloneable, Serializable {
         try {
             ValidationResult result = getValidationChain().validate(this);
             
-            // Record metrics
-            Duration duration = Duration.between(start, Instant.now());
-            metrics.recordValidation(duration, result.isValid());
             
             return result;
         } catch (Exception e) {
-            // Record error metrics
-            Duration duration = Duration.between(start, Instant.now());
-            metrics.recordValidation(duration, false);
-            metrics.recordError();
             
             log.error("Validation failed for {}: {}", getName(), e.getMessage(), e);
             
@@ -269,21 +256,6 @@ public class MetaData implements Cloneable, Serializable {
         return cache.getStats().map(stats -> (Object) stats);
     }
 
-    // ========== METRICS ==========
-
-    /**
-     * Get metrics for this MetaData
-     */
-    public MetaDataMetrics getMetrics() {
-        return metrics;
-    }
-
-    /**
-     * Get metrics snapshot
-     */
-    public MetaDataMetrics.MetricsSnapshot getMetricsSnapshot() {
-        return metrics.getSnapshot();
-    }
 
     // ========== ENHANCED ATTRIBUTE MANAGEMENT ==========
 
@@ -723,8 +695,6 @@ public class MetaData implements Cloneable, Serializable {
         
         // Use indexed collection for O(1) operations
         if (children.add(data)) {
-            // Record metrics
-            metrics.recordChildAddition();
             
             // Flush caches
             flushCaches();
@@ -738,8 +708,6 @@ public class MetaData implements Cloneable, Serializable {
         MetaData d = getChildOfType(type, name);
         if (d.getParent() == this) {
             if (children.remove(d)) {
-                // Record metrics
-                metrics.recordChildRemoval();
                 
                 flushCaches();
             }
@@ -755,8 +723,6 @@ public class MetaData implements Cloneable, Serializable {
         MetaData d = getChild(name, c);
         if (d.getParent() == this) {
             if (children.remove(d)) {
-                // Record metrics
-                metrics.recordChildRemoval();
                 
                 flushCaches();
             }
@@ -774,8 +740,6 @@ public class MetaData implements Cloneable, Serializable {
         }
         
         if (children.remove(data)) {
-            // Record metrics
-            metrics.recordChildRemoval();
             
             flushCaches();
         }
@@ -983,8 +947,6 @@ public class MetaData implements Cloneable, Serializable {
         for (MetaData child : toRemove) {
             if (children.remove(child)) {
                 removed = true;
-                // Record metrics
-                metrics.recordChildRemoval();
             }
         }
         
@@ -1003,8 +965,6 @@ public class MetaData implements Cloneable, Serializable {
         for (MetaData child : toRemove) {
             if (children.remove(child)) {
                 removed = true;
-                // Record metrics
-                metrics.recordChildRemoval();
             }
         }
         
