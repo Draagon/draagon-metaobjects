@@ -86,6 +86,17 @@ mvn metaobjects:editor
 - Added comprehensive JavaDoc documentation
 - Resolved 25+ critical TODO items
 
+## Claude AI Documentation
+
+### Architectural Understanding
+- **CLAUDE_ARCHITECTURAL_SUMMARY.md**: Quick reference with key insights and anti-patterns
+- **CLAUDE_ARCHITECTURAL_ANALYSIS.md**: Comprehensive architectural analysis and assessment
+- **CLAUDE_ENHANCEMENTS.md**: Detailed enhancement plan with implementation roadmap
+- **CLAUDE_ARCHITECTURE.md**: Complete architecture guide with design patterns
+
+### ⚠️ Critical Understanding for Claude AI
+**MetaObjects is a load-once immutable metadata system** (like Java's Class/Field reflection API). DO NOT treat MetaData objects as mutable domain models. They are permanent, immutable metadata definitions that are thread-safe for reads after the loading phase.
+
 ## Development Guidelines
 
 ### Code Style

@@ -1,5 +1,28 @@
 # MetaObjects Architecture Guide for Claude AI
 
+## ⚠️ CRITICAL ARCHITECTURAL PRINCIPLE ⚠️
+
+**MetaObjects follows a LOAD-ONCE IMMUTABLE design pattern analogous to Java's Class/Field reflection system:**
+
+- **MetaData objects are loaded once during application startup and remain immutable thereafter**
+- **They are permanent in memory for the application lifetime (like Java Class objects)**
+- **Thread-safe for concurrent READ operations after loading phase**
+- **WeakReferences prevent circular references in permanent object graphs**
+- **Caching is appropriate - these objects ARE the cache**
+- **State management tracks loading phases, not runtime mutations**
+
+**DO NOT treat MetaData as mutable domain objects - they are immutable metadata definitions like Java Classes.**
+
+### Comparison to Java Reflection
+| Java Reflection | MetaObjects Framework |
+|----------------|----------------------|
+| `Class.forName()` | `MetaDataLoader.load()` |
+| `Class.getFields()` | `MetaObject.getMetaFields()` |
+| `Field.get(object)` | `MetaField.getValue(object)` |
+| Permanent in memory | Permanent MetaData objects |
+| Thread-safe reads | Thread-safe metadata access |
+| ClassLoader registry | MetaDataLoader registry |
+
 ## Core Architecture Overview
 
 MetaObjects implements a sophisticated metadata-driven development framework where application behavior and structure are controlled through metadata definitions rather than hard-coded implementations.
@@ -207,7 +230,9 @@ MetaException (base)
 2. **Classloader Issues**: Set appropriate classloader for OSGi/Maven contexts
 3. **Validation**: Don't skip object-level validation
 4. **Serialization**: Use MetaObject-aware serializers for complex objects
-5. **Memory**: Be careful with metadata caching in long-running applications
+5. **Immutability Misunderstanding**: DON'T try to modify MetaData after loading - they are immutable like Java Classes
+6. **WeakReference Misuse**: DON'T assume WeakReferences are a problem - they prevent memory leaks in permanent object graphs
+7. **Type Safety**: Be aware of unchecked cast warnings - these indicate real type safety issues that need addressing
 
 ## Future Architecture (v4.4.0+)
 

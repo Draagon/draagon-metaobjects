@@ -352,6 +352,7 @@ public class MetaData implements Cloneable, Serializable {
     /////////////////////////////////////////////////////
     // Object Instantiation Helpers
 
+    @SuppressWarnings("unchecked")
     public <T extends MetaData> T setMetaDataClassLoader( ClassLoader classLoader ) {
         metaDataClassLoader = classLoader;
         return (T) this;
@@ -376,9 +377,10 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     // Loads the specified Class using the proper ClassLoader
+    @SuppressWarnings("unchecked")
     public <T> Class<T> loadClass( Class<T> clazz, String name ) throws ClassNotFoundException {
         try {
-            Class c = getMetaDataClassLoader().loadClass(name);
+            Class<?> c = getMetaDataClassLoader().loadClass(name);
             if (!clazz.isAssignableFrom(c)) {
                 throw new InvalidValueException("Class [" + c.getName() + "] is not assignable from [" + clazz.getName() + "]");
             }
@@ -391,12 +393,12 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     // Loads the specified Class using the proper ClassLoader
-    public Class loadClass( String name ) throws ClassNotFoundException {
+    public Class<?> loadClass( String name ) throws ClassNotFoundException {
         return loadClass(name, true);
     }
 
         // Loads the specified Class using the proper ClassLoader
-    public Class loadClass( String name, boolean throwError ) throws ClassNotFoundException {
+    public Class<?> loadClass( String name, boolean throwError ) throws ClassNotFoundException {
         try {
             return getMetaDataClassLoader().loadClass(name);
         }
@@ -486,6 +488,7 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Gets the Super Data
      */
+    @SuppressWarnings("unchecked")
     public <T extends MetaData> T getSuperData() {
         return (T) superData;
     }
@@ -782,6 +785,7 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     /** Add all the matching children to the map */
+    @SuppressWarnings("unchecked")
     private <T extends MetaData> void addChildren( List<String> keys, List<T> items, String type, Class<T> c, boolean includeParentData, boolean isParent, boolean firstOnly ) {
 
         // Get all the local children
@@ -879,6 +883,7 @@ public class MetaData implements Cloneable, Serializable {
         return (T) getChildOfTypeOrClass( null, name, c, includeParentData, shouldThrow );
     }
 
+    @SuppressWarnings("unchecked")
     private final <T extends MetaData> T getChildOfTypeOrClass( String type, String name, Class<T> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
 
         for (MetaData d : children.getAll()) {
@@ -979,6 +984,7 @@ public class MetaData implements Cloneable, Serializable {
      * @return The wrapped MetaData
      */
     public <T extends MetaData> T overload()  {
+        @SuppressWarnings("unchecked")
         T d = (T) clone();
         d.clearChildren();
         d.setSuperData(this);
@@ -1066,6 +1072,7 @@ public class MetaData implements Cloneable, Serializable {
     public <T> T useCache( String cacheKey, GetValueForCache<T> getter ) {
         Object o = getCacheValue( cacheKey );
         if ( o != null && o == CACHE_NULL ) return null;
+        @SuppressWarnings("unchecked")
         T cacheValue = (T) o;
         if ( cacheValue == null ) {
             cacheValue = getter.get();
@@ -1085,6 +1092,7 @@ public class MetaData implements Cloneable, Serializable {
         final String CACHE_KEY = cacheKeyPrefix+"{"+arg+"}";
         Object o = getCacheValue( CACHE_KEY );
         if ( o != null && o == CACHE_NULL ) return null;
+        @SuppressWarnings("unchecked")
         T cacheValue = (T) o;
         if ( cacheValue == null ) {
             cacheValue = getter.get(arg);
