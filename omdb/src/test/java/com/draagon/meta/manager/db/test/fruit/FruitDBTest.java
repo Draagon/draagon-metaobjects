@@ -15,6 +15,7 @@ import com.draagon.meta.manager.db.test.AbstractOMDBTest;
 import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
+import com.draagon.meta.loader.MetaDataRegistry;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -32,7 +33,7 @@ public class FruitDBTest extends AbstractOMDBTest {
     public void testApple() throws Exception {
         
         Apple apple = new Apple();
-        MetaObject mo = MetaObject.forObject( apple );
+        MetaObject mo = MetaDataRegistry.findMetaObject( apple );
         
         assertEquals( "produce::Apple", mo.getName() );
         
@@ -69,13 +70,13 @@ public class FruitDBTest extends AbstractOMDBTest {
         assertTrue( omdb.getObjects(oc, mo).isEmpty() );
 
         // Better be an Orange
-        assertFalse( omdb.getObjects(oc, MetaObject.forObject( orange )).isEmpty() );    
+        assertFalse( omdb.getObjects(oc, MetaDataRegistry.findMetaObject( orange )).isEmpty() );    
     }
     
     @Test
     public void testBasket() throws Exception {
         
-        MetaObject mo = MetaObject.forName( "container::Basket" );        
+        MetaObject mo = MetaDataRegistry.findMetaObjectByName( "container::Basket" );        
         assertEquals( "container::Basket", mo.getName() );
         
         ValueObject vo = (ValueObject) mo.newInstance();
@@ -91,7 +92,7 @@ public class FruitDBTest extends AbstractOMDBTest {
         assertFalse( "isEmpty", data.isEmpty() );
         assertEquals( Integer.valueOf(12), ((ValueObject) data.iterator().next()).getInt("oranges"));
         
-        MetaObject mo2 = MetaObject.forName( "produce::FullBasketView" );
+        MetaObject mo2 = MetaDataRegistry.findMetaObjectByName( "produce::FullBasketView" );
         data = omdb.getObjects(oc, mo2);
         assertFalse( "isEmpty", data.isEmpty() );
         

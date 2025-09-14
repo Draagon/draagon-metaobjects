@@ -7,6 +7,10 @@
 package com.draagon.meta.manager;
 
 import java.util.ArrayList;
+import java.util.Collection;
+
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.MetaDataRegistry;
 
 import com.draagon.meta.object.MetaObject;
 
@@ -31,7 +35,7 @@ public class ObjectRef {
     if ( i < 0 )
       throw new IllegalArgumentException( "Invalid object reference [" + ref + "]" );
 
-    MetaObject mc = MetaObject.forName( ref.substring( OBJECTREF_PREFIX.length(), i ));
+    MetaObject mc = MetaDataRegistry.findMetaObjectByName( ref.substring( OBJECTREF_PREFIX.length(), i ));
 
     i += OBJECTREF_SEP.length();
     ArrayList<String> al = new ArrayList<String>();

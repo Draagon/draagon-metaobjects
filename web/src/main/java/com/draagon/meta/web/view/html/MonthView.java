@@ -63,7 +63,7 @@ public class MonthView extends HtmlView
   }
   
   public void doView( PageContext page, Object o, String label, int mode, Map params )
-    throws MetaException
+    throws MetaDataException
   {
     MetaField mf = getMetaField( o );
     //MetaClass mc = mf.getMetaClass();
@@ -118,7 +118,7 @@ public class MonthView extends HtmlView
    */
   @Override
   public void getValue( HttpServletRequest request, Object o, String label )
-    throws MetaException
+    throws MetaDataException
   {
     // Get the integer
     int i = HtmlViewHelper.getIntValue( request, label );

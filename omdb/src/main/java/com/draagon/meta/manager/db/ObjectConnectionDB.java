@@ -7,8 +7,9 @@
 
 package com.draagon.meta.manager.db;
 
-import com.draagon.meta.MetaException;
+
 import com.draagon.meta.manager.ObjectConnection;
+import com.draagon.meta.MetaDataException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,62 +33,62 @@ public class ObjectConnectionDB implements ObjectConnection
     }
 
     public void setReadOnly(boolean state)
-            throws MetaException {
+            throws MetaDataException {
         try {
             mConn.setReadOnly(state);
         }
         catch (Exception e) {
-            throw new MetaException("Could not set JDBC Connection to read-only", e);
+            throw new MetaDataException("Could not set JDBC Connection to read-only", e);
         }
     }
 
     public boolean isReadOnly()
-            throws MetaException {
+            throws MetaDataException {
         try {
             return mConn.isReadOnly();
         }
         catch (Exception e) {
-            throw new MetaException("Could not determine if JDBC was read-only", e);
+            throw new MetaDataException("Could not determine if JDBC was read-only", e);
         }
     }
 
     public void setAutoCommit(boolean state)
-            throws MetaException {
+            throws MetaDataException {
         try {
             mConn.setAutoCommit(state);
         }
         catch (Exception e) {
-            throw new MetaException("Could not set JDBC connection to auto commit", e);
+            throw new MetaDataException("Could not set JDBC connection to auto commit", e);
         }
     }
 
     public boolean getAutoCommit()
-            throws MetaException {
+            throws MetaDataException {
         try {
             return mConn.getAutoCommit();
         }
         catch (Exception e) {
-            throw new MetaException("Could not get JDBC auto commit status", e);
+            throw new MetaDataException("Could not get JDBC auto commit status", e);
         }
     }
 
     public void commit()
-            throws MetaException {
+            throws MetaDataException {
         try {
             mConn.commit();
         }
         catch (Exception e) {
-            throw new MetaException("Could not commit on JDBC connection", e);
+            throw new MetaDataException("Could not commit on JDBC connection", e);
         }
     }
 
     public void rollback()
-            throws MetaException {
+            throws MetaDataException {
         try {
             mConn.rollback();
         }
         catch (Exception e) {
-            throw new MetaException("Could not rollback on JDBC Connection", e);
+            throw new MetaDataException("Could not rollback on JDBC Connection", e);
         }
     }
 
@@ -101,12 +102,12 @@ public class ObjectConnectionDB implements ObjectConnection
     }
 
     public boolean isClosed()
-            throws MetaException {
+            throws MetaDataException {
         try {
             return mConn.isClosed();
         }
         catch (Exception e) {
-            throw new MetaException("Could not determine if JDBC connection is closed", e);
+            throw new MetaDataException("Could not determine if JDBC connection is closed", e);
         }
     }
 }

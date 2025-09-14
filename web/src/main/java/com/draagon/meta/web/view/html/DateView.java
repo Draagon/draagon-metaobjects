@@ -42,7 +42,7 @@ public class DateView extends MonthView {
     }
 
     public void getValue(HttpServletRequest request, Object o, String label)
-            throws MetaException {
+            throws MetaDataException {
         int year = HtmlViewHelper.getIntValue(request, label + "-year");
         int mon = HtmlViewHelper.getIntValue(request, label + "-mon");
         int day = HtmlViewHelper.getIntValue(request, label + "-day");
@@ -98,7 +98,7 @@ public class DateView extends MonthView {
      * Draws a date view of the field
      */
     public void doView(PageContext page, Object o, String label, int mode, Map params)
-            throws MetaException {
+            throws MetaDataException {
         MetaField mf = getMetaField(o);
 
         try {
@@ -117,8 +117,8 @@ public class DateView extends MonthView {
         Calendar c = Calendar.getInstance();
 
         String emptyString = ViewHelper.getStringParam(params, ATTR_EMPTYVALUE, null);
-        if (emptyString == null && hasAttribute(ATTR_EMPTYVALUE)) {
-            emptyString = (String) getAttribute(ATTR_EMPTYVALUE);
+        if (emptyString == null && hasMetaAttr(ATTR_EMPTYVALUE)) {
+            emptyString = (String) getMetaAttr(ATTR_EMPTYVALUE).getValue();
         }
         if (emptyString != null) {
             setEmptyString(emptyString);
@@ -172,11 +172,11 @@ public class DateView extends MonthView {
             int defMax = c.get(Calendar.YEAR) + 30;
 
             try {
-                defMin = Integer.parseInt((String) getAttribute(ATTR_MINRANGE));
+                defMin = Integer.parseInt((String) getMetaAttr(ATTR_MINRANGE).getValue());
             } catch (Exception e) {
             }
             try {
-                defMax = Integer.parseInt((String) getAttribute(ATTR_MAXRANGE));
+                defMax = Integer.parseInt((String) getMetaAttr(ATTR_MAXRANGE).getValue());
             } catch (Exception e) {
             }
 

@@ -37,7 +37,7 @@ public class ViewHelper
   public static String getStringAttribute( MetaView view, String label )
   {
     try {
-      return (String) view.getAttribute( label );
+      return (String) view.getMetaAttr( label ).getValue();
     } catch( MetaAttributeNotFoundException e ) {
       return null;
     }
@@ -113,7 +113,7 @@ public class ViewHelper
     throws NumberFormatException
   {
     try {
-      view.getAttribute( label );
+      view.getMetaAttr( label ).getValue();
       return getIntAttribute( view, label );
     } catch( MetaAttributeNotFoundException e ) {
       return def;

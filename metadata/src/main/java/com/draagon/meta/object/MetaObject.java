@@ -47,14 +47,6 @@ public abstract class MetaObject extends MetaData {
     // Object-specific metrics
     private final MetaDataMetrics objectMetrics;
 
-    /**
-     * Legacy constructor used in unit tests
-     * @param name Name of the MetaObject
-     * @deprecated Use MetaObject( subtype, name )
-     */
-    public MetaObject( String name ) {
-        this( "deprecated", name );
-    }
 
     /**
      * Constructs the MetaObject with enhanced validation and metrics
@@ -302,23 +294,7 @@ public abstract class MetaObject extends MetaData {
         };
     }
 
-    /**
-     * Returns the MetaObject for the specified Meta Object name
-     *
-     * @deprecated Use MetaDataRegistry.findMetaObjectByName(), if enabled in MetaDataLoader
-     */
-    public static MetaObject forName(String name) {
-        return MetaDataRegistry.findMetaObjectByName(name);
-    }
 
-    /**
-     * Returns the MetaObject for the specified Object
-     *
-     * @deprecated Use MetaDataRegistry.findMetaObject(), if registry enabled in MetaDataLoader
-     */
-    public static MetaObject forObject(Object o) {
-        return MetaDataRegistry.findMetaObject( o );
-    }
 
     /**
      * Sets the Super Class

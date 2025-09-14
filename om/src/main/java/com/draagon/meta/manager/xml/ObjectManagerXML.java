@@ -413,7 +413,7 @@ public class ObjectManagerXML extends ObjectManager
     protected String getNameRef( MetaObject mc )
     {
         try {
-            return (String) mc.getAttribute( "nameRef" );
+            return (String) mc.getMetaAttr( "nameRef" ).getValue();
         }
         catch( MetaAttributeNotFoundException e ) { }
 
@@ -423,7 +423,7 @@ public class ObjectManagerXML extends ObjectManager
     protected String getFieldRef( MetaField mf )
     {
         try {
-            return (String) mf.getAttribute( "nameRef" );
+            return (String) mf.getMetaAttr( "nameRef" ).getValue();
         }
         catch( MetaAttributeNotFoundException e ) { }
 

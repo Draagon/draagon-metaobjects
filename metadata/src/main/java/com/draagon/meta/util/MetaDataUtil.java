@@ -28,74 +28,10 @@ public class MetaDataUtil {
   public final static String ATTR_OBJECT_REF = MetaObject.ATTR_OBJECT_REF;
   public final static String SEP = MetaDataLoader.PKG_SEPARATOR;
 
-  /**
-   * Returns the MetaObject for the class name string specified
-   * @param name MetaObject name
-   * @return MetaClass representing the name specified
-   * @deprecated Use MetaDataRegistry.findMetaObjectByName( name )
-   */
-  public static MetaObject forName( String name ) {
-      return MetaDataRegistry.findMetaObjectByName( name );
-  }
 
-  /**
-   * Returns a new object based on the MetaClass name specified
-   * @param metaClassName
-   * @return new object instance
-   * @deprecated Use MetaDataRegistry.findMetaObjectByName( name )
-   */
-  public static Object newInstance( String metaClassName ) {
-    return newInstance( MetaDataRegistry.findMetaObjectByName( metaClassName ));
-  }
 
-  /**
-   * Returns a new object based on the MetaClass name specified
-   * @return new object instance
-   * @deprecated Use MetaObject.newInstance()
-   */
-  public static Object newInstance( MetaObject mc ) {
-      return mc.newInstance();
-  }
 
-  /**
-   * Returns the MetaClass associated with the specified Class or
-   * null if no CLASSNAME static field exists on the object.
-   * @param c Class to retrieve
-   * @return MetaClass
-   * @deprecated Use MetaDataRegistry.findMetaObjectByName( name )
-   */
-  public static MetaObject forClass( Class<?> c )
-  {
-    try {
-      Field f = c.getField( "CLASSNAME" );
-      String metaclassname = (String) f.get( null );
-      //return MetaObject.forName( metaclassname );
-      return MetaDataRegistry.findMetaObjectByName( metaclassname );
-    }
-    catch (SecurityException e1) {
-      throw new RuntimeException( "Security violation accessing CLASSNAME field on class [" + c + "]", e1 );
-    }
-    catch (NoSuchFieldException e1) {
-      // If no CLASSNAME field exists, then no logic bean exists for it
-      return null;
-    }
-    catch (IllegalArgumentException e2) {
-      throw new RuntimeException( "Illegal argument violation accessing CLASSNAME field on class [" + c + "]", e2 );
-    }
-    catch (IllegalAccessException e2) {
-      throw new RuntimeException( "Illegal access violation accessing CLASSNAME field on class [" + c + "]", e2 );
-    }
-  }
 
-  /**
-   * @param o
-   * @return
-   *
-   * @deprecated Use MetaDataRegistry.findMetaObject( o )
-   */
-  public static MetaObject findMetaObject(Object o) {
-    return MetaDataRegistry.findMetaObject( o );
-  }
 
 
   /** Find an actual package traversing parents if needed */

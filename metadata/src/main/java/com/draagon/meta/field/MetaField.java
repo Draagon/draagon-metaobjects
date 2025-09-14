@@ -29,7 +29,7 @@ import java.util.Optional;
  * @version 2.0
  */
 @SuppressWarnings("serial")
-public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>, MetaFieldTypes {
+public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T> {
 
     private static final Logger log = LoggerFactory.getLogger(MetaField.class);
 
@@ -52,14 +52,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     // Field-specific metrics
     private final MetaDataMetrics fieldMetrics;
 
-    /**
-     * Legacy constructor used in unit tests
-     * @param name Name of the metafield
-     * @deprecated Use MetaField( subtype, name, dataType )
-     */
-    public MetaField( String name ) {
-        this( "deprecated", name, DataTypes.STRING );
-    }
 
     /**
      * Construct a MetaField with enhanced validation and metrics
@@ -79,13 +71,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         //addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
     }
 
-    /**
-     * Return the older MetaFieldTypes values
-     * @deprecated Use getDataType() and the DataTypes Enum
-     */
-    public int getType() {
-        return getDataType().getId();
-    }
 
     /**
      * Gets the primary MetaData class
@@ -136,22 +121,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     //    return (ObjectReference) getFirstChildOfType(ObjectReference.TYPE_OBJECTREF);
     //}
 
-    /**
-     * Sets the default field value
-     * @deprecated Add a child MetaAttribute with DEFAULT_VALUE
-     */
-    public void setDefaultValue(T defVal) {
-
-        defaultValue = defVal;
-
-        if (!getValueClass().isInstance(defVal)) {
-            // Convert as needed
-            defVal = (T) DataConverter.toType(getDataType(), defVal);
-            String def = defVal.toString();
-        }
-
-        defaultValue = (T) defVal;
-    }
 
     /**
      * Gets the default field value
@@ -352,7 +321,13 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         T oldValue = this.defaultValue;
         
         try {
-            setDefaultValue(defVal); // Call existing method
+            // Set the default value directly (replaces the removed deprecated method)
+            this.defaultValue = defVal;
+            
+            if (defVal != null && !getValueClass().isInstance(defVal)) {
+                // Convert as needed
+                this.defaultValue = (T) DataConverter.toType(getDataType(), defVal);
+            }
             
             // Record metrics
             fieldMetrics.recordPropertyChange();

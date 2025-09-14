@@ -141,7 +141,10 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
                     }
                 }
 
-                mMetaObject = MetaObject.forName(mObjectName);
+                // Use registry to find MetaObject if specific loader didn't work
+                if (mMetaObject == null) {
+                    mMetaObject = MetaDataRegistry.findMetaObjectByName(mObjectName);
+                }
             } catch (MetaObjectNotFoundException e) {
                 throw new RuntimeException("Could not re-attach MetaObject: " + e.getMessage(), e);
             }

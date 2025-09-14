@@ -81,10 +81,10 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
     /**
      * Checks to see if a transaction exists or not
      */
-    protected void checkTransaction(Connection c, boolean throwEx) throws MetaException {
+    protected void checkTransaction(Connection c, boolean throwEx) throws MetaDataException {
         try {
             if (enforceTransaction() && c.getAutoCommit()) {
-                MetaException me = new MetaException("The connection retrieved is not operating under a transaction and transactions are being enforced");
+                MetaDataException me = new MetaDataException("The connection retrieved is not operating under a transaction and transactions are being enforced");
                 if (throwEx) {
                     throw me;
                 } else {
@@ -92,7 +92,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
                 }
             }
         } catch (SQLException e) {
-            throw new MetaException("Error checking connection for transaction enforcement: " + e.getMessage(), e);
+            throw new MetaDataException("Error checking connection for transaction enforcement: " + e.getMessage(), e);
         }
     }
 
@@ -354,7 +354,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      * Breaks apart the values from the id field represented by the keys
      */
     /*protected Collection getKeyValuesFromRef( MetaClass mc, Collection keys, String ref )
-     throws MetaException
+     throws MetaDataException
      {
      ArrayList values = new ArrayList();
 
@@ -366,7 +366,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      MetaField f = (MetaField) i.next();
 
      if ( tmp == null || tmp.length() == 0 )
-     throw new MetaException( "Invalid Reference [" + ref + "] for MetaClass [" + mc + "]" );
+     throw new MetaDataException( "Invalid Reference [" + ref + "] for MetaClass [" + mc + "]" );
 
      String val = null;
      int j = tmp.indexOf( '-' );
@@ -391,7 +391,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      * id.
      */
     /*    protected void setStatementValuesForRef( PreparedStatement s, Collection keys, int start, ObjectRef ref )
-     throws MetaException, SQLException
+     throws MetaDataException, SQLException
      {
      //Collection values = getKeyValuesFromRef( keys, ref );
      String [] ids = ref.getIds();
@@ -410,9 +410,9 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
     /**
      * Parses an Object returned from the database
      */
-    protected void parseObject(ResultSet rs, Collection<MetaField> fields, MetaObject mc, Object o) throws SQLException, MetaException {
+    protected void parseObject(ResultSet rs, Collection<MetaField> fields, MetaObject mc, Object o) throws SQLException, MetaDataException {
         if (!isReadableClass(mc)) {
-            throw new MetaException("MetaClass [" + mc + "] is not readable");
+            throw new MetaDataException("MetaClass [" + mc + "] is not readable");
         }
 
         int j = 1;
@@ -433,56 +433,37 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      * Enhanced field parsing with better type handling and null safety
      */
     protected void parseField(Object o, MetaField f, ResultSet rs, int j) throws SQLException {
-        switch (f.getType()) {
-            case MetaField.BOOLEAN -> {
-                boolean bv = rs.getBoolean(j);
-                f.setBoolean(o, rs.wasNull() ? null : bv);
-            }
-
-            case MetaField.BYTE -> {
-                byte bv = rs.getByte(j);
-                f.setByte(o, rs.wasNull() ? null : bv);
-            }
-
-            case MetaField.SHORT -> {
-                short sv = rs.getShort(j);
-                f.setShort(o, rs.wasNull() ? null : sv);
-            }
-
-            case MetaField.INT -> {
-                int iv = rs.getInt(j);
-                f.setInt(o, rs.wasNull() ? null : iv);
-            }
-
-
-            case MetaField.DATE -> {
-                Timestamp tv = rs.getTimestamp(j);
-                f.setDate(o, rs.wasNull() ? null : new java.util.Date(tv.getTime()));
-            }
-
-            case MetaField.LONG -> {
-                long lv = rs.getLong(j);
-                f.setLong(o, rs.wasNull() ? null : lv);
-            }
-
-            case MetaField.FLOAT -> {
-                float fv = rs.getFloat(j);
-                f.setFloat(o, rs.wasNull() ? null : fv);
-            }
-
-            case MetaField.DOUBLE -> {
-                double dv = rs.getDouble(j);
-                f.setDouble(o, rs.wasNull() ? null : dv);
-            }
-
-            case MetaField.STRING -> f.setString(o, rs.getString(j));
-
-            case MetaField.OBJECT -> f.setObject(o, rs.getObject(j));
-            
-            default -> {
-                log.warn("Unknown field type {} for field {}", f.getType(), f.getName());
-                f.setObject(o, rs.getObject(j));
-            }
+        if (f instanceof com.draagon.meta.field.BooleanField) {
+            boolean bv = rs.getBoolean(j);
+            f.setBoolean(o, rs.wasNull() ? null : bv);
+        } else if (f instanceof com.draagon.meta.field.ByteField) {
+            byte bv = rs.getByte(j);
+            f.setByte(o, rs.wasNull() ? null : bv);
+        } else if (f instanceof com.draagon.meta.field.ShortField) {
+            short sv = rs.getShort(j);
+            f.setShort(o, rs.wasNull() ? null : sv);
+        } else if (f instanceof com.draagon.meta.field.IntegerField) {
+            int iv = rs.getInt(j);
+            f.setInt(o, rs.wasNull() ? null : iv);
+        } else if (f instanceof com.draagon.meta.field.DateField) {
+            Timestamp tv = rs.getTimestamp(j);
+            f.setDate(o, rs.wasNull() ? null : new java.util.Date(tv.getTime()));
+        } else if (f instanceof com.draagon.meta.field.LongField) {
+            long lv = rs.getLong(j);
+            f.setLong(o, rs.wasNull() ? null : lv);
+        } else if (f instanceof com.draagon.meta.field.FloatField) {
+            float fv = rs.getFloat(j);
+            f.setFloat(o, rs.wasNull() ? null : fv);
+        } else if (f instanceof com.draagon.meta.field.DoubleField) {
+            double dv = rs.getDouble(j);
+            f.setDouble(o, rs.wasNull() ? null : dv);
+        } else if (f instanceof com.draagon.meta.field.StringField) {
+            f.setString(o, rs.getString(j));
+        } else if (f instanceof com.draagon.meta.field.ObjectField) {
+            f.setObject(o, rs.getObject(j));
+        } else {
+            log.warn("Unknown field type {} for field {}", f.getClass().getSimpleName(), f.getName());
+            f.setObject(o, rs.getObject(j));
         }
     }
 
@@ -623,7 +604,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      * Gets the total count of objects with the specified search criteria
      */
     @Override
-    public long getObjectsCount(ObjectConnection c, MetaObject mc, Expression exp) throws MetaException {
+    public long getObjectsCount(ObjectConnection c, MetaObject mc, Expression exp) throws MetaDataException {
         if (!isReadableClass(mc)) {
             throw new PersistenceException("MetaClass [" + mc + "] is not persistable");
         }
@@ -647,7 +628,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      * Gets the objects by the field with the specified search criteria
      */
     @Override
-    public Collection<?> getObjects(ObjectConnection c, MetaObject mc, QueryOptions options) throws MetaException {
+    public Collection<?> getObjects(ObjectConnection c, MetaObject mc, QueryOptions options) throws MetaDataException {
         if (!isReadableClass(mc)) {
             throw new PersistenceException("MetaClass [" + mc + "] is not persistable");
         }
@@ -687,7 +668,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
     /**
      * Load the specified object from the database
      */
-    public void loadObject(ObjectConnection c, Object o) throws MetaException {
+    public void loadObject(ObjectConnection c, Object o) throws MetaDataException {
         // Verify this object was loaded by the same object manager
         //verifyObjectManager( o );
 
@@ -967,7 +948,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
     //
     //private final static String ROOT_CLASS_KEY = "*ROOT_CLASS_KEY*";
 
-    /*protected Map<String,MetaClass> getMetaClassMap( String query ) throws MetaException
+    /*protected Map<String,MetaClass> getMetaClassMap( String query ) throws MetaDataException
      {
      Map<String,MetaClass> m = new HashMap<String,MetaClass>();
 
@@ -1000,7 +981,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      return m;
      }*/
 
-    /* private String convertToSQL( String query, Map<String,MetaClass> m ) throws MetaException
+    /* private String convertToSQL( String query, Map<String,MetaClass> m ) throws MetaDataException
      {
      //StringBuffer b = new StringBuffer();
      //ystem.out.println( "IN: " + query );
@@ -1100,8 +1081,8 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      */
     @Override
     public boolean allowsDirtyWrites(MetaObject mc) {
-        if (!mc.hasAttribute(ALLOW_DIRTY_WRITE)
-                || !("false".equals(mc.getAttribute(ALLOW_DIRTY_WRITE)))) {
+        if (!mc.hasMetaAttr(ALLOW_DIRTY_WRITE)
+                || !("false".equals(mc.getMetaAttr(ALLOW_DIRTY_WRITE).getValue()))) {
             return true;
         } else {
             return false;
@@ -1117,11 +1098,11 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
         MetaField field = (MetaField) mc.getCacheValue(KEY);
 
         if (field == null) {
-            if (mc.hasAttribute(DIRTY_WRITE_CHECK_FIELD)) {
-                field = mc.getMetaField(mc.getAttribute(DIRTY_WRITE_CHECK_FIELD).toString());
+            if (mc.hasMetaAttr(DIRTY_WRITE_CHECK_FIELD)) {
+                field = mc.getMetaField(mc.getMetaAttr(DIRTY_WRITE_CHECK_FIELD).getValue().toString());
             } else {
                 for (MetaField f : getAutoFields(mc)) {
-                    if (AUTO_UPDATE.equals(f.getAttribute(AUTO))) {
+                    if (AUTO_UPDATE.equals(f.getMetaAttr(AUTO).getValue())) {
                         field = f;
                         break;
                     }
@@ -1129,7 +1110,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
             }
 
             if (field == null) {
-                throw new MetaException("No MetaField that is useable to prevent dirty writes was found");
+                throw new MetaDataException("No MetaField that is useable to prevent dirty writes was found");
             }
 
             mc.setCacheValue(KEY, field);
@@ -1145,7 +1126,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
     //	return getDirtyField( mc ).getObject( obj );
     //}
     //private Cache<String,String> mOQLCache = new Cache<String,String>( true, 900, 3600 );
-    protected PreparedStatement getPreparedStatement(Connection c, String query, Collection<?> args) throws MetaException, SQLException {
+    protected PreparedStatement getPreparedStatement(Connection c, String query, Collection<?> args) throws MetaDataException, SQLException {
         String sql = query; // (String) mOQLCache.get( query );
 
         // If it's not in the cache, then parse it and put it there
@@ -1197,7 +1178,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
     }
 
     @Override
-    public int execute(ObjectConnection c, String query, Collection<?> arguments) throws MetaException {
+    public int execute(ObjectConnection c, String query, Collection<?> arguments) throws MetaDataException {
         Connection conn = (Connection) c.getDatastoreConnection();
 
         // Check for a valid transaction if enforced
@@ -1217,11 +1198,11 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
             }
         } catch (SQLException e) {
             log.error("Unable to execute object query [" + query + "]: " + e.getMessage());
-            throw new MetaException("Unable to execute object query [" + query + "]", e);
+            throw new MetaDataException("Unable to execute object query [" + query + "]", e);
         }
     }
 
-    protected MetaField getFieldForColumn(MetaObject resultClass, ObjectMapping mapping, String col) throws MetaException {
+    protected MetaField getFieldForColumn(MetaObject resultClass, ObjectMapping mapping, String col) throws MetaDataException {
         // Generate a cache key
         //final String KEY = ( new StringBuilder( "getFieldForColumn(" ) ).append( col ).append( ")" ).toString();
 
@@ -1262,7 +1243,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
      * Product.CLASSNAME + "]";
      */
     @Override
-    public Collection<?> executeQuery(ObjectConnection c, String query, Collection<?> arguments) throws MetaException {
+    public Collection<?> executeQuery(ObjectConnection c, String query, Collection<?> arguments) throws MetaDataException {
         Connection conn = (Connection) c.getDatastoreConnection();
 
         // Check for a valid transaction if enforced
@@ -1276,7 +1257,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
             /*if (query.startsWith("[{")) {
                 int i = query.indexOf("}]");
                 if (i <= 0) {
-                    throw new MetaException("OQL does not contain a closing '}]': [" + query + "]");
+                    throw new MetaDataException("OQL does not contain a closing '}]': [" + query + "]");
                 }
 
                 String classTemplate = query.substring(2, i).trim();
@@ -1293,15 +1274,15 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
             if (query.startsWith("[")) {
                 int i = query.indexOf("]");
                 if (i <= 0) {
-                    throw new MetaException("OQL does not contain a closing ']': [" + query + "]");
+                    throw new MetaDataException("OQL does not contain a closing ']': [" + query + "]");
                 }
 
                 String className = query.substring(1, i).trim();
                 query = query.substring(i + 1).trim();
 
-                resultClass = MetaObject.forName(className);
+                resultClass = com.draagon.meta.loader.MetaDataRegistry.findMetaObjectByName(className);
             } else {
-                throw new MetaException("OQL does not contain a result set definition using []'s or {}'s: [" + query + "]");
+                throw new MetaDataException("OQL does not contain a result set definition using []'s or {}'s: [" + query + "]");
             }
 
             PreparedStatement s = getPreparedStatement(conn, query, arguments);
@@ -1342,7 +1323,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
             }
         } catch (SQLException e) {
             log.error("Unable to execute object query [" + query + " (" + arguments + ")]: " + e.getMessage());
-            throw new MetaException("Unable to execute object query [" + query + " (" + arguments + ")]: " + e.getMessage(), e);
+            throw new MetaDataException("Unable to execute object query [" + query + " (" + arguments + ")]: " + e.getMessage(), e);
         }
     }
 

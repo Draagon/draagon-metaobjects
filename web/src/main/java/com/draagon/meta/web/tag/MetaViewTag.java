@@ -189,8 +189,8 @@ public class MetaViewTag extends TagSupport
     {
       if ( val != null && val.length() > 0 )
         p.put( name, val );
-      else if ( view.hasAttribute( name )){
-        p.put( name, "" + view.getAttribute( name ));
+      else if ( view.hasMetaAttr( name )){
+        p.put( name, "" + view.getMetaAttr( name ).getValue());
       }
     }
 }

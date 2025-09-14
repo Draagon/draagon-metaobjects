@@ -1,9 +1,10 @@
 package com.draagon.meta.manager.db.validator;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
+
 
 @SuppressWarnings("serial")
-public class TableDoesNotExistException extends MetaException
+public class TableDoesNotExistException extends MetaDataException
 {
   public TableDoesNotExistException( String msg, Exception e ) {
     super( msg, e );

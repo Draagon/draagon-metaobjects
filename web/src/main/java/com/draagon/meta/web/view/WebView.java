@@ -27,7 +27,7 @@ public abstract class WebView extends MetaView
    * Calling doView without overriding the label
    */
   public final void doView( PageContext page, Object o, int mode, Map<String,String> params )
-    throws MetaException
+    throws MetaDataException
   {
       doView( page, o, getParent().getName(), mode, params );
   }
@@ -35,12 +35,12 @@ public abstract class WebView extends MetaView
   /**
    * Basic doView with a label
    */
-  public abstract void doView( PageContext page, Object o, String label, int mode, Map<String,String> params ) throws MetaException;
+  public abstract void doView( PageContext page, Object o, String label, int mode, Map<String,String> params ) throws MetaDataException;
 
   /**
    * Retrieve the value for the field and place it into the object
    */
-  public final void getValue( HttpServletRequest request, Object o ) throws MetaException
+  public final void getValue( HttpServletRequest request, Object o ) throws MetaDataException
   {
     getValue( request, o, getParent().getName() );
   }
@@ -48,7 +48,7 @@ public abstract class WebView extends MetaView
   /**
    * Retrieve the value for the field and place it into the object
    */
-  public abstract void getValue( HttpServletRequest request, Object o, String label ) throws MetaException;
+  public abstract void getValue( HttpServletRequest request, Object o, String label ) throws MetaDataException;
 
   /**
    * Converts the mode value to an english readable mode

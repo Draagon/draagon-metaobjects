@@ -14,6 +14,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.exp.*;
 import com.draagon.meta.object.MetaObject;
@@ -148,8 +149,8 @@ public abstract class ObjectManager
 	protected String getPersistenceAttribute( MetaData md, String name )
 	{
 		try {
-			if ( md.hasAttribute( name ))
-				return (String) md.getAttribute( name );
+			if ( md.hasMetaAttr( name ))
+				return (String) md.getMetaAttr( name ).getValue();
 		} catch ( MetaAttributeNotFoundException e ) {
 			throw new RuntimeException( "[" + md + "] had attribute [" + name + "], but threw exception reading it", e );
 		}
@@ -159,7 +160,7 @@ public abstract class ObjectManager
 	protected boolean isReadOnly( MetaData md )
 	{
 		try {
-			if ( "true".equals( md.getAttribute( IS_READONLY ))) return true;
+			if ( "true".equals( md.getMetaAttr( IS_READONLY ).getValue())) return true;
 		} catch( MetaAttributeNotFoundException e ) {}
 		return false;
 	}
@@ -229,7 +230,7 @@ public abstract class ObjectManager
 		String cacheKey = mc.getName() + ":autoFields";
 		return autoFieldsCache.computeIfAbsent(cacheKey, key -> 
 			mc.getMetaFields().stream()
-				.filter(f -> f.hasAttribute(AUTO))
+				.filter(f -> f.hasMetaAttr(AUTO))
 				.collect(Collectors.toList())
 		);
 	}
@@ -238,7 +239,7 @@ public abstract class ObjectManager
 	{
 		for( MetaField f : getAutoFields( mc ))
 		{
-			Object auto = f.getAttribute( AUTO );
+			Object auto = f.getMetaAttr( AUTO ).getValue();
 			handleAutoField( c, mc, f, obj, auto, state, action );
 		}
 	}
@@ -328,7 +329,7 @@ public abstract class ObjectManager
 	public boolean isPrimaryKey( MetaField mf )
 	{
 		try {
-			if ( "true".equals( mf.getAttribute( IS_KEY ))) return true;
+			if ( "true".equals( mf.getMetaAttr( IS_KEY ).getValue())) return true;
 		} catch( MetaAttributeNotFoundException e ) {}
 		return false;
 	}
@@ -573,7 +574,7 @@ public abstract class ObjectManager
 	 */
 	public QueryBuilder query(String className) throws MetaDataException {
 		try {
-			MetaObject metaObject = MetaObject.forName(className);
+			MetaObject metaObject = MetaDataRegistry.findMetaObjectByName(className);
 			return new QueryBuilder(this, metaObject);
 		} catch (Exception e) {
 			throw new MetaDataException("Could not find MetaObject for class: " + className, e);

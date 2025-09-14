@@ -175,7 +175,7 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
     /*@Test(expected=com.draagon.meta.field.MetaFieldNotFoundException.class)
     public void testAllowExtensionsPreventArbitraryField() throws Exception {
 
-        MetaObject mo = MetaObject.forName("produce::v1::container::Basket");
+        MetaObject mo = MetaDataRegistry.getDefaultDataLoader().getMetaDataByName(MetaObject.class, "produce::v1::container::Basket");
         ValueObject basket = (ValueObject) mo.newInstance();
         assertFalse("allowsExtensions==false", basket.allowsExtensions());
         assertEquals( "produce::v1::container::Basket", mo.getName() );
@@ -189,7 +189,7 @@ public class FileMetaDataLoaderTestXml extends FileMetaDataLoaderTestBase {
     @Test
     public void testAllowExtensionsAllowArbitraryField() throws Exception {
 
-        MetaObject mo = MetaObject.forName("produce::v1::container::Basket");
+        MetaObject mo = MetaDataRegistry.getDefaultDataLoader().getMetaDataByName(MetaObject.class, "produce::v1::container::Basket");
         ValueObject basket = (ValueObject) mo.newInstance();
         basket.allowExtensions(true);
         assertTrue("allowsExtensions==true", basket.allowsExtensions());

@@ -31,7 +31,7 @@ public class TextView extends HtmlView
    * Draws a Textbox view of the field
    */
   public void doView( PageContext page, Object o, String label, int mode, Map params )
-    throws MetaException
+    throws MetaDataException
   {
     MetaField mf = getMetaField( o );
     //MetaClass mc = mf.getMetaClass();
@@ -69,7 +69,7 @@ public class TextView extends HtmlView
    * Retrieve the value for the field and place it into the object
    */
   public void getValue( HttpServletRequest request, Object o, String label )
-    throws MetaException
+    throws MetaDataException
   {
     MetaField mf = getMetaField( o );
 

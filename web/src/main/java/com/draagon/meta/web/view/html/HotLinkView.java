@@ -48,7 +48,7 @@ public class HotLinkView extends HtmlView {
     }
 
     public void doView(PageContext page, Object o, String label, int mode, Map<String, String> params)
-            throws MetaException {
+            throws MetaDataException {
         MetaField mf = getMetaField(o);
         //MetaClass mc = mf.getMetaClass();
 
@@ -68,7 +68,7 @@ public class HotLinkView extends HtmlView {
     public String getLinkClass(Map params) {
         String def = null;
         try {
-            def = (String) getAttribute("linkClass");
+            def = (String) getMetaAttr("linkClass").getValue();
         } catch (MetaAttributeNotFoundException e) {
         }
 
@@ -79,7 +79,7 @@ public class HotLinkView extends HtmlView {
      * Renders a hotlink view
      */
     protected void doHotLinkView(PageContext page, Object o, String label, int mode, Map params)
-            throws IOException, MetaException {
+            throws IOException, MetaDataException {
         String link = createLink(page, o, mode, params);
         String val = getMetaField(o).getString(o);
 
@@ -87,10 +87,10 @@ public class HotLinkView extends HtmlView {
             return;
         }
 
-        if (!hasAttribute("viewRef")) {
+        if (!hasMetaAttr("viewRef")) {
             HtmlViewHelper.drawLink(page, link, val, getLinkClass(params), params);
         } else {
-            String viewRef = (String) getAttribute("viewRef");
+            String viewRef = (String) getMetaAttr("viewRef").getValue();
 
             WebView mv = (WebView) getMetaField(o).getView(viewRef);
 
@@ -122,11 +122,11 @@ public class HotLinkView extends HtmlView {
      * values
      */
     protected String createLink(PageContext page, Object o, int mode, Map params)
-            throws MetaException {
-        String url = (String) getAttribute("url");
+            throws MetaDataException {
+        String url = (String) getMetaAttr("url").getValue();
 
         if (url == null) {
-            throw new MetaException("No 'url' attribute found for view [" + getName() + "] in field [" + getMetaField(o) + "]");
+            throw new MetaDataException("No 'url' attribute found for view [" + getName() + "] in field [" + getMetaField(o) + "]");
         }
 
         // If the URL starts with a "/" then prepend the Context Path
@@ -189,7 +189,7 @@ public class HotLinkView extends HtmlView {
      */
     @Override
     public void getValue(HttpServletRequest request, Object o, String label)
-            throws MetaException {
-        throw new MetaException("This is a read only view");
+            throws MetaDataException {
+        throw new MetaDataException("This is a read only view");
     }
 }

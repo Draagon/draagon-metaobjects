@@ -8,7 +8,6 @@
 package com.draagon.meta.manager.db;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.MetaException;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.object.MetaObject;
 
@@ -94,12 +93,12 @@ public interface DBOperations {
     /**
      * Executes a SQL statement and returns the number of affected rows
      */
-    int execute(ObjectConnection c, String query, Collection<?> arguments) throws MetaException;
+    int execute(ObjectConnection c, String query, Collection<?> arguments) throws MetaDataException;
     
     /**
      * Executes a SQL query and returns the results mapped to objects
      */
-    Collection<?> executeQuery(ObjectConnection c, String query, Collection<?> arguments) throws MetaException;
+    Collection<?> executeQuery(ObjectConnection c, String query, Collection<?> arguments) throws MetaDataException;
     
     ///////////////////////////////////////////////////////
     // CONFIGURATION METHODS

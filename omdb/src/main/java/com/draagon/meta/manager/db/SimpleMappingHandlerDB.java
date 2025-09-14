@@ -9,7 +9,8 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
+
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.manager.db.defs.BaseTableDef;
@@ -249,7 +250,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
 		case DOUBLE: return Types.DOUBLE;
 		case STRING: return Types.VARCHAR;
 		case OBJECT: return Types.BLOB;
-		default: throw new IllegalArgumentException( "Unable to get SQL type for MetaField [" + mf + "] with type (" + mf.getType() + ")" );
+		default: throw new IllegalArgumentException( "Unable to get SQL type for MetaField [" + mf + "] with type (" + mf.getDataType() + ")" );
 		}
 	}
 
@@ -267,7 +268,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
 			case DOUBLE: return 8;
 			case STRING: return 50;
 			case OBJECT: return 100;
-			default: throw new IllegalArgumentException( "Unable to get SQL type for MetaField [" + mf + "] with type (" + mf.getType() + ")" );
+			default: throw new IllegalArgumentException( "Unable to get SQL type for MetaField [" + mf + "] with type (" + mf.getDataType() + ")" );
 		}
 	}
 
@@ -374,15 +375,15 @@ public class SimpleMappingHandlerDB implements MappingHandler {
     /*private boolean isViewOnly( MetaField mf )
     {
 	    try {
-	      if ( "true".equals( mf.getAttribute( IS_VIEWONLY ))) return true;
+	      if ( "true".equals( mf.getMetaAttr( IS_VIEWONLY ).getValue())) return true;
 	    } catch( MetaAttributeNotFoundException e ) {}
 	    return false;
     }*/
 
 	/** Get the persistence attribute */
     private String getPersistenceAttribute( MetaData md, String ref ) {
-    	if ( !md.hasAttribute( ref )) return null;
-		Object r = md.getAttribute( ref );
+    	if ( !md.hasMetaAttr( ref )) return null;
+		Object r = md.getMetaAttr( ref ).getValue();
 		if ( r != null ) return r.toString();
 		return null;
 	}
@@ -391,7 +392,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
      * Retrieves the table name from the MetaClass
      *
      * @return Returns the table name
-     * @throws MetaException An exception is thrown if the object is not persistable
+     * @throws MetaDataException An exception is thrown if the object is not persistable
      */
     protected String getViewRef( MetaObject mc )
     {
@@ -402,7 +403,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
      * Retrieves the SQL generation for the view
      *
      * @return Returns the SQL to create the view
-     * @throws MetaException An exception is thrown if the object is not persistable
+     * @throws MetaDataException An exception is thrown if the object is not persistable
      */
     protected String getViewSQL( MetaObject mc )
     {
@@ -413,7 +414,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
      * Retrieves the table name from the MetaClass
      *
      * @return Returns the table name
-     * @throws MetaException An exception is thrown if the object is not persistable
+     * @throws MetaDataException An exception is thrown if the object is not persistable
      */
     protected String getTableRef( MetaObject mc )
     {
@@ -424,7 +425,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
      * Retrieves the table column from the MetaField
      *
      * @return Returns the column name
-     * @throws MetaException An exception is thrown if the column is not persistable
+     * @throws MetaDataException An exception is thrown if the column is not persistable
      */
     protected String getColumnRef( MetaField mf )
     {
@@ -435,7 +436,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
      * Retrieves the sequence name for the MetaField
      *
      * @return Returns the sequence name
-     * @throws MetaException An exception is thrown if the object is not persistable
+     * @throws MetaDataException An exception is thrown if the object is not persistable
      */
     public String getSequenceRef( MetaField mf )
     {
@@ -446,7 +447,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
      * Retrieves the sequence name for the MetaField
      *
      * @return Returns the sequence name
-     * @throws MetaException An exception is thrown if the object is not persistable
+     * @throws MetaDataException An exception is thrown if the object is not persistable
      */
     public int getSequenceStart( MetaField mf )
     {
@@ -465,7 +466,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
     public boolean isIndex( MetaField mf )
     {
       try {
-        if ( TRUE.equals( mf.getAttribute( IS_INDEX ))) return true;
+        if ( TRUE.equals( mf.getMetaAttr( IS_INDEX ).getValue())) return true;
       } catch( MetaAttributeNotFoundException e ) {}
       return false;
     }
@@ -476,7 +477,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
     public boolean isUnique( MetaField mf )
     {
       try {
-        if ( TRUE.equals( mf.getAttribute( IS_UNIQUE ))) return true;
+        if ( TRUE.equals( mf.getMetaAttr( IS_UNIQUE ).getValue())) return true;
       } catch( MetaAttributeNotFoundException e ) {}
       return false;
     }

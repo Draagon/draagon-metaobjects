@@ -415,23 +415,7 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         return result;
     }
 
-    /**
-     * Removes the MetaData
-     * @deprecated Use MetaData.deleteChild()
-     */
-    public void removeMetaData( Class<MetaData> c, String name) throws MetaDataNotFoundException {
-        checkState();
-        deleteChild(getMetaDataByName( c, name));
-    }
 
-    /**
-     * Adds the MetaData
-     * @deprecated Use MetaData.addChild
-     */
-    public void addMetaData(MetaData mc) {
-        checkState();
-        addChild(mc);
-    }
 
     /**
      * Lookup the specified class by name

@@ -117,7 +117,7 @@ public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
     /*@Test(expected=com.draagon.meta.field.MetaFieldNotFoundException.class)
     public void testAllowExtensionsPreventArbitraryField() throws Exception {
 
-        MetaObject mo = MetaObject.forName("produce::v1::container::Basket");
+        MetaObject mo = MetaDataRegistry.getDefaultDataLoader().getMetaDataByName(MetaObject.class, "produce::v1::container::Basket");
         ValueObject basket = (ValueObject) mo.newInstance();
         assertFalse("allowsExtensions==false", basket.allowsExtensions());
         assertEquals( "produce::v1::container::Basket", mo.getName() );
@@ -131,7 +131,7 @@ public class XMLMetaDataLoaderTest extends XMLMetaDataLoaderTestBase {
     @Test
     public void testAllowExtensionsAllowArbitraryField() throws Exception {
 
-        MetaObject mo = MetaObject.forName("produce::v1::container::Basket");
+        MetaObject mo = MetaDataRegistry.getDefaultDataLoader().getMetaDataByName(MetaObject.class, "produce::v1::container::Basket");
         ValueObject basket = (ValueObject) mo.newInstance();
         basket.allowExtensions(true);
         assertTrue("allowsExtensions==true", basket.allowsExtensions());

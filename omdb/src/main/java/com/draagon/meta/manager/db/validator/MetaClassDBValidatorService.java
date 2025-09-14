@@ -1,12 +1,13 @@
 package com.draagon.meta.manager.db.validator;
 
-import com.draagon.meta.MetaException;
+
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.*;
 import com.draagon.meta.manager.db.defs.*;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.MetaDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +147,7 @@ public class MetaClassDBValidatorService
 	  if ( mapping == null ) return;
 
 	  if (!( mapping instanceof ObjectMappingDB )) {
-		  throw new MetaException( "Expected an ObjectMappingDB instance, not a [" + mapping.getClass().getSimpleName() + "]" );
+		  throw new MetaDataException( "Expected an ObjectMappingDB instance, not a [" + mapping.getClass().getSimpleName() + "]" );
 	  }
 	  	  
 	  ObjectMappingDB omdb = (ObjectMappingDB) mapping;
@@ -157,7 +158,7 @@ public class MetaClassDBValidatorService
 	      }
 	  }
 	  catch( Exception e ) {
-		  //throw new MetaException( "Error validating mapping [" + mapping + "] for MetaClass [" + mc + "]: " + e.getMessage(), e );
+		  //throw new MetaDataException( "Error validating mapping [" + mapping + "] for MetaClass [" + mc + "]: " + e.getMessage(), e );
 	  }
   }
 
@@ -221,7 +222,7 @@ public class MetaClassDBValidatorService
 	  return false;
   }
 
-  /*private void validateTableOrView( Connection c, String name, Collection<MetaField> fields, MetaClass mc ) throws SQLException, MetaException
+  /*private void validateTableOrView( Connection c, String name, Collection<MetaField> fields, MetaClass mc ) throws SQLException, MetaDataException
   {
     // VALIDATE TABLE OR VIEW
 	String schema = null;
@@ -281,7 +282,7 @@ public class MetaClassDBValidatorService
     }
   }*/
 
-  //protected Connection getConnection() throws MetaException {
+  //protected Connection getConnection() throws MetaDataException {
   //  return (Connection) getObjectManager().getConnection().getDatastoreConnection();
   //}
 

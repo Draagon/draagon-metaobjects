@@ -13,6 +13,7 @@ package com.draagon.meta.demo.fishstore.service;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.loader.MetaDataRegistry;
 import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,7 @@ public class FishstoreService {
         
         ObjectConnection oc = om.getConnection();
         try {
-            MetaObject storeMO = MetaObject.forName( "fishstore::Store" );
+            MetaObject storeMO = MetaDataRegistry.findMetaObjectByName( "fishstore::Store" );
             Collection<?> stores = om.getObjects( oc, storeMO );
             if ( stores.isEmpty() ) {
                 

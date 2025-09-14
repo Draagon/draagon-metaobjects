@@ -17,7 +17,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
+
+
 import com.draagon.meta.manager.db.defs.ColumnDef;
 import com.draagon.meta.manager.db.defs.ForeignKeyDef;
 import com.draagon.meta.manager.db.defs.IndexDef;
@@ -275,7 +277,7 @@ public class MySQLDriver extends GenericSQLDriver {
     @Override
     protected String getNextAutoId(Connection conn, ColumnDef col) throws SQLException {
         if (col.getSequence() == null) {
-            throw new MetaException("Column definition [" + col + "] has no sequence defined");
+            throw new MetaDataException("Column definition [" + col + "] has no sequence defined");
         }
         
         String seqTable = getProperName(col.getSequence().getNameDef());
@@ -341,7 +343,7 @@ public class MySQLDriver extends GenericSQLDriver {
      * MySQL row locking syntax
      */
     @Override
-    public String getLockString() throws MetaException {
+    public String getLockString() throws MetaDataException {
         return "FOR UPDATE";
     }
     

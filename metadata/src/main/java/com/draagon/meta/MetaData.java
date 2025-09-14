@@ -533,70 +533,11 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Sets an attribute of the MetaClass
-     * @deprecated Use addMetaAttr(attr)
      */
-    public void addAttribute(MetaAttribute attr) {
-        addMetaAttr(attr);
-    }
-
-    /**
-     * Sets an attribute of the MetaClass
-     * @deprecated Use deleteAttr(attr)
-     */
-    public void deleteAttribute(String name) throws MetaAttributeNotFoundException {
-        deleteMetaAttr(name);
-    }
-
-    /**
-     * Sets an attribute of the MetaClass
-     */
+    @SuppressWarnings("unchecked")
     public <T extends MetaData> T addMetaAttr(MetaAttribute attr) {
-        return (T) addChild(attr);
-    }
-
-    /**
-     * Sets an attribute of the MetaClass
-     * @deprecated Use deleteMetaAttr
-     */
-    public void deleteMetaAttr(String name) throws MetaAttributeNotFoundException {
-        try {
-            deleteChild(name, MetaAttribute.class);
-        } catch (MetaDataException e) {
-            throw new MetaAttributeNotFoundException("MetaAtribute [" + name + "] not found in [" + toString() + "]", name);
-        }
-    }
-
-
-    /**
-     * Sets an attribute value of the MetaData
-     *
-     * @deprecated Use getAttribute(name).setValue*(value)
-     */
-    public void setAttribute(String name, Object value) {
-        MetaAttribute<?> ma = null;
-        try {
-            ma = (MetaAttribute<?>) getChild(name, MetaAttribute.class);
-        } catch (MetaDataNotFoundException e) {
-            throw new MetaAttributeNotFoundException("MetaAttribute [" + name + "] was not found in [" + toString() + "]", name);
-        }
-        
-        ma.setValueAsObject(value);
-    }
-
-    /**
-     * Retrieves an attribute value of the MetaData
-     * @deprecated Use getAttr(name).getValueAsString()
-     */
-    public String getAttribute(String name) throws MetaAttributeNotFoundException {
-        return getMetaAttr(name,true).getValueAsString();
-    }
-
-    /**
-     * Retrieves an attribute value of the MetaData
-     * @deprecated Use getAttr(name, includeParentData).getValueAsString()
-     */
-    public Object getAttribute(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
-        return getMetaAttr(name,includeParentData).getValueAsString();
+        addChild(attr);
+        return (T) this;
     }
 
     /**
@@ -617,21 +558,7 @@ public class MetaData implements Cloneable, Serializable {
         }
     }
 
-    /**
-     * Retrieves all attribute names
-     * @deprecated Use hasAttr(name)
-     */
-    public boolean hasAttribute(String name) {
-        return hasMetaAttr(name,true);
-    }
 
-    /**
-     * Retrieves all attribute names
-     * @deprecated Use hasAttr(name,includeParentData)
-     */
-    public boolean hasAttribute(String name, boolean includeParentData) {
-        return hasMetaAttr( name, includeParentData );
-    }
 
     /**
      * Retrieves all attribute names
@@ -651,21 +578,6 @@ public class MetaData implements Cloneable, Serializable {
         } catch (MetaDataNotFoundException ignored) {}
         
         return false;
-    }
-    /**
-     * Retrieves all attribute names
-     * @deprecated Use getMetaAttrs()
-     */
-    public List<MetaAttribute> getAttributes() {
-        return getMetaAttrs(true);
-    }
-
-    /**
-     * Retrieves all attribute names
-     * @deprecated Use getMetaAttrs(includeParentData)
-     */
-    public List<MetaAttribute> getAttributes( boolean includeParentData ) {
-        return getMetaAttrs( includeParentData );
     }
 
     /**
@@ -734,6 +646,7 @@ public class MetaData implements Cloneable, Serializable {
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
      */
+    @SuppressWarnings("unchecked")
     public <T extends MetaData> T addChild(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
         return (T) this;
@@ -1068,23 +981,6 @@ public class MetaData implements Cloneable, Serializable {
         
         if (removed) flushCaches();
     }
-
-    ////////////////////////////////////////////////////
-    // DEPRECATED CHILDREN METHODS
-
-    /*private String getTypeForClass( Class<?> c ) {
-        switch( c.getSimpleName() ) {
-            case "MetaAttribute": return MetaAttribute.TYPE_ATTR;
-            case "MetaField": return MetaField.TYPE_FIELD;
-            case "MetaObject": return MetaObject.TYPE_OBJECT;
-            case "MetaView": return MetaView.TYPE_VIEW;
-            case "MetaValidator": return MetaValidator.TYPE_VALIDATOR;
-            default: throw new IllegalStateException( "These deprecated methods only support MetaAttribute, MetaField, MetaObject, MetaView, and MetaValidator, not ["+c.getSimpleName() + "]");
-        }
-    }*/
-
-    ////////////////////////////////////////////////////
-
 
     ////////////////////////////////////////////////////
     // MISC METHODS

@@ -23,7 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.MetaException;
+import com.draagon.meta.MetaDataException;
+
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.manager.QueryOptions;
 import com.draagon.meta.manager.db.DatabaseDriver;
@@ -182,12 +183,12 @@ public class GenericSQLDriver implements DatabaseDriver {
     protected String getNextAutoId(Connection conn, ColumnDef col) throws SQLException {
         // String table = getManager().getTableName( mc );
         // if ( table == null )
-        // throw new MetaException( "MetaClass [" + mc + "] has no table
+        // throw new MetaDataException( "MetaClass [" + mc + "] has no table
         // defined" );
 
         // String col = getManager().getColumnName( mf );
         // if ( col == null )
-        // throw new MetaException( "MetaField [" + mf + "] has no column
+        // throw new MetaDataException( "MetaField [" + mf + "] has no column
         // defined" );
 
         StringBuilder query = new StringBuilder();
@@ -568,7 +569,7 @@ public class GenericSQLDriver implements DatabaseDriver {
     /**
      * Perform the actual delete call
      */
-    protected boolean executeDelete(Connection c, MetaObject mc, ObjectMappingDB omdb, Expression exp) throws MetaException, SQLException {
+    protected boolean executeDelete(Connection c, MetaObject mc, ObjectMappingDB omdb, Expression exp) throws MetaDataException, SQLException {
 
         PreparedStatement s = getDeleteStatementWhere(c, mc, omdb, exp);
 
@@ -838,7 +839,7 @@ public class GenericSQLDriver implements DatabaseDriver {
     /**
      * <p> Concatonates the list of ?'s for each field in the collection </p>
      */
-    protected String getQuestionCommaString(int size) throws MetaException {
+    protected String getQuestionCommaString(int size) throws MetaDataException {
         // Setup the select fields string
         StringBuilder buf = new StringBuilder();
         for (int j = 0; j < size; j++) {
@@ -881,7 +882,7 @@ public class GenericSQLDriver implements DatabaseDriver {
     /**
      * Gets the ORDER BY clause
      */
-    protected String getOrderString(MetaObject mc, ObjectMappingDB omdb, SortOrder order) throws MetaException {
+    protected String getOrderString(MetaObject mc, ObjectMappingDB omdb, SortOrder order) throws MetaDataException {
 
         StringBuilder b = new StringBuilder();
 
@@ -899,10 +900,10 @@ public class GenericSQLDriver implements DatabaseDriver {
             char prefix = 'A';
             ColumnDef colDef = (ColumnDef) omdb.getArgDef(mf);
             if (colDef == null) {
-                throw new MetaException("MetaField [" + mf + "] has no column mapping for [" + omdb + "]");
+                throw new MetaDataException("MetaField [" + mf + "] has no column mapping for [" + omdb + "]");
             }
 
-            if (mf.getType() == MetaField.STRING) {
+            if (mf instanceof com.draagon.meta.field.StringField) {
                 b.append("UPPER(");
                 b.append(prefix).append(".");
                 b.append(colDef.getName());
@@ -926,7 +927,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      * Gets the SQL WHERE clause for the fields of a class
      */
     protected String getExpressionString(MetaObject mc, ObjectMappingDB omdb, Expression exp,
-            ArrayList<SQLArg> args, String prefix) throws MetaException {
+            ArrayList<SQLArg> args, String prefix) throws MetaDataException {
         StringBuilder set = new StringBuilder();
 
         if (exp instanceof ExpressionGroup) {
@@ -954,7 +955,7 @@ public class GenericSQLDriver implements DatabaseDriver {
 
             ColumnDef colDef = (ColumnDef) omdb.getArgDef(f);
             if (colDef == null) {
-                throw new MetaException("MetaField [" + f + "] has no column mapping defined for [" + omdb + "]");
+                throw new MetaDataException("MetaField [" + f + "] has no column mapping defined for [" + omdb + "]");
             }
 
             int c = exp.getCondition();
@@ -1126,14 +1127,14 @@ public class GenericSQLDriver implements DatabaseDriver {
      * Gets the SQL WHERE clause for the keys of a class
      */
     protected String getWhereStringForKeys(ObjectMappingDB omdb, Collection<MetaField> keys)
-            throws MetaException {
+            throws MetaDataException {
         StringBuilder where = new StringBuilder();
 
         // Setup the WHERE clause
         for (MetaField f : keys) {
             ColumnDef colDef = (ColumnDef) omdb.getArgDef(f);
             if (colDef == null) {
-                throw new MetaException("MetaField [" + f
+                throw new MetaDataException("MetaField [" + f
                         + "] has no column mapping defined for [" + omdb + "]");
             }
 
@@ -1152,12 +1153,12 @@ public class GenericSQLDriver implements DatabaseDriver {
      */
     /*protected PreparedStatement getSelectStatementForRef(Connection c,
      MetaClass mc, Collection<MetaField> fields, ObjectRef ref)
-     throws SQLException, MetaException {
+     throws SQLException, MetaDataException {
      // TODO: The query construction should be cached for each MetaClass &
      // field combo
 
      if (!isReadableClass(mc))
-     throw new MetaException("MetaClass [" + mc + "] is not readable");
+     throw new MetaDataException("MetaClass [" + mc + "] is not readable");
 
      // validateMetaClass( c, mc );
 
@@ -1166,7 +1167,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      // Get the components of the SELECT query
      String tableStr = getViewName(mc);
      if (tableStr == null)
-     throw new MetaException("MetaClass [" + mc
+     throw new MetaDataException("MetaClass [" + mc
      + "] has no table or view defined");
 
      String whereStr = getWhereStringForKeys(keys);
@@ -1214,12 +1215,12 @@ public class GenericSQLDriver implements DatabaseDriver {
      */
     /* protected PreparedStatement getSelectStatementForObject(Connection c,
      MetaClass mc, Collection<MetaField> fields, Object obj)
-     throws SQLException, MetaException {
+     throws SQLException, MetaDataException {
      // TODO: The query construction should be cached for each MetaClass &
      // field combo
 
      if (!isReadableClass(mc))
-     throw new MetaException("MetaClass [" + mc + "] is not persistable");
+     throw new MetaDataException("MetaClass [" + mc + "] is not persistable");
      // PersistableMetaClass pmc = (PersistableMetaClass) mc;
 
      // validateMetaClass( c, mc );
@@ -1229,7 +1230,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      // Get the components of the SELECT query
      String tableStr = getViewName(mc);
      if (tableStr == null)
-     throw new MetaException("MetaClass [" + mc
+     throw new MetaDataException("MetaClass [" + mc
      + "] has no table or view defined");
 
      String whereStr = getWhereStringForKeys(keys);
@@ -1271,7 +1272,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      */
     protected PreparedStatement getCountStatementWhere(Connection c, MetaObject mc,
             ObjectMappingDB omdb, Expression where)
-            throws SQLException, MetaException {
+            throws SQLException, MetaDataException {
 
         // Construct the SELECT query
         StringBuilder query = new StringBuilder();
@@ -1356,7 +1357,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      */
     protected PreparedStatement getSelectStatementWhere(Connection c, MetaObject mc,
             ObjectMappingDB omdb, Collection<MetaField> fields, QueryOptions options)
-            throws SQLException, MetaException {
+            throws SQLException, MetaDataException {
 
         Expression where = options.getExpression();
         SortOrder order = options.getSortOrder();
@@ -1482,7 +1483,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      */
     protected PreparedStatement getDeleteStatementWhere(Connection c,
             MetaObject mc, ObjectMappingDB omdb, Expression where) throws SQLException,
-            MetaException {
+            MetaDataException {
 
         // Get the components of the SELECT query
         String tableStr = getProperName(omdb.getDBDef().getNameDef());
@@ -1538,112 +1539,84 @@ public class GenericSQLDriver implements DatabaseDriver {
     protected void setStatementValue(PreparedStatement s, MetaField f, int index, Object value) throws SQLException {
         int j = index;
 
-        switch (f.getType()) {
-            case MetaField.BOOLEAN: {
-                if (value == null) {
-                    s.setNull(j, Types.BIT);
-                } else if (value instanceof Boolean) {
-                    s.setBoolean(j, ((Boolean) value).booleanValue());
-                } else {
-                    s.setBoolean(j, Boolean.valueOf(value.toString()).booleanValue());
-                }
+        if (f instanceof com.draagon.meta.field.BooleanField) {
+            if (value == null) {
+                s.setNull(j, Types.BIT);
+            } else if (value instanceof Boolean) {
+                s.setBoolean(j, ((Boolean) value).booleanValue());
+            } else {
+                s.setBoolean(j, Boolean.valueOf(value.toString()).booleanValue());
             }
-            break;
-
-            case MetaField.BYTE: {
-                if (value == null) {
-                    s.setNull(j, Types.TINYINT);
-                } else if (value instanceof Byte) {
-                    s.setByte(j, ((Byte) value).byteValue());
-                } else {
-                    s.setByte(j, Byte.valueOf(value.toString()).byteValue());
-                }
+        } else if (f instanceof com.draagon.meta.field.ByteField) {
+            if (value == null) {
+                s.setNull(j, Types.TINYINT);
+            } else if (value instanceof Byte) {
+                s.setByte(j, ((Byte) value).byteValue());
+            } else {
+                s.setByte(j, Byte.valueOf(value.toString()).byteValue());
             }
-            break;
-
-            case MetaField.SHORT: {
-                if (value == null) {
-                    s.setNull(j, Types.SMALLINT);
-                } else if (value instanceof Short) {
-                    s.setShort(j, ((Short) value).shortValue());
-                } else {
-                    s.setShort(j, Short.valueOf(value.toString()).shortValue());
-                }
+        } else if (f instanceof com.draagon.meta.field.ShortField) {
+            if (value == null) {
+                s.setNull(j, Types.SMALLINT);
+            } else if (value instanceof Short) {
+                s.setShort(j, ((Short) value).shortValue());
+            } else {
+                s.setShort(j, Short.valueOf(value.toString()).shortValue());
             }
-            break;
-
-            case MetaField.INT: {
-                if (value == null) {
-                    s.setNull(j, Types.INTEGER);
-                } else if (value instanceof Integer) {
-                    s.setInt(j, ((Integer) value).intValue());
-                } else {
-                    s.setInt(j, Integer.valueOf(value.toString()).intValue());
-                }
+        } else if (f instanceof com.draagon.meta.field.IntegerField) {
+            if (value == null) {
+                s.setNull(j, Types.INTEGER);
+            } else if (value instanceof Integer) {
+                s.setInt(j, ((Integer) value).intValue());
+            } else {
+                s.setInt(j, Integer.valueOf(value.toString()).intValue());
             }
-            break;
-
-            case MetaField.DATE: // NOTE DATE IS TREATED AS LONG!
-            {
-                if (value == null) {
-                    s.setNull(j, Types.TIMESTAMP);
-                } else if (value instanceof java.util.Date) {
-                    s.setTimestamp(j, new Timestamp(((java.util.Date) value).getTime()));
-                } else {
-                    s.setTimestamp(j, new Timestamp(Long.valueOf(value.toString()).longValue()));
-                }
+        } else if (f instanceof com.draagon.meta.field.DateField) { // NOTE DATE IS TREATED AS LONG!
+            if (value == null) {
+                s.setNull(j, Types.TIMESTAMP);
+            } else if (value instanceof java.util.Date) {
+                s.setTimestamp(j, new Timestamp(((java.util.Date) value).getTime()));
+            } else {
+                s.setTimestamp(j, new Timestamp(Long.valueOf(value.toString()).longValue()));
             }
-            break;
-
-            case MetaField.LONG: {
-                if (value == null) {
-                    s.setNull(j, Types.BIGINT);
-                } else if (value instanceof Long) {
-                    s.setLong(j, ((Long) value).longValue());
-                } else {
-                    s.setLong(j, Long.valueOf(value.toString()).longValue());
-                }
+        } else if (f instanceof com.draagon.meta.field.LongField) {
+            if (value == null) {
+                s.setNull(j, Types.BIGINT);
+            } else if (value instanceof Long) {
+                s.setLong(j, ((Long) value).longValue());
+            } else {
+                s.setLong(j, Long.valueOf(value.toString()).longValue());
             }
-            break;
-
-            // WARNING:  This should not be a valid key
-            case MetaField.FLOAT: {
-                if (value == null) {
-                    s.setNull(j, Types.FLOAT);
-                } else if (value instanceof Float) {
-                    s.setFloat(j, ((Float) value).floatValue());
-                } else {
-                    s.setFloat(j, Float.valueOf(value.toString()).floatValue());
-                }
+        } else if (f instanceof com.draagon.meta.field.FloatField) { // WARNING:  This should not be a valid key
+            if (value == null) {
+                s.setNull(j, Types.FLOAT);
+            } else if (value instanceof Float) {
+                s.setFloat(j, ((Float) value).floatValue());
+            } else {
+                s.setFloat(j, Float.valueOf(value.toString()).floatValue());
             }
-            break;
-
-            // WARNING:  This should not be a valid key
-            case MetaField.DOUBLE: {
-                if (value == null) {
-                    s.setNull(j, Types.DOUBLE);
-                } else if (value instanceof Double) {
-                    s.setDouble(j, ((Double) value).doubleValue());
-                } else {
-                    s.setDouble(j, Double.valueOf(value.toString()).doubleValue());
-                }
+        } else if (f instanceof com.draagon.meta.field.DoubleField) { // WARNING:  This should not be a valid key
+            if (value == null) {
+                s.setNull(j, Types.DOUBLE);
+            } else if (value instanceof Double) {
+                s.setDouble(j, ((Double) value).doubleValue());
+            } else {
+                s.setDouble(j, Double.valueOf(value.toString()).doubleValue());
             }
-            break;
-
-            case MetaField.STRING:
-                if (value == null) {
-                    s.setNull(j, Types.VARCHAR);
-                } else {
-                    s.setString(j, value.toString());
-                }
-                break;
-
-            case MetaField.OBJECT:
-                //if ( value == null )
-                //  s.setNull( j, Types.BLOB );
-                //else
-                s.setObject(j, value);
-                break;
+        } else if (f instanceof com.draagon.meta.field.StringField) {
+            if (value == null) {
+                s.setNull(j, Types.VARCHAR);
+            } else {
+                s.setString(j, value.toString());
+            }
+        } else if (f instanceof com.draagon.meta.field.ObjectField) {
+            //if ( value == null )
+            //  s.setNull( j, Types.BLOB );
+            //else
+            s.setObject(j, value);
+        } else {
+            // Default fallback for unknown field types
+            s.setObject(j, value);
         }
     }
 
@@ -1651,7 +1624,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      * Gets the id clause for a unique transaction
      */
     protected PreparedStatement getInsertStatement(Connection c, MetaObject mc,
-            ObjectMappingDB omdb, Object o) throws SQLException, MetaException {
+            ObjectMappingDB omdb, Object o) throws SQLException, MetaDataException {
 
         Collection<MetaField> fields = omdb.getMetaFields();
 
@@ -1757,7 +1730,7 @@ public class GenericSQLDriver implements DatabaseDriver {
 
         // Used to prevent dirty writes
         //if (dirtyField != null) {
-        //	query += " AND ( " + dirtyField.getAttribute(COL_REF) + "=? )";
+        //	query += " AND ( " + dirtyField.getMetaAttr(COL_REF).getValue() + "=? )";
         //}
 
         PreparedStatement s = c.prepareStatement(query);
@@ -1840,7 +1813,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      * Gets the delete statement for a specific id
      */
     protected PreparedStatement getDeleteStatement(Connection c, MetaObject mc,
-            ObjectMappingDB omdb, Collection<MetaField> keys, Object obj) throws SQLException, MetaException {
+            ObjectMappingDB omdb, Collection<MetaField> keys, Object obj) throws SQLException, MetaDataException {
 
         // Get the components of the SELECT query
         String tableStr = getProperName(omdb.getDBDef().getNameDef());
@@ -1883,7 +1856,7 @@ public class GenericSQLDriver implements DatabaseDriver {
      * Parses an Object returned from the database
      */
     protected void parseObject(ResultSet rs, Collection<MetaField> fields,
-            MetaObject mc, Object o) throws SQLException, MetaException {
+            MetaObject mc, Object o) throws SQLException, MetaDataException {
         int j = 1;
         for (MetaField f : fields) {
             parseField(o, f, rs, j++);
@@ -1904,55 +1877,37 @@ public class GenericSQLDriver implements DatabaseDriver {
      * Enhanced field parsing with modern Java patterns and proper null handling
      */
     protected void parseField(Object o, MetaField f, ResultSet rs, int j) throws SQLException {
-        switch (f.getType()) {
-            case MetaField.BOOLEAN -> {
-                boolean bv = rs.getBoolean(j);
-                f.setBoolean(o, rs.wasNull() ? null : bv);
-            }
-            
-            case MetaField.BYTE -> {
-                byte bv = rs.getByte(j);
-                f.setByte(o, rs.wasNull() ? null : bv);
-            }
-            
-            case MetaField.SHORT -> {
-                short sv = rs.getShort(j);
-                f.setShort(o, rs.wasNull() ? null : sv);
-            }
-            
-            case MetaField.INT -> {
-                int iv = rs.getInt(j);
-                f.setInt(o, rs.wasNull() ? null : iv);
-            }
-            
-            case MetaField.DATE -> {
-                Timestamp tv = rs.getTimestamp(j);
-                f.setDate(o, rs.wasNull() ? null : new Date(tv.getTime()));
-            }
-            
-            case MetaField.LONG -> {
-                long lv = rs.getLong(j);
-                f.setLong(o, rs.wasNull() ? null : lv);
-            }
-            
-            case MetaField.FLOAT -> {
-                float fv = rs.getFloat(j);
-                f.setFloat(o, rs.wasNull() ? null : fv);
-            }
-            
-            case MetaField.DOUBLE -> {
-                double dv = rs.getDouble(j);
-                f.setDouble(o, rs.wasNull() ? null : dv);
-            }
-            
-            case MetaField.STRING -> f.setString(o, rs.getString(j));
-            
-            case MetaField.OBJECT -> f.setObject(o, rs.getObject(j));
-            
-            default -> {
-                log.warn("Unknown field type {} for field {}, defaulting to Object", f.getType(), f.getName());
-                f.setObject(o, rs.getObject(j));
-            }
+        if (f instanceof com.draagon.meta.field.BooleanField) {
+            boolean bv = rs.getBoolean(j);
+            f.setBoolean(o, rs.wasNull() ? null : bv);
+        } else if (f instanceof com.draagon.meta.field.ByteField) {
+            byte bv = rs.getByte(j);
+            f.setByte(o, rs.wasNull() ? null : bv);
+        } else if (f instanceof com.draagon.meta.field.ShortField) {
+            short sv = rs.getShort(j);
+            f.setShort(o, rs.wasNull() ? null : sv);
+        } else if (f instanceof com.draagon.meta.field.IntegerField) {
+            int iv = rs.getInt(j);
+            f.setInt(o, rs.wasNull() ? null : iv);
+        } else if (f instanceof com.draagon.meta.field.DateField) {
+            Timestamp tv = rs.getTimestamp(j);
+            f.setDate(o, rs.wasNull() ? null : new Date(tv.getTime()));
+        } else if (f instanceof com.draagon.meta.field.LongField) {
+            long lv = rs.getLong(j);
+            f.setLong(o, rs.wasNull() ? null : lv);
+        } else if (f instanceof com.draagon.meta.field.FloatField) {
+            float fv = rs.getFloat(j);
+            f.setFloat(o, rs.wasNull() ? null : fv);
+        } else if (f instanceof com.draagon.meta.field.DoubleField) {
+            double dv = rs.getDouble(j);
+            f.setDouble(o, rs.wasNull() ? null : dv);
+        } else if (f instanceof com.draagon.meta.field.StringField) {
+            f.setString(o, rs.getString(j));
+        } else if (f instanceof com.draagon.meta.field.ObjectField) {
+            f.setObject(o, rs.getObject(j));
+        } else {
+            log.warn("Unknown field type {} for field {}, defaulting to Object", f.getClass().getSimpleName(), f.getName());
+            f.setObject(o, rs.getObject(j));
         }
     }
 

@@ -8,7 +8,7 @@ package com.draagon.meta.web.view;
 
 import com.draagon.meta.*;
 
-public class WebViewException extends MetaException
+public class WebViewException extends MetaDataException
 {
   public WebViewException( String msg, Throwable t )
   {

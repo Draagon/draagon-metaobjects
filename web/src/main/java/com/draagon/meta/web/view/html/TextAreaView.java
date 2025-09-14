@@ -36,7 +36,7 @@ public class TextAreaView extends TextView
     }
 
   public void doView( PageContext page, Object o, String label, int mode, Map params )
-      throws MetaException
+      throws MetaDataException
   {
     MetaField mf = getMetaField( o );
 
