@@ -29,13 +29,7 @@ public abstract class MetaValidator extends MetaData {
         super(TYPE_VALIDATOR, subtype, name);
     }
 
-    /**
-     * Gets the primary MetaData class
-     */
-    @SuppressWarnings("unchecked")
-    public final Class<MetaValidator> getMetaDataClass() {
-        return (Class<MetaValidator>) MetaValidator.class;
-    }
+    // Note: getMetaDataClass() is now inherited from MetaData base class
 
     /** Add Child to the MetaValidator */
     //public MetaValidator addChild(MetaData data) throws InvalidMetaDataException {

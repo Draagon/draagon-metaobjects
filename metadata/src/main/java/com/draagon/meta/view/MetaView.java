@@ -25,13 +25,7 @@ public abstract class MetaView extends MetaData {
         super(TYPE_VIEW, subtype, name);
     }
 
-    /**
-     * Gets the primary MetaData class
-     */
-    @SuppressWarnings("unchecked")
-    public final Class<MetaView> getMetaDataClass() {
-        return (Class<MetaView>) MetaView.class;
-    }
+    // Note: getMetaDataClass() is now inherited from MetaData base class
 
     /** Add Child to the MetaView */
     //public MetaView addChild(MetaData data) throws InvalidMetaDataException {

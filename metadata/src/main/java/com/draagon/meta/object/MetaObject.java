@@ -51,13 +51,7 @@ public abstract class MetaObject extends MetaData {
         log.debug("Created MetaObject: {}:{}:{}", TYPE_OBJECT, subtype, name);
     }
 
-    /**
-     * Gets the primary MetaData class
-     */
-    @SuppressWarnings("unchecked")
-    public final Class<MetaObject> getMetaDataClass() {
-        return (Class<MetaObject>) MetaObject.class;
-    }
+    // Note: getMetaDataClass() is now inherited from MetaData base class
 
 
     /** Create an overloaded copy of the MetaObject */

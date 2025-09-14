@@ -33,14 +33,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         log.debug("Created MetaAttribute: {}:{}:{} with dataType: {}", TYPE_ATTR, subtype, name, dataType);
     }
 
-    /**
-     * Gets the primary MetaAttribute class
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Class<MetaAttribute> getMetaDataClass() {
-        return (Class<MetaAttribute>) MetaAttribute.class;
-    }
+    // Note: getMetaDataClass() is now inherited from MetaData base class
 
     /**
      * Sets an attribute of the MetaClass

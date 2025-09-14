@@ -24,6 +24,9 @@ public class MetaData implements Cloneable, Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(MetaData.class);
 
+    // Type-safe class constants for common usage
+    public static final Class<MetaData> METADATA_CLASS = MetaData.class;
+    
     public final static String PKG_SEPARATOR = "::";
     public final static String SEPARATOR = PKG_SEPARATOR;
 
@@ -416,12 +419,38 @@ public class MetaData implements Cloneable, Serializable {
     // SETTER / GETTER METHODS
 
     /**
-     * Get the Base Class for the MetaData
+     * Get the Base Class for the MetaData - type-safe implementation
      * @return Class The Java class for the metadata
      */
-    @SuppressWarnings("unchecked")
-    public <T extends MetaData> Class<T> getMetaDataClass() {
-        return (Class<T>) MetaData.class;
+    public Class<? extends MetaData> getMetaDataClass() {
+        return this.getClass();
+    }
+    
+    /**
+     * Type-safe utility methods for common type checks
+     */
+    public boolean isFieldMetaData() {
+        return this instanceof com.draagon.meta.field.MetaField;
+    }
+    
+    public boolean isObjectMetaData() {
+        return this instanceof com.draagon.meta.object.MetaObject;
+    }
+    
+    public boolean isAttributeMetaData() {
+        return this instanceof com.draagon.meta.attr.MetaAttribute;
+    }
+    
+    public boolean isValidatorMetaData() {
+        return this instanceof com.draagon.meta.validator.MetaValidator;
+    }
+    
+    public boolean isViewMetaData() {
+        return this instanceof com.draagon.meta.view.MetaView;
+    }
+    
+    public boolean isLoaderMetaData() {
+        return this instanceof com.draagon.meta.loader.MetaDataLoader;
     }
 
     /**

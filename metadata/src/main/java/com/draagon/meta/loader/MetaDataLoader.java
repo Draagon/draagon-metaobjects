@@ -209,13 +209,7 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         return isRegistered;
     }
 
-    /**
-     * Gets the primary MetaData class
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends MetaData> Class<T> getMetaDataClass() {
-        return (Class<T>) MetaDataLoader.class;
-    }
+    // Note: getMetaDataClass() is now inherited from MetaData base class
 
     /** Wrap the MetaDataLoader */
     public MetaDataLoader overload() {

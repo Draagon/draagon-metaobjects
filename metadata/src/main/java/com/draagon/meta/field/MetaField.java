@@ -65,14 +65,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
 
-    /**
-     * Gets the primary MetaData class
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public final Class<MetaField> getMetaDataClass() {
-        return (Class<MetaField>) MetaField.class;
-    }
+    // Note: getMetaDataClass() is now inherited from MetaData base class
 
     /**
      * Returns the specific MetaClass in which this class is declared.<br>
