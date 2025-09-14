@@ -23,10 +23,10 @@ public class ViewHelper
     if ( tmp != null && tmp.length() > 0 )
     {
       if ( tmp.charAt( 0 ) == 't' || tmp.charAt( 0 ) == 'y' )
-        return new Boolean( true );
+        return Boolean.valueOf( true );
 
       else if ( tmp.charAt( 0 ) == 'f' || tmp.charAt( 0 ) == 'n' )
-        return new Boolean( false );
+        return Boolean.valueOf( false );
 
       //log.error( "(getBooleanParam) Boolean format exception for field [" + toString() + "] with param [" + label + "][" + tmp + "]" );
     }

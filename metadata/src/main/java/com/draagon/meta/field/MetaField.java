@@ -45,8 +45,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     private DataTypes dataType;
     
-    // Enhanced field-specific validation chain
-    private volatile ValidationChain<MetaField<T>> fieldValidationChain;
     
 
 
@@ -169,45 +167,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     // ========== ENHANCED FIELD-SPECIFIC METHODS ==========
     
     
-    /**
-     * Validate this MetaField using enhanced validation
-     */
-    public ValidationResult validateField() {
-        Instant start = Instant.now();
-        
-        try {
-            ValidationResult result = getFieldValidationChain().validate(this);
-            
-            
-            return result;
-        } catch (Exception e) {
-            
-            log.error("Field validation failed for {}: {}", getName(), e.getMessage(), e);
-            
-            return ValidationResult.builder()
-                .addError("Field validation failed: " + e.getMessage())
-                .build();
-        }
-    }
-    
-    /**
-     * Get the field validation chain (lazy initialization)
-     */
-    private ValidationChain<MetaField<T>> getFieldValidationChain() {
-        if (fieldValidationChain == null) {
-            synchronized (this) {
-                if (fieldValidationChain == null) {
-                    fieldValidationChain = ValidationChain.<MetaField<T>>builder()
-                        .addValidator(createDataTypeFieldValidator())
-                        .addValidator(createDefaultValueValidator())
-                        .addValidator(createDeclaringObjectValidator())
-                        .addValidator(createLegacyFieldValidator())
-                        .build();
-                }
-            }
-        }
-        return fieldValidationChain;
-    }
     
     /**
      * Create a data type validator for this field
@@ -314,25 +273,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         }
     }
     
-    /**
-     * Create a legacy validator wrapper for MetaField
-     */
-    private Validator<MetaField<T>> createLegacyFieldValidator() {
-        return new Validator<MetaField<T>>() {
-            @Override
-            public ValidationResult validate(MetaField<T> field) {
-                // Just use the basic validation from the parent
-                try {
-                    field.validate(); // Call existing validate method
-                    return ValidationResult.builder().build(); // Success
-                } catch (Exception e) {
-                    return ValidationResult.builder()
-                        .addError("Legacy validation failed: " + e.getMessage())
-                        .build();
-                }
-            }
-        };
-    }
 
     /** Add Child to the Field */
     //@Override
@@ -540,9 +480,64 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         });
     }
 
-    public void validate() {
-        super.validate();
-        if ( getName() == null ) throw new MetaDataException( "Name of MetaField was null :" + toString() );
+    /**
+     * Override to provide field-specific validation chain
+     */
+    @Override
+    protected ValidationChain<MetaData> createValidationChain() {
+        return ValidationChain.<MetaData>builder("MetaFieldValidation")
+            .continueOnError()
+            .addValidator(MetaDataValidators.typeSystemValidator())
+            .addValidator(MetaDataValidators.childrenValidator())
+            .addValidator(MetaDataValidators.legacyValidator())
+            .addValidator(createFieldNameValidatorAdapted())
+            .addValidator(createDataTypeValidatorAdapted())
+            .addValidator(createDefaultValueValidatorAdapted())
+            .build();
+    }
+    
+    /**
+     * Create adapted field name validator for MetaData validation chain
+     */
+    private Validator<MetaData> createFieldNameValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaField) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                if (metaData.getName() == null) {
+                    builder.addError("Name of MetaField was null: " + metaData.toString());
+                }
+                return builder.build();
+            }
+            return ValidationResult.success();
+        };
+    }
+    
+    /**
+     * Create adapted data type validator for MetaData validation chain
+     */
+    private Validator<MetaData> createDataTypeValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaField) {
+                @SuppressWarnings("unchecked")
+                MetaField<T> typedField = (MetaField<T>) metaData;
+                return createDataTypeFieldValidator().validate(typedField);
+            }
+            return ValidationResult.success();
+        };
+    }
+    
+    /**
+     * Create adapted default value validator for MetaData validation chain
+     */
+    private Validator<MetaData> createDefaultValueValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaField) {
+                @SuppressWarnings("unchecked")
+                MetaField<T> typedField = (MetaField<T>) metaData;
+                return createDefaultValueValidator().validate(typedField);
+            }
+            return ValidationResult.success();
+        };
     }
 
     ////////////////////////////////////////////////////

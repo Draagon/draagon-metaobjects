@@ -204,13 +204,13 @@ public class ExpressionParser
       try {
         switch( mf.getDataType() ) {
         case STRING: value = name; break;
-        case DOUBLE: value = new Double( name ); break;
-        case FLOAT: value = new Float( name ); break;
-        case LONG: value = new Long( name ); break;
-        case INT: value = new Integer( name ); break;
-        case SHORT: value = new Short( name ); break;
-        case BYTE: value = new Byte( name ); break;
-        case BOOLEAN: value = new Boolean( name ); break;
+        case DOUBLE: value = Double.valueOf( name ); break;
+        case FLOAT: value = Float.valueOf( name ); break;
+        case LONG: value = Long.valueOf( name ); break;
+        case INT: value = Integer.valueOf( name ); break;
+        case SHORT: value = Short.valueOf( name ); break;
+        case BYTE: value = Byte.valueOf( name ); break;
+        case BOOLEAN: value = Boolean.valueOf( name ); break;
         case DATE:
         	{
         		value = DateFormat.getDateTimeInstance().parse( name ); break;

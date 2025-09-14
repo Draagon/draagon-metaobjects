@@ -64,6 +64,7 @@ public abstract class ArrayField<A,T extends List> extends MetaField<T> {
      *
      * @deprecated Use getArrayItemClass()
      */
+    @Deprecated
     public Class<A> getItemClass() {
         return getArrayItemClass();
     }

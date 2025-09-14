@@ -70,8 +70,8 @@ public class MetaDataTypeSystemTest {
         // Create a MetaData instance
         MetaData md = new MetaData("attr", "string", "test");
         
-        // Test enhanced validation
-        ValidationResult result = md.validateEnhanced();
+        // Test validation
+        ValidationResult result = md.validate();
         assertNotNull(result);
         
         // Test Stream APIs

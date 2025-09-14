@@ -124,6 +124,6 @@ public class MonthView extends HtmlView
     int i = HtmlViewHelper.getIntValue( request, label );
 
     // Set the integer
-    getMetaField( o ).setInt( o, new Integer( i ));
+    getMetaField( o ).setInt( o, Integer.valueOf( i ));
   }
 }

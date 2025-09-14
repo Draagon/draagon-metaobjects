@@ -980,32 +980,32 @@ public abstract class ObjectManager
 		}
 		else if ( val instanceof Byte )
 		{
-			Byte v = (val2 instanceof Byte)?(Byte)val2:new Byte( val2.toString() );
+			Byte v = (val2 instanceof Byte)?(Byte)val2:Byte.valueOf( val2.toString() );
 			result = ((Byte) val ).compareTo( v );
 		}
 		else if ( val instanceof Short )
 		{
-			Short v = (val2 instanceof Short)?(Short)val2:new Short( val2.toString() );
+			Short v = (val2 instanceof Short)?(Short)val2:Short.valueOf( val2.toString() );
 			result = ((Short) val ).compareTo( v );
 		}
 		else if ( val instanceof Integer )
 		{
-			Integer v = (val2 instanceof Integer)?(Integer)val2:new Integer( val2.toString() );
+			Integer v = (val2 instanceof Integer)?(Integer)val2:Integer.valueOf( val2.toString() );
 			result = ((Integer) val ).compareTo( v );
 		}
 		else if ( val instanceof Long )
 		{
-			Long v = (val2 instanceof Long)?(Long)val2:new Long( val2.toString() );
+			Long v = (val2 instanceof Long)?(Long)val2:Long.valueOf( val2.toString() );
 			result = ((Long) val ).compareTo( v );
 		}
 		else if ( val instanceof Float )
 		{
-			Float v = (val2 instanceof Float)?(Float)val2:new Float( val2.toString() );
+			Float v = (val2 instanceof Float)?(Float)val2:Float.valueOf( val2.toString() );
 			result = ((Float) val ).compareTo( v );
 		}
 		else if ( val instanceof Double )
 		{
-			Double v = (val2 instanceof Double)?(Double)val2:new Double( val2.toString() );
+			Double v = (val2 instanceof Double)?(Double)val2:Double.valueOf( val2.toString() );
 			result = ((Double) val ).compareTo( v );
 		}
 		else if ( val instanceof Date )

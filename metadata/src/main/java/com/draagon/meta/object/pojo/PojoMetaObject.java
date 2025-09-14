@@ -8,9 +8,14 @@ package com.draagon.meta.object.pojo;
 
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.InvalidValueException;
+import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.ValidationResult;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.MetaDataValidators;
+import com.draagon.meta.validation.Validator;
 import java.lang.reflect.*;
 
 /**
@@ -219,12 +224,35 @@ public class PojoMetaObject extends MetaObject {
     }
 
     @Override
-    public void validate() {
-        if ( !hasObjectInstanceAttr()) {
-            if ( createClassFromMetaDataName( false ) == null ) {
-                throw new InvalidMetaDataException( this, "PojoMetaObject Requires a '"+ATTR_OBJECT+"' attribute "+
-                        "or metadata name that matches the fully qualified Java class: " + getName());
+    protected ValidationChain<MetaData> createValidationChain() {
+        return ValidationChain.<MetaData>builder("PojoMetaObjectValidation")
+            .continueOnError()
+            .addValidator(MetaDataValidators.typeSystemValidator())
+            .addValidator(MetaDataValidators.childrenValidator())
+            .addValidator(MetaDataValidators.legacyValidator())
+            .addValidator(createPojoValidatorAdapted())
+            .build();
+    }
+    
+    /**
+     * Create adapted POJO validator for MetaData validation chain
+     */
+    private Validator<MetaData> createPojoValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof PojoMetaObject) {
+                PojoMetaObject pojoMetaObject = (PojoMetaObject) metaData;
+                ValidationResult.Builder builder = ValidationResult.builder();
+                
+                if (!pojoMetaObject.hasObjectInstanceAttr()) {
+                    if (pojoMetaObject.createClassFromMetaDataName(false) == null) {
+                        builder.addError("PojoMetaObject Requires a '" + ATTR_OBJECT + "' attribute " +
+                                "or metadata name that matches the fully qualified Java class: " + pojoMetaObject.getName());
+                    }
+                }
+                
+                return builder.build();
             }
-        }
+            return ValidationResult.success();
+        };
     }
 }

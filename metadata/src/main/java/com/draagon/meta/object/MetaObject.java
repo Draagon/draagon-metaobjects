@@ -9,6 +9,7 @@ import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.MetaDataValidators;
 import com.draagon.meta.validation.Validator;
 
 import java.lang.reflect.Constructor;
@@ -38,8 +39,6 @@ public abstract class MetaObject extends MetaData {
     // and shared usage across field implementations
     public final static String ATTR_OBJECT_REF = "objectRef";
     
-    // Enhanced object-specific validation chain
-    private volatile ValidationChain<MetaObject> objectValidationChain;
     
 
 
@@ -72,45 +71,6 @@ public abstract class MetaObject extends MetaData {
     // ========== ENHANCED OBJECT-SPECIFIC METHODS ==========
     
     
-    /**
-     * Validate this MetaObject using enhanced validation
-     */
-    public ValidationResult validateObject() {
-        Instant start = Instant.now();
-        
-        try {
-            ValidationResult result = getObjectValidationChain().validate(this);
-            
-            
-            return result;
-        } catch (Exception e) {
-            
-            log.error("Object validation failed for {}: {}", getName(), e.getMessage(), e);
-            
-            return ValidationResult.builder()
-                .addError("Object validation failed: " + e.getMessage())
-                .build();
-        }
-    }
-    
-    /**
-     * Get the object validation chain (lazy initialization)
-     */
-    private ValidationChain<MetaObject> getObjectValidationChain() {
-        if (objectValidationChain == null) {
-            synchronized (this) {
-                if (objectValidationChain == null) {
-                    objectValidationChain = ValidationChain.<MetaObject>builder()
-                        .addValidator(createObjectClassValidator())
-                        .addValidator(createFieldsValidator())
-                        .addValidator(createKeysValidator())
-                        .addValidator(createLegacyObjectValidator())
-                        .build();
-                }
-            }
-        }
-        return objectValidationChain;
-    }
     
     /**
      * Create an object class validator
@@ -240,25 +200,6 @@ public abstract class MetaObject extends MetaData {
         }
     }
     
-    /**
-     * Create a legacy validator wrapper for MetaObject
-     */
-    private Validator<MetaObject> createLegacyObjectValidator() {
-        return new Validator<MetaObject>() {
-            @Override
-            public ValidationResult validate(MetaObject object) {
-                // Just use the basic validation from the parent
-                try {
-                    object.validate(); // Call existing validate method
-                    return ValidationResult.builder().build(); // Success
-                } catch (Exception e) {
-                    return ValidationResult.builder()
-                        .addError("Legacy validation failed: " + e.getMessage())
-                        .build();
-                }
-            }
-        };
-    }
 
 
 
@@ -574,9 +515,56 @@ public abstract class MetaObject extends MetaData {
     }
 
 
+    /**
+     * Override to provide object-specific validation chain
+     */
     @Override
-    public void validate() {
-        super.validate();
+    protected ValidationChain<MetaData> createValidationChain() {
+        return ValidationChain.<MetaData>builder("MetaObjectValidation")
+            .continueOnError()
+            .addValidator(MetaDataValidators.typeSystemValidator())
+            .addValidator(MetaDataValidators.childrenValidator())
+            .addValidator(MetaDataValidators.legacyValidator())
+            .addValidator(createObjectClassValidatorAdapted())
+            .addValidator(createFieldsValidatorAdapted())
+            .addValidator(createKeysValidatorAdapted())
+            .build();
+    }
+    
+    /**
+     * Create adapted object class validator for MetaData validation chain
+     */
+    private Validator<MetaData> createObjectClassValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaObject) {
+                return createObjectClassValidator().validate((MetaObject) metaData);
+            }
+            return ValidationResult.success();
+        };
+    }
+    
+    /**
+     * Create adapted fields validator for MetaData validation chain
+     */
+    private Validator<MetaData> createFieldsValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaObject) {
+                return createFieldsValidator().validate((MetaObject) metaData);
+            }
+            return ValidationResult.success();
+        };
+    }
+    
+    /**
+     * Create adapted keys validator for MetaData validation chain
+     */
+    private Validator<MetaData> createKeysValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaObject) {
+                return createKeysValidator().validate((MetaObject) metaData);
+            }
+            return ValidationResult.success();
+        };
     }
 
     ////////////////////////////////////////////////////

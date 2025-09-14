@@ -182,10 +182,6 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         return this;
     }
 
-    @Override
-    public void validate() {
-        super.validate();
-    }
 
     /**
      * Returns if the MetaDataLoader is initialized

@@ -79,6 +79,19 @@ public class ValidationResult {
     }
     
     /**
+     * Convenience method for legacy-style exception behavior.
+     * Throws MetaDataException if this result contains errors.
+     * 
+     * @throws MetaDataException if validation failed
+     */
+    public void throwIfInvalid() throws MetaDataException {
+        if (!isValid()) {
+            String errorMessage = String.join("; ", getAllErrors());
+            throw new MetaDataException("Validation failed: " + errorMessage);
+        }
+    }
+    
+    /**
      * Combine this result with another
      */
     public ValidationResult combine(ValidationResult other) {

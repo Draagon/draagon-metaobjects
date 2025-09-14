@@ -194,7 +194,7 @@ public class ObjectManagerXML extends ObjectManager
         for( Object o : list )
         {
             Long l = f.getLong( o );
-            if ( l == null ) l = new Long( 1 );
+            if ( l == null ) l = Long.valueOf( 1 );
 
             if ( l.longValue() > id ) id = l.longValue();
         }

@@ -1,12 +1,17 @@
 package com.draagon.meta.key;
 
 import com.draagon.meta.InvalidMetaDataException;
+import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.ValidationResult;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.MetaDataUtil;
+import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.MetaDataValidators;
+import com.draagon.meta.validation.Validator;
 
 import java.util.List;
 
@@ -114,26 +119,51 @@ public class ForeignKey extends MetaKey {
     }
 
     @Override
-    public void validate() {
-        super.validate();
-        if ( getParent() instanceof MetaDataLoader) {
-            // TODO: When adding native abstract support, ensure it's true if attached to MetaDataLoader
-        }
-        else {
-            getForeignObject();
-
-            getForeignKey();
-
-            if (getForeignKeyFields().size() == 0)
-                throw new InvalidMetaDataException(this, "Attribute '" + ATTR_FOREIGNKEY + "' " +
-                        "had no valid key fields listed");
-
-            if (getNumKeys() != getNumForeignKeys()) {
-                throw new InvalidMetaDataException(this, "Number of keys ("+getNumKeys()+") is not the same size as "+
-                        "number of foreign keys ("+getNumForeignKeys()+")" );
+    protected ValidationChain<MetaData> createValidationChain() {
+        return ValidationChain.<MetaData>builder("ForeignKeyValidation")
+            .continueOnError()
+            .addValidator(MetaDataValidators.typeSystemValidator())
+            .addValidator(MetaDataValidators.childrenValidator())
+            .addValidator(MetaDataValidators.legacyValidator())
+            .addValidator(createForeignKeyValidatorAdapted())
+            .build();
+    }
+    
+    /**
+     * Create adapted foreign key validator for MetaData validation chain
+     */
+    private Validator<MetaData> createForeignKeyValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof ForeignKey && !(((ForeignKey) metaData).getParent() instanceof MetaDataLoader)) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                ForeignKey foreignKey = (ForeignKey) metaData;
+                
+                try {
+                    foreignKey.getForeignObject();
+                } catch (Exception e) {
+                    builder.addError("Failed to get foreign object: " + e.getMessage());
+                }
+                
+                try {
+                    foreignKey.getForeignKey();
+                } catch (Exception e) {
+                    builder.addError("Failed to get foreign key: " + e.getMessage());
+                }
+                
+                if (foreignKey.getForeignKeyFields().size() == 0) {
+                    builder.addError("Attribute '" + ATTR_FOREIGNKEY + "' had no valid key fields listed");
+                }
+                
+                if (foreignKey.getNumKeys() != foreignKey.getNumForeignKeys()) {
+                    builder.addError("Number of keys (" + foreignKey.getNumKeys() + ") is not the same size as " +
+                            "number of foreign keys (" + foreignKey.getNumForeignKeys() + ")");
+                }
+                
+                // TODO: Compare data types on keys vs. foreign keys
+                
+                return builder.build();
             }
-
-            // TODO:  Compare data types on keys vs. foreign keys
-        }
+            return ValidationResult.success();
+        };
     }
 }

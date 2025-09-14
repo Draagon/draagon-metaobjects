@@ -3,10 +3,14 @@ package com.draagon.meta.key;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
+import com.draagon.meta.ValidationResult;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.validation.ValidationChain;
+import com.draagon.meta.validation.MetaDataValidators;
+import com.draagon.meta.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,18 +115,38 @@ public abstract class MetaKey extends MetaData {
     }
 
     @Override
-    public void validate() {
-        super.validate();
-
-        if ( getParent() instanceof MetaDataLoader ) {
-            // TODO: When adding native abstract support, ensure it's true if attached to MetaDataLoader
-        }
-        else {
-            getDeclaringObject();
-
-            if (loadKeyFields().size() == 0)
-                throw new InvalidMetaDataException(this, "Attribute '" + ATTR_KEYS + "' " +
-                        "had no valid key fields listed");
-        }
+    protected ValidationChain<MetaData> createValidationChain() {
+        return ValidationChain.<MetaData>builder("MetaKeyValidation")
+            .continueOnError()
+            .addValidator(MetaDataValidators.typeSystemValidator())
+            .addValidator(MetaDataValidators.childrenValidator())
+            .addValidator(MetaDataValidators.legacyValidator())
+            .addValidator(createMetaKeyValidatorAdapted())
+            .build();
+    }
+    
+    /**
+     * Create adapted meta key validator for MetaData validation chain
+     */
+    private Validator<MetaData> createMetaKeyValidatorAdapted() {
+        return metaData -> {
+            if (metaData instanceof MetaKey && !(((MetaKey) metaData).getParent() instanceof MetaDataLoader)) {
+                ValidationResult.Builder builder = ValidationResult.builder();
+                MetaKey metaKey = (MetaKey) metaData;
+                
+                try {
+                    metaKey.getDeclaringObject();
+                } catch (Exception e) {
+                    builder.addError("Failed to get declaring object: " + e.getMessage());
+                }
+                
+                if (metaKey.loadKeyFields().size() == 0) {
+                    builder.addError("Attribute '" + ATTR_KEYS + "' had no valid key fields listed");
+                }
+                
+                return builder.build();
+            }
+            return ValidationResult.success();
+        };
     }
 }

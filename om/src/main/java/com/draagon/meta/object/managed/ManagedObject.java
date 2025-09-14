@@ -231,37 +231,37 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
     // PRIMITIVE SETTER VALUES
     public void setBoolean(String name, boolean value) //throws ValueException
     {
-        setBoolean(name, new Boolean(value));
+        setBoolean(name, Boolean.valueOf(value));
     }
 
     public void setByte(String name, byte value) //throws MetaException
     {
-        setByte(name, new Byte(value));
+        setByte(name, Byte.valueOf(value));
     }
 
     public void setShort(String name, short value) //throws MetaException
     {
-        setShort(name, new Short(value));
+        setShort(name, Short.valueOf(value));
     }
 
     public void setInt(String name, int value) //throws MetaException
     {
-        setInt(name, new Integer(value));
+        setInt(name, Integer.valueOf(value));
     }
 
     public void setLong(String name, long value) //throws MetaException
     {
-        setLong(name, new Long(value));
+        setLong(name, Long.valueOf(value));
     }
 
     public void setFloat(String name, float value) //throws MetaException
     {
-        setFloat(name, new Float(value));
+        setFloat(name, Float.valueOf(value));
     }
 
     public void setDouble(String name, double value) //throws MetaException
     {
-        setDouble(name, new Double(value));
+        setDouble(name, Double.valueOf(value));
     }
 
     //////////////////////////////////////////////////////////////

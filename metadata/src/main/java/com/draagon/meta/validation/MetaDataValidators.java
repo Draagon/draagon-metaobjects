@@ -2,7 +2,6 @@ package com.draagon.meta.validation;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.ValidationResult;
-import com.draagon.meta.type.MetaDataTypeDefinition;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -150,21 +149,24 @@ public class MetaDataValidators {
             builder.addError("SubType name cannot be null or empty");
         }
         
-        // Validate package and short name consistency
+        // Validate package and short name consistency (handle null values)
         String fullName = metaData.getName();
         String pkg = metaData.getPackage();
         String shortName = metaData.getShortName();
         
-        if (pkg.isEmpty()) {
-            // No package, short name should equal full name
-            if (!shortName.equals(fullName)) {
-                builder.addError("Short name '" + shortName + "' should equal full name '" + fullName + "' when no package");
-            }
-        } else {
-            // Has package, full name should be package + separator + short name
-            String expectedFullName = pkg + MetaData.PKG_SEPARATOR + shortName;
-            if (!expectedFullName.equals(fullName)) {
-                builder.addError("Full name '" + fullName + "' should equal '" + expectedFullName + "'");
+        // Skip package validation if any of the name components are null
+        if (fullName != null && pkg != null && shortName != null) {
+            if (pkg.isEmpty()) {
+                // No package, short name should equal full name
+                if (!shortName.equals(fullName)) {
+                    builder.addError("Short name '" + shortName + "' should equal full name '" + fullName + "' when no package");
+                }
+            } else {
+                // Has package, full name should be package + separator + short name
+                String expectedFullName = pkg + MetaData.PKG_SEPARATOR + shortName;
+                if (!expectedFullName.equals(fullName)) {
+                    builder.addError("Full name '" + fullName + "' should equal '" + expectedFullName + "'");
+                }
             }
         }
         
