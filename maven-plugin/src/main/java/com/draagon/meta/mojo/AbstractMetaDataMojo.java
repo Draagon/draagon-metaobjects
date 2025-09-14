@@ -3,7 +3,7 @@ package com.draagon.meta.mojo;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.generator.Generator;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.mojo.MojoSupport;
+import com.draagon.meta.loader.LoaderConfigurable;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecution;
@@ -128,60 +128,57 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
 
     protected MetaDataLoader createLoader(ClassLoader projectClassLoader) {
 
-        MojoSupport mojoSupport = null;
+        LoaderConfigurable configurable = null;
         String loaderClass = loaderConfig.getClassname();
         String loaderName = loaderConfig.getName();
 
         if (loaderClass != null) {
-            mojoSupport = getConfiguredLoader( projectClassLoader, loaderClass, loaderName);
-        }
-        else {
-            mojoSupport = new SimpleLoader( loaderName );
+            configurable = getConfiguredLoader(projectClassLoader, loaderClass, loaderName);
+        } else {
+            configurable = new SimpleLoader(loaderName);
         }
 
-        // Get the Source Directory if it is specified
+        // Configure the loader using the new pattern
+        String sourceDir = null;
         File srcDir = getSourceDir();
-        if ( srcDir != null ) mojoSupport.mojoSetSourceDir( loaderConfig.getSourceDir() );
-        //getLog().info( "Setting MojoClassLoader: " + getProjectClassLoader() );
-        mojoSupport.mojoSetClassLoader( projectClassLoader );
-        mojoSupport.mojoSetSources( loaderConfig.getSources() );
-        mojoSupport.mojoInit( getGlobals() );
+        if (srcDir != null) {
+            sourceDir = loaderConfig.getSourceDir();
+        }
 
-        MetaDataLoader loader = mojoSupport.getLoader();
-        //getLog().info("projectClassLoader: " + projectClassLoader);
-        //getLog().info("loader.getClass():  " + mojoSupport.getClass().getClassLoader());
-        //getLog().info("loader.getMDCP():   " + mojoSupport.getLoader().getMetaDataClassLoader());
-        //getLog().info("loader.Options():   " + mojoSupport.getLoader().getLoaderOptions().getClass().getClassLoader());
+        MavenLoaderConfiguration.configure(configurable, sourceDir, projectClassLoader, 
+                                         loaderConfig.getSources(), getGlobals());
+
+        MetaDataLoader loader = configurable.getLoader();
 
         getLog().info("MetaData Mojo > Create Loader: " + loader.toString());
 
         return loader;
     }
 
-    private MojoSupport getConfiguredLoader(ClassLoader projectClassLoader, String loaderClass, String loaderName) {
+    private LoaderConfigurable getConfiguredLoader(ClassLoader projectClassLoader, String loaderClass, String loaderName) {
 
-        MojoSupport mojoSupport;
+        LoaderConfigurable configurable;
         try {
             // Attempt to load the loader by classname
             Class c;
             try {
                 c = projectClassLoader.loadClass(loaderClass);
             }
-            catch ( ClassNotFoundException ex ) {
-                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
-                        "[" + loaderClass + "] as it was not found on the Project ClassLoader" );
+            catch (ClassNotFoundException ex) {
+                throw new MetaDataException("Could not create MetaDataLoader(" + loaderName + ") with class " +
+                        "[" + loaderClass + "] as it was not found on the Project ClassLoader");
             }
 
             // See if it's an interface
-            if ( c.isInterface() ) {
-                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
-                        "[" + loaderClass + "] as it is an interface" );
+            if (c.isInterface()) {
+                throw new MetaDataException("Could not create MetaDataLoader(" + loaderName + ") with class " +
+                        "[" + loaderClass + "] as it is an interface");
             }
 
-            // See if it implements MojoSupport
-            if (!MojoSupport.class.isAssignableFrom( c )) {
-                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
-                        "[" + loaderClass + "] as it does not implement MojoSupport" );
+            // See if it implements LoaderConfigurable
+            if (!LoaderConfigurable.class.isAssignableFrom(c)) {
+                throw new MetaDataException("Could not create MetaDataLoader(" + loaderName + ") with class " +
+                        "[" + loaderClass + "] as it does not implement LoaderConfigurable");
             }
 
             // Try for a constructor with a String for the loaderName
@@ -189,20 +186,20 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
             try {
                 cc = c.getDeclaredConstructor(String.class);
             }
-            catch( NoSuchMethodException | SecurityException ex ) {
-                throw new MetaDataException( "Could not create MetaDataLoader("+loaderName+") with class "+
-                        "[" + loaderClass + "] as the Constructor was not found or had security issues: "+
-                        ex.getMessage(), ex );
+            catch (NoSuchMethodException | SecurityException ex) {
+                throw new MetaDataException("Could not create MetaDataLoader(" + loaderName + ") with class " +
+                        "[" + loaderClass + "] as the Constructor was not found or had security issues: " +
+                        ex.getMessage(), ex);
             }
 
-            mojoSupport = (MojoSupport) cc.newInstance( loaderName );
+            configurable = (LoaderConfigurable) cc.newInstance(loaderName);
         }
-        catch ( InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-            throw new MetaDataException( "Could not instantiate MetaDataLoader("+loaderName+") with class "+
-                    "[" + loaderConfig.getClassname() + "]: " + ex.getMessage(), ex );
+        catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+            throw new MetaDataException("Could not instantiate MetaDataLoader(" + loaderName + ") with class " +
+                    "[" + loaderConfig.getClassname() + "]: " + ex.getMessage(), ex);
         }
 
-        return mojoSupport;
+        return configurable;
     }
 
     protected ClassLoader createProjectClassLoader()

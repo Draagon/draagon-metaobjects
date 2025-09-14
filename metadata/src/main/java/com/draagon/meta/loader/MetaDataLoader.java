@@ -10,7 +10,6 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.types.TypesConfig;
-import com.draagon.meta.loader.mojo.MojoSupport;
 import com.draagon.meta.loader.types.TypesConfigLoader;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
@@ -24,7 +23,7 @@ import java.util.Map;
 /**
  *  MetaDataLoader with common functions for all MetaDataLoaders
  */
-public class MetaDataLoader extends MetaData implements MojoSupport {
+public class MetaDataLoader extends MetaData implements LoaderConfigurable {
 
     private static final Logger log = LoggerFactory.getLogger(MetaDataLoader.class);
 
@@ -103,62 +102,49 @@ public class MetaDataLoader extends MetaData implements MojoSupport {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
-    // MOJO Support Methods
-    private String mojoSourceDir=null;
+    // LoaderConfigurable Support Methods
+    private String configSourceDir = null;
 
     @Override
-    public final void mojoSetClassLoader( ClassLoader classLoader ) {
-        if ( classLoader == null ) throw new IllegalArgumentException( "You cannot set null for the mojoClassLoader" );
-        if (log.isDebugEnabled()) log.debug( "Setting MojoClassLoader: " + classLoader );
-        setMetaDataClassLoader(classLoader);
-    }
-
-    @Override
-    public final void mojoSetSourceDir( String sourceDir ) {
-        File sd = new File(sourceDir);
-        if ( !sd.exists() ) throw new IllegalStateException( "MojoSourceDir ["+sourceDir+"] does not exist");
-        if (log.isDebugEnabled()) log.debug( "Setting MojoSourceDir: " + sourceDir );
-        mojoSourceDir = sourceDir;
-    }
-
-    @Override
-    public final void mojoSetSources( List<String> sourceList) {
-
-        if ( sourceList == null ) throw new IllegalArgumentException(
-                "sourceURIList was null on setURIList for Loader: " + toString());
-
-        mojoProcessSources( mojoSourceDir, sourceList );
-    }
-
-    protected void mojoProcessSources( String sourceDir, List<String> sourceList ) {
-        throw new UnsupportedOperationException( getClass().getName()+" does not support the MetaData Plugin "+
-                "(you must implement mojoProcessSources or the direct MojoSupport interface methods)");
-
-        //String name = this.getClass().getSimpleName();
-        //if ( sourceList == null ) throw new IllegalArgumentException(
-        //        "sourceURIList was null on setURIList for " + name);
-        //if ( sourceList.size() > 0  ) throw new IllegalArgumentException( name +
-        //        " does not support URI sources");
-    }
-
-    protected void mojoInitArgs( Map<String, String> args ) {
-
-        if ( args == null ) return;
-
-        if ( args.get( MojoSupport.ARG_REGISTER ) != null ) {
-            getLoaderOptions().setShouldRegister( Boolean.parseBoolean( args.get( MojoSupport.ARG_REGISTER ) ));
+    public void configure(LoaderConfiguration config) {
+        if (config.getClassLoader() != null) {
+            if (log.isDebugEnabled()) log.debug("Setting ClassLoader: " + config.getClassLoader());
+            setMetaDataClassLoader(config.getClassLoader());
         }
-        if ( args.get( MojoSupport.ARG_VERBOSE ) != null ) {
-            getLoaderOptions().setVerbose( Boolean.parseBoolean( args.get( MojoSupport.ARG_VERBOSE ) ));
+        
+        if (config.getSourceDir() != null) {
+            File sd = new File(config.getSourceDir());
+            if (!sd.exists()) throw new IllegalStateException("SourceDir [" + config.getSourceDir() + "] does not exist");
+            if (log.isDebugEnabled()) log.debug("Setting SourceDir: " + config.getSourceDir());
+            configSourceDir = config.getSourceDir();
         }
-        if ( args.get( MojoSupport.ARG_STRICT ) != null ) {
-            getLoaderOptions().setStrict( Boolean.parseBoolean( args.get( MojoSupport.ARG_STRICT ) ));
+        
+        if (config.getSources() != null && !config.getSources().isEmpty()) {
+            if (log.isDebugEnabled()) log.debug("Processing sources: " + config.getSources());
+            processSources(configSourceDir, config.getSources());
         }
-    }
-
-    @Override
-    public void mojoInit( Map<String, String> args ) {
+        
+        processArguments(config.getArguments());
         init();
+    }
+
+    protected void processSources(String sourceDir, List<String> sourceList) {
+        throw new UnsupportedOperationException(getClass().getName() + " does not support source processing " +
+                "(you must implement processSources method)");
+    }
+
+    protected void processArguments(Map<String, String> args) {
+        if (args == null) return;
+
+        if (args.get(LoaderConfigurationConstants.ARG_REGISTER) != null) {
+            getLoaderOptions().setShouldRegister(Boolean.parseBoolean(args.get(LoaderConfigurationConstants.ARG_REGISTER)));
+        }
+        if (args.get(LoaderConfigurationConstants.ARG_VERBOSE) != null) {
+            getLoaderOptions().setVerbose(Boolean.parseBoolean(args.get(LoaderConfigurationConstants.ARG_VERBOSE)));
+        }
+        if (args.get(LoaderConfigurationConstants.ARG_STRICT) != null) {
+            getLoaderOptions().setStrict(Boolean.parseBoolean(args.get(LoaderConfigurationConstants.ARG_STRICT)));
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////

@@ -62,47 +62,47 @@ public class FileMetaDataLoader extends MetaDataLoader {
     // MOJO Support Methods
 
     @Override
-    protected void mojoProcessSources( String sourceDir, List<String> rawSources ) {
-
-        if ( rawSources == null ) throw new IllegalArgumentException(
+    protected void processSources(String sourceDir, List<String> rawSources) {
+        if (rawSources == null) throw new IllegalArgumentException(
                 "sourceURIList was null on setURIList for Loader: " + toString());
 
         List<String> localSourceList = new ArrayList<>();
         List<URI> uriSourceList = new ArrayList<>();
 
         // See if the raw input is a URI or not and add to appropriate list
-        for ( String raw: rawSources ) {
-            if ( raw.indexOf(":") > 0) uriSourceList.add(URIHelper.toURI(raw));
+        for (String raw : rawSources) {
+            if (raw.indexOf(":") > 0) uriSourceList.add(URIHelper.toURI(raw));
             else localSourceList.add(raw);
         }
 
-        // Set URI Souces
+        // Set URI Sources
         if (!uriSourceList.isEmpty()) {
             URIFileMetaDataSources uriSources = new URIFileMetaDataSources(uriSourceList);
             getLoaderOptions().addSources(uriSources);
-            uriSources.setLoaderClassLoader( getMetaDataClassLoader() );
+            uriSources.setLoaderClassLoader(getMetaDataClassLoader());
         }
 
         // Set Local Sources
         if (!localSourceList.isEmpty()) {
             LocalFileMetaDataSources localSources = null;
-            if ( sourceDir != null ) localSources = new LocalFileMetaDataSources(sourceDir,localSourceList);
+            if (sourceDir != null) localSources = new LocalFileMetaDataSources(sourceDir, localSourceList);
             else localSources = new LocalFileMetaDataSources(localSourceList);
             getLoaderOptions().addSources(localSources);
-            localSources.setLoaderClassLoader( getMetaDataClassLoader() );
+            localSources.setLoaderClassLoader(getMetaDataClassLoader());
         }
     }
 
     @Override
-    public void mojoInit( Map<String, String> args ) {
-
-        mojoInitArgs( args );
-
+    public void configure(LoaderConfiguration config) {
+        // Process configuration arguments first to set up parsers
+        processArguments(config.getArguments());
+        
         FileLoaderOptions options = getLoaderOptions()
-                .addParser( XML_EXTENSION, XMLMetaDataParser.class)
-                .addParser( JSON_EXTENSION, JsonMetaDataParser.class);
+                .addParser(XML_EXTENSION, XMLMetaDataParser.class)
+                .addParser(JSON_EXTENSION, JsonMetaDataParser.class);
 
-        init();
+        // Call parent to handle the rest of the configuration
+        super.configure(config);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////

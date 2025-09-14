@@ -68,22 +68,19 @@ public class SimpleLoader extends MetaDataLoader {
     // MOJO Support Methods
 
     @Override
-    protected void mojoProcessSources( String sourceDir, List<String> sourceList ) {
-
+    protected void processSources(String sourceDir, List<String> sourceList) {
         String name = this.getClass().getSimpleName();
-        if ( sourceList == null ) throw new IllegalArgumentException(
+        if (sourceList == null) throw new IllegalArgumentException(
                 "sourceList was null on setURIList for " + name);
 
         List<URI> sourceURIs = new ArrayList<>();
-        for( String s : sourceList) {
+        for (String s : sourceList) {
             if (s.indexOf(':') < 0) {
                 if (sourceDir != null) {
                     s = "model:file:" + s + ";" + URIHelper.URI_ARG_SOURCEDIR + "=" + sourceDir;
-                }
-                else if (new File(s).exists()) {
+                } else if (new File(s).exists()) {
                     s = "model:file:" + s;
-                }
-                else {
+                } else {
                     s = "model:resource:" + s;
                 }
             }
@@ -91,12 +88,6 @@ public class SimpleLoader extends MetaDataLoader {
         }
 
         setSourceURIs(sourceURIs);
-    }
-
-    @Override
-    public void mojoInit( Map<String, String> args ) {
-        if ( args != null ) mojoInitArgs( args );
-        init();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
