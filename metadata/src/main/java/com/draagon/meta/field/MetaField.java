@@ -12,7 +12,6 @@ import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
 import com.draagon.meta.validation.MetaDataValidators;
 import com.draagon.meta.metrics.MetaDataMetrics;
-import com.draagon.meta.event.MetaDataEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -232,9 +231,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             Duration duration = Duration.between(start, Instant.now());
             fieldMetrics.recordValidation(duration, result.isValid());
             
-            // Publish validation event
-            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
-            
             return result;
         } catch (Exception e) {
             // Record error metrics
@@ -360,9 +356,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             
             // Record metrics
             fieldMetrics.recordPropertyChange();
-            
-            // Publish property change event
-            publishEvent(new MetaDataEvent.PropertyChanged(this, "defaultValue", oldValue, defVal));
             
             log.debug("MetaField {} default value changed from {} to {}", getName(), oldValue, defVal);
             

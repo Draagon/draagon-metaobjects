@@ -8,7 +8,6 @@ import com.draagon.meta.type.MetaDataTypeRegistry;
 import com.draagon.meta.cache.CacheStrategy;
 import com.draagon.meta.cache.HybridCache;
 import com.draagon.meta.collections.IndexedMetaDataCollection;
-import com.draagon.meta.event.*;
 import com.draagon.meta.metrics.MetaDataMetrics;
 import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.MetaDataValidators;
@@ -37,8 +36,6 @@ public class MetaData implements Cloneable, Serializable {
     // Indexed collection for O(1) child lookups
     private final IndexedMetaDataCollection children = new IndexedMetaDataCollection();
     
-    // Event system
-    private volatile MetaDataEventPublisher eventPublisher;
     
     // Metrics collection
     private final MetaDataMetrics metrics;
@@ -138,9 +135,6 @@ public class MetaData implements Cloneable, Serializable {
             // Record metrics
             Duration duration = Duration.between(start, Instant.now());
             metrics.recordValidation(duration, result.isValid());
-            
-            // Publish validation event
-            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
             
             return result;
         } catch (Exception e) {
@@ -273,47 +267,6 @@ public class MetaData implements Cloneable, Serializable {
      */
     public Optional<Object> getCacheStats() {
         return cache.getStats().map(stats -> (Object) stats);
-    }
-
-    // ========== EVENT SYSTEM ==========
-
-    /**
-     * Get the event publisher (lazy initialization)
-     */
-    public MetaDataEventPublisher getEventPublisher() {
-        if (eventPublisher == null) {
-            synchronized (this) {
-                if (eventPublisher == null) {
-                    eventPublisher = new MetaDataEventPublisher();
-                }
-            }
-        }
-        return eventPublisher;
-    }
-
-    /**
-     * Publish an event
-     */
-    protected void publishEvent(MetaDataEvent<?> event) {
-        try {
-            getEventPublisher().publishEvent(event);
-        } catch (Exception e) {
-            log.warn("Failed to publish event {}: {}", event.getClass().getSimpleName(), e.getMessage());
-        }
-    }
-
-    /**
-     * Add event listener
-     */
-    public void addEventListener(MetaDataEventListener listener) {
-        getEventPublisher().addListener(listener);
-    }
-
-    /**
-     * Remove event listener
-     */
-    public void removeEventListener(MetaDataEventListener listener) {
-        getEventPublisher().removeListener(listener);
     }
 
     // ========== METRICS ==========
@@ -831,9 +784,6 @@ public class MetaData implements Cloneable, Serializable {
             // Record metrics
             metrics.recordChildAddition();
             
-            // Publish event
-            publishEvent(new MetaDataEvent.ChildAdded(this, data));
-            
             // Flush caches
             flushCaches();
         }
@@ -848,9 +798,6 @@ public class MetaData implements Cloneable, Serializable {
             if (children.remove(d)) {
                 // Record metrics
                 metrics.recordChildRemoval();
-                
-                // Publish event
-                publishEvent(new MetaDataEvent.ChildRemoved(this, d));
                 
                 flushCaches();
             }
@@ -868,9 +815,6 @@ public class MetaData implements Cloneable, Serializable {
             if (children.remove(d)) {
                 // Record metrics
                 metrics.recordChildRemoval();
-                
-                // Publish event
-                publishEvent(new MetaDataEvent.ChildRemoved(this, d));
                 
                 flushCaches();
             }
@@ -890,9 +834,6 @@ public class MetaData implements Cloneable, Serializable {
         if (children.remove(data)) {
             // Record metrics
             metrics.recordChildRemoval();
-            
-            // Publish event
-            publishEvent(new MetaDataEvent.ChildRemoved(this, data));
             
             flushCaches();
         }
@@ -1100,9 +1041,8 @@ public class MetaData implements Cloneable, Serializable {
         for (MetaData child : toRemove) {
             if (children.remove(child)) {
                 removed = true;
-                // Record metrics and publish event
+                // Record metrics
                 metrics.recordChildRemoval();
-                publishEvent(new MetaDataEvent.ChildRemoved(this, child));
             }
         }
         
@@ -1121,9 +1061,8 @@ public class MetaData implements Cloneable, Serializable {
         for (MetaData child : toRemove) {
             if (children.remove(child)) {
                 removed = true;
-                // Record metrics and publish event
+                // Record metrics
                 metrics.recordChildRemoval();
-                publishEvent(new MetaDataEvent.ChildRemoved(this, child));
             }
         }
         

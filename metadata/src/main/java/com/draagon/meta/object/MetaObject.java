@@ -13,7 +13,6 @@ import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
 import com.draagon.meta.validation.MetaDataValidators;
 import com.draagon.meta.metrics.MetaDataMetrics;
-import com.draagon.meta.event.MetaDataEvent;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -113,9 +112,6 @@ public abstract class MetaObject extends MetaData {
             // Record metrics
             Duration duration = Duration.between(start, Instant.now());
             objectMetrics.recordValidation(duration, result.isValid());
-            
-            // Publish validation event
-            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
             
             return result;
         } catch (Exception e) {

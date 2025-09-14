@@ -6,7 +6,6 @@ import com.draagon.meta.validation.ValidationChain;
 import com.draagon.meta.validation.Validator;
 import com.draagon.meta.validation.MetaDataValidators;
 import com.draagon.meta.metrics.MetaDataMetrics;
-import com.draagon.meta.event.MetaDataEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,9 +110,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             // Record metrics
             Duration duration = Duration.between(start, Instant.now());
             attributeMetrics.recordValidation(duration, result.isValid());
-            
-            // Publish validation event
-            publishEvent(new MetaDataEvent.ValidationCompleted(this, result.isValid(), result.getErrors().size()));
             
             return result;
         } catch (Exception e) {
@@ -246,9 +242,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         // Record metrics
         attributeMetrics.recordPropertyChange();
         
-        // Publish property change event
-        publishEvent(new MetaDataEvent.PropertyChanged(this, "value", oldValue, value));
-        
         log.debug("MetaAttribute {} value changed from {} to {}", getName(), oldValue, value);
     }
 
@@ -293,9 +286,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             // Record successful conversion metrics
             Duration duration = Duration.between(start, Instant.now());
             attributeMetrics.recordPropertyChange();
-            
-            // Publish property change event
-            publishEvent(new MetaDataEvent.PropertyChanged(this, "value", oldValue, this.value));
             
             log.debug("MetaAttribute {} value converted and set from {} to {}", getName(), oldValue, this.value);
             
