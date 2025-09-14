@@ -16,18 +16,18 @@ public class MetaModelBuilder {
     public static MetaData buildDefaultMetaDataModels() {
 
         // METADATA ROOT
-        MetaObject metadata = PojoMetaObject.create(MetaModel.OBJECT_NAME)
-                .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT, MetaModelPojo.class.getName()))
-                .addChild(buildStringField(MetaModel.FIELD_PACKAGE,true))
-                .addChild(buildStringField(MetaModel.FIELD_SUPER,true))
-                .addChild(buildStringField(MetaModel.FIELD_TYPE,true)
-)
-                .addChild(buildStringField(MetaModel.FIELD_SUBTYPE,true)
-)
-                .addChild(buildStringField(MetaModel.FIELD_NAME,true))
-                .addChild(buildValueField(MetaModel.FIELD_VALUE))
-                .addChild(ObjectArrayField.create(MetaModel.FIELD_CHILDREN)
-                        .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MetaModel.OBJECT_NAME)));
+        MetaObject metadata = PojoMetaObject.create(MetaModel.OBJECT_NAME);
+        metadata.addChild(StringAttribute.create(MetaObject.ATTR_OBJECT, MetaModelPojo.class.getName()));
+        metadata.addChild(buildStringField(MetaModel.FIELD_PACKAGE,true));
+        metadata.addChild(buildStringField(MetaModel.FIELD_SUPER,true));
+        metadata.addChild(buildStringField(MetaModel.FIELD_TYPE,true));
+        metadata.addChild(buildStringField(MetaModel.FIELD_SUBTYPE,true));
+        metadata.addChild(buildStringField(MetaModel.FIELD_NAME,true));
+        metadata.addChild(buildValueField(MetaModel.FIELD_VALUE));
+        
+        ObjectArrayField childrenField = ObjectArrayField.create(MetaModel.FIELD_CHILDREN);
+        childrenField.addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MetaModel.OBJECT_NAME));
+        metadata.addChild(childrenField);
 
         return metadata;
     }

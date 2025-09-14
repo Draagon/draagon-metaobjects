@@ -28,15 +28,19 @@ public class MetaDataLoaderTest {
 
     @Before
     public void buildModel() {
-        loader = MetaDataLoader.createManual( false, "test1" )
-                .init()
-                .register()
-                .addMetaAttr( StringAttribute.create( "hello", "world" ))
-                .addChild( MappedMetaObject.create("foo")
-                        .addMetaField( IntegerField.create( "bar", 5 )
-                                .addMetaAttr( IntAttribute.create("length", 10))
-                                .addMetaAttr( StringAttribute.create("abc", "def"))))
-                .getLoader();
+        MetaDataLoader tempLoader = MetaDataLoader.createManual( false, "test1" );
+        tempLoader.init();
+        tempLoader.register();
+        tempLoader.addMetaAttr( StringAttribute.create( "hello", "world" ));
+        
+        MappedMetaObject foo = MappedMetaObject.create("foo");
+        IntegerField bar = IntegerField.create( "bar", 5 );
+        bar.addMetaAttr( IntAttribute.create("length", 10));
+        bar.addMetaAttr( StringAttribute.create("abc", "def"));
+        foo.addMetaField(bar);
+        
+        tempLoader.addChild(foo);
+        loader = tempLoader.getLoader();
     }
 
     @After
@@ -98,14 +102,14 @@ public class MetaDataLoaderTest {
         //         .length = 11
 
         MetaObject mo = loader.getMetaObjectByName( "foo" );
-        MetaObject baby = MappedMetaObject.create("foo-baby").setSuperObject( mo );
+        MetaObject baby = MappedMetaObject.create("foo-baby");
+        baby.setSuperObject( mo );
 
         // Create an overlay for bar and length
-        baby.addMetaField(
-                mo.getMetaField( "bar" )
-                .overload() // overload or extend
-                .addMetaAttr( IntAttribute.create( "length", 11 ))
-                .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
+        MetaField barField = mo.getMetaField( "bar" ).overload(); // overload or extend
+        barField.addMetaAttr( IntAttribute.create( "length", 11 ));
+        barField.addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) );
+        baby.addMetaField(barField);
 
         Map bo = (Map) baby.newInstance();
         //log.info( "MetaObject: " + bo );
@@ -128,15 +132,14 @@ public class MetaDataLoaderTest {
         //         .length = 11
 
         MetaObject mo = loader.getMetaObjectByName( "foo" );
-        MetaObject baby = MappedMetaObject.create("foo-baby")
-                .setSuperObject( mo );
+        MetaObject baby = MappedMetaObject.create("foo-baby");
+        baby.setSuperObject( mo );
 
         // Create an overlay for bar and length
-        baby.addMetaField(
-                mo.getMetaField( "bar" )
-                .overload()
-                .addMetaAttr( IntAttribute.create( "length", 11 ))
-                .addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) ) );
+        MetaField barField = mo.getMetaField( "bar" ).overload();
+        barField.addMetaAttr( IntAttribute.create( "length", 11 ));
+        barField.addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) );
+        baby.addMetaField(barField);
 
         Map bo = (Map) baby.newInstance();
         //log.info( "MetaObject: " + bo );

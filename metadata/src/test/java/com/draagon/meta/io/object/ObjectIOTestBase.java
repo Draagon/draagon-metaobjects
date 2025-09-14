@@ -65,27 +65,41 @@ public abstract class ObjectIOTestBase {
 
     @Before
     public void setup() {
-        loader = MetaDataLoader.createManual( false, "json-MappedObject-io-test" )
-                .init()
-                .register()
-                .addChild(MappedMetaObject.create(MD.OBJ_BASKET)
-                        .addChild(IntegerField.create( MD.ID, 1 ))
-                        .addChild(StringField.create( MD.NAME, null ))
-                        .addChild(ObjectArrayField.create( MD.BASKET_FRUITS )
-                            .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_FRUIT)))
-                )
-                .addChild(MappedMetaObject.create("fruit")
-                        .addChild(IntegerField.create( MD.ID, 1 ))
-                        .addChild(StringField.create( MD.NAME, null ))
-                        .addChild(BooleanField.create( MD.FRUIT_IN_BASKET, false ))
-                        .addChild(ObjectField.create(MD.FRUIT_BUG)
-                            .addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_BUG)))
-                )
-                .addChild(MappedMetaObject.create(MD.OBJ_BUG)
-                        .addChild(IntegerField.create( MD.ID, 1 ))
-                        .addChild(StringField.create( MD.NAME, null ))
-                )
-                .getLoader();
+        MetaDataLoader tempLoader = MetaDataLoader.createManual( false, "json-MappedObject-io-test" );
+        tempLoader.init();
+        tempLoader.register();
+        
+        // Create basket object
+        MappedMetaObject basket = MappedMetaObject.create(MD.OBJ_BASKET);
+        basket.addChild(IntegerField.create( MD.ID, 1 ));
+        basket.addChild(StringField.create( MD.NAME, null ));
+        
+        ObjectArrayField basketFruitsField = ObjectArrayField.create( MD.BASKET_FRUITS );
+        basketFruitsField.addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_FRUIT));
+        basket.addChild(basketFruitsField);
+        
+        tempLoader.addChild(basket);
+        
+        // Create fruit object  
+        MappedMetaObject fruit = MappedMetaObject.create("fruit");
+        fruit.addChild(IntegerField.create( MD.ID, 1 ));
+        fruit.addChild(StringField.create( MD.NAME, null ));
+        fruit.addChild(BooleanField.create( MD.FRUIT_IN_BASKET, false ));
+        
+        ObjectField fruitBugField = ObjectField.create(MD.FRUIT_BUG);
+        fruitBugField.addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_BUG));
+        fruit.addChild(fruitBugField);
+        
+        tempLoader.addChild(fruit);
+        
+        // Create bug object
+        MappedMetaObject bug = MappedMetaObject.create(MD.OBJ_BUG);
+        bug.addChild(IntegerField.create( MD.ID, 1 ));
+        bug.addChild(StringField.create( MD.NAME, null ));
+        
+        tempLoader.addChild(bug);
+        
+        loader = tempLoader.getLoader();
     }
 
     @After

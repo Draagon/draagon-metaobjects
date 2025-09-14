@@ -32,8 +32,9 @@ public abstract class MetaValidator extends MetaData {
     /**
      * Gets the primary MetaData class
      */
+    @SuppressWarnings("unchecked")
     public final Class<MetaValidator> getMetaDataClass() {
-        return MetaValidator.class;
+        return (Class<MetaValidator>) MetaValidator.class;
     }
 
     /** Add Child to the MetaValidator */

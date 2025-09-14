@@ -18,7 +18,6 @@ import java.util.List;
  * @version 1.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class ObjectArrayField extends ArrayField<Object,List<Object>> {
 
     public final static String SUBTYPE_OBJECT_ARRAY = "objectArray";

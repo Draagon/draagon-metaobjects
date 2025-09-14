@@ -2,13 +2,9 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
-import com.draagon.meta.validation.ValidationChain;
-import com.draagon.meta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,8 +37,9 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
      * Gets the primary MetaAttribute class
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Class<MetaAttribute> getMetaDataClass() {
-        return MetaAttribute.class;
+        return (Class<MetaAttribute>) MetaAttribute.class;
     }
 
     /**
@@ -148,7 +145,6 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
      */
     @Override
     public void setValueAsObject(Object value) {
-        Instant start = Instant.now();
         T oldValue = this.value;
         
         try {

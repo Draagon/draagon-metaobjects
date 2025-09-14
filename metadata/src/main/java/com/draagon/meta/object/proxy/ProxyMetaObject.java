@@ -30,8 +30,8 @@ public class ProxyMetaObject extends PojoMetaObject {
         return create( name, objectClass, null );
     }
     public static MetaObject create(String name, Class<?> objectClass, Class<?> proxyObjectClass ) {
-        MetaObject mo = new ProxyMetaObject( name )
-                .addChild(StringAttribute.create(ATTR_OBJECT, objectClass.getName() ));
+        MetaObject mo = new ProxyMetaObject( name );
+        mo.addChild(StringAttribute.create(ATTR_OBJECT, objectClass.getName() ));
         if ( proxyObjectClass != null )
             mo.addChild(StringAttribute.create(ATTR_PROXYOBJECT, proxyObjectClass.getName() ));
         return mo;

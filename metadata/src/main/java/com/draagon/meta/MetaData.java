@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -50,7 +48,6 @@ public class MetaData implements Cloneable, Serializable {
     // Type system integration
     private volatile MetaDataTypeDefinition typeDefinition;
 
-    private MetaData overloadedMetaData = null;
     private MetaData superData = null;
 
     // TODO:  Is this meant to be a weak reference for MetaDataLoader only...?
@@ -420,6 +417,7 @@ public class MetaData implements Cloneable, Serializable {
      * Get the Base Class for the MetaData
      * @return Class The Java class for the metadata
      */
+    @SuppressWarnings("unchecked")
     public <T extends MetaData> Class<T> getMetaDataClass() {
         return (Class<T>) MetaData.class;
     }
@@ -515,20 +513,16 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Sets an attribute of the MetaClass
      */
-    @SuppressWarnings("unchecked")
-    public <T extends MetaData> T addMetaAttr(MetaAttribute attr) {
+    public void addMetaAttr(MetaAttribute attr) {
         addChild(attr);
-        return (T) this;
     }
 
     /**
-     * Sets an attribute of the MetaClass and returns this MetaData (type-safe version)
+     * Sets an attribute of the MetaClass (type-safe version)
      * @param attr The attribute to add
-     * @return This MetaData instance for method chaining
      */
-    public MetaData addMetaAttrSafe(MetaAttribute attr) {
+    public void addMetaAttrSafe(MetaAttribute attr) {
         addChild(attr);
-        return this;
     }
 
     /**
@@ -637,20 +631,16 @@ public class MetaData implements Cloneable, Serializable {
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
      */
-    @SuppressWarnings("unchecked")
-    public <T extends MetaData> T addChild(MetaData data) throws InvalidMetaDataException {
+    public void addChild(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
-        return (T) this;
     }
 
     /**
-     * Adds a child MetaData object and returns this MetaData (type-safe version)
+     * Adds a child MetaData object (type-safe version)
      * @param data The child MetaData to add
-     * @return This MetaData instance for method chaining
      */
-    public MetaData addChildSafe(MetaData data) throws InvalidMetaDataException {
+    public void addChildSafe(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
-        return this;
     }
 
     /**

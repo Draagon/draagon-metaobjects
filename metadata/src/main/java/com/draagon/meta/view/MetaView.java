@@ -28,8 +28,9 @@ public abstract class MetaView extends MetaData {
     /**
      * Gets the primary MetaData class
      */
+    @SuppressWarnings("unchecked")
     public final Class<MetaView> getMetaDataClass() {
-        return MetaView.class;
+        return (Class<MetaView>) MetaView.class;
     }
 
     /** Add Child to the MetaView */

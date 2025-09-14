@@ -54,18 +54,15 @@ public abstract class MetaObject extends MetaData {
     /**
      * Gets the primary MetaData class
      */
+    @SuppressWarnings("unchecked")
     public final Class<MetaObject> getMetaDataClass() {
-        return MetaObject.class;
+        return (Class<MetaObject>) MetaObject.class;
     }
 
-    /** Add Child to the MetaObject */
-    public MetaObject addChild(MetaData data) throws InvalidMetaDataException {
-        return super.addChild( data );
-    }
 
-    /** Wrap the MetaObject */
+    /** Create an overloaded copy of the MetaObject */
     public MetaObject overload() {
-        return super.overload();
+        return (MetaObject) super.overload();
     }
     
     // ========== ENHANCED OBJECT-SPECIFIC METHODS ==========
@@ -206,9 +203,8 @@ public abstract class MetaObject extends MetaData {
     /**
      * Sets the Super Class
      */
-    public MetaObject setSuperObject(MetaObject superObject) {
+    public void setSuperObject(MetaObject superObject) {
         setSuperData(superObject);
-        return this;
     }
 
     /**

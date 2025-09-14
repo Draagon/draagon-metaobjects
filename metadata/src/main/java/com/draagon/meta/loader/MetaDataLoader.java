@@ -212,8 +212,9 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     /**
      * Gets the primary MetaData class
      */
-    public final Class<? extends MetaData> getMetaDataClass() {
-        return MetaDataLoader.class;
+    @SuppressWarnings("unchecked")
+    public final <T extends MetaData> Class<T> getMetaDataClass() {
+        return (Class<T>) MetaDataLoader.class;
     }
 
     /** Wrap the MetaDataLoader */
@@ -224,8 +225,8 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     /**
      * Sets an attribute on the MetaClass
      */
-    public MetaDataLoader addMetaAttr(MetaAttribute attr) {
-        return addChild(attr);
+    public void addMetaAttr(MetaAttribute attr) {
+        addChild(attr);
     }
 
     /**
@@ -433,9 +434,9 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
      * Adds the child MetaData
      */
     @Override
-    public MetaDataLoader addChild(MetaData mc) {
+    public void addChild(MetaData mc) {
         checkState();
-        return super.addChild(mc);
+        super.addChild(mc);
     }
 
     /**
