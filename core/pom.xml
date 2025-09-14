@@ -51,7 +51,19 @@
                                     <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
                                 </sources>
                             </loader>
-                            <!-- No generators needed for JSON-first build -->
+                            <generators>
+                                <generator>
+                                    <classname>com.draagon.meta.generator.direct.metadata.jsonschema.MetaDataJsonSchemaGenerator</classname>
+                                    <args>
+                                        <outputDir>${project.basedir}/target/generated-resources</outputDir>
+                                        <outputFilename>metaobjects-schema.json</outputFilename>
+                                        <schemaVersion>https://json-schema.org/draft/2020-12/schema</schemaVersion>
+                                        <schemaId>https://draagon.com/schemas/metaobjects/5.1.0/metaobjects-schema.json</schemaId>
+                                        <title>MetaObjects Schema</title>
+                                        <description>JSON Schema for MetaObjects metadata validation</description>
+                                    </args>
+                                </generator>
+                            </generators>
                         </configuration>
                     </execution>
                     <execution>
