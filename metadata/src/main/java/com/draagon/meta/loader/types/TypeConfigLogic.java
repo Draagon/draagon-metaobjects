@@ -1,8 +1,6 @@
 package com.draagon.meta.loader.types;
 
 import com.draagon.meta.*;
-import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.Validatable;
 
 import java.util.*;
 

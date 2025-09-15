@@ -11,7 +11,6 @@ package com.draagon.meta;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
 
-@SuppressWarnings("serial")
 public class InvalidMetaDataException extends MetaDataException {
 
     public InvalidMetaDataException( MetaData md, String msg) {

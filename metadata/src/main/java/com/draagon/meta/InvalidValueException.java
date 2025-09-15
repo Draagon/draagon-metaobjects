@@ -11,7 +11,6 @@ package com.draagon.meta;
  * This should be thrown when a value is invalid for a field
  * of an object.
  */
-@SuppressWarnings("serial")
 public class InvalidValueException extends ValueException {
 
   public InvalidValueException( String msg, Throwable t )

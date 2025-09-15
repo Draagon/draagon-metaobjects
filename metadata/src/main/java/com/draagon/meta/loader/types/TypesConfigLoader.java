@@ -1,6 +1,5 @@
 package com.draagon.meta.loader.types;
 
-import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
 

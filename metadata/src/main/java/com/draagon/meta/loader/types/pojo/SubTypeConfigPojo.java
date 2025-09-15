@@ -9,7 +9,6 @@ import com.draagon.meta.loader.types.SubTypeConfig;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.pojo.PojoObject;
 
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
 
