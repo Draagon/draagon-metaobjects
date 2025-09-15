@@ -52,6 +52,8 @@ http://www.eclipse.org/legal/epl-v10.html
 
     <!-- Component scan for the Controllers -->    
     <context:component-scan base-package="com.draagon.meta.demo.fishstore.web" />
+    <context:component-scan base-package="com.draagon.meta.demo.fishstore.api" />
+    <context:component-scan base-package="com.draagon.meta.web.react.api" />
     
     <!-- Forwards requests to the "/" resource to the "welcome" view -->
     <mvc:view-controller path="/" view-name="redirect:/home"/>

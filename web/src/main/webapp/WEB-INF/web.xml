@@ -8,17 +8,7 @@
     <display-name>MetaObjects Web React</display-name>
     <description>MetaObjects React Web Components</description>
 
-    <!-- MetaData API Servlet -->
-    <servlet>
-        <servlet-name>MetaDataApiController</servlet-name>
-        <servlet-class>com.draagon.meta.web.react.api.MetaDataApiController</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>MetaDataApiController</servlet-name>
-        <url-pattern>/api/metadata/*</url-pattern>
-    </servlet-mapping>
+    <!-- MetaData API is now handled by Spring Controllers -->
 
     <!-- Default servlet for static resources -->
     <servlet-mapping>

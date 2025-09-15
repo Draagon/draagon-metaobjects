@@ -1,207 +1,195 @@
 package com.draagon.meta.web.react.api;
 
-import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.view.MetaView;
-import com.draagon.meta.web.react.MetaDataJsonSerializer;
+import com.draagon.meta.io.object.json.JsonObjectWriter;
+import com.draagon.meta.MetaDataNotFoundException;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collection;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * REST API Controller for serving MetaData as JSON to React components
+ * Spring REST API Controller for serving MetaData as JSON to React components
  * 
  * Endpoints:
  * - GET /api/metadata/objects - List all MetaObjects
  * - GET /api/metadata/objects/{name} - Get specific MetaObject
  * - GET /api/metadata/packages/{packageName} - Get entire package
- * - GET /api/metadata/fields/{objectName}/{fieldName} - Get specific field
- * - GET /api/metadata/views/{objectName}/{fieldName}/{viewName} - Get specific view
  */
-public class MetaDataApiController extends HttpServlet {
+@Controller
+@RequestMapping("/api/metadata")
+public class MetaDataApiController {
     
-    private final MetaDataJsonSerializer serializer = new MetaDataJsonSerializer();
-    
+    @Autowired
+    private MetaDataLoader metaDataLoader;
+
     /**
-     * Helper method to get all MetaObjects from all registered loaders
+     * Enable CORS for development
      */
-    private List<MetaObject> getAllMetaObjects() {
-        List<MetaObject> allObjects = new ArrayList<>();
-        Collection<MetaDataLoader> loaders = MetaDataRegistry.getDataLoaders();
-        for (MetaDataLoader loader : loaders) {
-            allObjects.addAll(loader.getMetaObjects());
-        }
-        return allObjects;
-    }
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        
-        // Enable CORS for development
+    @CrossOrigin(origins = "*")
+    private void setCorsHeaders(HttpServletResponse response) {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    }
+
+    /**
+     * List all available MetaObjects
+     */
+    @GetMapping("/objects")
+    @ResponseBody
+    @CrossOrigin(origins = "*")
+    public Map<String, Object> listObjects(HttpServletResponse response) {
+        setCorsHeaders(response);
         
-        String pathInfo = request.getPathInfo();
-        if (pathInfo == null) {
-            pathInfo = "";
+        List<Map<String, String>> objects = new ArrayList<>();
+        for (MetaObject obj : metaDataLoader.getMetaObjects()) {
+            Map<String, String> objectInfo = new HashMap<>();
+            objectInfo.put("name", obj.getName());
+            objectInfo.put("type", obj.getSubTypeName());
+            objects.add(objectInfo);
         }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("objects", objects);
+        return result;
+    }
+
+    /**
+     * Get specific MetaObject by name  
+     */
+    @GetMapping("/objects/{name}")
+    @ResponseBody
+    @CrossOrigin(origins = "*")
+    public String getMetaObject(@PathVariable String name, HttpServletResponse response) throws IOException {
+        setCorsHeaders(response);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         
         try {
-            String jsonResponse = handleGetRequest(pathInfo, request);
-            PrintWriter out = response.getWriter();
-            out.print(jsonResponse);
-            out.flush();
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            PrintWriter out = response.getWriter();
-            out.print("{\"error\": \"" + e.getMessage() + "\"}");
-            out.flush();
-        }
-    }
-    
-    private String handleGetRequest(String pathInfo, HttpServletRequest request) throws Exception {
-        String[] pathParts = pathInfo.split("/");
-        
-        // Remove empty first element from split
-        if (pathParts.length > 0 && pathParts[0].isEmpty()) {
-            String[] newParts = new String[pathParts.length - 1];
-            System.arraycopy(pathParts, 1, newParts, 0, newParts.length);
-            pathParts = newParts;
-        }
-        
-        if (pathParts.length == 0) {
-            return handleListObjects();
-        }
-        
-        switch (pathParts[0]) {
-            case "objects":
-                return handleObjectsEndpoint(pathParts);
-            case "packages":
-                return handlePackagesEndpoint(pathParts);
-            case "fields":
-                return handleFieldsEndpoint(pathParts);
-            case "views":
-                return handleViewsEndpoint(pathParts);
-            default:
-                throw new IllegalArgumentException("Unknown endpoint: " + pathParts[0]);
-        }
-    }
-    
-    private String handleObjectsEndpoint(String[] pathParts) throws Exception {
-        if (pathParts.length == 1) {
-            // List all objects
-            return handleListObjects();
-        } else if (pathParts.length == 2) {
-            // Get specific object
-            String objectName = pathParts[1];
-            MetaObject metaObject = MetaDataRegistry.findMetaObject(objectName);
+            MetaObject metaObject = metaDataLoader.getMetaObjectByName(name);
             if (metaObject == null) {
-                throw new IllegalArgumentException("MetaObject not found: " + objectName);
+                throw new MetaDataNotFoundException("MetaObject not found", name);
             }
-            return serializer.serializeMetaObject(metaObject);
-        } else {
-            throw new IllegalArgumentException("Invalid objects endpoint path");
+            
+            // Use the existing JsonObjectWriter to serialize the MetaObject
+            StringWriter stringWriter = new StringWriter();
+            JsonObjectWriter jsonWriter = new JsonObjectWriter(metaDataLoader, stringWriter);
+            jsonWriter.withPrettyPrint();
+            
+            // Create a simple wrapper object to serialize
+            Map<String, Object> wrapper = createMetaObjectWrapper(metaObject);
+            jsonWriter.write(wrapper);
+            jsonWriter.close();
+            
+            return stringWriter.toString();
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
-    
-    private String handlePackagesEndpoint(String[] pathParts) throws Exception {
-        if (pathParts.length != 2) {
-            throw new IllegalArgumentException("Package name required");
-        }
+
+    /**
+     * Get entire metadata package
+     */
+    @GetMapping("/packages/{packageName}")
+    @ResponseBody
+    @CrossOrigin(origins = "*")
+    public Map<String, Object> getMetaDataPackage(@PathVariable String packageName, HttpServletResponse response) {
+        setCorsHeaders(response);
         
-        String packageName = pathParts[1];
-        // Get all objects for the package - this is simplified
-        // In reality, you'd need a way to filter by package
-        List<MetaObject> allObjects = getAllMetaObjects();
-        return serializer.serializeMetaDataPackage(packageName, allObjects);
+        Map<String, Object> packageData = new HashMap<>();
+        packageData.put("name", packageName);
+        packageData.put("version", "1.0.0");
+        
+        Map<String, Object> objects = new HashMap<>();
+        for (MetaObject obj : metaDataLoader.getMetaObjects()) {
+            objects.put(obj.getName(), createMetaObjectWrapper(obj));
+        }
+        packageData.put("objects", objects);
+        
+        return packageData;
     }
-    
-    private String handleFieldsEndpoint(String[] pathParts) throws Exception {
-        if (pathParts.length != 3) {
-            throw new IllegalArgumentException("Object name and field name required");
+
+    /**
+     * Create a simplified wrapper for MetaObject that can be easily serialized
+     */
+    private Map<String, Object> createMetaObjectWrapper(MetaObject metaObject) {
+        Map<String, Object> wrapper = new HashMap<>();
+        wrapper.put("name", metaObject.getName());
+        wrapper.put("type", metaObject.getSubTypeName());
+        wrapper.put("displayName", metaObject.getName());
+        
+        if (metaObject.getSuperData() != null) {
+            wrapper.put("super", metaObject.getSuperData().getName());
         }
         
-        String objectName = pathParts[1];
-        String fieldName = pathParts[2];
-        
-        MetaObject metaObject = MetaDataRegistry.findMetaObject(objectName);
-        if (metaObject == null) {
-            throw new IllegalArgumentException("MetaObject not found: " + objectName);
+        // Add attributes
+        Map<String, Object> attributes = new HashMap<>();
+        if (metaObject.hasMetaAttr("object")) {
+            attributes.put("className", metaObject.getMetaAttr("object").getValueAsString());
         }
+        wrapper.put("attributes", attributes);
         
-        MetaField field = metaObject.getMetaField(fieldName);
-        if (field == null) {
-            throw new IllegalArgumentException("MetaField not found: " + fieldName);
+        // Add fields
+        Map<String, Object> fields = new HashMap<>();
+        for (MetaField field : metaObject.getMetaFields()) {
+            fields.put(field.getName(), createMetaFieldWrapper(field));
         }
+        wrapper.put("fields", fields);
         
-        return serializer.serializeMetaField(field).toString();
+        return wrapper;
     }
-    
-    private String handleViewsEndpoint(String[] pathParts) throws Exception {
-        if (pathParts.length != 4) {
-            throw new IllegalArgumentException("Object name, field name, and view name required");
+
+    /**
+     * Create a simplified wrapper for MetaField
+     */
+    private Map<String, Object> createMetaFieldWrapper(MetaField field) {
+        Map<String, Object> wrapper = new HashMap<>();
+        wrapper.put("name", field.getName());
+        wrapper.put("type", field.getDataType().name().toLowerCase());
+        wrapper.put("displayName", field.getName());
+        wrapper.put("isRequired", false); // Default, could be enhanced
+        
+        // Add attributes
+        Map<String, Object> attributes = new HashMap<>();
+        if (field.hasMetaAttr("len")) {
+            try {
+                wrapper.put("length", Integer.parseInt(field.getMetaAttr("len").getValueAsString()));
+            } catch (NumberFormatException ignored) {}
         }
-        
-        String objectName = pathParts[1];
-        String fieldName = pathParts[2];
-        String viewName = pathParts[3];
-        
-        MetaObject metaObject = MetaDataRegistry.findMetaObject(objectName);
-        if (metaObject == null) {
-            throw new IllegalArgumentException("MetaObject not found: " + objectName);
+        if (field.hasMetaAttr("isKey")) {
+            wrapper.put("isKey", Boolean.parseBoolean(field.getMetaAttr("isKey").getValueAsString()));
         }
-        
-        MetaField field = metaObject.getMetaField(fieldName);
-        if (field == null) {
-            throw new IllegalArgumentException("MetaField not found: " + fieldName);
+        if (field.hasMetaAttr("dbColumn")) {
+            attributes.put("dbColumn", field.getMetaAttr("dbColumn").getValueAsString());
         }
+        wrapper.put("attributes", attributes);
         
-        MetaView view = field.getView(viewName);
-        if (view == null) {
-            throw new IllegalArgumentException("MetaView not found: " + viewName);
-        }
+        // Simplified validators and views
+        wrapper.put("validators", new ArrayList<>());
+        wrapper.put("views", new HashMap<>());
         
-        return serializer.serializeMetaView(view).toString();
+        return wrapper;
     }
-    
-    private String handleListObjects() {
-        StringBuilder json = new StringBuilder();
-        json.append("{\"objects\": [");
-        
-        List<MetaObject> objects = getAllMetaObjects();
-        boolean first = true;
-        for (MetaObject obj : objects) {
-            if (!first) {
-                json.append(",");
-            }
-            json.append("{\"name\": \"").append(obj.getName()).append("\", \"type\": \"").append(obj.getSubTypeName()).append("\"}");
-            first = false;
-        }
-        
-        json.append("]}");
-        return json.toString();
-    }
-    
-    @Override
-    protected void doOptions(HttpServletRequest request, HttpServletResponse response) {
-        // Handle CORS preflight requests
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    /**
+     * Handle OPTIONS requests for CORS
+     */
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    @CrossOrigin(origins = "*")
+    public void handleOptions(HttpServletResponse response) {
+        setCorsHeaders(response);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }
