@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.draagon.meta.generator.util.GeneratorUtil.getFilteredMetaData;
 
@@ -31,6 +33,183 @@ public class PlantUMLGenerator extends SingleFileDirectGeneratorBase<PlantUMLWri
     private String embeddedAttr = null;
     private String embeddedValues = null;
     private boolean debug = false;
+
+    //////////////////////////////////////////////////////////////////////
+    // BUILDER PATTERN SUPPORT
+
+    /**
+     * Create a new PlantUMLGenerator builder
+     * @return New PlantUMLGenerator.Builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder pattern for PlantUMLGenerator configuration providing a fluent API
+     * for configuring PlantUML generation options
+     */
+    public static class Builder {
+        private boolean showAttrs = false;
+        private boolean showFields = false;
+        private boolean showAbstracts = true;
+        private boolean drawKeys = true;
+        private boolean drawRefs = false;
+        private String embeddedAttr = null;
+        private String embeddedValues = null;
+        private boolean debug = false;
+        private String outputFilename = null;
+        private String outputDir = null;
+        private List<String> filters = null;
+
+        /**
+         * Configure whether to show attributes in the generated UML
+         * @param show true to show attributes
+         * @return this builder
+         */
+        public Builder showAttrs(boolean show) {
+            this.showAttrs = show;
+            return this;
+        }
+
+        /**
+         * Configure whether to show fields in the generated UML
+         * @param show true to show fields
+         * @return this builder
+         */
+        public Builder showFields(boolean show) {
+            this.showFields = show;
+            return this;
+        }
+
+        /**
+         * Configure whether to show abstract classes in the generated UML
+         * @param show true to show abstracts
+         * @return this builder
+         */
+        public Builder showAbstracts(boolean show) {
+            this.showAbstracts = show;
+            return this;
+        }
+
+        /**
+         * Configure whether to draw keys in the generated UML
+         * @param draw true to draw keys
+         * @return this builder
+         */
+        public Builder drawKeys(boolean draw) {
+            this.drawKeys = draw;
+            return this;
+        }
+
+        /**
+         * Configure whether to draw references in the generated UML
+         * @param draw true to draw references
+         * @return this builder
+         */
+        public Builder drawRefs(boolean draw) {
+            this.drawRefs = draw;
+            return this;
+        }
+
+        /**
+         * Set the embedded attribute name
+         * @param attr embedded attribute name
+         * @return this builder
+         */
+        public Builder withEmbeddedAttr(String attr) {
+            this.embeddedAttr = attr;
+            return this;
+        }
+
+        /**
+         * Set the embedded values
+         * @param values embedded values string
+         * @return this builder
+         */
+        public Builder withEmbeddedValues(String values) {
+            this.embeddedValues = values;
+            return this;
+        }
+
+        /**
+         * Configure debug mode
+         * @param debug true to enable debug
+         * @return this builder
+         */
+        public Builder debug(boolean debug) {
+            this.debug = debug;
+            return this;
+        }
+
+        /**
+         * Set the output filename
+         * @param filename output filename
+         * @return this builder
+         */
+        public Builder outputFilename(String filename) {
+            this.outputFilename = filename;
+            return this;
+        }
+
+        /**
+         * Set the output directory
+         * @param dir output directory
+         * @return this builder
+         */
+        public Builder outputDir(String dir) {
+            this.outputDir = dir;
+            return this;
+        }
+
+        /**
+         * Set the filters for generation
+         * @param filters list of filter strings
+         * @return this builder
+         */
+        public Builder withFilters(List<String> filters) {
+            this.filters = filters;
+            return this;
+        }
+
+        /**
+         * Build the configured PlantUMLGenerator
+         * @return Configured PlantUMLGenerator instance
+         */
+        public PlantUMLGenerator build() {
+            PlantUMLGenerator generator = new PlantUMLGenerator();
+            
+            // Configure the generator with builder values
+            Map<String, String> args = new HashMap<>();
+            args.put(ARG_SHOW_ATTRS, Boolean.toString(showAttrs));
+            args.put(ARG_SHOW_FIELDS, Boolean.toString(showFields));
+            args.put(ARG_SHOW_ABSTRACTS, Boolean.toString(showAbstracts));
+            args.put(ARG_DRAW_KEYS, Boolean.toString(drawKeys));
+            args.put(ARG_DRAW_REFS, Boolean.toString(drawRefs));
+            args.put(ARG_DEBUG, Boolean.toString(debug));
+            
+            if (embeddedAttr != null) {
+                args.put(ARG_EMBEDDED_ATTR, embeddedAttr);
+            }
+            if (embeddedValues != null) {
+                args.put(ARG_EMBEDDED_ATTR_VALUES, embeddedValues);
+            }
+            if (outputFilename != null) {
+                args.put(com.draagon.meta.generator.GeneratorBase.ARG_OUTPUTFILENAME, outputFilename);
+            }
+            if (outputDir != null) {
+                args.put(com.draagon.meta.generator.GeneratorBase.ARG_OUTPUTDIR, outputDir);
+            }
+            
+            generator.setArgs(args);
+            
+            if (filters != null) {
+                generator.setFilters(filters);
+            }
+            
+            return generator;
+        }
+    }
 
     //////////////////////////////////////////////////////////////////////
     // SingleFileDirectorGenerator Execute Override methods

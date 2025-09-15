@@ -11,11 +11,8 @@ import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.manager.StateAwareMetaObject;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.*;
-import com.draagon.meta.object.value.ValueMetaObject;
 import com.draagon.meta.manager.*;
 import com.draagon.meta.manager.db.driver.*;
-//import com.draagon.util.InitializationException;
-//import com.draagon.cache.Cache;
 import com.draagon.meta.manager.exp.Expression;
 
 import org.slf4j.Logger;
@@ -523,21 +520,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
         try {
 
             // Create the Expression for the Primary Keys
-            Expression exp = null;
-            int i = 0;
-            for (MetaField mf : getPrimaryKeys(mc)) {
-                Expression e = new Expression(mf.getName(), ref.getIds()[ i]);
-                if (exp == null) {
-                    exp = e;
-                } else {
-                    exp = exp.and(e);
-                }
-                i++;
-            }
-
-            if (exp == null) {
-                throw new PersistenceException("MetaClass [" + mc + "] has no primary keys get object by reference [" + ref + "]");
-            }
+            Expression exp = buildPrimaryKeyExpressionFromRef(mc, ref);
 
             // Create the QueryOptions and limit to the first 1
             QueryOptions qo = new QueryOptions();
@@ -694,19 +677,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
         }
 
         // Create the Expression for the Primary Keys
-        Expression exp = null;
-        for (MetaField mf : getPrimaryKeys(mc)) {
-            Expression e = new Expression(mf.getName(), mf.getObject(o));
-            if (exp == null) {
-                exp = e;
-            } else {
-                exp = exp.and(e);
-            }
-        }
-
-        if (exp == null) {
-            throw new PersistenceException("MetaClass [" + mc + "] has no primary keys defined to load object [" + o + "]");
-        }
+        Expression exp = buildPrimaryKeyExpressionFromObject(mc, o);
 
         // Try to read the object
         try {
@@ -829,19 +800,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
                     mapping = (ObjectMappingDB) getReadMapping(mc);
 
                     // Create the Expression for the Primary Keys
-                    Expression exp = null;
-                    for (MetaField mf : getPrimaryKeys(mc)) {
-                        Expression e = new Expression(mf.getName(), mf.getObject(obj));
-                        if (exp == null) {
-                            exp = e;
-                        } else {
-                            exp = exp.and(e);
-                        }
-                    }
-
-                    if (exp == null) {
-                        throw new PersistenceException("MetaClass [" + mc + "] has no primary keys defined to update object [" + obj + "]");
-                    }
+                    Expression exp = buildPrimaryKeyExpressionFromObject(mc, obj);
 
                     Collection<Object> results = getTypedDatabaseDriver().readMany(conn, mc, mapping, new QueryOptions(exp));
                     if (results.size() > 0) {
@@ -906,19 +865,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
                 if (!allowsDirtyWrites) {
 
                     // Create the Expression for the Primary Keys
-                    Expression exp = null;
-                    for (MetaField mf : getPrimaryKeys(mc)) {
-                        Expression e = new Expression(mf.getName(), mf.getObject(obj));
-                        if (exp == null) {
-                            exp = e;
-                        } else {
-                            exp = exp.and(e);
-                        }
-                    }
-
-                    if (exp == null) {
-                        throw new PersistenceException("MetaClass [" + mc + "] has no primary keys defined to delete object [" + obj + "]");
-                    }
+                    Expression exp = buildPrimaryKeyExpressionFromObject(mc, obj);
 
                     Collection<Object> results = getTypedDatabaseDriver().readMany(conn, mc, mapping, new QueryOptions(exp));
                     if (results.size() > 0) {
@@ -1424,6 +1371,63 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
                 conn.setAutoCommit(true);
             }
         }
+    }
+
+    ///////////////////////////////////////////////////////
+    // UTILITY METHODS FOR EXPRESSION BUILDING
+
+    /**
+     * Build an Expression chain for primary keys with values from an object reference
+     * @param mc MetaObject to get primary keys from
+     * @param ref ObjectRef containing the key values
+     * @return Expression chain combining all primary key conditions
+     * @throws PersistenceException if MetaObject has no primary keys
+     */
+    protected Expression buildPrimaryKeyExpressionFromRef(MetaObject mc, ObjectRef ref) throws PersistenceException {
+        Expression exp = null;
+        int i = 0;
+        
+        for (MetaField mf : getPrimaryKeys(mc)) {
+            Expression e = new Expression(mf.getName(), ref.getIds()[i]);
+            if (exp == null) {
+                exp = e;
+            } else {
+                exp = exp.and(e);
+            }
+            i++;
+        }
+        
+        if (exp == null) {
+            throw new PersistenceException("MetaObject [" + mc + "] has no primary keys");
+        }
+        
+        return exp;
+    }
+
+    /**
+     * Build an Expression chain for primary keys with values from an object
+     * @param mc MetaClass to get primary keys from
+     * @param obj Object containing the key values
+     * @return Expression chain combining all primary key conditions
+     * @throws PersistenceException if MetaObject has no primary keys
+     */
+    protected Expression buildPrimaryKeyExpressionFromObject(MetaObject mc, Object obj) throws PersistenceException {
+        Expression exp = null;
+        
+        for (MetaField mf : getPrimaryKeys(mc)) {
+            Expression e = new Expression(mf.getName(), mf.getObject(obj));
+            if (exp == null) {
+                exp = e;
+            } else {
+                exp = exp.and(e);
+            }
+        }
+        
+        if (exp == null) {
+            throw new PersistenceException("MetaObject [" + mc + "] has no primary keys");
+        }
+        
+        return exp;
     }
 
     ///////////////////////////////////////////////////////

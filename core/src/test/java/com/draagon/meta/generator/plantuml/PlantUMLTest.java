@@ -35,24 +35,31 @@ public class PlantUMLTest extends GeneratorTestBase {
 
     @Test
     public void testPlantUMLGenerator1() {
+        Generator generator = PlantUMLGenerator.builder()
+                .showAttrs(true)
+                .showAbstracts(true)
+                .outputFilename("test-plantuml-1.pu")
+                .outputDir(getGeneratedTestSourcesPath())
+                .build();
 
-        Map<String,String> args = new HashMap<>();
-        args.put( "showAttrs", "true" );
-        args.put( "showAbstracts", "true" );
-        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-1.pu" );
+        generator.execute(loader);
 
-        drawUML( args, null );
+        // Verify the output file was generated
+        verifyOutputFile("test-plantuml-1.pu");
     }
 
     @Test
     public void testPlantUMLGenerator2() {
+        Generator generator = PlantUMLGenerator.builder()
+                .showAttrs(false)
+                .showAbstracts(true)
+                .outputFilename("test-plantuml-2.pu")
+                .outputDir(getGeneratedTestSourcesPath())
+                .withFilters(Arrays.asList(new String[] {}))
+                .build();
 
-        Map<String,String> args = new HashMap<>();
-        args.put( "showAttrs", "false" );
-        args.put( "showAbstracts", "true" );
-        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-2.pu" );
-
-        drawUML( args, Arrays.asList( new String[] {} ) );
+        generator.execute(loader);
+        verifyOutputFile("test-plantuml-2.pu");
     }
 
     @Test
@@ -83,16 +90,19 @@ public class PlantUMLTest extends GeneratorTestBase {
 
     @Test
     public void testPlantUMLGenerator5() {
+        Generator generator = PlantUMLGenerator.builder()
+                .showAttrs(false)
+                .showAbstracts(false)
+                .outputFilename("test-plantuml-5.pu")
+                .outputDir(getGeneratedTestSourcesPath())
+                .withFilters(Arrays.asList(new String[] {
+                        "produce::v1::fruit::*",
+                        "produce::v1::container::@"
+                }))
+                .build();
 
-        Map<String,String> args = new HashMap<>();
-        args.put( "showAttrs", "false" );
-        args.put( "showAbstracts", "false" );
-        args.put( GeneratorBase.ARG_OUTPUTFILENAME, "test-plantuml-5.pu" );
-
-        drawUML( args, Arrays.asList( new String[] {
-                "produce::v1::fruit::*",
-                "produce::v1::container::@"
-        } ));
+        generator.execute(loader);
+        verifyOutputFile("test-plantuml-5.pu");
     }
 
     @Test
@@ -146,6 +156,19 @@ public class PlantUMLTest extends GeneratorTestBase {
             assertTrue("Generated PlantUML file should not be empty", 
                       outputFile.length() > 0);
         }
+    }
+
+    /**
+     * Helper method to verify that a PlantUML output file was generated correctly
+     * @param filename the output filename to verify
+     */
+    protected void verifyOutputFile(String filename) {
+        String outputPath = getGeneratedTestSourcesPath();
+        java.io.File outputFile = new java.io.File(outputPath, filename);
+        assertTrue("Generated PlantUML file should exist: " + outputFile.getAbsolutePath(), 
+                  outputFile.exists());
+        assertTrue("Generated PlantUML file should not be empty", 
+                  outputFile.length() > 0);
     }
 
 }
