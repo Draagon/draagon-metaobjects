@@ -1,0 +1,37 @@
+{
+  "name": "fishstore-demo",
+  "version": "1.0.0",
+  "description": "Fishstore Demo using MetaObjects React Components",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack serve --mode development",
+    "build": "webpack --mode production",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.9.0",
+    "@tanstack/react-query": "^4.29.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.1.0",
+    "react-router-dom": "^6.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@webpack-cli/generators": "^3.0.0",
+    "css-loader": "^6.8.0",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.0",
+    "ts-loader": "^9.4.0",
+    "typescript": "^5.0.0",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 11"
+  ]
+}
