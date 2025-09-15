@@ -24,8 +24,26 @@ http://www.eclipse.org/legal/epl-v10.html
     </jdbc:embedded-database>
     
     <!-- Setup the MetaDataLoader -->
-    <bean id="loader" class="com.draagon.meta.loader.xml.XMLFileMetaDataLoader">        
-        <property name="source" value="fishstore-metadata.xml"/>
+    <bean id="loader" class="com.draagon.meta.loader.file.FileMetaDataLoader">
+        <constructor-arg>
+            <bean class="com.draagon.meta.loader.file.FileLoaderOptions">
+                <property name="sources">
+                    <list>
+                        <bean class="com.draagon.meta.loader.file.LocalFileMetaDataSources">
+                            <constructor-arg>
+                                <list>
+                                    <value>metadata/fishstore-metadata.json</value>
+                                </list>
+                            </constructor-arg>
+                        </bean>
+                    </list>
+                </property>
+                <property name="shouldRegister" value="true"/>
+                <property name="strict" value="true"/>
+                <property name="verbose" value="false"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg value="FishstoreLoader"/>
     </bean>    
     
     <!-- Setup the ObjectManagerDB -->

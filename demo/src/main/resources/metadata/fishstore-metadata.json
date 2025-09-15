@@ -1,0 +1,343 @@
+{
+  "name": "fishstore",
+  "version": "1.0.0",
+  "description": "Fishstore demo metadata for React MetaViews",
+  "objects": {
+    "Base": {
+      "name": "Base",
+      "type": "managed",
+      "displayName": "Base Entity",
+      "className": "com.draagon.meta.demo.fishstore.Base",
+      "attributes": {},
+      "fields": {
+        "id": {
+          "name": "id",
+          "type": "long",
+          "displayName": "ID",
+          "isKey": true,
+          "isRequired": true,
+          "auto": "last",
+          "dbColumn": "ID",
+          "attributes": {},
+          "validators": [],
+          "views": {
+            "numeric": {
+              "name": "numeric",
+              "type": "numeric",
+              "attributes": {}
+            }
+          },
+          "defaultView": "numeric"
+        }
+      }
+    },
+    "Store": {
+      "name": "Store",
+      "type": "managed",
+      "super": "Base",
+      "displayName": "Fish Store",
+      "className": "com.draagon.meta.demo.fishstore.Store",
+      "dbTable": "STORE",
+      "attributes": {},
+      "fields": {
+        "name": {
+          "name": "name",
+          "type": "string",
+          "displayName": "Store Name",
+          "length": 50,
+          "isRequired": true,
+          "dbColumn": "NAME",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Store name is required"
+            },
+            {
+              "type": "length",
+              "message": "Store name must be between 1 and 50 characters",
+              "params": { "min": 1, "max": 50 }
+            }
+          ],
+          "views": {
+            "text": {
+              "name": "text",
+              "type": "text",
+              "attributes": {
+                "placeholder": {
+                  "name": "placeholder",
+                  "value": "Enter store name"
+                }
+              }
+            }
+          },
+          "defaultView": "text"
+        },
+        "maxTanks": {
+          "name": "maxTanks",
+          "type": "int",
+          "displayName": "Maximum Tanks",
+          "isRequired": true,
+          "dbColumn": "MAX_TANKS",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Maximum tanks is required"
+            },
+            {
+              "type": "range",
+              "message": "Maximum tanks must be between 1 and 100",
+              "params": { "min": 1, "max": 100 }
+            }
+          ],
+          "views": {
+            "numeric": {
+              "name": "numeric", 
+              "type": "numeric",
+              "attributes": {
+                "min": { "name": "min", "value": 1 },
+                "max": { "name": "max", "value": 100 }
+              }
+            }
+          },
+          "defaultView": "numeric"
+        }
+      }
+    },
+    "Tank": {
+      "name": "Tank",
+      "type": "managed",
+      "super": "Base",
+      "displayName": "Fish Tank",
+      "className": "com.draagon.meta.demo.fishstore.Tank",
+      "dbTable": "TANK",
+      "attributes": {},
+      "fields": {
+        "num": {
+          "name": "num",
+          "type": "int",
+          "displayName": "Tank Number",
+          "isRequired": true,
+          "dbColumn": "NUM",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Tank number is required"
+            }
+          ],
+          "views": {
+            "numeric": {
+              "name": "numeric",
+              "type": "numeric",
+              "attributes": {}
+            }
+          },
+          "defaultView": "numeric"
+        },
+        "maxFish": {
+          "name": "maxFish",
+          "type": "int",
+          "displayName": "Maximum Fish",
+          "isRequired": true,
+          "dbColumn": "MAX_FISH",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Maximum fish is required"
+            },
+            {
+              "type": "range",
+              "message": "Maximum fish must be between 1 and 50",
+              "params": { "min": 1, "max": 50 }
+            }
+          ],
+          "views": {
+            "numeric": {
+              "name": "numeric",
+              "type": "numeric",
+              "attributes": {
+                "min": { "name": "min", "value": 1 },
+                "max": { "name": "max", "value": 50 }
+              }
+            }
+          },
+          "defaultView": "numeric"
+        }
+      }
+    },
+    "Breed": {
+      "name": "Breed",
+      "type": "managed",
+      "super": "Base",
+      "displayName": "Fish Breed",
+      "className": "com.draagon.meta.demo.fishstore.Breed",
+      "dbTable": "BREED",
+      "attributes": {},
+      "fields": {
+        "name": {
+          "name": "name",
+          "type": "string",
+          "displayName": "Breed Name",
+          "length": 100,
+          "isRequired": true,
+          "dbColumn": "NAME",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Breed name is required"
+            }
+          ],
+          "views": {
+            "text": {
+              "name": "text",
+              "type": "text",
+              "attributes": {}
+            }
+          },
+          "defaultView": "text"
+        },
+        "agressionLevel": {
+          "name": "agressionLevel",
+          "type": "int",
+          "displayName": "Aggression Level",
+          "isRequired": true,
+          "dbColumn": "AGRESSION_LEVEL",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Aggression level is required"
+            },
+            {
+              "type": "range",
+              "message": "Aggression level must be between 1 and 10",
+              "params": { "min": 1, "max": 10 }
+            }
+          ],
+          "views": {
+            "select": {
+              "name": "select",
+              "type": "select",
+              "attributes": {
+                "options": {
+                  "name": "options",
+                  "value": [
+                    { "value": 1, "label": "1 - Very Peaceful" },
+                    { "value": 2, "label": "2 - Peaceful" },
+                    { "value": 3, "label": "3 - Semi-Peaceful" },
+                    { "value": 4, "label": "4 - Semi-Aggressive" },
+                    { "value": 5, "label": "5 - Aggressive" },
+                    { "value": 6, "label": "6 - Very Aggressive" },
+                    { "value": 7, "label": "7 - Highly Aggressive" },
+                    { "value": 8, "label": "8 - Extremely Aggressive" },
+                    { "value": 9, "label": "9 - Predatory" },
+                    { "value": 10, "label": "10 - Apex Predator" }
+                  ]
+                }
+              }
+            }
+          },
+          "defaultView": "select"
+        }
+      }
+    },
+    "Fish": {
+      "name": "Fish",
+      "type": "managed",
+      "super": "Base",
+      "displayName": "Fish",
+      "className": "com.draagon.meta.demo.fishstore.Fish",
+      "dbTable": "FISH",
+      "attributes": {},
+      "fields": {
+        "breedName": {
+          "name": "breedName",
+          "type": "string",
+          "displayName": "Breed Name",
+          "length": 100,
+          "isRequired": true,
+          "dbColumn": "BREED_NAME",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Breed name is required"
+            }
+          ],
+          "views": {
+            "text": {
+              "name": "text",
+              "type": "text",
+              "attributes": {}
+            }
+          },
+          "defaultView": "text"
+        },
+        "length": {
+          "name": "length",
+          "type": "int",
+          "displayName": "Length (inches)",
+          "isRequired": true,
+          "dbColumn": "LENGTH",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Length is required"
+            },
+            {
+              "type": "range",
+              "message": "Length must be between 1 and 100 inches",
+              "params": { "min": 1, "max": 100 }
+            }
+          ],
+          "views": {
+            "numeric": {
+              "name": "numeric",
+              "type": "numeric",
+              "attributes": {
+                "min": { "name": "min", "value": 1 },
+                "max": { "name": "max", "value": 100 }
+              }
+            }
+          },
+          "defaultView": "numeric"
+        },
+        "weight": {
+          "name": "weight",
+          "type": "int",
+          "displayName": "Weight (grams)",
+          "isRequired": true,
+          "dbColumn": "WEIGHT",
+          "attributes": {},
+          "validators": [
+            {
+              "type": "required",
+              "message": "Weight is required"
+            },
+            {
+              "type": "range",
+              "message": "Weight must be between 1 and 10000 grams",
+              "params": { "min": 1, "max": 10000 }
+            }
+          ],
+          "views": {
+            "numeric": {
+              "name": "numeric",
+              "type": "numeric",
+              "attributes": {
+                "min": { "name": "min", "value": 1 },
+                "max": { "name": "max", "value": 10000 }
+              }
+            }
+          },
+          "defaultView": "numeric"
+        }
+      }
+    }
+  }
+}
