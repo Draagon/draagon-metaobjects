@@ -199,6 +199,88 @@ public abstract class ObjectManager
 	 */
 	public abstract Object getObjectByRef( ObjectConnection c, String refStr ) throws MetaDataException;
 
+	///////////////////////////////////////////////////////
+	// OPTIONAL-BASED APIs FOR NULL-SAFE ACCESS
+	//
+
+	/**
+	 * Finds an object by reference, returning Optional to handle null cases safely
+	 * @param c Object connection
+	 * @param refStr Reference string
+	 * @return Optional containing the object, or empty if not found
+	 */
+	public Optional<Object> findObjectByRef(ObjectConnection c, String refStr) {
+		try {
+			Object obj = getObjectByRef(c, refStr);
+			return Optional.ofNullable(obj);
+		} catch (ObjectNotFoundException e) {
+			return Optional.empty();
+		} catch (MetaDataException e) {
+			// Re-throw other exceptions as they indicate real errors
+			throw new RuntimeException("Error finding object by reference: " + refStr, e);
+		}
+	}
+
+	/**
+	 * Finds an object by reference using automatic connection management
+	 * @param refStr Reference string
+	 * @return Optional containing the object, or empty if not found
+	 */
+	public Optional<Object> findObjectByRef(String refStr) {
+		try (ObjectConnection connection = getConnection()) {
+			return findObjectByRef(connection, refStr);
+		} catch (Exception e) {
+			throw new RuntimeException("Error finding object by reference: " + refStr, e);
+		}
+	}
+
+	/**
+	 * Finds an object asynchronously by reference
+	 * @param refStr Reference string
+	 * @return CompletableFuture containing Optional of the object
+	 */
+	public CompletableFuture<Optional<Object>> findObjectByRefAsync(String refStr) {
+		return CompletableFuture.supplyAsync(() -> findObjectByRef(refStr), asyncExecutor);
+	}
+
+	/**
+	 * Finds the first object matching the given expression
+	 * @param mc MetaObject to search
+	 * @param expression Query expression
+	 * @return Optional containing the first matching object, or empty if none found
+	 */
+	public Optional<Object> findFirst(MetaObject mc, Expression expression) {
+		try (ObjectConnection connection = getConnection()) {
+			QueryOptions options = new QueryOptions(expression);
+			options.setRange(new Range(1, 1));
+			Collection<?> results = getObjects(connection, mc, options);
+			return results.isEmpty() ? Optional.empty() : Optional.of(results.iterator().next());
+		} catch (Exception e) {
+			throw new RuntimeException("Error finding first object", e);
+		}
+	}
+
+	/**
+	 * Finds the first object matching the given field and value
+	 * @param mc MetaObject to search
+	 * @param fieldName Field name to match
+	 * @param value Value to match
+	 * @return Optional containing the first matching object, or empty if none found
+	 */
+	public Optional<Object> findFirst(MetaObject mc, String fieldName, Object value) {
+		return findFirst(mc, new Expression(fieldName, value));
+	}
+
+	/**
+	 * Asynchronously finds the first object matching the given expression
+	 * @param mc MetaObject to search
+	 * @param expression Query expression
+	 * @return CompletableFuture containing Optional of the first matching object
+	 */
+	public CompletableFuture<Optional<Object>> findFirstAsync(MetaObject mc, Expression expression) {
+		return CompletableFuture.supplyAsync(() -> findFirst(mc, expression), asyncExecutor);
+	}
+
 	/**
 	 * Load the specified object from the datastore
 	 */

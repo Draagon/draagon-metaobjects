@@ -18,10 +18,83 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Fluent query builder for ObjectManager operations
+ * Fluent query builder for ObjectManager operations providing a clean,
+ * readable API for constructing complex database queries.
+ * 
+ * <h3>Basic Usage Examples:</h3>
+ * 
+ * <pre>{@code
+ * // Simple query by field value
+ * Collection<?> users = objectManager.query("User")
+ *     .where("status", "active")
+ *     .execute();
+ *
+ * // Complex query with multiple conditions, ordering, and pagination
+ * Collection<?> results = objectManager.query("Product")
+ *     .where("category", "electronics")
+ *     .and("price", 100)
+ *     .orderByDesc("createdDate")
+ *     .limit(10)
+ *     .execute();
+ *
+ * // Using expressions for advanced conditions
+ * Optional<Object> user = objectManager.query("User")
+ *     .where(new Expression("age", Expression.GREATER, 18))
+ *     .and("isActive", true)
+ *     .firstOptional();
+ *
+ * // Asynchronous query execution
+ * CompletableFuture<Collection<?>> futureResults = objectManager.query("Order")
+ *     .where("customerId", customerId)
+ *     .orderByAsc("orderDate")
+ *     .executeAsync();
+ *
+ * // Count operations
+ * long activeUserCount = objectManager.query("User")
+ *     .where("status", "active")
+ *     .count();
+ *
+ * // Field selection for performance
+ * Collection<?> userNames = objectManager.query("User")
+ *     .fields("firstName", "lastName")
+ *     .where("department", "engineering")
+ *     .execute();
+ *
+ * // Range/pagination with ordering
+ * Collection<?> pagedResults = objectManager.query("Article")
+ *     .where("published", true)
+ *     .orderByDesc("publishDate")
+ *     .limit(20, 40)  // Get records 20-40
+ *     .execute();
+ * }</pre>
+ * 
+ * <h3>Event System Integration:</h3>
+ * <p>The QueryBuilder automatically integrates with the ObjectManager's event system.
+ * All persistence operations (create, update, delete) will fire appropriate events
+ * to registered {@link PersistenceEventListener}s, allowing for:</p>
+ * <ul>
+ *   <li>Audit logging of data changes</li>
+ *   <li>Cache invalidation</li>
+ *   <li>Data validation</li>
+ *   <li>Business rule enforcement</li>
+ *   <li>Real-time notifications</li>
+ * </ul>
+ * 
+ * <h3>Performance Considerations:</h3>
+ * <ul>
+ *   <li>Use field selection to limit data transfer</li>
+ *   <li>Implement proper indexing on queried fields</li>
+ *   <li>Use pagination for large result sets</li>
+ *   <li>Consider async operations for non-blocking execution</li>
+ * </ul>
+ * 
+ * @see ObjectManager#query(MetaObject)
+ * @see ObjectManager#query(String)
+ * @see PersistenceEventListener
  */
 public class QueryBuilder {
     
@@ -201,27 +274,48 @@ public class QueryBuilder {
     }
     
     /**
-     * Executes the query and returns the first result
+     * Executes the query and returns the first result, or null if no results found
+     * @deprecated Use {@link #firstOptional()} for null-safe access
      */
+    @Deprecated
     public Object first() throws MetaDataException {
+        return firstOptional().orElse(null);
+    }
+    
+    /**
+     * Executes the query and returns the first result as Optional for null-safe access
+     * @return Optional containing the first result, or empty if no results found
+     * @throws MetaDataException if query execution fails
+     */
+    public Optional<Object> firstOptional() throws MetaDataException {
         QueryOptions options = build();
         options.setRange(new Range(1, 1));
         
         try (ObjectConnection connection = objectManager.getConnection()) {
             Collection<?> results = objectManager.getObjects(connection, metaObject, options);
-            return results.isEmpty() ? null : results.iterator().next();
+            return results.isEmpty() ? Optional.empty() : Optional.of(results.iterator().next());
         }
     }
     
     /**
-     * Executes the query asynchronously and returns the first result
+     * Executes the query asynchronously and returns the first result as Optional
+     * @return CompletableFuture containing Optional of the first result
      */
-    public CompletableFuture<Object> firstAsync() {
+    public CompletableFuture<Optional<Object>> firstOptionalAsync() {
         QueryOptions options = build();
         options.setRange(new Range(1, 1));
         
         return objectManager.getObjectsAsync(metaObject, options)
-            .thenApply(results -> results.isEmpty() ? null : results.iterator().next());
+            .thenApply(results -> results.isEmpty() ? Optional.empty() : Optional.of(results.iterator().next()));
+    }
+    
+    /**
+     * Executes the query asynchronously and returns the first result (legacy method)
+     * @deprecated Use {@link #firstOptionalAsync()} for null-safe access
+     */
+    @Deprecated
+    public CompletableFuture<Object> firstAsync() {
+        return firstOptionalAsync().thenApply(opt -> opt.orElse(null));
     }
     
     /**

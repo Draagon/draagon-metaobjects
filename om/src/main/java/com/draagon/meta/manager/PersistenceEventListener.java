@@ -13,8 +13,113 @@ import com.draagon.meta.object.MetaObject;
 import java.util.Collection;
 
 /**
- * Event listener interface for persistence operations.
- * Allows for custom logic to be executed before and after persistence operations.
+ * Event listener interface for persistence operations providing hooks for custom logic
+ * to be executed before and after persistence operations on MetaObjects.
+ * 
+ * <p>The event system enables powerful cross-cutting concerns such as auditing, validation,
+ * caching, security, and business rule enforcement. Events are fired synchronously within
+ * the same transaction context as the persistence operation.</p>
+ * 
+ * <h3>Usage Examples:</h3>
+ * 
+ * <pre>{@code
+ * // Audit logging implementation
+ * public class AuditEventListener implements PersistenceEventListener {
+ *     private final AuditLog auditLog;
+ *     
+ *     @Override
+ *     public void onAfterCreate(MetaObject mc, Object obj) {
+ *         auditLog.logCreate(mc.getName(), getObjectId(obj), getCurrentUser());
+ *     }
+ *     
+ *     @Override
+ *     public void onAfterUpdate(MetaObject mc, Object obj, Collection<MetaField> modifiedFields) {
+ *         String changes = modifiedFields.stream()
+ *             .map(field -> field.getName() + "=" + field.getObject(obj))
+ *             .collect(Collectors.joining(", "));
+ *         auditLog.logUpdate(mc.getName(), getObjectId(obj), changes, getCurrentUser());
+ *     }
+ *     
+ *     @Override
+ *     public void onAfterDelete(MetaObject mc, Object obj) {
+ *         auditLog.logDelete(mc.getName(), getObjectId(obj), getCurrentUser());
+ *     }
+ * }
+ * 
+ * // Cache invalidation implementation
+ * public class CacheInvalidationListener implements PersistenceEventListener {
+ *     private final CacheManager cacheManager;
+ *     
+ *     @Override
+ *     public void onAfterCreate(MetaObject mc, Object obj) {
+ *         invalidateRelatedCaches(mc, obj);
+ *     }
+ *     
+ *     @Override
+ *     public void onAfterUpdate(MetaObject mc, Object obj, Collection<MetaField> modifiedFields) {
+ *         // Only invalidate if specific fields changed
+ *         if (modifiedFields.stream().anyMatch(field -> field.hasMetaAttr("cacheable"))) {
+ *             invalidateRelatedCaches(mc, obj);
+ *         }
+ *     }
+ *     
+ *     private void invalidateRelatedCaches(MetaObject mc, Object obj) {
+ *         cacheManager.evict(mc.getName() + ":" + getObjectId(obj));
+ *         cacheManager.evictPattern(mc.getName() + ":*");
+ *     }
+ * }
+ * 
+ * // Business rule validation
+ * public class BusinessRuleListener implements PersistenceEventListener {
+ *     @Override
+ *     public void onBeforeCreate(MetaObject mc, Object obj) {
+ *         if ("Order".equals(mc.getName())) {
+ *             validateOrderBusinessRules(obj);
+ *         }
+ *     }
+ *     
+ *     @Override
+ *     public void onBeforeUpdate(MetaObject mc, Object obj, Collection<MetaField> modifiedFields) {
+ *         if ("User".equals(mc.getName()) && 
+ *             modifiedFields.stream().anyMatch(f -> "email".equals(f.getName()))) {
+ *             validateEmailUniqueness(obj);
+ *         }
+ *     }
+ * }
+ * 
+ * // Registration with ObjectManager
+ * objectManager.addPersistenceEventListener(new AuditEventListener(auditLog));
+ * objectManager.addPersistenceEventListener(new CacheInvalidationListener(cacheManager));
+ * objectManager.addPersistenceEventListener(new BusinessRuleListener());
+ * }</pre>
+ * 
+ * <h3>Event Timing and Transaction Context:</h3>
+ * <ul>
+ *   <li><strong>Before Events</strong>: Called within the same transaction, allowing validation 
+ *       and business rule enforcement that can prevent the operation</li>
+ *   <li><strong>After Events</strong>: Called after successful persistence, ideal for auditing,
+ *       cache invalidation, and notifications</li>
+ *   <li><strong>Error Events</strong>: Called when persistence operations fail, useful for
+ *       error reporting and cleanup</li>
+ * </ul>
+ * 
+ * <h3>Best Practices:</h3>
+ * <ul>
+ *   <li>Keep event handlers fast to avoid performance impact</li>
+ *   <li>Use before events for validation and business rules</li>
+ *   <li>Use after events for auditing and side effects</li>
+ *   <li>Handle exceptions gracefully in event handlers</li>
+ *   <li>Consider async processing for non-critical operations</li>
+ *   <li>Use the modifiedFields parameter to optimize update handlers</li>
+ * </ul>
+ * 
+ * <h3>Thread Safety:</h3>
+ * <p>Event listeners must be thread-safe as they may be called concurrently
+ * from multiple threads. The ObjectManager synchronizes access to the listener
+ * list but not individual listener method calls.</p>
+ * 
+ * @see ObjectManager#addPersistenceEventListener(PersistenceEventListener)
+ * @see ObjectManager#removePersistenceEventListener(PersistenceEventListener)
  */
 public interface PersistenceEventListener {
     
