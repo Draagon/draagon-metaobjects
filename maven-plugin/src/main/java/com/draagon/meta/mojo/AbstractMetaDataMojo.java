@@ -81,8 +81,10 @@ public abstract class AbstractMetaDataMojo extends AbstractMojo
         if ( getGenerators() != null ) {
             for ( GeneratorParam g : getGenerators() ) {
                 try {
-                    // TODO: Change this not to use newInstance()
-                    Generator impl = (Generator) projectClassLoader.loadClass(g.getClassname()).newInstance();
+                    // Fixed: Replaced deprecated newInstance() with proper constructor usage
+                    Class<?> generatorClass = projectClassLoader.loadClass(g.getClassname());
+                    Constructor<?> constructor = generatorClass.getDeclaredConstructor();
+                    Generator impl = (Generator) constructor.newInstance();
 
                     // Merge generator args and global args
                     Map<String, String> allargs = mergeAndOverwriteArgs(g);
