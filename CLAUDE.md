@@ -16,9 +16,10 @@ MetaObjects is a Java-based suite of tools for metadata-driven development, prov
 ├── metadata/       # Metadata models and types
 ├── maven-plugin/   # Maven plugin for code generation
 ├── om/            # Object Manager module
-├── demo/          # Demo applications (commented out in build)
-├── web/           # Web-related utilities (commented out in build)
-├── omdb/          # Database Object Manager (commented out in build)
+├── demo/          # Demo applications with React MetaView integration
+├── web/           # Web-related utilities with React MetaView components
+├── omdb/          # Database Object Manager
+├── omnosql/       # NoSQL Object Manager
 └── docs/          # Documentation
 ```
 
@@ -67,6 +68,7 @@ mvn metaobjects:editor
 - **Default field values** support in meta models
 - **PlantUML diagram generation** from metadata definitions
 - **Maven plugin integration** for build-time code generation
+- **React MetaView System** with TypeScript components and automatic form generation
 
 ## Recent Major Changes (v5.1.0)
 
@@ -114,6 +116,33 @@ A comprehensive modernization initiative that enhanced all core modules:
 - **Comprehensive Documentation**: 200+ lines of new JavaDoc with practical examples
 - **Build Success**: All modules compile and test successfully
 
+### React MetaView System Implementation (September 2025)
+A comprehensive React.js integration that extends the JSP-based MetaView system to modern web development:
+
+#### React Components & TypeScript
+- **Complete TypeScript Integration**: Type-safe React components with Redux Toolkit state management
+- **MetaView Component Library**: TextView, NumericView, DateView, SelectView, CheckboxView React components
+- **Dynamic Form Generation**: MetaObjectForm component that automatically renders forms from MetaObject definitions
+- **State Management**: Redux-based form state with React Query for data fetching and caching
+
+#### Backend Integration Architecture
+- **Spring REST API Controllers**: MetaDataApiController serves metadata as JSON to React frontend
+- **Existing IO Package Usage**: Leverages JsonObjectWriter from MetaObjects IO package for proper serialization
+- **FileMetaDataLoader Support**: JSON metadata loading via existing FileMetaDataLoader with JsonMetaDataParser
+- **ObjectManagerDB Integration**: Full database persistence with Derby driver and auto table creation
+
+#### Fishstore Demo Enhancement
+- **Complete React Demo**: Full fishstore storefront application with React components and routing
+- **JSON Metadata Definitions**: Rich metadata with React-specific view configurations, validators, and field attributes
+- **Sample Data Management**: Automated sample data creation with Store, Breed, Tank, and Fish entities
+- **End-to-End Integration**: React frontend → Spring API → MetaObjects metadata → Derby database
+
+#### Key Architectural Lessons
+- **Use Existing Infrastructure**: Always leverage existing MetaObjects patterns (FileMetaDataLoader, IO package) vs custom solutions
+- **Module Dependency Management**: Controllers belong in demo module when referencing demo classes, not web module
+- **JSON Metadata Location**: Place JSON metadata in `/src/main/resources/metadata/` for proper classpath loading
+- **API Consistency**: Use correct ObjectManager methods (`createObject()` not `insertObject()`) and constructor signatures
+
 ## Claude AI Documentation
 
 ### Architectural Understanding
@@ -140,6 +169,13 @@ A comprehensive modernization initiative that enhanced all core modules:
 - Use JUnit 4.13.2 for testing
 - Test files should follow existing patterns
 
+### React & Frontend Integration
+- **Use Existing MetaObjects Infrastructure**: Always leverage FileMetaDataLoader, JsonObjectWriter from IO package
+- **JSON Metadata**: Place in `/src/main/resources/metadata/` for proper classpath loading via FileMetaDataLoader
+- **Spring Integration**: Use proper controller module placement - demo controllers in demo module, web controllers in web module
+- **TypeScript Components**: Follow React MetaView patterns for metadata-driven UI component generation
+- **State Management**: Use Redux Toolkit with React Query for form state and data fetching
+
 ### Maven Configuration
 - Uses parent POM for dependency management
 - OSGi bundle support enabled
@@ -153,6 +189,15 @@ Build order (important for development):
 2. `maven-plugin` - Code generation plugin
 3. `core` - Core functionality (depends on generated models)
 4. `om` - Object Manager
+5. `omdb` - Database Object Manager (extends om)
+6. `omnosql` - NoSQL Object Manager (extends om)
+7. `web` - Web utilities with React MetaView components
+8. `demo` - Demo applications with React integration
+
+### Module Integration Notes
+- **web** module: Contains React TypeScript components and Spring controllers for metadata APIs
+- **demo** module: Contains fishstore React demo, data controllers, and JSON metadata definitions
+- **Controllers**: Demo-specific controllers belong in demo module, generic web controllers in web module
 
 ## Key Files for Development
 
@@ -163,6 +208,15 @@ Build order (important for development):
 - Core source: `core/src/main/java/com/draagon/meta/`
 - Metadata: `metadata/src/main/java/com/draagon/meta/`
 - Tests: `*/src/test/java/`
+
+### React MetaView Files
+- React components: `web/src/typescript/components/metaviews/`
+- React forms: `web/src/typescript/components/forms/`
+- TypeScript types: `web/src/typescript/types/metadata.ts`
+- Spring controllers: `web/src/main/java/com/draagon/meta/web/react/api/`
+- Demo controllers: `demo/src/main/java/com/draagon/meta/demo/fishstore/api/`
+- JSON metadata: `demo/src/main/resources/metadata/fishstore-metadata.json`
+- Package configuration: `web/package.json`, `web/tsconfig.json`
 
 ## Upcoming Features (v4.4.0 Planned)
 

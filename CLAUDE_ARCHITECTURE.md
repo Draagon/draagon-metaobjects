@@ -226,6 +226,7 @@ MetaException (base)
 
 ## Common Pitfalls
 
+### Core Framework Pitfalls
 1. **Build Order**: Always build `metadata` before `core`
 2. **Classloader Issues**: Set appropriate classloader for OSGi/Maven contexts
 3. **Validation**: Don't skip object-level validation
@@ -233,6 +234,15 @@ MetaException (base)
 5. **Immutability Misunderstanding**: DON'T try to modify MetaData after loading - they are immutable like Java Classes
 6. **WeakReference Misuse**: DON'T assume WeakReferences are a problem - they prevent memory leaks in permanent object graphs
 7. **Type Safety**: Be aware of unchecked cast warnings - these indicate real type safety issues that need addressing
+
+### React Integration Pitfalls
+8. **Custom Infrastructure**: DON'T build custom JSON serializers - use existing `JsonObjectWriter` from IO package
+9. **Wrong Module Placement**: DON'T put demo-specific controllers in web module - they belong in demo module
+10. **Static JSON Files**: DON'T serve JSON metadata as static files - load via `FileMetaDataLoader` for proper integration
+11. **Incorrect API Usage**: DON'T use `insertObject()` - use `createObject()` for ObjectManager operations
+12. **Wrong Constructor Calls**: DON'T use single-parameter constructors for exceptions requiring multiple parameters
+13. **Missing Dependencies**: DON'T forget to add Spring dependencies to modules using Spring annotations
+14. **Metadata Location**: DON'T put JSON metadata in webapp/static - use `/src/main/resources/metadata/` for classpath loading
 
 ## Framework Enhancement Status (September 2025)
 
@@ -247,6 +257,114 @@ The MetaObjects framework has been successfully modernized with comprehensive mu
 - **✅ Zero Regressions**: Full backward compatibility maintained
 
 The framework now provides modern, type-safe APIs while preserving its elegant load-once immutable architecture.
+
+## React MetaView Architecture (September 2025)
+
+### Frontend-Backend Integration Pattern
+
+The React MetaView system follows a proper n-tier architecture that integrates seamlessly with existing MetaObjects patterns:
+
+```
+React UI Layer
+    ↓ (Redux/React Query)
+Spring REST API Layer  
+    ↓ (JsonObjectWriter from IO package)
+MetaObjects Metadata Layer
+    ↓ (FileMetaDataLoader + JsonMetaDataParser)
+ObjectManagerDB Data Layer
+    ↓ (DerbyDriver)
+Database Layer
+```
+
+### Key Architectural Principles
+
+#### 1. **Leverage Existing Infrastructure**
+- **✅ USE**: `FileMetaDataLoader` with `JsonMetaDataParser` for JSON metadata loading
+- **✅ USE**: `JsonObjectWriter` from existing IO package for serialization
+- **❌ AVOID**: Building custom JSON serializers or metadata loaders
+- **✅ USE**: Existing `ObjectManager` API patterns (`createObject()`, `getObjects()`)
+
+#### 2. **Proper Module Boundaries**
+- **Web Module**: Generic React components, TypeScript types, metadata API controllers
+- **Demo Module**: Demo-specific controllers, sample data services, JSON metadata definitions
+- **Rule**: Controllers referencing demo classes belong in demo module, not web module
+
+#### 3. **JSON Metadata Management**
+- **Location**: `/src/main/resources/metadata/*.json` for proper classpath loading
+- **Loading**: Via `LocalFileMetaDataSources` in Spring configuration
+- **Content**: Rich metadata with React-specific view definitions, validators, and attributes
+
+### Component Architecture
+
+#### React TypeScript Layer
+```typescript
+// Type-safe metadata definitions
+interface MetaField {
+  name: string;
+  type: FieldType;
+  validators: ValidationRule[];
+  views: Record<string, MetaView>;
+}
+
+// Metadata-driven components
+<TextView field={metaField} value={value} mode={ViewMode.EDIT} />
+<MetaObjectForm metaObject={storeMetaObject} onSubmit={handleSubmit} />
+```
+
+#### Spring API Layer
+```java
+@Controller
+@RequestMapping("/api/metadata")
+public class MetaDataApiController {
+    @Autowired
+    private MetaDataLoader metaDataLoader;
+    
+    // Uses existing JsonObjectWriter
+    StringWriter writer = new StringWriter();
+    JsonObjectWriter jsonWriter = new JsonObjectWriter(metaDataLoader, writer);
+}
+```
+
+#### MetaObjects Integration
+```xml
+<!-- Spring configuration -->
+<bean id="loader" class="com.draagon.meta.loader.file.FileMetaDataLoader">
+    <constructor-arg>
+        <bean class="com.draagon.meta.loader.file.FileLoaderOptions">
+            <property name="sources">
+                <list>
+                    <bean class="com.draagon.meta.loader.file.LocalFileMetaDataSources">
+                        <constructor-arg>
+                            <list>
+                                <value>metadata/fishstore-metadata.json</value>
+                            </list>
+                        </constructor-arg>
+                    </bean>
+                </list>
+            </property>
+        </bean>
+    </constructor-arg>
+</bean>
+```
+
+### Critical Integration Lessons
+
+1. **Don't Reinvent Infrastructure**: The framework already provides FileMetaDataLoader and JsonObjectWriter - use them
+2. **Respect Module Dependencies**: Demo controllers access demo classes, so they belong in demo module
+3. **JSON Metadata Location**: Must be in resources/metadata/ for classpath loading via FileMetaDataLoader
+4. **API Consistency**: Use correct method signatures (`createObject()` not `insertObject()`, proper constructor parameters)
+5. **Spring Integration**: Add proper Spring dependencies to modules that use Spring annotations
+
+### End-to-End Data Flow
+
+1. **JSON Metadata** loaded via FileMetaDataLoader at Spring startup
+2. **React Frontend** requests metadata via REST API (`/api/metadata/objects/{name}`)
+3. **Spring Controller** uses JsonObjectWriter to serialize MetaObject to JSON
+4. **React Components** render forms dynamically based on metadata definitions
+5. **Form Submissions** flow back through API to ObjectManagerDB for persistence
+6. **Sample Data** created automatically via FishstoreService on initialization
+
+This architecture maintains the elegance of MetaObjects' load-once immutable design while enabling modern React frontend development with full type safety and metadata-driven UI generation.
 
 ## Future Architecture (v4.4.0+)
 
