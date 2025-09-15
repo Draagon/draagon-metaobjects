@@ -7,12 +7,14 @@
 package com.draagon.meta.object.value;
 
 import com.draagon.meta.ValueException;
+import com.draagon.meta.ValueNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.DataConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -173,6 +175,174 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
 
     public <T> List<T> getAndCreateObjectArray( Class<T> clazz, String name) {
         return _getAndCreateObjectArray( clazz, name );
+    }
+
+    //////////////////////////////////////////////////////////////
+    // MODERN OPTIONAL-BASED APIs
+
+    /**
+     * Find a string value, returning Optional to handle null cases safely
+     * @param name Field name
+     * @return Optional containing the string value, or empty if null/missing
+     */
+    public Optional<String> findString(String name) {
+        return Optional.ofNullable(getString(name));
+    }
+
+    /**
+     * Find a boolean value, returning Optional to handle null cases safely  
+     * @param name Field name
+     * @return Optional containing the boolean value, or empty if null/missing
+     */
+    public Optional<Boolean> findBoolean(String name) {
+        return Optional.ofNullable(getBoolean(name));
+    }
+
+    /**
+     * Find an integer value, returning Optional to handle null cases safely
+     * @param name Field name
+     * @return Optional containing the integer value, or empty if null/missing
+     */
+    public Optional<Integer> findInt(String name) {
+        return Optional.ofNullable(getInt(name));
+    }
+
+    /**
+     * Find an object value, returning Optional to handle null cases safely
+     * @param name Field name  
+     * @return Optional containing the object value, or empty if null/missing
+     */
+    public Optional<Object> findObject(String name) {
+        return Optional.ofNullable(getObject(name));
+    }
+
+    /**
+     * Require a string value, throwing exception if null/missing
+     * @param name Field name
+     * @return String value
+     * @throws ValueNotFoundException if value is null or missing
+     */
+    public String requireString(String name) throws ValueNotFoundException {
+        return findString(name).orElseThrow(() -> 
+            new ValueNotFoundException("Required string field '" + name + "' is missing or null"));
+    }
+
+    /**
+     * Require an integer value, throwing exception if null/missing
+     * @param name Field name
+     * @return Integer value
+     * @throws ValueNotFoundException if value is null or missing
+     */
+    public Integer requireInt(String name) throws ValueNotFoundException {
+        return findInt(name).orElseThrow(() -> 
+            new ValueNotFoundException("Required int field '" + name + "' is missing or null"));
+    }
+
+    //////////////////////////////////////////////////////////////
+    // STREAM-BASED COLLECTION ACCESS
+
+    /**
+     * Get a stream of all field names
+     * @return Stream of field names
+     */
+    public Stream<String> getKeysStream() {
+        return keySet().stream();
+    }
+
+    /**
+     * Get a stream of all field values
+     * @return Stream of field values
+     */
+    public Stream<Object> getValuesStream() {
+        return values().stream();
+    }
+
+    /**
+     * Get a stream of all entries (key-value pairs)
+     * @return Stream of Map.Entry objects
+     */
+    public Stream<Map.Entry<String, Object>> getEntriesStream() {
+        return entrySet().stream();
+    }
+
+    //////////////////////////////////////////////////////////////
+    // BUILDER PATTERN SUPPORT
+
+    /**
+     * Create a new ValueObject builder
+     * @return New ValueObject.Builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Create a new ValueObject builder with specified MetaObject
+     * @param metaObject MetaObject to associate
+     * @return New ValueObject.Builder instance
+     */
+    public static Builder builder(MetaObject metaObject) {
+        return new Builder(metaObject);
+    }
+
+    /**
+     * Builder pattern for ValueObject creation
+     */
+    public static class Builder {
+        private MetaObject metaObject;
+        private boolean allowExtensions = true;
+        private final Map<String, Object> values = new HashMap<>();
+
+        public Builder() {}
+
+        public Builder(MetaObject metaObject) {
+            this.metaObject = metaObject;
+        }
+
+        public Builder withMetaObject(MetaObject metaObject) {
+            this.metaObject = metaObject;
+            return this;
+        }
+
+        public Builder allowExtensions(boolean allow) {
+            this.allowExtensions = allow;
+            return this;
+        }
+
+        public Builder withString(String name, String value) {
+            this.values.put(name, value);
+            return this;
+        }
+
+        public Builder withInt(String name, Integer value) {
+            this.values.put(name, value);
+            return this;
+        }
+
+        public Builder withBoolean(String name, Boolean value) {
+            this.values.put(name, value);
+            return this;
+        }
+
+        public Builder withObject(String name, Object value) {
+            this.values.put(name, value);
+            return this;
+        }
+
+        public ValueObject build() {
+            ValueObject obj;
+            if (metaObject != null) {
+                obj = new ValueObject(metaObject, allowExtensions);
+            } else {
+                obj = new ValueObject();
+                obj._allowExtensions(allowExtensions);
+            }
+            
+            // Set all values
+            values.forEach(obj::setObject);
+            
+            return obj;
+        }
     }
 
     @Override

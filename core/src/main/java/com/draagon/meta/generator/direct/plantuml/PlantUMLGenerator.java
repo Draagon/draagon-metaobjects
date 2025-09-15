@@ -33,6 +33,88 @@ public class PlantUMLGenerator extends SingleFileDirectGeneratorBase<PlantUMLWri
     private boolean debug = false;
 
     //////////////////////////////////////////////////////////////////////
+    // BUILDER PATTERN SUPPORT
+
+    /**
+     * Create a new PlantUMLGenerator builder
+     * @return New PlantUMLGenerator.Builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder pattern for PlantUMLGenerator configuration
+     */
+    public static class Builder {
+        private boolean showAttrs = false;
+        private boolean showFields = false;
+        private boolean showAbstracts = true;
+        private boolean drawKeys = true;
+        private boolean drawRefs = false;
+        private String embeddedAttr = null;
+        private String embeddedValues = null;
+        private boolean debug = false;
+
+        public Builder showAttrs(boolean show) {
+            this.showAttrs = show;
+            return this;
+        }
+
+        public Builder showFields(boolean show) {
+            this.showFields = show;
+            return this;
+        }
+
+        public Builder showAbstracts(boolean show) {
+            this.showAbstracts = show;
+            return this;
+        }
+
+        public Builder drawKeys(boolean draw) {
+            this.drawKeys = draw;
+            return this;
+        }
+
+        public Builder drawRefs(boolean draw) {
+            this.drawRefs = draw;
+            return this;
+        }
+
+        public Builder withEmbeddedAttr(String attr) {
+            this.embeddedAttr = attr;
+            return this;
+        }
+
+        public Builder withEmbeddedValues(String values) {
+            this.embeddedValues = values;
+            return this;
+        }
+
+        public Builder debug(boolean debug) {
+            this.debug = debug;
+            return this;
+        }
+
+        /**
+         * Build the configured PlantUMLGenerator
+         * @return Configured PlantUMLGenerator instance
+         */
+        public PlantUMLGenerator build() {
+            PlantUMLGenerator generator = new PlantUMLGenerator();
+            generator.showAttrs = this.showAttrs;
+            generator.showFields = this.showFields;
+            generator.showAbstracts = this.showAbstracts;
+            generator.drawKeys = this.drawKeys;
+            generator.drawRefs = this.drawRefs;
+            generator.embeddedAttr = this.embeddedAttr;
+            generator.embeddedValues = this.embeddedValues;
+            generator.debug = this.debug;
+            return generator;
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////
     // SingleFileDirectorGenerator Execute Override methods
 
     @Override
