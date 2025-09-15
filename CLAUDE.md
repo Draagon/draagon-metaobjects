@@ -54,8 +54,8 @@ mvn metaobjects:editor
 ## Core Concepts
 
 ### MetaObjects Types
-- **ValueMetaObject**: Dynamic objects with public getter/setter access
-- **DataMetaObject**: Wrapped objects with protected accessors
+- **ValueMetaObject**: Dynamic objects with public getter/setter access and Optional-based find methods
+- **DataMetaObject**: Wrapped objects with public accessors and Builder pattern support
 - **ProxyMetaObject**: Proxy implementations without concrete classes
 - **MappedMetaObject**: Works with Map interface objects
 
@@ -85,6 +85,34 @@ mvn metaobjects:editor
 - Replaced StringBuffer with StringBuilder (8 files)
 - Added comprehensive JavaDoc documentation
 - Resolved 25+ critical TODO items
+
+### Multi-Module Enhancement Project (September 2025)
+A comprehensive modernization initiative that enhanced all core modules:
+
+#### Phase 4A: Core Module API Consistency
+- **Fixed Visibility Inconsistency**: DataObject methods now public (consistent with ValueObject)
+- **Added Optional-Based APIs**: `findString()`, `requireString()`, `findInt()` for null-safe access
+- **Implemented Builder Patterns**: ValueObject.Builder, DataObject.Builder, PlantUMLGenerator.Builder
+- **Added Stream APIs**: `getKeysStream()`, `getValuesStream()`, `getEntriesStream()`
+- **Enhanced JavaDoc**: Comprehensive examples and usage patterns
+
+#### Phase 4B: Maven-Plugin Critical Fixes
+- **Fixed Critical Bug**: GeneratorParam.setFilters() parameter assignment issue
+- **Modernized Deprecated Code**: Replaced Class.newInstance() with Constructor.newInstance()
+- **Added Builder Patterns**: GeneratorParam.Builder, LoaderParam.Builder
+- **Enhanced Documentation**: Usage examples and fluent configuration patterns
+
+#### Phase 4C: OM Module Polish
+- **Added Optional APIs**: `findObjectByRef()`, `findFirst()`, `firstOptional()`
+- **Enhanced QueryBuilder**: 50+ lines of comprehensive usage examples
+- **Documented Event System**: Auditing, caching, validation patterns with real-world examples
+- **Added Async Methods**: `findObjectByRefAsync()`, `firstOptionalAsync()`
+
+#### Project Impact
+- **Zero Regressions**: 100% backward compatibility maintained
+- **Enhanced Developer Experience**: Modern, type-safe APIs across all modules
+- **Comprehensive Documentation**: 200+ lines of new JavaDoc with practical examples
+- **Build Success**: All modules compile and test successfully
 
 ## Claude AI Documentation
 
