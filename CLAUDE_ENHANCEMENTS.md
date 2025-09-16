@@ -33,6 +33,267 @@
 
 ---
 
+## 🏗️ NEXT MAJOR ENHANCEMENT: TypesConfig Replacement Architecture (v6.0.0)
+
+### ⚠️ CRITICAL ARCHITECTURAL REDESIGN PLANNED
+
+**Status:** DESIGN COMPLETE - IMPLEMENTATION PENDING  
+**Target Version:** 6.0.0 (Breaking Changes)  
+**Estimated Effort:** 8-12 weeks  
+
+### 🎯 PROBLEM STATEMENT
+
+The current TypesConfig system has **fundamental architectural flaws** that prevent cross-language MetaObjects implementations and limit extensibility:
+
+#### Current Issues Identified:
+
+1. **Language Lock-in:** TypesConfig hard-codes Java class names (e.g., `"class": "com.draagon.meta.field.MetaField"`), making C# and TypeScript implementations impossible
+2. **Type/Subtype Confusion:** MetaData classes don't cleanly separate type ("field") from subtype ("int"), causing `getMetaDataClass()` to lose subtype information
+3. **Extensibility Limitation:** Parent types must pre-declare allowed subtypes, preventing future extensions (e.g., enterprise packages can't add new field types)
+4. **OSGI Incompatibility:** Current MetaDataRegistry uses global static state that breaks in OSGI environments
+5. **Validation Duplication:** Both TypesConfig AND ValidationChain enforce constraints, creating maintenance overhead
+
+#### Real-World Extension Scenario That Fails:
+```java
+// Today: This fails because MetaField doesn't know about future "currency" subtype
+@MetaDataType(allowedSubTypes={"string", "int", "date"}) // ❌ Can't add "currency" later
+public class MetaField extends MetaData { }
+
+// Enterprise package wants to add:
+public class CurrencyField extends MetaField { } // ❌ BLOCKED - not in allowedSubTypes
+```
+
+### 🚀 COMPREHENSIVE SOLUTION: Service-Based Architecture
+
+#### **Core Principle:** Child-Declares-Parent Pattern
+Instead of parents constraining children, **children declare what parents they're compatible with**.
+
+#### **Key Architectural Changes:**
+
+### 1. **Clean Type/Subtype Separation in MetaData Core**
+```java
+// NEW: Explicit type/subtype as first-class concept
+public record MetaDataTypeId(String type, String subType) {
+    public String toQualifiedName() { return type + "." + subType; }
+}
+
+public abstract class MetaData {
+    private final MetaDataTypeId typeId;
+    
+    protected MetaData(String type, String subType, String name) {
+        this.typeId = new MetaDataTypeId(type, subType);
+    }
+    
+    // CLEAN API - no more confusion
+    public String getType() { return typeId.type(); }           // "field"
+    public String getSubType() { return typeId.subType(); }     // "int" 
+    public MetaDataTypeId getTypeId() { return typeId; }        // "field.int"
+    
+    // REMOVE: getMetaDataClass() - conceptually wrong!
+}
+```
+
+### 2. **Self-Registering Implementation Classes**
+```java
+// Each implementation class declares what type+subtype it handles
+@MetaDataTypeHandler(type="field", subType="int")
+public class IntegerField extends MetaData {
+    public IntegerField(String name) {
+        super("field", "int", name); // ✅ Explicit type/subtype
+    }
+    
+    // Self-registration via static block
+    static {
+        MetaDataTypeRegistry.registerHandler(
+            new MetaDataTypeId("field", "int"), 
+            IntegerField.class
+        );
+    }
+}
+
+// Future extensions work seamlessly
+@MetaDataTypeHandler(type="field", subType="currency")  
+public class CurrencyField extends MetaData {
+    public CurrencyField(String name) {
+        super("field", "currency", name); // ✅ New subtype - no parent changes needed
+    }
+    
+    static {
+        MetaDataTypeRegistry.registerHandler(
+            new MetaDataTypeId("field", "currency"),
+            CurrencyField.class
+        );
+    }
+}
+```
+
+### 3. **Service-Based Registry System (OSGI Compatible)**
+```java
+// Context-aware registry - no global static state
+public class MetaDataTypeRegistry {
+    private final Map<MetaDataTypeId, Class<? extends MetaData>> typeHandlers;
+    private final Map<MetaDataTypeId, ValidationChain<MetaData>> validationChains;
+    private final ServiceRegistry serviceRegistry; // OSGI or ServiceLoader
+    
+    // Main factory method - replaces TypesConfig logic
+    public <T extends MetaData> T createInstance(String type, String subType, String name) {
+        MetaDataTypeId typeId = new MetaDataTypeId(type, subType);
+        Class<? extends MetaData> handlerClass = typeHandlers.get(typeId);
+        
+        if (handlerClass == null) {
+            throw new MetaDataException("No handler for type: " + typeId.toQualifiedName());
+        }
+        
+        return (T) handlerClass.getConstructor(String.class).newInstance(name);
+    }
+    
+    // Service discovery replaces static registration
+    private void discoverAndRegisterTypes() {
+        Collection<MetaDataTypeProvider> providers = 
+            serviceRegistry.getServices(MetaDataTypeProvider.class);
+        
+        for (MetaDataTypeProvider provider : providers) {
+            provider.registerTypes(this);
+            provider.enhanceValidation(this); // ✅ Dynamic validation enhancement
+        }
+    }
+}
+```
+
+### 4. **Dynamic Validation Enhancement Pattern**
+```java
+// Plugin can enhance existing types' validation
+public class CurrencyExtensionProvider implements MetaDataTypeProvider {
+    
+    @Override
+    public void registerTypes(MetaDataTypeRegistry registry) {
+        // Register new currency field type
+        registry.registerHandler(new MetaDataTypeId("field", "currency"), CurrencyField.class);
+    }
+    
+    @Override
+    public void enhanceValidation(MetaDataTypeRegistry registry) {
+        // ✅ ENHANCE existing "field" validation with currency rules
+        registry.enhanceValidationChain(
+            new MetaDataTypeId("field", "*"), // Apply to ALL field subtypes
+            new CurrencyFieldValidator()
+        );
+        
+        // ✅ ADD new parent-child relationship rules
+        registry.enhanceValidationChain(
+            new MetaDataTypeId("object", "account"),
+            metaData -> {
+                // Validate account objects can only contain currency fields
+                for (MetaData child : metaData.getChildren()) {
+                    if (child.getType().equals("field") && 
+                        !child.getSubType().equals("currency")) {
+                        return ValidationResult.error("Account objects require currency fields");
+                    }
+                }
+                return ValidationResult.success();
+            }
+        );
+    }
+}
+```
+
+### 5. **Cross-Language Implementation Foundation**
+
+**Java (Current):**
+```java
+// Service discovery via ServiceLoader or OSGI
+ServiceLoader<MetaDataTypeProvider> providers = 
+    ServiceLoader.load(MetaDataTypeProvider.class);
+```
+
+**C# (.NET):**
+```csharp
+// Use MEF (Managed Extensibility Framework)
+[Export(typeof(IMetaDataTypeProvider))]
+public class CurrencyExtensionProvider : IMetaDataTypeProvider {
+    public void RegisterTypes(IMetaDataTypeRegistry registry) {
+        registry.RegisterHandler(
+            new MetaDataTypeId("field", "currency"), 
+            typeof(CurrencyField)
+        );
+    }
+}
+
+[MetaDataTypeHandler(Type="field", SubType="currency")]
+public class CurrencyField : MetaData {
+    public CurrencyField(string name) : base("field", "currency", name) { }
+}
+```
+
+**TypeScript:**
+```typescript
+// Use dependency injection framework
+@injectable()
+export class CurrencyExtensionProvider implements MetaDataTypeProvider {
+    registerTypes(registry: MetaDataTypeRegistry): void {
+        registry.registerHandler(
+            new MetaDataTypeId("field", "currency"),
+            CurrencyField
+        );
+    }
+}
+
+@MetaDataTypeHandler("field", "currency")
+export class CurrencyField extends MetaData {
+    constructor(name: string) {
+        super("field", "currency", name);
+    }
+}
+```
+
+### 🗂️ COMPLETE IMPLEMENTATION PLAN
+
+#### **Phase 1: Core Architecture Overhaul (Weeks 1-3)**
+1. **Week 1:** Create `MetaDataTypeId` record and update `MetaData` base class
+2. **Week 2:** Implement service registry abstraction (OSGI/ServiceLoader)  
+3. **Week 3:** Build new `MetaDataTypeRegistry` with factory methods
+
+#### **Phase 2: Registry System Replacement (Weeks 4-5)**
+1. **Week 4:** Replace TypesConfig with service-based registry
+2. **Week 5:** Update `MetaDataLoaderRegistry` to use same service pattern
+
+#### **Phase 3: Implementation Class Updates (Weeks 6-7)**  
+1. **Week 6:** Update all MetaField, MetaView, MetaValidator subclasses
+2. **Week 7:** Add self-registration via static blocks and annotations
+
+#### **Phase 4: Service Provider Framework (Week 8)**
+1. **Week 8:** Create service provider interfaces and core providers
+
+#### **Phase 5: Complete Legacy Removal (Week 9)**
+1. **Week 9:** Remove TypesConfig system, static MetaDataRegistry, update MetaDataLoader
+
+#### **Phase 6: Cross-Language Foundations (Weeks 10-12)**
+1. **Week 10:** Language-agnostic metadata format specification
+2. **Week 11:** C# prototype implementation
+3. **Week 12:** TypeScript prototype implementation
+
+### 🎯 KEY BENEFITS ACHIEVED
+
+1. **True Extensibility:** Child-declares-parent pattern enables unlimited future extensions
+2. **Cross-Language Compatible:** No Java class references in type system  
+3. **OSGI Compatible:** Service-based registries, no global static state
+4. **Dynamic Validation:** New types can enhance existing types' validation chains
+5. **Simplified Architecture:** Single ValidationChain source of truth vs dual TypesConfig/validation
+6. **Plugin Friendly:** Automatic discovery via platform-native service mechanisms
+7. **Clean Type/Subtype API:** MetaData explicitly knows its type and subtype identity
+
+### ⚠️ BREAKING CHANGES (v6.0.0)
+
+- **REMOVE:** All TypesConfig classes and JSON files
+- **REMOVE:** Static MetaDataRegistry methods  
+- **REMOVE:** `getMetaDataClass()` method from MetaData
+- **MODIFY:** All MetaData constructors require explicit type/subtype
+- **MODIFY:** MetaDataLoader construction requires registry dependencies
+
+**Migration Impact:** Complete rewrite of type system - no backwards compatibility possible or desired.
+
+---
+
 ## 🔍 MULTI-MODULE ANALYSIS FINDINGS (September 2025)
 
 ### 📋 MODULE REVIEW SUMMARY
