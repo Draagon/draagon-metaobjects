@@ -33,6 +33,7 @@
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
+                    <!-- DISABLED v6.0.0: TypesConfig system removed - will be replaced with ValidationChain-based generator
                     <execution>
                         <id>gen-resources</id>
                         <phase>generate-test-sources</phase>
@@ -66,6 +67,7 @@
                             </generators>
                         </configuration>
                     </execution>
+                    -->
                     <execution>
                         <id>gen-test-resources</id>
                         <phase>generate-test-resources</phase>
@@ -82,7 +84,9 @@
                                 <name>gen-test-resources</name>
                                 <sourceDir>${project.basedir}/src/test/resources</sourceDir>
                                 <sources>
+                                    <!-- REMOVED v6.0.0: TypesConfig system removed
                                     <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
+                                    -->
                                     <source>metadata/test/produce/v1/produce-v1.bundle</source>
                                 </sources>
                             </loader>

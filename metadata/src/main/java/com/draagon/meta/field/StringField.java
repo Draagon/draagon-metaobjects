@@ -8,6 +8,7 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.registry.MetaDataTypeHandler;
 
 /**
  * A String Field.
@@ -16,6 +17,7 @@ import com.draagon.meta.attr.StringAttribute;
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
+@MetaDataTypeHandler(type = "field", subType = "string", description = "String field type")
 public class StringField extends PrimitiveField<String> {
 
     public final static String SUBTYPE_STRING   = "string";

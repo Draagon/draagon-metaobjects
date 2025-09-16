@@ -41,6 +41,10 @@ public class MetaData implements Cloneable, Serializable {
     // Validation chain
     private volatile ValidationChain<MetaData> validationChain;
 
+    // NEW v6.0: Type/subtype as first-class concept  
+    private final MetaDataTypeId typeId;
+
+    // LEGACY: Keep for backward compatibility during transition
     private final String type;
     private final String subType;
     private final String name;
@@ -68,6 +72,11 @@ public class MetaData implements Cloneable, Serializable {
         // if ( subType == null ) throw new NullPointerException( "MetaData SubType cannot be null" );
         // if ( name == null ) throw new NullPointerException( "MetaData Name cannot be null" );
 
+        // NEW v6.0: Create MetaDataTypeId (allows nulls for testing)
+        this.typeId = (type != null && subType != null) ? 
+            new MetaDataTypeId(type, subType) : null;
+
+        // LEGACY: Keep for backward compatibility during transition
         this.type = type;
         this.subType = subType;
         this.name = name;
@@ -310,6 +319,60 @@ public class MetaData implements Cloneable, Serializable {
         return subType;
     }
 
+    // ========== NEW v6.0 TYPE SYSTEM METHODS ==========
+
+    /**
+     * Get the type of this MetaData (modern API)
+     * 
+     * @return The primary type (e.g., "field", "view", "validator")
+     * @since 6.0.0
+     */
+    public String getType() {
+        return typeId != null ? typeId.type() : type;
+    }
+
+    /**
+     * Get the subtype of this MetaData (modern API)
+     * 
+     * @return The specific implementation subtype (e.g., "int", "string", "currency")
+     * @since 6.0.0
+     */
+    public String getSubType() {
+        return typeId != null ? typeId.subType() : subType;
+    }
+
+    /**
+     * Get the type ID of this MetaData (modern API)
+     * 
+     * @return MetaDataTypeId containing both type and subtype
+     * @since 6.0.0
+     */
+    public MetaDataTypeId getTypeId() {
+        return typeId;
+    }
+
+    /**
+     * Check if this MetaData matches a type pattern
+     * 
+     * @param pattern Pattern like "field.*" or "field.int" where "*" means any
+     * @return true if this MetaData matches the pattern
+     * @since 6.0.0
+     */
+    public boolean matchesType(String pattern) {
+        return typeId != null && typeId.matches(pattern);
+    }
+
+    /**
+     * Check if this MetaData matches a type pattern
+     * 
+     * @param pattern MetaDataTypeId pattern (type or subtype can be "*")
+     * @return true if this MetaData matches the pattern
+     * @since 6.0.0
+     */
+    public boolean matchesType(MetaDataTypeId pattern) {
+        return typeId != null && typeId.matches(pattern);
+    }
+
     /**
      * Returns whether this MetaData matches specified Type, SubType, and Name
      */
@@ -419,11 +482,19 @@ public class MetaData implements Cloneable, Serializable {
     // SETTER / GETTER METHODS
 
     /**
-     * Get the Base Class for the MetaData - type-safe implementation
-     * @return Class The Java class for the metadata
+     * REMOVED in v6.0.0: This method was conceptually flawed as it conflated
+     * the Java implementation class with the MetaData type concept.
+     * 
+     * Use getTypeId() instead to get the proper type+subtype identity.
+     * If you need the Java class, use getClass() directly.
+     * 
+     * @deprecated Use getTypeId() for type information or getClass() for Java class
      */
+    @Deprecated(since = "6.0.0", forRemoval = true)
     public Class<? extends MetaData> getMetaDataClass() {
-        return this.getClass();
+        throw new UnsupportedOperationException(
+            "getMetaDataClass() removed in v6.0.0. Use getTypeId() for type info or getClass() for Java class."
+        );
     }
     
     /**
