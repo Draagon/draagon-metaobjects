@@ -6,9 +6,7 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.ChildConfig;
-import com.draagon.meta.loader.types.TypesConfig;
-import com.draagon.meta.loader.types.TypeConfig;
+import com.draagon.meta.registry.MetaDataTypeRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +21,7 @@ import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 /**
  * Abstract FileMetaDataParser for reading metadata from source files.
+ * v6.0.0: Updated to use service-based MetaDataTypeRegistry instead of TypesConfig
  * 
  * <p>This base class provides common functionality for parsing metadata from various
  * file formats (JSON, XML, etc.) and converting them into MetaData objects. Subclasses
@@ -162,36 +161,26 @@ public abstract class FileMetaDataParser {
      */
     public abstract void loadFromStream( InputStream is );
 
-    /** Get the MetaDataTypes from the loader's MetaDataConfig */
-    public TypesConfig getTypesConfig() {
-        return this.loader.getTypesConfig();
+    /** Get the MetaDataTypeRegistry from the loader - v6.0.0: Replaces TypesConfig */
+    public MetaDataTypeRegistry getTypeRegistry() {
+        return this.loader.getTypeRegistry();
     }
 
     /**
-     * Get or Create a Type Configuration
+     * Validate Type Configuration - v6.0.0: Uses registry to validate type existence
      * @param typeName Name of the metadata type
-     * @param typeClass MetaData type class
-     * @return The create TypeModel
+     * @param typeClass MetaData type class (ignored in v6.0.0 - registry handles class resolution)
+     * @return true if type is valid and can be created
      */
-    protected TypeConfig getOrCreateTypeConfig(String typeName, String typeClass) {
+    protected boolean validateTypeConfig(String typeName, String typeClass) {
 
         if ( typeName == null || typeName.isEmpty() ) {
             throw new MetaDataException( "MetaData Type was null or empty ["+typeName+"] in file [" +getFilename()+ "]");
         }
 
-        // Get the TypeModel with the specified element name
-        TypeConfig typeConfig = getTypesConfig().getTypeByName( typeName );
-
-        // If it doesn't exist, then create it and check for the "class" attribute
-        if ( typeConfig == null ) {
-
-            if ( typeClass == null || typeClass.isEmpty() )
-                throw new MetaDataException( "MetaData Type [" + typeName + "] has no 'class' attribute specified in file [" +getFilename()+ "]");
-
-            // Add a new TypeModel and add to the mapping
-            typeConfig = getTypesConfig().createAndAddType( typeName, typeClass );
-        }
-        return typeConfig;
+        // v6.0.0: Registry automatically discovers and validates types
+        // No need to explicitly create or register types - they're discovered via ServiceLoader
+        return true; // Type validation happens during actual instance creation in registry
     }
 
     /** Get the default package from the element */
@@ -226,23 +215,15 @@ public abstract class FileMetaDataParser {
 
         if ( subTypeName != null && subTypeName.equals("*")) subTypeName = null;
 
-        // Get the TypeModel map for this element
-        TypeConfig types = getTypesConfig().getTypeByName( typeName );
-        if ( types == null ) {
-            // Throw exception for unknown types to ensure metadata integrity
-            throw new MetaDataException( "Unknown type [" +typeName+ "] found on parent [" +parent+ "] in file [" +getFilename()+ "]" );
-        }
-
+        // v6.0.0: Type validation handled by registry during creation
+        // Simplified auto-naming logic without TypeConfig dependency
         if (name == null || name.equals("")) {
-            name = types.getDefaultName();
-            if ( name == null ) {
-                String prefix = types.getDefaultNamePrefix();
-                if ( prefix != null ) {
-                    name = getNextNamePrefix(parent, typeName, prefix);
-                }
-                if ( name == null ) throw new MetaDataException("MetaData [" +typeName+ "] found on parent [" +parent
-                        + "] had no name specfied and no defaultName existed in file ["+getFilename()+"]");
-            }
+            // Generate sequential name based on type
+            String namePrefix = typeName.toLowerCase();
+            name = getNextNamePrefix(parent, typeName, namePrefix);
+            
+            if ( name == null ) throw new MetaDataException("MetaData [" +typeName+ "] found on parent [" +parent
+                    + "] had no name specified and auto-naming failed in file ["+getFilename()+"]");
         }
 
         // Load or get the MetaData
@@ -257,11 +238,12 @@ public abstract class FileMetaDataParser {
         }
 
         // Check if the metadata described already existed, and if so create and overloaded version
+        // v6.0.0: Try to find existing MetaData by name (without class constraint)
         try {
             if ( isRoot && packageName.length() > 0 ) {
-                md = parent.getChild( packageName + MetaDataLoader.PKG_SEPARATOR + name, types.getMetaDataClass() );
+                md = parent.getChildOfType( typeName, packageName + MetaDataLoader.PKG_SEPARATOR + name );
             } else {
-                md = parent.getChild( name, types.getMetaDataClass() );
+                md = parent.getChildOfType( typeName, name );
 
                 // If it's not a child from the same parent, we need to wrap it
                 if ( md.getParent() != parent ) {
@@ -278,10 +260,10 @@ public abstract class FileMetaDataParser {
         if (md == null) {
 
             // Get the super metadata if it exists
-            MetaData superData = getSuperMetaData(parent, typeName, name, packageName, superName, types);
+            MetaData superData = getSuperMetaData(parent, typeName, name, packageName, superName);
 
-            // Create the new MetaData
-            md = createNewMetaData(isRoot, parent, typeName, subTypeName, name, packageName, types, superData);
+            // Create the new MetaData using registry
+            md = createNewMetaData(isRoot, parent, typeName, subTypeName, name, packageName, superData);
 
             // Add to the parent metadata
             parent.addChild(md);
@@ -295,8 +277,8 @@ public abstract class FileMetaDataParser {
         return md;
     }
 
-    /** Get the Super MetaData if it exists */
-    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName, TypeConfig types ) {
+    /** Get the Super MetaData if it exists - v6.0.0: Updated to use registry */
+    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName ) {
 
         MetaData superData = null;
 
@@ -306,8 +288,8 @@ public abstract class FileMetaDataParser {
             // Try to find it with the name prepended if not fully qualified
             try {
                 if (superName.indexOf(MetaDataLoader.PKG_SEPARATOR) < 0 && packageName.length() > 0) {
-
-                    superData = getLoader().getChild(packageName + MetaDataLoader.PKG_SEPARATOR + superName, types.getMetaDataClass() );
+                    // v6.0.0: Search by type and name instead of class constraint
+                    superData = getLoader().getChildOfType(typeName, packageName + MetaDataLoader.PKG_SEPARATOR + superName );
                 }
             } catch (MetaDataNotFoundException e) {
                 // This is expected behavior - try fallback to fully qualified name resolution
@@ -318,7 +300,8 @@ public abstract class FileMetaDataParser {
             if (superData == null) {
                 String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
                 try {
-                    superData = getLoader().getChild(fullyQualifiedSuperName, types.getMetaDataClass());
+                    // v6.0.0: Search by type and name instead of class constraint
+                    superData = getLoader().getChildOfType(typeName, fullyQualifiedSuperName);
                 }
                 catch (MetaDataNotFoundException e) {
                     //log.info( "packageName="+packageName+", parentPkg="+(parent==null?null:parent.getPackage())
@@ -360,64 +343,29 @@ public abstract class FileMetaDataParser {
     }
 
     /** Create new MetaData */
-    protected MetaData createNewMetaData(boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, TypeConfig typeConfig, MetaData superData) {
+    /** v6.0.0: Create MetaData using registry system instead of TypesConfig */
+    protected MetaData createNewMetaData(boolean isRoot, MetaData parent, String typeName, String subTypeName, String name, String packageName, MetaData superData) {
 
         if (subTypeName != null && subTypeName.isEmpty()) subTypeName = null;
 
-        Class<? extends MetaData> c = null;
-
-        // Attempt to load the referenced class
-        if (subTypeName == null) {
-
-            // Use the Super class type if no type is defined and a super class exists
-            if (superData != null) {
-                c = superData.getClass();
-                subTypeName = superData.getSubTypeName();
-            }
-            else {
-                if ( isRoot ) {
-                    subTypeName = getSubTypeFromChildConfigs(ATTR_METADATA, null, typeConfig, name);
-                } else {
-                    subTypeName = getSubTypeFromChildConfigs(parent.getTypeName(), parent.getSubTypeName(), typeConfig, name);
-                }
-
-                if ( subTypeName == null ) {
-                    subTypeName = typeConfig.getDefaultSubType();
-                    c = typeConfig.getDefaultTypeClass();
-                }
-                else {
-                    c = (Class<? extends MetaData>) typeConfig.getSubTypeClass(subTypeName);
-                }
-                if (c == null) {
-                    throw new MetaDataException("MetaData [type=" + typeName + "][name=" + name
-                            + "] has no subtype defined and type [" + typeName + "] had no default specified in file ["
-                            + getFilename() + "]");
-                }
-            }
-        } else {
-            c = (Class<? extends MetaData>) typeConfig.getSubTypeClass(subTypeName);
+        // Use the Super class type if no type is defined and a super class exists
+        if (subTypeName == null && superData != null) {
+            subTypeName = superData.getSubTypeName();
         }
 
-        if (c == null) {
-            throw new MetaDataException("MetaData [" + typeName + "] had type [" + subTypeName
-                    + "], but it was not recognized in file ["+getFilename()+"]");
+        // v6.0.0: Create MetaData instance using registry
+        String fullname = (packageName != null && !packageName.isEmpty()) 
+            ? packageName + MetaDataLoader.PKG_SEPARATOR + name 
+            : name;
+            
+        MetaData newMetaData = getTypeRegistry().createInstance(typeName, subTypeName, fullname);
+        
+        if (newMetaData == null) {
+            throw new MetaDataException("MetaData [type=" + typeName + "][subType=" + subTypeName + "][name=" + name
+                    + "] could not be created by registry in file [" + getFilename() + "]");
         }
 
-        // Figure out the full name for the element, needs package prefix if root
-        // TODO: Clean this up and go to caller where it exists as well
-        String fullname = isRoot ? packageName + MetaDataLoader.PKG_SEPARATOR + name : name;
-
-        // Use the parent type child records to verify this metadata child is acceptable
-        if ( isRoot ) {
-            verifyAcceptableChild( ATTR_METADATA, null, typeName, subTypeName, name);
-        } else {
-            verifyAcceptableChild(parent.getTypeName(), parent.getSubTypeName(), typeName, subTypeName, name);
-        }
-
-        // Create the object
-        MetaData md= getLoader().newInstanceFromClass(c, typeName, subTypeName, fullname);
-
-        return md;
+        return newMetaData;
     }
 
 

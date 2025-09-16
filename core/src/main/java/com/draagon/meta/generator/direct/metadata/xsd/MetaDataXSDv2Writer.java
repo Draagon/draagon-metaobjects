@@ -5,10 +5,6 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.model.MetaModel;
-import com.draagon.meta.loader.types.ChildConfig;
-import com.draagon.meta.loader.types.SubTypeConfig;
-import com.draagon.meta.loader.types.TypeConfig;
-import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.util.XMLUtil;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -20,6 +16,12 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * XSD Schema writer v2 for MetaData configuration.
+ * v6.0.0: Temporarily disabled pending ValidationChain-based schema generation implementation.
+ * 
+ * TODO: Implement ValidationChain-based XSD schema generation in future version
+ */
 public class MetaDataXSDv2Writer extends XMLDirectWriter<MetaDataXSDv2Writer> {
 
     private String nameSpace;
@@ -56,16 +58,12 @@ public class MetaDataXSDv2Writer extends XMLDirectWriter<MetaDataXSDv2Writer> {
     }
 
     public void writeXML() throws GeneratorIOException {
-
-        Element rootElement = doc().getDocumentElement();
-        rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xs", "http://www.w3.org/2001/XMLSchema");
-        rootElement.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", nameSpace);
-        rootElement.setAttribute("targetNamespace", nameSpace);
-        rootElement.setAttribute("elementFormDefault", "qualified");
-
-        doc().setStrictErrorChecking(true);
-
-        writeTypes( rootElement, getLoader().getTypesConfig() );
+        // v6.0.0: Temporarily throw exception pending ValidationChain implementation
+        throw new UnsupportedOperationException(
+            "MetaDataXSDv2Writer is temporarily disabled in v6.0.0. " +
+            "XSD schema generation will be reimplemented using ValidationChain in a future version. " +
+            "Please use ValidationChain-based validation instead of XSD schema validation for now."
+        );
     }
 
     protected void writeTypes( Element el, TypesConfig tsc )  throws GeneratorIOException {

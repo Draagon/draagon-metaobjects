@@ -1,0 +1,3 @@
+com.draagon.meta.enhancement.providers.DatabaseAttributeProvider
+com.draagon.meta.enhancement.providers.IOAttributeProvider
+com.draagon.meta.enhancement.providers.ValidationAttributeProvider

@@ -1,8 +1,10 @@
 package com.draagon.meta.loader.parser;
 
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.TypesConfigLoader;
 
+/**
+ * v6.0.0: Updated to remove TypesConfigLoader dependency - now uses service-based registry system
+ */
 public abstract class ParserBase<T extends MetaDataLoader,M,S> {
 
     private final T loader;

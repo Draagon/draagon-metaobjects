@@ -8,9 +8,11 @@ package com.draagon.meta.loader;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.types.TypesConfig;
-import com.draagon.meta.loader.types.TypesConfigLoader;
+import com.draagon.meta.registry.MetaDataTypeRegistry;
+import com.draagon.meta.registry.MetaDataLoaderRegistry;
+import com.draagon.meta.registry.ServiceRegistryFactory;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +44,10 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
     private final LoaderOptions loaderOptions;
-    private TypesConfigLoader<?> typesLoader = null;
-    private TypesConfig typesConfig = null;
+    
+    // v6.0.0: Replace TypesConfig with service-based registries
+    private MetaDataTypeRegistry typeRegistry = null;
+    private MetaDataLoaderRegistry loaderRegistry = null;
 
     // Enhanced thread-safe loading state management
     private final LoadingState loadingState = new LoadingState();
@@ -89,22 +93,30 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         return loaderOptions;
     }
 
-    public <T extends TypesConfig> T getTypesConfig() {
-        return (T) typesConfig;
+    // v6.0.0: Replace TypesConfig methods with registry-based API
+    
+    public MetaDataTypeRegistry getTypeRegistry() {
+        if (typeRegistry == null) {
+            typeRegistry = new MetaDataTypeRegistry(ServiceRegistryFactory.getDefault());
+        }
+        return typeRegistry;
     }
 
-    public <T extends TypesConfig> MetaDataLoader setTypesLoader(TypesConfigLoader<T> typesLoader ) {
-        this.typesLoader = typesLoader;
-        typesConfig = typesLoader.newTypesConfig();
-        if (typesConfig == null ) {
-            throw new MetaDataNotFoundException( "No TypesConfig was found (was it not initialized?) in "+
-                    "TypesConfigLoader: "+typesLoader, TypesConfig.OBJECT_NAME);
-        }
+    public MetaDataLoader setTypeRegistry(MetaDataTypeRegistry typeRegistry) {
+        this.typeRegistry = typeRegistry;
         return this;
     }
 
-    public <T extends TypesConfig> TypesConfigLoader<T> getTypesLoader() {
-        return (TypesConfigLoader<T>) typesLoader;
+    public MetaDataLoaderRegistry getLoaderRegistry() {
+        if (loaderRegistry == null) {
+            loaderRegistry = new MetaDataLoaderRegistry(ServiceRegistryFactory.getDefault());
+        }
+        return loaderRegistry;
+    }
+
+    public MetaDataLoader setLoaderRegistry(MetaDataLoaderRegistry loaderRegistry) {
+        this.loaderRegistry = loaderRegistry;
+        return this;
     }
 
     /**
@@ -259,9 +271,10 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         isRegistered = false;
         
         // Clear any partial state
-        if (typesConfig != null) {
-            log.debug("Clearing partial TypesConfig for retry");
-            typesConfig = null;
+        if (typeRegistry != null || loaderRegistry != null) {
+            log.debug("Clearing partial registry state for retry");
+            typeRegistry = null;
+            loaderRegistry = null;
         }
         
         log.debug("Reset loader state for retry: {}", getName());
@@ -346,10 +359,18 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     ////////////////////////////////////////////////////////////////////////////////////////////
     // Initialization Methods
 
-    protected void initDefaultTypesConfig() {
-        // Create the TypesConfigLoader and set a new TypesConfig
-        TypesConfigLoader typesLoader = TypesConfigLoader.create( getMetaDataClassLoader() );
-        setTypesLoader(typesLoader);
+    // v6.0.0: Replace TypesConfig initialization with registry initialization
+    protected void initDefaultRegistries() {
+        // Initialize registries with service discovery
+        if (typeRegistry == null) {
+            typeRegistry = new MetaDataTypeRegistry(ServiceRegistryFactory.getDefault());
+            log.debug("Initialized default MetaDataTypeRegistry for loader: {}", getName());
+        }
+        
+        if (loaderRegistry == null) {
+            loaderRegistry = new MetaDataLoaderRegistry(ServiceRegistryFactory.getDefault());
+            log.debug("Initialized default MetaDataLoaderRegistry for loader: {}", getName());
+        }
     }
 
     /**
@@ -443,9 +464,9 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
                 log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]");
             }
 
-            // Initialize the Default TypesConfig if one did not exist
-            if (getTypesLoader() == null) {
-                initDefaultTypesConfig();
+            // Initialize the Default Registries if they do not exist
+            if (typeRegistry == null || loaderRegistry == null) {
+                initDefaultRegistries();
             }
 
             // Transition to initialized state

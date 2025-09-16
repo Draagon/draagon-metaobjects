@@ -1,79 +1,87 @@
 package com.draagon.meta.loader.simple;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.io.object.json.JsonObjectReader;
-import com.draagon.meta.loader.types.TypesConfig;
-import com.draagon.meta.loader.types.TypesConfigLoader;
-import com.draagon.meta.loader.types.TypesConfigParser;
+import com.draagon.meta.registry.MetaDataTypeRegistry;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-public class SimpleTypesParser extends TypesConfigParser<InputStream> {
+/**
+ * v6.0.0: Simplified parser that replaces TypesConfig-based parsing with service discovery.
+ * 
+ * <p>This class maintains API compatibility with the old TypesConfigParser system
+ * but now uses the service-based MetaDataTypeRegistry for type discovery instead
+ * of parsing JSON configuration files.</p>
+ * 
+ * <p>The actual type registration now happens automatically via ServiceLoader
+ * discovery of MetaDataTypeProvider implementations.</p>
+ */
+public class SimpleTypesParser {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleTypesParser.class);
 
-    protected SimpleTypesParser( TypesConfigLoader loader, ClassLoader classLoader, String sourceName) {
-        super(loader, classLoader, sourceName);
+    private final MetaDataTypeRegistry typeRegistry;
+    private final ClassLoader classLoader;
+    private final String sourceName;
+
+    protected SimpleTypesParser(MetaDataTypeRegistry typeRegistry, ClassLoader classLoader, String sourceName) {
+        this.typeRegistry = typeRegistry;
+        this.classLoader = classLoader;
+        this.sourceName = sourceName;
     }
 
-    public void loadAndMerge( SimpleLoader simpleLoader, URI uri ) {
-
-        InputStream is = null;
-        try {
-            List<ClassLoader> classLoaders = Arrays.asList(
-                    getClassLoader(),
-                    ClassLoader.getSystemClassLoader() );
-
-            is = URIHelper.getInputStream( classLoaders, URIHelper.toURIModel( uri ));
-            //intoLoader.getResourceInputStream(resource);
-            loadAndMerge( simpleLoader.getTypesConfig(), is );
+    /**
+     * v6.0.0: Load and merge types from URI (now a no-op - types loaded via service discovery)
+     * 
+     * <p>This method maintains API compatibility but no longer parses TypesConfig files.
+     * Type registration now happens automatically via ServiceLoader discovery of 
+     * MetaDataTypeProvider implementations.</p>
+     */
+    public void loadAndMerge(SimpleLoader simpleLoader, URI uri) {
+        log.debug("loadAndMerge called for URI: {} (v6.0.0: no-op - using service discovery instead)", uri);
+        
+        // v6.0.0: Types are now registered automatically via service discovery
+        // This method is maintained for API compatibility but does nothing
+        
+        // Log the registry stats for debugging
+        if (log.isDebugEnabled()) {
+            var stats = typeRegistry.getStats();
+            log.debug("TypeRegistry stats: {} total types registered via service discovery", 
+                     stats.totalTypes());
         }
-        catch( IOException e ) {
-            throw new MetaDataException( "Unable to load URI ["+uri+"]: " + e.getMessage(), e );
-        }
-        finally {
+    }
+
+    /**
+     * v6.0.0: Load and merge types from InputStream (now a no-op - types loaded via service discovery) 
+     */
+    public void loadAndMerge(Object intoConfig, InputStream is) {
+        log.debug("loadAndMerge with InputStream called (v6.0.0: no-op - using service discovery instead)");
+        
+        // v6.0.0: TypesConfig system removed - types registered via ServiceLoader
+        // This method maintained for API compatibility
+        
+        // Close the input stream to prevent resource leaks
+        if (is != null) {
             try {
-                if (is != null) is.close();
-            } catch( IOException e ) {
-                throw new MetaDataException( "Unable to close URI ["+uri+"]: " + e.getMessage(), e );
+                is.close();
+            } catch (IOException e) {
+                log.warn("Failed to close input stream: {}", e.getMessage());
             }
         }
     }
-
-    @Override
-    public void loadAndMerge(TypesConfig intoConfig, InputStream is ) {
-
-        TypesConfig loadedConfig = null;
-        JsonObjectReader reader = null;
-        IOException ioEx = null;
-
-        // Read the TypesConfig
-        try {
-            reader = new JsonObjectReader( getLoader(), new InputStreamReader( is ));
-            loadedConfig = (TypesConfig) reader.read( getLoader().getMetaObjectByName(TypesConfig.OBJECT_NAME));
-        } catch (IOException e) {
-            ioEx = e;
-        }
-
-        // Close the Reader
-        try {
-            reader.close();
-        } catch (IOException ex) {
-            if ( ioEx != null ) ioEx = ex;
-        }
-
-        if ( ioEx != null ) throw new MetaDataException( "Error loading typesConfig from "+
-                "["+getSourcename()+"]: "+ ioEx.toString(), ioEx );
-
-        // Merge the Loaded Types Config
-        super.mergeTypesConfig( intoConfig, loadedConfig);
+    
+    // Getter methods for compatibility
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+    
+    public String getSourceName() {
+        return sourceName;
     }
 }

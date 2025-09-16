@@ -109,12 +109,12 @@ public class SimpleLoader extends MetaDataLoader {
         MetaModelLoader modelLoader = MetaModelLoader.create(
                 getMetaDataClassLoader(),
                 "simple",
-                getTypesLoader() );
+                getTypeRegistry() );
         for( URI sourceURI : sourceURIs) {
 
             if (URIHelper.isTypesURI(sourceURI)) {
                 SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
-                        getTypesLoader(),
+                        getTypeRegistry(),
                         getMetaDataClassLoader(),
                         sourceURI.toString() );
                 simpleTypesParser.loadAndMerge( this, sourceURI);
@@ -143,7 +143,7 @@ public class SimpleLoader extends MetaDataLoader {
 
     protected void loadDefaultSimpleTypes() {
         SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
-                getTypesLoader(),
+                getTypeRegistry(),
                 getMetaDataClassLoader(),
                 SIMPLE_TYPES_JSON );
         simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_JSON));

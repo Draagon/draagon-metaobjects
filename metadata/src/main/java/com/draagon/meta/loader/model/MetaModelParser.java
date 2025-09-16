@@ -2,15 +2,18 @@ package com.draagon.meta.loader.model;
 
 import com.draagon.meta.*;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.types.*;
 import com.draagon.meta.loader.parser.ParserBase;
+import com.draagon.meta.registry.MetaDataTypeRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDataLoader, S> extends ParserBase<MetaModelLoader,I,S> {
+/**
+ * v6.0.0: Updated to use service-based MetaDataTypeRegistry instead of TypesConfig
+ */
+public abstract class MetaModelParser<I extends MetaDataLoader, S> extends ParserBase<MetaModelLoader,I,S> {
 
     private static final Logger log = LoggerFactory.getLogger(MetaModelParser.class);
 
@@ -25,22 +28,20 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
 
     /** Merge the loaded MetaDataModel into the specified MetaDataLoader */
     protected <M extends MetaModel> void mergeMetaDataModel( I intoLoader, M model ) {
+        
+        // v6.0.0: Use MetaDataTypeRegistry instead of TypesConfig
+        MetaDataTypeRegistry typeRegistry = intoLoader.getTypeRegistry();
+        if ( typeRegistry == null ) throw new IllegalStateException( "MetaDataLoader did not have a MetaDataTypeRegistry set, loader=["+intoLoader+"]");
 
-        TSC typesConfig = intoLoader.getTypesConfig();
-        if ( typesConfig == null ) throw new IllegalStateException( "MetaDataLoader did not have a TypesConfig set, loader=["+intoLoader+"]");
+        // Set The default Package from the root MetaModel  
+        String defPkg = getDefaultPackageName( model );
 
-        // Get the TypeConfig for the root model (throws exception)
-        TypeConfig tc = getTypeConfig( typesConfig, model );
-
-        // Set The default Package from the root MetaModel
-        String defPkg = getDefaultPackageName( tc, model );
-
-        // Begin merging the MetaModels into the Laoder
-        mergeMetaData( intoLoader, defPkg, typesConfig, model );
+        // Begin merging the MetaModels into the Loader
+        mergeMetaData( intoLoader, defPkg, typeRegistry, model );
     }
 
     /** Set default package name */
-    protected <T extends TypeConfig, M extends MetaModel> String getDefaultPackageName( T typeConfig, M model ) {
+    protected <M extends MetaModel> String getDefaultPackageName( M model ) {
 
         String defPkg = model.getPackage();
         if ( defPkg == null ) defPkg = "";
@@ -49,51 +50,64 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
 
     /** Merge the MetaModels into the parent MetaData */
     protected <M extends MetaModel> void mergeMetaData(
-            MetaData parent, String pkgDef, TSC typesConfig, M model) {
+            MetaData parent, String pkgDef, MetaDataTypeRegistry typeRegistry, M model) {
 
         List<M> children = (List<M>) model.getChildren();
         if ( children == null ) return;
 
         for ( M child : children ) {
 
-            // Attempt to get TypeConfig and return null if no type was found
-            TypeConfig tc = getTypeConfig( typesConfig, child );
+            // v6.0.0: Validate type exists in registry and create MetaData
+            validateModelType( typeRegistry, child );
 
             // Create or Overload MetaData from the Model
-            MetaData merge = createOrOverloadMetaData(parent, pkgDef, tc, child );
+            MetaData merge = createOrOverloadMetaData(parent, pkgDef, typeRegistry, child );
 
             // Merge additional records from the Model
-            mergeAdditionalModelData( parent, merge, tc, child );
+            mergeAdditionalModelData( parent, merge, child );
 
             // Merge child records
-            mergeMetaData( merge, pkgDef, typesConfig, child );
+            mergeMetaData( merge, pkgDef, typeRegistry, child );
         }
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> void mergeAdditionalModelData(
-            MetaData parent, MetaData merge, TypeConfig tc, M model) {
+    protected <M extends MetaModel> void mergeAdditionalModelData(
+            MetaData parent, MetaData merge, M model) {
 
         // Merge the Value for MetaDataValueHandlers like MetaAttribute
         if ( merge instanceof MetaDataValueHandler && model.getValue() != null ) {
             ((MetaDataValueHandler)merge).setValueAsObject(model.getValue());
         }
     }
-
-    protected <M extends MetaModel> MetaData createOrOverloadMetaData(
-            MetaData parent, String pkgDef, TypeConfig tc, M model) {
-
-        // Get the fullname for the model
-        String fullname = getFullname(parent, tc, pkgDef, model);
-
-        // Get the fullname for the supername
-        String superName = getFullSuperName(parent, tc, pkgDef, model);
-
-        // Create or Overload MetaData from Model with specified superName and fullname
-        return createOrOverloadMetaDataWithName(parent, tc, model, superName, fullname);
+    
+    /** v6.0.0: Validate that the model type exists in the registry */
+    protected <M extends MetaModel> void validateModelType(MetaDataTypeRegistry typeRegistry, M model) {
+        String typeName = model.getType();
+        String subTypeName = model.getSubType();
+        
+        if (typeName == null || typeName.isEmpty()) {
+            throw new InvalidValueException("Model type cannot be null or empty: " + model);
+        }
+        
+        // For v6.0.0, we rely on the registry to validate types during creation
+        // The actual validation happens in createOrOverloadMetaData
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> String getFullSuperName(
-            MetaData parent, T tc, String pkgDef, M model) {
+    protected <M extends MetaModel> MetaData createOrOverloadMetaData(
+            MetaData parent, String pkgDef, MetaDataTypeRegistry typeRegistry, M model) {
+
+        // Get the fullname for the model
+        String fullname = getFullname(parent, pkgDef, model);
+
+        // Get the fullname for the supername  
+        String superName = getFullSuperName(parent, pkgDef, model);
+
+        // Create or Overload MetaData from Model with specified superName and fullname
+        return createOrOverloadMetaDataWithName(parent, typeRegistry, model, superName, fullname);
+    }
+
+    protected <M extends MetaModel> String getFullSuperName(
+            MetaData parent, String pkgDef, M model) {
 
         if (model.getSuper() == null) return null;
 
@@ -143,15 +157,15 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         return pkg;
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> String getFullname(
-            MetaData parent, T tc, String pkgDef, M model ) {
+    protected <M extends MetaModel> String getFullname(
+            MetaData parent, String pkgDef, M model ) {
 
         String pkg = getPackage(parent, pkgDef, model);
         //if (pkg.isEmpty()) pkg=pkgDef;
 
         String name = model.getName();
         if ( name == null ) {
-            name = autoCreateNameFromTypeConfig(parent, tc, model);
+            name = autoCreateName(parent, model);
         }
         if ( name == null ) {
             throw new InvalidValueException( "Name is null, cannot merge MetaDataModel ["+model+"]" );
@@ -159,75 +173,69 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         return (pkg.isEmpty()?"":pkg + "::") + name;
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> String autoCreateNameFromTypeConfig(
-            MetaData parent, T tc, M model ) {
+    protected <M extends MetaModel> String autoCreateName(
+            MetaData parent, M model ) {
 
-        String name = null;
-        if ( tc.getDefaultName() != null ) {
-            name = tc.getDefaultName();
+        // v6.0.0: Simplified auto-naming - use type as base for name generation
+        String typeName = model.getType();
+        if (typeName == null || typeName.isEmpty()) {
+            return null;
         }
-        else if ( tc.getDefaultNamePrefix() != null ) {
+        
+        // Generate sequential name based on type
+        String namePrefix = typeName.toLowerCase();
+        int i = 0;
 
-            int i = 0;
-
-            // TODO: If auto named, then super could match, or we could match by subType
-            for( MetaData md : parent.getChildrenOfType( tc.getName(), true )) {
-                if ( md.getName().startsWith( tc.getDefaultNamePrefix() )) {
-                    String n = md.getName().substring(tc.getDefaultNamePrefix().length());
-                    try {
-                        i = Integer.parseInt(n);
-                    }
-                    catch( NumberFormatException ex ) {
-                        log.warn("Error parsing ["+n+"] on name ["+md.getName()+"] on autoname creation for model: " +model);
-                    }
+        // Count existing children of the same type to generate unique name
+        for( MetaData md : parent.getChildrenOfType( typeName, true )) {
+            if ( md.getName().startsWith( namePrefix )) {
+                String n = md.getName().substring(namePrefix.length());
+                try {
+                    int num = Integer.parseInt(n);
+                    if (num > i) i = num;
+                }
+                catch( NumberFormatException ex ) {
+                    log.debug("Non-numeric suffix [{}] on name [{}] during autoname creation for model: {}", n, md.getName(), model);
                 }
             }
-            name = tc.getDefaultNamePrefix()+(++i);
         }
-        return name;
+        return namePrefix + (++i);
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> MetaData createOrOverloadMetaDataWithName(
-            MetaData parent, T tc, M model, String superName, String fullname) {
+    protected <M extends MetaModel> MetaData createOrOverloadMetaDataWithName(
+            MetaData parent, MetaDataTypeRegistry typeRegistry, M model, String superName, String fullname) {
 
-        MetaData merge = findExistingMetaData(parent, tc, fullname);
+        MetaData merge = findExistingMetaData(parent, model.getType(), fullname);
 
         if ( merge != null ) {
-            merge = overloadedMetaData(tc, model, merge);
+            merge = overloadedMetaData(model, merge);
         }
         else {
-            merge = createNewMetaData(parent, tc, model, superName, fullname, merge);
+            merge = createNewMetaData(parent, typeRegistry, model, superName, fullname);
         }
         parent.addChild( merge );
         return merge;
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> MetaData createNewMetaData(
-            MetaData parent, T tc, M model, String superName, String fullname, MetaData merge) {
+    protected <M extends MetaModel> MetaData createNewMetaData(
+            MetaData parent, MetaDataTypeRegistry typeRegistry, M model, String superName, String fullname) {
 
-        String subType = null;
+        String subType = getSubTypeName(model);
 
         // Get the superData && set the subType if null
         MetaData superData = null;
         if ( model.getSuper() != null ) {
 
-            superData = getSuperData( parent, tc, model, superName );
+            superData = getSuperData( parent, model, superName );
 
-            subType = superData.getSubTypeName();
-            if ( model.getSubType() != null && !model.getSubType().equals(subType)) {
+            if ( model.getSubType() != null && !model.getSubType().equals(superData.getSubTypeName())) {
                 throw new MetaDataException("SubType mismatch [" + model.getSubType() + "] != "+
-                        "["+ merge.getSubTypeName()+"] on superData: " + superData );
+                        "["+ superData.getSubTypeName()+"] on superData: " + superData );
             }
         }
-        else {
-            // Get the MetaData subType
-            subType = getSubTypeName(tc, model);
-        }
 
-        SubTypeConfig stc = getSubTypeConfig(tc, model, subType);
-
-        // Create the new MetaData
-        merge = createNewMetaData(parent, tc, stc, fullname);
+        // v6.0.0: Create MetaData using registry instead of TypesConfig
+        MetaData merge = typeRegistry.createInstance(model.getType(), subType, fullname);
 
         // Set the SuperData if it exists
         if ( superData != null ) {
@@ -238,20 +246,19 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         return merge;
     }
 
-    protected <T extends TypeConfig> MetaData findExistingMetaData(MetaData parent, T tc, String fullname) {
+    protected MetaData findExistingMetaData(MetaData parent, String typeName, String fullname) {
 
         MetaData merge = null;
         try {
-            merge = parent.getChildOfType( tc.getName(), fullname);
+            merge = parent.getChildOfType( typeName, fullname);
         } catch( MetaDataNotFoundException ignore ) {
-            if ( log.isDebugEnabled() ) log.debug( "No child of type ["+tc.getName()+"] "+
+            if ( log.isDebugEnabled() ) log.debug( "No child of type ["+typeName+"] "+
                     " with name ["+fullname+"] on parent: "+parent);
         }
         return merge;
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> MetaData overloadedMetaData(
-            T tc,  M model, MetaData merge ) {
+    protected <M extends MetaModel> MetaData overloadedMetaData(M model, MetaData merge ) {
 
         // Get the superData && set the subType if null
         if ( model.getSuper() != null ) {
@@ -271,56 +278,23 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         return merge;
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> T getTypeConfig( TSC tsc, M model ) {
+    /** v6.0.0: Replaced getTypeConfig - validation now handled by registry during creation */
+    // This method is no longer needed as type validation happens in the MetaDataTypeRegistry
 
-        String typeName = model.getType();
-        if ( typeName != null ) {
-            for (TypeConfig tc : tsc.getTypes()) {
-                if (typeName.equals(tc.getName())) return (T) tc;
-            }
-        }
-        throw new InvalidValueException("Type [" + typeName + "] did not exist in TypesConfig, " +
-                "cannot parse model: " + model);
-    }
+    protected <M extends MetaModel> String getSubTypeName( M model ) {
 
-    protected <T extends TypeConfig, M extends MetaModel> String getSubTypeName( T tc, M model ) {
-
+        // v6.0.0: Simplified - just return the model's subType, no default from TypesConfig
         String subType = model.getSubType();
-        if ( subType == null && tc.getDefaultSubType() != null ) {
-            subType = tc.getDefaultSubType();
-        }
+        
+        // If null, the registry will handle default subType assignment
         return subType;
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> SubTypeConfig getSubTypeConfig(
-            T tc, M model, String subType) {
+    /** v6.0.0: Replaced getSubTypeConfig - subtype validation now handled by registry during creation */
+    // This method is no longer needed as subtype validation happens in the MetaDataTypeRegistry
 
-        SubTypeConfig stc = null;
-
-        if ( subType != null && tc.getSubTypes() != null ) {
-            for ( SubTypeConfig st : tc.getSubTypes() ) {
-                if ( st.getName().equals(subType)) {
-                    stc = st;
-                    break;
-                }
-            }
-        }
-
-        // Error if no subType was specified and there was no default
-        if ( stc == null ) {
-            throw new InvalidValueException( "Type ["+tc.getName()+"] with SubType ["+subType+"] did not exist "+
-                    "in TypesConfig, cannot merge MetaDataModel: "+model );
-        }
-        return stc;
-    }
-
-    protected <TC extends TypeConfig, T extends SubTypeConfig> MetaData createNewMetaData(
-            MetaData parent, TC tc, T stc, String fullname) {
-        MetaData merge;
-        Class<? extends MetaData> clazz = stc.getMetaDataClass();
-        merge = (MetaData) parent.newInstanceFromClass( clazz, tc.getName(), stc.getName(), fullname );
-        return merge;
-    }
+    /** v6.0.0: Replaced createNewMetaData overload - creation now handled by registry */
+    // This overloaded method is no longer needed as MetaData creation happens in the MetaDataTypeRegistry
 
     protected void validateSuperDataOnNew(MetaData merge, MetaData superData ) {
 
@@ -331,15 +305,15 @@ public abstract class MetaModelParser<TSC extends TypesConfig, I extends MetaDat
         }
     }
 
-    protected <T extends TypeConfig, M extends MetaModel> MetaData getSuperData(
-            MetaData parent, T tc, M model, String superName ) {
+    protected <M extends MetaModel> MetaData getSuperData(
+            MetaData parent, M model, String superName ) {
 
         MetaData superData;
         try {
             MetaDataLoader loader = parent.getLoader();
-            superData = loader.getChildOfType(tc.getName(),superName);
+            superData = loader.getChildOfType(model.getType(), superName);
         } catch( MetaDataNotFoundException ex ) {
-            throw new MetaDataException( "Referenced superData ["+superName+"] with type ["+tc.getName()+"] "+
+            throw new MetaDataException( "Referenced superData ["+superName+"] with type ["+model.getType()+"] "+
                     "was not found by superRef on model: "+model);
         }
         return superData;

@@ -5,7 +5,6 @@ import com.draagon.meta.io.object.json.JsonObjectReader;
 import com.draagon.meta.loader.model.MetaModel;
 import com.draagon.meta.loader.model.MetaModelLoader;
 import com.draagon.meta.loader.model.MetaModelParser;
-import com.draagon.meta.loader.types.TypesConfig;
 import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.IOException;
@@ -13,7 +12,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 
-public class SimpleModelParser extends MetaModelParser<TypesConfig,SimpleLoader,URI> {
+/**
+ * v6.0.0: Updated to use service-based MetaDataTypeRegistry instead of TypesConfig
+ */
+public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
 
     protected SimpleModelParser(MetaModelLoader modelLoader, ClassLoader classLoader, String sourceName) {
         super(modelLoader, classLoader, sourceName);
