@@ -369,44 +369,23 @@ public abstract class FileMetaDataParser {
     }
 
 
-    protected String getSubTypeFromChildConfigs( String parentType, String parentSubType, TypeConfig typeConfig, String name ) {
-
-        TypeConfig tc = getTypesConfig ().getTypeByName( parentType );
-
-        ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType,
-                typeConfig.getName(), null, name );
-
-        if ( cc == null ) return null;
-
-        return ( cc.getSubType().equals("*")) ? null : cc.getSubType();
+    /** v6.0.0: Simplified - no longer using ChildConfig constraints */
+    protected String getSubTypeFromChildConfigs( String parentType, String parentSubType, String typeName, String name ) {
+        // v6.0.0: Registry system handles subtype resolution during creation
+        // Return null to let registry determine appropriate subtype
+        return null;
     }
 
 
+    /** v6.0.0: Simplified - registry validates acceptable types during creation */
     protected void verifyAcceptableChild( String parentType, String parentSubType, String type, String subType, String name ) {
-
-        TypeConfig tc = getTypesConfig().getTypeByName( parentType );
-
-        ChildConfig cc = findBestChildConfigMatch( tc, parentType, parentSubType, type, subType, name );
-
-        if (cc == null) {
-            if ( getLoader().getLoaderOptions().isStrict() ) {
-                throw new MetaDataException( "Child record ["+type+":"+subType+"] with name ["+name+"] is not allowed"
-                        +" on parent records ["+parentType+":"+parentSubType+"] in file ["+getFilename()+"]" );
-            }
-            else if ( type.equals( MetaAttribute.TYPE_ATTR ) && getLoader().getLoaderOptions().allowsAutoAttrs() ) {
-                // Auto add the new child configuration
-                cc = tc.createChildConfig( type, subType, name );
-                cc.setAutoCreatedFromFile( getFilename() );
-                tc.addTypeChildConfig( cc );
-            }
-            else {
-                //log.info( "LOADER: " + getLoader() );
-                //log.info( "LOADER CONFIG: " + getLoader().getLoaderConfig() );
-                String errMsg = "Child record ["+type+":"+subType+"] with name ["+name+"] was not configured"
-                        +" for parent records ["+parentType+":"+parentSubType+"]: file ["+getFilename()+"]";
-                logWarnOnce( getLoader(), "verifyAcceptableChild("+parentType+","+parentSubType+","+
-                        type+","+subType+","+name+")", errMsg );
-            }
+        // v6.0.0: Registry system validates acceptable child types during MetaData creation
+        // No explicit validation needed here - registry will fail creation if type is invalid
+        
+        // Only log debug info for troubleshooting in strict mode
+        if ( getLoader().getLoaderOptions().isStrict() ) {
+            log.debug("Creating child [{}:{}] with name [{}] on parent [{}:{}] in file [{}]", 
+                     type, subType, name, parentType, parentSubType, getFilename());
         }
     }
 
@@ -433,68 +412,44 @@ public abstract class FileMetaDataParser {
         }
     }
 
-    protected ChildConfig findBestChildConfigMatch(TypeConfig parentTypeConfig, String parentType, String parentSubType, String type, String subType, String name ) {
-
-        ChildConfig cc = null;
-        TypeConfig tc = parentTypeConfig;
-
-        List<ChildConfig> ccList;// Check for best match on subtype
-        if ( parentSubType != null ) {
-            ccList = tc.getSubTypeChildConfigs(parentSubType);
-            if ( ccList != null ) {
-                cc = tc.getBestMatchChildConfig(ccList, type, subType, name);
-            }
-        }
-
-        if ( cc == null ) {
-
-            // Check for best match type level
-            ccList = tc.getTypeChildConfigs();
-            cc = tc.getBestMatchChildConfig(ccList, type, subType, name);
-        }
-
-        return cc;
+    /** v6.0.0: Removed - no longer using ChildConfig matching system */
+    protected Object findBestChildConfigMatch(Object parentTypeConfig, String parentType, String parentSubType, String type, String subType, String name ) {
+        // v6.0.0: Registry system handles child type validation during creation
+        // Return null - no longer using ChildConfig matching
+        return null;
     }
 
+    /** v6.0.0: Simplified to use registry system for attribute creation */
     protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
 
         String parentType = parentMetaData.getTypeName();
         String parentSubType = parentMetaData.getSubTypeName();
 
-        TypeConfig parentTypeConfig = getTypesConfig().getTypeByName( parentMetaData.getTypeName() );
-        ChildConfig cc = findBestChildConfigMatch( parentTypeConfig, parentType, parentSubType,
-                MetaAttribute.TYPE_ATTR, null, attrName );
-
+        // v6.0.0: Create attribute using registry system
         MetaAttribute attr = null;
-
-        if ( cc == null ) {
-            String errMsg = "MetaAttribute with name ["+attrName+"] is not allowed on parent record ["
-                    +parentType+":"+parentSubType+":"+parentMetaData.getName()+"] in file ["+getFilename()+"]";
-
-            if ( getLoader().getLoaderOptions().allowsAutoAttrs() ) {
-                cc = parentTypeConfig.createChildConfig( StringAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName );
-                cc.setAutoCreatedFromFile( getFilename() );
+        
+        try {
+            // Default to StringAttribute for auto-created attributes
+            attr = (MetaAttribute) getTypeRegistry().createInstance(
+                MetaAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName);
+            
+            if (attr != null) {
+                parentMetaData.addChild(attr);
+                attr.setValueAsString(value);
+                
+                log.debug("Auto-created attribute [{}] on parent [{}:{}:{}] in file [{}]", 
+                         attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
             }
-            else if ( getLoader().getLoaderOptions().isStrict() ) {
-                throw new MetaDataException( errMsg );
+            
+        } catch (Exception e) {
+            String errMsg = "Failed to create MetaAttribute [" + attrName + "] on parent record ["
+                    + parentType + ":" + parentSubType + ":" + parentMetaData.getName() + "] in file [" + getFilename() + "]";
+            
+            if (getLoader().getLoaderOptions().isStrict()) {
+                throw new MetaDataException(errMsg + ": " + e.getMessage(), e);
+            } else {
+                logWarnOnce(parentMetaData, "createAttributeOnParent(" + attrName + ")", errMsg + ": " + e.getMessage());
             }
-            else {
-                logWarnOnce( parentMetaData, "createAttributeOnParent("+attrName+")", errMsg );
-
-                attr = new StringAttribute( attrName );
-                parentMetaData.addChild( attr );
-            }
-        }
-
-        if ( attr == null && cc != null ) {
-            attr = (MetaAttribute) createOrOverlayMetaData(parentType.equals(MetaDataLoader.TYPE_LOADER),
-                    parentMetaData, cc.getType(), cc.getSubType(),
-                    attrName /*cc.getName()*/, null, null,
-                    null, null, null );
-        }
-
-        if ( attr != null ) {
-            attr.setValueAsString(value);
         }
     }
 }

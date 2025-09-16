@@ -90,45 +90,21 @@ public class JsonMetaDataParser extends FileMetaDataParser {
             if (name == null || name.isEmpty()) {
                 throw new MetaDataException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
-            TypeConfig typeConfig = getOrCreateTypeConfig(name, clazz);
-
-            if ( type.has( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubType(getValueAsString(type, ATTR_DEFSUBTYPE));
-            if ( type.has( ATTR_DEFNAME)) typeConfig.setDefaultName(getValueAsString(type, ATTR_DEFNAME));
-            if ( type.has( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix(getValueAsString(type, ATTR_DEFNAMEPREFIX));
-            loadChildren( typeConfig, type ).forEach( c-> typeConfig.addTypeChildConfig(c));
-
-            // If we have subtypes, load them
+            // v6.0.0: Registry-based type validation instead of TypesConfig
+            validateTypeConfig(name, clazz);
+            
+            // Note: TypeConfig configuration attributes (defSubType, defName, defNamePrefix) are no longer needed
+            // in the service-based registry system - these are now handled by type providers directly
+            
+            // If we have subtypes, load them  
             if ( type.has( ATTR_SUBTYPES )) {
                 // Load all the types for the specific element type
-                loadSubTypes( type.getAsJsonArray( ATTR_SUBTYPES ), typeConfig );
+                loadSubTypes( type.getAsJsonArray( ATTR_SUBTYPES ), name );
             }
         }
     }
 
-    protected  List<ChildConfig> loadChildren(TypeConfig tc, JsonObject el) {
-        List<ChildConfig> children = new ArrayList<>();
-        if ( el.has(ATTR_CHILDREN)) {
-            JsonArray chArray = el.get(ATTR_CHILDREN).getAsJsonArray();
-            for( JsonElement e : chArray ) {
-                JsonObject o = e.getAsJsonObject();
-                if ( o.has( "child")) {
-                    JsonObject ec = o.get("child").getAsJsonObject();
-                    ChildConfig cc = tc.createChildConfig(ec.get(ATTR_TYPE).getAsString(), ec.get(ATTR_SUBTYPE).getAsString(), ec.get(ATTR_NAME).getAsString());
-                    if (ec.has("nameAliases")) cc.setNameAliases(Arrays.asList(ec.get("nameAliases").getAsString().split(",")));
-                    //if (ec.has("required")) cc.setRequired(ec.get("required").getAsBoolean());
-                    //if (ec.has("autoCreate")) cc.setAutoCreate(ec.get("autoCreate").getAsBoolean());
-                    //if (ec.has("defaultValue")) cc.setDefaultValue(ec.get("defaultValue").getAsString());
-                    //if (ec.has("minValue")) cc.setMinValue(ec.get("minValue").getAsInt());
-                    //if (ec.has("maxValue")) cc.setMaxValue(ec.get("maxValue").getAsInt());
-                    //if (ec.has("inlineAttr")) cc.setInlineAttr(ec.get("inlineAttr").getAsString());
-                    //if (ec.has("inlineAttrName")) cc.setInlineAttrName(ec.get("inlineAttrName").getAsString());
-                    //if (ec.has("inlineAttrValueMap")) cc.setInlineAttrValueMap(ec.get("inlineAttrValueMap").getAsString());
-                    children.add(cc);
-                }
-            }
-        }
-        return children;
-    }
+    // v6.0.0: ChildConfig system removed - child validation now handled by registry and enhancement services
 
 
     private String getValueAsString(JsonObject e, String name) {
@@ -141,7 +117,7 @@ public class JsonMetaDataParser extends FileMetaDataParser {
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(JsonArray subtypes, TypeConfig typeConfig) {
+    protected void loadSubTypes(JsonArray subtypes, String typeName) {
 
         // Iterate through each type
         for (JsonElement subtype : subtypes) {
@@ -154,23 +130,18 @@ public class JsonMetaDataParser extends FileMetaDataParser {
 
             String name = getValueAsString( subTypeEl, ATTR_NAME);
             String tclass = getValueAsString( subTypeEl, ATTR_CLASS);
-            //Boolean def = getValueAsBoolean( subTypeEl, "default");
-            //if ( Boolean.TRUE.equals( def )) typeConfig.setDefaultSubTypeName( name );
 
             if (name == null && name.isEmpty()) {
-                throw new MetaDataException("SubType of Type [" + typeConfig.getName() + "] has no 'name' attribute specified");
+                throw new MetaDataException("SubType of Type [" + typeName + "] has no 'name' attribute specified");
             }
 
-            // Add the type class with the specified name
-            typeConfig.addSubTypeConfig(name, tclass);
-
-            // Load subtypes
-            loadChildren( typeConfig, subTypeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
+            // v6.0.0: Registry-based subtype validation instead of TypesConfig
+            validateTypeConfig(name, tclass);
 
             // Update info msg if verbose
             if ( getLoader().getLoaderOptions().isVerbose() ) {
                 // Increment the # of subtypes
-                info.incType(typeConfig.getName());
+                info.incType(typeName);
             }
         }
     }
@@ -194,7 +165,7 @@ public class JsonMetaDataParser extends FileMetaDataParser {
             String implementsArray = getValueAsString(el, ATTR_IMPLEMENTS);
 
             // See if the specified type exists or not
-            if ( getTypesConfig().getTypeByName( typeName ) == null ) {
+            if ( !getTypeRegistry().hasType( typeName ) ) {
 
                 // If we are strict, throw an exception, otheriwse log an error
                 if ( getLoader().getLoaderOptions().isStrict() ) {

@@ -3,8 +3,7 @@ package com.draagon.meta.loader.file.xml;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.loader.types.ChildConfig;
-import com.draagon.meta.loader.types.TypeConfig;
+// v6.0.0: TypesConfig and related classes replaced with service-based registry system
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 
 import com.draagon.meta.util.XMLUtil;
@@ -108,42 +107,22 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 throw new MetaDataException("Type has no 'name' attribute specified in file [" +getFilename()+ "]");
             }
 
-            TypeConfig typeConfig = getOrCreateTypeConfig( name, e.getAttribute( ATTR_CLASS ));
-            if ( e.hasAttribute( ATTR_DEFSUBTYPE)) typeConfig.setDefaultSubType( e.getAttribute( ATTR_DEFSUBTYPE ));
-            if ( e.hasAttribute( ATTR_DEFNAME)) typeConfig.setDefaultName( e.getAttribute( ATTR_DEFNAME ));
-            if ( e.hasAttribute( ATTR_DEFNAMEPREFIX)) typeConfig.setDefaultNamePrefix( e.getAttribute( ATTR_DEFNAMEPREFIX ));
-            loadChildren( typeConfig, e ).forEach( c-> typeConfig.addTypeChildConfig(c));
+            // v6.0.0: Registry-based type validation instead of TypesConfig
+            validateTypeConfig(name, e.getAttribute( ATTR_CLASS ));
+            // Note: TypeConfig configuration attributes (defSubType, defName, defNamePrefix) are no longer needed
+            // in the service-based registry system - these are now handled by type providers directly
 
             // Load all the types for the specific element type
-            loadSubTypes( e, typeConfig );
+            loadSubTypes( e, name );
         }
     }
 
-    protected List<ChildConfig> loadChildren(TypeConfig tc, Element el) {
-        List<ChildConfig> children = new ArrayList<>();
-        List<Element> childrenEl = getElementsOfName(el, "children");
-        if ( !childrenEl.isEmpty() ) {
-            for (Element ec : getElementsOfName(childrenEl.iterator().next(), "child")) {
-                ChildConfig cc = tc.createChildConfig( ec.getAttribute(ATTR_TYPE), ec.getAttribute(ATTR_SUBTYPE), ec.getAttribute(ATTR_NAME));
-                if ( ec.hasAttribute("nameAliases"))    cc.setNameAliases( Arrays.asList( ec.getAttribute( "nameAliases").split(",")));
-                //if ( ec.hasAttribute("required"))           cc.setRequired( Boolean.parseBoolean( ec.getAttribute( "required")));
-                //if ( ec.hasAttribute("autoCreate"))         cc.setAutoCreate( Boolean.parseBoolean( ec.getAttribute( "autoCreate")));
-                //if ( ec.hasAttribute("defaultValue"))       cc.setDefaultValue( ec.getAttribute( "defaultValue"));
-                //if ( ec.hasAttribute("minValue"))           cc.setMinValue( Integer.parseInt( ec.getAttribute( "minValue")));
-                //if ( ec.hasAttribute("maxValue"))           cc.setMaxValue( Integer.parseInt( ec.getAttribute( "maxValue")));
-                //if ( ec.hasAttribute("inlineAttr"))         cc.setInlineAttr( ec.getAttribute( "inlineAttr"));
-                //if ( ec.hasAttribute("inlineAttrName"))     cc.setInlineAttrName( ec.getAttribute( "inlineAttrName"));
-                //if ( ec.hasAttribute("inlineAttrValueMap")) cc.setInlineAttrValueMap( ec.getAttribute( "inlineAttrValueMap"));
-                children.add( cc );
-            }
-        }
-        return children;
-    }
+    // v6.0.0: ChildConfig system removed - child validation now handled by registry and enhancement services
 
     /**
      * Loads the specified group types
      */
-    protected void loadSubTypes(Element el, TypeConfig typeConfig) throws MetaDataException, SAXException {
+    protected void loadSubTypes(Element el, String typeName) throws MetaDataException, SAXException {
 
         Collection<Element> subTypeElements = getElementsOfName(el, ATTR_SUBTYPE);
 
@@ -152,22 +131,18 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             String name = typeEl.getAttribute(ATTR_NAME);
             String tclass = typeEl.getAttribute("class");
-            String def = typeEl.getAttribute("default");
 
             if (name.length() == 0) {
-                throw new MetaDataException("SubType of Type [" + typeConfig.getName() + "] has no 'name' attribute specified");
+                throw new MetaDataException("SubType of Type [" + typeName + "] has no 'name' attribute specified");
             }
 
-            // Add the type class with the specified name
-            typeConfig.addSubTypeConfig(name, tclass);
-
-            // Load subtypes
-            loadChildren( typeConfig, typeEl ).forEach( c-> typeConfig.addSubTypeChild( name, c));
+            // v6.0.0: Registry-based subtype validation instead of TypesConfig
+            validateTypeConfig(name, tclass);
 
             // Update info msg if verbose
             if ( getLoader().getLoaderOptions().isVerbose() ) {
                 // Increment the # of subtypes
-                info.incType(typeConfig.getName());
+                info.incType(typeName);
             }
         }
     }
@@ -189,7 +164,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
             // NOTE:  This exists for backwards compatibility
             // Handle unknown types based on strict mode configuration
-            if ( getTypesConfig().getTypeByName( typeName ) == null ) {
+            if ( !getTypeRegistry().hasType( typeName ) ) {
                 if ( getLoader().getLoaderOptions().isStrict() ) {
                     throw new MetaDataException("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                 } else {

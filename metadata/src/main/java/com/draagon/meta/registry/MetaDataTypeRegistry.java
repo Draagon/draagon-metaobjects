@@ -223,6 +223,20 @@ public class MetaDataTypeRegistry {
     }
     
     /**
+     * Check if any type is registered with the given primary type name
+     * 
+     * @param type Primary type name (e.g., "field", "view", "validator")
+     * @return true if any subtype is registered for this primary type
+     */
+    public boolean hasType(String type) {
+        Objects.requireNonNull(type, "Type cannot be null");
+        
+        ensureInitialized();
+        return typeHandlers.keySet().stream()
+            .anyMatch(typeId -> type.equals(typeId.type()));
+    }
+    
+    /**
      * Get all registered type identifiers
      * 
      * @return Set of registered MetaDataTypeId instances
