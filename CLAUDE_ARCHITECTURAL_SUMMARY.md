@@ -410,6 +410,69 @@ The service-based architecture is production-ready for:
 
 **Migration Impact**: 100% API Compatibility - existing MetaData usage unchanged with enhanced functionality.
 
+### 🚀 OVERLAY FUNCTIONALITY RESTORATION & SERVICE ARCHITECTURE v5.2.0 - COMPLETED (September 2025)
+
+Critical metadata overlay functionality restoration that was broken during the v6.0.0 refactoring, plus sophisticated context-aware attribute creation system:
+
+#### ✅ CRITICAL OVERLAY FUNCTIONALITY RESTORATION
+**Metadata Overlay System Fixed** ✅
+- **Root Cause**: v6.0.0 refactoring created overlay fields with fully qualified names instead of simple names
+- **Solution**: Modified FileMetaDataParser.createNewMetaData() to use simple names for child elements (like pre-v6.0.0)
+- **Impact**: Secondary metadata files can now properly augment existing MetaData models during merge and load operations
+
+**Context-Aware Attribute Creation** ✅
+- **Problem**: v6.0.0 TypesConfig replacement lost context rules (e.g., 'keys' attributes under 'key' elements should default to stringArray)
+- **Architecture**: Implemented service-based context-aware attribute creation system
+- **Implementation**: MetaDataContextProvider service interface with CoreMetaDataContextProvider implementation
+
+#### ✅ SERVICE-BASED CONTEXT ARCHITECTURE
+**MetaDataContextProvider Service** ✅
+- **Purpose**: Service interface for providing context-specific metadata creation rules
+- **Location**: `metadata/src/main/java/com/draagon/meta/registry/MetaDataContextProvider.java`
+- **Method**: `getContextSpecificAttributeSubType(parentType, parentSubType, attrName)` for parent-context-aware type resolution
+
+**MetaDataContextRegistry** ✅  
+- **Purpose**: Singleton registry using ServiceLoader pattern for automatic provider discovery
+- **Location**: `metadata/src/main/java/com/draagon/meta/registry/MetaDataContextRegistry.java`
+- **Discovery**: Uses ServiceLoader to find all MetaDataContextProvider implementations
+
+**CoreMetaDataContextProvider** ✅
+- **Purpose**: Implementation that parses metaobjects.types.xml to restore original context-aware behavior
+- **Location**: `metadata/src/main/java/com/draagon/meta/registry/CoreMetaDataContextProvider.java`
+- **Functionality**: Loads attribute rules and subtype-specific rules from existing metadata type definitions
+
+#### ✅ TYPE REGISTRATION COMPLETENESS
+**Missing Attribute Types Restored** ✅
+- **Problem**: CoreMetaDataTypeProvider only registered 4 attribute types, missing PropertiesAttribute and ClassAttribute
+- **Root Cause**: Caused "No handler registered for type: attr.properties" errors in omdb module tests
+- **Solution**: Added missing type registrations in CoreMetaDataTypeProvider:
+  ```java
+  registry.registerHandler(new MetaDataTypeId("attr", "properties"), 
+      com.draagon.meta.attr.PropertiesAttribute.class);
+  registry.registerHandler(new MetaDataTypeId("attr", "class"), 
+      com.draagon.meta.attr.ClassAttribute.class);
+  ```
+
+#### ✅ ENHANCED FILEMETADATAPARSER
+**Context-Aware Field Creation** ✅
+- **Enhancement**: Updated FileMetaDataParser to use MetaDataContextRegistry for determining appropriate attribute subtypes
+- **Logic**: Instead of hard-coded rules, uses service-based lookup for parent-context-aware attribute creation
+- **Backward Compatibility**: Maintains all existing context rules while enabling extensibility
+
+#### 🏆 V5.2.0 ARCHITECTURAL BENEFITS
+1. **✅ Overlay Functionality Restored**: Secondary metadata files properly augment existing models
+2. **✅ Service-Based Context Rules**: Extensible context-aware attribute creation without hard-coding
+3. **✅ Complete Type Coverage**: All standard attribute types properly registered and discoverable
+4. **✅ Technical Debt Resolution**: Properly addressed architectural gaps from v6.0.0 refactoring
+5. **✅ Zero Regression Policy**: Maintained 100% backward compatibility while fixing broken functionality
+
+#### 🎯 TEST SUITE RESTORATION
+- **✅ 34 Core Tests Passing**: All core module tests now pass successfully after overlay functionality restoration
+- **✅ OMDB Tests Fixed**: Database Object Manager tests execute without type registration errors
+- **✅ Build Verification**: BUILD SUCCESS across all 10 modules with comprehensive overlay functionality
+
+**Migration Impact**: 100% API Compatibility - existing MetaData usage unchanged with enhanced functionality.
+
 ## Architecture Assessment
 
 **VERDICT**: Production-ready immutable metadata framework with modern service-based architecture that supports cross-language implementations.

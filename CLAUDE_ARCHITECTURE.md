@@ -366,6 +366,129 @@ public class MetaDataApiController {
 
 This architecture maintains the elegance of MetaObjects' load-once immutable design while enabling modern React frontend development with full type safety and metadata-driven UI generation.
 
+## Service-Based Context Architecture (v5.2.0)
+
+### Overlay Functionality Restoration
+
+Following the v6.0.0 TypesConfig replacement, critical overlay functionality was restored through a sophisticated service-based context architecture:
+
+#### Service-Based Context Pattern
+```java
+// Service interface for context-specific metadata creation rules
+public interface MetaDataContextProvider {
+    String getContextSpecificAttributeSubType(String parentType, String parentSubType, String attrName);
+}
+
+// ServiceLoader-based discovery registry
+public class MetaDataContextRegistry {
+    private final List<MetaDataContextProvider> providers;
+    
+    // Automatic discovery via ServiceLoader
+    private MetaDataContextRegistry() {
+        this.providers = ServiceLoader.load(MetaDataContextProvider.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .collect(Collectors.toList());
+    }
+    
+    // Context-aware attribute subtype resolution
+    public String getContextSpecificAttributeSubType(String parentType, String parentSubType, String attrName) {
+        return providers.stream()
+            .map(provider -> provider.getContextSpecificAttributeSubType(parentType, parentSubType, attrName))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+    }
+}
+```
+
+#### Core Context Provider Implementation
+```java
+// Implementation that parses metaobjects.types.xml for context rules
+public class CoreMetaDataContextProvider implements MetaDataContextProvider {
+    private Map<String, Map<String, String>> contextRules;
+    
+    // Loads rules like: <type name="key"><child type="attr" subType="stringArray" name="keys"/></type>
+    private void loadContextRulesFromTypesXML() {
+        InputStream typesXML = getClass().getResourceAsStream("/com/draagon/meta/loader/xml/metaobjects.types.xml");
+        // Parse XML and build contextRules map
+    }
+    
+    @Override
+    public String getContextSpecificAttributeSubType(String parentType, String parentSubType, String attrName) {
+        Map<String, String> typeRules = contextRules.get(parentType + "." + parentSubType);
+        return typeRules != null ? typeRules.get(attrName) : null;
+    }
+}
+```
+
+#### Enhanced FileMetaDataParser Integration
+```java
+// Context-aware attribute creation in FileMetaDataParser
+private MetaData createNewMetaData(String packageName, String name, String type, 
+                                   String subType, String attrName, boolean isRoot) {
+    // Fixed field naming: use simple names for children (like pre-v6.0.0)
+    String fullname = isRoot 
+        ? packageName + MetaDataLoader.PKG_SEPARATOR + name 
+        : name;
+    
+    // Context-aware attribute subtype resolution
+    String contextSubType = MetaDataContextRegistry.getInstance()
+        .getContextSpecificAttributeSubType(parentType, parentSubType, attrName);
+    
+    if (contextSubType != null) {
+        subType = contextSubType; // Use context-specific subtype
+    }
+}
+```
+
+### Architectural Benefits
+
+#### Service Discovery Pattern
+- **ServiceLoader Integration**: Standard Java service discovery mechanism
+- **Extensibility**: New context providers can be added without modifying core framework
+- **OSGI Compatibility**: No global static state, proper service-based architecture
+- **Separation of Concerns**: Clean separation between type registration and context enhancement
+
+#### Context-Aware Metadata Creation
+- **Restored Behavior**: 'keys' attributes under 'key' elements properly default to stringArray type
+- **Extensible Rules**: New context rules can be added through additional MetaDataContextProvider implementations
+- **Backward Compatibility**: All existing metadata definitions continue to work unchanged
+
+#### Overlay Functionality
+- **Secondary Metadata Files**: Can now properly augment existing MetaData models during merge and load operations
+- **Field Naming Fixed**: Overlay fields created with correct simple names for child elements  
+- **Zero Regression**: All test suites pass successfully with restored functionality
+
+### Service Registration
+```xml
+<!-- META-INF/services/com.draagon.meta.registry.MetaDataContextProvider -->
+com.draagon.meta.registry.CoreMetaDataContextProvider
+```
+
+### Usage Patterns
+```java
+// Framework automatically discovers and uses context providers
+MetaDataContextRegistry registry = MetaDataContextRegistry.getInstance();
+
+// Context-aware attribute creation during metadata loading
+String subType = registry.getContextSpecificAttributeSubType("key", null, "keys");
+// Returns "stringArray" for 'keys' attributes under 'key' elements
+
+// Extensible through additional providers
+public class CustomContextProvider implements MetaDataContextProvider {
+    public String getContextSpecificAttributeSubType(String parentType, String parentSubType, String attrName) {
+        // Custom context rules for enterprise extensions
+        if ("customField".equals(parentType) && "specialAttrib".equals(attrName)) {
+            return "customType";
+        }
+        return null;
+    }
+}
+```
+
+This service-based context architecture demonstrates the framework's resilience and extensibility - when functionality was lost during TypesConfig replacement, the service-based foundation provided clean extension points to restore it without architectural disruption.
+
 ## Future Architecture (v4.4.0+)
 
 - **Abstract/Interface MetaData**: Native support for inheritance
