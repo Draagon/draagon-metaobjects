@@ -33,7 +33,7 @@ public class MetaModelLoader extends MetaDataLoader {
     protected void generatedAndAddMetaModels() {
         // v6.0.0: Generate MetaModel using type registry instead of TypesConfig
         // The registry returns MetaData, but we know it will be a MetaModel type
-        addChild( getTypeRegistry().createInstance("metaObject", "metaModel", "generated") );
+        addChild( getTypeRegistry().createInstance("metaObject", "metaModel", MetaModel.OBJECT_NAME) );
     }
 
     @Override

@@ -3,7 +3,7 @@
 ## Project Overview
 MetaObjects is a Java-based suite of tools for metadata-driven development, providing sophisticated control over applications beyond traditional model-driven development techniques.
 
-- **Current Version**: 6.0.0 (development) - Major TypesConfig Replacement Architecture
+- **Current Version**: 5.2.0 (development) - Overlay Functionality Restoration & Service Architecture Enhancement  
 - **Previous Stable**: 5.1.0
 - **License**: Apache License 2.0
 - **Java Version**: Java 21 (upgraded from Java 1.8)
@@ -13,15 +13,16 @@ MetaObjects is a Java-based suite of tools for metadata-driven development, prov
 ## Project Structure
 
 ```
-├── core/           # Core MetaObjects functionality
-├── metadata/       # Metadata models and types
-├── maven-plugin/   # Maven plugin for code generation
-├── om/            # Object Manager module
-├── demo/          # Demo applications with React MetaView integration
-├── web/           # Web-related utilities with React MetaView components
-├── omdb/          # Database Object Manager
-├── omnosql/       # NoSQL Object Manager
-└── docs/          # Documentation
+├── core/               # Core MetaObjects functionality
+├── metadata/           # Metadata models and types
+├── metaobjects-codegen/# Code generation libraries (separated v6.0.0)
+├── maven-plugin/       # Maven plugin for code generation
+├── om/                # Object Manager module
+├── demo/              # Demo applications with React MetaView integration
+├── web/               # Web-related utilities with React MetaView components
+├── omdb/              # Database Object Manager
+├── omnosql/           # NoSQL Object Manager
+└── docs/              # Documentation
 ```
 
 ## Key Build Commands
@@ -170,7 +171,8 @@ A comprehensive architectural redesign that replaces the TypesConfig system with
 - **File Parser Updates**: FileMetaDataParser, JsonMetaDataParser, XMLMetaDataParser fully migrated to registry system
 - **Method Call Migration**: All TypesConfig method calls updated (`getTypesConfig()` → `getTypeRegistry()`, `getOrCreateTypeConfig()` → `validateTypeConfig()`)
 - **Registry Integration**: Added missing `hasType(String type)` method to MetaDataTypeRegistry for parser compatibility
-- **Full Project Compilation**: BUILD SUCCESS across all 9 modules - TypesConfig elimination complete
+- **Full Project Compilation**: BUILD SUCCESS across all 10 modules - TypesConfig elimination complete
+- **Code Generation Separation**: All generator code moved to dedicated `metaobjects-codegen` module (v6.0.0)
 
 #### Key Benefits Achieved
 
@@ -266,15 +268,17 @@ public class JPAEntityTemplate {
 
 Build order (important for development):
 1. `metadata` - Base metadata models
-2. `maven-plugin` - Code generation plugin
-3. `core` - Core functionality (depends on generated models)
-4. `om` - Object Manager
-5. `omdb` - Database Object Manager (extends om)
-6. `omnosql` - NoSQL Object Manager (extends om)
-7. `web` - Web utilities with React MetaView components
-8. `demo` - Demo applications with React integration
+2. `metaobjects-codegen` - Code generation libraries (separated v6.0.0)
+3. `maven-plugin` - Code generation plugin (depends on codegen)
+4. `core` - Core functionality (depends on generated models)
+5. `om` - Object Manager
+6. `omdb` - Database Object Manager (extends om)
+7. `omnosql` - NoSQL Object Manager (extends om)
+8. `web` - Web utilities with React MetaView components
+9. `demo` - Demo applications with React integration
 
 ### Module Integration Notes
+- **metaobjects-codegen** module: Contains all code generation functionality (moved from metadata v6.0.0)
 - **web** module: Contains React TypeScript components and Spring controllers for metadata APIs
 - **demo** module: Contains fishstore React demo, data controllers, and JSON metadata definitions
 - **Controllers**: Demo-specific controllers belong in demo module, generic web controllers in web module

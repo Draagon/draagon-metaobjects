@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.draagon</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
   
     <artifactId>metaobjects-core</artifactId>
@@ -32,6 +32,18 @@
                 <groupId>com.draagon</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.draagon</groupId>
+                        <artifactId>metaobjects-metadata</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.draagon</groupId>
+                        <artifactId>metaobjects-codegen</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <!-- DISABLED v6.0.0: TypesConfig system removed - will be replaced with ValidationChain-based generator
                     <execution>
@@ -68,6 +80,7 @@
                         </configuration>
                     </execution>
                     -->
+                    <!-- DISABLED v6.0.0: TypesConfig system removed - these metadata files use old v5.x format
                     <execution>
                         <id>gen-test-resources</id>
                         <phase>generate-test-resources</phase>
@@ -80,19 +93,18 @@
                                 <strict>true</strict>
                             </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
                                 <name>gen-test-resources</name>
-                                <sourceDir>${project.basedir}/src/test/resources</sourceDir>
                                 <sources>
-                                    <!-- REMOVED v6.0.0: TypesConfig system removed
+                                    REMOVED v6.0.0: TypesConfig system removed
                                     <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
-                                    -->
-                                    <source>metadata/test/produce/v1/produce-v1.bundle</source>
+                                    
+                                    <source>model:resource:metadata/test/produce/v1/produce-v1.bundle</source>
                                 </sources>
                             </loader>
                             <generators>
                                 <generator>
-                                    <!-- classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname -->
+                                    OLD: classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname
                                     <classname>com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-test-sources</outputDir>
@@ -105,6 +117,7 @@
                             </generators>
                         </configuration>
                     </execution>
+                    -->
                 </executions>
             </plugin>
         </plugins>
@@ -117,14 +130,14 @@
             <version>${project.version}</version>
         </dependency>
         
-        <!-- Groovy for hybrid script generators -->
+        <!-- Code generation dependency for tests (generator classes moved to codegen in v6.0.0) -->
         <dependency>
-            <groupId>org.apache.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>4.0.15</version>
-            <type>pom</type>
-            <optional>true</optional>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-codegen</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
+        
     </dependencies>
                     
 </project>

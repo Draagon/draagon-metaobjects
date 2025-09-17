@@ -1,11 +1,11 @@
 package com.draagon.meta.generator.hybrid;
 
-import com.draagon.meta.loader.simple.SimpleLoader;
-import com.draagon.meta.loader.uri.URIHelper;
+import com.draagon.meta.loader.file.FileMetaDataLoader;
+import com.draagon.meta.loader.file.FileMetaDataLoaderTestBase;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -13,19 +13,23 @@ import static org.junit.Assert.*;
 /**
  * Tests for ScriptContext functionality
  */
-public class ScriptContextTest {
+public class ScriptContextTest extends FileMetaDataLoaderTestBase {
 
     private ScriptContext context;
-    private SimpleLoader loader;
+    private FileMetaDataLoader loader;
     
     @Before
     public void setUp() {
-        loader = new SimpleLoader("test-loader")
-                .setSourceURIs(Arrays.asList(URIHelper.toURI(
-                    "model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml"
-                )))
-                .init();
+        // Use the XML metadata bundle like other tests in core
+        loader = super.initLoader("xml");
         context = new ScriptContext(loader);
+    }
+    
+    @After
+    public void tearDown() {
+        if (loader != null) {
+            loader.destroy();
+        }
     }
     
     @Test

@@ -201,12 +201,11 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
             com.draagon.meta.object.mapped.MappedMetaObject.class);
         registry.registerHandler(new MetaDataTypeId("object", "pojo"), 
             com.draagon.meta.object.pojo.PojoMetaObject.class);
-        registry.registerHandler(new MetaDataTypeId("object", "value"), 
-            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        // Note: "value" subtype is registered by CoreObjectTypeProvider in core module
         
-        // Register default object type (when subType is null/empty)
+        // Register default object type (when subType is null/empty) - use pojo as default
         registry.registerHandler(new MetaDataTypeId("object", "default"), 
-            com.draagon.meta.object.mapped.MappedMetaObject.class);
+            com.draagon.meta.object.pojo.PojoMetaObject.class);
         
         // Register attribute types for JSON metadata parsing
         registry.registerHandler(new MetaDataTypeId("attr", "string"), 
@@ -217,8 +216,12 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
             com.draagon.meta.attr.IntAttribute.class);
         registry.registerHandler(new MetaDataTypeId("attr", "stringarray"), 
             com.draagon.meta.attr.StringArrayAttribute.class);
+        registry.registerHandler(new MetaDataTypeId("attr", "properties"), 
+            com.draagon.meta.attr.PropertiesAttribute.class);
+        registry.registerHandler(new MetaDataTypeId("attr", "class"), 
+            com.draagon.meta.attr.ClassAttribute.class);
         
-        log.debug("Registered {} object types and {} attribute types", 6, 4);
+        log.debug("Registered {} object types and {} attribute types", 6, 6);
     }
     
     @Override

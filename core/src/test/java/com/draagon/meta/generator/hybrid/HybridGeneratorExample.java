@@ -8,8 +8,9 @@ import com.draagon.meta.generator.direct.GenerationContext;
 import com.draagon.meta.generator.direct.CodeFragment;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class HybridGeneratorExample {
     private MetaDataLoader loader;
     private String outputDir;
     
-    @BeforeEach
+    @Before
     void setUp() {
         // Initialize with sample metadata (in a real scenario, you'd load from XML/JSON)
         loader = createSampleLoader();

@@ -158,13 +158,6 @@ public class URIHelper implements URIConstants {
         }
     }
 
-    public static boolean isTypesURI( URI uri ) {
-        if ( uri.getScheme().startsWith( URI_TYPE_TYPES )) {
-            return true;
-        }
-        return false;
-    }
-
     public static boolean isModelURI( URI uri ) {
         if ( uri.getScheme().startsWith( URI_TYPE_MODEL )) {
             return true;

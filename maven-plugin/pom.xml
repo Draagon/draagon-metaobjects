@@ -2,7 +2,7 @@
     <parent>
         <artifactId>metaobjects</artifactId>
         <groupId>com.draagon</groupId>
-        <version>5.1.0-SNAPSHOT</version>
+        <version>5.2.0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -51,6 +51,11 @@
         <dependency>
             <groupId>com.draagon</groupId>
             <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-codegen</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

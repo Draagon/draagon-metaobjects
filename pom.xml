@@ -8,7 +8,7 @@
     </parent>
   
     <artifactId>metaobjects</artifactId>
-    <version>5.1.0-SNAPSHOT</version>
+    <version>5.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>MetaObjects</name>
@@ -29,6 +29,7 @@
 
     <modules>
         <module>metadata</module>
+        <module>metaobjects-codegen</module>
         <module>maven-plugin</module>
         <module>core</module>
         <module>om</module>

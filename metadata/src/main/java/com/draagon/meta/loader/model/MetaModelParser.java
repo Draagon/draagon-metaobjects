@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * v6.0.0: Updated to use service-based MetaDataTypeRegistry instead of TypesConfig
@@ -16,6 +18,9 @@ import java.util.List;
 public abstract class MetaModelParser<I extends MetaDataLoader, S> extends ParserBase<MetaModelLoader,I,S> {
 
     private static final Logger log = LoggerFactory.getLogger(MetaModelParser.class);
+    
+    // Thread-safe counter for auto-naming to handle concurrent parsing
+    private final Map<String, Integer> autoNameCounters = new ConcurrentHashMap<>();
 
     private String defaultPackageName = null;
 
@@ -176,30 +181,45 @@ public abstract class MetaModelParser<I extends MetaDataLoader, S> extends Parse
     protected <M extends MetaModel> String autoCreateName(
             MetaData parent, M model ) {
 
-        // v6.0.0: Simplified auto-naming - use type as base for name generation
+        // v6.0.0: Simplified auto-naming - use subtype as base for name generation
+        String subTypeName = model.getSubType();
         String typeName = model.getType();
-        if (typeName == null || typeName.isEmpty()) {
+        
+        // Use subType if available, otherwise fall back to type
+        String namePrefix = (subTypeName != null && !subTypeName.isEmpty()) 
+                ? subTypeName.toLowerCase() 
+                : (typeName != null ? typeName.toLowerCase() : null);
+                
+        if (namePrefix == null) {
             return null;
         }
         
-        // Generate sequential name based on type
-        String namePrefix = typeName.toLowerCase();
-        int i = 0;
-
-        // Count existing children of the same type to generate unique name
+        // Create a unique key for this parent-type-subtype combination to track counters
+        String counterKey = parent.getName() + "::" + typeName + "::" + (subTypeName != null ? subTypeName : "");
+        
+        // Get the starting index based on existing children with the same name prefix
+        int tempStartIndex = 0;
         for( MetaData md : parent.getChildrenOfType( typeName, true )) {
             if ( md.getName().startsWith( namePrefix )) {
-                String n = md.getName().substring(namePrefix.length());
+                String suffix = md.getName().substring(namePrefix.length());
                 try {
-                    int num = Integer.parseInt(n);
-                    if (num > i) i = num;
+                    int num = Integer.parseInt(suffix);
+                    if (num > tempStartIndex) tempStartIndex = num;
                 }
                 catch( NumberFormatException ex ) {
-                    log.debug("Non-numeric suffix [{}] on name [{}] during autoname creation for model: {}", n, md.getName(), model);
+                    log.debug("Non-numeric suffix [{}] on name [{}] during autoname creation for model: {}", suffix, md.getName(), model);
                 }
             }
         }
-        return namePrefix + (++i);
+        final int startIndex = tempStartIndex;
+        
+        // Use atomic increment to get next unique index for this parent-type-subtype combination
+        int nextIndex = autoNameCounters.compute(counterKey, (key, currentValue) -> {
+            int baseValue = (currentValue == null) ? startIndex : Math.max(currentValue, startIndex);
+            return baseValue + 1;
+        });
+        
+        return namePrefix + nextIndex;
     }
 
     protected <M extends MetaModel> MetaData createOrOverloadMetaDataWithName(

@@ -21,7 +21,8 @@ public class ConfigLoaderTest {
 
     public final static String PREFIX = "./target/tests/config/";
 
-    @Test
+    // DISABLED v6.0.0: TypesConfig system removed - replaced with MetaDataTypeRegistry
+    /*@Test
     public void testConfigLoader() throws IOException, MetaDataIOException {
 
         TypesConfigLoader loader = TypesConfigLoader.create(getClass().getClassLoader());
@@ -33,7 +34,7 @@ public class ConfigLoaderTest {
         //roundTripTest(tc1, "test-config", TypesConfig.class);
 
         loader.destroy();
-    }
+    }*/
 
 
    /* @Test

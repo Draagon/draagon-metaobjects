@@ -30,7 +30,6 @@ public class ProxyObjectTests {
     @Before
     public void initLoader() throws ClassNotFoundException {
         loader = SimpleLoader.createManual("proxytest", Arrays.asList(
-                //"com/draagon/meta/loader/simple/fruitbasket-metadata.xml",
                 "com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.json"
         ));
 

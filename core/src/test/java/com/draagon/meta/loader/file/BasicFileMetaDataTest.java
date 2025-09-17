@@ -11,7 +11,6 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.io.MetaDataIOException;
-import com.draagon.meta.loader.types.TypesConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -36,7 +35,7 @@ public class BasicFileMetaDataTest extends FileMetaDataLoaderTestBase {
     @After
     public void destroyLoader() { this.loader.destroy(); }
 
-    @Test
+    /*@Test
     public void testTypesConfig() throws MetaDataIOException {
 
         TypesConfig typesConfig = loader.getTypesConfig();
@@ -51,10 +50,10 @@ public class BasicFileMetaDataTest extends FileMetaDataLoaderTestBase {
         //writer.close();
 
         // Write Json
-        /*JsonObjectWriter writer2 = new JsonObjectWriter( typesConfig.getMetaData().getLoader(), new OutputStreamWriter( System.out ));
+        JsonObjectWriter writer2 = new JsonObjectWriter( typesConfig.getMetaData().getLoader(), new OutputStreamWriter( System.out ));
         writer2.withIndent(" ");
         writer2.write( typesConfig );
-        writer2.close();*/
-    }
+        writer2.close();
+    }*/
 }
 

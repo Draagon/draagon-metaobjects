@@ -6,6 +6,7 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.registry.MetaDataContextRegistry;
 import com.draagon.meta.registry.MetaDataTypeRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import org.slf4j.Logger;
@@ -218,8 +219,10 @@ public abstract class FileMetaDataParser {
         // v6.0.0: Type validation handled by registry during creation
         // Simplified auto-naming logic without TypeConfig dependency
         if (name == null || name.equals("")) {
-            // Generate sequential name based on type
-            String namePrefix = typeName.toLowerCase();
+            // Generate sequential name based on subtype if available, otherwise use type
+            String namePrefix = (subTypeName != null && !subTypeName.isEmpty()) 
+                    ? subTypeName.toLowerCase() 
+                    : typeName.toLowerCase();
             name = getNextNamePrefix(parent, typeName, namePrefix);
             
             if ( name == null ) throw new MetaDataException("MetaData [" +typeName+ "] found on parent [" +parent
@@ -229,17 +232,36 @@ public abstract class FileMetaDataParser {
         // Load or get the MetaData
         MetaData md = null;
 
+        
         if (packageName == null || packageName.trim().isEmpty()) {
             // If not found, then use the default
-            packageName = getDefaultPackageName();
+            // For child elements, inherit package from parent instead of root document
+            if (!isRoot && parent != null && parent.getName().contains(MetaDataLoader.PKG_SEPARATOR)) {
+                // Extract package from parent's full name (everything before the last separator)
+                String parentName = parent.getName();
+                int lastSep = parentName.lastIndexOf(MetaDataLoader.PKG_SEPARATOR);
+                if (lastSep > 0) {
+                    packageName = parentName.substring(0, lastSep);
+                } else {
+                    packageName = getDefaultPackageName();
+                }
+            } else {
+                packageName = getDefaultPackageName();
+            }
         } else {
             // Convert any relative paths to the full package path
             packageName = expandPackageForPath( getDefaultPackageName(), packageName );
         }
+        
 
         // Check if the metadata described already existed, and if so create and overloaded version
         // v6.0.0: Try to find existing MetaData by name (without class constraint)
         try {
+            String searchName = (isRoot && packageName.length() > 0) 
+                ? packageName + MetaDataLoader.PKG_SEPARATOR + name 
+                : name;
+                
+            
             if ( isRoot && packageName.length() > 0 ) {
                 md = parent.getChildOfType( typeName, packageName + MetaDataLoader.PKG_SEPARATOR + name );
             } else {
@@ -251,6 +273,7 @@ public abstract class FileMetaDataParser {
                     parent.addChild(md);
                 }
             }
+            
         }
         catch (MetaDataNotFoundException e) {
             // Handle cases where it's bad that it wasn't found
@@ -273,6 +296,7 @@ public abstract class FileMetaDataParser {
                 md.setSuperData(superData);
             }
         }
+
 
         return md;
     }
@@ -354,7 +378,8 @@ public abstract class FileMetaDataParser {
         }
 
         // v6.0.0: Create MetaData instance using registry
-        String fullname = (packageName != null && !packageName.isEmpty()) 
+        // Only use fully qualified name for root elements, simple name for children (like pre-v6.0.0)
+        String fullname = isRoot 
             ? packageName + MetaDataLoader.PKG_SEPARATOR + name 
             : name;
             
@@ -419,26 +444,37 @@ public abstract class FileMetaDataParser {
         return null;
     }
 
-    /** v6.0.0: Simplified to use registry system for attribute creation */
+    /** v6.0.0: Context-aware attribute creation using MetaDataContextRegistry */
     protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
 
         String parentType = parentMetaData.getTypeName();
         String parentSubType = parentMetaData.getSubTypeName();
 
-        // v6.0.0: Create attribute using registry system
+        // v6.0.0: Create attribute using context-aware registry system
         MetaAttribute attr = null;
         
         try {
-            // Default to StringAttribute for auto-created attributes
+            // Use context registry to determine appropriate attribute subtype based on parent context
+            String subType = MetaDataContextRegistry.getInstance()
+                    .getContextSpecificAttributeSubType(parentType, parentSubType, attrName);
+            
             attr = (MetaAttribute) getTypeRegistry().createInstance(
-                MetaAttribute.TYPE_ATTR, StringAttribute.SUBTYPE_STRING, attrName);
+                MetaAttribute.TYPE_ATTR, subType, attrName);
             
             if (attr != null) {
                 parentMetaData.addChild(attr);
-                attr.setValueAsString(value);
                 
-                log.debug("Auto-created attribute [{}] on parent [{}:{}:{}] in file [{}]", 
-                         attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                // Handle array format for StringArrayAttribute types
+                if ("stringarray".equals(subType) && !value.startsWith("[")) {
+                    // Convert single value to array format for StringArrayAttribute
+                    attr.setValueAsString("[" + value + "]");
+                    log.debug("Auto-created context-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]", 
+                             attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                } else {
+                    attr.setValueAsString(value);
+                    log.debug("Auto-created context-aware attribute [{}] with subtype [{}] on parent [{}:{}:{}] in file [{}]", 
+                             attrName, subType, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                }
             }
             
         } catch (Exception e) {

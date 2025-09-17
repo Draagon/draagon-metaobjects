@@ -1,14 +1,13 @@
 package com.draagon.meta.generator.hybrid;
 
-import com.draagon.meta.loader.simple.SimpleLoader;
-import com.draagon.meta.loader.uri.URIHelper;
+import com.draagon.meta.loader.file.FileMetaDataLoader;
+import com.draagon.meta.loader.file.FileMetaDataLoaderTestBase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.After;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,21 +16,17 @@ import static org.junit.Assert.*;
 /**
  * Tests for Hybrid Generation system
  */
-public class HybridGeneratorTest {
+public class HybridGeneratorTest extends FileMetaDataLoaderTestBase {
 
     public static final String OUT_DIR = "./target/tests/hybrid";
     
-    protected SimpleLoader loader;
+    protected FileMetaDataLoader loader;
     private File outputDir;
     
     @Before
     public void setUp() {
-        // Create loader directly since we're not extending test base
-        loader = new SimpleLoader("hybrid-test")
-                .setSourceURIs(Arrays.asList(URIHelper.toURI(
-                    "model:resource:com/draagon/meta/generator/direct/javacode/simple/test-interface-metadata.xml"
-                )))
-                .init();
+        // Use the XML metadata bundle like other tests in core
+        loader = super.initLoader("xml");
         
         outputDir = new File(OUT_DIR);
         if (outputDir.exists()) {
@@ -42,6 +37,9 @@ public class HybridGeneratorTest {
     
     @After
     public void tearDown() {
+        if (loader != null) {
+            loader.destroy();
+        }
         if (outputDir != null && outputDir.exists()) {
             deleteDirectory(outputDir);
         }

@@ -150,12 +150,17 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
     /** Parse the metadata */
     protected void parseMetaData( MetaData parent, Element element, boolean isRoot ) throws SAXException {
 
+        // Child elements will be processed and registered with the MetaDataTypeRegistry
+
         // Iterate through all elements
         for ( Element el : getElements( element )) {
 
             String typeName     = el.getNodeName();
             String subTypeName  = el.getAttribute(ATTR_TYPE);
             String name         = el.getAttribute(ATTR_NAME);
+            
+            
+            // Process all types including attr elements for MetaAttribute creation
             String packageName  = el.getAttribute(ATTR_PACKAGE);
             String superName    = el.getAttribute(ATTR_SUPER);
             Boolean isAbstract  = Boolean.parseBoolean( el.getAttribute(ATTR_ISABSTRACT));
@@ -188,9 +193,18 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
                 info.incData( typeName );
             }
 
+            // DEBUG: Log created MetaData
+            if ("attr".equals(md.getType())) {
+                System.out.println("DEBUG: Created MetaAttribute [" + md.getName() + "] in parent [" + parent.getName() + "], class=" + md.getClass().getSimpleName());
+            }
+
             // Different behavior if it's a MetaAttribute
             if ( md instanceof MetaAttribute) {
                 parseMetaAttributeValue( (MetaAttribute) md, el );
+                // DEBUG: Log MetaAttribute value
+                if ("object".equals(md.getName())) {
+                    System.out.println("DEBUG: MetaAttribute 'object' value = [" + ((MetaAttribute) md).getValueAsString() + "]");
+                }
             }
             // otherwide, parse as normal recursively
             else {

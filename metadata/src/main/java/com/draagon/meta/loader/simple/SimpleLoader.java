@@ -99,65 +99,20 @@ public class SimpleLoader extends MetaDataLoader {
 
         super.init();
 
-        // Load TypesConfig
-        //SimpleTypesParser simpleTypesParser = new SimpleTypesParser( typesLoader, SIMPLE_TYPES_XML );
-        //simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_XML));
-
-        boolean typesLoaded = false;
-
         // Load MetaData
         MetaModelLoader modelLoader = MetaModelLoader.create(
                 getMetaDataClassLoader(),
                 "simple",
                 getTypeRegistry() );
         for( URI sourceURI : sourceURIs) {
-
-            if (URIHelper.isTypesURI(sourceURI)) {
-                SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
-                        getTypeRegistry(),
-                        getMetaDataClassLoader(),
-                        sourceURI.toString() );
-                simpleTypesParser.loadAndMerge( this, sourceURI);
-                typesLoaded = true;
-            }
-            else {
-                if ( !typesLoaded ) {
-                    loadDefaultSimpleTypes();
-                    typesLoaded = true;
-                }
-
-                SimpleModelParser simpleModelParser = new SimpleModelParser(
-                        modelLoader, getMetaDataClassLoader(), sourceURI.toString());
-                simpleModelParser.loadAndMerge(this, sourceURI);
-            }
+            SimpleModelParser simpleModelParser = new SimpleModelParser(
+                    modelLoader, getMetaDataClassLoader(), sourceURI.toString());
+            simpleModelParser.loadAndMerge(this, sourceURI);
         }
-
-        // Only occurs if no sourceURIs were loaded
-        if ( !typesLoaded ) loadDefaultSimpleTypes();
 
         // Validate the MetaData
         validate();
 
         return this;
     }
-
-    protected void loadDefaultSimpleTypes() {
-        SimpleTypesParser simpleTypesParser = new SimpleTypesParser(
-                getTypeRegistry(),
-                getMetaDataClassLoader(),
-                SIMPLE_TYPES_JSON );
-        simpleTypesParser.loadAndMerge( this, URIHelper.toURI("types:resource:"+SIMPLE_TYPES_JSON));
-    }
-
-    /*protected InputStream getResourceInputStream(String resource) throws FileNotFoundException {
-
-        InputStream is = null;
-        File f = new File(resource);
-        if (!f.exists()) {
-            is = this.getClass().getClassLoader().getResourceAsStream(resource);
-        } else {
-            is = new FileInputStream(f);
-        }
-        return is;
-    }*/
 }

@@ -8,6 +8,10 @@ public class PrimaryKey extends MetaKey {
     public PrimaryKey() {
         super(SUBTYPE, NAME);
     }
+    
+    public PrimaryKey(String name) {
+        super(SUBTYPE, name);
+    }
 
     @Override
     public ObjectKey getObjectKey(Object o) {
