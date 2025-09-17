@@ -104,6 +104,37 @@ public interface MetaDataTypeProvider {
     void registerTypes(MetaDataTypeRegistry registry);
     
     /**
+     * Register default subtypes for primary types.
+     * 
+     * <p>This method is called after {@link #registerTypes(MetaDataTypeRegistry)} 
+     * to allow providers to declare default subtypes for their registered types.
+     * Later registrations override earlier ones (last-wins semantics).</p>
+     * 
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * @Override
+     * public void registerDefaults(MetaDataTypeRegistry registry) {
+     *     // StringField declares itself as default for "field" type
+     *     registry.registerDefaultSubType("field", "string");
+     *     registry.registerDefaultSubType("object", "pojo");
+     *     registry.registerDefaultSubType("view", "base");
+     * }
+     * }</pre>
+     * 
+     * <p><strong>Override Semantics:</strong> If multiple providers register
+     * defaults for the same type, the last one wins. This allows plugins to
+     * override core defaults with custom implementations.</p>
+     * 
+     * <p><strong>Important:</strong> This method may be called multiple times,
+     * so implementations should be idempotent.</p>
+     * 
+     * @param registry The registry to register default subtypes with
+     */
+    default void registerDefaults(MetaDataTypeRegistry registry) {
+        // Default implementation does nothing - providers can override
+    }
+    
+    /**
      * Enhance validation chains for existing types.
      * 
      * <p>This method is called after all types have been registered and allows

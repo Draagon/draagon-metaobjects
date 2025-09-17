@@ -228,13 +228,18 @@ public abstract class MetaModelParser<I extends MetaDataLoader, S> extends Parse
 
             superData = getSuperData( parent, model, superName );
 
-            if ( model.getSubType() != null && !model.getSubType().equals(superData.getSubTypeName())) {
-                throw new MetaDataException("SubType mismatch [" + model.getSubType() + "] != "+
+            // If model subType is null, inherit from super data
+            if ( subType == null ) {
+                subType = superData.getSubTypeName();
+            }
+            // If model has explicit subType, validate it matches super data
+            else if ( !subType.equals(superData.getSubTypeName())) {
+                throw new MetaDataException("SubType mismatch [" + subType + "] != "+
                         "["+ superData.getSubTypeName()+"] on superData: " + superData );
             }
         }
 
-        // v6.0.0: Create MetaData using registry instead of TypesConfig
+        // v6.0.0: Create MetaData using registry (registry handles null subType with defaults)
         MetaData merge = typeRegistry.createInstance(model.getType(), subType, fullname);
 
         // Set the SuperData if it exists

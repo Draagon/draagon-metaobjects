@@ -2,7 +2,9 @@ package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.ValidationResult;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
+import com.draagon.meta.key.*;
 import com.draagon.meta.validator.*;
 import com.draagon.meta.view.MetaView;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
  * 
  * <ul>
  *   <li><strong>Field Types:</strong> string, int, long, double, boolean, date, etc.</li>
+ *   <li><strong>Key Types:</strong> primary, foreign, secondary keys</li>
  *   <li><strong>Validator Types:</strong> required, regex, numeric, length, array</li>
  *   <li><strong>View Types:</strong> Basic view implementations</li>
  * </ul>
@@ -33,14 +36,23 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
     public void registerTypes(MetaDataTypeRegistry registry) {
         log.debug("Registering core MetaData types");
         
+        // Register base types (abstract versions that can be extended)
+        registerBaseTypes(registry);
+        
         // Register field types
         registerFieldTypes(registry);
+        
+        // Register key types
+        registerKeyTypes(registry);
         
         // Register validator types
         registerValidatorTypes(registry);
         
         // Register view types
         registerViewTypes(registry);
+        
+        // Register object types
+        registerObjectTypes(registry);
         
         log.info("Registered all core MetaData types");
     }
@@ -76,6 +88,43 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
         log.debug("Enhanced validation for core types");
     }
     
+    @Override
+    public void registerDefaults(MetaDataTypeRegistry registry) {
+        log.debug("Registering default subtypes for core types");
+        
+        // StringField declares itself as default for "field" type
+        registry.registerDefaultSubType("field", "string");
+        
+        // Default object type is "pojo" 
+        registry.registerDefaultSubType("object", "pojo");
+        
+        // Default view type is "base"
+        registry.registerDefaultSubType("view", "base");
+        
+        // Default validator is "required"
+        registry.registerDefaultSubType("validator", "required");
+        
+        // Default key type is "primary"
+        registry.registerDefaultSubType("key", "primary");
+        
+        // Default attr type is "string"
+        registry.registerDefaultSubType("attr", "string");
+        
+        log.debug("Registered default subtypes for core types");
+    }
+    
+    /**
+     * Register additional missing types that are needed by XML metadata parsing.
+     * These handle cases where XML metadata references types not yet registered.
+     */
+    private void registerBaseTypes(MetaDataTypeRegistry registry) {
+        // Register missing metaobject.metamodel type (used by XML metadata parsing)
+        registry.registerHandler(new MetaDataTypeId("metaobject", "metamodel"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        
+        log.debug("Registered {} additional base types", 1);
+    }
+    
     /**
      * Register all field types
      */
@@ -98,6 +147,17 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
         registry.registerHandler(new MetaDataTypeId("field", "class"), ClassField.class);
         
         log.debug("Registered {} field types", 12);
+    }
+    
+    /**
+     * Register all key types - core common metadata patterns for primary keys, foreign keys, etc.
+     */
+    private void registerKeyTypes(MetaDataTypeRegistry registry) {
+        registry.registerHandler(new MetaDataTypeId("key", "primary"), PrimaryKey.class);
+        registry.registerHandler(new MetaDataTypeId("key", "foreign"), ForeignKey.class);
+        registry.registerHandler(new MetaDataTypeId("key", "secondary"), SecondaryKey.class);
+        
+        log.debug("Registered {} key types", 3);
     }
     
     /**
@@ -126,6 +186,41 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
         log.debug("Registered {} view types", 1);
     }
     
+    /**
+     * Register object types 
+     */
+    private void registerObjectTypes(MetaDataTypeRegistry registry) {
+        // Register MetaModel object type using MappedMetaObject for JSON metadata reading
+        registry.registerHandler(new MetaDataTypeId("metaObject", "metaModel"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        
+        // Register domain object types for JSON metadata parsing
+        registry.registerHandler(new MetaDataTypeId("object", "proxy"), 
+            com.draagon.meta.object.proxy.ProxyMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("object", "map"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("object", "pojo"), 
+            com.draagon.meta.object.pojo.PojoMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("object", "value"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        
+        // Register default object type (when subType is null/empty)
+        registry.registerHandler(new MetaDataTypeId("object", "default"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        
+        // Register attribute types for JSON metadata parsing
+        registry.registerHandler(new MetaDataTypeId("attr", "string"), 
+            com.draagon.meta.attr.StringAttribute.class);
+        registry.registerHandler(new MetaDataTypeId("attr", "boolean"), 
+            com.draagon.meta.attr.BooleanAttribute.class);
+        registry.registerHandler(new MetaDataTypeId("attr", "int"), 
+            com.draagon.meta.attr.IntAttribute.class);
+        registry.registerHandler(new MetaDataTypeId("attr", "stringarray"), 
+            com.draagon.meta.attr.StringArrayAttribute.class);
+        
+        log.debug("Registered {} object types and {} attribute types", 6, 4);
+    }
+    
     @Override
     public int getPriority() {
         return 10; // High priority - register core types first
@@ -133,6 +228,6 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
     
     @Override
     public String getDescription() {
-        return "Core MetaData Type Provider - registers built-in field, validator, and view types";
+        return "Core MetaData Type Provider - registers built-in field, validator, view, and object types";
     }
 }

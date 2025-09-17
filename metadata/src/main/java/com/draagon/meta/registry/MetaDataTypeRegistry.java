@@ -36,7 +36,9 @@ public class MetaDataTypeRegistry {
     private final ServiceRegistry serviceRegistry;
     private final Map<MetaDataTypeId, Class<? extends MetaData>> typeHandlers = new ConcurrentHashMap<>();
     private final Map<MetaDataTypeId, ValidationChain<MetaData>> validationChains = new ConcurrentHashMap<>();
+    private final Map<String, String> defaultSubTypes = new ConcurrentHashMap<>();
     private volatile boolean initialized = false;
+    private volatile boolean initializing = false;
     
     /**
      * Create registry with service discovery
@@ -59,11 +61,16 @@ public class MetaDataTypeRegistry {
      * Ensure the registry is initialized (lazy initialization)
      */
     private void ensureInitialized() {
-        if (!initialized) {
+        if (!initialized && !initializing) {
             synchronized (this) {
-                if (!initialized) {
-                    discoverAndRegisterTypes();
-                    initialized = true;
+                if (!initialized && !initializing) {
+                    initializing = true;
+                    try {
+                        discoverAndRegisterTypes();
+                        initialized = true;
+                    } finally {
+                        initializing = false;
+                    }
                 }
             }
         }
@@ -82,8 +89,16 @@ public class MetaDataTypeRegistry {
     @SuppressWarnings("unchecked")
     public <T extends MetaData> T createInstance(String type, String subType, String name) {
         Objects.requireNonNull(type, "Type cannot be null");
-        Objects.requireNonNull(subType, "SubType cannot be null");
         Objects.requireNonNull(name, "Name cannot be null");
+        
+        // If subType is null, use registered default
+        if (subType == null) {
+            subType = getDefaultSubType(type);
+            if (subType == null) {
+                throw new MetaDataException("No subType provided and no default registered for type: " + type);
+            }
+            log.debug("Using default subType [{}] for type [{}]", subType, type);
+        }
         
         MetaDataTypeId typeId = new MetaDataTypeId(type, subType);
         return (T) createInstance(typeId, name);
@@ -199,7 +214,10 @@ public class MetaDataTypeRegistry {
         Objects.requireNonNull(typeId, "TypeId cannot be null");
         Objects.requireNonNull(validator, "Validator cannot be null");
         
-        ensureInitialized();
+        // Only initialize if we're not currently initializing (to avoid infinite recursion)
+        if (!initializing) {
+            ensureInitialized();
+        }
         
         // Apply to matching types
         for (Map.Entry<MetaDataTypeId, ValidationChain<MetaData>> entry : validationChains.entrySet()) {
@@ -262,6 +280,45 @@ public class MetaDataTypeRegistry {
     }
     
     /**
+     * Register a default subtype for a given type.
+     * Later registrations override earlier ones (last-wins semantics).
+     * 
+     * @param type Primary type (e.g., "field", "object", "view")
+     * @param defaultSubType Default subtype to use when none specified
+     */
+    public void registerDefaultSubType(String type, String defaultSubType) {
+        Objects.requireNonNull(type, "Type cannot be null");
+        Objects.requireNonNull(defaultSubType, "DefaultSubType cannot be null");
+        
+        String previous = defaultSubTypes.put(type, defaultSubType);
+        if (previous != null) {
+            log.debug("Overrode default subType for [{}]: [{}] -> [{}]", type, previous, defaultSubType);
+        } else {
+            log.debug("Registered default subType [{}] for type [{}]", defaultSubType, type);
+        }
+    }
+    
+    /**
+     * Get the default subtype for a given type
+     * 
+     * @param type Primary type
+     * @return Default subtype, or null if none registered
+     */
+    public String getDefaultSubType(String type) {
+        Objects.requireNonNull(type, "Type cannot be null");
+        return defaultSubTypes.get(type);
+    }
+    
+    /**
+     * Get all registered default subtypes
+     * 
+     * @return Map of type -> default subtype
+     */
+    public Map<String, String> getDefaultSubTypes() {
+        return Map.copyOf(defaultSubTypes);
+    }
+    
+    /**
      * Get handler class for a type
      * 
      * @param typeId Type identifier
@@ -317,6 +374,9 @@ public class MetaDataTypeRegistry {
                 try {
                     log.debug("Registering types from provider: {}", provider.getClass().getName());
                     provider.registerTypes(this);
+                    
+                    log.debug("Registering defaults from provider: {}", provider.getClass().getName());
+                    provider.registerDefaults(this);
                     
                     log.debug("Enhancing validation from provider: {}", provider.getClass().getName());
                     provider.enhanceValidation(this);
