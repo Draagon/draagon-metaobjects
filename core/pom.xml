@@ -40,7 +40,7 @@
                     </dependency>
                     <dependency>
                         <groupId>com.draagon</groupId>
-                        <artifactId>metaobjects-codegen</artifactId>
+                        <artifactId>codegen</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
@@ -133,7 +133,7 @@
         <!-- Code generation dependency for tests (generator classes moved to codegen in v6.0.0) -->
         <dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-codegen</artifactId>
+            <artifactId>codegen</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

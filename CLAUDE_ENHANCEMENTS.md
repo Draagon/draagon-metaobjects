@@ -256,7 +256,7 @@ Timestamp: 2025-09-17T20:45:11.123Z"
 - **✅ 15+ Enhanced Exception Classes**: Comprehensive coverage across metadata, object manager, database, web, and code generation modules
 - **✅ 25+ Factory Methods**: Convenient creation of context-rich exceptions with operation-specific details
 - **✅ Zero Regressions**: 100% backward compatibility maintained across all enhanced modules
-- **✅ Build Success**: All 5 modules (metadata, om, omdb, web, metaobjects-codegen) compile and function correctly
+- **✅ Build Success**: All 5 modules (metadata, om, omdb, web, codegen) compile and function correctly
 - **✅ Quality Improvement**: Major quality-of-life enhancement for MetaObjects developers
 
 **🚀 PHASE 6 COMPLETE:** Enhanced Error Reporting System successfully implemented across the entire MetaObjects ecosystem, providing rich contextual error information while maintaining framework's commitment to backward compatibility.

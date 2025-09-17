@@ -15,7 +15,7 @@ MetaObjects is a Java-based suite of tools for metadata-driven development, prov
 ```
 ├── core/               # Core MetaObjects functionality
 ├── metadata/           # Metadata models and types
-├── metaobjects-codegen/# Code generation libraries (separated v6.0.0)
+├── codegen/# Code generation libraries (separated v6.0.0)
 ├── maven-plugin/       # Maven plugin for code generation
 ├── om/                # Object Manager module
 ├── demo/              # Demo applications with React MetaView integration
@@ -172,7 +172,7 @@ A comprehensive architectural redesign that replaces the TypesConfig system with
 - **Method Call Migration**: All TypesConfig method calls updated (`getTypesConfig()` → `getTypeRegistry()`, `getOrCreateTypeConfig()` → `validateTypeConfig()`)
 - **Registry Integration**: Added missing `hasType(String type)` method to MetaDataTypeRegistry for parser compatibility
 - **Full Project Compilation**: BUILD SUCCESS across all 10 modules - TypesConfig elimination complete
-- **Code Generation Separation**: All generator code moved to dedicated `metaobjects-codegen` module (v6.0.0)
+- **Code Generation Separation**: All generator code moved to dedicated `codegen` module (v6.0.0)
 
 #### Key Benefits Achieved
 
@@ -267,7 +267,7 @@ A comprehensive enhancement of exception handling across all MetaObjects modules
 **Web Module (web)**
 - `WebViewException` → Web-specific error reporting with request context and user information
 
-**Code Generation Module (metaobjects-codegen)**
+**Code Generation Module (codegen)**
 - `GeneratorException` → Code generation errors with template and file context
 - `GeneratorIOException` → I/O errors during generation with writer and operation context
 
@@ -406,7 +406,7 @@ The Enhanced Error Reporting System represents a major quality-of-life improveme
 
 Build order (important for development):
 1. `metadata` - Base metadata models
-2. `metaobjects-codegen` - Code generation libraries (separated v6.0.0)
+2. `codegen` - Code generation libraries (separated v6.0.0)
 3. `maven-plugin` - Code generation plugin (depends on codegen)
 4. `core` - Core functionality (depends on generated models)
 5. `om` - Object Manager
@@ -416,7 +416,7 @@ Build order (important for development):
 9. `demo` - Demo applications with React integration
 
 ### Module Integration Notes
-- **metaobjects-codegen** module: Contains all code generation functionality (moved from metadata v6.0.0)
+- **codegen** module: Contains all code generation functionality (moved from metadata v6.0.0)
 - **web** module: Contains React TypeScript components and Spring controllers for metadata APIs
 - **demo** module: Contains fishstore React demo, data controllers, and JSON metadata definitions
 - **Controllers**: Demo-specific controllers belong in demo module, generic web controllers in web module

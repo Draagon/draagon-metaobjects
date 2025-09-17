@@ -55,7 +55,7 @@
         </dependency>
         <dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-codegen</artifactId>
+            <artifactId>codegen</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

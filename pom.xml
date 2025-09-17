@@ -29,7 +29,7 @@
 
     <modules>
         <module>metadata</module>
-        <module>metaobjects-codegen</module>
+        <module>codegen</module>
         <module>maven-plugin</module>
         <module>core</module>
         <module>om</module>
