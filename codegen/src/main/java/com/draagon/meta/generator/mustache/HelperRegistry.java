@@ -15,7 +15,7 @@ import java.util.function.Function;
  * type conversion, and MetaObjects integration.
  * 
  * Based on the cross-language template system architecture documented in
- * TEMPLATE_IMPLEMENTATION_GUIDE.md
+ * .claude/archive/template-system/TEMPLATE_IMPLEMENTATION_GUIDE.md
  */
 public class HelperRegistry {
     

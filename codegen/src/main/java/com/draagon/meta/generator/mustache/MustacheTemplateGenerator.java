@@ -26,7 +26,7 @@ import java.util.HashMap;
  * cross-language code generation using Mustache templates.
  * 
  * Based on the cross-language template system architecture documented in
- * TEMPLATE_IMPLEMENTATION_GUIDE.md and TEMPLATE_SYSTEM_ARCHITECTURE.md
+ * .claude/archive/template-system/TEMPLATE_IMPLEMENTATION_GUIDE.md and .claude/archive/template-system/TEMPLATE_SYSTEM_ARCHITECTURE.md
  */
 public class MustacheTemplateGenerator implements Generator {
     

@@ -483,9 +483,9 @@ Critical metadata overlay functionality restoration that was broken during the v
 
 ## Quick Reference Files
 
-- **Comprehensive Analysis**: `CLAUDE_ARCHITECTURAL_ANALYSIS.md`
-- **Detailed Enhancements**: `CLAUDE_ENHANCEMENTS.md`  
-- **Architecture Guide**: `CLAUDE_ARCHITECTURE.md`
-- **This Summary**: `CLAUDE_ARCHITECTURAL_SUMMARY.md`
+- **Comprehensive Analysis**: `archive/architectural-analysis/CLAUDE_ARCHITECTURAL_ANALYSIS.md`
+- **Detailed Enhancements**: `archive/architectural-analysis/CLAUDE_ENHANCEMENTS.md`  
+- **Architecture Guide**: `archive/architectural-analysis/original-architecture-guide.md`
+- **This Summary**: `architectural-summary.md` (current file)
 
 This framework deserves enhancement, not replacement. The core design is sophisticated and follows metadata framework best practices.

@@ -11,7 +11,7 @@ import java.util.Map;
  * how MetaObjects should be transformed into code.
  * 
  * Based on the cross-language template system architecture documented in
- * TEMPLATE_SYSTEM_ARCHITECTURE.md
+ * .claude/archive/template-system/TEMPLATE_SYSTEM_ARCHITECTURE.md
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TemplateDefinition {

@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * the HelperRegistry for Java-specific helper functions.
  * 
  * Based on the cross-language template system architecture documented in
- * TEMPLATE_IMPLEMENTATION_GUIDE.md
+ * .claude/archive/template-system/TEMPLATE_IMPLEMENTATION_GUIDE.md
  */
 public class MustacheTemplateEngine {
     

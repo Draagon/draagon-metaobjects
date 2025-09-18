@@ -12,7 +12,7 @@ import java.util.List;
  * Supports validation of template requirements and helper function availability.
  * 
  * Based on the cross-language template system architecture documented in
- * TEMPLATE_IMPLEMENTATION_GUIDE.md
+ * .claude/archive/template-system/TEMPLATE_IMPLEMENTATION_GUIDE.md
  */
 public class TemplateParser {
     

@@ -72,7 +72,7 @@ Release date: [Current Date]
 ```
 
 ### Step 5: Update CLAUDE.md
-Located at: `./CLAUDE.md`
+Located at: `./.claude/CLAUDE.md`
 
 Update lines:
 - Line 6: `- **Current Version**: X.Y.Z-SNAPSHOT (latest stable: X.Y.Z)`
@@ -84,7 +84,7 @@ Search and verify these files/patterns are updated:
 - All pom.xml files contain new version
 - README.md shows new current release
 - RELEASE_NOTES.md has new version section
-- CLAUDE.md reflects new version
+- .claude/CLAUDE.md reflects new version
 - Any hardcoded version references in documentation
 
 ## Files That Must Be Updated
@@ -97,7 +97,7 @@ Search and verify these files/patterns are updated:
 5. **./om/pom.xml** - Object Manager module version
 6. **./README.md** - Current Release line
 7. **./RELEASE_NOTES.md** - Add new version section
-8. **./CLAUDE.md** - Current version and recent changes header
+8. **./.claude/CLAUDE.md** - Current version and recent changes header
 
 ### Secondary Files (Update if uncommented in build)
 9. **./demo/pom.xml** - Demo module version
@@ -118,7 +118,7 @@ When user requests version increment:
 # 1. Update all POM files with new version
 # 2. Update README.md current release
 # 3. Update RELEASE_NOTES.md with new section
-# 4. Update CLAUDE.md version references
+# 4. Update .claude/CLAUDE.md version references
 # 5. Verify all changes with grep search
 # 6. Build and test the project
 mvn clean compile
@@ -167,7 +167,7 @@ grep "Current Release:" README.md
 head -20 RELEASE_NOTES.md | grep "Version"
 
 # Verify CLAUDE.md version
-grep "Current Version" CLAUDE.md
+grep "Current Version" .claude/CLAUDE.md
 ```
 
 ## Error Prevention
@@ -176,7 +176,7 @@ grep "Current Version" CLAUDE.md
 1. **Version Consistency**: All pom.xml files MUST have same version
 2. **SNAPSHOT Handling**: Development versions should end with -SNAPSHOT
 3. **Date Updates**: RELEASE_NOTES.md should have current date
-4. **Section Headers**: Update major changes section in CLAUDE.md
+4. **Section Headers**: Update major changes section in .claude/CLAUDE.md
 5. **Build Verification**: Project must compile after version changes
 
 ### Common Mistakes to Avoid
@@ -184,7 +184,7 @@ grep "Current Version" CLAUDE.md
 2. Missing README.md current release update
 3. Not adding new section to RELEASE_NOTES.md
 4. Inconsistent version numbers across modules
-5. Forgetting to update CLAUDE.md version references
+5. Forgetting to update .claude/CLAUDE.md version references
 
 ## Implementation Notes for Claude AI
 
