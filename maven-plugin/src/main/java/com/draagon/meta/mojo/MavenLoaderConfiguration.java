@@ -33,6 +33,14 @@ public class MavenLoaderConfiguration {
                                List<String> sources, 
                                Map<String, String> globals) {
         
+        
+        // Trigger lazy initialization of ServiceLoader type discovery
+        if (configurable instanceof com.draagon.meta.loader.MetaDataLoader) {
+            com.draagon.meta.loader.MetaDataLoader loader = (com.draagon.meta.loader.MetaDataLoader) configurable;
+            // Just access registry to trigger ServiceLoader discovery - no manual registration needed
+            loader.getTypeRegistry().getRegisteredTypes();
+        }
+        
         LoaderConfigurable.LoaderConfiguration config = new LoaderConfigurationBuilder()
                 .sourceDir(sourceDir)
                 .classLoader(classLoader)

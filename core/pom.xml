@@ -45,10 +45,13 @@
                     </dependency>
                 </dependencies>
                 <executions>
-                    <!-- DISABLED v6.0.0: TypesConfig system removed - will be replaced with ValidationChain-based generator
+                    <!-- v6.0.0: Constraint-based schema generation - FIXED: Using correct SimpleLoader
+                         SOLUTION: SimpleLoader/SimpleModelParser from metadata module supports our JSON format
+                         STATUS: Re-enabled with correct loader
+                    -->
                     <execution>
-                        <id>gen-resources</id>
-                        <phase>generate-test-sources</phase>
+                        <id>gen-schemas</id>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -59,27 +62,34 @@
                             </globals>
                             <loader>
                                 <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
-                                <name>gen-resources</name>
+                                <name>gen-schemas</name>
                                 <sources>
-                                    <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
+                                    <source>resource:com/draagon/meta/loader/json/metaobjects-core.json</source>
                                 </sources>
                             </loader>
                             <generators>
                                 <generator>
-                                    <classname>com.draagon.meta.generator.direct.metadata.jsonschema.MetaDataJsonSchemaGenerator</classname>
+                                    <classname>com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator</classname>
                                     <args>
-                                        <outputDir>${project.basedir}/target/generated-resources</outputDir>
-                                        <outputFilename>metaobjects-schema.json</outputFilename>
+                                        <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
+                                        <outputFilename>metaobjects-file-schema.json</outputFilename>
                                         <schemaVersion>https://json-schema.org/draft/2020-12/schema</schemaVersion>
-                                        <schemaId>https://draagon.com/schemas/metaobjects/5.1.0/metaobjects-schema.json</schemaId>
-                                        <title>MetaObjects Schema</title>
-                                        <description>JSON Schema for MetaObjects metadata validation</description>
+                                        <schemaId>https://draagon.com/schemas/metaobjects/6.0.0/metaobjects-file-schema.json</schemaId>
+                                        <title>MetaObjects File Schema v6.0.0</title>
+                                        <description>JSON Schema for validating MetaData file structure and constraints</description>
+                                    </args>
+                                </generator>
+                                <generator>
+                                    <classname>com.draagon.meta.generator.direct.metadata.file.xsd.MetaDataFileXSDGenerator</classname>
+                                    <args>
+                                        <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
+                                        <outputFilename>metaobjects-file-schema.xsd</outputFilename>
+                                        <nameSpace>https://draagon.com/schemas/metaobjects/6.0.0</nameSpace>
                                     </args>
                                 </generator>
                             </generators>
                         </configuration>
                     </execution>
-                    -->
                     <!-- DISABLED v6.0.0: TypesConfig system removed - these metadata files use old v5.x format
                     <execution>
                         <id>gen-test-resources</id>
@@ -93,7 +103,7 @@
                                 <strict>true</strict>
                             </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
                                 <name>gen-test-resources</name>
                                 <sources>
                                     REMOVED v6.0.0: TypesConfig system removed
@@ -104,7 +114,6 @@
                             </loader>
                             <generators>
                                 <generator>
-                                    OLD: classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname
                                     <classname>com.draagon.meta.generator.direct.object.javacode.JavaCodeGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-test-sources</outputDir>

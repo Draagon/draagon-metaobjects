@@ -139,6 +139,8 @@ public abstract class MetaModelParser<I extends MetaDataLoader, S> extends Parse
 
         if (model.getSuper().contains(MetaDataLoader.PKG_SEPARATOR))
             return MetaDataUtil.expandPackageForMetaDataRef(superPkgDef, model.getSuper());
+        else if (superPkgDef == null || superPkgDef.isEmpty())
+            return model.getSuper();
         else
             return superPkgDef + MetaDataLoader.PKG_SEPARATOR + model.getSuper();
     }

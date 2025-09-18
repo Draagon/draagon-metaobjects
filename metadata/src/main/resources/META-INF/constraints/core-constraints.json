@@ -1,0 +1,71 @@
+{
+  "abstracts": [
+    {
+      "id": "identifier-pattern",
+      "type": "pattern",
+      "description": "Standard identifier pattern for metadata names",
+      "parameters": {
+        "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+        "flags": "i"
+      }
+    },
+    {
+      "id": "required-string",
+      "type": "required",
+      "description": "Validates that a string field is not null or empty"
+    },
+    {
+      "id": "name-length",
+      "type": "length",
+      "description": "Standard length constraint for metadata names",
+      "parameters": {
+        "min": 1,
+        "max": 64
+      }
+    },
+    {
+      "id": "subtype-enum",
+      "type": "enum",
+      "description": "Valid subtypes for core metadata",
+      "parameters": {
+        "values": ["value", "pojo", "map", "proxy", "data"],
+        "caseSensitive": false
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "targetType": "object",
+      "targetSubType": "*",
+      "targetName": "*",
+      "abstractRef": "identifier-pattern"
+    },
+    {
+      "targetType": "object",
+      "targetSubType": "*",
+      "targetName": "*",
+      "abstractRef": "name-length"
+    },
+    {
+      "targetType": "field",
+      "targetSubType": "*",
+      "targetName": "*",
+      "abstractRef": "identifier-pattern"
+    },
+    {
+      "targetType": "field",
+      "targetSubType": "*", 
+      "targetName": "*",
+      "abstractRef": "name-length"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "defaultValue",
+      "type": "length",
+      "parameters": {
+        "max": 255
+      }
+    }
+  ]
+}

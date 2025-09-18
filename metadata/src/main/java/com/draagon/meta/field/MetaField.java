@@ -8,9 +8,6 @@ import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.view.MetaViewNotFoundException;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.validation.ValidationChain;
-import com.draagon.meta.validation.Validator;
-import com.draagon.meta.validation.MetaDataValidators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,70 +160,8 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     
     
-    /**
-     * Create a data type validator for this field
-     */
-    private Validator<MetaField<T>> createDataTypeFieldValidator() {
-        return new Validator<MetaField<T>>() {
-            @Override
-            public ValidationResult validate(MetaField<T> field) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                
-                if (field.getDataType() == null) {
-                    builder.addError("MetaField must have a data type");
-                }
-                
-                return builder.build();
-            }
-        };
-    }
     
-    /**
-     * Create a default value validator for this field
-     */
-    private Validator<MetaField<T>> createDefaultValueValidator() {
-        return new Validator<MetaField<T>>() {
-            @Override
-            public ValidationResult validate(MetaField<T> field) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                
-                // Validate default value against data type if present
-                T defaultVal = field.getDefaultValue();
-                if (defaultVal != null && field.getDataType() != null) {
-                    try {
-                        // Attempt to convert default value to validate compatibility
-                        DataConverter.toType(field.getDataType(), defaultVal);
-                    } catch (Exception e) {
-                        builder.addError("Default value '" + defaultVal + 
-                                       "' is not compatible with data type " + field.getDataType());
-                    }
-                }
-                
-                return builder.build();
-            }
-        };
-    }
     
-    /**
-     * Create a declaring object validator for this field
-     */
-    private Validator<MetaField<T>> createDeclaringObjectValidator() {
-        return new Validator<MetaField<T>>() {
-            @Override
-            public ValidationResult validate(MetaField<T> field) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                
-                // Validate that field has proper parent relationship
-                if (field.getParent() != null && 
-                    !(field.getParent() instanceof MetaDataLoader) &&
-                    !(field.getParent() instanceof MetaObject)) {
-                    builder.addError("MetaField must be attached to MetaObject or MetaDataLoader");
-                }
-                
-                return builder.build();
-            }
-        };
-    }
     
     /**
      * Safe default value getter with Optional wrapper
@@ -567,65 +502,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         return findChildren(MetaValidator.class);
     }
 
-    /**
-     * Override to provide field-specific validation chain
-     */
-    @Override
-    protected ValidationChain<MetaData> createValidationChain() {
-        return ValidationChain.<MetaData>builder("MetaFieldValidation")
-            .continueOnError()
-            .addValidator(MetaDataValidators.typeSystemValidator())
-            .addValidator(MetaDataValidators.childrenValidator())
-            .addValidator(MetaDataValidators.legacyValidator())
-            .addValidator(createFieldNameValidatorAdapted())
-            .addValidator(createDataTypeValidatorAdapted())
-            .addValidator(createDefaultValueValidatorAdapted())
-            .build();
-    }
     
-    /**
-     * Create adapted field name validator for MetaData validation chain
-     */
-    private Validator<MetaData> createFieldNameValidatorAdapted() {
-        return metaData -> {
-            if (metaData instanceof MetaField) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                if (metaData.getName() == null) {
-                    builder.addError("Name of MetaField was null: " + metaData.toString());
-                }
-                return builder.build();
-            }
-            return ValidationResult.success();
-        };
-    }
     
-    /**
-     * Create adapted data type validator for MetaData validation chain
-     */
-    private Validator<MetaData> createDataTypeValidatorAdapted() {
-        return metaData -> {
-            if (metaData instanceof MetaField) {
-                @SuppressWarnings("unchecked")
-                MetaField<T> typedField = (MetaField<T>) metaData;
-                return createDataTypeFieldValidator().validate(typedField);
-            }
-            return ValidationResult.success();
-        };
-    }
     
-    /**
-     * Create adapted default value validator for MetaData validation chain
-     */
-    private Validator<MetaData> createDefaultValueValidatorAdapted() {
-        return metaData -> {
-            if (metaData instanceof MetaField) {
-                @SuppressWarnings("unchecked")
-                MetaField<T> typedField = (MetaField<T>) metaData;
-                return createDefaultValueValidator().validate(typedField);
-            }
-            return ValidationResult.success();
-        };
-    }
 
     ////////////////////////////////////////////////////
     // OBJECT SETTER METHODS

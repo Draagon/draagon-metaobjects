@@ -13,10 +13,10 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * v6.0.0: Provides validation-related attributes for ValidationChain and validation rules.
+ * v6.0.0: Provides constraint-related attributes for the new constraint system.
  * This replaces the TypesConfig overlay system with service-based attribute provision.
  * 
- * These attributes control validation behaviors and rules across MetaData instances.
+ * These attributes control constraint behaviors and validation rules across MetaData instances.
  */
 public class ValidationAttributeProvider implements MetaDataAttributeProvider {
     

@@ -59,33 +59,9 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
     
     @Override
     public void enhanceValidation(MetaDataTypeRegistry registry) {
-        log.debug("Enhancing validation for core types");
-        
-        // Add common field validation
-        registry.enhanceValidationChain(
-            MetaDataTypeId.pattern("field", "*"),
-            metaData -> {
-                // Basic field validation - ensure name is valid
-                if (metaData.getName() == null || metaData.getName().trim().isEmpty()) {
-                    return ValidationResult.withError("Field name cannot be null or empty");
-                }
-                return ValidationResult.success();
-            }
-        );
-        
-        // Add validator-specific validation  
-        registry.enhanceValidationChain(
-            MetaDataTypeId.pattern("validator", "*"),
-            metaData -> {
-                // Ensure validators have proper configuration
-                if (metaData.getName() == null || metaData.getName().trim().isEmpty()) {
-                    return ValidationResult.withError("Validator name cannot be null or empty");
-                }
-                return ValidationResult.success();
-            }
-        );
-        
-        log.debug("Enhanced validation for core types");
+        // ValidationChain system has been replaced with constraint system
+        // Constraints are now enforced during metadata construction
+        log.debug("Validation enhancement skipped - using constraint system instead");
     }
     
     @Override
@@ -201,7 +177,17 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
             com.draagon.meta.object.mapped.MappedMetaObject.class);
         registry.registerHandler(new MetaDataTypeId("object", "pojo"), 
             com.draagon.meta.object.pojo.PojoMetaObject.class);
-        // Note: "value" subtype is registered by CoreObjectTypeProvider in core module
+        // Register "value" subtype for environments where CoreObjectTypeProvider isn't available
+        try {
+            @SuppressWarnings("unchecked")
+            Class<? extends com.draagon.meta.MetaData> valueObjectClass = 
+                (Class<? extends com.draagon.meta.MetaData>) Class.forName("com.draagon.meta.object.value.ValueMetaObject");
+            registry.registerHandler(new MetaDataTypeId("object", "value"), valueObjectClass);
+            log.debug("Registered object.value type from core module");
+        } catch (ClassNotFoundException e) {
+            // ValueMetaObject not available - skip registration
+            log.debug("ValueMetaObject not available, skipping object.value registration");
+        }
         
         // Register default object type (when subType is null/empty) - use pojo as default
         registry.registerHandler(new MetaDataTypeId("object", "default"), 

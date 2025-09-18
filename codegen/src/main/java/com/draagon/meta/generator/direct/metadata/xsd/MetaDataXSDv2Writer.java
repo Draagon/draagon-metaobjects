@@ -7,11 +7,12 @@ import com.draagon.meta.loader.MetaDataLoader;
 import java.io.OutputStream;
 
 /**
- * XSDv2 Schema writer for MetaData configuration.
- * v6.0.0: Temporarily disabled pending ValidationChain-based schema generation implementation.
+ * Legacy XSDv2 Schema writer for MetaData configuration.
+ * v6.0.0: This class is deprecated - use MetaDataConstraintXSDWriter instead.
  * 
- * TODO: Implement ValidationChain-based XSD schema generation in future version
+ * @deprecated Use MetaDataConstraintXSDWriter for constraint-based XSD generation
  */
+@Deprecated
 public class MetaDataXSDv2Writer extends XMLDirectWriter<MetaDataXSDv2Writer> {
 
     private String nameSpace;
@@ -36,11 +37,10 @@ public class MetaDataXSDv2Writer extends XMLDirectWriter<MetaDataXSDv2Writer> {
     // MetaDataXSDv2 Methods
 
     public void writeXML() throws GeneratorIOException {
-        // v6.0.0: Temporarily throw exception pending ValidationChain implementation
+        // v6.0.0: Deprecated - use constraint-based XSD writer instead
         throw new UnsupportedOperationException(
-            "MetaDataXSDv2Writer is temporarily disabled in v6.0.0. " +
-            "XSD schema generation will be reimplemented using ValidationChain in a future version. " +
-            "Please use ValidationChain-based validation instead of XSD schema validation for now."
+            "MetaDataXSDv2Writer is deprecated in v6.0.0. " +
+            "Use MetaDataConstraintXSDWriter for constraint-based XSD schema generation instead."
         );
     }
 

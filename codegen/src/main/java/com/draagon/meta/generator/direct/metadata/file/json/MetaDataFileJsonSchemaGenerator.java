@@ -1,4 +1,4 @@
-package com.draagon.meta.generator.direct.metadata.jsonschema;
+package com.draagon.meta.generator.direct.metadata.file.json;
 
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.json.SingleJsonDirectGeneratorBase;
@@ -8,11 +8,14 @@ import com.draagon.meta.loader.MetaDataLoader;
 import java.io.OutputStream;
 
 /**
- * Generator for creating JSON Schema from MetaData configuration.
- * This is the JSON equivalent of the XSD generators, providing schema validation
- * for JSON-based metadata files.
+ * Generator for creating JSON Schema that validates metadata files themselves.
+ * v6.0.0: Creates schemas for validating the structure of metadata JSON files
+ * (like {"metadata": {"children": [...]}}), not the data instances.
+ * 
+ * This reads constraint definitions to understand valid metadata structure and
+ * generates JSON Schema that can validate metadata files during development.
  */
-public class MetaDataJsonSchemaGenerator extends SingleJsonDirectGeneratorBase {
+public class MetaDataFileJsonSchemaGenerator extends SingleJsonDirectGeneratorBase {
 
     public final static String ARG_SCHEMA_VERSION = "schemaVersion";
     public final static String ARG_SCHEMA_ID = "schemaId";
@@ -21,8 +24,8 @@ public class MetaDataJsonSchemaGenerator extends SingleJsonDirectGeneratorBase {
 
     private String schemaVersion = "https://json-schema.org/draft/2020-12/schema";
     private String schemaId = null;
-    private String title = "MetaData JSON Schema";
-    private String description = "JSON Schema for MetaData configuration files";
+    private String title = "MetaData File JSON Schema";
+    private String description = "JSON Schema for validating MetaData file structure";
 
     //////////////////////////////////////////////////////////////////////
     // SingleFileDirectorGenerator Execute Override methods
@@ -50,7 +53,7 @@ public class MetaDataJsonSchemaGenerator extends SingleJsonDirectGeneratorBase {
 
     @Override
     protected JsonDirectWriter getWriter(MetaDataLoader loader, OutputStream os) throws GeneratorIOException {
-        return new MetaDataJsonSchemaWriter(loader, os)
+        return new MetaDataFileSchemaWriter(loader, os)
                 .withSchemaVersion(schemaVersion)
                 .withSchemaId(schemaId)
                 .withTitle(title)

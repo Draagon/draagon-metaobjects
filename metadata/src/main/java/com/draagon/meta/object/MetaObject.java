@@ -8,9 +8,6 @@ import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
-import com.draagon.meta.validation.ValidationChain;
-import com.draagon.meta.validation.MetaDataValidators;
-import com.draagon.meta.validation.Validator;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -63,78 +60,8 @@ public abstract class MetaObject extends MetaData {
     
     
     
-    /**
-     * Create an object class validator
-     */
-    private Validator<MetaObject> createObjectClassValidator() {
-        return new Validator<MetaObject>() {
-            @Override
-            public ValidationResult validate(MetaObject object) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                
-                try {
-                    Class<?> objectClass = object.getObjectClass();
-                    if (objectClass == null) {
-                        builder.addError("MetaObject must have a valid object class");
-                    }
-                } catch (Exception e) {
-                    builder.addError("Invalid object class: " + e.getMessage());
-                }
-                
-                return builder.build();
-            }
-        };
-    }
     
-    /**
-     * Create a fields validator
-     */
-    private Validator<MetaObject> createFieldsValidator() {
-        return new Validator<MetaObject>() {
-            @Override
-            public ValidationResult validate(MetaObject object) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                
-                // Validate that all fields are properly configured
-                Collection<MetaField> fields = object.getMetaFields();
-                for (MetaField field : fields) {
-                    if (field.getDataType() == null) {
-                        builder.addError("Field '" + field.getName() + "' must have a data type");
-                    }
-                    
-                    if (field.getDeclaringObject() != object && field.getDeclaringObject() != null) {
-                        builder.addError("Field '" + field.getName() + "' has incorrect declaring object");
-                    }
-                }
-                
-                return builder.build();
-            }
-        };
-    }
     
-    /**
-     * Create a keys validator
-     */
-    private Validator<MetaObject> createKeysValidator() {
-        return new Validator<MetaObject>() {
-            @Override
-            public ValidationResult validate(MetaObject object) {
-                ValidationResult.Builder builder = ValidationResult.builder();
-                
-                // Validate keys - check that there's only one primary key
-                try {
-                    PrimaryKey primaryKey = object.getPrimaryKey();
-                    // If we got here without exception, there is one primary key which is good
-                    // No additional validation needed for now
-                } catch (Exception e) {
-                    // Either no primary key or error - this is okay for validation
-                    // Could be more specific about required vs optional primary keys
-                }
-                
-                return builder.build();
-            }
-        };
-    }
     
     /**
      * Find a MetaField by name using modern Optional-based API.
@@ -530,57 +457,9 @@ public abstract class MetaObject extends MetaData {
     }
 
 
-    /**
-     * Override to provide object-specific validation chain
-     */
-    @Override
-    protected ValidationChain<MetaData> createValidationChain() {
-        return ValidationChain.<MetaData>builder("MetaObjectValidation")
-            .continueOnError()
-            .addValidator(MetaDataValidators.typeSystemValidator())
-            .addValidator(MetaDataValidators.childrenValidator())
-            .addValidator(MetaDataValidators.legacyValidator())
-            .addValidator(createObjectClassValidatorAdapted())
-            .addValidator(createFieldsValidatorAdapted())
-            .addValidator(createKeysValidatorAdapted())
-            .build();
-    }
     
-    /**
-     * Create adapted object class validator for MetaData validation chain
-     */
-    private Validator<MetaData> createObjectClassValidatorAdapted() {
-        return metaData -> {
-            if (metaData instanceof MetaObject) {
-                return createObjectClassValidator().validate((MetaObject) metaData);
-            }
-            return ValidationResult.success();
-        };
-    }
     
-    /**
-     * Create adapted fields validator for MetaData validation chain
-     */
-    private Validator<MetaData> createFieldsValidatorAdapted() {
-        return metaData -> {
-            if (metaData instanceof MetaObject) {
-                return createFieldsValidator().validate((MetaObject) metaData);
-            }
-            return ValidationResult.success();
-        };
-    }
     
-    /**
-     * Create adapted keys validator for MetaData validation chain
-     */
-    private Validator<MetaData> createKeysValidatorAdapted() {
-        return metaData -> {
-            if (metaData instanceof MetaObject) {
-                return createKeysValidator().validate((MetaObject) metaData);
-            }
-            return ValidationResult.success();
-        };
-    }
 
     ////////////////////////////////////////////////////
     // MISC METHODS

@@ -26,6 +26,13 @@ public class ValidationResult {
     }
     
     /**
+     * Create a successful validation result (alias for success)
+     */
+    public static ValidationResult valid() {
+        return success();
+    }
+    
+    /**
      * Create a validation result with errors
      */
     public static ValidationResult withErrors(List<String> errors) {

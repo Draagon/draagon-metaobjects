@@ -1,0 +1,176 @@
+{
+  "references": [
+    "META-INF/constraints/core-constraints.json"
+  ],
+  "abstracts": [
+    {
+      "id": "sql-identifier",
+      "type": "pattern",
+      "description": "SQL-safe identifier pattern (avoids SQL keywords and invalid chars)",
+      "parameters": {
+        "pattern": "^(?!(?i)(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|INNER|OUTER|LEFT|RIGHT|FULL|ORDER|GROUP|HAVING|CREATE|DROP|ALTER|TABLE|INDEX|VIEW|TRIGGER|PROCEDURE|FUNCTION|DATABASE|SCHEMA|USER|ROLE|GRANT|REVOKE|COMMIT|ROLLBACK|TRANSACTION|BEGIN|END|IF|ELSE|WHILE|FOR|LOOP|DECLARE|SET|EXEC|EXECUTE|PRIMARY|KEY|FOREIGN|REFERENCES|CONSTRAINT|UNIQUE|NOT|NULL|DEFAULT|AUTO_INCREMENT|TIMESTAMP|CURRENT_TIMESTAMP))([a-zA-Z][a-zA-Z0-9_]*)$"
+      }
+    },
+    {
+      "id": "table-name-constraints",
+      "type": "length",
+      "description": "Database table name length constraints",
+      "parameters": {
+        "min": 1,
+        "max": 64
+      }
+    },
+    {
+      "id": "column-name-constraints",
+      "type": "length", 
+      "description": "Database column name length constraints",
+      "parameters": {
+        "min": 1,
+        "max": 64
+      }
+    },
+    {
+      "id": "sql-data-types",
+      "type": "enum",
+      "description": "Valid SQL data types for database schema generation",
+      "parameters": {
+        "values": [
+          "VARCHAR", "CHAR", "TEXT", "CLOB", "BLOB",
+          "INTEGER", "INT", "BIGINT", "SMALLINT", "TINYINT",
+          "DECIMAL", "NUMERIC", "FLOAT", "REAL", "DOUBLE",
+          "DATE", "TIME", "DATETIME", "TIMESTAMP",
+          "BOOLEAN", "BIT"
+        ],
+        "caseSensitive": false
+      }
+    },
+    {
+      "id": "db-length-range",
+      "type": "range",
+      "description": "Valid range for database field lengths",
+      "parameters": {
+        "min": 1,
+        "max": 65535
+      }
+    },
+    {
+      "id": "db-precision-range", 
+      "type": "range",
+      "description": "Valid range for decimal precision",
+      "parameters": {
+        "min": 1,
+        "max": 65
+      }
+    },
+    {
+      "id": "db-scale-range",
+      "type": "range",
+      "description": "Valid range for decimal scale", 
+      "parameters": {
+        "min": 0,
+        "max": 30
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbTable",
+      "abstractRef": "required-string"
+    },
+    {
+      "targetType": "attr", 
+      "targetSubType": "string",
+      "targetName": "dbTable",
+      "abstractRef": "sql-identifier"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbTable",
+      "abstractRef": "table-name-constraints"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbSchema", 
+      "abstractRef": "sql-identifier"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbSchema",
+      "abstractRef": "table-name-constraints"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbCol",
+      "abstractRef": "required-string"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string", 
+      "targetName": "dbCol",
+      "abstractRef": "sql-identifier"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbCol",
+      "abstractRef": "column-name-constraints"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbType",
+      "abstractRef": "required-string"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbType",
+      "abstractRef": "sql-data-types"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "int",
+      "targetName": "dbLength",
+      "abstractRef": "db-length-range"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "int",
+      "targetName": "dbPrecision",
+      "abstractRef": "db-precision-range"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "int", 
+      "targetName": "dbScale",
+      "abstractRef": "db-scale-range"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "boolean",
+      "targetName": "dbNullable",
+      "type": "required"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "boolean", 
+      "targetName": "dbPrimaryKey",
+      "type": "required"
+    },
+    {
+      "targetType": "attr",
+      "targetSubType": "string",
+      "targetName": "dbDefault",
+      "type": "length",
+      "parameters": {
+        "max": 255
+      }
+    }
+  ]
+}

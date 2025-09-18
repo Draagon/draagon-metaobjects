@@ -93,6 +93,7 @@ public class SimpleLoader extends MetaDataLoader {
     ////////////////////////////////////////////////////////////////////////////////////////////
     // Initialization Methods
 
+
     public SimpleLoader init() {
 
         if ( sourceURIs == null ) throw new MetaDataException( "No sourceData was specified" );

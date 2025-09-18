@@ -1,6 +1,8 @@
 package com.draagon.meta.generator.direct.metadata.jsonschema;
 
 import com.draagon.meta.generator.GeneratorIOException;
+import com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator;
+import com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileSchemaWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,7 +19,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for MetaDataJsonSchemaGenerator and MetaDataJsonSchemaWriter.
+ * Unit tests for MetaDataFileJsonSchemaGenerator and MetaDataFileSchemaWriter.
  */
 public class MetaDataJsonSchemaGeneratorTest {
 
@@ -44,7 +46,7 @@ public class MetaDataJsonSchemaGeneratorTest {
     public void testJsonSchemaGeneration() throws GeneratorIOException, IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         
-        MetaDataJsonSchemaWriter writer = new MetaDataJsonSchemaWriter(testLoader, output)
+        MetaDataFileSchemaWriter writer = new MetaDataFileSchemaWriter(testLoader, output)
                 .withSchemaVersion("https://json-schema.org/draft/2020-12/schema")
                 .withSchemaId("https://example.com/metadata-schema.json")
                 .withTitle("Test MetaData Schema")
@@ -86,42 +88,36 @@ public class MetaDataJsonSchemaGeneratorTest {
 
     @Test
     public void testGeneratorConfiguration() {
-        MetaDataJsonSchemaGenerator generator = new MetaDataJsonSchemaGenerator();
+        MetaDataFileJsonSchemaGenerator generator = new MetaDataFileJsonSchemaGenerator();
         
         // Set test arguments using setArgs with Map
         Map<String, String> args = new HashMap<>();
-        args.put(MetaDataJsonSchemaGenerator.ARG_SCHEMA_VERSION, 
+        args.put(MetaDataFileJsonSchemaGenerator.ARG_SCHEMA_VERSION, 
                  "https://json-schema.org/draft/2019-09/schema");
-        args.put(MetaDataJsonSchemaGenerator.ARG_SCHEMA_ID, 
+        args.put(MetaDataFileJsonSchemaGenerator.ARG_SCHEMA_ID, 
                  "https://test.com/schema.json");
-        args.put(MetaDataJsonSchemaGenerator.ARG_TITLE, "Custom Title");
-        args.put(MetaDataJsonSchemaGenerator.ARG_DESCRIPTION, "Custom Description");
+        args.put(MetaDataFileJsonSchemaGenerator.ARG_TITLE, "Custom Title");
+        args.put(MetaDataFileJsonSchemaGenerator.ARG_DESCRIPTION, "Custom Description");
         
         generator.setArgs(args);
         
         // Test toString includes all arguments
         String toString = generator.toString();
         assertTrue("toString should include class name", 
-                  toString.contains("MetaDataJsonSchemaGenerator"));
+                  toString.contains("MetaDataFileJsonSchemaGenerator"));
     }
 
     @Test
     public void testWriterConfiguration() throws GeneratorIOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         
-        MetaDataJsonSchemaWriter writer = new MetaDataJsonSchemaWriter(testLoader, output)
+        MetaDataFileSchemaWriter writer = new MetaDataFileSchemaWriter(testLoader, output)
                 .withSchemaVersion("custom-version")
                 .withSchemaId("custom-id")
                 .withTitle("custom-title")
                 .withDescription("custom-description");
 
-        // Verify configuration
-        assertEquals("custom-version", writer.getSchemaVersion());
-        assertEquals("custom-id", writer.getSchemaId());
-        assertEquals("custom-title", writer.getTitle());
-        assertEquals("custom-description", writer.getDescription());
-        
-        // Test toString includes configuration
+        // Test toString includes configuration - note: the new writer doesn't expose getters
         String toString = writer.toString();
         assertTrue("toString should include schema version", toString.contains("custom-version"));
         assertTrue("toString should include schema id", toString.contains("custom-id"));
@@ -132,7 +128,7 @@ public class MetaDataJsonSchemaGeneratorTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         
         // Test with minimal configuration (only required parameters)
-        MetaDataJsonSchemaWriter writer = new MetaDataJsonSchemaWriter(testLoader, output);
+        MetaDataFileSchemaWriter writer = new MetaDataFileSchemaWriter(testLoader, output);
         writer.writeJson();
         writer.close();
 

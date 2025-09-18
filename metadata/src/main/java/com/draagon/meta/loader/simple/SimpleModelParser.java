@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.Arrays;
 
 /**
  * v6.0.0: Updated to use service-based MetaDataTypeRegistry instead of TypesConfig
@@ -105,7 +106,10 @@ public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
 
         InputStream is = null;
         try {
-            is = URIHelper.getInputStream( uri );
+            is = URIHelper.getInputStream( 
+                getClassLoader() != null ? Arrays.asList(getClassLoader()) : null, 
+                URIHelper.toURIModel(uri) 
+            );
             //intoLoader.getResourceInputStream(resource);
             loadAndMergeFromStream( intoLoader, is );
         }

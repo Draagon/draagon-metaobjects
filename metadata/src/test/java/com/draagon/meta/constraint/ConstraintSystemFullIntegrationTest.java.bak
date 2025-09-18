@@ -1,0 +1,265 @@
+package com.draagon.meta.constraint;
+
+import com.draagon.meta.InvalidMetaDataException;
+import com.draagon.meta.MetaData;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.attr.IntAttribute;
+import com.draagon.meta.field.StringField;
+import com.draagon.meta.field.IntegerField;
+import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.value.ValueMetaObject;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * Full integration test demonstrating the complete v6.0.0 constraint system:
+ * - Abstract constraint definitions with reusable logic
+ * - Reference-based constraint file loading across modules
+ * - Real-time constraint enforcement during metadata construction
+ * - Graceful degradation for unknown constraint types
+ * - Cross-module constraint integration (core + database + web)
+ */
+public class ConstraintSystemFullIntegrationTest {
+    
+    private ConstraintRegistry constraintRegistry;
+    private ConstraintEnforcer constraintEnforcer;
+    
+    @Before
+    public void setUp() throws Exception {
+        // Clear any existing state
+        constraintRegistry = ConstraintRegistry.getInstance();
+        constraintRegistry.clearAllConstraints();
+        
+        constraintEnforcer = ConstraintEnforcer.getInstance();
+        constraintEnforcer.setConstraintCheckingEnabled(true);
+        
+        // Load all constraint files to test cross-module integration
+        loadAllConstraintFiles();
+    }
+    
+    private void loadAllConstraintFiles() throws Exception {
+        // Load constraints in dependency order (references are resolved automatically)
+        constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+        
+        // These would normally be loaded by their respective modules
+        try {
+            constraintRegistry.loadConstraintsFromResource("META-INF/constraints/database-constraints.json");
+        } catch (ConstraintParseException e) {
+            // File might not exist in test classpath - that's ok for graceful degradation testing
+        }
+        
+        try {
+            constraintRegistry.loadConstraintsFromResource("META-INF/constraints/web-constraints.json");  
+        } catch (ConstraintParseException e) {
+            // File might not exist in test classpath - that's ok for graceful degradation testing
+        }
+    }
+    
+    @Test
+    public void testFullSystemIntegration_ValidMetadata() throws Exception {
+        // Test creation of fully valid metadata that passes all constraints
+        
+        // Create a valid User object
+        ValueMetaObject user = new ValueMetaObject( "User");
+        
+        // Add valid fields that pass identifier and length constraints
+        StringField username = new StringField("username");
+        user.addChild(username);
+        
+        StringField email = new StringField("email");
+        user.addChild(email);
+        
+        IntegerField age = new IntegerField("age");
+        user.addChild(age);
+        
+        // Add valid attributes
+        StringAttribute defaultValue = new StringAttribute("defaultValue");
+        defaultValue.setValue("guest_user");
+        username.addChild(defaultValue);
+        
+        // Verify the metadata was created successfully
+        assertNotNull("User object should be created successfully", user);
+        assertEquals("User should have 3 fields", 3, user.getChildren(StringField.class).size() + user.getChildren(IntegerField.class).size());
+        assertEquals("Username field should have default value", 1, username.getChildren(StringAttribute.class).size());
+    }
+    
+    @Test
+    public void testInvalidObjectName() {
+        try {
+            // Try to create object with invalid name (starts with number)
+            ValueMetaObject invalid = new ValueMetaObject( "123User");
+            fail("Should have thrown InvalidMetaDataException for invalid object name");
+            
+        } catch (InvalidMetaDataException e) {
+            assertTrue("Exception should mention constraint violation", 
+                e.getMessage().contains("Constraint violation"));
+            assertNotNull("Should have underlying ConstraintViolationException", e.getCause());
+            assertTrue("Cause should be ConstraintViolationException", 
+                e.getCause() instanceof ConstraintViolationException);
+            
+            ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
+            assertEquals("Should be pattern constraint", "pattern", cve.getConstraintType());
+        }
+    }
+    
+    @Test
+    public void testInvalidFieldName() {
+        try {
+            ValueMetaObject user = new ValueMetaObject( "User");
+            
+            // Try to add field with invalid name (contains special characters)
+            StringField invalid = new StringField("user-name-with-dashes");
+            user.addChild(invalid);
+            
+            fail("Should have thrown InvalidMetaDataException for invalid field name");
+            
+        } catch (InvalidMetaDataException e) {
+            assertTrue("Exception should mention constraint violation", 
+                e.getMessage().contains("Constraint violation"));
+            
+            ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
+            assertEquals("Should be pattern constraint", "pattern", cve.getConstraintType());
+        }
+    }
+    
+    @Test
+    public void testAttributeLengthConstraint() {
+        try {
+            ValueMetaObject user = new ValueMetaObject( "User");
+            StringField username = new StringField("username");
+            user.addChild(username);
+            
+            // Try to add attribute with value that exceeds length limit
+            StringAttribute longDefault = new StringAttribute("defaultValue");
+            StringBuilder longValue = new StringBuilder();
+            for (int i = 0; i < 300; i++) { // Over 255 character limit
+                longValue.append("x");
+            }
+            longDefault.setValue(longValue.toString());
+            
+            username.addChild(longDefault);
+            
+            fail("Should have thrown InvalidMetaDataException for attribute value too long");
+            
+        } catch (InvalidMetaDataException e) {
+            assertTrue("Exception should mention constraint violation", 
+                e.getMessage().contains("Constraint violation"));
+                
+            ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
+            assertEquals("Should be length constraint", "length", cve.getConstraintType());
+        }
+    }
+    
+    @Test
+    public void testConstraintSystemCanBeDisabled() throws Exception {
+        // Disable constraint checking
+        constraintEnforcer.setConstraintCheckingEnabled(false);
+        
+        // Now invalid names should be allowed
+        ValueMetaObject invalid = new ValueMetaObject( "123InvalidName");
+        StringField invalidField = new StringField("field-with-dashes");
+        invalid.addChild(invalidField);
+        
+        StringAttribute longAttr = new StringAttribute("defaultValue");
+        StringBuilder longValue = new StringBuilder();
+        for (int i = 0; i < 300; i++) {
+            longValue.append("x");
+        }
+        longAttr.setValue(longValue.toString());
+        invalidField.addChild(longAttr);
+        
+        // Should succeed because constraint checking is disabled
+        assertNotNull("Invalid metadata should be allowed when constraints disabled", invalid);
+        assertEquals("Object should have the field", 1, invalid.getChildren(StringField.class).size());
+        assertEquals("Field should have the attribute", 1, invalidField.getChildren(StringAttribute.class).size());
+    }
+    
+    @Test
+    public void testTypeSpecificConstraintDisabling() throws Exception {
+        // Disable constraint checking only for "attr" type
+        constraintEnforcer.setConstraintCheckingEnabled("attr", false);
+        
+        ValueMetaObject user = new ValueMetaObject( "User"); // Should still be validated
+        StringField username = new StringField("username"); // Should still be validated
+        user.addChild(username);
+        
+        // This attribute constraint should be ignored
+        StringAttribute longAttr = new StringAttribute("defaultValue");
+        StringBuilder longValue = new StringBuilder();
+        for (int i = 0; i < 300; i++) {
+            longValue.append("x");
+        }
+        longAttr.setValue(longValue.toString());
+        username.addChild(longAttr); // Should succeed - attr constraints disabled
+        
+        // But try to create invalid field - should still fail
+        try {
+            StringField invalidField = new StringField("123invalidfield");
+            user.addChild(invalidField);
+            fail("Field constraints should still be active");
+        } catch (InvalidMetaDataException e) {
+            // Expected - field constraints are still active
+        }
+        
+        // Verify our valid metadata was created
+        assertNotNull("User should be created", user);
+        assertEquals("Should have username field", 1, user.getChildren(StringField.class).size());
+        assertEquals("Username should have long default value", 1, username.getChildren(StringAttribute.class).size());
+    }
+    
+    @Test
+    public void testAbstractConstraintResolution() {
+        // Test that abstract constraints are properly resolved
+        var objectConstraints = constraintRegistry.getConstraintsForTarget("object", "value", "User");
+        
+        assertFalse("Should have constraints for object type", objectConstraints.isEmpty());
+        
+        // Should have constraints from abstract references (identifier-pattern and name-length)
+        boolean hasPatternConstraint = objectConstraints.stream()
+            .anyMatch(c -> "pattern".equals(c.getType()));
+        boolean hasLengthConstraint = objectConstraints.stream()
+            .anyMatch(c -> "length".equals(c.getType()));
+            
+        assertTrue("Should have pattern constraint from identifier-pattern abstract", hasPatternConstraint);
+        assertTrue("Should have length constraint from name-length abstract", hasLengthConstraint);
+    }
+    
+    @Test
+    public void testConstraintRegistryReporting() {
+        // Test constraint registry provides useful information for debugging
+        
+        var knownTypes = constraintRegistry.getKnownConstraintTypes();
+        var unknownTypes = constraintRegistry.getUnknownConstraintTypes();
+        var allTypes = constraintRegistry.getAllConstraintTypes();
+        
+        assertTrue("Should have known constraint types", !knownTypes.isEmpty());
+        assertTrue("Known types should include built-ins", knownTypes.contains("required"));
+        assertTrue("Known types should include built-ins", knownTypes.contains("pattern"));
+        assertTrue("Known types should include built-ins", knownTypes.contains("length"));
+        
+        // All constraint types should be the union of known and unknown
+        assertEquals("All types should equal known + unknown", 
+            knownTypes.size() + unknownTypes.size(), allTypes.size());
+    }
+    
+    @Test
+    public void testGracefulDegradationForUnknownConstraints() {
+        // This test verifies that the system handles unknown constraint types gracefully
+        
+        // Unknown constraint types encountered during loading should be tracked but not cause failures
+        var unknownTypes = constraintRegistry.getUnknownConstraintTypes();
+        
+        // The system should continue operating even if some constraint types are unknown
+        // In a real scenario, this would happen when constraint files reference constraint types
+        // that don't have registered factories
+        
+        // For now, just verify the tracking mechanism works
+        assertNotNull("Unknown constraint types should be tracked", unknownTypes);
+        
+        // Create metadata - should work even if there are unknown constraints in the registry
+        ValueMetaObject user = new ValueMetaObject( "TestUser");
+        assertNotNull("Metadata creation should work despite unknown constraints", user);
+    }
+}

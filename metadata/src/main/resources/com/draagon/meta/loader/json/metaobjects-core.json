@@ -1,0 +1,63 @@
+{"metadata": {
+  "package": "core",
+  "children": [
+    {
+      "object": {
+        "name": "User",
+        "type": "pojo",
+        "children": [
+          {
+            "field": {
+              "name": "name",
+              "type": "string"
+            }
+          },
+          {
+            "field": {
+              "name": "email",
+              "type": "string"
+            }
+          },
+          {
+            "field": {
+              "name": "age",
+              "type": "int"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "object": {
+        "name": "Product",
+        "type": "pojo",
+        "children": [
+          {
+            "field": {
+              "name": "name",
+              "type": "string"
+            }
+          },
+          {
+            "field": {
+              "name": "description",
+              "type": "string"
+            }
+          },
+          {
+            "field": {
+              "name": "price",
+              "type": "double"
+            }
+          },
+          {
+            "field": {
+              "name": "quantity",
+              "type": "int"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}}

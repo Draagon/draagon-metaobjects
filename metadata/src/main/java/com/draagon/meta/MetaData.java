@@ -8,8 +8,6 @@ import com.draagon.meta.type.MetaDataTypeRegistry;
 import com.draagon.meta.cache.CacheStrategy;
 import com.draagon.meta.cache.HybridCache;
 import com.draagon.meta.collections.IndexedMetaDataCollection;
-import com.draagon.meta.validation.ValidationChain;
-import com.draagon.meta.validation.MetaDataValidators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +34,6 @@ public class MetaData implements Cloneable, Serializable {
     // Indexed collection for O(1) child lookups
     private final IndexedMetaDataCollection children = new IndexedMetaDataCollection();
     
-    
-    
-    // Validation chain
-    private volatile ValidationChain<MetaData> validationChain;
 
     // NEW v6.0: Type/subtype as first-class concept  
     private final MetaDataTypeId typeId;
@@ -136,34 +130,6 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     
-    /**
-     * Get the validation chain (lazy initialization)
-     */
-    protected ValidationChain<MetaData> getValidationChain() {
-        if (validationChain == null) {
-            synchronized (this) {
-                if (validationChain == null) {
-                    validationChain = createValidationChain();
-                }
-            }
-        }
-        return validationChain;
-    }
-    
-    /**
-     * Create the validation chain for this MetaData type.
-     * Subclasses can override this to customize validation.
-     * 
-     * @return ValidationChain configured for this type
-     */
-    protected ValidationChain<MetaData> createValidationChain() {
-        return ValidationChain.<MetaData>builder("MetaDataValidation")
-            .continueOnError()
-            .addValidator(MetaDataValidators.typeSystemValidator())
-            .addValidator(MetaDataValidators.childrenValidator())
-            .addValidator(MetaDataValidators.legacyValidator())
-            .build();
-    }
 
     // ========== MODERN COLLECTION APIS ==========
 
@@ -784,6 +750,13 @@ public class MetaData implements Cloneable, Serializable {
             }
         }
         
+        // v6.0.0: Enforce constraints before adding child
+        try {
+            com.draagon.meta.constraint.ConstraintEnforcer.getInstance().enforceConstraintsOnAddChild(this, data);
+        } catch (com.draagon.meta.constraint.ConstraintViolationException e) {
+            throw new InvalidMetaDataException(data, "Constraint violation when adding child: " + e.getMessage(), e);
+        }
+        
         data.attachParent(this);
         
         // Use indexed collection for O(1) operations
@@ -1070,13 +1043,16 @@ public class MetaData implements Cloneable, Serializable {
     // MISC METHODS
     
     /**
-     * Validates the state of the data in the MetaData object.
-     * Uses ValidationChain to collect all validation errors.
+     * v6.0.0: Constraint enforcement is now done during construction (addChild/setAttribute).
+     * This method is deprecated - constraints are enforced in real-time.
      * 
-     * @return ValidationResult containing any errors found
+     * @return Always returns valid result since constraints are enforced during construction
+     * @deprecated Use constraint system during construction instead
      */
+    @Deprecated
     public ValidationResult validate() {
-        return getValidationChain().validate(this);
+        // Constraints are now enforced during construction, so metadata is always valid
+        return ValidationResult.valid();
     }
 
     /**

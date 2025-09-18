@@ -3,8 +3,6 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataTypeId;
-import com.draagon.meta.validation.ValidationChain;
-import com.draagon.meta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,6 @@ public class MetaDataTypeRegistry {
     
     private final ServiceRegistry serviceRegistry;
     private final Map<MetaDataTypeId, Class<? extends MetaData>> typeHandlers = new ConcurrentHashMap<>();
-    private final Map<MetaDataTypeId, ValidationChain<MetaData>> validationChains = new ConcurrentHashMap<>();
     private final Map<String, String> defaultSubTypes = new ConcurrentHashMap<>();
     private volatile boolean initialized = false;
     private volatile boolean initializing = false;
@@ -182,52 +179,11 @@ public class MetaDataTypeRegistry {
         
         typeHandlers.put(typeId, handlerClass);
         
-        // Initialize default validation chain for this type
-        ValidationChain<MetaData> defaultChain = createDefaultValidationChain(typeId);
-        validationChains.put(typeId, defaultChain);
         
         log.debug("Registered type handler: {} -> {}", typeId.toQualifiedName(), handlerClass.getSimpleName());
     }
     
-    /**
-     * Get validation chain for a specific type
-     * 
-     * @param typeId Type identifier
-     * @return ValidationChain for the type, or empty chain if not found
-     */
-    public ValidationChain<MetaData> getValidationChain(MetaDataTypeId typeId) {
-        Objects.requireNonNull(typeId, "TypeId cannot be null");
-        
-        ensureInitialized();
-        
-        ValidationChain<MetaData> chain = validationChains.get(typeId);
-        return chain != null ? chain : ValidationChain.<MetaData>builder("EmptyChain").build();
-    }
     
-    /**
-     * Enhance validation chain for a type (used by plugins)
-     * 
-     * @param typeId Type identifier (can use "*" wildcards)
-     * @param validator Additional validator to add
-     */
-    public void enhanceValidationChain(MetaDataTypeId typeId, Validator<MetaData> validator) {
-        Objects.requireNonNull(typeId, "TypeId cannot be null");
-        Objects.requireNonNull(validator, "Validator cannot be null");
-        
-        // Only initialize if we're not currently initializing (to avoid infinite recursion)
-        if (!initializing) {
-            ensureInitialized();
-        }
-        
-        // Apply to matching types
-        for (Map.Entry<MetaDataTypeId, ValidationChain<MetaData>> entry : validationChains.entrySet()) {
-            if (entry.getKey().matches(typeId)) {
-                entry.getValue().addValidator(validator);
-                log.debug("Enhanced validation for {} with {}", 
-                         entry.getKey().toQualifiedName(), validator.getClass().getSimpleName());
-            }
-        }
-    }
     
     /**
      * Check if a type is registered
@@ -334,7 +290,6 @@ public class MetaDataTypeRegistry {
      */
     public void clear() {
         typeHandlers.clear();
-        validationChains.clear();
         initialized = false;
         log.debug("Cleared all registered types");
     }
@@ -394,14 +349,6 @@ public class MetaDataTypeRegistry {
         }
     }
     
-    /**
-     * Create default validation chain for a type
-     */
-    private ValidationChain<MetaData> createDefaultValidationChain(MetaDataTypeId typeId) {
-        return ValidationChain.<MetaData>builder("DefaultChain-" + typeId.toQualifiedName())
-            .continueOnError()
-            .build();
-    }
     
     /**
      * Registry statistics record
