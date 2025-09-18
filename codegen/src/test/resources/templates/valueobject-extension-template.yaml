@@ -1,0 +1,50 @@
+template:
+  metadata:
+    name: 'valueobject-extension'
+    version: '1.0.0'
+    description: 'ValueObject extension template for Maven plugin integration'
+    targetLanguage: 'java'
+  
+  variables:
+    className: '${simpleClassName}'
+    packageName: '${metaObject.attr.package}'
+  
+  output:
+    fileName: '${className}.java'
+  
+  sections:
+    - name: 'package-declaration'
+      content: 'package ${packageName};'
+      
+    - name: 'imports'
+      content: |
+        
+        import com.draagon.meta.object.value.ValueObject;
+        import com.draagon.meta.object.MetaObject;
+        import java.util.*;
+        import java.math.BigDecimal;
+        
+    - name: 'class-declaration'
+      content: |
+        public class ${className} extends ValueObject {
+
+        public ${className}() {
+            super(null); // Would get MetaObject in real implementation
+        }
+        
+    - name: 'dynamic-accessors'
+      forEach: '${metaObject.fields}'
+      content: |
+        public ${javaType} get${capitalizedFieldName}() {
+            return (${javaType}) getAttrValue("${field.name}");
+        }
+
+        public void set${capitalizedFieldName}(${javaType} ${field.name}) {
+            setAttrValue("${field.name}", ${field.name});
+        }
+      variables:
+        javaType: '${field.javaType}'
+        capitalizedFieldName: '${field.capitalizedName}'
+        
+    - name: 'class-closing'
+      content: '}'

@@ -5,7 +5,6 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.GeneratorIOWriter;
 import com.draagon.meta.generator.direct.MultiFileDirectGeneratorBase;
 import com.draagon.meta.generator.direct.GenerationContext;
-import com.draagon.meta.generator.direct.GenerationPlugin;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 
@@ -13,12 +12,10 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
- * Base class for Object Code Generators that support plugins and configurable code fragments.
- * This provides language-agnostic functionality for generating code from MetaObjects.
+ * Base class for Object Code Generators providing language-agnostic functionality 
+ * for generating code from MetaObjects.
  */
 public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBase<MetaObject> {
 
@@ -30,7 +27,6 @@ public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBa
     public final static String ARG_NAMESUFFIX  = "nameSuffix";
     public final static String ARG_OPTARRAYS   = "optArrays";
     public final static String ARG_OPTKEYS     = "optKeys";
-    public final static String ARG_PLUGINS     = "plugins";
     public final static String ARG_DEBUG       = "debug";
     
     // Error message constants
@@ -40,7 +36,6 @@ public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBa
 
     protected Map<MetaObject,String> objectNameMap = new LinkedHashMap<>();
     protected GenerationContext globalContext;
-    protected List<GenerationPlugin> plugins = new ArrayList<>();
     protected MetaDataLoader currentLoader = null;
 
     //////////////////////////////////////////////////////////////////////
@@ -74,20 +69,8 @@ public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBa
         this.globalContext = new GenerationContext(null);
     }
     
-    public BaseObjectCodeGenerator addPlugin(GenerationPlugin plugin) {
-        plugins.add(plugin);
-        if (globalContext != null) {
-            globalContext.addPlugin(plugin);
-        }
-        return this;
-    }
-    
     public BaseObjectCodeGenerator withGlobalContext(GenerationContext context) {
         this.globalContext = context;
-        // Add any previously registered plugins
-        for (GenerationPlugin plugin : plugins) {
-            context.addPlugin(plugin);
-        }
         return this;
     }
 
@@ -171,11 +154,6 @@ public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBa
             
             // Configure context with arguments now that we have the loader
             configureGlobalContext();
-            
-            // Add plugins to context
-            for (GenerationPlugin plugin : plugins) {
-                globalContext.addPlugin(plugin);
-            }
         }
         
         // Create a new context for each file generation, inheriting from global context
@@ -205,11 +183,8 @@ public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBa
      * Copy settings from global context to file context
      */
     protected void copyContextSettings(GenerationContext source, GenerationContext target) {
-        // Copy plugins
-        source.getPlugins().forEach(target::addPlugin);
-        
         // Copy properties
-        for (String key : List.of("generator.type", "package.prefix", "package.suffix", 
+        for (String key : java.util.List.of("generator.type", "package.prefix", "package.suffix", 
                                   "name.prefix", "name.suffix", "generate.arrayMethods", 
                                   "generate.keyMethods", "debug")) {
             if (source.getProperty(key, null) != null) {
@@ -276,7 +251,6 @@ public abstract class BaseObjectCodeGenerator extends MultiFileDirectGeneratorBa
     @Override
     public String toString() {
         return super.toString() + 
-               ",plugins=" + plugins.size() + 
                ",context=" + (globalContext != null ? "initialized" : "null");
     }
 }

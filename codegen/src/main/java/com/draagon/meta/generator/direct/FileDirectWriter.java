@@ -2,7 +2,7 @@ package com.draagon.meta.generator.direct;
 
 import com.draagon.meta.generator.GeneratorIOWriter;
 import com.draagon.meta.generator.GeneratorIOException;
-import com.draagon.meta.generator.util.FileIndentor;
+import com.draagon.meta.generator.direct.util.FileIndentor;
 import com.draagon.meta.loader.MetaDataLoader;
 
 import java.io.PrintWriter;

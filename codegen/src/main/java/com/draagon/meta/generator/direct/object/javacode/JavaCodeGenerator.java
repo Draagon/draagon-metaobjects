@@ -15,7 +15,13 @@ import java.util.Collection;
 
 /**
  * Java-specific implementation of Object Code Generator
+ * 
+ * @deprecated This direct generator is deprecated in favor of the new Mustache template system.
+ *             Use the JPA entity template, ValueObject extension template, or basic entity template
+ *             from the Mustache system for more flexible and maintainable code generation.
+ *             This generator will be removed in a future version.
  */
+@Deprecated
 public class JavaCodeGenerator extends BaseObjectCodeGenerator {
 
     public final static String TYPE_INTERFACE  = "interface";

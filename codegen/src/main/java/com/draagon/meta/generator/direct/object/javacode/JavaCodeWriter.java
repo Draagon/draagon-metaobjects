@@ -4,7 +4,6 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.direct.object.BaseObjectCodeWriter;
 import com.draagon.meta.generator.direct.GenerationContext;
-import com.draagon.meta.generator.direct.CodeFragment;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -101,38 +100,14 @@ public class JavaCodeWriter extends BaseObjectCodeWriter {
         if (!type.equals("interface"))
             throw new UnsupportedOperationException("Cannot draw method ["+getterName+"] for type ["+type+"]");
 
-        // Use code fragments if available
-        CodeFragment javadocFragment = context.getCodeFragment("java.getter.javadoc");
-        if (javadocFragment != null) {
-            Map<String, Object> vars = new HashMap<>();
-            vars.put("field.javaType", typeName);
-            vars.put("field.nameCapitalized", GeneratorUtil.toCamelCase(field.getName(), true));
-            
-            String javadoc = javadocFragment.generate(context, vars);
-            for (String line : javadoc.split("\n")) {
-                println(true, line);
-            }
-        } else {
-            // Fallback to hardcoded
-            println(true,"/**");
-            println(true," * "+getterName+" is a code generated Getter method");
-            println(true," * @returns "+typeName+" Value to get");
-            println(true," */");
-        }
+        // Simple JavaDoc for deprecated generator
+        println(true,"/**");
+        println(true," * "+getterName+" is a code generated Getter method");
+        println(true," * @returns "+typeName+" Value to get");
+        println(true," */");
 
         // Method signature
-        CodeFragment signatureFragment = context.getCodeFragment("java.interface.getter");
-        if (signatureFragment != null) {
-            Map<String, Object> vars = new HashMap<>();
-            vars.put("field.javaType", typeName);
-            vars.put("field.nameCapitalized", GeneratorUtil.toCamelCase(field.getName(), true));
-            
-            String signature = signatureFragment.generate(context, vars);
-            println(true, signature);
-        } else {
-            // Fallback
-            println(true, "public " + typeName + " " + getterName + "();");
-        }
+        println(true, "public " + typeName + " " + getterName + "();");
     }
 
     @Override
@@ -140,38 +115,14 @@ public class JavaCodeWriter extends BaseObjectCodeWriter {
         if (!type.equals("interface"))
             throw new UnsupportedOperationException("Cannot draw method ["+setterName+"] for type ["+type+"]");
 
-        // Use code fragments for JavaDoc
-        CodeFragment javadocFragment = context.getCodeFragment("java.setter.javadoc");
-        if (javadocFragment != null) {
-            Map<String, Object> vars = new HashMap<>();
-            vars.put("field.javaType", typeName);
-            vars.put("field.nameCapitalized", GeneratorUtil.toCamelCase(field.getName(), true));
-            
-            String javadoc = javadocFragment.generate(context, vars);
-            for (String line : javadoc.split("\n")) {
-                println(true, line);
-            }
-        } else {
-            // Fallback
-            println(true,"/**");
-            println(true," * "+setterName+" is a code generated Setter method");
-            println(true," * @param "+paramName+" Value to set");
-            println(true," */");
-        }
+        // Simple JavaDoc for deprecated generator
+        println(true,"/**");
+        println(true," * "+setterName+" is a code generated Setter method");
+        println(true," * @param "+paramName+" Value to set");
+        println(true," */");
 
         // Method signature
-        CodeFragment signatureFragment = context.getCodeFragment("java.interface.setter");
-        if (signatureFragment != null) {
-            Map<String, Object> vars = new HashMap<>();
-            vars.put("field.javaType", typeName);
-            vars.put("field.nameCapitalized", GeneratorUtil.toCamelCase(field.getName(), true));
-            
-            String signature = signatureFragment.generate(context, vars);
-            println(true, signature);
-        } else {
-            // Fallback
-            println(true, "public void " + setterName + "(" + typeName + " " + paramName + ");");
-        }
+        println(true, "public void " + setterName + "(" + typeName + " " + paramName + ");");
     }
 
     @Override
@@ -197,20 +148,9 @@ public class JavaCodeWriter extends BaseObjectCodeWriter {
         }
         println(" */");
 
-        // Use code fragment for class header if available
-        CodeFragment headerFragment = context.getCodeFragment("java.class.header");
-        if (headerFragment != null) {
-            Map<String, Object> vars = new HashMap<>();
-            vars.put("classType", type);
-            vars.put("superClass", (fullSuperName != null && !fullSuperName.isEmpty()) ? " extends " + fullSuperName : "");
-            
-            String header = headerFragment.generate(context, vars);
-            println(header);
-        } else {
-            // Fallback
-            String extendsClause = (fullSuperName != null && !fullSuperName.isEmpty()) ? " extends " + fullSuperName : "";
-            println("public " + type + " " + name + extendsClause + " {");
-        }
+        // Simple class header for deprecated generator
+        String extendsClause = (fullSuperName != null && !fullSuperName.isEmpty()) ? " extends " + fullSuperName : "";
+        println("public " + type + " " + name + extendsClause + " {");
     }
 
     @Override

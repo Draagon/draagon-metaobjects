@@ -3,10 +3,7 @@ package com.draagon.meta.generator.direct.object;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.FileDirectWriter;
-import com.draagon.meta.generator.direct.CodeFragment;
 import com.draagon.meta.generator.direct.GenerationContext;
-import com.draagon.meta.generator.direct.GenerationPlugin;
-import com.draagon.meta.generator.direct.BaseGenerationPlugin;
 import com.draagon.meta.generator.util.GeneratorUtil;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
@@ -185,10 +182,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
         return this;
     }
     
-    public BaseObjectCodeWriter addPlugin(GenerationPlugin plugin) {
-        context.addPlugin(plugin);
-        return this;
-    }
     
     public GenerationContext getContext() {
         return context;
@@ -211,10 +204,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
             initPackagePrefixMap(objectReferenceMap.values());
             initImportList(objectReferenceMap.values());
             
-            // Let plugins contribute imports
-            for (BaseGenerationPlugin<MetaObject> plugin : context.getPlugins()) {
-                plugin.contributeImports(mo, context);
-            }
             
             // Merge context imports with local imports
             importList.addAll(context.getImports());
@@ -226,13 +215,9 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
                     "SuperObject:              " + (superObject != null ? superObject.getName() : ""),
                     "MetaDataLoader:           " + getLoader().toString(),
                     "Generated On:             " + (new Date()).toString(),
-                    "Plugins:                  " + getPluginNames()
+                    "Context:                  " + (context != null ? "initialized" : "null")
             );
             
-            // Notify plugins before generation starts
-            for (BaseGenerationPlugin<MetaObject> plugin : context.getPlugins()) {
-                plugin.beforeItemGeneration(mo, context, this);
-            }
             
             writeObjectHeader(docs, pkg, name, importList, fullSuperName);
 
@@ -240,10 +225,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
 
             writeObjectFooter();
             
-            // Notify plugins after generation completes
-            for (BaseGenerationPlugin<MetaObject> plugin : context.getPlugins()) {
-                plugin.afterItemGeneration(mo, context, this);
-            }
 
             return (pkg != null && !pkg.isEmpty()) ? pkg + "." + name : name;
         }
@@ -252,12 +233,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
         }
     }
     
-    private String getPluginNames() {
-        return context.getPlugins().stream()
-                .map(BaseGenerationPlugin::getName)
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("none");
-    }
 
     protected void writeObjectMethods(MetaObject mo) {
         inc();
@@ -265,12 +240,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
         for (MetaField mf : mo.getMetaFields(false)) {
             context.setCurrentField(mf);
             
-            // Notify plugins before field generation
-            for (BaseGenerationPlugin<MetaObject> plugin : context.getPlugins()) {
-                if (plugin instanceof GenerationPlugin) {
-                    ((GenerationPlugin) plugin).beforeFieldGeneration(mf, context, this);
-                }
-            }
 
             // Check if we should generate getters/setters (plugins might disable this)
             boolean generateGetters = context.getBooleanProperty("generate.getters", true);
@@ -282,15 +251,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
                 String paramName = getParameterName(mf);
                 String typeName = getLanguageType(mf);
 
-                // Allow plugins to customize method names and types
-                for (BaseGenerationPlugin<MetaObject> plugin : context.getPlugins()) {
-                    if (plugin instanceof GenerationPlugin) {
-                        GenerationPlugin genPlugin = (GenerationPlugin) plugin;
-                        getterName = genPlugin.customizeMethodName(mf, "getter", getterName, context);
-                        setterName = genPlugin.customizeMethodName(mf, "setter", setterName, context);
-                        typeName = genPlugin.customizeFieldType(mf, typeName, context);
-                    }
-                }
 
                 writeNewLine();
                 writeComment("Methods for MetaField: " + mf.getName());
@@ -305,12 +265,6 @@ public abstract class BaseObjectCodeWriter extends FileDirectWriter<BaseObjectCo
                 }
             }
             
-            // Notify plugins after field generation
-            for (BaseGenerationPlugin<MetaObject> plugin : context.getPlugins()) {
-                if (plugin instanceof GenerationPlugin) {
-                    ((GenerationPlugin) plugin).afterFieldGeneration(mf, context, this);
-                }
-            }
         }
 
         dec();
