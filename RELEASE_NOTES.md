@@ -45,38 +45,40 @@ limitations under the License.
   - Support for viewing included metadata, editing project metadata, and supporting overlays
   - Support for running generators after edit and viewing the output within the editor
 
-# Current Releases
+# Current Development
 
-## Version 5.2.0
-Comprehensive overlay functionality restoration and service-based architecture enhancement release. This release fixes critical metadata overlay functionality broken during the v6.0.0 refactoring and implements a sophisticated context-aware attribute creation system while maintaining full backward compatibility.
+## Version 5.2.0-SNAPSHOT (In Development)
+Major architectural evolution release featuring comprehensive code generation simplification, enhanced error reporting system, and preparation for cross-language template-based generation. This development version includes significant architectural improvements while maintaining full backward compatibility.
 
-### Critical Overlay Functionality Restoration
-* **Metadata Overlay System Fixed** - Restored ability for secondary metadata files to augment existing MetaData models during merge and load operations
-* **Field Naming Convention Fix** - Corrected v6.0.0 regression where overlay fields were created with fully qualified names instead of simple names
-* **Context-Aware Attribute Creation** - Implemented service-based system to replace lost TypesConfig context rules for proper attribute subtype resolution
+### Code Generation Module Simplification (v6.0.0+ Architecture)
+* **Module Separation Complete** - All code generation functionality moved to dedicated `codegen` module
+* **Complexity Elimination** - Removed ~730 lines of unnecessary code including CodeFragment system and complex plugin lifecycle
+* **Template System Preparation** - Simplified architecture prepared for upcoming Mustache-based template system
+* **FileIndentor Relocation** - Properly scoped utility from `generator.util` to `generator.direct.util` package
+* **Backward Compatibility** - Maven plugin integration remains unchanged, zero breaking changes
 
-### Service-Based Architecture Implementation
-* **MetaDataContextProvider Service** - New service interface for providing context-specific metadata creation rules 
-* **MetaDataContextRegistry** - Singleton registry using ServiceLoader pattern for automatic provider discovery
-* **CoreMetaDataContextProvider** - Implementation that parses metaobjects.types.xml to restore original context-aware behavior
-* **Enhanced FileMetaDataParser** - Updated to use context registry for determining appropriate attribute subtypes based on parent context
+### Enhanced Error Reporting System Implementation
+* **MetaDataPath Utility** - Hierarchical path building for human-readable error navigation
+* **Rich MetaDataException Context** - Automatic collection of metadata source, operation, thread, and timestamp information
+* **ErrorFormatter Utility** - Consistent error formatting with context-aware messaging
+* **15+ Enhanced Exception Classes** - Comprehensive coverage across all major modules (metadata, om, omdb, web, codegen)
+* **Factory Method Patterns** - 25+ factory methods for convenient creation of context-rich exceptions
 
-### Type Registration Enhancements
-* **Missing Attribute Types Restored** - Added PropertiesAttribute and ClassAttribute type registrations to CoreMetaDataTypeProvider
-* **Database Integration Fixed** - Resolved "No handler registered for type: attr.properties" errors in omdb module tests
-* **Complete Type Coverage** - Ensured all standard attribute types are properly registered and discoverable
+### Service-Based Architecture Enhancements
+* **TypesConfig Replacement Complete** - Full migration to MetaDataTypeRegistry and MetaDataEnhancementService
+* **Cross-Language Compatibility** - String-based type system works across Java, C#, and TypeScript
+* **ServiceLoader Discovery** - Automatic provider discovery with priority-based loading
+* **Attribute Enhancement System** - Template-driven metadata enhancement with declarative requirements
 
-### Test Suite Restoration
-* **34 Core Tests Passing** - All core module tests now pass successfully after overlay functionality restoration
-* **OMDB Tests Fixed** - Database Object Manager tests now execute without type registration errors
-* **Zero Regression Policy** - All fixes maintain 100% backward compatibility with existing metadata definitions
+### React MetaView System Integration
+* **Production-Ready React Components** - Complete TypeScript component library with Redux state management
+* **Spring REST API Integration** - JSON metadata serialization with CORS support for modern web development
+* **Fishstore Demo Enhancement** - Full React storefront application demonstrating metadata-driven UI generation
+* **Cross-Language Validation** - Proves metadata system effectiveness across Java/TypeScript boundary
 
-### Technical Debt Resolution
-* **v6.0.0 Refactoring Completion** - Properly addressed architectural gaps introduced during TypesConfig replacement
-* **Context Rules Preservation** - Maintained original behavior where 'keys' attributes under 'key' elements default to stringArray type
-* **Service Discovery Architecture** - Clean separation between type registration and context-aware enhancement services
+# Stable Releases
 
-## Version 5.1.0
+## Version 5.1.0 (Latest Stable)
 Comprehensive ObjectManager enhancements release focused on modern Java patterns, improved database abstraction, and NoSQL persistence layer support. This release fixes critical interface design issues while introducing extensive functionality improvements and architectural enhancements.
 
 ### Critical Interface Fixes

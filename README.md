@@ -3,7 +3,8 @@ MetaObjects is a suite of tools for Metadata-driven development, providing a mor
 over your applications than traditional model-driven development techniques.
 
 ## Release Notes
-Current Release:  5.2.0
+Current Development:  5.2.0-SNAPSHOT
+Latest Stable Release: 5.1.0
 
 Click here for [Release Notes](RELEASE_NOTES.md).
 
