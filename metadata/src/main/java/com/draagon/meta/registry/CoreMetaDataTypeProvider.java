@@ -94,11 +94,7 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
      * These handle cases where XML metadata references types not yet registered.
      */
     private void registerBaseTypes(MetaDataTypeRegistry registry) {
-        // Register missing metaobject.metamodel type (used by XML metadata parsing)
-        registry.registerHandler(new MetaDataTypeId("metaobject", "metamodel"), 
-            com.draagon.meta.object.mapped.MappedMetaObject.class);
-        
-        log.debug("Registered {} additional base types", 1);
+        log.debug("Registered {} additional base types", 0);
     }
     
     /**
@@ -145,8 +141,10 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
         registry.registerHandler(new MetaDataTypeId("validator", "numeric"), NumericValidator.class);
         registry.registerHandler(new MetaDataTypeId("validator", "length"), LengthValidator.class);
         registry.registerHandler(new MetaDataTypeId("validator", "array"), ArrayValidator.class);
+        // Range validator uses NumericValidator for now (can handle min/max ranges)
+        registry.registerHandler(new MetaDataTypeId("validator", "range"), NumericValidator.class);
         
-        log.debug("Registered {} validator types", 5);
+        log.debug("Registered {} validator types", 6);
     }
     
     /**
@@ -154,12 +152,27 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
      */
     private void registerViewTypes(MetaDataTypeRegistry registry) {
         // Register base view type
-        registry.registerHandler(new MetaDataTypeId("view", "base"), MetaView.class);
+        registry.registerHandler(new MetaDataTypeId("view", "base"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        
+        // Register common view types used in metadata
+        registry.registerHandler(new MetaDataTypeId("view", "numeric"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("view", "text"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("view", "textarea"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("view", "slider"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("view", "currency"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
+        registry.registerHandler(new MetaDataTypeId("view", "date"), 
+            com.draagon.meta.object.mapped.MappedMetaObject.class);
         
         // Note: Specific view implementations (TextView, etc.) are in the web module
         // and will be registered by WebMetaDataTypeProvider
         
-        log.debug("Registered {} view types", 1);
+        log.debug("Registered {} view types", 7);
     }
     
     /**

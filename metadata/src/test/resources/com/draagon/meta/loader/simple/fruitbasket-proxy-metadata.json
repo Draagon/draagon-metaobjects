@@ -1,5 +1,5 @@
 {"$schema": "simple-model.schema.json",
- "type": "metadata", "package": "simple::fruitbasket",
+ "metadata": {"package": "simple::fruitbasket",
   "children": [
 
     {"type": "field", "package": "simple::common", "name": "id", "subType": "long", "_isAbstract": "true",
@@ -98,4 +98,4 @@
         {"type": "field", "name": "pickedDate", "subType": "date"}
       ]}
   ]
-}
+}}

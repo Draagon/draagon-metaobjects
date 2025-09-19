@@ -1,0 +1,10 @@
+{"metadata": {"package": "test",
+  "children": [
+    {"object": {"name": "TestObject", 
+        "children": [
+          {"field": {"name": "id", "super": "..::common::id"}}
+        ]
+      }
+    }
+  ]
+}}

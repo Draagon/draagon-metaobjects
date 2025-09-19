@@ -3,7 +3,7 @@ package com.draagon.meta.loader.simple;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.model.MetaModelLoader;
+import com.draagon.meta.loader.json.JsonMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.*;
@@ -100,15 +100,16 @@ public class SimpleLoader extends MetaDataLoader {
 
         super.init();
 
-        // Load MetaData
-        MetaModelLoader modelLoader = MetaModelLoader.create(
-                getMetaDataClassLoader(),
-                "simple",
-                getTypeRegistry() );
+        // Load MetaData using direct JSON parser approach
         for( URI sourceURI : sourceURIs) {
-            SimpleModelParser simpleModelParser = new SimpleModelParser(
-                    modelLoader, getMetaDataClassLoader(), sourceURI.toString());
-            simpleModelParser.loadAndMerge(this, sourceURI);
+            String filename = sourceURI.toString();
+            JsonMetaDataParser jsonParser = new JsonMetaDataParser(this, filename);
+            
+            try (InputStream is = URIHelper.getInputStream(sourceURI)) {
+                jsonParser.loadFromStream(is);
+            } catch (IOException e) {
+                throw new MetaDataException("Failed to load metadata from [" + filename + "]: " + e.getMessage(), e);
+            }
         }
 
         // Validate the MetaData

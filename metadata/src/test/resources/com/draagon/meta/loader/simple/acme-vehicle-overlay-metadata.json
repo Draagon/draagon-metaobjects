@@ -1,0 +1,56 @@
+{"metadata": {"package": "acme",
+  "children": [
+    {"object": {"package": "::garage", "name": "Garage",
+        "children": [
+          {"field": {"name": "premiumLocation", "type": "boolean", "@default": "false"}},
+          {"field": {"name": "operatingHours",
+              "children": [{"validator": {"name": "hoursFormat", "type": "pattern", "@pattern": "^[0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}$"}}]
+            }
+          },
+          {"field": {"name": "specialFeatures",
+              "children": [{"attr": {"name": "specialConfig", "type": "properties", "@feature1": "climate-controlled", "@feature2": "security-system", "@maxFeatures": "10"}}]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle", "name": "Vehicle",
+        "children": [
+          {"field": {"name": "warranty", "type": "boolean", "@default": "true"}},
+          {"field": {"name": "inspectionDate", "type": "date",
+              "children": [
+                {"view": {"name": "datePicker", "type": "date", "@format": "MM/dd/yyyy",
+                    "children": [{"validator": {"name": "pastDate", "type": "dateRange", "@maxDate": "today"}}]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle::car::luxury", "name": "Porsche",
+        "children": [
+          {"field": {"name": "certifiedPreOwned", "type": "boolean", "@default": "false"}},
+          {"field": {"name": "specialEdition",
+              "children": [
+                {"validator": {"name": "editionValidator", "type": "length", "@min": "0", "@max": "50"}},
+                {"attr": {"name": "editionDetails", "type": "properties", "@limitedRun": "true", "@serialNumber": "", "@collectible": "false"}}
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle::motorcycle", "name": "Motorcycle",
+        "children": [
+          {"field": {"name": "customPaint", "type": "boolean", "@default": "false"}},
+          {"field": {"name": "modifications",
+              "children": [{"validator": {"name": "modValidator", "type": "length", "@max": "200"}}]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}}
