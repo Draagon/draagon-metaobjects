@@ -1,246 +1,105 @@
 {
   "name": "mustache-test-metadata",
-  "type": "metadata",
-  "version": "1.0.0",
-  "children": [
-    {
-      "name": "User",
-      "type": "object",
-      "package": "com.example.model",
-      "children": [
-        {
-          "type": "attr",
-          "subType": "string",
-          "name": "dbTable",
-          "value": "users"
-        },
-        {
-          "type": "attr",
-          "subType": "boolean",
-          "name": "hasAuditing",
-          "value": "true"
-        },
-        {
-          "type": "attr",
-          "subType": "boolean", 
-          "name": "hasJpa",
-          "value": "true"
-        },
-        {
-          "type": "attr",
-          "subType": "boolean",
-          "name": "hasValidation", 
-          "value": "true"
-        },
-        {
-          "name": "id",
-          "type": "field",
-          "subType": "long",
+  "metadata": {
+    "version": "1.0.0",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "package": "com.example.model",
+          "@dbTable": "users",
+          "@hasAuditing": true,
+          "@hasJpa": true,
+          "@hasValidation": true,
           "children": [
             {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "isId",
-              "value": "true"
+              "field": {
+                "name": "id",
+                "type": "long",
+                "@isId": true,
+                "@dbColumn": "user_id"
+              }
             },
             {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "user_id"
-            }
-          ]
-        },
-        {
-          "name": "username",
-          "type": "field",
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
+              "field": {
+                "name": "username",
+                "type": "string",
+                "@required": true,
+                "@dbColumn": "username",
+                "@maxLength": 50,
+                "@isSearchable": true
+              }
             },
             {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "username"
+              "field": {
+                "name": "email",
+                "type": "string",
+                "@required": true,
+                "@dbColumn": "email_address",
+                "@maxLength": 255,
+                "@isSearchable": true
+              }
             },
             {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "50"
+              "field": {
+                "name": "age",
+                "type": "int",
+                "@dbColumn": "user_age",
+                "@isOptional": true
+              }
             },
             {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "isSearchable",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "name": "email",
-          "type": "field", 
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
-            },
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "email_address"
-            },
-            {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "255"
-            },
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "isSearchable",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "name": "age",
-          "type": "field",
-          "subType": "int",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "user_age"
-            },
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "isOptional",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "name": "createdAt",
-          "type": "field",
-          "subType": "date",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "created_at"
+              "field": {
+                "name": "createdAt",
+                "type": "date",
+                "@dbColumn": "created_at"
+              }
             }
           ]
         }
-      ]
-    },
-    {
-      "name": "Product",
-      "type": "object",
-      "package": "com.example.model",
-      "children": [
-        {
-          "type": "attr",
-          "subType": "string",
-          "name": "dbTable",
-          "value": "products"
-        },
-        {
-          "name": "id",
-          "type": "field",
-          "subType": "long",
+      },
+      {
+        "object": {
+          "name": "Product",
+          "package": "com.example.model",
+          "@dbTable": "products",
           "children": [
             {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "isId",
-              "value": "true"
+              "field": {
+                "name": "id",
+                "type": "long",
+                "@isId": true,
+                "@dbColumn": "product_id"
+              }
             },
             {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "product_id"
-            }
-          ]
-        },
-        {
-          "name": "name",
-          "type": "field",
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
+              "field": {
+                "name": "name",
+                "type": "string",
+                "@required": true,
+                "@dbColumn": "product_name",
+                "@maxLength": 100
+              }
             },
             {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "product_name"
+              "field": {
+                "name": "price",
+                "type": "double",
+                "@required": true,
+                "@dbColumn": "price"
+              }
             },
             {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "100"
-            }
-          ]
-        },
-        {
-          "name": "price",
-          "type": "field",
-          "subType": "double",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
-            },
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "price"
-            }
-          ]
-        },
-        {
-          "name": "description",
-          "type": "field",
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "description"
-            },
-            {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "1000"
+              "field": {
+                "name": "description",
+                "type": "string",
+                "@dbColumn": "description",
+                "@maxLength": 1000
+              }
             }
           ]
         }
-      ]
-    }
-  ]
+      }
+    ]
+  }
 }

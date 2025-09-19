@@ -143,8 +143,14 @@ public class CoreMetaDataTypeProvider implements MetaDataTypeProvider {
         registry.registerHandler(new MetaDataTypeId("validator", "array"), ArrayValidator.class);
         // Range validator uses NumericValidator for now (can handle min/max ranges)
         registry.registerHandler(new MetaDataTypeId("validator", "range"), NumericValidator.class);
+        // Options validator uses RegexValidator for now (can validate against comma-separated options)
+        registry.registerHandler(new MetaDataTypeId("validator", "options"), RegexValidator.class);
+        // Pattern validator uses RegexValidator for pattern matching
+        registry.registerHandler(new MetaDataTypeId("validator", "pattern"), RegexValidator.class);
+        // Date range validator uses NumericValidator for date range validation
+        registry.registerHandler(new MetaDataTypeId("validator", "daterange"), NumericValidator.class);
         
-        log.debug("Registered {} validator types", 6);
+        log.debug("Registered {} validator types", 9);
     }
     
     /**

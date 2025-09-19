@@ -115,8 +115,9 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         log.info("Testing inline attribute format (@attribute: 'value')");
         
         // The metadata files use @attribute: "value" inline format
-        // If they load successfully, inline attributes are working
+        // Need to load common metadata first for cross-file references to work
         SimpleLoader loader = initLoader(Arrays.asList(
+            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-common-metadata.json"),
             URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-vehicle-metadata.json")
         ));
         

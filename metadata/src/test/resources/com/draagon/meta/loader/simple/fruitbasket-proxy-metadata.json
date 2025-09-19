@@ -2,100 +2,67 @@
  "metadata": {"package": "simple::fruitbasket",
   "children": [
 
-    {"type": "field", "package": "simple::common", "name": "id", "subType": "long", "_isAbstract": "true",
+    {"field": {"package": "simple::common", "name": "id", "type": "long", "@isAbstract": true,
       "children": [
-        {"type": "attr", "subType": "boolean", "name": "isKey", "value": "true"}
-      ]},
+        {"attr": {"name": "isKey", "type": "boolean", "value": "true"}}
+      ]}},
 
-    {"type": "field", "package": "simple::common", "name": "name", "subType": "string", "_isAbstract": "true",
+    {"field": {"package": "simple::common", "name": "name", "type": "string", "@isAbstract": true,
       "children": [
-        {"type": "validator", "subType": "required"},
-        {"type": "validator", "subType": "length",
-          "children": [
-            {"type": "attr", "subType": "int", "name": "min", "value": "1"},
-            {"type": "attr", "subType": "int", "name": "max", "value": "50"}
-          ]}
-      ]},
+        {"validator": {"type": "required"}},
+        {"validator": {"type": "length", "@min": 1, "@max": 50}}
+      ]}},
 
-    {"type": "object", "name": "Basket", "subType": "proxy",
+    {"object": {"name": "Basket", "type": "proxy", "@object": "com.draagon.meta.test.proxy.fruitbasket.Basket",
       "children": [
-        {"type": "key", "name": "primary", "subType": "primary",
+        {"key": {"name": "primary", "type": "primary", "@keys": "id"}},
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "numApples", "type": "int",
           "children": [
-            {"type": "attr", "subType": "stringArray", "name": "keys", "value": "id"}
-          ]},
-        {"type": "attr", "subType": "string", "name": "object", "value": "com.draagon.meta.test.proxy.fruitbasket.Basket"},
-        {"type": "field", "name": "id", "super": "..::common::id"},
-        {"type": "field", "name": "name", "super": "..::common::name"},
-        {"type": "field", "name": "numApples", "subType": "int",
+            {"validator": {"type": "length", "@min": 0, "@max": 10}}
+          ]}},
+        {"field": {"name": "numOranges", "type": "int",
           "children": [
-            {"type": "validator", "subType": "length", "min": "0", "max": "10"}
-          ]},
-        {"type": "field", "name": "numOranges", "subType": "int",
-          "children": [
-            {"type": "validator", "subType": "length", "min": "0", "max": "10"}
-          ]},
-        {"type": "field", "name": "fruitIds", "subType": "objectArray", "objectRef": "::Apple"},
-        {"type": "field", "name": "apples", "subType": "objectArray", "objectRef": "::Apple"},
-        {"type": "field", "name": "oranges", "subType": "objectArray", "objectRef": "::Orange"}
-      ]},
+            {"validator": {"type": "length", "@min": 0, "@max": 10}}
+          ]}},
+        {"field": {"name": "fruitIds", "type": "objectArray", "@objectRef": "::Apple"}},
+        {"field": {"name": "apples", "type": "objectArray", "@objectRef": "::Apple"}},
+        {"field": {"name": "oranges", "type": "objectArray", "@objectRef": "::Orange"}}
+      ]}},
 
-    {"type": "object", "name": "BasketToFruit", "subType": "proxy",
+    {"object": {"name": "BasketToFruit", "type": "proxy", "@object": "com.draagon.meta.test.proxy.fruitbasket.BasketToFruit",
       "children": [
-        {"type": "attr", "subType": "string", "name": "object", "value": "com.draagon.meta.test.proxy.fruitbasket.BasketToFruit"},
-        {"type": "key", "name": "primary", "subType": "primary",
-          "children": [
-            {"type": "attr", "subType": "stringArray", "name": "keys", "value": "basketId,fruitId"}
-          ]},
-        {"type": "key", "subType": "foreign", "name": "basketKey",
-          "children": [
-            {"type": "attr", "subType": "stringArray", "name": "keys", "value": "basketId"},
-            {"type": "attr", "subType": "string", "name": "foreignObjectRef", "value": "::Basket"}
-          ]},
-        {"type": "key", "subType": "foreign", "name": "fruitKey",
-          "children": [
-            {"type": "attr", "subType": "stringArray", "name": "keys", "value": "fruitId"},
-            {"type": "attr", "subType": "string", "name": "foreignObjectRef", "value": "::Fruit"}
-          ]},
-        {"type": "field", "name": "basketId", "super": "..::common::id"},
-        {"type": "field", "name": "fruitId", "super": "..::common::id"}
-      ]},
+        {"key": {"name": "primary", "type": "primary", "@keys": "basketId,fruitId"}},
+        {"key": {"type": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
+        {"key": {"type": "foreign", "name": "fruitKey", "@keys": "fruitId", "@foreignObjectRef": "::Fruit"}},
+        {"field": {"name": "basketId", "super": "..::common::id"}},
+        {"field": {"name": "fruitId", "super": "..::common::id"}}
+      ]}},
 
-    {"type": "object", "name": "Fruit", "subType": "proxy", "_isAbstract": "true",
+    {"object": {"name": "Fruit", "type": "proxy", "@isAbstract": true, "@object": "com.draagon.meta.test.proxy.fruitbasket.Fruit",
       "children": [
-        {"type": "attr", "subType": "string", "name": "object", "value": "com.draagon.meta.test.proxy.fruitbasket.Fruit"},
-        {"type": "key", "name": "primary", "subType": "primary",
-          "children": [
-            {"type": "attr", "subType": "stringArray", "name": "keys", "value": "id"}
-          ]},
-        {"type": "key", "subType": "foreign", "name": "basketKey",
-          "children": [
-            {"type": "attr", "subType": "stringArray", "name": "keys", "value": "basketId"},
-            {"type": "attr", "subType": "string", "name": "foreignObjectRef", "value": "::Basket"}
-          ]},
-        {"type": "field", "name": "id", "super": "..::common::id"},
-        {"type": "field", "name": "name", "super": "..::common::name"},
-        {"type": "field", "name": "basketId", "super": "..::common::id"},
-        {"type": "field", "name": "length", "subType": "int"},
-        {"type": "field", "name": "weight", "subType": "int"},
-        {"type": "field", "name": "inBasket", "subType": "boolean"}
-      ]},
+        {"key": {"name": "primary", "type": "primary", "@keys": "id"}},
+        {"key": {"type": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "basketId", "super": "..::common::id"}},
+        {"field": {"name": "length", "type": "int"}},
+        {"field": {"name": "weight", "type": "int"}},
+        {"field": {"name": "inBasket", "type": "boolean"}}
+      ]}},
 
-    {"type": "object", "name": "Apple", "super": "Fruit",
+    {"object": {"name": "Apple", "super": "Fruit", "@object": "com.draagon.meta.test.proxy.fruitbasket.Apple",
       "children": [
-        {"type": "attr", "subType": "string", "name": "object", "value": "com.draagon.meta.test.proxy.fruitbasket.Apple"},
-        {"type": "field", "name": "orchard", "subType": "string"},
-        {"type": "field", "name": "worms", "subType": "short"}
-      ]},
+        {"field": {"name": "orchard", "type": "string"}},
+        {"field": {"name": "worms", "type": "short"}}
+      ]}},
 
-    {"type": "object", "name": "Macintosh", "super": "Apple",
-      "children": [
-        {"type": "attr", "subType": "string", "name": "object", "value": "com.draagon.meta.test.proxy.fruitbasket.Macintosh"}
-      ]},
+    {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.draagon.meta.test.proxy.fruitbasket.Macintosh"}},
 
-    {"type": "object", "name": "Orange", "super": "Fruit",
+    {"object": {"name": "Orange", "super": "Fruit", "@object": "com.draagon.meta.test.proxy.fruitbasket.Orange",
       "children": [
-        {"type": "attr", "subType": "string", "name": "object", "value": "com.draagon.meta.test.proxy.fruitbasket.Orange"},
-        {"type": "field", "name": "pickedDate", "subType": "date"}
-      ]}
+        {"field": {"name": "pickedDate", "type": "date"}}
+      ]}}
   ]
 }}

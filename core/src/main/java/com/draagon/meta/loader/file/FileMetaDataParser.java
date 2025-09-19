@@ -488,4 +488,67 @@ public abstract class FileMetaDataParser {
             }
         }
     }
+
+    /**
+     * Check if a MetaData type supports inline attributes (attr type has default subType)
+     */
+    protected boolean supportsInlineAttributes(MetaData md) {
+        try {
+            return getTypeRegistry().getDefaultSubType("attr") != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Cast string value to appropriate Java type based on content pattern
+     */
+    protected Object castStringValueToObject(String stringValue) {
+        if (stringValue == null || stringValue.isEmpty()) {
+            return null;
+        }
+        
+        // Try to parse as boolean
+        if ("true".equalsIgnoreCase(stringValue) || "false".equalsIgnoreCase(stringValue)) {
+            return Boolean.parseBoolean(stringValue);
+        }
+        
+        // Try to parse as number
+        try {
+            // Try int first
+            if (stringValue.matches("-?\\d+")) {
+                return Integer.parseInt(stringValue);
+            }
+            // Try double for decimal numbers
+            if (stringValue.matches("-?\\d*\\.\\d+")) {
+                return Double.parseDouble(stringValue);
+            }
+        } catch (NumberFormatException e) {
+            // Not a number, continue as string
+        }
+        
+        // Default to string
+        return stringValue;
+    }
+
+    /**
+     * Parse inline attribute with type casting support
+     */
+    protected void parseInlineAttribute(MetaData md, String attrName, String stringValue) {
+        // Check if inline attributes are supported
+        if (!supportsInlineAttributes(md)) {
+            log.warn("Inline attributes not supported - no attr type default subType registered");
+            return;
+        }
+        
+        // Cast string value to appropriate Java type
+        Object castedValue = castStringValueToObject(stringValue);
+        String finalValue = castedValue != null ? castedValue.toString() : null;
+        
+        // Create the attribute using existing infrastructure
+        createAttributeOnParent(md, attrName, finalValue);
+        
+        log.debug("Created inline attribute [{}] with value [{}] on [{}:{}:{}] in file [{}]", 
+            attrName, finalValue, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+    }
 }

@@ -1,159 +1,76 @@
 {
   "name": "template-test-metadata",
-  "type": "metadata",
-  "version": "1.0.0",
-  "children": [
-    {
-      "name": "User",
-      "type": "object",
-      "package": "com.example.model",
-      "children": [
-        {
-          "type": "attr",
-          "subType": "string",
-          "name": "dbTable",
-          "value": "users"
-        },
-        {
-          "type": "attr",
-          "subType": "string",
-          "name": "description",
-          "value": "User entity for template testing"
-        },
-        {
-          "name": "id",
-          "type": "field",
-          "subType": "long",
+  "metadata": {
+    "version": "1.0.0",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "package": "com.example.model",
+          "@dbTable": "users",
+          "@description": "User entity for template testing",
           "children": [
             {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "primaryKey",
-              "value": "true"
+              "field": {
+                "name": "id",
+                "type": "long",
+                "@primaryKey": true,
+                "@dbColumn": "id"
+              }
             },
             {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "id"
-            }
-          ]
-        },
-        {
-          "name": "username",
-          "type": "field",
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
+              "field": {
+                "name": "username",
+                "type": "string",
+                "@required": true,
+                "@maxLength": 50,
+                "@dbColumn": "username",
+                "@dbNullable": false
+              }
             },
             {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "50"
-            },
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "username"
-            },
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "dbNullable",
-              "value": "false"
-            }
-          ]
-        },
-        {
-          "name": "email",
-          "type": "field",
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
-            },
-            {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "100"
-            },
-            {
-              "type": "attr",
-              "subType": "string",
-              "name": "dbColumn",
-              "value": "email"
+              "field": {
+                "name": "email",
+                "type": "string",
+                "@required": true,
+                "@maxLength": 100,
+                "@dbColumn": "email"
+              }
             }
           ]
         }
-      ]
-    },
-    {
-      "name": "Product",
-      "type": "object",
-      "package": "com.example.model",
-      "children": [
-        {
-          "type": "attr",
-          "subType": "string",
-          "name": "description",
-          "value": "Product value object for template testing"
-        },
-        {
-          "name": "name",
-          "type": "field",
-          "subType": "string",
+      },
+      {
+        "object": {
+          "name": "Product",
+          "package": "com.example.model",
+          "@description": "Product value object for template testing",
           "children": [
             {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
+              "field": {
+                "name": "name",
+                "type": "string",
+                "@required": true,
+                "@maxLength": 100
+              }
             },
             {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "100"
-            }
-          ]
-        },
-        {
-          "name": "price",
-          "type": "field",
-          "subType": "double",
-          "children": [
+              "field": {
+                "name": "price",
+                "type": "double",
+                "@required": true
+              }
+            },
             {
-              "type": "attr",
-              "subType": "boolean",
-              "name": "required",
-              "value": "true"
-            }
-          ]
-        },
-        {
-          "name": "category",
-          "type": "field",
-          "subType": "string",
-          "children": [
-            {
-              "type": "attr",
-              "subType": "int",
-              "name": "maxLength",
-              "value": "50"
+              "field": {
+                "name": "category",
+                "type": "string",
+                "@maxLength": 50
+              }
             }
           ]
         }
-      ]
-    }
-  ]
+      }
+    ]
+  }
 }

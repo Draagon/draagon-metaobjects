@@ -11,11 +11,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class SimpleLoader extends MetaDataLoader {
 
-    public final static String SIMPLE_TYPES_JSON = "com/draagon/meta/loader/simple/simple.types.json";
     public final static String SUBTYPE_SIMPLE = "simple";
 
     private static List<URI> sourceURIs = null;

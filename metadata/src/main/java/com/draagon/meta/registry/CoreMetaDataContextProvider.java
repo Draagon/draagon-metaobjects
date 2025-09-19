@@ -89,15 +89,35 @@ public class CoreMetaDataContextProvider implements MetaDataContextProvider {
     private synchronized void ensureInitialized() {
         if (!initialized) {
             try {
+                // Load hardcoded essential rules first
+                loadEssentialRules();
+                
+                // Then try to load additional rules from XML file
                 loadContextRules();
+                
                 initialized = true;
-                log.info("Loaded {} attribute rules and {} subtype-specific rules from metaobjects.types.xml", 
+                log.info("Loaded {} attribute rules and {} subtype-specific rules from context providers", 
                         attributeRules.size(), subTypeAttributeRules.size());
             } catch (Exception e) {
-                log.error("Failed to load context rules from metaobjects.types.xml", e);
+                log.error("Failed to load context rules", e);
                 initialized = true; // Don't retry on every call
             }
         }
+    }
+    
+    /**
+     * Load essential context rules that are required for core functionality
+     */
+    private void loadEssentialRules() {
+        // Keys attributes on key elements should always be stringArray
+        attributeRules.computeIfAbsent("key", k -> new HashMap<>())
+                .put("keys", "stringArray");
+        
+        // ForeignObjectRef attributes on key elements should be string  
+        attributeRules.computeIfAbsent("key", k -> new HashMap<>())
+                .put("foreignObjectRef", "string");
+                
+        log.debug("Loaded essential context rules: keys -> stringArray, foreignObjectRef -> string");
     }
     
     private void loadContextRules() throws ParserConfigurationException, IOException, SAXException {
