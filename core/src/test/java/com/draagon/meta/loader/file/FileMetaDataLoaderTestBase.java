@@ -11,7 +11,7 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.loader.file.json.JsonMetaDataParser;
+import com.draagon.meta.loader.file.json.JsonMetaDataParserAdapter;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class FileMetaDataLoaderTestBase {
             loader = new FileMetaDataLoader(
                     new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
-                            .addParser("*.json", JsonMetaDataParser.class)
+                            .addParser("*.json", JsonMetaDataParserAdapter.class)
                             .addSources(new LocalFileMetaDataSources(
                                     "com/draagon/meta/loader/json/metaobjects.types.json"))
                             .addSources(new LocalFileMetaDataSources(
@@ -55,7 +55,7 @@ public class FileMetaDataLoaderTestBase {
             loader = new FileMetaDataLoader(
                     new FileLoaderOptions()
                             .addParser("*.xml", XMLMetaDataParser.class)
-                            .addParser("*.json", JsonMetaDataParser.class)
+                            .addParser("*.json", JsonMetaDataParserAdapter.class)
                             .addSources(new LocalFileMetaDataSources(
                                     Arrays.asList(
                                             "com/draagon/meta/loader/xml/metaobjects.types.xml",

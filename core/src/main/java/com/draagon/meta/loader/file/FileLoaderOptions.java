@@ -2,7 +2,7 @@ package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
-import com.draagon.meta.loader.json.JsonMetaDataParser;
+import com.draagon.meta.loader.file.json.JsonMetaDataParserAdapter;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 import java.lang.reflect.Constructor;
@@ -60,7 +60,7 @@ public class FileLoaderOptions<T extends FileLoaderOptions> extends LoaderOption
     public static void createFileLoaderConfig(List<FileMetaDataSources> sources, boolean shouldRegister ) {
         FileLoaderOptions config = new FileLoaderOptions()
                 .addParser( "*.xml", XMLMetaDataParser.class )
-                .addParser( "*.json", JsonMetaDataParser.class )
+                .addParser( "*.json", JsonMetaDataParserAdapter.class )
                 .setSources( sources )
                 .setAllowAutoAttrs( true )
                 .setShouldRegister( shouldRegister );

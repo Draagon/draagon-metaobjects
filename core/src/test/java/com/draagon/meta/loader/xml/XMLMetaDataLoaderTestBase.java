@@ -50,7 +50,7 @@ public class XMLMetaDataLoaderTestBase {
             List<String> list = new ArrayList<String>();
             list.add("metadata/test/produce/v1/produce-v1.bundle");
             list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
-            xl.init(new LocalFileMetaDataSources(null,list));
+            xl.init(new LocalFileMetaDataSources((ClassLoader)null,list));
             xl.register();
 
             loaderStatic = xl;

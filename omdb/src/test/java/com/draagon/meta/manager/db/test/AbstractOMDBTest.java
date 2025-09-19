@@ -56,7 +56,8 @@ public class AbstractOMDBTest {
                     .setVerbose( false ),
                 "test-db" );
             
-            xl.init(new LocalFileMetaDataSources( "meta.fruit.xml" ), true);
+            xl.init(new LocalFileMetaDataSources( "meta.fruit.xml" ));
+            xl.register();
 
             loader = xl;
             

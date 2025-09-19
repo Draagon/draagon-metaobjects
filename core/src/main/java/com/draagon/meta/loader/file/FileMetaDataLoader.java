@@ -1,7 +1,7 @@
 package com.draagon.meta.loader.file;
 
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.json.JsonMetaDataParser;
+import com.draagon.meta.loader.file.json.JsonMetaDataParserAdapter;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
         
         FileLoaderOptions options = getLoaderOptions()
                 .addParser(XML_EXTENSION, XMLMetaDataParser.class)
-                .addParser(JSON_EXTENSION, JsonMetaDataParser.class);
+                .addParser(JSON_EXTENSION, JsonMetaDataParserAdapter.class);
 
         // Call parent to handle the rest of the configuration
         super.configure(config);
