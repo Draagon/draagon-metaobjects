@@ -2,7 +2,7 @@ package com.draagon.meta.loader.file;
 
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
-import com.draagon.meta.loader.file.json.JsonMetaDataParser;
+import com.draagon.meta.loader.json.JsonMetaDataParser;
 import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 
 import java.lang.reflect.Constructor;

@@ -14,6 +14,10 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.ObjectField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.loader.file.FileMetaDataLoader;
+import com.draagon.meta.loader.file.FileLoaderOptions;
+import com.draagon.meta.loader.file.LocalFileMetaDataSources;
+import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.test.produce.v1.Apple;
@@ -37,12 +41,20 @@ public class XMLMetaDataLoaderTest2 {
     @Before
     public void initLoader() throws Exception {
                 
-        // Initialize the loader
-        XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test" );
+        // Initialize the loader using FileMetaDataLoader with XML parser
+        FileMetaDataLoader xl = new FileMetaDataLoader(
+            new FileLoaderOptions()
+                .addParser( "*.xml", XMLMetaDataParser.class )
+                .setShouldRegister( false )
+                .setAllowAutoAttrs( true )
+                .setStrict( false )
+                .setVerbose( false ),
+            "test" );
+            
         List<String> list = new ArrayList<String>();
         list.add("metadata/test/produce/v1/produce-v1.bundle");
         list.add("metadata/test/produce/v1/meta.fruit.overlay.xml");
-        xl.init(new LocalMetaDataSources(/*"src/test/resources",*/ list));
+        xl.init(new LocalFileMetaDataSources(/*"src/test/resources",*/ list));
         //xl.register();
 
         this.loader = xl;

@@ -11,8 +11,10 @@
 package com.draagon.meta.manager.db.test;
 
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.xml.LocalMetaDataSources;
-import com.draagon.meta.loader.xml.XMLFileMetaDataLoader;
+import com.draagon.meta.loader.file.FileMetaDataLoader;
+import com.draagon.meta.loader.file.FileLoaderOptions;
+import com.draagon.meta.loader.file.LocalFileMetaDataSources;
+import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.ObjectManagerDB;
 import com.draagon.meta.manager.db.driver.DerbyDriver;
@@ -44,10 +46,17 @@ public class AbstractOMDBTest {
                 
         if ( dbFile == null ) {
 
-            // Initialize the loader
-            XMLFileMetaDataLoader xl = new XMLFileMetaDataLoader( "test-db" );
+            // Initialize the loader using FileMetaDataLoader with XML parser
+            FileMetaDataLoader xl = new FileMetaDataLoader(
+                new FileLoaderOptions()
+                    .addParser( "*.xml", XMLMetaDataParser.class )
+                    .setShouldRegister( false )
+                    .setAllowAutoAttrs( true )
+                    .setStrict( false )
+                    .setVerbose( false ),
+                "test-db" );
             
-            xl.init(new LocalMetaDataSources( "meta.fruit.xml" ), true);
+            xl.init(new LocalFileMetaDataSources( "meta.fruit.xml" ), true);
 
             loader = xl;
             
