@@ -57,6 +57,15 @@ public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
         
         // Validatable methods
         @Override public void validate() throws com.draagon.meta.ValueException { }
+        
+        // Inline attribute support
+        @Override public com.draagon.meta.loader.model.MetaModel createInlineAttributeChild(String name, Object value) {
+            SimpleMetaModel attrChild = new SimpleMetaModel();
+            attrChild.setType(SYNTHETIC_ATTR_TYPE);
+            attrChild.setName(name);
+            attrChild.setValue(value != null ? value.toString() : null);
+            return attrChild;
+        }
     }
 
     protected SimpleModelParser(MetaModelLoader modelLoader, ClassLoader classLoader, String sourceName) {
@@ -173,6 +182,9 @@ public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
         metaModel.setSuper(superRef);
         metaModel.setValue(value);
         
+        // Parse inline attributes (@ prefixed) if type supports them
+        parseInlineAttributes(metaModel, jsonObj, type);
+        
         // Parse children
         if (jsonObj.has("children")) {
             JsonArray children = jsonObj.getAsJsonArray("children");
@@ -188,6 +200,70 @@ public class SimpleModelParser extends MetaModelParser<SimpleLoader,URI> {
         }
         
         return metaModel;
+    }
+    
+    /**
+     * Parse inline attributes (@ prefixed) from JSON object and add as synthetic children
+     */
+    private void parseInlineAttributes(SimpleMetaModel metaModel, JsonObject jsonObj, String type) {
+        // Check if this type supports inline attributes (has default subType)
+        if (type == null || !supportsInlineAttributes(type)) {
+            return;
+        }
+        
+        // Parse @ prefixed attributes
+        for (java.util.Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith(com.draagon.meta.loader.model.MetaModel.INLINE_ATTR_PREFIX)) {
+                // Remove @ prefix for attribute name
+                String attrName = key.substring(1);
+                JsonElement value = entry.getValue();
+                
+                // Cast value based on JSON type and add as synthetic child
+                Object castedValue = castJsonValue(value);
+                metaModel.addInlineAttribute(attrName, castedValue);
+            }
+        }
+    }
+    
+    /**
+     * Check if a type supports inline attributes (attr type has default subType)
+     */
+    private boolean supportsInlineAttributes(String type) {
+        try {
+            // Get the loader's type registry to check if attr type has default subType
+            com.draagon.meta.registry.MetaDataTypeRegistry registry = 
+                getLoader().getTypeRegistry();
+            return registry != null && registry.getDefaultSubType("attr") != null;
+        } catch (Exception e) {
+            // If we can't determine, be conservative and don't allow inline attributes
+            return false;
+        }
+    }
+    
+    /**
+     * Cast JSON value to appropriate Java type based on JSON type
+     */
+    private Object castJsonValue(JsonElement jsonElement) {
+        if (jsonElement.isJsonNull()) {
+            return null;
+        } else if (jsonElement.isJsonPrimitive()) {
+            com.google.gson.JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+            if (primitive.isBoolean()) {
+                return primitive.getAsBoolean();
+            } else if (primitive.isNumber()) {
+                // Try int first, then double for non-integer numbers
+                try {
+                    return primitive.getAsInt();
+                } catch (NumberFormatException e) {
+                    return primitive.getAsDouble();
+                }
+            } else if (primitive.isString()) {
+                return primitive.getAsString();
+            }
+        }
+        // For arrays and objects, convert to string representation
+        return jsonElement.toString();
     }
     
     /**

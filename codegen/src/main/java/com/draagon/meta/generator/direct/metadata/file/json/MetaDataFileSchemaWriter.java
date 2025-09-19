@@ -282,6 +282,11 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         
         objectSchema.add("properties", properties);
         
+        // Add pattern properties for inline attributes (@ prefixed)
+        JsonObject patternProperties = new JsonObject();
+        patternProperties.add("^@[a-zA-Z][a-zA-Z0-9_]*$", createInlineAttributeValueSchema());
+        objectSchema.add("patternProperties", patternProperties);
+        
         // Required properties
         JsonArray required = new JsonArray();
         required.add("name");
@@ -321,6 +326,11 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         properties.add("type", typeSchema);
         
         fieldSchema.add("properties", properties);
+        
+        // Add pattern properties for inline attributes (@ prefixed)
+        JsonObject patternProperties = new JsonObject();
+        patternProperties.add("^@[a-zA-Z][a-zA-Z0-9_]*$", createInlineAttributeValueSchema());
+        fieldSchema.add("patternProperties", patternProperties);
         
         // Required properties
         JsonArray required = new JsonArray();
@@ -374,5 +384,36 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         }
         
         return nameSchema;
+    }
+
+    /**
+     * Create schema for inline attribute values (@ prefixed attributes)
+     * Supports boolean, number, and string values
+     */
+    private JsonObject createInlineAttributeValueSchema() {
+        JsonObject valueSchema = new JsonObject();
+        valueSchema.addProperty("description", "Inline attribute value (@ prefixed) - supports boolean, number, or string");
+        
+        // Allow boolean, number, or string values
+        JsonArray anyOf = new JsonArray();
+        
+        // Boolean value
+        JsonObject boolSchema = new JsonObject();
+        boolSchema.addProperty("type", "boolean");
+        anyOf.add(boolSchema);
+        
+        // Number value
+        JsonObject numberSchema = new JsonObject();
+        numberSchema.addProperty("type", "number");
+        anyOf.add(numberSchema);
+        
+        // String value
+        JsonObject stringSchema = new JsonObject();
+        stringSchema.addProperty("type", "string");
+        anyOf.add(stringSchema);
+        
+        valueSchema.add("anyOf", anyOf);
+        
+        return valueSchema;
     }
 }

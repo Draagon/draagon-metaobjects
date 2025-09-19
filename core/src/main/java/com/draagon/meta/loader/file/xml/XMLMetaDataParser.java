@@ -219,6 +219,7 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
 
     /**
      * Parses actual element attributes and adds them as StringAttributes
+     * Enhanced to support inline attributes with type casting (no prefix for XML)
      */
     protected void parseAttributes( MetaData md, Element el ) {
 
@@ -230,9 +231,73 @@ public class XMLMetaDataParser extends XMLMetaDataParserBase {
             if ( !reservedAttributes.contains( attrName )) {
 
                 String value = n.getNodeValue();
-                createAttributeOnParent(md, attrName, value);
+                
+                // Check if this should be treated as an inline attribute
+                if (supportsInlineAttributes(md)) {
+                    parseInlineAttribute(md, attrName, value);
+                } else {
+                    // Regular attribute - use existing logic
+                    createAttributeOnParent(md, attrName, value);
+                }
             }
         }
+    }
+    
+    /**
+     * Parse inline attribute with type casting support (XML format - no prefix)
+     */
+    protected void parseInlineAttribute(MetaData md, String attrName, String xmlValue) {
+        // Cast string value based on content pattern
+        Object castedValue = castXmlValueToObject(xmlValue);
+        String stringValue = castedValue != null ? castedValue.toString() : null;
+        
+        // Create the attribute using existing infrastructure
+        createAttributeOnParent(md, attrName, stringValue);
+        
+        log.debug("Created inline attribute [{}] with value [{}] on [{}:{}:{}] in file [{}]", 
+            attrName, stringValue, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+    }
+    
+    /**
+     * Check if a MetaData type supports inline attributes (attr type has default subType)
+     */
+    protected boolean supportsInlineAttributes(MetaData md) {
+        try {
+            return getTypeRegistry().getDefaultSubType("attr") != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Cast XML string value to appropriate Java type based on content pattern
+     */
+    protected Object castXmlValueToObject(String xmlValue) {
+        if (xmlValue == null || xmlValue.isEmpty()) {
+            return null;
+        }
+        
+        // Try to parse as boolean
+        if ("true".equalsIgnoreCase(xmlValue) || "false".equalsIgnoreCase(xmlValue)) {
+            return Boolean.parseBoolean(xmlValue);
+        }
+        
+        // Try to parse as number
+        try {
+            // Try int first
+            if (xmlValue.matches("-?\\d+")) {
+                return Integer.parseInt(xmlValue);
+            }
+            // Try double for decimal numbers
+            if (xmlValue.matches("-?\\d*\\.\\d+")) {
+                return Double.parseDouble(xmlValue);
+            }
+        } catch (NumberFormatException e) {
+            // Not a number, continue as string
+        }
+        
+        // Default to string
+        return xmlValue;
     }
 
     /**

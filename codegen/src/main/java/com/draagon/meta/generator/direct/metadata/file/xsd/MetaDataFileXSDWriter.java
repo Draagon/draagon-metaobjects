@@ -299,6 +299,16 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         typeAttr.setAttribute("use", "required");
         complexType.appendChild(typeAttr);
         
+        // Add support for inline attributes (any additional attributes beyond reserved ones)
+        Element anyAttribute = doc.createElement("xs:anyAttribute");
+        anyAttribute.setAttribute("processContents", "lax");
+        Element anyAttrAnnotation = doc.createElement("xs:annotation");
+        Element anyAttrDoc = doc.createElement("xs:documentation");
+        anyAttrDoc.setTextContent("Inline attributes support: Additional attributes are allowed when attr type has default subType configured. Values are type-cast based on content (boolean, number, string).");
+        anyAttrAnnotation.appendChild(anyAttrDoc);
+        anyAttribute.appendChild(anyAttrAnnotation);
+        complexType.appendChild(anyAttribute);
+        
         return complexType;
     }
 
@@ -326,6 +336,16 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         typeAttr.setAttribute("type", "FieldTypeEnum");
         typeAttr.setAttribute("use", "required");
         complexType.appendChild(typeAttr);
+        
+        // Add support for inline attributes (any additional attributes beyond reserved ones)
+        Element anyAttribute = doc.createElement("xs:anyAttribute");
+        anyAttribute.setAttribute("processContents", "lax");
+        Element anyAttrAnnotation = doc.createElement("xs:annotation");
+        Element anyAttrDoc = doc.createElement("xs:documentation");
+        anyAttrDoc.setTextContent("Inline attributes support: Additional attributes are allowed when attr type has default subType configured. Values are type-cast based on content (boolean, number, string).");
+        anyAttrAnnotation.appendChild(anyAttrDoc);
+        anyAttribute.appendChild(anyAttrAnnotation);
+        complexType.appendChild(anyAttribute);
         
         return complexType;
     }

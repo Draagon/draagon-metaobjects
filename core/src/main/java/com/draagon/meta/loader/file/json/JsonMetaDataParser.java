@@ -4,8 +4,6 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.file.FileMetaDataParser;
-import com.draagon.meta.loader.types.ChildConfig;
-import com.draagon.meta.loader.types.TypeConfig;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -201,6 +199,7 @@ public class JsonMetaDataParser extends FileMetaDataParser {
 
     /**
      * Parses actual element attributes and adds them as StringAttributes
+     * Enhanced to support @ prefixed inline attributes with type casting
      */
     protected void parseAttributes( MetaData md, JsonObject el ) {
 
@@ -208,10 +207,82 @@ public class JsonMetaDataParser extends FileMetaDataParser {
             String attrName = n.getKey();
             if ( !reservedAttributes.contains( attrName )) {
 
-                String value = n.getValue().getAsString();
-                createAttributeOnParent(md, attrName, value);
+                // Handle @ prefixed inline attributes
+                if (attrName.startsWith("@")) {
+                    parseInlineAttribute(md, attrName, n.getValue());
+                } else {
+                    // Regular attribute - convert to string
+                    String value = n.getValue().getAsString();
+                    createAttributeOnParent(md, attrName, value);
+                }
             }
         });
+    }
+    
+    /**
+     * Parse inline attribute (@ prefixed) with type casting support
+     */
+    protected void parseInlineAttribute(MetaData md, String attrName, JsonElement jsonValue) {
+        // Check if this MetaData type supports inline attributes
+        if (!supportsInlineAttributes(md)) {
+            if (getLoader().getLoaderOptions().isStrict()) {
+                throw new MetaDataException("Inline attribute [" + attrName + "] not allowed on type [" + 
+                    md.getTypeName() + "] - no default subType configured in file [" + getFilename() + "]");
+            } else {
+                log.warn("Ignoring inline attribute [{}] on type [{}] - no default subType configured in file [{}]", 
+                    attrName, md.getTypeName(), getFilename());
+                return;
+            }
+        }
+        
+        // Remove @ prefix for actual attribute name
+        String actualAttrName = attrName.substring(1);
+        
+        // Cast JSON value based on type
+        Object castedValue = castJsonValueToObject(jsonValue);
+        String stringValue = castedValue != null ? castedValue.toString() : null;
+        
+        // Create the attribute using existing infrastructure
+        createAttributeOnParent(md, actualAttrName, stringValue);
+        
+        log.debug("Created inline attribute [{}] with value [{}] on [{}:{}:{}] in file [{}]", 
+            actualAttrName, stringValue, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+    }
+    
+    /**
+     * Check if a MetaData type supports inline attributes (attr type has default subType)
+     */
+    protected boolean supportsInlineAttributes(MetaData md) {
+        try {
+            return getTypeRegistry().getDefaultSubType("attr") != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Cast JSON value to appropriate Java type based on JSON type
+     */
+    protected Object castJsonValueToObject(JsonElement jsonElement) {
+        if (jsonElement.isJsonNull()) {
+            return null;
+        } else if (jsonElement.isJsonPrimitive()) {
+            com.google.gson.JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+            if (primitive.isBoolean()) {
+                return primitive.getAsBoolean();
+            } else if (primitive.isNumber()) {
+                // Try int first, then double for non-integer numbers
+                try {
+                    return primitive.getAsInt();
+                } catch (NumberFormatException e) {
+                    return primitive.getAsDouble();
+                }
+            } else if (primitive.isString()) {
+                return primitive.getAsString();
+            }
+        }
+        // For arrays and objects, convert to string representation
+        return jsonElement.toString();
     }
 
     /**
