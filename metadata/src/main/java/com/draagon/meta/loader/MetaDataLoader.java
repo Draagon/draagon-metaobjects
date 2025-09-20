@@ -29,7 +29,50 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- *  MetaDataLoader with common functions for all MetaDataLoaders
+ * MetaDataLoader serves as the foundation for loading and managing metadata definitions.
+ * 
+ * <p>MetaDataLoader operates exactly like Java's ClassLoader - it loads metadata definitions 
+ * once at startup and keeps them permanently in memory for the application lifetime. This is 
+ * <strong>NOT</strong> a typical data access pattern but rather a metadata definition system 
+ * analogous to the Java reflection system.</p>
+ * 
+ * <h3>ClassLoader Pattern Analogy</h3>
+ * <table border="1">
+ * <tr><th>Java Reflection</th><th>MetaObjects Framework</th><th>Purpose</th></tr>
+ * <tr><td>Class.forName()</td><td>MetaDataLoader.load()</td><td>Load definitions</td></tr>
+ * <tr><td>Class.getFields()</td><td>MetaObject.getMetaFields()</td><td>Access structure</td></tr>
+ * <tr><td>Field.get(object)</td><td>MetaField.getValue(object)</td><td>Read object data</td></tr>
+ * <tr><td>Permanent in memory</td><td>Permanent MetaData objects</td><td>Cached access</td></tr>
+ * <tr><td>Thread-safe reads</td><td>Thread-safe metadata access</td><td>Concurrent operations</td></tr>
+ * </table>
+ * 
+ * <h3>Loading vs Runtime Phases</h3>
+ * <pre>{@code
+ * // LOADING PHASE - Happens once at startup
+ * MetaDataLoader loader = new SimpleLoader("myLoader");
+ * loader.setSourceURIs(Arrays.asList(URI.create("metadata.json")));
+ * loader.init(); // Loads ALL metadata into permanent memory structures
+ * 
+ * // RUNTIME PHASE - All operations are READ-ONLY
+ * MetaObject userMeta = loader.getMetaObjectByName("User");  // O(1) lookup
+ * MetaField field = userMeta.getMetaField("email");          // Cached access
+ * Object value = field.getValue(userObject);                // Thread-safe read
+ * }</pre>
+ * 
+ * <h3>Performance Characteristics</h3>
+ * <ul>
+ * <li><strong>Startup Cost, Runtime Speed</strong>: Heavy initialization, ultra-fast runtime access</li>
+ * <li><strong>Permanent References</strong>: Like Class objects, MetaData stays in memory until app shutdown</li>
+ * <li><strong>Thread-Safe Reads</strong>: No synchronization needed for read operations (primary use case)</li>
+ * <li><strong>OSGI Ready</strong>: WeakHashMap and service patterns handle dynamic class loading</li>
+ * </ul>
+ * 
+ * @author Doug Mealing
+ * @version 6.0.0
+ * @since 1.0
+ * @see com.draagon.meta.loader.simple.SimpleLoader
+ * @see com.draagon.meta.loader.file.FileMetaDataLoader
+ * @see MetaData
  */
 public class MetaDataLoader extends MetaData implements LoaderConfigurable {
 

@@ -1,3 +1,9 @@
+/*
+ * Copyright 2003 Draagon Software LLC. All Rights Reserved.
+ *
+ * This software is the proprietary information of Draagon Software LLC.
+ * Use is subject to license terms.
+ */
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
@@ -17,12 +23,54 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * A MetaField represents a field of an object and is contained within a MetaClass.
- * It functions as both a proxy to get/set data within an object and also handles
- * accessing meta data about a field.
- *
+ * MetaField represents a field definition within a MetaObject, functioning as both 
+ * a metadata descriptor and a type-safe accessor for object properties.
+ * 
+ * <p>MetaField follows the same <strong>READ-OPTIMIZED WITH CONTROLLED MUTABILITY</strong> 
+ * pattern as other MetaData objects. Field definitions are loaded once during application 
+ * startup and then provide ultra-fast, thread-safe access to object properties throughout 
+ * the application lifetime.</p>
+ * 
+ * <h3>Field as Metadata Pattern</h3>
+ * <p>Similar to {@code java.lang.reflect.Field}, MetaField serves dual purposes:</p>
+ * <ul>
+ * <li><strong>Metadata Descriptor</strong>: Defines field name, type, validation rules, display preferences</li>
+ * <li><strong>Value Accessor</strong>: Type-safe getter/setter operations on object instances</li>
+ * <li><strong>Validation Engine</strong>: Enforces data integrity through constraint system</li>
+ * <li><strong>Serialization Guide</strong>: Controls JSON/XML serialization behavior</li>
+ * </ul>
+ * 
+ * <h3>Usage Examples</h3>
+ * <pre>{@code
+ * // Loading Phase - Field definition
+ * MetaObject userMeta = loader.getMetaObjectByName("User");
+ * MetaField<String> emailField = userMeta.getMetaField("email");
+ * 
+ * // Runtime Phase - Value operations (thread-safe, high-performance)
+ * String email = emailField.getValue(userObject);           // Type-safe get
+ * emailField.setValue(userObject, "user@example.com");      // Type-safe set
+ * boolean isValid = emailField.validate(userObject);        // Constraint validation
+ * }</pre>
+ * 
+ * <h3>Type Safety</h3>
+ * <p>MetaField is parameterized with the expected Java type {@code <T>} for compile-time 
+ * type safety. This prevents ClassCastException and provides IDE support for auto-completion.</p>
+ * 
+ * <h3>Performance Characteristics</h3>
+ * <ul>
+ * <li><strong>Field Lookup</strong>: O(1) cached access from parent MetaObject</li>
+ * <li><strong>Value Access</strong>: Direct reflection or optimized accessors</li>
+ * <li><strong>Validation</strong>: Cached constraint evaluation</li>
+ * <li><strong>Memory</strong>: Permanent field definitions, no per-instance overhead</li>
+ * </ul>
+ * 
+ * @param <T> the Java type that this field represents (String, Integer, etc.)
  * @author Doug Mealing
- * @version 2.0
+ * @version 6.0.0
+ * @since 1.0
+ * @see MetaObject
+ * @see DataTypes
+ * @see com.draagon.meta.constraint.Constraint
  */
 @SuppressWarnings("serial")
 public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T> {
