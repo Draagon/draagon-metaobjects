@@ -2,22 +2,332 @@
 
 ## ⚠️ CRITICAL ARCHITECTURAL PRINCIPLE ⚠️
 
-**MetaObjects follows a LOAD-ONCE IMMUTABLE design pattern analogous to Java's Class/Field reflection system:**
+**MetaObjects follows a READ-OPTIMIZED WITH CONTROLLED MUTABILITY design pattern analogous to Java's Class/Field reflection system with dynamic class loading:**
 
-- **MetaData objects are loaded once during application startup and remain immutable thereafter**
+- **MetaData objects are loaded once during application startup and optimized for heavy read access**
 - **They are permanent in memory for the application lifetime (like Java Class objects)**
-- **Thread-safe for concurrent READ operations after loading phase**
-- **DO NOT treat MetaData as mutable domain objects - they are immutable metadata definitions**
+- **Thread-safe for concurrent READ operations (primary use case: 99.9% of operations)**
+- **Support INFREQUENT controlled updates** (metadata repository pushes, dynamic editing)
+- **Updates use Copy-on-Write patterns to maintain read performance during changes**
+- **DO NOT treat MetaData as frequently mutable domain objects - optimize for heavy reads, rare updates**
 
 ### Framework Analogy
-| Java Reflection | MetaObjects Framework |
-|----------------|----------------------|
-| `Class.forName()` | `MetaDataLoader.load()` |
-| `Class.getFields()` | `MetaObject.getMetaFields()` |
-| `Field.get(object)` | `MetaField.getValue(object)` |
-| Permanent in memory | Permanent MetaData objects |
-| Thread-safe reads | Thread-safe metadata access |
-| ClassLoader registry | MetaDataTypeRegistry |
+| Java Reflection | MetaObjects Framework | Dynamic Updates |
+|----------------|----------------------|----------------|
+| `Class.forName()` | `MetaDataLoader.load()` | `loader.reload()` |
+| `Class.getFields()` | `MetaObject.getMetaFields()` | Copy-on-write fields |
+| `Field.get(object)` | `MetaField.getValue(object)` | Read during update |
+| Permanent in memory | Permanent MetaData objects | Versioned references |
+| Thread-safe reads | Thread-safe metadata access | Concurrent read-during-update |
+| ClassLoader registry | MetaDataTypeRegistry | Hot-swappable types |
+| Class reloading | Dynamic metadata updates | Central repository pushes |
+
+## 🏗️ **DETAILED ARCHITECTURE GUIDE**
+
+### MetaDataLoader as ClassLoader Pattern
+
+**MetaDataLoader operates exactly like Java's ClassLoader** - it loads metadata definitions once at startup and keeps them permanently in memory for the application lifetime. This is NOT a typical data access pattern.
+
+#### **Loading Phase vs Runtime Phase**
+```java
+// LOADING PHASE - Happens once at startup
+MetaDataLoader loader = new SimpleLoader("myLoader");
+loader.setSourceURIs(Arrays.asList(URI.create("metadata.json")));
+loader.init(); // Loads ALL metadata into permanent memory structures
+
+// RUNTIME PHASE - All operations are READ-ONLY
+MetaObject userMeta = loader.getMetaObjectByName("User");  // O(1) lookup
+MetaField field = userMeta.getMetaField("email");          // Cached access
+Object value = field.getValue(userObject);                // Thread-safe read
+```
+
+#### **Key Architectural Principles**
+1. **Startup Cost, Runtime Speed**: Heavy initialization, ultra-fast runtime access
+2. **Read-Optimized with Controlled Mutability**: Optimized for 99.9% reads, rare controlled updates
+3. **Permanent References**: Like `Class` objects, MetaData stays in memory until app shutdown
+4. **Thread-Safe Reads**: No synchronization needed for read operations (primary use case)
+5. **Copy-on-Write Updates**: Infrequent updates use atomic reference swapping to maintain read performance
+
+#### **ClassLoader Analogy Mapping**
+| ClassLoader Operation | MetaDataLoader Operation | Purpose |
+|----------------------|-------------------------|---------|
+| `Class.forName("String")` | `loader.getMetaObjectByName("User")` | Resolve by name |
+| `String.class.getDeclaredFields()` | `userMeta.getMetaFields()` | Get structure info |
+| `field.get(object)` | `metaField.getValue(object)` | Access object data |
+| `Class` object caching | MetaData object caching | Permanent memory residence |
+| ClassLoader hierarchy | MetaDataLoader inheritance | Package resolution |
+
+### 🔄 **OSGI Compatibility & Bundle Management**
+
+**Critical Design Decision**: MetaObjects framework is designed for OSGI environments where bundles can be loaded/unloaded dynamically.
+
+#### **OSGI Bundle Lifecycle Considerations**
+```java
+// When OSGI bundle unloads:
+// 1. Bundle classloader becomes invalid
+// 2. WeakReferences allow GC of computed caches
+// 3. Core MetaData objects remain (referenced by application)
+// 4. Service registrations are cleaned up automatically
+```
+
+#### **Service Discovery Pattern**
+```java
+// OSGI-compatible service loading
+ServiceRegistry registry = ServiceRegistryFactory.getDefault();
+MetaDataTypeRegistry typeRegistry = registry.getService(MetaDataTypeRegistry.class);
+
+// Uses ServiceLoader under the hood - works in both OSGI and standalone
+List<MetaDataTypeProvider> providers = ServiceLoader.load(MetaDataTypeProvider.class);
+```
+
+#### **Bundle Unload Safety**
+- **MetaData objects**: Permanent references prevent GC
+- **Computed caches**: WeakHashMap allows cleanup when bundle unloads
+- **Service references**: Released automatically by OSGI container
+- **ClassLoader references**: WeakReference pattern prevents memory leaks
+
+### 💾 **Cache Strategy & WeakHashMap Design**
+
+**CRITICAL**: The HybridCache design with WeakHashMap is architecturally sophisticated and intentional.
+
+#### **Dual Cache Strategy Explained**
+```java
+public class HybridCache {
+    // PERMANENT CACHE - Strong references for core metadata lookups
+    private final Map<String, Object> modernCache = new ConcurrentHashMap<>();
+    
+    // COMPUTED CACHE - Weak references for derived calculations
+    private final Map<Object, Object> legacyCache = Collections.synchronizedMap(new WeakHashMap<>());
+}
+```
+
+#### **Cache Usage Patterns**
+| Cache Type | Purpose | Content | GC Behavior |
+|-----------|---------|---------|-------------|
+| **ConcurrentHashMap** | Core lookups | MetaData references, field mappings | Never GC'd |
+| **WeakHashMap** | Computed values | Derived calculations, transformations | GC'd when memory pressure |
+
+#### **Why WeakHashMap is Essential**
+1. **OSGI Bundle Unloading**: Computed caches get cleaned up when bundles unload
+2. **Memory Pressure**: Non-essential computed values can be GC'd and recomputed
+3. **Long-Running Applications**: Prevents memory leaks over application lifetime
+4. **Dynamic Metadata**: Allows for metadata enhancement without permanent memory growth
+
+#### **Cache Access Pattern**
+```java
+// Fast path: Check modern cache first (permanent data)
+Object value = modernCache.get(key);
+if (value != null) return value;
+
+// Fallback: Check computed cache (may be GC'd)
+value = legacyCache.get(key);
+if (value != null) {
+    modernCache.put(key, value); // Promote to permanent if frequently accessed
+    return value;
+}
+
+// Miss: Compute and cache
+value = expensiveComputation();
+legacyCache.put(key, value); // Weak reference - can be GC'd
+```
+
+### 🧵 **Thread-Safety for Read-Heavy Workloads**
+
+**Performance Pattern**: After loading phase, MetaObjects is optimized for massively concurrent read access.
+
+#### **Read-Optimized Synchronization**
+```java
+// LOADING PHASE - Synchronized writes
+public synchronized void addChild(MetaData child) {
+    // Constraint validation and structural changes
+    children.add(child);
+    flushCaches(); // Clear derived computations
+}
+
+// RUNTIME PHASE - Lock-free reads
+public MetaField getMetaField(String name) {
+    // No synchronization needed - data is immutable
+    return useCache("getMetaField()", name, this::computeField);
+}
+```
+
+#### **Concurrency Design Patterns**
+1. **Copy-on-Write Collections**: For metadata collections that rarely change
+2. **ConcurrentHashMap**: For high-frequency lookup tables
+3. **Volatile References**: For immutable object references
+4. **Lock-Free Algorithms**: For read-heavy operations after loading
+
+#### **Performance Characteristics**
+- **Loading Phase**: ~100ms-1s (one-time cost)
+- **Runtime Reads**: ~1-10μs (cached, lock-free)
+- **Concurrent Readers**: Unlimited (no contention)
+- **Memory Overhead**: 10-50MB for typical metadata sets
+- **Update Phase**: ~50-200ms (infrequent, atomic replacement)
+
+### 🔄 **Dynamic Metadata Updates**
+
+**Future Capability**: The framework is designed to support infrequent controlled metadata updates while maintaining read performance.
+
+#### **Use Cases for Dynamic Updates**
+1. **Central Repository Pushes**: Metadata server pushes updated model definitions to running services
+2. **Dynamic Editors**: Live system behavior modification through metadata editing interfaces
+3. **Version Updates**: Hot-swapping metadata when new model versions are deployed
+4. **A/B Testing**: Runtime metadata switching for behavioral experiments
+
+#### **Copy-on-Write Update Pattern**
+```java
+// UPDATE PATTERN - Infrequent, atomic replacement
+public class MetaDataUpdateManager {
+    private volatile MetaObject currentUserMetaData; // Atomic reference
+    
+    public void updateMetaData(MetaObject newMetaData) {
+        // 1. Validate new metadata
+        validateMetaData(newMetaData);
+        
+        // 2. Build derived caches for new metadata
+        newMetaData.buildCaches();
+        
+        // 3. Atomic swap - readers see old OR new, never partial state
+        MetaObject old = currentUserMetaData;
+        currentUserMetaData = newMetaData; // Atomic reference assignment
+        
+        // 4. Invalidate related caches
+        invalidateDerivedCaches();
+        
+        // 5. Notify observers of change
+        notifyMetaDataChanged(old, newMetaData);
+    }
+    
+    // READ PATH - Still lock-free and fast
+    public MetaObject getUserMetaData() {
+        return currentUserMetaData; // Volatile read - no locks needed
+    }
+}
+```
+
+#### **Thread-Safety During Updates**
+1. **Volatile References**: Atomic visibility of metadata changes
+2. **Immutable Metadata Objects**: Each version is immutable, preventing partial updates
+3. **Cache Invalidation**: Related caches cleared atomically after swap
+4. **No Reader Blocking**: Readers continue accessing old version until swap completes
+
+#### **Update Performance Considerations**
+- **Frequency**: Designed for infrequent updates (minutes/hours, not seconds)
+- **Update Time**: 50-200ms for metadata replacement (acceptable for rare operations)
+- **Reader Impact**: Zero performance impact during updates (atomic swap)
+- **Memory Usage**: Temporary 2x memory during update transition
+
+#### **OSGI Compatibility with Updates**
+```java
+// Update mechanism works in OSGI environments
+public void updateFromBundle(Bundle metadataBundle) {
+    // 1. Load metadata from new bundle
+    MetaDataLoader tempLoader = new SimpleLoader("update");
+    tempLoader.loadFromBundle(metadataBundle);
+    
+    // 2. Atomic replacement of loader reference
+    MetaDataLoader old = currentLoader;
+    currentLoader = tempLoader; // Volatile assignment
+    
+    // 3. WeakHashMap caches naturally clean up old references
+    // No explicit cleanup needed - OSGI + WeakHashMap handles it
+}
+```
+
+#### **Cache Strategy for Updates**
+- **Permanent Cache**: Core metadata references updated atomically
+- **WeakHashMap Cache**: Derived computations invalidated and recomputed on demand
+- **Version Tracking**: Each metadata version can be tracked for rollback capability
+
+### ⚠️ **COMMON ARCHITECTURAL PITFALLS**
+
+**Critical mistakes to avoid when working with MetaObjects framework:**
+
+#### **❌ DON'T: Treat MetaData as Mutable Domain Objects**
+```java
+// WRONG - Treating MetaData like a mutable entity
+MetaObject userMeta = loader.getMetaObjectByName("User");
+userMeta.addMetaField(new StringField("dynamicField")); // ❌ Runtime mutation
+
+// RIGHT - MetaData is loaded once and immutable
+MetaObject userMeta = loader.getMetaObjectByName("User"); 
+MetaField field = userMeta.getMetaField("email"); // ✅ Read-only access
+```
+
+#### **❌ DON'T: Replace WeakHashMap with Strong References**
+```java
+// WRONG - Would cause memory leaks in OSGI
+private final Map<Object, Object> cache = new ConcurrentHashMap<>(); // ❌ Strong refs
+
+// RIGHT - Allows GC cleanup when bundles unload
+private final Map<Object, Object> cache = Collections.synchronizedMap(new WeakHashMap<>()); // ✅
+```
+
+#### **❌ DON'T: Create New MetaDataLoader Instances Frequently**
+```java
+// WRONG - MetaDataLoader is like ClassLoader, create once
+for (String source : sources) {
+    MetaDataLoader loader = new SimpleLoader(source); // ❌ Expensive, wasteful
+    loader.init();
+}
+
+// RIGHT - One loader per application context
+MetaDataLoader appLoader = new SimpleLoader("appMetadata");
+appLoader.setSourceURIs(allSources);
+appLoader.init(); // ✅ Load once, use forever
+```
+
+#### **❌ DON'T: Synchronize Read Operations After Loading**
+```java
+// WRONG - Unnecessary synchronization kills performance
+public synchronized MetaField getMetaField(String name) { // ❌ Blocks concurrent reads
+    return fieldCache.get(name);
+}
+
+// RIGHT - Lock-free reads after loading
+public MetaField getMetaField(String name) { // ✅ Concurrent reads
+    return fieldCache.get(name); // Immutable after loading
+}
+```
+
+#### **✅ DO: Follow ClassLoader Patterns**
+```java
+// Cache expensive lookups (like Class.forName())
+private static final Map<String, MetaObject> METADATA_CACHE = new ConcurrentHashMap<>();
+
+public static MetaObject getMetaObject(String name) {
+    return METADATA_CACHE.computeIfAbsent(name, 
+        key -> loader.getMetaObjectByName(key)); // Cache like Class objects
+}
+```
+
+#### **✅ DO: Separate Loading Logic from Runtime Logic**
+```java
+// Loading phase - builders, validation, construction
+public class MetaDataBuilder {
+    public MetaObject build() {
+        validate(); // ✅ Validate during construction
+        return new ImmutableMetaObject(fields, attributes);
+    }
+}
+
+// Runtime phase - pure read operations
+public class MetaObject {
+    public MetaField getMetaField(String name) {
+        return immutableFields.get(name); // ✅ Read-only after construction
+    }
+}
+```
+
+### 🎯 **Architecture Summary**
+
+**Remember**: MetaObjects is a **metadata definition framework**, not a data access framework. Think `java.lang.Class` and `java.lang.reflect.Field`, not Hibernate entities or REST resources.
+
+- **Load Once**: Like ClassLoader, expensive startup for permanent benefit
+- **Read Many**: Optimized for thousands of concurrent read operations
+- **OSGI Ready**: WeakHashMap and service patterns handle dynamic class loading
+- **Thread Safe**: Immutable after loading, no synchronization needed for reads
+- **Memory Efficient**: Smart caching balances performance with memory cleanup
 
 ## Project Overview
 
@@ -208,10 +518,169 @@ import { MetaObjectForm } from './components/forms/MetaObjectForm';
 
 ### Code Style & Patterns
 - Use **SLF4J** for all logging (migrated from Commons Logging)
-- Follow **Builder patterns** for complex object creation
+- Follow **Builder patterns** for complex object creation (LOADING PHASE ONLY)
 - Use **Optional-based APIs** for safe null handling
 - Maintain **backward compatibility** in all changes
 - Add **comprehensive JavaDoc** for public APIs
+
+### 🏆 **Code Quality Guidelines - Architecture Aligned**
+
+**These guidelines are specifically tailored for the LOAD-ONCE IMMUTABLE architecture:**
+
+#### **HIGH PRIORITY - Critical for Architecture Compliance**
+
+##### **1. Type Safety in Data Conversion**
+```java
+// ❌ UNSAFE - Existing pattern in DataConverter.java
+public static List<String> toStringArray(Object val) {
+    if (val instanceof List<?>) {
+        return (List<String>) val; // ClassCastException risk
+    }
+}
+
+// ✅ SAFE - Use stream-based conversion
+public static List<String> toStringArraySafe(Object val) {
+    if (val instanceof List<?>) {
+        return ((List<?>) val).stream()
+            .map(item -> item != null ? item.toString() : null)
+            .collect(Collectors.toList());
+    }
+}
+```
+
+##### **2. Thread-Safety for Read-Heavy Workloads**
+```java
+// ❌ WRONG - Over-synchronization in read paths
+public synchronized MetaField getMetaField(String name) {
+    return fieldMap.get(name); // Kills concurrent performance
+}
+
+// ✅ RIGHT - Immutable collections after loading
+private final Map<String, MetaField> fieldMap = new ConcurrentHashMap<>(); // Thread-safe
+public MetaField getMetaField(String name) {
+    return fieldMap.get(name); // Lock-free reads
+}
+```
+
+##### **3. Respect WeakHashMap Design in Caches**
+```java
+// ❌ WRONG - Replacing WeakHashMap breaks OSGI compatibility
+private final Map<String, Object> cache = new ConcurrentHashMap<>(); // Memory leak risk
+
+// ✅ RIGHT - Maintain dual cache strategy
+private final Map<String, Object> permanentCache = new ConcurrentHashMap<>();
+private final Map<Object, Object> computedCache = Collections.synchronizedMap(new WeakHashMap<>());
+```
+
+#### **MEDIUM PRIORITY - Performance & Maintainability**
+
+##### **4. Loading vs Runtime Phase Separation**
+```java
+// ✅ GOOD - Clear phase separation
+public class MetaObjectBuilder {
+    // LOADING PHASE - Mutable, validated construction
+    public MetaObjectBuilder addField(MetaField field) {
+        validateField(field); // Heavy validation acceptable during loading
+        return this;
+    }
+    
+    public MetaObject build() {
+        return new ImmutableMetaObject(fields); // Creates immutable result
+    }
+}
+
+public class MetaObject {
+    // RUNTIME PHASE - Read-only, high-performance access
+    public MetaField getMetaField(String name) {
+        return fieldLookup.get(name); // O(1), no validation needed
+    }
+}
+```
+
+##### **5. Exception Context for Framework Operations**
+```java
+// ✅ GOOD - Rich context for metadata loading failures
+throw new MetaDataLoadingException(
+    "Failed to load metadata from: " + sourceUri,
+    Optional.of(MetaDataPath.of("loader", "initialization")),
+    Map.of("sourceUri", sourceUri, "phase", "loading")
+);
+```
+
+#### **LOW PRIORITY - Clean-up & Optimization**
+
+##### **6. Stream Operations (with Performance Awareness)**
+```java
+// ✅ ACCEPTABLE - Use streams for loading phase operations
+public void loadMetaFields(List<FieldDefinition> definitions) {
+    definitions.stream()
+        .map(this::createMetaField)
+        .forEach(this::addField); // Loading phase - performance less critical
+}
+
+// ⚠️ CAUTION - Avoid streams in hot runtime paths if they impact performance
+public MetaField getMetaField(String name) {
+    // Simple map lookup - don't add stream overhead
+    return fieldMap.get(name); 
+}
+```
+
+##### **7. String Operations and Constants**
+```java
+// ✅ GOOD - Consolidated constants
+public final class MetaDataConstants {
+    public static final String PKG_SEPARATOR = "::";
+    public static final String TYPE_FIELD = "field";
+    public static final String TYPE_OBJECT = "object";
+}
+
+// ✅ GOOD - Efficient string formatting
+public String toString() {
+    return String.format("%s[%s:%s]{%s}", 
+        getClass().getSimpleName(), getTypeName(), getSubTypeName(), getName());
+}
+```
+
+#### **Architecture-Specific Guidelines**
+
+##### **8. MetaDataLoader Usage Patterns**
+```java
+// ✅ APPLICATION STARTUP - Single loader instance
+@Bean
+@Singleton
+public MetaDataLoader applicationMetaDataLoader() {
+    SimpleLoader loader = new SimpleLoader("app-metadata");
+    loader.setSourceURIs(getMetadataSourceURIs());
+    loader.init(); // Heavy one-time cost
+    return loader; // Permanent application bean
+}
+
+// ✅ RUNTIME - Fast cached access
+@Service
+public class MetaDataService {
+    private final MetaDataLoader loader;
+    
+    public MetaObject getUserMetaData() {
+        return loader.getMetaObjectByName("User"); // O(1) cached lookup
+    }
+}
+```
+
+##### **9. OSGI Bundle Compatibility**
+```java
+// ✅ GOOD - Service discovery that works in OSGI
+ServiceRegistry registry = ServiceRegistryFactory.getDefault();
+List<MetaDataTypeProvider> providers = registry.getServices(MetaDataTypeProvider.class);
+
+// ✅ GOOD - WeakReference for classloader cleanup
+private final WeakReference<ClassLoader> bundleClassLoaderRef;
+```
+
+#### **Performance Expectations**
+- **Loading Phase**: 100ms-1s (acceptable one-time cost)
+- **Runtime Reads**: 1-10μs (cached, immutable access)
+- **Memory Overhead**: 10-50MB (permanent metadata residence)
+- **Concurrent Readers**: Unlimited (no lock contention)
 
 ### Testing
 - Use **JUnit 4.13.2** for testing
@@ -392,6 +861,7 @@ StringField field = new StringField("user_name_123");
 - **Schema Generation**: ✅ MetaDataFile generators with inline attribute support
 - **Architecture Cleanup**: ✅ Removed obsolete TypeConfig/ChildConfig system + additional cleanup
 - **Full Project Build**: ✅ All 10 modules building and packaging successfully
+- **OSGI Bundle Lifecycle**: ✅ ServiceReference leak prevention, WeakReference patterns, BundleListener implementation
 
 ### 📋 **Context for New Claude Sessions**
 
@@ -408,6 +878,7 @@ The following critical systems have been successfully implemented and tested:
 8. **OM Module Fixes**: ✅ COMPLETE - Build issues resolved, legacy tests handled
 9. **Types Config Cleanup**: ✅ COMPLETE - Additional removal of old types config references
 10. **Build System**: ✅ VERIFIED - All modules building and packaging successfully
+11. **OSGI Bundle Lifecycle Compatibility**: ✅ COMPLETE - ServiceReference leak prevention, WeakReference ClassLoader cleanup, BundleListener implementation
 
 **Recent Major Improvements:**
 1. **SimpleLoader Refactoring**: Eliminated MetaModel abstraction, direct JSON parsing approach
@@ -423,6 +894,7 @@ The following critical systems have been successfully implemented and tested:
 11. **Parser Architecture Refactoring**: JsonMetaDataParser now extends BaseMetaDataParser (eliminated code duplication)
 12. **Enhanced Cross-File References**: Improved package context resolution for complex metadata hierarchies
 13. **OM Module Stabilization**: Resolved build issues and legacy test conflicts during types config cleanup
+14. **OSGI Bundle Lifecycle Implementation**: Complete ServiceReference leak prevention, WeakReference ClassLoader patterns, BundleListener via reflection
 
 **Key Files to Know:**
 - Constraint system: `metadata/src/main/java/com/draagon/meta/constraint/`
@@ -432,6 +904,9 @@ The following critical systems have been successfully implemented and tested:
 - SimpleLoader: `metadata/src/main/java/com/draagon/meta/loader/simple/SimpleLoader.java`
 - Vehicle test suite: `metadata/src/test/java/com/draagon/meta/loader/simple/VehicleMetadataTest.java`
 - XSD generation: `MetaDataFileXSDWriter` with inline attribute support
+- OSGI lifecycle management: `metadata/src/main/java/com/draagon/meta/registry/osgi/BundleLifecycleManager.java`
+- Enhanced OSGI registry: `metadata/src/main/java/com/draagon/meta/registry/OSGIServiceRegistry.java`
+- OSGI test suite: `metadata/src/test/java/com/draagon/meta/registry/osgi/OSGILifecycleTest.java`
 
 ## ServiceLoader Issue Resolution (v5.2.0+)
 
@@ -800,6 +1275,84 @@ cd core && mvn compile
 - **Commons Validator 1.9.0** for validation
 - **React + TypeScript** for frontend components
 - **Redux Toolkit** for state management
+
+## 🧠 **CRITICAL INSIGHTS FOR FUTURE CLAUDE SESSIONS**
+
+### **Architecture Foundation - Never Forget These Principles**
+
+1. **MetaDataLoader = ClassLoader Pattern**
+   - Load once at startup, read forever
+   - Permanent memory residence like Class objects
+   - Thread-safe for concurrent reads after loading
+   - NOT a data access layer - it's a metadata definition system
+
+2. **WeakHashMap is Architecturally Essential**
+   - Enables OSGI bundle unloading without memory leaks
+   - Allows GC cleanup of computed caches under memory pressure
+   - Dual cache strategy is sophisticated, not redundant
+   - Replacing with strong references breaks OSGI compatibility
+
+3. **OSGI Bundle Lifecycle Must Be Respected**
+   - Service discovery via ServiceLoader/ServiceRegistry patterns
+   - WeakReference patterns for classloader cleanup
+   - Computed caches can be GC'd when bundles unload
+   - Core MetaData objects remain permanently referenced
+
+4. **Thread-Safety is Read-Optimized**
+   - Immutable after loading = no synchronization needed for reads
+   - ConcurrentHashMap for high-frequency lookups
+   - Lock-free algorithms in runtime read paths
+   - Avoid over-synchronization that kills concurrent performance
+
+5. **Two Distinct Phases: Loading vs Runtime**
+   - **Loading Phase**: Heavy validation, construction, synchronization acceptable
+   - **Runtime Phase**: Pure read operations, microsecond performance expected
+   - Builder patterns only make sense during loading phase
+   - Stream operations should be used carefully in runtime paths
+
+### **Code Review Red Flags - What NOT to Recommend**
+
+❌ **"Replace WeakHashMap with ConcurrentHashMap"** - Breaks OSGI compatibility
+❌ **"Make MetaData mutable for easier testing"** - Violates core architecture
+❌ **"Create new MetaDataLoader instances frequently"** - Expensive ClassLoader pattern violation
+❌ **"Add synchronization to read methods for safety"** - Kills concurrent performance
+❌ **"Use builder patterns everywhere"** - Only needed during loading phase
+❌ **"Replace caching with real-time computation"** - Violates permanent object model
+
+### **Performance Characteristics to Remember**
+
+- **Startup Cost**: 100ms-1s (one-time investment)
+- **Runtime Reads**: 1-10μs (cached, immutable access)
+- **Memory Model**: 10-50MB permanent residence (like Class objects)
+- **Concurrency**: Unlimited concurrent readers (no contention)
+- **OSGI**: Dynamic bundle loading/unloading supported via WeakReference patterns
+
+### **When Reviewing Code Quality**
+
+✅ **Focus on**: Type safety, OSGI compatibility, read path optimization
+✅ **Appreciate**: WeakHashMap usage, permanent caching, thread-safe immutable patterns
+✅ **Recommend**: Loading phase improvements, exception context, architectural compliance
+
+❌ **Don't suggest**: Mutable MetaData, frequent loader creation, WeakHashMap removal
+❌ **Avoid recommending**: Runtime phase synchronization, builder patterns for everything
+
+## 🚀 **CODE QUALITY ENHANCEMENT ROADMAP**
+
+**See `.claude/ENHANCEMENTS.md` for prioritized improvement tasks.**
+
+**Quick Start for Future Claude Sessions:**
+```
+"Please read .claude/ENHANCEMENTS.md and work on the next priority item."
+```
+
+This file contains:
+- **12 prioritized improvement items** (HIGH/MEDIUM/LOW priority)
+- **Specific file locations** and line numbers  
+- **Clear success criteria** for each task
+- **Progress tracking** across multiple sessions
+- **Architectural compliance** notes aligned with this document
+
+Current status: **HIGH-1 (Type Safety in DataConverter)** is next priority item.
 
 ## VERSION MANAGEMENT FOR CLAUDE AI
 

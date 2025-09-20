@@ -3,6 +3,7 @@ package com.draagon.meta.registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,9 +22,10 @@ public class StandardServiceRegistry implements ServiceRegistry {
     
     private static final Logger log = LoggerFactory.getLogger(StandardServiceRegistry.class);
     
-    private final ClassLoader classLoader;
+    private final WeakReference<ClassLoader> classLoaderRef;
     private final Map<Class<?>, Set<Object>> manualServices = new ConcurrentHashMap<>();
     private volatile boolean closed = false;
+    private final ClassLoader fallbackClassLoader; // Fallback when original is GC'd
     
     /**
      * Create registry with current thread's context class loader
@@ -38,8 +40,10 @@ public class StandardServiceRegistry implements ServiceRegistry {
      * @param classLoader ClassLoader to use for service discovery
      */
     public StandardServiceRegistry(ClassLoader classLoader) {
-        this.classLoader = classLoader != null ? classLoader : getClass().getClassLoader();
-        log.debug("Created StandardServiceRegistry with ClassLoader: {}", this.classLoader);
+        ClassLoader targetLoader = classLoader != null ? classLoader : getClass().getClassLoader();
+        this.classLoaderRef = new WeakReference<>(targetLoader);
+        this.fallbackClassLoader = getClass().getClassLoader(); // System/bootstrap fallback
+        log.debug("Created StandardServiceRegistry with ClassLoader: {} (WeakReference)", targetLoader);
     }
     
     @Override
@@ -54,8 +58,9 @@ public class StandardServiceRegistry implements ServiceRegistry {
         Set<T> services = new LinkedHashSet<>();
         
         try {
-            // 1. Load services via ServiceLoader
-            ServiceLoader<T> serviceLoader = ServiceLoader.load(serviceClass, classLoader);
+            // 1. Load services via ServiceLoader (with ClassLoader fallback handling)
+            ClassLoader currentLoader = getActiveClassLoader();
+            ServiceLoader<T> serviceLoader = ServiceLoader.load(serviceClass, currentLoader);
             serviceLoader.forEach(service -> {
                 services.add(service);
                 log.debug("Discovered service via ServiceLoader: {} -> {}", 
@@ -140,9 +145,46 @@ public class StandardServiceRegistry implements ServiceRegistry {
         return false;
     }
     
+    /**
+     * Get the active ClassLoader, with fallback if original was GC'd
+     * 
+     * @return Active ClassLoader (original or fallback)
+     */
+    private ClassLoader getActiveClassLoader() {
+        ClassLoader loader = classLoaderRef.get();
+        if (loader == null) {
+            log.debug("Original ClassLoader was garbage collected, using fallback: {}", fallbackClassLoader);
+            return fallbackClassLoader;
+        }
+        return loader;
+    }
+    
+    /**
+     * Check if the original ClassLoader is still available
+     * 
+     * @return true if original ClassLoader has not been GC'd
+     */
+    public boolean isOriginalClassLoaderAvailable() {
+        return classLoaderRef.get() != null;
+    }
+    
+    /**
+     * Get information about ClassLoader status
+     * 
+     * @return Status description
+     */
+    public String getClassLoaderStatus() {
+        ClassLoader original = classLoaderRef.get();
+        if (original != null) {
+            return "Original ClassLoader active: " + original;
+        } else {
+            return "Original ClassLoader GC'd, using fallback: " + fallbackClassLoader;
+        }
+    }
+    
     @Override
     public String getDescription() {
-        return "Java ServiceLoader (ClassLoader: " + classLoader + ")";
+        return "Java ServiceLoader (" + getClassLoaderStatus() + ")";
     }
     
     @Override

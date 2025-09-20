@@ -5,6 +5,7 @@ import com.draagon.meta.MetaDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -26,10 +27,16 @@ public class MetaDataTypeRegistry {
     private static volatile MetaDataTypeRegistry instance;
     private static final Object INSTANCE_LOCK = new Object();
     
+    // Bundle-aware instance management for OSGI environments
+    private static final Map<Object, WeakReference<MetaDataTypeRegistry>> bundleInstances = new ConcurrentHashMap<>();
+    private static final Object BUNDLE_LOCK = new Object();
+    
     private final Map<String, MetaDataTypeDefinition> types = new ConcurrentHashMap<>();
+    private final WeakReference<Object> bundleRef; // Bundle reference for OSGI environments
+    private final String registryId; // Unique identifier for this registry instance
     
     /**
-     * Singleton instance accessor
+     * Singleton instance accessor (for non-OSGI environments)
      */
     public static MetaDataTypeRegistry getInstance() {
         if (instance == null) {
@@ -44,9 +51,94 @@ public class MetaDataTypeRegistry {
     }
     
     /**
+     * Get bundle-specific instance for OSGI environments
+     * 
+     * @param bundle OSGI Bundle (as Object to avoid compile dependency)
+     * @return MetaDataTypeRegistry instance specific to this bundle
+     */
+    public static MetaDataTypeRegistry getInstance(Object bundle) {
+        if (bundle == null) {
+            return getInstance(); // Fall back to singleton for null bundle
+        }
+        
+        synchronized (BUNDLE_LOCK) {
+            // Check if we have an existing instance for this bundle
+            WeakReference<MetaDataTypeRegistry> registryRef = bundleInstances.get(bundle);
+            MetaDataTypeRegistry registry = null;
+            
+            if (registryRef != null) {
+                registry = registryRef.get();
+            }
+            
+            if (registry == null) {
+                // Create new bundle-specific instance
+                registry = new MetaDataTypeRegistry(bundle);
+                registry.registerCoreTypes();
+                bundleInstances.put(bundle, new WeakReference<>(registry));
+                
+                log.debug("Created new bundle-specific MetaDataTypeRegistry for: {}", getBundleId(bundle));
+            } else {
+                log.trace("Reusing existing MetaDataTypeRegistry for: {}", getBundleId(bundle));
+            }
+            
+            return registry;
+        }
+    }
+    
+    /**
+     * Clean up stale bundle references (called periodically or on bundle events)
+     */
+    public static void cleanupStaleReferences() {
+        synchronized (BUNDLE_LOCK) {
+            bundleInstances.entrySet().removeIf(entry -> {
+                WeakReference<MetaDataTypeRegistry> registryRef = entry.getValue();
+                if (registryRef.get() == null) {
+                    log.debug("Cleaning up stale registry reference for bundle: {}", getBundleId(entry.getKey()));
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+    
+    /**
+     * Get bundle identifier for logging
+     */
+    private static String getBundleId(Object bundle) {
+        if (bundle == null) {
+            return "null";
+        }
+        
+        try {
+            var getSymbolicNameMethod = bundle.getClass().getMethod("getSymbolicName");
+            var getBundleIdMethod = bundle.getClass().getMethod("getBundleId");
+            
+            String symbolicName = (String) getSymbolicNameMethod.invoke(bundle);
+            long bundleId = (Long) getBundleIdMethod.invoke(bundle);
+            
+            return symbolicName + "[" + bundleId + "]";
+        } catch (Exception e) {
+            return bundle.toString();
+        }
+    }
+    
+    /**
      * Package-private constructor for testing
      */
     MetaDataTypeRegistry() {
+        this.bundleRef = null;
+        this.registryId = "default-" + System.currentTimeMillis();
+    }
+    
+    /**
+     * Bundle-aware constructor for OSGI environments
+     * 
+     * @param bundle OSGI Bundle (as Object to avoid compile dependency)
+     */
+    private MetaDataTypeRegistry(Object bundle) {
+        this.bundleRef = bundle != null ? new WeakReference<>(bundle) : null;
+        this.registryId = bundle != null ? getBundleId(bundle) : "unknown-" + System.currentTimeMillis();
+        log.debug("Created bundle-aware MetaDataTypeRegistry: {}", registryId);
     }
     
     /**
@@ -231,6 +323,100 @@ public class MetaDataTypeRegistry {
             types.values().stream().mapToInt(def -> def.allowedSubTypes().size()).sum(),
             types.values().stream().filter(MetaDataTypeDefinition::isAbstract).count()
         );
+    }
+    
+    /**
+     * Check if this registry is bundle-aware
+     * 
+     * @return true if this registry is associated with a specific OSGI bundle
+     */
+    public boolean isBundleAware() {
+        return bundleRef != null;
+    }
+    
+    /**
+     * Check if the associated bundle is still available
+     * 
+     * @return true if bundle-aware and bundle has not been GC'd
+     */
+    public boolean isBundleAvailable() {
+        return bundleRef != null && bundleRef.get() != null;
+    }
+    
+    /**
+     * Get the registry identifier
+     * 
+     * @return Unique identifier for this registry instance
+     */
+    public String getRegistryId() {
+        return registryId;
+    }
+    
+    /**
+     * Get bundle information if available
+     * 
+     * @return Bundle description or "not bundle-aware"
+     */
+    public String getBundleInfo() {
+        if (bundleRef == null) {
+            return "not bundle-aware";
+        }
+        
+        Object bundle = bundleRef.get();
+        if (bundle == null) {
+            return "bundle GC'd";
+        }
+        
+        return getBundleId(bundle);
+    }
+    
+    /**
+     * Get detailed status of this registry
+     * 
+     * @return Status description including bundle info and type counts
+     */
+    public String getDetailedStatus() {
+        StringBuilder status = new StringBuilder();
+        status.append("MetaDataTypeRegistry[").append(registryId).append("]");
+        status.append(" Bundle: ").append(getBundleInfo());
+        status.append(" Types: ").append(types.size());
+        
+        if (isBundleAware() && !isBundleAvailable()) {
+            status.append(" (STALE - bundle was GC'd)");
+        }
+        
+        return status.toString();
+    }
+    
+    /**
+     * Get global statistics about all registry instances
+     * 
+     * @return Global registry information
+     */
+    public static String getGlobalStats() {
+        StringBuilder stats = new StringBuilder();
+        stats.append("Global MetaDataTypeRegistry Stats:\\n");
+        stats.append("Singleton instance: ").append(instance != null ? "created" : "not created").append("\\n");
+        
+        synchronized (BUNDLE_LOCK) {
+            stats.append("Bundle instances: ").append(bundleInstances.size()).append("\\n");
+            
+            int activeInstances = 0;
+            int staleInstances = 0;
+            
+            for (Map.Entry<Object, WeakReference<MetaDataTypeRegistry>> entry : bundleInstances.entrySet()) {
+                if (entry.getValue().get() != null) {
+                    activeInstances++;
+                } else {
+                    staleInstances++;
+                }
+            }
+            
+            stats.append("Active bundle instances: ").append(activeInstances).append("\\n");
+            stats.append("Stale bundle references: ").append(staleInstances);
+        }
+        
+        return stats.toString();
     }
     
     /**

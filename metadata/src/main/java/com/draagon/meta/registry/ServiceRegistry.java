@@ -61,6 +61,48 @@ public interface ServiceRegistry {
     String getDescription();
     
     /**
+     * Handle OSGI bundle lifecycle events
+     * 
+     * <p>This method is called when bundle lifecycle events occur in OSGI environments.
+     * Non-OSGI implementations can provide a no-op implementation.</p>
+     * 
+     * @param bundle OSGI Bundle that had a lifecycle event (as Object to avoid compile dependency)
+     */
+    default void onBundleEvent(Object bundle) {
+        // Default no-op implementation for non-OSGI registries
+    }
+    
+    /**
+     * Clean up services specific to a bundle
+     * 
+     * <p>This method is called when a bundle is being unloaded to clean up
+     * any services or references specific to that bundle.</p>
+     * 
+     * @param bundle OSGI Bundle to clean up (as Object to avoid compile dependency)
+     */
+    default void cleanupForBundle(Object bundle) {
+        // Default no-op implementation for non-OSGI registries
+    }
+    
+    /**
+     * Check if bundle lifecycle management is supported and active
+     * 
+     * @return true if this registry supports and is actively handling bundle lifecycle events
+     */
+    default boolean isBundleLifecycleActive() {
+        return false; // Default: no bundle lifecycle support
+    }
+    
+    /**
+     * Get status information about bundle lifecycle management
+     * 
+     * @return Status description, or "Not supported" for non-OSGI registries
+     */
+    default String getBundleLifecycleStatus() {
+        return "Not supported";
+    }
+    
+    /**
      * Close/cleanup the service registry
      */
     void close();

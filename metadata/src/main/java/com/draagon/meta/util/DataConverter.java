@@ -102,8 +102,11 @@ public final class DataConverter
 			return null;
 		}
 		else if (val instanceof List<?>) {
-			// TODO: Fix this to map to an actual object array
-			return (List<String>) val;
+			List<?> list = (List<?>) val;
+			// Stream-based safe conversion - each element becomes a String
+			return list.stream()
+				.map(item -> item != null ? item.toString() : null)
+				.collect(java.util.stream.Collectors.toList());
 		}
 		else if ( val instanceof String ) {
 			List<String> list = new ArrayList<>();
@@ -166,8 +169,17 @@ public final class DataConverter
 			return null;
 		}
 		else if (val instanceof List<?>) {
-			// TODO: Fix this to map to an actual object array
-			return (List<Object>) val;
+			List<?> list = (List<?>) val;
+			// If it's already a List<Object> or unparameterized List, safe to cast
+			// Otherwise create safe copy to avoid ClassCastException
+			try {
+				@SuppressWarnings("unchecked")
+				List<Object> result = (List<Object>) list;
+				return result; // Safe cast - preserve reference semantics
+			} catch (ClassCastException e) {
+				// Unsafe cast - create safe copy
+				return new ArrayList<>(list);
+			}
 		}
 		else {
 			List<Object> l = new ArrayList<Object>();
