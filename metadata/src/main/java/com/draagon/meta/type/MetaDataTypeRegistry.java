@@ -376,16 +376,9 @@ public class MetaDataTypeRegistry {
      * @return Status description including bundle info and type counts
      */
     public String getDetailedStatus() {
-        StringBuilder status = new StringBuilder();
-        status.append("MetaDataTypeRegistry[").append(registryId).append("]");
-        status.append(" Bundle: ").append(getBundleInfo());
-        status.append(" Types: ").append(types.size());
-        
-        if (isBundleAware() && !isBundleAvailable()) {
-            status.append(" (STALE - bundle was GC'd)");
-        }
-        
-        return status.toString();
+        String staleInfo = (isBundleAware() && !isBundleAvailable()) ? " (STALE - bundle was GC'd)" : "";
+        return String.format("MetaDataTypeRegistry[%s] Bundle: %s Types: %d%s", 
+            registryId, getBundleInfo(), types.size(), staleInfo);
     }
     
     /**
@@ -394,13 +387,9 @@ public class MetaDataTypeRegistry {
      * @return Global registry information
      */
     public static String getGlobalStats() {
-        StringBuilder stats = new StringBuilder();
-        stats.append("Global MetaDataTypeRegistry Stats:\\n");
-        stats.append("Singleton instance: ").append(instance != null ? "created" : "not created").append("\\n");
+        String singletonStatus = instance != null ? "created" : "not created";
         
         synchronized (BUNDLE_LOCK) {
-            stats.append("Bundle instances: ").append(bundleInstances.size()).append("\\n");
-            
             int activeInstances = 0;
             int staleInstances = 0;
             
@@ -412,11 +401,14 @@ public class MetaDataTypeRegistry {
                 }
             }
             
-            stats.append("Active bundle instances: ").append(activeInstances).append("\\n");
-            stats.append("Stale bundle references: ").append(staleInstances);
+            return String.format(
+                "Global MetaDataTypeRegistry Stats:\\n" +
+                "Singleton instance: %s\\n" +
+                "Bundle instances: %d\\n" +
+                "Active bundle instances: %d\\n" +
+                "Stale bundle references: %d",
+                singletonStatus, bundleInstances.size(), activeInstances, staleInstances);
         }
-        
-        return stats.toString();
     }
     
     /**

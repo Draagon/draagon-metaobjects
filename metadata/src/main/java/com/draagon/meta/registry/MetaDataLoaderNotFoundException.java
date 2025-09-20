@@ -8,8 +8,12 @@ import com.draagon.meta.MetaDataException;
  * <p>This exception is thrown by {@link MetaDataLoaderRegistry} when attempting
  * to retrieve a loader that has not been registered.</p>
  * 
- * @since 6.0.0
+ * @deprecated As of 5.2.0, use {@link com.draagon.meta.MetaDataConfigurationException#forLoaderConfiguration} instead.
+ *             This class represents a configuration issue and should use the configuration exception hierarchy.
+ * 
+ * @since 6.0.0 (deprecated in 5.2.0)
  */
+@Deprecated(since = "5.2.0", forRemoval = true)
 public class MetaDataLoaderNotFoundException extends MetaDataException {
     
     private static final long serialVersionUID = 1L;

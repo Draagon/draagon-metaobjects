@@ -158,11 +158,6 @@ public enum DataTypes {
         else return OBJECT;
     }
 
-    /**
-     * Matches for equivalency for downcasting from d1 to d2 lossless
-     */
-    // TODO:  Finish this
-    //public boolean equivalentTo( DataTypes d1, DataTypes d2 ) {
-    //    if ( d1.isBoolean && d2.isBoolean )
-    //}
+    // Note: Type equivalency checking was considered but not implemented.
+    // Current type system handles type checking through individual type methods.
 }

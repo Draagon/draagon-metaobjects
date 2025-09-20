@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.draagon.meta.util.MetaDataConstants.*;
+
 /**
  * Utility class for creating consistent, human-readable error message formatting.
  * Provides standardized error message patterns for common MetaData error scenarios.
@@ -145,7 +147,7 @@ public final class ErrorFormatter {
             capitalize(itemType),
             itemName,
             parent.getName(),
-            available.isEmpty() ? "<none>" : available,
+            available.isEmpty() ? DISPLAY_NONE : available,
             MetaDataPath.buildPath(parent).toHierarchicalString()
         );
     }
@@ -197,24 +199,13 @@ public final class ErrorFormatter {
             throw new IllegalArgumentException("operation cannot be null");
         }
 
-        StringBuilder message = new StringBuilder();
-        message.append("Loading failed during ").append(operation);
-        
-        if (source != null) {
-            message.append(" for ").append(source.getName());
-        }
-        
-        message.append(":\n");
-        
-        if (details != null && !details.trim().isEmpty()) {
-            message.append("  Details: ").append(details).append("\n");
-        }
-        
-        if (source != null) {
-            message.append("  Path: ").append(MetaDataPath.buildPath(source).toHierarchicalString());
-        }
+        String sourceInfo = source != null ? " for " + source.getName() : "";
+        String detailsInfo = (details != null && !details.trim().isEmpty()) ? 
+            String.format("\n  Details: %s", details) : "";
+        String pathInfo = source != null ? 
+            String.format("\n  Path: %s", MetaDataPath.buildPath(source).toHierarchicalString()) : "";
 
-        return message.toString();
+        return String.format("Loading failed during %s%s:%s%s", operation, sourceInfo, detailsInfo, pathInfo);
     }
 
     /**
@@ -232,25 +223,21 @@ public final class ErrorFormatter {
             throw new IllegalArgumentException("errorMessage cannot be null");
         }
 
-        StringBuilder message = new StringBuilder();
-        message.append(errorMessage);
+        String operationInfo = operation != null ? String.format(" (during %s)", operation) : "";
+        String sourceInfo = source != null ? 
+            String.format("\n  Target: %s\n  Path: %s", 
+                source.getName(), 
+                MetaDataPath.buildPath(source).toHierarchicalString()) : "";
         
-        if (operation != null) {
-            message.append(" (during ").append(operation).append(")");
-        }
-        
-        if (source != null) {
-            message.append("\n  Target: ").append(source.getName());
-            message.append("\n  Path: ").append(MetaDataPath.buildPath(source).toHierarchicalString());
-        }
-        
+        String contextInfo = "";
         if (context != null && !context.isEmpty()) {
-            message.append("\n  Context:");
+            StringBuilder contextBuilder = new StringBuilder("\n  Context:");
             context.forEach((key, value) -> 
-                message.append("\n    ").append(key).append(": ").append(formatValue(value)));
+                contextBuilder.append(String.format("\n    %s: %s", key, formatValue(value))));
+            contextInfo = contextBuilder.toString();
         }
 
-        return message.toString();
+        return String.format("%s%s%s%s", errorMessage, operationInfo, sourceInfo, contextInfo);
     }
 
     /**
@@ -280,19 +267,19 @@ public final class ErrorFormatter {
      */
     private static String formatValue(Object value) {
         if (value == null) {
-            return "<null>";
+            return DISPLAY_NULL;
         }
         
         String str = value.toString();
         
-        // Truncate very long values
-        if (str.length() > 100) {
-            return str.substring(0, 97) + "...";
-        }
-        
         // Handle empty strings
         if (str.isEmpty()) {
-            return "<empty>";
+            return DISPLAY_EMPTY;
+        }
+        
+        // Truncate very long values using constants
+        if (str.length() > MAX_DISPLAY_LENGTH) {
+            return str.substring(0, MAX_DISPLAY_LENGTH - DISPLAY_ELLIPSIS.length()) + DISPLAY_ELLIPSIS;
         }
         
         return str;

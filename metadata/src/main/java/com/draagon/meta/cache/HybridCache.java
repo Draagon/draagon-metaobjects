@@ -1,5 +1,6 @@
 package com.draagon.meta.cache;
 
+import com.draagon.meta.MetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,29 +13,93 @@ import java.util.function.Supplier;
  * Hybrid cache implementation that maintains both legacy WeakHashMap
  * and modern ConcurrentHashMap for backward compatibility while
  * providing enhanced performance and thread safety.
+ * 
+ * <p>Optimized for permanent object references (like MetaData objects) with:</p>
+ * <ul>
+ *   <li>Object identity-based keys for MetaData objects</li>
+ *   <li>String interning for frequently used string keys</li>
+ *   <li>Dual cache strategy for OSGI compatibility</li>
+ *   <li>Enhanced performance for read-heavy workloads</li>
+ * </ul>
  */
 public class HybridCache implements CacheStrategy {
     
     private static final Logger log = LoggerFactory.getLogger(HybridCache.class);
     
-    // Legacy cache for backward compatibility
+    // Legacy cache for backward compatibility (WeakHashMap for OSGI)
     private final Map<Object, Object> legacyCache = Collections.synchronizedMap(new WeakHashMap<>());
     
-    // Modern cache for enhanced performance
+    // Modern cache for enhanced performance (permanent references)
     private final Map<String, Object> modernCache = new ConcurrentHashMap<>();
+    
+    // Object identity-based cache for permanent MetaData objects
+    private final Map<Object, Object> identityCache = new ConcurrentHashMap<>();
+    
+    // String interning cache for frequently used keys
+    private final Map<String, String> internedKeys = new ConcurrentHashMap<>();
     
     // Cache statistics
     private final AtomicLong hitCount = new AtomicLong();
     private final AtomicLong missCount = new AtomicLong();
     private final AtomicLong loadCount = new AtomicLong();
+    private final AtomicLong identityHitCount = new AtomicLong();
+    private final AtomicLong internHitCount = new AtomicLong();
+    
+    /**
+     * Optimizes string keys by interning frequently used ones.
+     * Reduces memory usage for repeated cache keys.
+     */
+    private String optimizeKey(String key) {
+        if (key == null) return null;
+        
+        // Intern frequently used keys to reduce memory usage
+        String interned = internedKeys.get(key);
+        if (interned == null) {
+            // Only intern if this appears to be a method/field name pattern
+            if (isFrequentlyUsedKey(key)) {
+                interned = key.intern();
+                internedKeys.put(key, interned);
+                internHitCount.incrementAndGet();
+            } else {
+                interned = key;
+            }
+        } else {
+            internHitCount.incrementAndGet();
+        }
+        
+        return interned;
+    }
+    
+    /**
+     * Determines if a key should be interned based on patterns.
+     */
+    private boolean isFrequentlyUsedKey(String key) {
+        // Intern keys that look like method calls or field access patterns
+        return key.contains("getMetaField(") || 
+               key.contains("getMetaObject(") ||
+               key.contains("hasAttribute(") ||
+               key.contains(".") ||
+               key.length() < 32; // Short keys are likely to be repeated
+    }
+    
+    /**
+     * Uses object identity for permanent objects like MetaData.
+     * This is more efficient than string conversion for permanent references.
+     */
+    private boolean useIdentityCache(Object key) {
+        return key instanceof MetaData || 
+               (key != null && key.getClass().getName().contains("MetaData"));
+    }
     
     /**
      * Get cached value with type safety
      */
     @Override
     public <T> Optional<T> get(String key, Class<T> type) {
+        String optimizedKey = optimizeKey(key);
+        
         // Check modern cache first
-        Object value = modernCache.get(key);
+        Object value = modernCache.get(optimizedKey);
         if (value != null) {
             hitCount.incrementAndGet();
             return value != null && type.isInstance(value) ? 
@@ -43,11 +108,11 @@ public class HybridCache implements CacheStrategy {
         }
         
         // Fallback to legacy cache for compatibility
-        value = legacyCache.get(key);
+        value = legacyCache.get(optimizedKey);
         if (value != null) {
             hitCount.incrementAndGet();
-            // Promote to modern cache
-            modernCache.put(key, value);
+            // Promote to modern cache using optimized key
+            modernCache.put(optimizedKey, value);
             return value != null && type.isInstance(value) ? 
                 Optional.of(type.cast(value)) : 
                 Optional.empty();
@@ -62,9 +127,19 @@ public class HybridCache implements CacheStrategy {
      */
     @Override
     public Object get(Object key) {
-        String stringKey = String.valueOf(key);
+        // Use identity cache for permanent objects like MetaData
+        if (useIdentityCache(key)) {
+            Object value = identityCache.get(key);
+            if (value != null) {
+                identityHitCount.incrementAndGet();
+                hitCount.incrementAndGet();
+                return value;
+            }
+        }
         
-        // Check modern cache first
+        String stringKey = optimizeKey(String.valueOf(key));
+        
+        // Check modern cache
         Object value = modernCache.get(stringKey);
         if (value != null) {
             hitCount.incrementAndGet();
@@ -75,8 +150,14 @@ public class HybridCache implements CacheStrategy {
         value = legacyCache.get(key);
         if (value != null) {
             hitCount.incrementAndGet();
-            // Promote to modern cache
-            modernCache.put(stringKey, value);
+            
+            // Promote to appropriate cache based on key type
+            if (useIdentityCache(key)) {
+                identityCache.put(key, value);
+            } else {
+                modernCache.put(stringKey, value);
+            }
+            
             return value;
         }
         
@@ -93,10 +174,11 @@ public class HybridCache implements CacheStrategy {
             return;
         }
         
-        modernCache.put(key, value);
-        legacyCache.put(key, value);
+        String optimizedKey = optimizeKey(key);
+        modernCache.put(optimizedKey, value);
+        legacyCache.put(optimizedKey, value);
         
-        log.trace("Cached value for key: {}", key);
+        log.trace("Cached value for key: {}", optimizedKey);
     }
     
     /**
@@ -108,11 +190,18 @@ public class HybridCache implements CacheStrategy {
             return;
         }
         
-        String stringKey = String.valueOf(key);
-        modernCache.put(stringKey, value);
-        legacyCache.put(key, value);
-        
-        log.trace("Cached value for legacy key: {}", key);
+        // Use identity cache for permanent objects
+        if (useIdentityCache(key)) {
+            identityCache.put(key, value);
+            // Also store in legacy cache for compatibility
+            legacyCache.put(key, value);
+            log.trace("Cached value in identity cache for key: {}", key);
+        } else {
+            String stringKey = optimizeKey(String.valueOf(key));
+            modernCache.put(stringKey, value);
+            legacyCache.put(key, value);
+            log.trace("Cached value for legacy key: {}", key);
+        }
     }
     
     /**
@@ -178,19 +267,23 @@ public class HybridCache implements CacheStrategy {
     }
     
     /**
-     * Clear both caches
+     * Clear all caches
      */
     @Override
     public void clear() {
         modernCache.clear();
         legacyCache.clear();
+        identityCache.clear();
+        internedKeys.clear();
         
         // Reset statistics
         hitCount.set(0);
         missCount.set(0);
         loadCount.set(0);
+        identityHitCount.set(0);
+        internHitCount.set(0);
         
-        log.debug("Cleared hybrid cache");
+        log.debug("Cleared hybrid cache (all cache types)");
     }
     
     /**
@@ -271,9 +364,57 @@ public class HybridCache implements CacheStrategy {
      * Get detailed cache information for debugging
      */
     public String getCacheInfo() {
-        return String.format("HybridCache[modern=%d, legacy=%d, hitRate=%.2f%%]", 
+        return String.format("HybridCache[modern=%d, legacy=%d, identity=%d, interned=%d, hitRate=%.2f%%, identityHits=%d, internHits=%d]", 
             modernCache.size(), 
-            legacyCache.size(), 
-            getStats().map(s -> s.hitRate() * 100).orElse(0.0));
+            legacyCache.size(),
+            identityCache.size(),
+            internedKeys.size(),
+            getStats().map(s -> s.hitRate() * 100).orElse(0.0),
+            identityHitCount.get(),
+            internHitCount.get());
+    }
+    
+    /**
+     * Get optimization statistics
+     */
+    public OptimizationStats getOptimizationStats() {
+        return new OptimizationStats(
+            identityHitCount.get(),
+            internHitCount.get(),
+            identityCache.size(),
+            internedKeys.size()
+        );
+    }
+    
+    /**
+     * Statistics for cache optimization features
+     */
+    public record OptimizationStats(
+        long identityHits,
+        long internHits,
+        int identityCacheSize,
+        int internedKeysSize
+    ) {}
+    
+    /**
+     * Manually optimize cache by promoting frequently accessed entries
+     * and cleaning up unnecessary interned keys
+     */
+    public void optimize() {
+        promoteLegacyEntries();
+        
+        // Clean up interned keys that are no longer being used
+        if (internedKeys.size() > 1000) {
+            // Keep only the most recent 500 interned keys
+            Set<String> toRemove = new HashSet<>();
+            internedKeys.keySet().stream()
+                .skip(500)
+                .forEach(toRemove::add);
+            toRemove.forEach(internedKeys::remove);
+            
+            log.debug("Cleaned up {} unused interned keys", toRemove.size());
+        }
+        
+        log.debug("Cache optimization completed: {}", getCacheInfo());
     }
 }

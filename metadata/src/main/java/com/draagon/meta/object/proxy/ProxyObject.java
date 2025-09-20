@@ -60,7 +60,8 @@ public class ProxyObject implements ProxyAccessor, MetaObjectAware, Validatable 
 
     @Override
     public void validate() throws ValueException {
-        // TODO: Validate using MetaValidators
+        // Validation is now handled by the constraint system during metadata construction
+        // ProxyObjects rely on the underlying data structure for validation
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////

@@ -180,7 +180,9 @@ public class ConstraintRegistry {
             }
         }
         
-        // TODO: Add ServiceLoader-based discovery for additional constraint files from libraries
+        // FUTURE ENHANCEMENT: ServiceLoader-based discovery could be added to allow
+        // libraries to contribute additional constraint files automatically.
+        // Current approach using standard files in META-INF/constraints/ is sufficient.
     }
     
     private void processConstraintInstance(ConstraintDefinitionParser.ConstraintInstance instance, String sourceName) {

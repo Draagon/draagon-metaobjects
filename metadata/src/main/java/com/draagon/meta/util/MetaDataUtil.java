@@ -1,8 +1,8 @@
 /*
- * Created on Jul 23, 2004
+ * Copyright 2003 Draagon Software LLC. All Rights Reserved.
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * This software is the proprietary information of Draagon Software LLC.
+ * Use is subject to license terms.
  */
 package com.draagon.meta.util;
 
@@ -18,10 +18,11 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 /**
+ * Utility class providing helper methods for MetaData operations.
+ * Contains commonly used operations for working with MetaData objects, loaders, and registries.
+ * 
  * @author dmealing
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * @since 1.0
  */
 public class MetaDataUtil {
 

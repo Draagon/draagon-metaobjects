@@ -55,15 +55,12 @@ public class PojoMetaObject extends MetaObject {
      * @param name Name of the field
      */
     protected void uppercase( StringBuilder b, String name ) {
-
-        //TODO:  USe Char and to.UpperCase()
-
-        int c = name.charAt(0);
-        if (c >= 'a' && c <= 'z') {
-            c = c - ('a' - 'A');
+        if (name.length() > 0) {
+            b.append(Character.toUpperCase(name.charAt(0)));
+            if (name.length() > 1) {
+                b.append(name.substring(1));
+            }
         }
-        b.append((char) c);
-        b.append(name.substring(1));
     }
 
     protected String getGetterName( MetaField f, String prefix ) {

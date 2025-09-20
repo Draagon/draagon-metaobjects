@@ -51,7 +51,7 @@ public class MetaData implements Cloneable, Serializable {
 
     private MetaData superData = null;
 
-    // TODO:  Is this meant to be a weak reference for MetaDataLoader only...?
+    // WeakReference prevents circular references and memory leaks in parent-child relationships
     private WeakReference<MetaData> parentRef = null;
     private MetaDataLoader loader = null;
     private ClassLoader metaDataClassLoader=null;
@@ -857,42 +857,86 @@ public class MetaData implements Cloneable, Serializable {
         return items;
     }
 
-    /** Add all the matching children to the map */
+    /** Add all the matching children to the map - refactored for better maintainability */
     @SuppressWarnings("unchecked")
     private <T extends MetaData> void addChildren( List<String> keys, List<T> items, String type, Class<T> c, boolean includeParentData, boolean isParent, boolean firstOnly ) {
-
-        // Get all the local children
-        children.stream().forEach( d -> {
-
-            // If only getting the first one, then exit
-            if ( firstOnly && items.size() > 0 ) return;
-
-            // TODO: Use Stream and filters
-            // Filter on the search criteria
-            if ((type == null && c == null )
-                    || ( type != null && d.isType(type) && ( c==null || c.isInstance(d)))
-                    || ( type == null && c.isInstance(d))) {
-
-                // TODO:  Make the key part of the MetaData class
-                String key = new StringBuilder( d.getTypeName())
-                        //.append('-').append( d.getSubTypeName() )
-                        .append('-').append( d.getName() ).toString();
-
-                // TODO: Add part of stream filters
-                // If this is a parent, then filter; only add if it didn't already exist
-                if ( (!isParent || !filterWhenParentData( d ))
-                        && !keys.contains( key )) {
-
-                    keys.add( key );
-                    items.add( (T) d);
-                }
-            }
-        });
-
-        // Recursively add the super metadata's children
+        addLocalChildren(keys, items, type, c, isParent, firstOnly);
+        addParentChildren(keys, items, type, c, includeParentData, firstOnly);
+    }
+    
+    /**
+     * Adds matching local children to the results
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends MetaData> void addLocalChildren(List<String> keys, List<T> items, String type, Class<T> c, boolean isParent, boolean firstOnly) {
+        children.stream()
+            .filter(child -> !shouldStopEarly(firstOnly, items))
+            .filter(child -> matchesSearchCriteria(child, type, c))
+            .filter(child -> shouldIncludeChild(child, isParent, keys))
+            .forEach(child -> addChildToResults(child, keys, items));
+    }
+    
+    /**
+     * Recursively adds children from parent metadata
+     */
+    private <T extends MetaData> void addParentChildren(List<String> keys, List<T> items, String type, Class<T> c, boolean includeParentData, boolean firstOnly) {
         if (getSuperData() != null && includeParentData) {
-            getSuperData().addChildren( keys, items, type, c, true, true, firstOnly );
+            getSuperData().addChildren(keys, items, type, c, true, true, firstOnly);
         }
+    }
+    
+    /**
+     * Checks if we should stop processing early (for firstOnly queries)
+     */
+    private <T extends MetaData> boolean shouldStopEarly(boolean firstOnly, List<T> items) {
+        return firstOnly && !items.isEmpty();
+    }
+    
+    /**
+     * Checks if a child matches the search criteria
+     */
+    private <T extends MetaData> boolean matchesSearchCriteria(MetaData child, String type, Class<T> c) {
+        // Match all if no criteria specified
+        if (type == null && c == null) {
+            return true;
+        }
+        
+        // Match by type and optionally by class
+        if (type != null && child.isType(type)) {
+            return c == null || c.isInstance(child);
+        }
+        
+        // Match by class only
+        return type == null && c != null && c.isInstance(child);
+    }
+    
+    /**
+     * Determines if a child should be included based on parent filtering and uniqueness
+     */
+    private boolean shouldIncludeChild(MetaData child, boolean isParent, List<String> keys) {
+        if (isParent && filterWhenParentData(child)) {
+            return false;
+        }
+        
+        String key = createChildKey(child);
+        return !keys.contains(key);
+    }
+    
+    /**
+     * Creates a unique key for a child MetaData object
+     */
+    private String createChildKey(MetaData child) {
+        return String.format("%s-%s", child.getTypeName(), child.getName());
+    }
+    
+    /**
+     * Adds a child to the results collections
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends MetaData> void addChildToResults(MetaData child, List<String> keys, List<T> items) {
+        String key = createChildKey(child);
+        keys.add(key);
+        items.add((T) child);
     }
 
     /**

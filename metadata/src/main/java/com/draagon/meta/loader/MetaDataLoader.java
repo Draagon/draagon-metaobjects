@@ -446,10 +446,31 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     }
     
     /**
-     * Core initialization logic
+     * Core initialization logic - refactored for better maintainability
      */
     private MetaDataLoader performInitializationInternal(long startTime) {
-        // Check if we can transition to initializing state
+        validateAndTransitionToInitializing();
+        
+        try {
+            logInitializationStart();
+            initializeRegistriesIfNeeded();
+            transitionToInitialized(startTime);
+            updateCompatibilityFlags();
+            registerIfRequested();
+            logInitializationSuccess(startTime);
+            
+            return this;
+            
+        } catch (Exception e) {
+            handleInitializationFailure(e, startTime);
+            throw e; // Re-throw after handling
+        }
+    }
+    
+    /**
+     * Validates current state and transitions to initializing phase
+     */
+    private void validateAndTransitionToInitializing() {
         if (!loadingState.tryTransition(LoadingState.Phase.UNINITIALIZED, LoadingState.Phase.INITIALIZING)) {
             LoadingState.Phase currentPhase = loadingState.getCurrentPhase();
             if (currentPhase == LoadingState.Phase.INITIALIZED || currentPhase == LoadingState.Phase.REGISTERED) {
@@ -458,43 +479,71 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
                 throw new IllegalStateException("MetaDataLoader [" + getName() + "] cannot be initialized from phase: " + currentPhase);
             }
         }
+    }
+    
+    /**
+     * Logs initialization start if verbose mode is enabled
+     */
+    private void logInitializationStart() {
+        if (loaderOptions.isVerbose()) {
+            log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]");
+        }
+    }
+    
+    /**
+     * Initializes default registries if they haven't been set
+     */
+    private void initializeRegistriesIfNeeded() {
+        if (typeRegistry == null || loaderRegistry == null) {
+            initDefaultRegistries();
+        }
+    }
+    
+    /**
+     * Transitions to initialized state with error handling
+     */
+    private void transitionToInitialized(long startTime) {
+        if (!loadingState.tryTransition(LoadingState.Phase.INITIALIZING, LoadingState.Phase.INITIALIZED)) {
+            throw new MetaDataLoadingException(
+                "Failed to transition to INITIALIZED phase", 
+                getName(), loadingState.getCurrentPhase(), 
+                System.currentTimeMillis() - startTime);
+        }
+    }
+    
+    /**
+     * Updates legacy compatibility flags
+     */
+    private void updateCompatibilityFlags() {
+        isInitialized = true;
+    }
+    
+    /**
+     * Registers the loader if configured to do so
+     */
+    private void registerIfRequested() {
+        if (loaderOptions.shouldRegister()) {
+            register();
+        }
+    }
+    
+    /**
+     * Logs successful initialization if verbose mode is enabled
+     */
+    private void logInitializationSuccess(long startTime) {
+        if (loaderOptions.isVerbose()) {
+            log.info("Successfully loaded MetaDataLoader [" + getName() + "] in " + 
+                    (System.currentTimeMillis() - startTime) + "ms");
+        }
+    }
+    
+    /**
+     * Handles initialization failures by recording error state and preparing exception
+     */
+    private void handleInitializationFailure(Exception e, long startTime) {
+        loadingState.setError(e, LoadingState.Phase.UNINITIALIZED);
         
-        try {
-            if (loaderOptions.isVerbose()) {
-                log.info("Loading the [" + getClass().getSimpleName() + "] MetaDataLoader with name [" + getName() + "]");
-            }
-
-            // Initialize the Default Registries if they do not exist
-            if (typeRegistry == null || loaderRegistry == null) {
-                initDefaultRegistries();
-            }
-
-            // Transition to initialized state
-            if (!loadingState.tryTransition(LoadingState.Phase.INITIALIZING, LoadingState.Phase.INITIALIZED)) {
-                throw new MetaDataLoadingException(
-                    "Failed to transition to INITIALIZED phase", 
-                    getName(), loadingState.getCurrentPhase(), 
-                    System.currentTimeMillis() - startTime);
-            }
-            
-            // Update legacy flag for compatibility
-            isInitialized = true;
-
-            if (loaderOptions.shouldRegister()) {
-                register();
-            }
-
-            if (loaderOptions.isVerbose()) {
-                log.info("Successfully loaded MetaDataLoader [" + getName() + "] in " + 
-                        (System.currentTimeMillis() - startTime) + "ms");
-            }
-            
-            return this;
-            
-        } catch (Exception e) {
-            // Record the error and transition to a failure state
-            loadingState.setError(e, LoadingState.Phase.UNINITIALIZED);
-            
+        if (!(e instanceof MetaDataLoadingException)) {
             throw new MetaDataLoadingException(
                 "Failed to initialize MetaDataLoader [" + getName() + "]", 
                 getName(), LoadingState.Phase.INITIALIZING, 

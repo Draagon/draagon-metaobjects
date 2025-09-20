@@ -17,8 +17,13 @@ import java.util.Map;
  * Exception thrown when a requested MetaObject cannot be found.
  * Enhanced with structured error reporting capabilities.
  * 
- * @since 1.0 (enhanced in 5.2.0)
+ * @deprecated As of 5.2.0, use {@link com.draagon.meta.MetaDataNotFoundException#forObject(String, MetaData)} instead.
+ *             This class is redundant and will be removed in a future version.
+ *             The consolidated exception hierarchy provides the same functionality with better consistency.
+ * 
+ * @since 1.0 (enhanced in 5.2.0, deprecated in 5.2.0)
  */
+@Deprecated(since = "5.2.0", forRemoval = true)
 public class MetaObjectNotFoundException extends MetaDataNotFoundException {
 
     /**
