@@ -3,7 +3,6 @@ package com.draagon.meta.object;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
@@ -88,14 +87,13 @@ public abstract class MetaObject extends MetaData {
      * 
      * @param name the name of the field to retrieve
      * @return the MetaField with the specified name
-     * @throws MetaFieldNotFoundException if no field with the given name exists
+     * @throws MetaDataNotFoundException if no field with the given name exists
      * @since 5.1.0
      * @see #findMetaField(String)
      */
     public MetaField requireMetaField(String name) {
         return findMetaField(name)
-            .orElseThrow(() -> new MetaFieldNotFoundException(
-                "MetaField '" + name + "' not found in MetaObject '" + getName() + "'", name));
+            .orElseThrow(() -> MetaDataNotFoundException.forField(name, this));
     }
     
     /**
@@ -191,7 +189,7 @@ public abstract class MetaObject extends MetaData {
         try {
             getMetaField(name);
             return true;
-        } catch (MetaFieldNotFoundException e) {
+        } catch (MetaDataNotFoundException e) {
             return false;
         }
     }
@@ -209,10 +207,10 @@ public abstract class MetaObject extends MetaData {
                 if (getSuperObject() != null) {
                     try {
                         f = getSuperObject().getMetaField(name);
-                    } catch (MetaFieldNotFoundException ex) {
+                    } catch (MetaDataNotFoundException ex) {
                     }
                 }
-                throw new MetaFieldNotFoundException("MetaField [" + name + "] does not exist in MetaObject [" + toString() + "]", name);
+                throw MetaDataNotFoundException.forField(name, this);
             }
             return f;
         });

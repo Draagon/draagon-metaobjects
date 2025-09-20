@@ -18,7 +18,6 @@ import java.lang.annotation.Target;
  * @MetaDataType(
  *     name = "custom-widget",
  *     description = "Custom UI Widget Metadata",
- *     allowedSubTypes = {"button", "input", "select"},
  *     allowsChildren = true
  * )
  * public class CustomWidgetMetaData extends MetaData {
@@ -41,11 +40,6 @@ public @interface MetaDataType {
      */
     String description() default "";
     
-    /**
-     * Array of allowed subtypes for this type.
-     * If empty, all subtypes are allowed.
-     */
-    String[] allowedSubTypes() default {};
     
     /**
      * Whether this type can have child metadata

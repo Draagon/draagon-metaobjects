@@ -2,10 +2,10 @@ package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.MetaDataConfigurationException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,7 +117,7 @@ public class MetaDataLoaderRegistry {
      * 
      * @param loaderName Name of the loader
      * @return MetaDataLoader instance
-     * @throws MetaDataLoaderNotFoundException if not found
+     * @throws MetaDataConfigurationException if not found
      */
     public MetaDataLoader getDataLoader(String loaderName) {
         Objects.requireNonNull(loaderName, "Loader name cannot be null");
@@ -126,9 +126,8 @@ public class MetaDataLoaderRegistry {
         
         MetaDataLoader loader = loaders.get(loaderName);
         if (loader == null) {
-            throw new MetaDataLoaderNotFoundException(
-                "No MetaDataLoader exists with name [" + loaderName + "]"
-            );
+            throw new MetaDataConfigurationException(
+                "No MetaDataLoader exists with name [" + loaderName + "]");
         }
         
         return loader;
@@ -186,9 +185,9 @@ public class MetaDataLoaderRegistry {
         
         MetaDataLoader loader = findLoader(obj);
         if (loader == null) {
-            throw new MetaObjectNotFoundException(
-                "No MetaDataLoader exists for object of class [" + obj.getClass().getName() + "]", obj
-            );
+            throw new MetaDataNotFoundException(
+                "No MetaDataLoader exists for object of class [" + obj.getClass().getName() + "]", 
+                obj.getClass().getSimpleName());
         }
         
         MetaObject mo = loader.getMetaObjectFor(obj);

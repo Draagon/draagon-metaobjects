@@ -12,13 +12,12 @@ package com.draagon.meta.manager;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.exp.*;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +150,7 @@ public abstract class ObjectManager
 		try {
 			if ( md.hasMetaAttr( name ))
 				return (String) md.getMetaAttr( name ).getValue();
-		} catch ( MetaAttributeNotFoundException e ) {
+		} catch ( MetaDataNotFoundException e ) {
 			throw new RuntimeException( "[" + md + "] had attribute [" + name + "], but threw exception reading it", e );
 		}
 		return null;
@@ -161,7 +160,7 @@ public abstract class ObjectManager
 	{
 		try {
 			if ( "true".equals( md.getMetaAttr( IS_READONLY ).getValue())) return true;
-		} catch( MetaAttributeNotFoundException e ) {}
+		} catch( MetaDataNotFoundException e ) {}
 		return false;
 	}
 
@@ -412,7 +411,7 @@ public abstract class ObjectManager
 	{
 		try {
 			if ( "true".equals( mf.getMetaAttr( IS_KEY ).getValue())) return true;
-		} catch( MetaAttributeNotFoundException e ) {}
+		} catch( MetaDataNotFoundException e ) {}
 		return false;
 	}
 
@@ -1196,11 +1195,11 @@ public abstract class ObjectManager
 	 * Attempts to retrieve the MetaClass for a specified object,
 	 *  and throws an exception if one does not exist
 	 */
-	public MetaObject getMetaObjectFor( Object o ) throws MetaObjectNotFoundException
+	public MetaObject getMetaObjectFor( Object o ) throws MetaDataNotFoundException
 	{
 		MetaObject mc = MetaDataRegistry.findMetaObject( o );
 		if ( mc == null )
-			throw new MetaObjectNotFoundException( "No MetaClass exists for object [" + o + "]", o );
+			throw MetaDataNotFoundException.forObject(o.getClass().getSimpleName(), null);
 
 		return mc;
 	}

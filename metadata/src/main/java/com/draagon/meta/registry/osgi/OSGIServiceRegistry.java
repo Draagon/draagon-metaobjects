@@ -1,12 +1,12 @@
-package com.draagon.meta.registry;
+package com.draagon.meta.registry.osgi;
 
-import com.draagon.meta.registry.osgi.BundleLifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.draagon.meta.registry.ServiceRegistry;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.lang.ref.WeakReference;
 
 /**
  * OSGI-based service registry implementation.

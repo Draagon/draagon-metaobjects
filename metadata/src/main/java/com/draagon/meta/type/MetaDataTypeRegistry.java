@@ -209,27 +209,12 @@ public class MetaDataTypeRegistry {
             .collect(Collectors.toSet());
     }
     
-    /**
-     * Validate if a subtype is allowed for the given type
-     */
-    public boolean isSubTypeValid(String typeName, String subType) {
-        return getType(typeName)
-            .map(def -> def.isSubTypeAllowed(subType))
-            .orElse(false);
-    }
     
     /**
      * Create a new MetaData instance of the specified type
      */
     public <T extends MetaData> T createInstance(String typeName, String subType, String name) {
         MetaDataTypeDefinition definition = requireType(typeName);
-        
-        if (!definition.isSubTypeAllowed(subType)) {
-            throw new MetaDataException(
-                "SubType '" + subType + "' is not allowed for type '" + typeName + "'. " +
-                "Allowed subtypes: " + definition.allowedSubTypes()
-            );
-        }
         
         try {
             // Try constructor with type, subType, name
@@ -320,7 +305,6 @@ public class MetaDataTypeRegistry {
     public RegistryStats getStats() {
         return new RegistryStats(
             types.size(),
-            types.values().stream().mapToInt(def -> def.allowedSubTypes().size()).sum(),
             types.values().stream().filter(MetaDataTypeDefinition::isAbstract).count()
         );
     }
@@ -416,7 +400,6 @@ public class MetaDataTypeRegistry {
      */
     public record RegistryStats(
         int totalTypes,
-        int totalAllowedSubTypes,
         long abstractTypes
     ) {}
 }

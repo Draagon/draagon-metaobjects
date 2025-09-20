@@ -1,9 +1,9 @@
 package com.draagon.meta.io.object.json;
 
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.json.JsonMetaDataReader;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.object.gson.MetaObjectGsonInitializer;
 import com.draagon.meta.io.string.StringSerializationHandler;
@@ -113,7 +113,7 @@ public class JsonObjectReader extends JsonMetaDataReader {
 
             return vo;
         }
-        catch (MetaFieldNotFoundException e) {
+        catch (MetaDataNotFoundException e) {
             throw new MetaDataIOException( this, "Error reading field name ["+lastName+"]: "+e, e );
         }
         catch (IOException e) {

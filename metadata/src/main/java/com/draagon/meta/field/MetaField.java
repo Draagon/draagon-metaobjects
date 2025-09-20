@@ -6,7 +6,6 @@ import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
-import com.draagon.meta.view.MetaViewNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -304,7 +303,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         try {
             return (MetaView) getChild(name, MetaView.class);
         } catch (MetaDataNotFoundException e) {
-            throw new MetaViewNotFoundException("MetaView with name [" + name + "] not found in MetaField [" + toString() + "]", name);
+            throw MetaDataNotFoundException.forView(name, this);
         }
     }
 
@@ -332,14 +331,13 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * 
      * @param name the name of the view to retrieve
      * @return the MetaView with the specified name
-     * @throws MetaViewNotFoundException if no view with the given name exists
+     * @throws MetaDataNotFoundException if no view with the given name exists
      * @since 5.1.0
      * @see #findView(String)
      */
     public MetaView requireView(String name) {
         return findView(name)
-            .orElseThrow(() -> new MetaViewNotFoundException(
-                "MetaView '" + name + "' not found in MetaField '" + getName() + "'", name));
+            .orElseThrow(() -> MetaDataNotFoundException.forView(name, this));
     }
 
     /**

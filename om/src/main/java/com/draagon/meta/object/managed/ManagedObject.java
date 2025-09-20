@@ -7,7 +7,7 @@ import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.MetaObjectNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.util.DataConverter;
 
 import java.io.Serializable;
@@ -145,7 +145,7 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
                 if (mMetaObject == null) {
                     mMetaObject = MetaDataRegistry.findMetaObjectByName(mObjectName);
                 }
-            } catch (MetaObjectNotFoundException e) {
+            } catch (MetaDataNotFoundException e) {
                 throw new RuntimeException("Could not re-attach MetaObject: " + e.getMessage(), e);
             }
         }

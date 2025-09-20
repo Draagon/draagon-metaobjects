@@ -6,7 +6,6 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.relation.ObjectRelation;
 import com.draagon.meta.util.MetaDataUtil;
 
@@ -67,8 +66,7 @@ public class ObjectReference extends ObjectRelation {
                     try {
                         o = getLoader().getMetaObjectByName(name);
                     } catch (MetaDataNotFoundException e) {
-                        throw new MetaObjectNotFoundException(
-                                "MetaObject[" + name + "] referenced by ObjectReference [" + this + "] does not exist", name);
+                        throw MetaDataNotFoundException.forObject(name, this);
                     }
 
                     setCacheValue(KEY, o);

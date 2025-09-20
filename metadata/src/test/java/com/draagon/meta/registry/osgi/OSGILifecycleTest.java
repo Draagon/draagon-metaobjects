@@ -1,7 +1,5 @@
 package com.draagon.meta.registry.osgi;
 
-import com.draagon.meta.registry.OSGIServiceRegistry;
-import com.draagon.meta.registry.ServiceRegistry;
 import com.draagon.meta.registry.ServiceRegistryFactory;
 import com.draagon.meta.type.MetaDataTypeRegistry;
 import org.junit.After;

@@ -1,12 +1,9 @@
 package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaDataTypeId;
-import com.draagon.meta.ValidationResult;
-import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.*;
 import com.draagon.meta.key.*;
 import com.draagon.meta.validator.*;
-import com.draagon.meta.view.MetaView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

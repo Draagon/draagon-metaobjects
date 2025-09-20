@@ -3,8 +3,8 @@ package com.draagon.meta.view;
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -89,7 +89,7 @@ public abstract class MetaView extends MetaData {
         try {
             String list = getMetaAttr(ATTR_VALIDATION).getValueAsString();
             getMetaField(obj).getValidatorList(list).forEach(v -> v.validate(obj, val));
-        } catch (MetaAttributeNotFoundException ignored) {
+        } catch (MetaDataNotFoundException ignored) {
         }
     }
 }

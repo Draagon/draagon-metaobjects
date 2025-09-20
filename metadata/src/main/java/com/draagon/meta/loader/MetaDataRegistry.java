@@ -2,9 +2,9 @@ package com.draagon.meta.loader;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.MetaDataConfigurationException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,7 +53,7 @@ public class MetaDataRegistry {
 
         MetaDataLoader l = metaDataLoaders.get(loaderName);
         if (l == null) {
-            throw new MetaDataLoaderNotFoundException("No MetaDataLoader exists with name [" + loaderName + "]" );
+            throw new MetaDataConfigurationException("No MetaDataLoader exists with name [" + loaderName + "]");
         }
 
         return l;
@@ -86,7 +86,7 @@ public class MetaDataRegistry {
 
         MetaDataLoader l = findLoader(obj);
         if (l == null) {
-            throw new MetaObjectNotFoundException("No MetaDataLoader exists for object of class [" + obj.getClass().getName() + "]", obj );
+            throw new MetaDataNotFoundException("No MetaDataLoader exists for object of class [" + obj.getClass().getName() + "]", obj.getClass().getSimpleName());
         }
 
         MetaObject mo = l.getMetaObjectFor( obj );

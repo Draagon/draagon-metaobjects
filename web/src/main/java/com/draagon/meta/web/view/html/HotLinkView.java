@@ -10,7 +10,7 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.*;
 import com.draagon.meta.web.view.ViewHelper;
 import com.draagon.meta.web.view.WebView;
@@ -69,7 +69,7 @@ public class HotLinkView extends HtmlView {
         String def = null;
         try {
             def = (String) getMetaAttr("linkClass").getValue();
-        } catch (MetaAttributeNotFoundException e) {
+        } catch (MetaDataNotFoundException e) {
         }
 
         return ViewHelper.getStringParam(params, "linkClass", def);

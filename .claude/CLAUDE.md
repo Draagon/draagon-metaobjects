@@ -301,6 +301,56 @@ public static MetaObject getMetaObject(String name) {
 }
 ```
 
+#### **❌ DON'T: Add Rigid Validation to Core Types**
+```java
+// WRONG - Hardcoded restrictions prevent extensibility
+@MetaDataType(
+    name = "field",
+    allowedSubTypes = {"string", "int", "long"} // ❌ Rigid, not extensible
+)
+public class MetaField extends MetaData {
+    public MetaField(String subType) {
+        if (!ALLOWED_SUBTYPES.contains(subType)) { // ❌ Prevents plugins
+            throw new IllegalArgumentException("Invalid subtype");
+        }
+    }
+}
+
+// RIGHT - Use constraint system for validation
+@MetaDataType(name = "field") // ✅ No rigid restrictions
+public class MetaField extends MetaData {
+    // Validation handled by constraint system
+    // Downstream implementations can extend subtypes
+}
+```
+
+#### **❌ DON'T: Create New Validation Mechanisms**
+```java
+// WRONG - Bypassing existing constraint system
+public void validateSubType(String subType) {
+    if (!myCustomValidation(subType)) { // ❌ Redundant validation
+        throw new ValidationException("Invalid");
+    }
+}
+
+// RIGHT - Use existing constraint system
+// Add constraints to META-INF/constraints/*.json
+// Constraints automatically enforce during construction
+```
+
+#### **✅ DO: Check Constraint System Before Adding Validation**
+```java
+// ALWAYS search these first before adding validation:
+// 1. META-INF/constraints/*.json files
+// 2. ConstraintRegistry implementation  
+// 3. Existing constraint patterns
+
+// If validation needed, extend constraint system:
+// 1. Add new constraint definition to JSON
+// 2. Register constraint type if needed
+// 3. Test with ConstraintSystemTest
+```
+
 #### **✅ DO: Separate Loading Logic from Runtime Logic**
 ```java
 // Loading phase - builders, validation, construction
@@ -771,6 +821,37 @@ loader.addChild(obj); // ❌ FAILS HERE - constraint violation immediately detec
 - `metadata/src/main/resources/META-INF/constraints/core-constraints.json` - 5 constraints
 - `metadata/src/main/resources/META-INF/constraints/database-constraints.json` - 11 constraints
 - **Location**: Loaded via classpath scanning during startup
+
+#### **🔍 MANDATORY PRE-VALIDATION CHECKLIST**
+
+**⚠️ BEFORE adding ANY validation logic anywhere in the codebase, you MUST:**
+
+1. **Search Existing Constraints**:
+   ```bash
+   # Search all constraint files
+   find . -name "*constraints*.json" -exec grep -l "your_validation_concept" {} \;
+   
+   # Check constraint registry implementation
+   grep -r "ConstraintRegistry\|constraint" metadata/src/main/java/
+   ```
+
+2. **Check Extensibility Impact**:
+   - ❓ Will this prevent downstream implementations from adding new subtypes?
+   - ❓ Could a plugin need to extend this validation?
+   - ❓ Are you hardcoding values that should be configurable?
+
+3. **Architecture Compliance Questions**:
+   - ❓ Does this violate the "extensible by downstream" principle?
+   - ❓ Are you adding compile-time restrictions to runtime-configurable data?
+   - ❓ Could this be expressed as a constraint definition instead?
+
+4. **Required Actions if Validation Needed**:
+   - ✅ Add constraint definition to appropriate META-INF/constraints/*.json
+   - ✅ Test with ConstraintSystemTest
+   - ✅ Document extensibility for downstream implementations
+   - ❌ **NEVER** add to type definitions, annotations, enums, or constructors
+
+**If you answered "yes" to any question in steps 2-3, DO NOT add the validation. Use the constraint system instead.**
 
 ### Testing Status
 
@@ -1322,6 +1403,19 @@ cd core && mvn compile
    - Builder patterns only make sense during loading phase
    - Stream operations should be used carefully in runtime paths
 
+6. **🚨 Constraint System is THE Validation Mechanism**
+   - **NEVER add rigid validation to core types** (like allowedSubTypes, hardcoded enums)
+   - **ALWAYS use the constraint system** for any validation needs
+   - **Constraint files**: META-INF/constraints/*.json define all validation rules
+   - **Extensibility requirement**: Downstream implementations must be able to add new subtypes/constraints
+   - **Before adding validation**: Search constraint system first, extend it if needed
+
+7. **🔌 Extensibility is Non-Negotiable**
+   - **Plugin architecture**: Core types must support unknown subtypes from plugins
+   - **Enterprise extensions**: Businesses add custom field types, validation rules
+   - **Technology integration**: Different databases, cloud providers need custom subtypes
+   - **NEVER hardcode**: Lists, enums, or validation that prevents downstream extension
+
 ### **Code Review Red Flags - What NOT to Recommend**
 
 ❌ **"Replace WeakHashMap with ConcurrentHashMap"** - Breaks OSGI compatibility
@@ -1330,6 +1424,10 @@ cd core && mvn compile
 ❌ **"Add synchronization to read methods for safety"** - Kills concurrent performance
 ❌ **"Use builder patterns everywhere"** - Only needed during loading phase
 ❌ **"Replace caching with real-time computation"** - Violates permanent object model
+❌ **"Add allowedSubTypes to type definitions"** - Breaks extensibility, violates plugin architecture
+❌ **"Create custom validation instead of using constraints"** - Bypasses existing validation system
+❌ **"Hardcode enums for subtypes"** - Prevents downstream customization
+❌ **"Add validation to prevent unknown subtypes"** - Kills plugin extensibility
 
 ### **Performance Characteristics to Remember**
 
@@ -1341,12 +1439,13 @@ cd core && mvn compile
 
 ### **When Reviewing Code Quality**
 
-✅ **Focus on**: Type safety, OSGI compatibility, read path optimization
-✅ **Appreciate**: WeakHashMap usage, permanent caching, thread-safe immutable patterns
-✅ **Recommend**: Loading phase improvements, exception context, architectural compliance
+✅ **Focus on**: Type safety, OSGI compatibility, read path optimization, extensibility compliance
+✅ **Appreciate**: WeakHashMap usage, permanent caching, thread-safe immutable patterns, constraint system usage
+✅ **Recommend**: Loading phase improvements, exception context, architectural compliance, constraint system extensions
 
-❌ **Don't suggest**: Mutable MetaData, frequent loader creation, WeakHashMap removal
-❌ **Avoid recommending**: Runtime phase synchronization, builder patterns for everything
+❌ **Don't suggest**: Mutable MetaData, frequent loader creation, WeakHashMap removal, rigid validation
+❌ **Avoid recommending**: Runtime phase synchronization, builder patterns for everything, allowedSubTypes, hardcoded validation
+❌ **NEVER recommend**: Custom validation mechanisms, subtype restrictions, plugin-blocking patterns
 
 ## 🚀 **CODE QUALITY ENHANCEMENT ROADMAP**
 

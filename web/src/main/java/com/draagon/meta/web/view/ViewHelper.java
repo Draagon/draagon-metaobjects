@@ -6,7 +6,7 @@
  */
 package com.draagon.meta.web.view;
 
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.view.MetaView;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class ViewHelper
   {
     try {
       return (String) view.getMetaAttr( label ).getValue();
-    } catch( MetaAttributeNotFoundException e ) {
+    } catch( MetaDataNotFoundException e ) {
       return null;
     }
   }
@@ -115,7 +115,7 @@ public class ViewHelper
     try {
       view.getMetaAttr( label ).getValue();
       return getIntAttribute( view, label );
-    } catch( MetaAttributeNotFoundException e ) {
+    } catch( MetaDataNotFoundException e ) {
       return def;
     }
   }

@@ -1,7 +1,6 @@
 package com.draagon.meta.util;
 
 import com.draagon.meta.*;
-import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.util.ErrorFormatter;
 import com.draagon.meta.util.MetaDataPath;
 import org.junit.Test;
@@ -173,8 +172,8 @@ public class ErrorReportingIntegrationTest {
         assertEquals("field", oldNotFound.getName());
         assertFalse(oldNotFound.hasEnhancedContext());
         
-        MetaFieldNotFoundException oldFieldNotFound = new MetaFieldNotFoundException("Field not found", "email");
-        assertEquals("email", oldFieldNotFound.getName());
+        MetaDataNotFoundException newFieldNotFound = new MetaDataNotFoundException("Field not found", "email");
+        assertEquals("email", newFieldNotFound.getName());
         
         InvalidValueException oldInvalid = new InvalidValueException("Invalid value");
         assertEquals("Invalid value", oldInvalid.getMessage());

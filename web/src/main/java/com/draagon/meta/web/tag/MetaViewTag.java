@@ -9,7 +9,7 @@ package com.draagon.meta.web.tag;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.view.MetaView;
-import com.draagon.meta.view.MetaViewNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.*;
@@ -136,7 +136,7 @@ public class MetaViewTag extends TagSupport
                 return (WebView) mf.getView( getView() );
 
         }
-        catch( MetaViewNotFoundException e ) {
+        catch( MetaDataNotFoundException e ) {
         }
         catch( ClassCastException e ) {
           log.error( "View is not of type WebView, which is required by the MetaViewTag", e );

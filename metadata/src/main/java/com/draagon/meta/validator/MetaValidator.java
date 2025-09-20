@@ -8,8 +8,8 @@ package com.draagon.meta.validator;
 
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
@@ -108,7 +108,7 @@ public abstract class MetaValidator extends MetaData {
         String msg = defMsg;
         try {
             msg = getMetaAttr(ATTR_MSG).getValueAsString();
-        } catch (MetaAttributeNotFoundException ignoreException) {
+        } catch (MetaDataNotFoundException ignoreException) {
         }
         return msg;
     }

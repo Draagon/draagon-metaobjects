@@ -3,6 +3,8 @@ package com.draagon.meta.registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.draagon.meta.registry.osgi.OSGIServiceRegistry;
+
 /**
  * Factory for creating the appropriate ServiceRegistry based on the runtime environment.
  * 

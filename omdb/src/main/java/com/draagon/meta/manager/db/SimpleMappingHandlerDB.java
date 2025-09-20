@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
@@ -376,7 +376,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
     {
 	    try {
 	      if ( "true".equals( mf.getMetaAttr( IS_VIEWONLY ).getValue())) return true;
-	    } catch( MetaAttributeNotFoundException e ) {}
+	    } catch( MetaDataNotFoundException e ) {}
 	    return false;
     }*/
 
@@ -467,7 +467,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
     {
       try {
         if ( TRUE.equals( mf.getMetaAttr( IS_INDEX ).getValue())) return true;
-      } catch( MetaAttributeNotFoundException e ) {}
+      } catch( MetaDataNotFoundException e ) {}
       return false;
     }
 
@@ -478,7 +478,7 @@ public class SimpleMappingHandlerDB implements MappingHandler {
     {
       try {
         if ( TRUE.equals( mf.getMetaAttr( IS_UNIQUE ).getValue())) return true;
-      } catch( MetaAttributeNotFoundException e ) {}
+      } catch( MetaDataNotFoundException e ) {}
       return false;
     }
 }

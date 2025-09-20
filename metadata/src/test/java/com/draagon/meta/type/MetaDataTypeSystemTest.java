@@ -21,9 +21,6 @@ public class MetaDataTypeSystemTest {
     public void setUp() {
         // Create a fresh registry for testing
         registry = new MetaDataTypeRegistry();
-        
-        // Initialize with migration utils
-        MetaDataMigrationUtils.initializeLegacyTypes();
     }
     
     @Test
@@ -31,16 +28,12 @@ public class MetaDataTypeSystemTest {
         // Create a type definition
         MetaDataTypeDefinition definition = MetaDataTypeDefinition.builder("test", MetaData.class)
             .description("Test type")
-            .allowedSubTypes("sub1", "sub2")
             .allowsChildren(true)
             .build();
             
         assertEquals("test", definition.typeName());
         assertEquals("Test type", definition.description());
         assertEquals(MetaData.class, definition.implementationClass());
-        assertTrue(definition.isSubTypeAllowed("sub1"));
-        assertTrue(definition.isSubTypeAllowed("sub2"));
-        assertFalse(definition.isSubTypeAllowed("sub3"));
         assertTrue(definition.allowsChildren());
     }
     
@@ -117,15 +110,4 @@ public class MetaDataTypeSystemTest {
         assertEquals(3, result.getAllErrors().size());
     }
     
-    @Test
-    public void testMigrationUtils() {
-        // Test legacy type detection
-        assertTrue(MetaDataMigrationUtils.isLegacyType("attr"));
-        assertTrue(MetaDataMigrationUtils.isLegacyType("field"));
-        assertFalse(MetaDataMigrationUtils.isLegacyType("custom"));
-        
-        // Test legacy mappings
-        String attrClass = MetaDataMigrationUtils.getModernImplementationClass("attr");
-        assertEquals("com.draagon.meta.attr.MetaAttribute", attrClass);
-    }
 }

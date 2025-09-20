@@ -17,7 +17,6 @@ public record MetaDataTypeDefinition(
     String typeName,
     String description,
     Class<? extends MetaData> implementationClass,
-    Set<String> allowedSubTypes,
     Map<String, Object> metadata,
     boolean allowsChildren,
     boolean isAbstract
@@ -30,7 +29,6 @@ public record MetaDataTypeDefinition(
         Objects.requireNonNull(typeName, "Type name cannot be null");
         Objects.requireNonNull(description, "Description cannot be null");
         Objects.requireNonNull(implementationClass, "Implementation class cannot be null");
-        Objects.requireNonNull(allowedSubTypes, "Allowed sub types cannot be null");
         Objects.requireNonNull(metadata, "Metadata map cannot be null");
         
         if (typeName.trim().isEmpty()) {
@@ -38,7 +36,6 @@ public record MetaDataTypeDefinition(
         }
         
         // Defensive copy to ensure immutability
-        allowedSubTypes = Set.copyOf(allowedSubTypes);
         metadata = Map.copyOf(metadata);
     }
     
@@ -49,12 +46,6 @@ public record MetaDataTypeDefinition(
         return new Builder(typeName, implementationClass);
     }
     
-    /**
-     * Validates if the given subtype is allowed for this type definition
-     */
-    public boolean isSubTypeAllowed(String subType) {
-        return allowedSubTypes.isEmpty() || allowedSubTypes.contains(subType);
-    }
     
     /**
      * Gets metadata value by key with type casting
@@ -91,7 +82,6 @@ public record MetaDataTypeDefinition(
         private final String typeName;
         private final Class<? extends MetaData> implementationClass;
         private String description = "";
-        private Set<String> allowedSubTypes = Set.of();
         private Map<String, Object> metadata = Map.of();
         private boolean allowsChildren = true;
         private boolean isAbstract = false;
@@ -106,15 +96,6 @@ public record MetaDataTypeDefinition(
             return this;
         }
         
-        public Builder allowedSubTypes(Set<String> allowedSubTypes) {
-            this.allowedSubTypes = allowedSubTypes;
-            return this;
-        }
-        
-        public Builder allowedSubTypes(String... allowedSubTypes) {
-            this.allowedSubTypes = Set.of(allowedSubTypes);
-            return this;
-        }
         
         public Builder metadata(Map<String, Object> metadata) {
             this.metadata = metadata;
@@ -136,7 +117,6 @@ public record MetaDataTypeDefinition(
                 typeName, 
                 description, 
                 implementationClass, 
-                allowedSubTypes, 
                 metadata, 
                 allowsChildren, 
                 isAbstract

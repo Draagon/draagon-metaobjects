@@ -12,7 +12,6 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -66,7 +65,7 @@ public class MetaDataUtil {
   }
 
   /** Gets the MetaObject referenced by this MetaData using the objectRef attribute */
-  public static MetaObject getObjectRef( MetaField d ) throws MetaObjectNotFoundException {
+  public static MetaObject getObjectRef( MetaField d ) throws MetaDataNotFoundException {
 
     synchronized ( d ) {
 
@@ -84,7 +83,7 @@ public class MetaDataUtil {
             try {
               o = d.getLoader().getMetaObjectByName(name);
             } catch (MetaDataNotFoundException e) {
-              throw new MetaObjectNotFoundException("MetaObject[" + name + "] referenced by MetaData [" + d + "] does not exist", name);
+              throw MetaDataNotFoundException.forObject(name, d);
             }
           }
 

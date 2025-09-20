@@ -167,7 +167,6 @@ public class MetaDataTypeScanner {
         MetaDataTypeDefinition definition = MetaDataTypeDefinition.builder(
             annotation.name(), clazz)
             .description(annotation.description())
-            .allowedSubTypes(Set.of(annotation.allowedSubTypes()))
             .allowsChildren(annotation.allowsChildren())
             .isAbstract(annotation.isAbstract())
             .build();

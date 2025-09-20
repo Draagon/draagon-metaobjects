@@ -8,7 +8,7 @@
 package com.draagon.meta.manager.xml;
 
 import com.draagon.meta.MetaDataException;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataRegistry;
 import com.draagon.meta.manager.*;
@@ -405,7 +405,7 @@ public class ObjectManagerXML extends ObjectManager
         try {
             return (String) mc.getMetaAttr( "fileRef" ).getValueAsString();
         }
-        catch( MetaAttributeNotFoundException e ) { }
+        catch( MetaDataNotFoundException e ) { }
 
         return mc.getShortName() + ".xml";
     }
@@ -415,7 +415,7 @@ public class ObjectManagerXML extends ObjectManager
         try {
             return (String) mc.getMetaAttr( "nameRef" ).getValue();
         }
-        catch( MetaAttributeNotFoundException e ) { }
+        catch( MetaDataNotFoundException e ) { }
 
         return mc.getShortName();
     }
@@ -425,7 +425,7 @@ public class ObjectManagerXML extends ObjectManager
         try {
             return (String) mf.getMetaAttr( "nameRef" ).getValue();
         }
-        catch( MetaAttributeNotFoundException e ) { }
+        catch( MetaDataNotFoundException e ) { }
 
         return mf.getName();
     }

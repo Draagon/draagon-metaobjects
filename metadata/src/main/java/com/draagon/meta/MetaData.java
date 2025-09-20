@@ -1,7 +1,6 @@
 package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.type.MetaDataTypeDefinition;
 import com.draagon.meta.type.MetaDataTypeRegistry;
@@ -246,8 +245,7 @@ public class MetaData implements Cloneable, Serializable {
      */
     public MetaAttribute requireAttribute(String name) {
         return findAttribute(name)
-            .orElseThrow(() -> new MetaAttributeNotFoundException(
-                "MetaAttribute '" + name + "' not found in '" + toString() + "'", name));
+            .orElseThrow(() -> MetaDataNotFoundException.forAttribute(name, this));
     }
 
     /**
@@ -597,18 +595,18 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Retrieves an attribute value of the MetaData
      */
-    public MetaAttribute getMetaAttr(String name) throws MetaAttributeNotFoundException {
+    public MetaAttribute getMetaAttr(String name) throws MetaDataNotFoundException {
         return getMetaAttr(name,true);
     }
 
     /**
      * Retrieves an attribute value of the MetaData
      */
-    public MetaAttribute getMetaAttr(String name, boolean includeParentData) throws MetaAttributeNotFoundException {
+    public MetaAttribute getMetaAttr(String name, boolean includeParentData) throws MetaDataNotFoundException {
         try {
             return (MetaAttribute) getChild( name, MetaAttribute.class, includeParentData);
         } catch (MetaDataNotFoundException e) {
-            throw new MetaAttributeNotFoundException( "MetaAtribute [" + name + "] not found in [" + toString() + "]", name );
+            throw MetaDataNotFoundException.forAttribute(name, this);
         }
     }
 

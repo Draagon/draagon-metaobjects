@@ -7,7 +7,6 @@
 package com.draagon.meta.manager.db;
 
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.manager.StateAwareMetaObject;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.*;
@@ -1166,7 +1165,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
             if (rc == null) {
                 try {
                     rc = resultClass.getMetaField(col);
-                } catch (MetaFieldNotFoundException e) {
+                } catch (MetaDataNotFoundException e) {
                 }
             }
 

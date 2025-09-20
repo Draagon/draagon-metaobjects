@@ -70,24 +70,10 @@ public enum CoreMetaDataTypes {
     public MetaDataTypeDefinition createTypeDefinition() {
         return MetaDataTypeDefinition.builder(typeName, getImplementationClass())
             .description(description)
-            .allowedSubTypes(getDefaultAllowedSubTypes())
             .allowsChildren(getAllowsChildren())
             .build();
     }
     
-    /**
-     * Get default allowed subtypes for each core type
-     */
-    private Set<String> getDefaultAllowedSubTypes() {
-        return switch (this) {
-            case ATTRIBUTE -> Set.of("string", "int", "long", "double", "boolean", "date", "enum");
-            case FIELD -> Set.of("string", "int", "long", "double", "boolean", "date", "ref");
-            case OBJECT -> Set.of("entity", "value", "proxy", "mapped");
-            case LOADER -> Set.of("xml", "json", "yaml", "manual", "simple");
-            case VIEW -> Set.of("list", "form", "detail", "summary");
-            case VALIDATOR -> Set.of("required", "length", "range", "pattern", "custom");
-        };
-    }
     
     /**
      * Determine if this type allows children

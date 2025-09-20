@@ -1,10 +1,9 @@
 package com.draagon.meta.util;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.MetaAttributeNotFoundException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.field.MetaFieldNotFoundException;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.view.MetaView;
@@ -67,15 +66,14 @@ public final class TypedMetaDataAccess {
      * @param metaObject The MetaObject to search in
      * @param fieldName The name of the field to find
      * @return The MetaField
-     * @throws MetaFieldNotFoundException if the field is not found
+     * @throws MetaDataNotFoundException if the field is not found
      */
     public static MetaField requireField(MetaObject metaObject, String fieldName) {
         if (metaObject == null) {
-            throw new MetaFieldNotFoundException("Cannot find field in null MetaObject", fieldName);
+            throw MetaDataNotFoundException.forField(fieldName, null);
         }
         return findField(metaObject, fieldName)
-            .orElseThrow(() -> new MetaFieldNotFoundException(
-                "Field '" + fieldName + "' not found in MetaObject '" + metaObject.getName() + "'", fieldName));
+            .orElseThrow(() -> MetaDataNotFoundException.forField(fieldName, metaObject));
     }
     
     /**
@@ -110,15 +108,14 @@ public final class TypedMetaDataAccess {
      * @param metaData The MetaData to search in
      * @param attributeName The name of the attribute to find
      * @return The MetaAttribute
-     * @throws MetaAttributeNotFoundException if the attribute is not found
+     * @throws MetaDataNotFoundException if the attribute is not found
      */
     public static MetaAttribute requireAttribute(MetaData metaData, String attributeName) {
         if (metaData == null) {
-            throw new MetaAttributeNotFoundException("Cannot find attribute in null MetaData", attributeName);
+            throw MetaDataNotFoundException.forAttribute(attributeName, null);
         }
         return findAttribute(metaData, attributeName)
-            .orElseThrow(() -> new MetaAttributeNotFoundException(
-                "Attribute '" + attributeName + "' not found in MetaData '" + metaData.getName() + "'", attributeName));
+            .orElseThrow(() -> MetaDataNotFoundException.forAttribute(attributeName, metaData));
     }
     
     /**

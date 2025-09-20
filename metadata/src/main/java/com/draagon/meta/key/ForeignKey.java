@@ -7,10 +7,10 @@ import com.draagon.meta.ValidationResult;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.MetaObjectNotFoundException;
 import com.draagon.meta.util.MetaDataUtil;
 
 import java.util.List;
+import java.util.Map;
 
 public class ForeignKey extends MetaKey {
 
@@ -49,8 +49,7 @@ public class ForeignKey extends MetaKey {
                     o = getLoader().getMetaObjectByName(name);
                 }
                 catch (MetaDataNotFoundException e) {
-                    throw new MetaObjectNotFoundException("Foreign MetaObject [" + name + "] referenced by key "+
-                            "["+getName()+"] on MetaObject ["+getDeclaringObject().getName()+"] does not exist", name);
+                    throw MetaDataNotFoundException.forObject(name, getDeclaringObject());
                 }
             }
 
