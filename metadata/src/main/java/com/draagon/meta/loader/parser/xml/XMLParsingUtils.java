@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.base;
+package com.draagon.meta.loader.parser.xml;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

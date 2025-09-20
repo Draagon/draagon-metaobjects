@@ -14,7 +14,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.file.FileMetaDataLoader;
 import com.draagon.meta.loader.file.FileLoaderOptions;
 import com.draagon.meta.loader.file.LocalFileMetaDataSources;
-import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.ObjectManagerDB;
 import com.draagon.meta.manager.db.driver.DerbyDriver;
@@ -46,10 +45,9 @@ public class AbstractOMDBTest {
                 
         if ( dbFile == null ) {
 
-            // Initialize the loader using FileMetaDataLoader with XML parser
+            // Initialize the loader using FileMetaDataLoader with auto-detection
             FileMetaDataLoader xl = new FileMetaDataLoader(
                 new FileLoaderOptions()
-                    .addParser( "*.xml", XMLMetaDataParser.class )
                     .setShouldRegister( false )
                     .setAllowAutoAttrs( true )
                     .setStrict( false )

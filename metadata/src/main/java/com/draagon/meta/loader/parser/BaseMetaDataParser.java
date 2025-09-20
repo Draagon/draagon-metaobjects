@@ -1,10 +1,9 @@
-package com.draagon.meta.loader.base;
+package com.draagon.meta.loader.parser;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.registry.MetaDataContextRegistry;
 import com.draagon.meta.registry.MetaDataTypeRegistry;
@@ -44,8 +43,8 @@ public abstract class BaseMetaDataParser {
     private static final Logger log = LoggerFactory.getLogger(BaseMetaDataParser.class);
 
     public final static String ATTR_METADATA        = "metadata";
-    public final static String ATTR_TYPESCONFIG     = "typesConfig";
-    public final static String ATTR_TYPES           = "types";
+    //public final static String ATTR_TYPESCONFIG     = "typesConfig";
+    //public final static String ATTR_TYPES           = "types";
     public final static String ATTR_PACKAGE         = "package";
     public final static String ATTR_DEFPACKAGE      = "defaultPackage";
     public final static String ATTR_CHILDREN        = "children";
@@ -80,9 +79,9 @@ public abstract class BaseMetaDataParser {
         reservedAttributes.add( ATTR_IMPLEMENTS );
     }
 
-    private MetaDataLoader loader;
-    private String filename;
-    private String defaultPackageName = "";
+    protected MetaDataLoader loader;
+    protected String filename;
+    protected String defaultPackageName = "";
 
     protected class ParserInfoMsg {
 
@@ -350,10 +349,16 @@ public abstract class BaseMetaDataParser {
     /** Get the fully qualified metadata name for the Super MetaData */
     protected String getFullyQualifiedSuperMetaDataName(MetaData parent, String packageName, String superName) {
 
-        if (shouldUseParentPackage(parent, packageName)) {
-            packageName = parent.getPackage();
+        // For super references, we need the appropriate package context:
+        // - For nested elements (validators, views inside fields), use the containing hierarchy's package
+        // - For top-level objects, use the object's own package
+        // The MetaDataUtil.findPackageForMetaData traverses up the hierarchy to find the right context
+        String basePackage = MetaDataUtil.findPackageForMetaData(parent);
+        if (basePackage == null || basePackage.isEmpty()) {
+            // Fallback to the packageName if parent hierarchy doesn't provide context
+            basePackage = packageName;
         }
-        return MetaDataUtil.expandPackageForMetaDataRef(packageName, superName);
+        return MetaDataUtil.expandPackageForMetaDataRef(basePackage, superName);
     }
 
     /** Determine if the packageName should change based on the parent metadata */

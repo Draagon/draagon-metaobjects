@@ -1,8 +1,9 @@
 package com.draagon.meta.loader.file;
 
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.file.json.JsonMetaDataParserAdapter;
-import com.draagon.meta.loader.file.xml.XMLMetaDataParser;
+import com.draagon.meta.loader.parser.json.JsonMetaDataParser;
+import com.draagon.meta.loader.parser.xml.XMLMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,12 +94,8 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
     @Override
     public void configure(LoaderConfiguration config) {
-        // Process configuration arguments first to set up parsers
+        // Process configuration arguments first
         processArguments(config.getArguments());
-        
-        FileLoaderOptions options = getLoaderOptions()
-                .addParser(XML_EXTENSION, XMLMetaDataParser.class)
-                .addParser(JSON_EXTENSION, JsonMetaDataParserAdapter.class);
 
         // Call parent to handle the rest of the configuration
         super.configure(config);
@@ -114,9 +111,6 @@ public class FileMetaDataLoader extends MetaDataLoader {
         if ( !getLoaderOptions().hasSources() ) {
             throw new IllegalStateException( "No Metadata Sources were defined [" + this + "]" );
         }
-        if ( !getLoaderOptions().hasParsers() ) {
-            throw new IllegalStateException( "No Metadata Parsers were defined [" + this + "]" );
-        }
 
         super.init();
 
@@ -129,13 +123,25 @@ public class FileMetaDataLoader extends MetaDataLoader {
 
         AtomicInteger i = new AtomicInteger();
 
-        // Load all the source data
+        // Load all the source data using direct parser selection
         List<FileMetaDataSources> sources = (List<FileMetaDataSources>) getLoaderOptions().getSources();
         sources.forEach( s -> s.getSourceData().forEach( d -> {
 
             if ( log.isDebugEnabled() ) log.debug( "LOADING: " + d.filename );
-            FileMetaDataParser p = getLoaderOptions().getParserForFile( this, d.filename);
-            p.loadFromStream( new ByteArrayInputStream( d.sourceData.getBytes() ));
+            
+            // Direct parser selection based on file extension
+            if (d.filename.endsWith(".json")) {
+                JsonMetaDataParser parser = new JsonMetaDataParser(this, d.filename);
+                parser.loadFromStream(new ByteArrayInputStream(d.sourceData.getBytes()));
+            } else if (d.filename.endsWith(".xml")) {
+                XMLMetaDataParser parser = new XMLMetaDataParser(this, d.filename);
+                parser.loadFromStream(new ByteArrayInputStream(d.sourceData.getBytes()));
+            } else if (!d.filename.endsWith(".bundle")) {
+                // Bundle files are handled by FileMetaDataSources itself, ignore here
+                throw new MetaDataException("Unsupported file type: " + d.filename + 
+                    ". Supported types: .json, .xml, .bundle");
+            }
+            
             i.getAndIncrement();
         }));
 

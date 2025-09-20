@@ -1,4 +1,4 @@
-package com.draagon.meta.loader.json;
+package com.draagon.meta.loader.parser.json;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
@@ -6,6 +6,8 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.parser.BaseMetaDataParser;
+import com.draagon.meta.loader.parser.MetaDataFileParser;
 import com.draagon.meta.registry.MetaDataContextRegistry;
 import com.draagon.meta.registry.MetaDataTypeRegistry;
 import com.draagon.meta.util.MetaDataUtil;
@@ -30,7 +32,7 @@ import java.util.Map;
  * - Array-only format (direct arrays without "children" wrapper)
  * - Robust cross-file reference resolution
  */
-public class JsonMetaDataParser {
+public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFileParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonMetaDataParser.class);
 
@@ -52,14 +54,10 @@ public class JsonMetaDataParser {
             ATTR_ISINTERFACE, ATTR_IMPLEMENTS, ATTR_CHILDREN
     );
 
-    private final MetaDataLoader loader;
-    private final String filename;
-    private String defaultPackageName = "";
     private final Map<String, Integer> nameCounters = new HashMap<>();
 
     public JsonMetaDataParser(MetaDataLoader loader, String filename) {
-        this.loader = loader;
-        this.filename = filename;
+        super(loader, filename);
     }
 
     /**
@@ -70,7 +68,7 @@ public class JsonMetaDataParser {
             JsonObject root = new JsonParser().parse(new InputStreamReader(is)).getAsJsonObject();
 
             if (!root.has(ATTR_METADATA)) {
-                throw new MetaDataException("The root 'metadata' object was not found in file [" + filename + "]");
+                throw new MetaDataException("The root 'metadata' object was not found in file [" + getFilename() + "]");
             }
 
             JsonObject metadata = root.getAsJsonObject(ATTR_METADATA);
@@ -88,7 +86,7 @@ public class JsonMetaDataParser {
             if (metadata.has(ATTR_CHILDREN)) {
                 JsonElement childrenElement = metadata.get(ATTR_CHILDREN);
                 if (childrenElement.isJsonArray()) {
-                    parseMetaData(loader, childrenElement.getAsJsonArray(), true);
+                    parseMetaData(getLoader(), childrenElement.getAsJsonArray(), true);
                 }
             } else {
                 // Check for array-only format - direct array without "children" wrapper
@@ -96,13 +94,13 @@ public class JsonMetaDataParser {
                     if (!entry.getKey().equals(ATTR_PACKAGE) && !entry.getKey().equals(ATTR_DEFPACKAGE) 
                         && entry.getValue().isJsonArray()) {
                         // Found direct array - this is array-only format
-                        parseMetaData(loader, entry.getValue().getAsJsonArray(), true);
+                        parseMetaData(getLoader(), entry.getValue().getAsJsonArray(), true);
                         break;
                     }
                 }
             }
         } catch (Exception ex) {
-            throw new MetaDataException("Error loading MetaData from file [" + filename + "]: " + ex.getMessage(), ex);
+            throw new MetaDataException("Error loading MetaData from file [" + getFilename() + "]: " + ex.getMessage(), ex);
         } finally {
             try { is.close(); } catch (Exception e) {}
         }
@@ -131,7 +129,7 @@ public class JsonMetaDataParser {
 
                 // Validate type exists in registry
                 if (!getTypeRegistry().hasType(typeName)) {
-                    log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + filename + "]");
+                    log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
                     continue;
                 }
 
@@ -169,158 +167,10 @@ public class JsonMetaDataParser {
         }
     }
 
-    /**
-     * Create or overlay MetaData - adapted from proven FileMetaDataParser logic
-     */
-    protected MetaData createOrOverlayMetaData(boolean isRoot, MetaData parent, String typeName, String subTypeName,
-                                               String name, String packageName, String superName,
-                                               Boolean isAbstract, Boolean isInterface, String implementsArray) {
-
-        if (subTypeName != null && subTypeName.equals("*")) subTypeName = null;
-
-        // Auto-generate name if not provided
-        if (name == null || name.equals("")) {
-            String namePrefix = (subTypeName != null && !subTypeName.isEmpty()) 
-                    ? subTypeName.toLowerCase() 
-                    : typeName.toLowerCase();
-            name = getNextNamePrefix(parent, typeName, namePrefix);
-            
-            if (name == null) {
-                throw new MetaDataException("MetaData [" + typeName + "] found on parent [" + parent
-                        + "] had no name specified and auto-naming failed in file [" + filename + "]");
-            }
-        }
-
-        // Resolve package name
-        if (packageName == null || packageName.trim().isEmpty()) {
-            // Inherit package from parent or use default
-            if (!isRoot && parent != null && parent.getName().contains(MetaDataLoader.PKG_SEPARATOR)) {
-                String parentName = parent.getName();
-                int lastSep = parentName.lastIndexOf(MetaDataLoader.PKG_SEPARATOR);
-                if (lastSep > 0) {
-                    packageName = parentName.substring(0, lastSep);
-                } else {
-                    packageName = defaultPackageName;
-                }
-            } else {
-                packageName = defaultPackageName;
-            }
-        } else {
-            // Convert relative paths using proven MetaDataUtil approach
-            packageName = MetaDataUtil.expandPackageForPath(defaultPackageName, packageName);
-        }
-
-        MetaData md = null;
-
-        // Check if MetaData already exists (for overlay scenarios)
-        try {
-            if (isRoot && packageName.length() > 0) {
-                md = parent.getChildOfType(typeName, packageName + MetaDataLoader.PKG_SEPARATOR + name);
-            } else {
-                md = parent.getChildOfType(typeName, name);
-                if (md.getParent() != parent) {
-                    md = md.overload();
-                    parent.addChild(md);
-                }
-            }
-        } catch (MetaDataNotFoundException e) {
-            // Expected - will create new MetaData
-        }
-
-        // Create new MetaData if it doesn't exist
-        if (md == null) {
-            // Get super metadata using proven reference resolution
-            MetaData superData = getSuperMetaData(parent, typeName, name, packageName, superName);
-
-            // Create using registry
-            md = createNewMetaData(isRoot, parent, typeName, subTypeName, name, packageName, superData);
-
-            // Add to parent
-            parent.addChild(md);
-
-            // Set super data
-            if (superData != null) {
-                md.setSuperData(superData);
-            }
-        }
-
-        return md;
-    }
-
-    /**
-     * Get super MetaData using proven FileMetaDataParser approach
-     */
-    protected MetaData getSuperMetaData(MetaData parent, String typeName, String name, String packageName, String superName) {
-        MetaData superData = null;
-
-        if (superName != null && !superName.isEmpty()) {
-            // Try package-prefixed lookup first
-            try {
-                if (superName.indexOf(MetaDataLoader.PKG_SEPARATOR) < 0 && packageName.length() > 0) {
-                    superData = loader.getChildOfType(typeName, packageName + MetaDataLoader.PKG_SEPARATOR + superName);
-                }
-            } catch (MetaDataNotFoundException e) {
-                // Expected - try fully qualified resolution
-            }
-
-            // Try fully qualified name resolution
-            if (superData == null) {
-                String fullyQualifiedSuperName = getFullyQualifiedSuperMetaDataName(parent, packageName, superName);
-                try {
-                    superData = loader.getChildOfType(typeName, fullyQualifiedSuperName);
-                } catch (MetaDataNotFoundException e) {
-                    throw new MetaDataException("Invalid MetaData [" + typeName + "][" + name + "] on parent [" + parent
-                            + "], the SuperClass [" + superName + "] does not exist in file [" + filename + "]");
-                }
-            }
-        }
-
-        return superData;
-    }
-
-    /**
-     * Get fully qualified super metadata name using MetaDataUtil
-     */
-    protected String getFullyQualifiedSuperMetaDataName(MetaData parent, String packageName, String superName) {
-        // For super references, we need the appropriate package context:
-        // - For nested elements (validators, views inside fields), use the containing hierarchy's package
-        // - For top-level objects, use the object's own package
-        // The MetaDataUtil.findPackageForMetaData traverses up the hierarchy to find the right context
-        String basePackage = MetaDataUtil.findPackageForMetaData(parent);
-        if (basePackage == null || basePackage.isEmpty()) {
-            // Fallback to the packageName if parent hierarchy doesn't provide context
-            basePackage = packageName;
-        }
-        return MetaDataUtil.expandPackageForMetaDataRef(basePackage, superName);
-    }
 
 
-    /**
-     * Create new MetaData using registry
-     */
-    protected MetaData createNewMetaData(boolean isRoot, MetaData parent, String typeName, String subTypeName, 
-                                         String name, String packageName, MetaData superData) {
-        
-        if (subTypeName != null && subTypeName.isEmpty()) subTypeName = null;
 
-        // Use the Super class type if no type is defined and a super class exists
-        if (subTypeName == null && superData != null) {
-            subTypeName = superData.getSubTypeName();
-        }
 
-        String fullName = (isRoot && !packageName.isEmpty()) 
-                ? packageName + MetaDataLoader.PKG_SEPARATOR + name 
-                : name;
-
-        MetaData newMetaData = getTypeRegistry().createInstance(typeName, subTypeName, fullName);
-        
-        if (newMetaData == null) {
-            throw new MetaDataException("MetaData [type=" + typeName + "][subType=" + subTypeName + "][name=" + name
-                    + "] could not be created by registry in file [" + filename + "]");
-        }
-
-        return newMetaData;
-    }
 
     /**
      * Parse attributes including inline @-prefixed ones with type casting
@@ -466,20 +316,10 @@ public class JsonMetaDataParser {
         return obj.has(key) ? obj.get(key).getAsBoolean() : null;
     }
 
-    protected String parsePackageValue(String pkg) {
-        return pkg != null ? pkg.trim() : "";
-    }
-
-    protected void setDefaultPackageName(String packageName) {
-        this.defaultPackageName = packageName != null ? packageName : "";
-    }
-
-    protected MetaDataTypeRegistry getTypeRegistry() {
-        return loader.getTypeRegistry();
-    }
-
-    protected String getFilename() {
-        return filename;
+    
+    @Override
+    public MetaDataLoader getLoader() {
+        return loader;
     }
     
     /**

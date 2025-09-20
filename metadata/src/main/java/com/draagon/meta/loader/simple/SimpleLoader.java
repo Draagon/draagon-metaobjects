@@ -3,7 +3,7 @@ package com.draagon.meta.loader.simple;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.json.JsonMetaDataParser;
+import com.draagon.meta.loader.parser.json.JsonMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
 
 import java.io.*;
