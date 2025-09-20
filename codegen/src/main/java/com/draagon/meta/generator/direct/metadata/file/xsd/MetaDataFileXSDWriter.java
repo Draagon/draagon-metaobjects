@@ -3,7 +3,10 @@ package com.draagon.meta.generator.direct.metadata.file.xsd;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.constraint.*;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
+import com.draagon.meta.constraint.Constraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
@@ -30,19 +33,19 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     private String elementFormDefault = "qualified";
     private List<String> constraintFiles = new ArrayList<>();
     
-    // Constraint system for reading definitions
-    private ConstraintDefinitionParser constraintParser;
-    private Map<String, ConstraintDefinitionParser.AbstractConstraintDefinition> abstractConstraints;
-    private List<ConstraintDefinitionParser.ConstraintInstance> constraintInstances;
+    // Constraint system for accessing programmatic definitions
+    private ConstraintRegistry constraintRegistry;
+    private List<PlacementConstraint> placementConstraints;
+    private List<ValidationConstraint> validationConstraints;
 
     public MetaDataFileXSDWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
         super(loader, out);
-        this.constraintParser = new ConstraintDefinitionParser();
-        this.abstractConstraints = new HashMap<>();
-        this.constraintInstances = new ArrayList<>();
+        this.constraintRegistry = ConstraintRegistry.getInstance();
+        this.placementConstraints = new ArrayList<>();
+        this.validationConstraints = new ArrayList<>();
         
-        // Default constraint files to load
-        this.constraintFiles.add("META-INF/constraints/core-constraints.json");
+        // Note: Constraint files no longer used - constraints are programmatic
+        // this.constraintFiles.add("META-INF/constraints/core-constraints.json");
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -103,35 +106,17 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     }
 
     /**
-     * Load constraint definitions from configured files
+     * Load constraint definitions from programmatic constraint registry
      */
-    private void loadConstraintDefinitions() throws ConstraintParseException {
-        log.info("Loading constraint definitions for XSD schema generation from {} files", constraintFiles.size());
+    private void loadConstraintDefinitions() {
+        log.info("Loading constraint definitions for XSD schema generation from programmatic registry");
         
-        for (String constraintFile : constraintFiles) {
-            try {
-                ConstraintDefinitionParser.ConstraintDefinitions definitions = 
-                    constraintParser.parseFromResource(constraintFile);
-                    
-                // Collect abstract definitions
-                for (ConstraintDefinitionParser.AbstractConstraintDefinition abstractDef : definitions.getAbstracts()) {
-                    abstractConstraints.put(abstractDef.getId(), abstractDef);
-                }
-                
-                // Collect constraint instances
-                constraintInstances.addAll(definitions.getInstances());
-                
-                log.debug("Loaded {} abstracts and {} instances from {}", 
-                    definitions.getAbstracts().size(), definitions.getInstances().size(), constraintFile);
-                    
-            } catch (ConstraintParseException e) {
-                log.warn("Could not load constraint file [{}] for XSD generation: {}", constraintFile, e.getMessage());
-                // Continue with other files - constraint files are optional for schema generation
-            }
-        }
+        // Get constraints from the unified registry
+        this.placementConstraints = constraintRegistry.getPlacementConstraints();
+        this.validationConstraints = constraintRegistry.getValidationConstraints();
         
-        log.info("Loaded total {} abstract constraints and {} constraint instances for XSD", 
-            abstractConstraints.size(), constraintInstances.size());
+        log.info("Loaded {} placement constraints and {} validation constraints for XSD", 
+            placementConstraints.size(), validationConstraints.size());
     }
 
     /**
@@ -361,32 +346,13 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         restriction.setAttribute("base", "xs:string");
         simpleType.appendChild(restriction);
         
-        // Apply constraints from loaded constraint definitions
-        String pattern = "^[a-zA-Z][a-zA-Z0-9_]*$"; // Default
+        // Apply standard naming constraints used by programmatic constraints
+        // This is the same pattern enforced by ValidationConstraint in MetaField.java
+        String pattern = "^[a-zA-Z][a-zA-Z0-9_]*$";
         int minLength = 1;
         int maxLength = 64;
         
-        for (ConstraintDefinitionParser.ConstraintInstance constraint : constraintInstances) {
-            String constraintType = constraint.getAbstractRef() != null ? constraint.getAbstractRef() : constraint.getInlineType();
-            String targetName = constraint.getTargetName();
-            
-            if ("pattern".equals(constraintType) && "name".equals(targetName)) {
-                Map<String, Object> params = constraint.getParameters();
-                if (params.containsKey("pattern")) {
-                    pattern = params.get("pattern").toString();
-                }
-            }
-            
-            if ("length".equals(constraintType) && "name".equals(targetName)) {
-                Map<String, Object> params = constraint.getParameters();
-                if (params.containsKey("min")) {
-                    minLength = ((Number) params.get("min")).intValue();
-                }
-                if (params.containsKey("max")) {
-                    maxLength = ((Number) params.get("max")).intValue();
-                }
-            }
-        }
+        log.debug("Generated name constraint type with pattern validation");
         
         // Add pattern facet
         Element patternFacet = doc.createElement("xs:pattern");
@@ -457,12 +423,13 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         StringBuilder constraintInfo = new StringBuilder(description);
         constraintInfo.append(": ");
         
-        for (ConstraintDefinitionParser.ConstraintInstance constraint : constraintInstances) {
-            String constraintType = constraint.getAbstractRef() != null ? constraint.getAbstractRef() : constraint.getInlineType();
-            constraintInfo.append(constraintType).append("(");
-            constraint.getParameters().forEach((key, value) -> 
-                constraintInfo.append(key).append("=").append(value).append(", "));
-            constraintInfo.append(") ");
+        // Add information about programmatic constraints
+        if (!placementConstraints.isEmpty() || !validationConstraints.isEmpty()) {
+            constraintInfo.append("Programmatic constraints: ");
+            constraintInfo.append(placementConstraints.size()).append(" placement, ");
+            constraintInfo.append(validationConstraints.size()).append(" validation");
+        } else {
+            constraintInfo.append("Standard naming and placement constraints enforced programmatically");
         }
         
         documentation.setTextContent(constraintInfo.toString());

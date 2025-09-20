@@ -3,7 +3,10 @@ package com.draagon.meta.generator.direct.metadata.file.json;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.json.JsonDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.constraint.*;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
+import com.draagon.meta.constraint.Constraint;
 import com.google.gson.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,19 +32,19 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     private String description;
     private List<String> constraintFiles = new ArrayList<>();
     
-    // Constraint system for reading definitions
-    private ConstraintDefinitionParser constraintParser;
-    private Map<String, ConstraintDefinitionParser.AbstractConstraintDefinition> abstractConstraints;
-    private List<ConstraintDefinitionParser.ConstraintInstance> constraintInstances;
+    // Constraint system for accessing programmatic definitions
+    private ConstraintRegistry constraintRegistry;
+    private List<PlacementConstraint> placementConstraints;
+    private List<ValidationConstraint> validationConstraints;
 
     public MetaDataFileSchemaWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
         super(loader, out);
-        this.constraintParser = new ConstraintDefinitionParser();
-        this.abstractConstraints = new HashMap<>();
-        this.constraintInstances = new ArrayList<>();
+        this.constraintRegistry = ConstraintRegistry.getInstance();
+        this.placementConstraints = new ArrayList<>();
+        this.validationConstraints = new ArrayList<>();
         
-        // Default constraint files to load
-        this.constraintFiles.add("META-INF/constraints/core-constraints.json");
+        // Note: Constraint files no longer used - constraints are programmatic
+        // this.constraintFiles.add("META-INF/constraints/core-constraints.json");
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -105,35 +108,17 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     }
 
     /**
-     * Load constraint definitions from configured files
+     * Load constraint definitions from programmatic constraint registry
      */
-    private void loadConstraintDefinitions() throws ConstraintParseException {
-        log.info("Loading constraint definitions for metadata file schema generation from {} files", constraintFiles.size());
+    private void loadConstraintDefinitions() {
+        log.info("Loading constraint definitions for metadata file schema generation from programmatic registry");
         
-        for (String constraintFile : constraintFiles) {
-            try {
-                ConstraintDefinitionParser.ConstraintDefinitions definitions = 
-                    constraintParser.parseFromResource(constraintFile);
-                    
-                // Collect abstract definitions
-                for (ConstraintDefinitionParser.AbstractConstraintDefinition abstractDef : definitions.getAbstracts()) {
-                    abstractConstraints.put(abstractDef.getId(), abstractDef);
-                }
-                
-                // Collect constraint instances
-                constraintInstances.addAll(definitions.getInstances());
-                
-                log.debug("Loaded {} abstracts and {} instances from {}", 
-                    definitions.getAbstracts().size(), definitions.getInstances().size(), constraintFile);
-                    
-            } catch (ConstraintParseException e) {
-                log.warn("Could not load constraint file [{}] for schema generation: {}", constraintFile, e.getMessage());
-                // Continue with other files - constraint files are optional for schema generation
-            }
-        }
+        // Get constraints from the unified registry
+        this.placementConstraints = constraintRegistry.getPlacementConstraints();
+        this.validationConstraints = constraintRegistry.getValidationConstraints();
         
-        log.info("Loaded total {} abstract constraints and {} constraint instances for metadata file schema", 
-            abstractConstraints.size(), constraintInstances.size());
+        log.info("Loaded {} placement constraints and {} validation constraints for metadata file schema", 
+            placementConstraints.size(), validationConstraints.size());
     }
 
     /**
@@ -349,39 +334,13 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         nameSchema.addProperty("type", "string");
         nameSchema.addProperty("description", "Name following MetaData naming constraints");
         
-        // Apply naming pattern constraints from loaded constraints
-        for (ConstraintDefinitionParser.ConstraintInstance constraint : constraintInstances) {
-            String constraintType = constraint.getAbstractRef() != null ? constraint.getAbstractRef() : constraint.getInlineType();
-            String targetName = constraint.getTargetName();
-            
-            if ("pattern".equals(constraintType) && "name".equals(targetName)) {
-                Map<String, Object> params = constraint.getParameters();
-                if (params.containsKey("pattern")) {
-                    nameSchema.addProperty("pattern", params.get("pattern").toString());
-                }
-            }
-            
-            if ("length".equals(constraintType) && "name".equals(targetName)) {
-                Map<String, Object> params = constraint.getParameters();
-                if (params.containsKey("min")) {
-                    nameSchema.addProperty("minLength", ((Number) params.get("min")).intValue());
-                }
-                if (params.containsKey("max")) {
-                    nameSchema.addProperty("maxLength", ((Number) params.get("max")).intValue());
-                }
-            }
-        }
+        // Apply standard naming pattern used by programmatic constraints
+        // This is the same pattern enforced by ValidationConstraint in MetaField.java
+        nameSchema.addProperty("pattern", "^[a-zA-Z][a-zA-Z0-9_]*$");
+        nameSchema.addProperty("minLength", 1);
+        nameSchema.addProperty("maxLength", 64);
         
-        // Default pattern if no constraints found
-        if (!nameSchema.has("pattern")) {
-            nameSchema.addProperty("pattern", "^[a-zA-Z][a-zA-Z0-9_]*$");
-        }
-        if (!nameSchema.has("minLength")) {
-            nameSchema.addProperty("minLength", 1);
-        }
-        if (!nameSchema.has("maxLength")) {
-            nameSchema.addProperty("maxLength", 64);
-        }
+        log.debug("Generated name constraints schema with pattern validation");
         
         return nameSchema;
     }

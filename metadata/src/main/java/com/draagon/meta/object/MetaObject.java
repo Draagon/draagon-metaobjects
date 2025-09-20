@@ -7,6 +7,9 @@ import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -34,9 +37,76 @@ public abstract class MetaObject extends MetaData {
     // Referenced by ObjectField and ObjectArrayField - maintained for backward compatibility
     // and shared usage across field implementations
     public final static String ATTR_OBJECT_REF = "objectRef";
-    
-    
 
+    // Self-registration with constraint setup (base constraints for all MetaObjects)
+    static {
+        try {
+            setupMetaObjectConstraints();
+            log.debug("Set up base constraints for MetaObject types");
+        } catch (Exception e) {
+            log.error("Failed to set up MetaObject base constraints", e);
+        }
+    }
+
+    /**
+     * Setup base constraints that apply to all MetaObject types
+     */
+    private static void setupMetaObjectConstraints() {
+        ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+        
+        // CONSTRAINT 1: MetaObject CAN contain MetaFields
+        PlacementConstraint fieldPlacement = new PlacementConstraint(
+            "metaobject.field.placement",
+            "MetaObject can contain MetaField children",
+            (parent) -> parent instanceof MetaObject,
+            (child) -> child instanceof MetaField
+        );
+        constraintRegistry.addConstraint(fieldPlacement);
+        
+        // CONSTRAINT 2: MetaObject CAN contain other MetaObjects (composition)
+        PlacementConstraint objectPlacement = new PlacementConstraint(
+            "metaobject.object.placement", 
+            "MetaObject can contain other MetaObject children",
+            (parent) -> parent instanceof MetaObject,
+            (child) -> child instanceof MetaObject
+        );
+        constraintRegistry.addConstraint(objectPlacement);
+
+        // CONSTRAINT 3: MetaObject CAN contain MetaKeys (primary, foreign, secondary keys)
+        PlacementConstraint keyPlacement = new PlacementConstraint(
+            "metaobject.key.placement",
+            "MetaObject can contain MetaKey children", 
+            (parent) -> parent instanceof MetaObject,
+            (child) -> child instanceof MetaKey
+        );
+        constraintRegistry.addConstraint(keyPlacement);
+
+        // CONSTRAINT 4: Object naming pattern validation (from core-constraints.json)
+        // NOTE: Use getShortName() to validate only the simple name, not package-qualified names
+        ValidationConstraint objectNamingPattern = new ValidationConstraint(
+            "object.naming.pattern",
+            "Object names must follow identifier pattern: ^[a-zA-Z][a-zA-Z0-9_]*$",
+            (metadata) -> metadata instanceof MetaObject,
+            (metadata, value) -> {
+                String shortName = metadata.getShortName();
+                return shortName != null && shortName.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+            }
+        );
+        constraintRegistry.addConstraint(objectNamingPattern);
+
+        // CONSTRAINT 5: Object name length validation (from core-constraints.json)
+        // NOTE: Use getShortName() to validate only the simple name, not package-qualified names
+        ValidationConstraint objectNameLength = new ValidationConstraint(
+            "object.name.length",
+            "Object names must be between 1 and 64 characters",
+            (metadata) -> metadata instanceof MetaObject,
+            (metadata, value) -> {
+                String shortName = metadata.getShortName();
+                return shortName != null && shortName.length() >= 1 && shortName.length() <= 64;
+            }
+        );
+        constraintRegistry.addConstraint(objectNameLength);
+    }
 
     /**
      * Constructs the MetaObject with enhanced validation and metrics

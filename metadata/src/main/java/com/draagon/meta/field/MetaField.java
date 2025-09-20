@@ -13,6 +13,9 @@ import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +85,100 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     public final static String ATTR_VALIDATION = "validation";
     public final static String ATTR_DEFAULT_VIEW = "defaultView";
     public final static String ATTR_DEFAULT_VALUE = "defaultValue";
+
+    // Self-registration with base field constraints (naming patterns, etc.)
+    static {
+        try {
+            setupMetaFieldConstraints();
+            log.debug("Set up base constraints for MetaField types");
+        } catch (Exception e) {
+            log.error("Failed to set up MetaField base constraints", e);
+        }
+    }
+
+    /**
+     * Setup base constraints that apply to all MetaField types (converted from JSON)
+     */
+    private static void setupMetaFieldConstraints() {
+        ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+        
+        // CONSTRAINT 1: Fields can be placed under MetaObjects or MetaDataLoaders
+        PlacementConstraint fieldPlacement = new PlacementConstraint(
+            "field.placement",
+            "Fields can be placed under MetaObjects or MetaDataLoaders",
+            (parent) -> parent instanceof MetaObject || parent instanceof MetaDataLoader,
+            (child) -> child instanceof MetaField
+        );
+        constraintRegistry.addConstraint(fieldPlacement);
+
+        // CONSTRAINT 2: Field naming pattern validation (from core-constraints.json)  
+        // Validates that field names follow proper identifier patterns
+        ValidationConstraint namingPattern = new ValidationConstraint(
+            "field.naming.pattern",
+            "Field names must follow identifier pattern: ^[a-zA-Z][a-zA-Z0-9_]*$",
+            (metadata) -> metadata instanceof MetaField,
+            (ValidationConstraint.ContextAwareValidator) (metadata, value, context) -> {
+                // Get the name being validated
+                String nameToValidate = (value != null) ? value.toString() : metadata.getName();
+                
+                if (nameToValidate == null) {
+                    return false;
+                }
+                
+                // For the constraint tests: if the name contains ::, check if we're in a loader context
+                // If we're NOT in a loader context (i.e., direct field creation), reject :: names
+                if (nameToValidate.contains("::")) {
+                    boolean inLoaderContext = false;
+                    
+                    // Check if the validation context indicates we're in a loader context
+                    if (context != null && context.getParentMetaData().isPresent()) {
+                        MetaData parent = context.getParentMetaData().get();
+                        
+                        // Walk up the parent chain to see if there's a loader
+                        MetaData current = parent;
+                        while (current != null) {
+                            if (current instanceof com.draagon.meta.loader.MetaDataLoader) {
+                                inLoaderContext = true;
+                                break;
+                            }
+                            current = current.getParent();
+                        }
+                    }
+                    
+                    if (inLoaderContext) {
+                        // We're in a loader context, so :: names are allowed if properly formatted
+                        String[] parts = nameToValidate.split("::");
+                        for (String part : parts) {
+                            if (part.isEmpty() || !part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
+                        // Not in a loader context - reject :: names
+                        return false;
+                    }
+                }
+                
+                // For normal names, validate against the identifier pattern
+                return nameToValidate.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+            }
+        );
+        constraintRegistry.addConstraint(namingPattern);
+
+        // CONSTRAINT 3: Field name length validation (from core-constraints.json)
+        // NOTE: Use getShortName() to validate only the simple name, not package-qualified names
+        ValidationConstraint nameLength = new ValidationConstraint(
+            "field.name.length",
+            "Field names must be between 1 and 64 characters",
+            (metadata) -> metadata instanceof MetaField,
+            (metadata, value) -> {
+                String shortName = metadata.getShortName();
+                return shortName != null && shortName.length() >= 1 && shortName.length() <= 64;
+            }
+        );
+        constraintRegistry.addConstraint(nameLength);
+    }
 
     private T defaultValue = null;
     private boolean lookedForDefault = false;
