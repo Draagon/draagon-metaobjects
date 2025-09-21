@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.draagon</groupId>
+        <artifactId>metaobjects-examples</artifactId>
+        <version>5.2.0-SNAPSHOT</version>
+    </parent>
+  
+    <artifactId>metaobjects-example-spring</artifactId>
+    <packaging>jar</packaging>
+
+    <name>MetaObjects :: Examples :: Spring Usage</name>
+    <description>MetaObjects usage with Spring Framework integration</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-core-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-examples-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>2.7.18</version>
+        </dependency>
+        
+        <!-- SLF4J binding for Spring Boot -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.12</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.7.18</version>
+                <configuration>
+                    <mainClass>com.draagon.meta.examples.spring.SpringMetaObjectsExample</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -41,6 +41,7 @@
         <module>web</module>
         <module>web-spring</module>
         <module>demo</module>
+        <module>examples</module>
         <!-- module>docs</module -->
     </modules>
 
