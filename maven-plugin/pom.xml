@@ -58,9 +58,21 @@
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <!-- Code Generation Dependencies -->
         <dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>codegen</artifactId>
+            <artifactId>metaobjects-codegen-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-codegen-mustache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-codegen-plantuml</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,0 +1,36 @@
+name: "Java Interface Template"
+version: "1.0.0"
+description: "Generate Java interfaces with getter/setter method signatures"
+targetLanguage: "java"
+outputFileExtension: "java"
+packagePath: true
+requirements:
+  helpers: ["capitalize", "javaType"]
+template: |
+  package {{packageName}};
+  
+  {{#imports}}
+  import {{.}};
+  {{/imports}}
+  
+  /**
+   * {{description}}
+   * Generated interface for {{className}}
+   */
+  public interface {{className}} {
+      
+      {{#fields}}
+      /**
+       * Gets the {{name}} value
+       * @return {{javaType}} the {{name}}
+       */
+      {{javaType}} {{getterName}}();
+      
+      /**
+       * Sets the {{name}} value
+       * @param {{name}} the {{name}} to set
+       */
+      void {{setterName}}({{javaType}} {{name}});
+      
+      {{/fields}}
+  }
