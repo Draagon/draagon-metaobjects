@@ -441,7 +441,7 @@ public abstract class MetaObject extends MetaData {
         if ( keys == null ) {
             keys = new ArrayList<>();
             for (T key : getChildren( clazz )) {
-                if ( key.getSubTypeName().equals( subType )) keys.add(key);
+                if ( key.getSubType().equals( subType )) keys.add(key);
             }
             setCacheValue(CACHE_KEY, keys);
         }

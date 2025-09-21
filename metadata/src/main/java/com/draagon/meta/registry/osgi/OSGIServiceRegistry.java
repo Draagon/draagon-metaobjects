@@ -412,16 +412,6 @@ public class OSGIServiceRegistry implements ServiceRegistry {
         return lifecycleManager != null ? lifecycleManager.getStatus() : "Not available";
     }
     
-    /**
-     * Get bundle lifecycle manager status (legacy method)
-     * 
-     * @return Lifecycle manager status or null if not available
-     * @deprecated Use getBundleLifecycleStatus() instead
-     */
-    @Deprecated
-    public String getLifecycleManagerStatus() {
-        return getBundleLifecycleStatus();
-    }
     
     /**
      * Check if bundle lifecycle management is active

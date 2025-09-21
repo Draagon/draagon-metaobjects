@@ -411,7 +411,7 @@ public abstract class BaseMetaDataParser {
 
         // Use the Super class type if no type is defined and a super class exists
         if (subTypeName == null && superData != null) {
-            subTypeName = superData.getSubTypeName();
+            subTypeName = superData.getSubType();
         }
         
         // SubType is required for creating new metadata instances (unless inherited from super or using override)
@@ -489,8 +489,8 @@ public abstract class BaseMetaDataParser {
     /** v6.0.0: Context-aware attribute creation using MetaDataContextRegistry */
     protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
 
-        String parentType = parentMetaData.getTypeName();
-        String parentSubType = parentMetaData.getSubTypeName();
+        String parentType = parentMetaData.getType();
+        String parentSubType = parentMetaData.getSubType();
 
         // v6.0.0: Create attribute using context-aware registry system
         MetaAttribute attr = null;
@@ -592,7 +592,7 @@ public abstract class BaseMetaDataParser {
         createInlineAttributeWithDetectedType(md, attrName, finalValue, attributeSubType);
         
         log.debug("Created inline attribute [{}] with value [{}] and expected type [{}] on [{}:{}:{}] in file [{}]", 
-            attrName, finalValue, attributeSubType, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+            attrName, finalValue, attributeSubType, md.getType(), md.getSubType(), md.getName(), getFilename());
     }
     
     /**
@@ -704,7 +704,7 @@ public abstract class BaseMetaDataParser {
                 attr.setValueAsString(value);
                 
                 log.debug("Successfully created type-detected attribute [{}] with subtype [{}] and value [{}] on [{}:{}:{}] in file [{}]", 
-                    attrName, attributeSubType, value, parentMetaData.getTypeName(), parentMetaData.getSubTypeName(), parentMetaData.getName(), getFilename());
+                    attrName, attributeSubType, value, parentMetaData.getType(), parentMetaData.getSubType(), parentMetaData.getName(), getFilename());
                 return;
             }
             

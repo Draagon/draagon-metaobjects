@@ -262,7 +262,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             JsonElement valueElement = el.get("value");
             
             // Handle stringArray attributes specially - convert single strings to Lists
-            if (attr.getSubTypeName() != null && attr.getSubTypeName().equals("stringArray")) {
+            if (attr.getSubType() != null && attr.getSubType().equals("stringArray")) {
                 if (valueElement.isJsonPrimitive()) {
                     // Single string value - convert to single-item list
                     String singleValue = valueElement.getAsString();
@@ -297,11 +297,11 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             parentMetaData.addChild(attr);
             
             log.debug("Successfully created StringArrayAttribute [{}] with values [{}] on parent [{}:{}:{}]", 
-                attrName, commaSeparatedValues, parentMetaData.getTypeName(), parentMetaData.getSubTypeName(), parentMetaData.getName());
+                attrName, commaSeparatedValues, parentMetaData.getType(), parentMetaData.getSubType(), parentMetaData.getName());
                 
         } catch (Exception e) {
             throw new MetaDataException("Failed to create StringArrayAttribute [" + attrName + "] on parent [" + 
-                parentMetaData.getTypeName() + ":" + parentMetaData.getSubTypeName() + ":" + parentMetaData.getName() + 
+                parentMetaData.getType() + ":" + parentMetaData.getSubType() + ":" + parentMetaData.getName() + 
                 "] in file [" + getFilename() + "]: " + e.getMessage(), e);
         }
     }
@@ -311,8 +311,8 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
      */
     protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
 
-        String parentType = parentMetaData.getTypeName();
-        String parentSubType = parentMetaData.getSubTypeName();
+        String parentType = parentMetaData.getType();
+        String parentSubType = parentMetaData.getSubType();
 
         // Create attribute using context-aware registry system
         MetaAttribute attr = null;
@@ -436,11 +436,11 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             try {
                 createStringArrayAttributeOnParent(md, attrName, keyNames);
                 log.debug("Created stringArray attribute [{}] with values [{}] on [{}:{}:{}] in file [{}]", 
-                    attrName, String.join(",", keyNames), md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+                    attrName, String.join(",", keyNames), md.getType(), md.getSubType(), md.getName(), getFilename());
                 return;
             } catch (Exception e) {
                 log.warn("Failed to create stringArray attribute [{}] on [{}:{}:{}], falling back to string: {}", 
-                    attrName, md.getTypeName(), md.getSubTypeName(), md.getName(), e.getMessage());
+                    attrName, md.getType(), md.getSubType(), md.getName(), e.getMessage());
             }
         }
         
@@ -452,7 +452,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         createAttributeOnParent(md, attrName, finalValue);
         
         log.debug("Created inline attribute [{}] with value [{}] on [{}:{}:{}] in file [{}]", 
-            attrName, finalValue, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+            attrName, finalValue, md.getType(), md.getSubType(), md.getName(), getFilename());
     }
     
     /**

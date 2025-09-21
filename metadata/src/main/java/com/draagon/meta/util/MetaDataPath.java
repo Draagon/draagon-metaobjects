@@ -130,8 +130,8 @@ public final class MetaDataPath {
 
         while (current != null) {
             segments.add(new PathSegment(
-                current.getTypeName(),
-                current.getSubTypeName(),
+                current.getType(),
+                current.getSubType(),
                 current.getName()
             ));
             current = current.getParent();

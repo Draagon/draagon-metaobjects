@@ -681,7 +681,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected void drawObjectMetaDataType(MetaObject mo) {
-        println(true,"@type="+mo.getSubTypeName() );
+        println(true,"@type="+mo.getSubType() );
     }
 
     protected void drawObjectExtension(MetaObject mo, MetaObject parent ) {
@@ -702,11 +702,11 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected void drawObjectField(boolean primary, MetaObject mo, MetaField f) {
-        println(true,(primary?"+":"#")+ _pu(f) + " {"+f.getSubTypeName() + "}");
+        println(true,(primary?"+":"#")+ _pu(f) + " {"+f.getSubType() + "}");
     }
 
     protected void drawObjectFieldWithSuper(boolean primary, MetaObject mo, MetaField f) {
-        println(true,(primary?"+":"#")+ _pu(f) + " {"+f.getSubTypeName() + "}");
+        println(true,(primary?"+":"#")+ _pu(f) + " {"+f.getSubType() + "}");
         println(true,"@super=" + _slimPkg( mo.getPackage(), f.getSuperField().getPackage() )
                 + _pu( f.getSuperField()));
     }
@@ -720,7 +720,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
     }
 
     protected void drawFieldAttr(MetaField f, MetaAttribute a) {
-        println(true,"  "+ _pu(a) + " {"+a.getSubTypeName()+"} ="+getAttrValue(a));
+        println(true,"  "+ _pu(a) + " {"+a.getSubType()+"} ="+getAttrValue(a));
     }
 
     protected void drawObjectSuperReference(MetaObject mo, MetaObject parent ) {

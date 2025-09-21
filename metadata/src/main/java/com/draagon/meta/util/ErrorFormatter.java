@@ -253,7 +253,7 @@ public final class ErrorFormatter {
         }
         
         return parent.getChildren().stream()
-                .filter(child -> itemType.equalsIgnoreCase(child.getTypeName()))
+                .filter(child -> itemType.equalsIgnoreCase(child.getType()))
                 .map(MetaData::getName)
                 .sorted()
                 .collect(Collectors.joining(", "));

@@ -262,7 +262,7 @@ public class HelperRegistry {
         
         // Type-based inference for numeric ID fields
         if (("id".equals(fieldName) || fieldName.endsWith("Id")) && 
-            (field.getSubTypeName().equals("long") || field.getSubTypeName().equals("int"))) {
+            (field.getSubType().equals("long") || field.getSubType().equals("int"))) {
             return true;
         }
         

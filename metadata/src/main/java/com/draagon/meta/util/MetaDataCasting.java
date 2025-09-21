@@ -139,7 +139,7 @@ public final class MetaDataCasting {
         while (current != null && !visited.contains(current)) {
             visited.add(current);
             
-            String typeName = current.getTypeName() != null ? current.getTypeName() : "unknown";
+            String typeName = current.getType() != null ? current.getType() : "unknown";
             String name = current.getName() != null ? current.getName() : "unnamed";
             pathComponents.add(typeName + ":" + name);
             

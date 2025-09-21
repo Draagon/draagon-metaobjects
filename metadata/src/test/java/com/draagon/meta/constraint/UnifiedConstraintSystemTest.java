@@ -137,7 +137,7 @@ public class UnifiedConstraintSystemTest {
             assertEquals("Should have correct name", "testArray", attr.getName());
             
             // Test that it has proper subtype registered
-            assertEquals("Should have stringarray subtype", "stringarray", attr.getSubTypeName());
+            assertEquals("Should have stringarray subtype", "stringarray", attr.getSubType());
             
             log.info("StringArrayAttribute created successfully: {} with values: {}", 
                      attr.getName(), attr.getValue());

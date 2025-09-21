@@ -275,7 +275,7 @@ public class IndexedMetaDataCollection {
      * Update the type index when adding/removing children
      */
     private void updateTypeIndex(MetaData child, boolean add) {
-        String typeName = child.getTypeName();
+        String typeName = child.getType();
         
         if (add) {
             typeIndex.computeIfAbsent(typeName, k -> new CopyOnWriteArrayList<>()).add(child);

@@ -64,7 +64,7 @@ public class BasicMetaObjectsExample {
             // Debug: List all loaded children
             System.out.println("   Debug: All loaded children:");
             for (MetaData child : loader.getChildren()) {
-                System.out.println("     - " + child.getClass().getSimpleName() + ": " + child.getName() + " (type: " + child.getTypeName() + ")");
+                System.out.println("     - " + child.getClass().getSimpleName() + ": " + child.getName() + " (type: " + child.getType() + ")");
             }
             
             // Debug: List all MetaObjects specifically
@@ -93,7 +93,7 @@ public class BasicMetaObjectsExample {
             
             if (userMeta != null) {
                 for (MetaField field : userMeta.getMetaFields()) {
-                    System.out.println("     - " + field.getName() + " (" + field.getSubTypeName() + ")");
+                    System.out.println("     - " + field.getName() + " (" + field.getSubType() + ")");
                 }
             }
             

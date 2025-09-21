@@ -90,7 +90,7 @@ public class FruitDBTest extends AbstractOMDBTest {
         for (MetaDataLoader loaderItem : getLoaderRegistry().getDataLoaders()) {
             System.out.println("Loader: " + loaderItem.getName());
             for (MetaObject obj : loaderItem.getChildren(MetaObject.class)) {
-                System.out.println("  Object: " + obj.getName() + " (type: " + obj.getSubTypeName() + ")");
+                System.out.println("  Object: " + obj.getName() + " (type: " + obj.getSubType() + ")");
             }
         }
         System.out.println("=== END METADATALOADERS ===");

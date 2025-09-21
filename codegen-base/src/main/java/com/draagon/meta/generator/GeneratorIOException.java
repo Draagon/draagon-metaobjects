@@ -64,7 +64,7 @@ public class GeneratorIOException extends MetaDataIOException {
         combinedContext.put("operation", operation);
         if (source != null) {
             combinedContext.put("sourceName", source.getName());
-            combinedContext.put("sourceType", source.getTypeName());
+            combinedContext.put("sourceType", source.getType());
         }
         if (additionalContext != null) {
             combinedContext.putAll(additionalContext);
@@ -136,7 +136,7 @@ public class GeneratorIOException extends MetaDataIOException {
 
             if (source != null) {
                 enhanced.append("\nMetaData: ").append(source.getName());
-                enhanced.append(" (").append(source.getTypeName()).append(")");
+                enhanced.append(" (").append(source.getType()).append(")");
             }
 
             if (operation != null) {

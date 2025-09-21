@@ -11,7 +11,7 @@ public class PathTracker {
 
     public void inc( MetaData md ) {
         if ( md == null ) inc( "[null]" );
-        else inc( "["+md.getTypeName()+":"+md.getName()+"]" );
+        else inc( "["+md.getType()+":"+md.getName()+"]" );
     }
 
     public void inc( String path ) {

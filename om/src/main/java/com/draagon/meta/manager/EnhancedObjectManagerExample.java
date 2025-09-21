@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -167,23 +168,23 @@ public class EnhancedObjectManagerExample {
     }
     
     /**
-     * Demonstrates first() method for single object retrieval
+     * Demonstrates firstOptional() method for single object retrieval
      */
-    public Object findActiveUser(String username) throws MetaDataException {
+    public Optional<Object> findActiveUser(String username) throws MetaDataException {
         return objectManager.query("User")
                 .where("username", username)
                 .and("status", "ACTIVE")
-                .first(); // Returns first matching object or null
+                .firstOptional(); // Returns Optional<Object> for safe null handling
     }
     
     /**
      * Demonstrates async query with first result
      */
-    public CompletableFuture<Object> findActiveUserAsync(String username) {
+    public CompletableFuture<Optional<Object>> findActiveUserAsync(String username) {
         return objectManager.query("User")
                 .where("username", username)
                 .and("status", "ACTIVE")
-                .firstAsync();
+                .firstOptionalAsync();
     }
     
     /**

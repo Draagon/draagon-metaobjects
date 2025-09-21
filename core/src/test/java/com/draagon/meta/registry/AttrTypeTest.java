@@ -18,11 +18,11 @@ public class AttrTypeTest {
             StringAttribute attr = new StringAttribute("testAttr");
             assertNotNull("StringAttribute should be created", attr);
             assertEquals("Attribute name should match", "testAttr", attr.getName());
-            assertEquals("Attribute type should be 'attr'", "attr", attr.getTypeName());
-            assertEquals("Attribute subtype should be 'string'", "string", attr.getSubTypeName());
+            assertEquals("Attribute type should be 'attr'", "attr", attr.getType());
+            assertEquals("Attribute subtype should be 'string'", "string", attr.getSubType());
             
             System.out.println("Successfully created StringAttribute: " + attr.getName() + 
-                             " [" + attr.getTypeName() + ":" + attr.getSubTypeName() + "]");
+                             " [" + attr.getType() + ":" + attr.getSubType() + "]");
             
         } catch (Exception e) {
             System.out.println("Failed to create StringAttribute: " + e.getMessage());

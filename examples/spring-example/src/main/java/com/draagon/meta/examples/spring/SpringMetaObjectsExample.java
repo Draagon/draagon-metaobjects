@@ -182,7 +182,7 @@ public class SpringMetaObjectsExample implements CommandLineRunner {
             // Field details
             user.getMetaFields().forEach(field -> {
                 System.out.println("     Field: " + field.getName() + 
-                    " (" + field.getSubTypeName() + ")");
+                    " (" + field.getSubType() + ")");
             });
             
         } catch (Exception e) {

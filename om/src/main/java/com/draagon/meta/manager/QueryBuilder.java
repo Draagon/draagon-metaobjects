@@ -273,14 +273,6 @@ public class QueryBuilder {
         return objectManager.getObjectsAsync(metaObject, build());
     }
     
-    /**
-     * Executes the query and returns the first result, or null if no results found
-     * @deprecated Use {@link #firstOptional()} for null-safe access
-     */
-    @Deprecated
-    public Object first() throws MetaDataException {
-        return firstOptional().orElse(null);
-    }
     
     /**
      * Executes the query and returns the first result as Optional for null-safe access
@@ -309,14 +301,6 @@ public class QueryBuilder {
             .thenApply(results -> results.isEmpty() ? Optional.empty() : Optional.of(results.iterator().next()));
     }
     
-    /**
-     * Executes the query asynchronously and returns the first result (legacy method)
-     * @deprecated Use {@link #firstOptionalAsync()} for null-safe access
-     */
-    @Deprecated
-    public CompletableFuture<Object> firstAsync() {
-        return firstOptionalAsync().thenApply(opt -> opt.orElse(null));
-    }
     
     /**
      * Returns the count of matching objects

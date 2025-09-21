@@ -39,7 +39,7 @@ public class WebConstraintProvider implements ConstraintProvider {
         PlacementConstraint htmlInputTypePlacement = new PlacementConstraint(
             "web.htmlInputType.placement",
             "htmlInputType attribute can be placed on string fields for form generation",
-            (parent) -> parent instanceof MetaField && "string".equals(((MetaField) parent).getSubTypeName()),
+            (parent) -> parent instanceof MetaField && "string".equals(((MetaField) parent).getSubType()),
             (child) -> child instanceof MetaAttribute && "htmlInputType".equals(child.getName())
         );
         registry.addConstraint(htmlInputTypePlacement);
@@ -131,7 +131,7 @@ public class WebConstraintProvider implements ConstraintProvider {
         PlacementConstraint placeholderPlacement = new PlacementConstraint(
             "web.placeholder.placement",
             "placeholder attribute can be placed on string fields for input hints",
-            (parent) -> parent instanceof MetaField && "string".equals(((MetaField) parent).getSubTypeName()),
+            (parent) -> parent instanceof MetaField && "string".equals(((MetaField) parent).getSubType()),
             (child) -> child instanceof MetaAttribute && "placeholder".equals(child.getName())
         );
         registry.addConstraint(placeholderPlacement);
@@ -196,7 +196,7 @@ public class WebConstraintProvider implements ConstraintProvider {
         ValidationConstraint xssValidation = new ValidationConstraint(
             "web.xss.validation",
             "String fields should not contain script tags for security",
-            (metadata) -> metadata instanceof MetaField && "string".equals(((MetaField) metadata).getSubTypeName()),
+            (metadata) -> metadata instanceof MetaField && "string".equals(((MetaField) metadata).getSubType()),
             (metadata, value) -> {
                 if (value == null) return true;
                 String stringValue = value.toString().toLowerCase();

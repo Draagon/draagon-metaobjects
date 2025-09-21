@@ -118,7 +118,7 @@ public class EnhancedMetaDataApiController {
         for (MetaObject obj : metaDataService.getAllMetaObjects()) {
             Map<String, String> objectInfo = new HashMap<>();
             objectInfo.put("name", obj.getName());
-            objectInfo.put("type", obj.getSubTypeName());
+            objectInfo.put("type", obj.getSubType());
             objectInfo.put("package", obj.getPackage());
             objects.add(objectInfo);
         }
@@ -191,7 +191,7 @@ public class EnhancedMetaDataApiController {
     private Map<String, Object> createMetaObjectWrapper(MetaObject metaObject) {
         Map<String, Object> wrapper = new HashMap<>();
         wrapper.put("name", metaObject.getName());
-        wrapper.put("type", metaObject.getSubTypeName());
+        wrapper.put("type", metaObject.getSubType());
         wrapper.put("displayName", metaObject.getName());
         
         if (metaObject.getSuperData() != null) {

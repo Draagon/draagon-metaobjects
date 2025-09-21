@@ -358,6 +358,7 @@ public class MetaData implements Cloneable, Serializable {
      * @see #getSubTypeName()
      * @deprecated Use {@link #getType()} instead for v6.0+ type system integration
      */
+    @Deprecated
     public String getTypeName() {
         return type;
     }
@@ -392,6 +393,7 @@ public class MetaData implements Cloneable, Serializable {
      * @see #getTypeName()
      * @deprecated Use {@link #getSubType()} instead for v6.0+ type system integration
      */
+    @Deprecated
     public String getSubTypeName() {
         return subType;
     }

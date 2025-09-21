@@ -95,8 +95,8 @@ public class MetaDataException extends RuntimeException {
         // Add automatic context if source is available
         if (source != null) {
             this.context.put("sourceClass", source.getClass().getSimpleName());
-            this.context.put("sourceType", source.getTypeName());
-            this.context.put("sourceSubType", source.getSubTypeName());
+            this.context.put("sourceType", source.getType());
+            this.context.put("sourceSubType", source.getSubType());
             this.context.put("sourceName", source.getName());
         }
     }
