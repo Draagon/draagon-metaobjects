@@ -198,6 +198,25 @@
         </dependency>
     </dependencies>
 
+    <!-- Override vulnerable transitive dependencies -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Security: Override SnakeYAML 1.30 (moderate vulnerabilities) with secure version -->
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>2.2</version>
+            </dependency>
+
+            <!-- Security: Keep Jackson compatible with Spring Boot 2.7.18 but use secure patch versions -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.13.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
 
         <extensions>
