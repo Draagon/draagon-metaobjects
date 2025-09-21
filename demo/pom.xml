@@ -30,21 +30,12 @@
         </dependency>
         <dependency>
             <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-web</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-spring</artifactId>
+            <artifactId>metaobjects-web-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
         
-        <!-- Spring Framework - Use consistent version -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>5.3.31</version>
-        </dependency>
+        <!-- Spring dependencies now come transitively from web-spring -->
+        <!-- Additional Spring dependencies for demo-specific functionality -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
@@ -53,11 +44,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>5.3.31</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
             <version>5.3.31</version>
         </dependency>
         

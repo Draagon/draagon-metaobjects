@@ -29,17 +29,17 @@
 
     <modules>
         <module>metadata</module>
-        <module>spring</module>
         <module>codegen-base</module>
         <module>codegen-mustache</module>
         <module>codegen-plantuml</module>
-        <module>codegen</module>
         <module>maven-plugin</module>
         <module>core</module>
+        <module>core-spring</module>
         <module>om</module>
         <module>omdb</module>
         <module>omnosql</module>
         <module>web</module>
+        <module>web-spring</module>
         <module>demo</module>
         <!-- module>docs</module -->
     </modules>
