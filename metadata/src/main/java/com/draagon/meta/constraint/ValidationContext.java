@@ -1,6 +1,7 @@
 package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.loader.MetaDataLoader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,6 +126,21 @@ public class ValidationContext {
             .parentMetaData(metaData)
             .fieldName(attributeName)
             .property("attributeValue", value)
+            .build();
+    }
+
+    /**
+     * Create a validation context for relationship validation
+     * @param sourceMetaData The source metadata being validated
+     * @param loader The MetaDataLoader for graph traversal
+     * @return A validation context
+     */
+    public static ValidationContext forRelationshipValidation(MetaData sourceMetaData, MetaDataLoader loader) {
+        return builder()
+            .operation("validateRelationship")
+            .parentMetaData(sourceMetaData)
+            .property("metaDataLoader", loader)
+            .property("validationType", "relationship")
             .build();
     }
     
