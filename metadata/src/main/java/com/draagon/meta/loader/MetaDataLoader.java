@@ -10,7 +10,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.registry.MetaDataTypeRegistry;
+import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataLoaderRegistry;
 import com.draagon.meta.registry.ServiceRegistryFactory;
 import com.draagon.meta.object.MetaObject;
@@ -85,11 +85,33 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     public final static String TYPE_LOADER = "loader";
     public final static String SUBTYPE_MANUAL = "manual";
 
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(MetaDataLoader.class, def -> def
+                .type(TYPE_LOADER).subType(SUBTYPE_MANUAL)
+                .description("Manual metadata loader")
+                
+                // ACCEPTS ALL METADATA TYPES
+                .optionalChild("object", "*")     // Any object type
+                .optionalChild("field", "*")      // Any field type
+                .optionalChild("attr", "*")       // Any attribute type
+                .optionalChild("view", "*")       // Any view type
+                .optionalChild("validator", "*")  // Any validator type
+                .optionalChild("loader", "*")     // Any loader type
+            );
+            
+            log.debug("Registered MetaDataLoader type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register MetaDataLoader type with unified registry", e);
+        }
+    }
+
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
     private final LoaderOptions loaderOptions;
     
-    // v6.0.0: Replace TypesConfig with service-based registries
-    private MetaDataTypeRegistry typeRegistry = null;
+    // v6.0.0: Replace TypesConfig with unified registry
+    private MetaDataRegistry typeRegistry = null;
     private MetaDataLoaderRegistry loaderRegistry = null;
 
     // Enhanced thread-safe loading state management
@@ -138,14 +160,14 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
 
     // v6.0.0: Replace TypesConfig methods with registry-based API
     
-    public MetaDataTypeRegistry getTypeRegistry() {
+    public MetaDataRegistry getTypeRegistry() {
         if (typeRegistry == null) {
-            typeRegistry = new MetaDataTypeRegistry(ServiceRegistryFactory.getDefault());
+            typeRegistry = MetaDataRegistry.getInstance();
         }
         return typeRegistry;
     }
 
-    public MetaDataLoader setTypeRegistry(MetaDataTypeRegistry typeRegistry) {
+    public MetaDataLoader setTypeRegistry(MetaDataRegistry typeRegistry) {
         this.typeRegistry = typeRegistry;
         return this;
     }
@@ -404,10 +426,10 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
 
     // v6.0.0: Replace TypesConfig initialization with registry initialization
     protected void initDefaultRegistries() {
-        // Initialize registries with service discovery
+        // Initialize registries with unified registry
         if (typeRegistry == null) {
-            typeRegistry = new MetaDataTypeRegistry(ServiceRegistryFactory.getDefault());
-            log.debug("Initialized default MetaDataTypeRegistry for loader: {}", getName());
+            typeRegistry = MetaDataRegistry.getInstance();
+            log.debug("Initialized default MetaDataRegistry for loader: {}", getName());
         }
         
         if (loaderRegistry == null) {
@@ -479,14 +501,6 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         }
     }
     
-    /**
-     * Legacy initialization method for backward compatibility
-     * @deprecated Use init() which now includes concurrent protection
-     */
-    @Deprecated
-    public MetaDataLoader initLegacy() {
-        return performInitializationInternal(System.currentTimeMillis());
-    }
     
     /**
      * Core initialization logic - refactored for better maintainability
@@ -621,9 +635,9 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         }
         
         try {
-            if (!isRegistered) {
-                MetaDataRegistry.registerLoader(this);
-            }
+            // Note: Registration with MetaDataLoaderRegistry should be handled by the calling code
+            // using ServiceRegistryFactory to ensure OSGi compatibility. The legacy static registry
+            // is not used for OSGi-compatible deployments.
             
             // Transition to registered state
             if (!loadingState.tryTransition(LoadingState.Phase.REGISTERING, LoadingState.Phase.REGISTERED)) {
@@ -901,10 +915,8 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
             // Remove all classes
             clearChildren();
 
-            // Unregister the class loader
-            if (isRegistered) {
-                MetaDataRegistry.unregisterLoader(this);
-            }
+            // Note: Unregistration from MetaDataLoaderRegistry should be handled by the calling code
+            // The legacy static registry is not used for OSGi-compatible deployments.
             
             // Transition to destroyed state
             loadingState.forceTransition(LoadingState.Phase.DESTROYED);

@@ -2,27 +2,22 @@
   "children": [
     {"field": {"name": "id", "type": "long", "@isAbstract": "true", "@validation": "required",
         "children": [
-          {"validator": {"name": "required"}},
-          {"view": {"name": "numeric", "@readOnly": "true"}}
+          {"validator": {"type": "required"}}
         ]
       }
     },
-    {"field": {"name": "name", "@isAbstract": "true", "@validation": "required,length",
+    {"field": {"name": "name", "type": "string", "@isAbstract": "true", "@validation": "required,length",
         "children": [
-          {"validator": {"name": "required"}},
-          {"validator": {"name": "length", "@min": "1", "@max": "100"}},
-          {"view": {"name": "text", "@placeholder": "Enter name", "@maxLength": "100"}}
+          {"validator": {"type": "required"}},
+          {"validator": {"type": "length", "@min": "1", "@max": "100"}}
         ]
       }
     },
-    {"field": {"name": "description", "@isAbstract": "true",
+    {"field": {"name": "description", "type": "string", "@isAbstract": "true",
         "children": [
-          {"validator": {"name": "length", "@max": "500"}},
-          {"view": {"name": "textarea", "@rows": "3", "@placeholder": "Enter description"}}
+          {"validator": {"type": "length", "@max": "500"}}
         ]
       }
-    },
-    {"validator": {"name": "positiveRange", "type": "range", "@isAbstract": "true", "@min": "1", "@max": "999999"}},
-    {"validator": {"name": "priceRange", "type": "range", "@isAbstract": "true", "@min": "100", "@max": "1000000"}}
+    }
   ]
 }}

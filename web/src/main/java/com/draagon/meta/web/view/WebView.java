@@ -8,19 +8,40 @@ package com.draagon.meta.web.view;
 
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.*;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
+@MetaDataTypeHandler(type = "view", subType = "web", description = "Web-based view for HTML form rendering")
 public abstract class WebView extends MetaView
 {
-  //private static Log log = LogFactory.getLog( WebView.class );
+  private static final Logger log = LoggerFactory.getLogger(WebView.class);
+  
+  public final static String SUBTYPE_WEB = "web";
+
+  // Self-registration with unified registry
+  static {
+      try {
+          MetaDataRegistry.registerType(WebView.class, def -> def
+              .type("view").subType(SUBTYPE_WEB)
+              .description("Web-based view for HTML form rendering")
+              .optionalChild("attr", "*")
+          );
+          log.debug("Registered WebView type with unified registry");
+      } catch (Exception e) {
+          log.error("Failed to register WebView type with unified registry", e);
+      }
+  }
 
   public WebView( String name )
   {
-      super( "web", name );
+      super( SUBTYPE_WEB, name );
   }
 
   /**

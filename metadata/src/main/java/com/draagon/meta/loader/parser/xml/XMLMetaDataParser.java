@@ -154,6 +154,7 @@ public class XMLMetaDataParser extends BaseMetaDataParser implements MetaDataFil
             Boolean isAbstract = Boolean.parseBoolean(el.getAttribute(ATTR_ISABSTRACT));
             Boolean isInterface = Boolean.parseBoolean(el.getAttribute(ATTR_ISINTERFACE));
             String implementsArray = el.getAttribute(ATTR_IMPLEMENTS);
+            Boolean isOverlay = Boolean.parseBoolean(el.getAttribute(ATTR_OVERLAY));
 
             // NOTE:  This exists for backwards compatibility
             // Handle unknown types based on strict mode configuration
@@ -173,7 +174,7 @@ public class XMLMetaDataParser extends BaseMetaDataParser implements MetaDataFil
             MetaData md = createOrOverlayMetaData(isRoot,
                     parent, typeName, subTypeName,
                     name, packageName, superName,
-                    isAbstract, isInterface, implementsArray);
+                    isAbstract, isInterface, implementsArray, isOverlay);
 
             // Update info msg if verbose
             if (getLoader().getLoaderOptions().isVerbose()) {

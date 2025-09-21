@@ -4,19 +4,105 @@ import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.pojo.PojoMetaObject;
+import com.draagon.meta.registry.MetaDataRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 
-public class ProxyMetaObject extends PojoMetaObject {
+/**
+ * ProxyMetaObject with unified registry registration for proxy-based objects.
+ *
+ * @version 6.0
+ */
+public class ProxyMetaObject extends PojoMetaObject
+{
+    private static final Logger log = LoggerFactory.getLogger(ProxyMetaObject.class);
 
     public final static String OBJECT_SUBTYPE = "proxy";
     public final static String ATTR_PROXYOBJECT = "proxyObject";
+    public final static String ATTR_INTERFACE_NAME = "interfaceName";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(ProxyMetaObject.class, def -> def
+                .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
+                .description("Proxy MetaObject with dynamic proxy field access")
+                
+                // PROXY-SPECIFIC ATTRIBUTES
+                .optionalAttribute(ATTR_OBJECT, "string")
+                .optionalAttribute(ATTR_OBJECT_REF, "string")
+                .optionalAttribute(ATTR_PROXYOBJECT, "string")
+                .optionalAttribute(ATTR_INTERFACE_NAME, "string")
+                .optionalAttribute(ATTR_DESCRIPTION, "string")
+                
+                // PROXY OBJECTS CAN CONTAIN ALL FIELD TYPES
+                .optionalChild("field", "string", "*")
+                .optionalChild("field", "int", "*")
+                .optionalChild("field", "long", "*")
+                .optionalChild("field", "double", "*")
+                .optionalChild("field", "float", "*")
+                .optionalChild("field", "short", "*")
+                .optionalChild("field", "byte", "*")
+                .optionalChild("field", "boolean", "*")
+                .optionalChild("field", "date", "*")
+                .optionalChild("field", "object", "*")
+                .optionalChild("field", "class", "*")
+                .optionalChild("field", "stringArray", "*")
+                .optionalChild("field", "objectArray", "*")
+                
+                // REMOVED: Direct attr children should not be allowed via addChild().
+                // Attributes are added via addMetaAttr(), not addChild().
+                
+                // PROXY OBJECTS CAN CONTAIN KEYS
+                .optionalChild("key", "primary", "*")
+                .optionalChild("key", "foreign", "*")
+                .optionalChild("key", "secondary", "*")
+                // Inherits: name, pkg attributes from MetaObject
+            );
+            
+            log.debug("Registered ProxyMetaObject type with unified registry");
+            
+            // Register ProxyMetaObject-specific constraints
+            setupProxyMetaObjectConstraints();
+            
+        } catch (Exception e) {
+            log.error("Failed to register ProxyMetaObject type with unified registry", e);
+        }
+    }
+    
+    /**
+     * Setup ProxyMetaObject-specific constraints in the constraint registry
+     */
+    private static void setupProxyMetaObjectConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+            
+            // PLACEMENT CONSTRAINT: ProxyMetaObject CAN have interfaceName attribute
+            PlacementConstraint proxyInterfaceNamePlacement = new PlacementConstraint(
+                "proxyobject.interfacename.placement",
+                "ProxyMetaObject can have interfaceName attribute",
+                (metadata) -> metadata instanceof ProxyMetaObject,
+                (child) -> child instanceof StringAttribute && 
+                          child.getName().equals(ATTR_INTERFACE_NAME)
+            );
+            constraintRegistry.addConstraint(proxyInterfaceNamePlacement);
+            
+            log.debug("Registered ProxyMetaObject-specific constraints");
+            
+        } catch (Exception e) {
+            log.error("Failed to register ProxyMetaObject constraints", e);
+        }
+    }
 
     public ProxyMetaObject(String name) {
         super(OBJECT_SUBTYPE,name);

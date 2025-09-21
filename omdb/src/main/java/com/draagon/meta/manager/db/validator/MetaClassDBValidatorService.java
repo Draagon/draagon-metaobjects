@@ -2,7 +2,8 @@ package com.draagon.meta.manager.db.validator;
 
 
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
+import com.draagon.meta.registry.MetaDataLoaderRegistry;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.*;
 import com.draagon.meta.manager.db.defs.*;
@@ -23,6 +24,7 @@ public class MetaClassDBValidatorService
   //private static final long WAIT_TIME = 60000;
 
   private ObjectManagerDB mObjectManager = null;
+  private MetaDataLoaderRegistry metaDataLoaderRegistry = null;
 
   private List<BaseDef> createdDefs = null;
   private List<BaseDef> checkedDefs = new ArrayList<BaseDef>();
@@ -48,6 +50,14 @@ public class MetaClassDBValidatorService
     return shouldWait;
   }
 
+  public void setMetaDataLoaderRegistry(MetaDataLoaderRegistry registry) {
+    this.metaDataLoaderRegistry = registry;
+  }
+
+  public MetaDataLoaderRegistry getMetaDataLoaderRegistry() {
+    return metaDataLoaderRegistry;
+  }
+
   public void init() throws Exception
   {
 	if ( getObjectManager() == null )
@@ -66,8 +76,18 @@ public class MetaClassDBValidatorService
       MappingHandler mh = getObjectManager().getMappingHandler();
       DatabaseDriver dd = (DatabaseDriver) getObjectManager().getDatabaseDriver();
       
+      // Get loaders from specific registry if set, otherwise use utility method
+      java.util.Collection<MetaDataLoader> loaders;
+      if (metaDataLoaderRegistry != null) {
+        loaders = metaDataLoaderRegistry.getDataLoaders();
+        log.info("Using specific MetaDataLoaderRegistry with " + loaders.size() + " loaders");
+      } else {
+        loaders = MetaDataUtil.getAllMetaDataLoaders(this);
+        log.info("Using MetaDataUtil registry discovery with " + loaders.size() + " loaders");
+      }
+      
       // Validate all Writeable (TABLE) MetaClasses
-      for( MetaDataLoader loader : MetaDataRegistry.getDataLoaders() )
+      for( MetaDataLoader loader : loaders )
       {
     	// Verify the Mutable Mappings
         for( MetaObject mc : loader.getMetaObjects() )            

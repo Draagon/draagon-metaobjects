@@ -31,7 +31,7 @@ public class MustacheTemplateEngineTest extends GeneratorTestBase {
         ));
         
         // Get the User MetaObject
-        testMetaObject = loader.getChild("com.example.model::User", MetaObject.class);
+        testMetaObject = loader.getChild("com_example_model::User", MetaObject.class);
         
         assertNotNull("Test MetaObject should be loaded", testMetaObject);
     }
@@ -119,7 +119,7 @@ public class MustacheTemplateEngineTest extends GeneratorTestBase {
         String result = engine.generateCode(template, testMetaObject);
         
         // Verify package name is included
-        assertTrue("Should include package declaration", result.contains("package com.example.model"));
+        assertTrue("Should include package declaration", result.contains("package com_example_model"));
         
         // Verify class name is correct
         assertTrue("Should have correct class name", result.contains("class User"));

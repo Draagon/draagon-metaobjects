@@ -116,8 +116,54 @@ public class CoreMetaDataContextProvider implements MetaDataContextProvider {
         // ForeignObjectRef attributes on key elements should be string  
         attributeRules.computeIfAbsent("key", k -> new HashMap<>())
                 .put("foreignObjectRef", "string");
+        
+        // Field-specific attribute type mappings (general rules)
+        Map<String, String> fieldRules = attributeRules.computeIfAbsent("field", k -> new HashMap<>());
+        fieldRules.put("maxLength", "int");
+        fieldRules.put("minLength", "int");
+        fieldRules.put("precision", "int");
+        fieldRules.put("pattern", "string");
+        fieldRules.put("defaultValue", "string");
+        fieldRules.put("validation", "string");
+        fieldRules.put("isAbstract", "string");
+        fieldRules.put("required", "string");
+        fieldRules.put("defaultView", "string");
+        fieldRules.put("dateFormat", "string");
+        fieldRules.put("minDate", "string");
+        fieldRules.put("maxDate", "string");
+        
+        // Subtype-specific attribute rules for numeric fields
+        Map<String, Map<String, String>> fieldSubTypes = subTypeAttributeRules.computeIfAbsent("field", k -> new HashMap<>());
+        
+        // Double field specific rules
+        Map<String, String> doubleFieldRules = fieldSubTypes.computeIfAbsent("double", k -> new HashMap<>());
+        doubleFieldRules.put("minValue", "double");
+        doubleFieldRules.put("maxValue", "double");
+        
+        // Long field specific rules  
+        Map<String, String> longFieldRules = fieldSubTypes.computeIfAbsent("long", k -> new HashMap<>());
+        longFieldRules.put("minValue", "long");
+        longFieldRules.put("maxValue", "long");
+        
+        // Float field specific rules
+        Map<String, String> floatFieldRules = fieldSubTypes.computeIfAbsent("float", k -> new HashMap<>());
+        floatFieldRules.put("minValue", "float");
+        floatFieldRules.put("maxValue", "float");
+        
+        // Integer field specific rules (explicit for clarity)
+        Map<String, String> intFieldRules = fieldSubTypes.computeIfAbsent("int", k -> new HashMap<>());
+        intFieldRules.put("minValue", "int");
+        intFieldRules.put("maxValue", "int");
+        
+        // Validator-specific attribute type mappings
+        Map<String, String> validatorRules = attributeRules.computeIfAbsent("validator", k -> new HashMap<>());
+        validatorRules.put("min", "string");  // Validators expect string attributes
+        validatorRules.put("max", "string");  // Validators expect string attributes
+        validatorRules.put("pattern", "string");
+        validatorRules.put("values", "string");
+        validatorRules.put("message", "string");
                 
-        log.debug("Loaded essential context rules: keys -> stringArray, foreignObjectRef -> string");
+        log.debug("Loaded essential context rules: {} attribute mappings total", attributeRules.values().stream().mapToInt(Map::size).sum());
     }
     
     private void loadContextRules() throws ParserConfigurationException, IOException, SAXException {

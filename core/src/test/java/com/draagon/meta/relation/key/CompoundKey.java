@@ -28,7 +28,6 @@ public class CompoundKey extends ObjectKey {
         return getFieldKeys();
     }
 
-    @Override
     public ValidationResult validate() {
         if ( getFieldKeys().size() <= 1 ) {
             return ValidationResult.withError("CompoundKey must have more than one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());

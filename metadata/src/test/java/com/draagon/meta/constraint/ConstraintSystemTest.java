@@ -68,8 +68,8 @@ public class ConstraintSystemTest {
         PojoMetaObject metaObject = new PojoMetaObject("testObject");
         
         try {
-            // Invalid name with :: should be rejected
-            StringField invalidField = new StringField("invalid::name");
+            // Invalid name starting with number should be rejected
+            StringField invalidField = new StringField("123invalid");
             metaObject.addMetaField(invalidField);
             
             // This should fail when adding to loader due to constraint violation
@@ -81,7 +81,7 @@ public class ConstraintSystemTest {
             assertTrue("Should mention pattern constraint", 
                       e.getMessage().contains("pattern"));
             assertTrue("Should mention the invalid value", 
-                      e.getMessage().contains("invalid::name"));
+                      e.getMessage().contains("123invalid"));
         } catch (Exception e) {
             // Also acceptable - could be wrapped in MetaDataException
             assertTrue("Should mention constraint violation", 
@@ -224,7 +224,7 @@ public class ConstraintSystemTest {
         
         try {
             // Invalid field name should be rejected immediately when added to object
-            StringField invalidField = new StringField("invalid::name");
+            StringField invalidField = new StringField("9invalidName");
             metaObject.addMetaField(invalidField); // Should work at object level
             
             // But should fail when adding to loader (where constraints are enforced)

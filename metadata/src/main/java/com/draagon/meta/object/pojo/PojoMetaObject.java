@@ -11,20 +11,118 @@ import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.ValidationResult;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.registry.MetaDataRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.lang.reflect.*;
 
 /**
- * MetaObject that supports POJO objects
+ * MetaObject that supports POJO objects with unified registry registration.
+ *
+ * @version 6.0
  */
 @SuppressWarnings("serial")
-public class PojoMetaObject extends MetaObject {
+public class PojoMetaObject extends MetaObject
+{
+    private static final Logger log = LoggerFactory.getLogger(PojoMetaObject.class);
 
     public final static String SUBTYPE_POJO = "pojo";
+    public final static String ATTR_CLASS_NAME = "className";
+    public final static String ATTR_PACKAGE_NAME = "packageName";
 
     public final static String CACHE_PARAM_GETTER_METHOD = "getterMethod";
     public final static String CACHE_PARAM_SETTER_METHOD = "setterMethod";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(PojoMetaObject.class, def -> def
+                .type(TYPE_OBJECT).subType(SUBTYPE_POJO)
+                .description("POJO MetaObject with reflection-based field access")
+                
+                // POJO-SPECIFIC ATTRIBUTES
+                .optionalAttribute(ATTR_OBJECT, "string")
+                .optionalAttribute(ATTR_OBJECT_REF, "string")
+                .optionalAttribute(ATTR_DESCRIPTION, "string")
+                .optionalAttribute(ATTR_CLASS_NAME, "string")
+                .optionalAttribute(ATTR_PACKAGE_NAME, "string")
+                
+                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
+                .optionalAttribute("dbTable", "string")
+                .optionalAttribute("hasAuditing", "boolean")
+                .optionalAttribute("hasJpa", "boolean")
+                .optionalAttribute("hasValidation", "boolean")
+                .optionalAttribute("implements", "string")
+                
+                // POJO OBJECTS CAN CONTAIN ALL FIELD TYPES
+                .optionalChild("field", "string")
+                .optionalChild("field", "int")
+                .optionalChild("field", "long")
+                .optionalChild("field", "double")
+                .optionalChild("field", "float")
+                .optionalChild("field", "short")
+                .optionalChild("field", "byte")
+                .optionalChild("field", "boolean")
+                .optionalChild("field", "date")
+                .optionalChild("field", "object")
+                .optionalChild("field", "class")
+                .optionalChild("field", "stringArray")
+                .optionalChild("field", "objectArray")
+                
+                // REMOVED: Direct attr children should not be allowed via addChild().
+                // Attributes are added via addMetaAttr(), not addChild().
+                // Specific attributes are defined via .optionalAttribute() calls above.
+                // Inherits: name, pkg attributes from MetaObject
+            );
+            
+            log.debug("Registered PojoMetaObject type with unified registry");
+            
+            // Register PojoMetaObject-specific constraints
+            setupPojoMetaObjectConstraints();
+            
+        } catch (Exception e) {
+            log.error("Failed to register PojoMetaObject type with unified registry", e);
+        }
+    }
+    
+    /**
+     * Setup PojoMetaObject-specific constraints in the constraint registry
+     */
+    private static void setupPojoMetaObjectConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+            
+            // PLACEMENT CONSTRAINT: POJO objects CAN have className attribute
+            PlacementConstraint pojoClassNamePlacement = new PlacementConstraint(
+                "pojoobject.classname.placement",
+                "POJO objects can have className attribute",
+                (metadata) -> metadata instanceof PojoMetaObject,
+                (child) -> child instanceof StringAttribute && 
+                          child.getName().equals(ATTR_CLASS_NAME)
+            );
+            constraintRegistry.addConstraint(pojoClassNamePlacement);
+            
+            // PLACEMENT CONSTRAINT: POJO objects CAN have packageName attribute
+            PlacementConstraint pojoPackageNamePlacement = new PlacementConstraint(
+                "pojoobject.packagename.placement",
+                "POJO objects can have packageName attribute",
+                (metadata) -> metadata instanceof PojoMetaObject,
+                (child) -> child instanceof StringAttribute && 
+                          child.getName().equals(ATTR_PACKAGE_NAME)
+            );
+            constraintRegistry.addConstraint(pojoPackageNamePlacement);
+            
+            log.debug("Registered PojoMetaObject-specific constraints");
+            
+        } catch (Exception e) {
+            log.error("Failed to register PojoMetaObject constraints", e);
+        }
+    }
 
     /**
      * Constructs a bean MetaClass

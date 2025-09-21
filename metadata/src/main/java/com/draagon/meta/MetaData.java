@@ -8,8 +8,9 @@ package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.type.MetaDataTypeDefinition;
-import com.draagon.meta.type.MetaDataTypeRegistry;
+// Using unified registry instead
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.constraint.ConstraintEnforcer;
 import com.draagon.meta.cache.CacheStrategy;
 import com.draagon.meta.cache.HybridCache;
 import com.draagon.meta.collections.IndexedMetaDataCollection;
@@ -96,7 +97,6 @@ public class MetaData implements Cloneable, Serializable {
     private final String pkg;
     
     // Type system integration
-    private volatile MetaDataTypeDefinition typeDefinition;
 
     private MetaData superData = null;
 
@@ -144,8 +144,12 @@ public class MetaData implements Cloneable, Serializable {
         this.subType = subType;
         this.name = name;
 
-        // Initialize type definition (lazy loading to avoid circular dependencies)
-        this.typeDefinition = null;
+        // v6.0.0: Validate name during construction
+        if (name != null && type != null) {
+            validateName(name);
+        }
+
+        // Type definition removed - using unified registry
         
 
         // Cache the shortName and packageName (handle null name)
@@ -171,31 +175,38 @@ public class MetaData implements Cloneable, Serializable {
 
     // ========== ENHANCED TYPE SYSTEM METHODS ==========
 
+    // Type definition methods removed - using unified registry with static self-registration
+    
     /**
-     * Get the type definition for this MetaData (modern approach)
+     * Validate MetaData name during construction
      */
-    public Optional<MetaDataTypeDefinition> getTypeDefinition() {
-        if (typeDefinition == null) {
-            synchronized (this) {
-                if (typeDefinition == null) {
-                    try {
-                        typeDefinition = MetaDataTypeRegistry.getInstance()
-                            .getType(type)
-                            .orElse(null);
-                    } catch (Exception e) {
-                        log.debug("Could not load type definition for {}: {}", type, e.getMessage());
+    private void validateName(String name) {
+        // Loaders and views can have more flexible naming (allow hyphens)
+        if ("loader".equals(type) || "view".equals(type)) {
+            // Allow hyphens for loaders and views
+            if (!name.matches("^[a-zA-Z][a-zA-Z0-9_-]*$")) {
+                throw new IllegalArgumentException(
+                    "Invalid " + type + " name '" + name + "': must follow pattern ^[a-zA-Z][a-zA-Z0-9_-]*$");
+            }
+        } else {
+            // Check if this is a package-qualified name
+            if (name.contains("::")) {
+                // Package-qualified name - validate each part separately
+                String[] parts = name.split("::");
+                for (String part : parts) {
+                    if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
+                        throw new IllegalArgumentException(
+                            "Constraint violation: Invalid MetaData name part '" + part + "' in '" + name + "': must follow identifier pattern ^[a-zA-Z][a-zA-Z0-9_]*$");
                     }
+                }
+            } else {
+                // Simple name - strict identifier pattern for fields and objects
+                if (!name.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
+                    throw new IllegalArgumentException(
+                        "Constraint violation: Invalid MetaData name '" + name + "': must follow identifier pattern ^[a-zA-Z][a-zA-Z0-9_]*$");
                 }
             }
         }
-        return Optional.ofNullable(typeDefinition);
-    }
-
-    /**
-     * Check if this MetaData type is registered in the type system
-     */
-    public boolean hasRegisteredType() {
-        return getTypeDefinition().isPresent();
     }
 
     
@@ -559,21 +570,6 @@ public class MetaData implements Cloneable, Serializable {
     ////////////////////////////////////////////////////
     // SETTER / GETTER METHODS
 
-    /**
-     * REMOVED in v6.0.0: This method was conceptually flawed as it conflated
-     * the Java implementation class with the MetaData type concept.
-     * 
-     * Use getTypeId() instead to get the proper type+subtype identity.
-     * If you need the Java class, use getClass() directly.
-     * 
-     * @deprecated Use getTypeId() for type information or getClass() for Java class
-     */
-    @Deprecated(since = "6.0.0", forRemoval = true)
-    public Class<? extends MetaData> getMetaDataClass() {
-        throw new UnsupportedOperationException(
-            "getMetaDataClass() removed in v6.0.0. Use getTypeId() for type info or getClass() for Java class."
-        );
-    }
     
     /**
      * Type-safe utility methods for common type checks
@@ -862,12 +858,20 @@ public class MetaData implements Cloneable, Serializable {
             }
         }
         
-        // v6.0.0: Enforce constraints before adding child
-        try {
-            com.draagon.meta.constraint.ConstraintEnforcer.getInstance().enforceConstraintsOnAddChild(this, data);
-        } catch (com.draagon.meta.constraint.ConstraintViolationException e) {
-            throw new InvalidMetaDataException(data, "Constraint violation when adding child: " + e.getMessage(), e);
+        // v6.0.0: Unified registry validation before adding child
+        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+        if (!registry.acceptsChild(this.getType(), this.getSubType(), 
+                                 data.getType(), data.getSubType(), data.getName())) {
+            String supportedChildren = registry.getSupportedChildrenDescription(this.getType(), this.getSubType());
+            throw new InvalidMetaDataException(data, String.format(
+                "%s.%s does not accept child '%s' of type %s.%s. %s",
+                this.getType(), this.getSubType(), data.getName(),
+                data.getType(), data.getSubType(), supportedChildren));
         }
+        
+        // v6.0.0: Constraint enforcement during construction
+        ConstraintEnforcer constraintEnforcer = ConstraintEnforcer.getInstance();
+        constraintEnforcer.enforceConstraintsOnAddChild(this, data);
         
         data.attachParent(this);
         
@@ -1198,18 +1202,6 @@ public class MetaData implements Cloneable, Serializable {
     ////////////////////////////////////////////////////
     // MISC METHODS
     
-    /**
-     * v6.0.0: Constraint enforcement is now done during construction (addChild/setAttribute).
-     * This method is deprecated - constraints are enforced in real-time.
-     * 
-     * @return Always returns valid result since constraints are enforced during construction
-     * @deprecated Use constraint system during construction instead
-     */
-    @Deprecated
-    public ValidationResult validate() {
-        // Constraints are now enforced during construction, so metadata is always valid
-        return ValidationResult.valid();
-    }
 
     /**
      * Overload the MetaData.  Used with overlays

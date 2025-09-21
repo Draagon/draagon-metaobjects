@@ -12,32 +12,54 @@ import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.util.DataConverter;
+import com.draagon.meta.registry.MetaDataRegistry;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
 
 /**
- * A Double Field.
+ * A Class Field with unified registry registration and child requirements.
  *
- * @version 2.0
+ * @version 6.0
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
 public class ClassField extends MetaField<Class> implements StringSerializationHandler // XMLSerializationHandler, JsonSerializationHandler
 {
-    public final static String SUBTYPE_DOUBLE   = "double";
+    private static final Logger log = LoggerFactory.getLogger(ClassField.class);
+
+    public final static String SUBTYPE_CLASS = "class";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(ClassField.class, def -> def
+                .type(TYPE_FIELD).subType(SUBTYPE_CLASS)
+                .description("Class field for class type references")
+                
+                // Inherits: required, defaultValue, validation, defaultView from MetaField
+                // No class-specific attributes needed
+            );
+            
+            log.debug("Registered ClassField type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register ClassField type with unified registry", e);
+        }
+    }
 
     public ClassField(String name ) {
-        super( SUBTYPE_DOUBLE, name, DataTypes.CUSTOM );
+        super( SUBTYPE_CLASS, name, DataTypes.CUSTOM );
     }
 
     /**
-     * Manually Create a DoubleField
+     * Manually Create a ClassField
      * @param name Name of the field
-     * @return New DoubleField
+     * @return New ClassField
      */
     public static ClassField create(String name ) {
         ClassField f = new ClassField( name );

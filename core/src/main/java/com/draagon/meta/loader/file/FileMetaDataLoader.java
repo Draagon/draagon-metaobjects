@@ -5,6 +5,8 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.parser.json.JsonMetaDataParser;
 import com.draagon.meta.loader.parser.xml.XMLMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
+import com.draagon.meta.registry.CoreTypeInitializer;
+import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,25 @@ public class FileMetaDataLoader extends MetaDataLoader {
     // File extension constants
     public static final String XML_EXTENSION = "*.xml";
     public static final String JSON_EXTENSION = "*.json";
+
+    // Self-registration with unified registry
+    static {
+        try {
+            MetaDataRegistry.registerType(FileMetaDataLoader.class, def -> def
+                .type("loader").subType(SUBTYPE_FILE)
+                .description("File-based metadata loader for XML and JSON files")
+                .optionalChild("field", "*")
+                .optionalChild("object", "*")
+                .optionalChild("attr", "*")
+                .optionalChild("validator", "*")
+                .optionalChild("key", "*")
+                .optionalChild("view", "*")
+            );
+            log.debug("Registered FileMetaDataLoader type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register FileMetaDataLoader type with unified registry", e);
+        }
+    }
 
     public FileMetaDataLoader(String name) {
         this( new FileLoaderOptions(), name );
@@ -111,6 +132,9 @@ public class FileMetaDataLoader extends MetaDataLoader {
         if ( !getLoaderOptions().hasSources() ) {
             throw new IllegalStateException( "No Metadata Sources were defined [" + this + "]" );
         }
+
+        // Ensure all core types are loaded and registered
+        CoreTypeInitializer.initializeCoreTypes();
 
         super.init();
 

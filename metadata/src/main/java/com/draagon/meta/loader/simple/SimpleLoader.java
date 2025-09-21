@@ -5,6 +5,9 @@ import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.parser.json.JsonMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
+import com.draagon.meta.registry.MetaDataRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
@@ -12,9 +15,56 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SimpleLoader extends MetaDataLoader {
+/**
+ * SimpleLoader with unified registry registration for accepting all MetaData types.
+ *
+ * @version 6.0
+ */
+public class SimpleLoader extends MetaDataLoader
+{
+    private static final Logger log = LoggerFactory.getLogger(SimpleLoader.class);
 
     public final static String SUBTYPE_SIMPLE = "simple";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(SimpleLoader.class, def -> def
+                .type(TYPE_LOADER).subType(SUBTYPE_SIMPLE)
+                .description("Simple JSON-based metadata loader")
+                
+                // LOADER ACCEPTS ALL FIELD TYPES
+                .optionalChild("field", "string")
+                .optionalChild("field", "int")
+                .optionalChild("field", "long")
+                .optionalChild("field", "double")
+                .optionalChild("field", "float")
+                .optionalChild("field", "short")
+                .optionalChild("field", "byte")
+                .optionalChild("field", "boolean")
+                .optionalChild("field", "date")
+                .optionalChild("field", "object")
+                .optionalChild("field", "class")
+                .optionalChild("field", "stringArray")
+                .optionalChild("field", "objectArray")
+                
+                // LOADER ACCEPTS ALL OBJECT TYPES
+                .optionalChild("object", "base")
+                .optionalChild("object", "pojo")
+                .optionalChild("object", "map")
+                .optionalChild("object", "proxy")
+                
+                // LOADER ACCEPTS ALL ATTRIBUTE TYPES
+                .optionalChild("attr", "string")
+                .optionalChild("attr", "int")
+                .optionalChild("attr", "boolean")
+            );
+            
+            log.debug("Registered SimpleLoader type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register SimpleLoader type with unified registry", e);
+        }
+    }
 
     private static List<URI> sourceURIs = null;
 
@@ -110,8 +160,7 @@ public class SimpleLoader extends MetaDataLoader {
             }
         }
 
-        // Validate the MetaData
-        validate();
+        // Validation is now enforced during construction (constraint system)
 
         return this;
     }

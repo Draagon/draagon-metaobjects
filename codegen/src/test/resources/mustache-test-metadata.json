@@ -6,17 +6,15 @@
       {
         "object": {
           "name": "User",
-          "package": "com.example.model",
+          "type": "pojo",
+          "package": "com_example_model",
           "@dbTable": "users",
           "@hasAuditing": true,
-          "@hasJpa": true,
-          "@hasValidation": true,
           "children": [
             {
               "field": {
                 "name": "id",
                 "type": "long",
-                "@isId": true,
                 "@dbColumn": "user_id"
               }
             },
@@ -61,14 +59,14 @@
       {
         "object": {
           "name": "Product",
-          "package": "com.example.model",
+          "type": "pojo",
+          "package": "com_example_model",
           "@dbTable": "products",
           "children": [
             {
               "field": {
                 "name": "id",
                 "type": "long",
-                "@isId": true,
                 "@dbColumn": "product_id"
               }
             },
@@ -91,7 +89,7 @@
             },
             {
               "field": {
-                "name": "description",
+                "name": "notes",
                 "type": "string",
                 "@dbColumn": "description",
                 "@maxLength": 1000

@@ -10,7 +10,7 @@ package com.draagon.meta.manager.xml;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.manager.*;
 import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.manager.exp.Range;
@@ -290,7 +290,7 @@ public class ObjectManagerXML extends ObjectManager
 
         Object o = getObjectByRef( c, ref );
 
-        for( MetaField mf : getReadableFields( MetaDataRegistry.findMetaObject( obj )))
+        for( MetaField mf : getReadableFields( MetaDataUtil.findMetaObject( obj, this )))
         {
           if ( !isPrimaryKey( mf ))
             mf.setObject( obj, mf.getObject( o ));
@@ -303,7 +303,7 @@ public class ObjectManagerXML extends ObjectManager
   public void createObject( ObjectConnection c, Object obj )
     throws MetaDataException
     {
-        MetaObject mc = MetaDataRegistry.findMetaObject( obj );
+        MetaObject mc = MetaDataUtil.findMetaObject( obj, this );
         List<Object> list = getObjectsFromTable( c, mc );
 
         if ( !isCreateableClass( mc ))
@@ -322,7 +322,7 @@ public class ObjectManagerXML extends ObjectManager
   public void updateObject( ObjectConnection c, Object obj )
     throws MetaDataException
   {
-    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
+    MetaObject mc = MetaDataUtil.findMetaObject( obj, this );
     List<Object> list = getObjectsFromTable( c, mc );
 
     int i = list.indexOf( obj );
@@ -345,7 +345,7 @@ public class ObjectManagerXML extends ObjectManager
   public void deleteObject( ObjectConnection c, Object obj )
     throws MetaDataException
   {
-    MetaObject mc = MetaDataRegistry.findMetaObject( obj );
+    MetaObject mc = MetaDataUtil.findMetaObject( obj, this );
     List<Object> list = getObjectsFromTable( c, mc );
 
     int i = list.indexOf( obj );

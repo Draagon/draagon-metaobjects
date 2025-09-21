@@ -33,6 +33,11 @@
             <artifactId>metaobjects-web</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
         <!-- Spring Framework - Use consistent version -->
         <dependency>

@@ -8,13 +8,39 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
+import com.draagon.meta.registry.MetaDataRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class ForeignKey extends MetaKey {
 
+    private static final Logger log = LoggerFactory.getLogger(ForeignKey.class);
+
     public final static String SUBTYPE = "foreign";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(ForeignKey.class, def -> def
+                .type(TYPE_KEY).subType(SUBTYPE)
+                .description("Foreign key for referencing other objects")
+                
+                // FOREIGN KEY ATTRIBUTES
+                .optionalAttribute("keys", "stringArray")
+                .optionalAttribute("foreignObjectRef", "string")
+                .optionalAttribute("foreignKey", "string")
+                .optionalAttribute("foreignKeyMap", "string")
+                .optionalAttribute("description", "string")
+            );
+            
+            log.debug("Registered ForeignKey type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register ForeignKey type with unified registry", e);
+        }
+    }
 
     public final static String ATTR_FOREIGNOBJECTREF = "foreignObjectRef";
     public final static String ATTR_FOREIGNKEY = "foreignKey";

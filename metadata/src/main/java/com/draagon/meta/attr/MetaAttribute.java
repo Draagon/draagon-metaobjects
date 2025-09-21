@@ -18,6 +18,18 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
 
     public final static String TYPE_ATTR = "attr";
 
+    // Cross-cutting attribute constraint registration
+    static {
+        try {
+            // Register cross-cutting attribute constraints
+            registerCrossCuttingAttributeConstraints();
+            
+            log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
+        } catch (Exception e) {
+            log.error("Failed to register cross-cutting attribute constraints", e);
+        }
+    }
+
     private T value = null;
     private DataTypes dataType;
     
@@ -183,5 +195,44 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     @Override
     protected String getToStringPrefix() {
         return  super.getToStringPrefix() + "{dataType=" + dataType + ", value=" + value + "}";
+    }
+    
+    /**
+     * Register cross-cutting attribute constraints that apply to all attribute types
+     */
+    private static void registerCrossCuttingAttributeConstraints() {
+        try {
+            // Import constraint classes
+            com.draagon.meta.constraint.ConstraintRegistry constraintRegistry = 
+                com.draagon.meta.constraint.ConstraintRegistry.getInstance();
+                
+            // PLACEMENT CONSTRAINT: Attributes can be placed on any MetaData
+            com.draagon.meta.constraint.PlacementConstraint universalAttributePlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "attribute.universal.placement",
+                    "Attributes can be placed on any MetaData",
+                    (metadata) -> metadata instanceof MetaData,
+                    (child) -> child instanceof MetaAttribute
+                );
+            constraintRegistry.addConstraint(universalAttributePlacement);
+            
+            // VALIDATION CONSTRAINT: Attribute naming patterns
+            com.draagon.meta.constraint.ValidationConstraint attributeNamingPattern = 
+                new com.draagon.meta.constraint.ValidationConstraint(
+                    "attribute.naming.pattern",
+                    "Attribute names must follow identifier pattern",
+                    (metadata) -> metadata instanceof MetaAttribute,
+                    (metadata, value) -> {
+                        String name = metadata.getName();
+                        return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                    }
+                );
+            constraintRegistry.addConstraint(attributeNamingPattern);
+            
+            log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
+            
+        } catch (Exception e) {
+            log.error("Failed to register cross-cutting attribute constraints", e);
+        }
     }
 }

@@ -18,6 +18,8 @@ import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.db.ObjectManagerDB;
 import com.draagon.meta.manager.db.driver.DerbyDriver;
 import com.draagon.meta.manager.db.validator.MetaClassDBValidatorService;
+import com.draagon.meta.registry.MetaDataLoaderRegistry;
+import com.draagon.meta.registry.ServiceRegistryFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,6 +39,7 @@ public class AbstractOMDBTest {
     protected static ObjectManagerDB omdb = null;
     protected static String dbFile = null;
     protected static MetaDataLoader loader = null;
+    protected static MetaDataLoaderRegistry registry = null;
 
     protected ObjectConnection oc = null;
     
@@ -44,6 +47,9 @@ public class AbstractOMDBTest {
     public static void setupDB() throws Exception {
                 
         if ( dbFile == null ) {
+
+            // Initialize OSGi-compatible loader registry
+            registry = new MetaDataLoaderRegistry(ServiceRegistryFactory.getDefault());
 
             // Initialize the loader using FileMetaDataLoader with auto-detection
             FileMetaDataLoader xl = new FileMetaDataLoader(
@@ -55,7 +61,10 @@ public class AbstractOMDBTest {
                 "test-db" );
             
             xl.init(new LocalFileMetaDataSources( "meta.fruit.xml" ));
-            xl.register();
+            
+            // Register with both old and new mechanisms for compatibility
+            xl.register();  // Old mechanism
+            registry.registerLoader(xl);  // New mechanism
 
             loader = xl;
             
@@ -121,6 +130,7 @@ public class AbstractOMDBTest {
             MetaClassDBValidatorService vs = new MetaClassDBValidatorService();
             vs.setObjectManager( omdb );
             vs.setAutoCreate( true );
+            vs.setMetaDataLoaderRegistry( registry );  // Use our specific registry
             vs.init();
         }        
     }

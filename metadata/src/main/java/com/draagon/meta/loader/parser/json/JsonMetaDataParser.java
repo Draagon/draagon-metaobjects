@@ -9,7 +9,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.parser.BaseMetaDataParser;
 import com.draagon.meta.loader.parser.MetaDataFileParser;
 import com.draagon.meta.registry.MetaDataContextRegistry;
-import com.draagon.meta.registry.MetaDataTypeRegistry;
+import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -47,11 +47,12 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
     protected static final String ATTR_ISABSTRACT = "isAbstract";
     protected static final String ATTR_ISINTERFACE = "isInterface";
     protected static final String ATTR_IMPLEMENTS = "implements";
+    protected static final String ATTR_OVERLAY = "overlay";
 
     // Reserved attributes that should not be converted to MetaAttributes
     protected static final List<String> reservedAttributes = Arrays.asList(
             ATTR_TYPE, ATTR_NAME, ATTR_PACKAGE, ATTR_SUPER, ATTR_ISABSTRACT, 
-            ATTR_ISINTERFACE, ATTR_IMPLEMENTS, ATTR_CHILDREN
+            ATTR_ISINTERFACE, ATTR_IMPLEMENTS, ATTR_CHILDREN, ATTR_OVERLAY
     );
 
     private final Map<String, Integer> nameCounters = new HashMap<>();
@@ -126,16 +127,33 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
                 Boolean isAbstract = getValueAsBoolean(el, ATTR_ISABSTRACT);
                 Boolean isInterface = getValueAsBoolean(el, ATTR_ISINTERFACE);
                 String implementsArray = getValueAsString(el, ATTR_IMPLEMENTS);
+                Boolean isOverlay = getValueAsBoolean(el, ATTR_OVERLAY);
+                Boolean isOverride = getValueAsBoolean(el, "override");
 
-                // Validate type exists in registry
-                if (!getTypeRegistry().hasType(typeName)) {
-                    log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
-                    continue;
+                MetaData md;
+                
+                // Handle override case - reference existing metadata by name
+                if (Boolean.TRUE.equals(isOverride)) {
+                    // Override case: look up existing metadata by name
+                    try {
+                        md = parent.getChildOfType(typeName, name);
+                        log.debug("Found existing metadata for override: {} in parent {}", name, parent.getName());
+                    } catch (Exception e) {
+                        log.warn("Override requested but metadata [{}] not found in parent [{}] in file [{}]", 
+                                name, parent.getName(), getFilename());
+                        continue;
+                    }
+                } else {
+                    // Normal case: validate type and create/overlay metadata
+                    if (!getTypeRegistry().hasType(typeName)) {
+                        log.warn("Unknown type [" + typeName + "] found on parent metadata [" + parent + "] in file [" + getFilename() + "]");
+                        continue;
+                    }
+
+                    // Create MetaData using proven FileMetaDataParser approach
+                    md = createOrOverlayMetaData(isRoot, parent, typeName, subTypeName,
+                            name, packageName, superName, isAbstract, isInterface, implementsArray, isOverlay);
                 }
-
-                // Create MetaData using proven FileMetaDataParser approach
-                MetaData md = createOrOverlayMetaData(isRoot, parent, typeName, subTypeName,
-                        name, packageName, superName, isAbstract, isInterface, implementsArray);
 
                 // Handle attributes differently for MetaAttribute vs normal MetaData
                 if (md instanceof MetaAttribute) {
@@ -198,27 +216,42 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
     }
 
     /**
-     * Parse inline attribute (@-prefixed) with type casting - uses common method
+     * Parse inline attribute (@-prefixed) with MetaField-aware type conversion
      */
     protected void parseInlineAttribute(MetaData md, String attrName, JsonElement jsonValue) {
         // Remove @ prefix if present
         String cleanAttrName = attrName.startsWith("@") ? attrName.substring(1) : attrName;
         
-        // Convert JSON value to string and use common method
-        String stringValue = null;
-        if (jsonValue != null && !jsonValue.isJsonNull()) {
-            if (jsonValue.isJsonPrimitive() && jsonValue.getAsJsonPrimitive().isBoolean()) {
-                stringValue = String.valueOf(jsonValue.getAsBoolean());
-            } else if (jsonValue.isJsonPrimitive() && jsonValue.getAsJsonPrimitive().isNumber()) {
-                stringValue = jsonValue.getAsString();
-            } else {
-                stringValue = jsonValue.getAsString();
-            }
+        // Skip null values
+        if (jsonValue == null || jsonValue.isJsonNull()) {
+            return;
         }
         
-        // Use common parseInlineAttribute method
-        parseInlineAttribute(md, cleanAttrName, stringValue);
+        // Convert JSON value to string for processing by base parser
+        String stringValue = jsonValueToString(jsonValue);
+        
+        // Delegate to base parser which will use MetaField type information
+        super.parseInlineAttribute(md, cleanAttrName, stringValue);
     }
+    
+    /**
+     * Convert JSON value to string representation, preserving the original value
+     */
+    private String jsonValueToString(JsonElement jsonValue) {
+        if (jsonValue.isJsonPrimitive()) {
+            if (jsonValue.getAsJsonPrimitive().isBoolean()) {
+                return String.valueOf(jsonValue.getAsBoolean());
+            } else if (jsonValue.getAsJsonPrimitive().isNumber()) {
+                return jsonValue.getAsString();
+            } else {
+                return jsonValue.getAsString();
+            }
+        } else {
+            // Complex JSON value -> JSON representation
+            return jsonValue.toString();
+        }
+    }
+
 
     /**
      * Parse MetaAttribute value
@@ -250,6 +283,26 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
                 // Regular attribute - use string value
                 attr.setValue(valueElement.getAsString());
             }
+        }
+    }
+
+    /**
+     * Create StringArray attribute on parent MetaData for keys and similar attributes
+     */
+    protected void createStringArrayAttributeOnParent(MetaData parentMetaData, String attrName, String[] values) {
+        try {
+            // Create StringArrayAttribute using the factory method with comma-separated string
+            String commaSeparatedValues = String.join(",", values);
+            com.draagon.meta.attr.StringArrayAttribute attr = com.draagon.meta.attr.StringArrayAttribute.create(attrName, commaSeparatedValues);
+            parentMetaData.addChild(attr);
+            
+            log.debug("Successfully created StringArrayAttribute [{}] with values [{}] on parent [{}:{}:{}]", 
+                attrName, commaSeparatedValues, parentMetaData.getTypeName(), parentMetaData.getSubTypeName(), parentMetaData.getName());
+                
+        } catch (Exception e) {
+            throw new MetaDataException("Failed to create StringArrayAttribute [" + attrName + "] on parent [" + 
+                parentMetaData.getTypeName() + ":" + parentMetaData.getSubTypeName() + ":" + parentMetaData.getName() + 
+                "] in file [" + getFilename() + "]: " + e.getMessage(), e);
         }
     }
 
@@ -326,11 +379,8 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
      * Check if a MetaData type supports inline attributes (attr type has default subType)
      */
     protected boolean supportsInlineAttributes(MetaData md) {
-        try {
-            return getTypeRegistry().getDefaultSubType("attr") != null;
-        } catch (Exception e) {
-            return false;
-        }
+        // Inline attributes are supported in the unified registry architecture
+        return true;
     }
     
     /**
@@ -372,6 +422,26 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         if (!supportsInlineAttributes(md)) {
             log.warn("Inline attributes not supported - no attr type default subType registered");
             return;
+        }
+        
+        // Special handling for keys attribute - should be stringArray
+        if ("keys".equals(attrName) && stringValue != null) {
+            // Split comma-separated values into array
+            String[] keyNames = stringValue.split(",");
+            for (int i = 0; i < keyNames.length; i++) {
+                keyNames[i] = keyNames[i].trim();
+            }
+            
+            // Create StringArrayAttribute instead of StringAttribute
+            try {
+                createStringArrayAttributeOnParent(md, attrName, keyNames);
+                log.debug("Created stringArray attribute [{}] with values [{}] on [{}:{}:{}] in file [{}]", 
+                    attrName, String.join(",", keyNames), md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+                return;
+            } catch (Exception e) {
+                log.warn("Failed to create stringArray attribute [{}] on [{}:{}:{}], falling back to string: {}", 
+                    attrName, md.getTypeName(), md.getSubTypeName(), md.getName(), e.getMessage());
+            }
         }
         
         // Cast string value to appropriate Java type

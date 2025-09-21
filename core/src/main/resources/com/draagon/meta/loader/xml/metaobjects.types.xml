@@ -35,27 +35,60 @@
             <subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/> <!-- required="true" inlineAttr="optional" / -->
+                    <child type="attr" subType="string" name="objectRef"/>
+                    <child type="attr" subType="string" name="description"/>
+                    <!-- Test-specific attributes for codegen tests -->
+                    <child type="attr" subType="string" name="dbTable"/>
+                    <child type="attr" subType="boolean" name="hasAuditing"/>
+                    <child type="attr" subType="boolean" name="hasJpa"/>
+                    <child type="attr" subType="boolean" name="hasValidation"/>
+                    <child type="attr" subType="string" name="implements"/>
+                    <!-- Key children -->
+                    <child type="key" subType="primary" name="primary"/>
+                    <child type="key" subType="secondary" name="*"/>
+                    <child type="key" subType="foreign" name="*"/>
                 </children>
             </subType>
             <subType name="map" class="com.draagon.meta.object.mapped.MappedMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/>
+                    <child type="attr" subType="string" name="objectRef"/>
+                    <child type="attr" subType="string" name="description"/>
+                    <!-- Test-specific attributes for codegen tests -->
+                    <child type="attr" subType="string" name="isAbstract"/>
+                    <child type="attr" subType="string" name="implements"/>
+                    <!-- Key children -->
+                    <child type="key" subType="primary" name="primary"/>
+                    <child type="key" subType="secondary" name="*"/>
+                    <child type="key" subType="foreign" name="*"/>
                 </children>
             </subType>
             <subType name="proxy" class="com.draagon.meta.object.proxy.ProxyMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/>
                     <child type="attr" subType="string" name="proxyObject"/>
+                    <!-- Key children -->
+                    <child type="key" subType="primary" name="primary"/>
+                    <child type="key" subType="secondary" name="*"/>
+                    <child type="key" subType="foreign" name="*"/>
                 </children>
             </subType>
             <subType name="data" class="com.draagon.meta.object.data.DataMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/> <!-- autoCreate="true" inlineAttr="optional" defaultValue="com.draagon.meta.object.value.ValueObject"/ -->
+                    <!-- Key children -->
+                    <child type="key" subType="primary" name="primary"/>
+                    <child type="key" subType="secondary" name="*"/>
+                    <child type="key" subType="foreign" name="*"/>
                 </children>
             </subType>
             <subType name="value" class="com.draagon.meta.object.value.ValueMetaObject">
                 <children>
                     <child type="attr" subType="string" name="object"/> <!-- autoCreate="true" inlineAttr="optional" defaultValue="com.draagon.meta.object.value.ValueObject"/ -->
+                    <!-- Key children -->
+                    <child type="key" subType="primary" name="primary"/>
+                    <child type="key" subType="secondary" name="*"/>
+                    <child type="key" subType="foreign" name="*"/>
                 </children>
             </subType>
         </type>
@@ -81,6 +114,17 @@
                 <child type="attr" subType="stringArray" name="validation"/>
                 <child type="attr" subType="string" name="defaultValue"/>
                 <child type="validator" subType="*" name="*"/>
+                <!-- Test-specific attributes for codegen tests -->
+                <child type="attr" subType="string" name="description"/>
+                <child type="attr" subType="boolean" name="isId"/>
+                <child type="attr" subType="string" name="dbColumn"/>
+                <child type="attr" subType="boolean" name="isSearchable"/>
+                <child type="attr" subType="boolean" name="isOptional"/>
+                <child type="attr" subType="boolean" name="required"/>
+                <child type="attr" subType="string" name="isAbstract"/>
+                <child type="attr" subType="int" name="maxLength"/>
+                <child type="attr" subType="int" name="minLength"/>
+                <child type="attr" subType="string" name="pattern"/>
             </children>
             <subType name="boolean"      class="com.draagon.meta.field.BooleanField" />
             <subType name="byte"         class="com.draagon.meta.field.ByteField" />

@@ -6,7 +6,7 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.registry.MetaDataContextRegistry;
-import com.draagon.meta.registry.MetaDataTypeRegistry;
+import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 
 /**
  * Abstract BaseMetaDataParser for reading metadata from source files.
- * v6.0.0: Updated to use service-based MetaDataTypeRegistry instead of TypesConfig
+ * v6.0.0: Updated to use unified MetaDataRegistry instead of TypesConfig
  * 
  * <p>This base class provides common functionality for parsing metadata from various
  * file formats (JSON, XML, etc.) and converting them into MetaData objects. Subclasses
@@ -61,6 +61,7 @@ public abstract class BaseMetaDataParser {
     public final static String ATTR_ISABSTRACT      = "_isAbstract";
     public final static String ATTR_ISINTERFACE     = "isInterface";
     public final static String ATTR_IMPLEMENTS      = "implements";
+    public final static String ATTR_OVERLAY         = "overlay";
 
     protected static List<String> reservedAttributes = new ArrayList<>();
     static {
@@ -161,8 +162,8 @@ public abstract class BaseMetaDataParser {
      */
     public abstract void loadFromStream( InputStream is );
 
-    /** Get the MetaDataTypeRegistry from the loader - v6.0.0: Replaces TypesConfig */
-    public MetaDataTypeRegistry getTypeRegistry() {
+    /** Get the MetaDataRegistry from the loader - v6.0.0: Replaces TypesConfig */
+    public MetaDataRegistry getTypeRegistry() {
         return this.loader.getTypeRegistry();
     }
 
@@ -211,21 +212,41 @@ public abstract class BaseMetaDataParser {
     protected MetaData createOrOverlayMetaData( boolean isRoot,
                                                 MetaData parent, String typeName, String subTypeName,
                                                 String name, String packageName, String superName,
-                                                Boolean isAbstract, Boolean isInterface, String implementsArray ) {
+                                                Boolean isAbstract, Boolean isInterface, String implementsArray, 
+                                                Boolean isOverlay ) {
 
         if ( subTypeName != null && subTypeName.equals("*")) subTypeName = null;
 
-        // v6.0.0: Type validation handled by registry during creation
-        // Simplified auto-naming logic without TypeConfig dependency
+        // v6.0.0: Enhanced auto-naming logic with validation rules
         if (name == null || name.equals("")) {
-            // Generate sequential name based on subtype if available, otherwise use type
-            String namePrefix = (subTypeName != null && !subTypeName.isEmpty()) 
-                    ? subTypeName.toLowerCase() 
-                    : typeName.toLowerCase();
-            name = getNextNamePrefix(parent, typeName, namePrefix);
+            // Validation rule: Abstract metadata must have names specified
+            if (Boolean.TRUE.equals(isAbstract)) {
+                throw new MetaDataException("Abstract MetaData [type=" + typeName + "][subType=" + subTypeName 
+                    + "] must have a name specified in file [" + getFilename() + "]");
+            }
             
-            if ( name == null ) throw new MetaDataException("MetaData [" +typeName+ "] found on parent [" +parent
-                    + "] had no name specified and auto-naming failed in file ["+getFilename()+"]");
+            // Validation rule: Object and field types require names (unless overlay)
+            if (("object".equals(typeName) || "field".equals(typeName)) && !Boolean.TRUE.equals(isOverlay)) {
+                throw new MetaDataException("MetaData [type=" + typeName + "][subType=" + subTypeName 
+                    + "] requires a name to be specified in file [" + getFilename() + "]");
+            }
+            
+            // Auto-naming only allowed for validator and view types (and not abstract at root)
+            if (("validator".equals(typeName) || "view".equals(typeName)) && 
+                !(isRoot && Boolean.TRUE.equals(isAbstract))) {
+                // Generate sequential name based on subtype if available, otherwise use type
+                String namePrefix = (subTypeName != null && !subTypeName.isEmpty()) 
+                        ? subTypeName.toLowerCase() 
+                        : typeName.toLowerCase();
+                name = getNextNamePrefix(parent, typeName, namePrefix);
+                
+                if ( name == null ) throw new MetaDataException("Auto-naming failed for MetaData [" +typeName+ "] on parent [" +parent
+                        + "] in file ["+getFilename()+"]");
+            } else if (!Boolean.TRUE.equals(isOverlay)) {
+                // All other types require explicit names (unless overlay)
+                throw new MetaDataException("MetaData [type=" + typeName + "][subType=" + subTypeName 
+                    + "] requires a name to be specified in file [" + getFilename() + "]");
+            }
         }
 
         // Load or get the MetaData
@@ -253,14 +274,13 @@ public abstract class BaseMetaDataParser {
         }
         
 
-        // Check if the metadata described already existed, and if so create and overloaded version
-        // v6.0.0: Try to find existing MetaData by name (without class constraint)
+        // Enhanced overlay logic with explicit overlay support
+        // v6.0.0: Try to find existing MetaData by name for overlay operations
         try {
             String searchName = (isRoot && packageName.length() > 0) 
                 ? packageName + MetaDataLoader.PKG_SEPARATOR + name 
                 : name;
                 
-            
             if ( isRoot && packageName.length() > 0 ) {
                 md = parent.getChildOfType( typeName, packageName + MetaDataLoader.PKG_SEPARATOR + name );
             } else {
@@ -273,9 +293,22 @@ public abstract class BaseMetaDataParser {
                 }
             }
             
+            // If overlay was explicitly requested but existing metadata found, that's expected
+            if (Boolean.TRUE.equals(isOverlay)) {
+                // Explicit overlay - existing metadata must be found
+                // This is the expected case - continue with overlay
+            }
+            
         }
         catch (MetaDataNotFoundException e) {
-            // Handle cases where it's bad that it wasn't found
+            // Handle cases where metadata wasn't found
+            if (Boolean.TRUE.equals(isOverlay)) {
+                // Explicit overlay was requested but no existing metadata found - this is an error
+                throw new MetaDataException("Overlay operation requested for MetaData [type=" + typeName 
+                    + "][subType=" + subTypeName + "][name=" + name + "] but no existing metadata found to overlay in file [" 
+                    + getFilename() + "]");
+            }
+            // If not overlay, continue to create new metadata below
         }
 
         // If this MetaData doesn't exist yet, then we need to create it
@@ -379,6 +412,11 @@ public abstract class BaseMetaDataParser {
         // Use the Super class type if no type is defined and a super class exists
         if (subTypeName == null && superData != null) {
             subTypeName = superData.getSubTypeName();
+        }
+        
+        // SubType is required for creating new metadata instances (unless inherited from super or using override)
+        if (subTypeName == null) {
+            throw new MetaDataException("No subType specified for type [" + typeName + "] for MetaData [name=" + name + "] in file [" + getFilename() + "]. Either specify a 'type' attribute, use 'super=\"...\"' to inherit type, or use 'override=true' for overlay operations.");
         }
 
         // v6.0.0: Create MetaData instance using registry
@@ -497,11 +535,8 @@ public abstract class BaseMetaDataParser {
      * Check if a MetaData type supports inline attributes (attr type has default subType)
      */
     protected boolean supportsInlineAttributes(MetaData md) {
-        try {
-            return getTypeRegistry().getDefaultSubType("attr") != null;
-        } catch (Exception e) {
-            return false;
-        }
+        // Inline attributes are supported in the unified registry architecture
+        return true;
     }
 
     /**
@@ -536,7 +571,7 @@ public abstract class BaseMetaDataParser {
     }
 
     /**
-     * Parse inline attribute with type casting support
+     * Parse inline attribute with type casting support - uses MetaField type information
      */
     protected void parseInlineAttribute(MetaData md, String attrName, String stringValue) {
         // Check if inline attributes are supported
@@ -545,14 +580,140 @@ public abstract class BaseMetaDataParser {
             return;
         }
         
-        // Cast string value to appropriate Java type
-        Object castedValue = castStringValueToObject(stringValue);
+        // Use MetaField's expected type information instead of guessing
+        String attributeSubType = getAttributeSubTypeFromMetaData(md, attrName);
+        Class<?> expectedType = getExpectedJavaTypeFromMetaData(md, attrName);
+        
+        // Convert string value to expected type, then back to string for storage
+        Object castedValue = convertStringToExpectedType(stringValue, expectedType);
         String finalValue = castedValue != null ? castedValue.toString() : null;
         
-        // Create the attribute using existing infrastructure
-        createAttributeOnParent(md, attrName, finalValue);
+        // Create the attribute with type-aware method
+        createInlineAttributeWithDetectedType(md, attrName, finalValue, attributeSubType);
         
-        log.debug("Created inline attribute [{}] with value [{}] on [{}:{}:{}] in file [{}]", 
-            attrName, finalValue, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+        log.debug("Created inline attribute [{}] with value [{}] and expected type [{}] on [{}:{}:{}] in file [{}]", 
+            attrName, finalValue, attributeSubType, md.getTypeName(), md.getSubTypeName(), md.getName(), getFilename());
+    }
+    
+    /**
+     * Get the expected attribute subtype by consulting the MetaData's type information
+     */
+    protected String getAttributeSubTypeFromMetaData(MetaData md, String attrName) {
+        Class<?> expectedType = getExpectedJavaTypeFromMetaData(md, attrName);
+        
+        if (expectedType == Boolean.class || expectedType == boolean.class) {
+            return "boolean";
+        } else if (expectedType == Integer.class || expectedType == int.class) {
+            return "int";
+        } else if (expectedType == Long.class || expectedType == long.class) {
+            return "long";
+        } else if (expectedType == Double.class || expectedType == double.class) {
+            return "double";
+        } else {
+            return "string";
+        }
+    }
+    
+    /**
+     * Get the expected Java type for an attribute by consulting the MetaData
+     */
+    protected Class<?> getExpectedJavaTypeFromMetaData(MetaData md, String attrName) {
+        // If the MetaData is a MetaField, use its type information
+        if (md instanceof com.draagon.meta.field.MetaField) {
+            com.draagon.meta.field.MetaField<?> field = (com.draagon.meta.field.MetaField<?>) md;
+            return field.getExpectedAttributeType(attrName);
+        }
+        
+        // For other MetaData types (MetaObject, etc.), use basic type mapping
+        // This could be enhanced to consult their registration info as well
+        return getBasicAttributeType(attrName);
+    }
+    
+    /**
+     * Basic attribute type mapping for non-field MetaData
+     */
+    protected Class<?> getBasicAttributeType(String attrName) {
+        switch (attrName) {
+            case "hasJpa":
+            case "hasAuditing": 
+            case "hasValidation":
+            case "skipJpa":
+                return Boolean.class;
+            case "dbTable":
+            case "description":
+            default:
+                return String.class;
+        }
+    }
+    
+    /**
+     * Convert a string value to the expected Java type
+     */
+    protected Object convertStringToExpectedType(String stringValue, Class<?> expectedType) {
+        if (stringValue == null) {
+            return null;
+        }
+        
+        try {
+            if (expectedType == Boolean.class || expectedType == boolean.class) {
+                return Boolean.parseBoolean(stringValue);
+            } else if (expectedType == Integer.class || expectedType == int.class) {
+                return Integer.parseInt(stringValue);
+            } else if (expectedType == Long.class || expectedType == long.class) {
+                return Long.parseLong(stringValue);
+            } else if (expectedType == Double.class || expectedType == double.class) {
+                return Double.parseDouble(stringValue);
+            } else {
+                return stringValue; // String or unknown type
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Failed to convert value [{}] to type [{}], using as string: {}", 
+                stringValue, expectedType.getSimpleName(), e.getMessage());
+            return stringValue;
+        }
+    }
+    
+    /**
+     * Determine appropriate attribute subtype from detected value type (legacy method)
+     */
+    protected String getAttributeSubTypeFromValue(Object value) {
+        if (value instanceof Boolean) {
+            return "boolean";
+        } else if (value instanceof Integer) {
+            return "int";
+        } else if (value instanceof Double) {
+            return "double";
+        } else if (value instanceof Long) {
+            return "long";
+        } else {
+            return "string";
+        }
+    }
+    
+    /**
+     * Create inline attribute with detected type (enhanced type detection)
+     */
+    protected void createInlineAttributeWithDetectedType(MetaData parentMetaData, String attrName, String value, String attributeSubType) {
+        try {
+            // Try to create attribute with the detected subtype directly
+            MetaAttribute attr = (MetaAttribute) getTypeRegistry().createInstance(
+                MetaAttribute.TYPE_ATTR, attributeSubType, attrName);
+            
+            if (attr != null) {
+                parentMetaData.addChild(attr);
+                attr.setValueAsString(value);
+                
+                log.debug("Successfully created type-detected attribute [{}] with subtype [{}] and value [{}] on [{}:{}:{}] in file [{}]", 
+                    attrName, attributeSubType, value, parentMetaData.getTypeName(), parentMetaData.getSubTypeName(), parentMetaData.getName(), getFilename());
+                return;
+            }
+            
+        } catch (Exception e) {
+            log.debug("Failed to create type-detected attribute [{}] with subtype [{}], falling back to context-based creation: {}", 
+                attrName, attributeSubType, e.getMessage());
+        }
+        
+        // Fallback to original context-based approach
+        createAttributeOnParent(parentMetaData, attrName, value);
     }
 }

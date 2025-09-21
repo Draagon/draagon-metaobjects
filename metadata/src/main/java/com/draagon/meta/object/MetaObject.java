@@ -7,9 +7,7 @@ import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
-import com.draagon.meta.constraint.ValidationConstraint;
+import com.draagon.meta.registry.MetaDataRegistry;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -28,84 +26,41 @@ public abstract class MetaObject extends MetaData {
 
     private static final Logger log = LoggerFactory.getLogger(MetaObject.class);
 
-    /** Object TYPE */
     public final static String TYPE_OBJECT = "object";
-
-    /** Object class name attribute */
     public final static String ATTR_OBJECT = "object";
-
-    // Referenced by ObjectField and ObjectArrayField - maintained for backward compatibility
-    // and shared usage across field implementations
     public final static String ATTR_OBJECT_REF = "objectRef";
+    public final static String ATTR_DESCRIPTION = "description";
 
-    // Self-registration with constraint setup (base constraints for all MetaObjects)
+    // Unified registry self-registration
     static {
         try {
-            setupMetaObjectConstraints();
-            log.debug("Set up base constraints for MetaObject types");
+            MetaDataRegistry.registerType(MetaObject.class, def -> def
+                .type(TYPE_OBJECT).subType("base")
+                .description("Object containing fields and attributes")
+                
+                // OBJECTS CONTAIN FIELDS (any field type, any name)
+                .optionalChild("field", "*", "*")
+                
+                // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
+                .optionalChild("object", "*", "*")
+                
+                // OBJECTS CAN CONTAIN KEYS
+                .optionalChild("key", "*", "*")
+                
+                // OBJECTS CAN HAVE ATTRIBUTES
+                .optionalAttribute(ATTR_DESCRIPTION, "string")
+                .optionalAttribute(ATTR_OBJECT, "string")
+                .optionalAttribute(ATTR_OBJECT_REF, "string")
+            );
+            
+            log.debug("Registered base MetaObject type with unified registry");
+            
+            // Register cross-cutting object constraints
+            registerCrossCuttingObjectConstraints();
+            
         } catch (Exception e) {
-            log.error("Failed to set up MetaObject base constraints", e);
+            log.error("Failed to register MetaObject type with unified registry", e);
         }
-    }
-
-    /**
-     * Setup base constraints that apply to all MetaObject types
-     */
-    private static void setupMetaObjectConstraints() {
-        ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-        
-        // CONSTRAINT 1: MetaObject CAN contain MetaFields
-        PlacementConstraint fieldPlacement = new PlacementConstraint(
-            "metaobject.field.placement",
-            "MetaObject can contain MetaField children",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaField
-        );
-        constraintRegistry.addConstraint(fieldPlacement);
-        
-        // CONSTRAINT 2: MetaObject CAN contain other MetaObjects (composition)
-        PlacementConstraint objectPlacement = new PlacementConstraint(
-            "metaobject.object.placement", 
-            "MetaObject can contain other MetaObject children",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaObject
-        );
-        constraintRegistry.addConstraint(objectPlacement);
-
-        // CONSTRAINT 3: MetaObject CAN contain MetaKeys (primary, foreign, secondary keys)
-        PlacementConstraint keyPlacement = new PlacementConstraint(
-            "metaobject.key.placement",
-            "MetaObject can contain MetaKey children", 
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaKey
-        );
-        constraintRegistry.addConstraint(keyPlacement);
-
-        // CONSTRAINT 4: Object naming pattern validation (from core-constraints.json)
-        // NOTE: Use getShortName() to validate only the simple name, not package-qualified names
-        ValidationConstraint objectNamingPattern = new ValidationConstraint(
-            "object.naming.pattern",
-            "Object names must follow identifier pattern: ^[a-zA-Z][a-zA-Z0-9_]*$",
-            (metadata) -> metadata instanceof MetaObject,
-            (metadata, value) -> {
-                String shortName = metadata.getShortName();
-                return shortName != null && shortName.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-            }
-        );
-        constraintRegistry.addConstraint(objectNamingPattern);
-
-        // CONSTRAINT 5: Object name length validation (from core-constraints.json)
-        // NOTE: Use getShortName() to validate only the simple name, not package-qualified names
-        ValidationConstraint objectNameLength = new ValidationConstraint(
-            "object.name.length",
-            "Object names must be between 1 and 64 characters",
-            (metadata) -> metadata instanceof MetaObject,
-            (metadata, value) -> {
-                String shortName = metadata.getShortName();
-                return shortName != null && shortName.length() >= 1 && shortName.length() <= 64;
-            }
-        );
-        constraintRegistry.addConstraint(objectNameLength);
     }
 
     /**
@@ -535,5 +490,128 @@ public abstract class MetaObject extends MetaData {
     public Object clone() {
         MetaObject mc = (MetaObject) super.clone();
         return mc;
+    }
+    
+    /**
+     * Register cross-cutting object constraints that apply to all object types
+     */
+    private static void registerCrossCuttingObjectConstraints() {
+        try {
+            // Import constraint classes
+            com.draagon.meta.constraint.ConstraintRegistry constraintRegistry = 
+                com.draagon.meta.constraint.ConstraintRegistry.getInstance();
+                
+            // VALIDATION CONSTRAINT: Object naming patterns (allow package-qualified names)
+            com.draagon.meta.constraint.ValidationConstraint objectNamingPattern = 
+                new com.draagon.meta.constraint.ValidationConstraint(
+                    "object.naming.pattern",
+                    "Object names must follow identifier pattern or be package-qualified",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (metadata, value) -> {
+                        String name = metadata.getName();
+                        if (name == null) return false;
+                        
+                        // Allow package-qualified names (with ::)
+                        if (name.contains("::")) {
+                            String[] parts = name.split("::");
+                            for (String part : parts) {
+                                if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } else {
+                            // Simple names must follow identifier pattern
+                            return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                        }
+                    }
+                );
+            constraintRegistry.addConstraint(objectNamingPattern);
+            
+            // PLACEMENT CONSTRAINT: Objects CAN contain fields
+            com.draagon.meta.constraint.PlacementConstraint fieldsPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "object.fields.placement",
+                    "Objects can contain fields",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (child) -> child instanceof MetaField
+                );
+            constraintRegistry.addConstraint(fieldsPlacement);
+            
+            // PLACEMENT CONSTRAINT: Objects CAN contain attributes
+            com.draagon.meta.constraint.PlacementConstraint attributesPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "object.attributes.placement",
+                    "Objects can contain attributes",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (child) -> child instanceof MetaAttribute
+                );
+            constraintRegistry.addConstraint(attributesPlacement);
+            
+            // PLACEMENT CONSTRAINT: Objects CAN contain keys
+            com.draagon.meta.constraint.PlacementConstraint keysPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "object.keys.placement",
+                    "Objects can contain keys (primary, foreign, secondary)",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (child) -> child instanceof MetaKey
+                );
+            constraintRegistry.addConstraint(keysPlacement);
+            
+            // PLACEMENT CONSTRAINT: Objects CAN contain validators
+            com.draagon.meta.constraint.PlacementConstraint validatorsPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "object.validators.placement",
+                    "Objects can contain validators",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (child) -> child instanceof com.draagon.meta.validator.MetaValidator
+                );
+            constraintRegistry.addConstraint(validatorsPlacement);
+            
+            // PLACEMENT CONSTRAINT: Objects CAN contain views
+            com.draagon.meta.constraint.PlacementConstraint viewsPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "object.views.placement",
+                    "Objects can contain views",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (child) -> child instanceof com.draagon.meta.view.MetaView
+                );
+            constraintRegistry.addConstraint(viewsPlacement);
+            
+            // PLACEMENT CONSTRAINT: Objects CAN contain nested objects
+            com.draagon.meta.constraint.PlacementConstraint nestedObjectsPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "object.nested.placement",
+                    "Objects can contain nested objects",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (child) -> child instanceof MetaObject
+                );
+            constraintRegistry.addConstraint(nestedObjectsPlacement);
+            
+            // VALIDATION CONSTRAINT: Unique field names within object (applies to all objects)
+            com.draagon.meta.constraint.ValidationConstraint uniqueFieldNames = 
+                new com.draagon.meta.constraint.ValidationConstraint(
+                    "object.field.uniqueness",
+                    "Field names must be unique within an object",
+                    (metadata) -> metadata instanceof MetaObject,
+                    (metadata, value) -> {
+                        if (metadata instanceof MetaObject) {
+                            MetaObject obj = (MetaObject) metadata;
+                            var fieldNames = obj.getChildren(MetaField.class).stream()
+                                .map(field -> field.getName())
+                                .collect(java.util.stream.Collectors.toSet());
+                            var fieldList = obj.getChildren(MetaField.class);
+                            return fieldNames.size() == fieldList.size(); // No duplicates
+                        }
+                        return true;
+                    }
+                );
+            constraintRegistry.addConstraint(uniqueFieldNames);
+            
+            log.debug("Registered cross-cutting object constraints in MetaObject");
+            
+        } catch (Exception e) {
+            log.error("Failed to register cross-cutting object constraints", e);
+        }
     }
 }

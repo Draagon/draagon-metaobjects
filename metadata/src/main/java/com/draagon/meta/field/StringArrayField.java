@@ -7,22 +7,44 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.attr.StringArrayAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.util.DataConverter;
+import com.draagon.meta.registry.MetaDataRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 /**
- * A String Array Field.
+ * A String Array Field with unified registry registration and child requirements.
  *
- * @version 1.0
+ * @version 6.0
  * @author Doug Mealing
  */
 @SuppressWarnings("serial")
-public class StringArrayField extends ArrayField<String,List<String>> implements StringSerializationHandler {
+public class StringArrayField extends ArrayField<String,List<String>> implements StringSerializationHandler
+{
+    private static final Logger log = LoggerFactory.getLogger(StringArrayField.class);
 
     public final static String SUBTYPE_STRING_ARRAY = "stringArray";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(StringArrayField.class, def -> def
+                .type(TYPE_FIELD).subType(SUBTYPE_STRING_ARRAY)
+                .description("String array field for lists of string values")
+                
+                // Inherits: required, defaultValue, validation, defaultView from MetaField
+                // Array fields inherit array-specific attributes from ArrayField
+            );
+            
+            log.debug("Registered StringArrayField type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register StringArrayField type with unified registry", e);
+        }
+    }
 
     public StringArrayField( String name ) {
         super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY );
@@ -37,7 +59,7 @@ public class StringArrayField extends ArrayField<String,List<String>> implements
     public static StringArrayField create( String name, String defaultValue ) {
         StringArrayField f = new StringArrayField( name );
         if ( defaultValue != null ) {
-            f.addMetaAttr(StringArrayAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
+            f.addMetaAttr(StringAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
         }
         return f;
     }

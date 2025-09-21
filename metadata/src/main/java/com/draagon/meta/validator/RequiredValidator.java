@@ -7,16 +7,42 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
 
 import org.apache.commons.validator.GenericValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A Reguired validator that ensures a field has a value and is not null
+ * A Required validator that ensures a field has a value and is not null with unified registry registration.
+ *
+ * @version 6.0
  */
+@MetaDataTypeHandler(type = "validator", subType = "required", description = "Required validator for field validation")
 @SuppressWarnings("serial")
-public class RequiredValidator extends MetaValidator {
+public class RequiredValidator extends MetaValidator
+{
+    private static final Logger log = LoggerFactory.getLogger(RequiredValidator.class);
 
     public final static String SUBTYPE_REQUIRED = "required";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(RequiredValidator.class, def -> def
+                .type(TYPE_VALIDATOR).subType(SUBTYPE_REQUIRED)
+                .description("Required validator ensures field has a value and is not null")
+                
+                // Validators typically don't have children or specific attributes
+                // Inherits from MetaValidator
+            );
+            
+            log.debug("Registered RequiredValidator type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register RequiredValidator type with unified registry", e);
+        }
+    }
 
     public RequiredValidator(String name) {
         super(SUBTYPE_REQUIRED, name);

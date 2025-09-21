@@ -9,7 +9,11 @@ package com.draagon.meta.object.data;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.pojo.PojoMetaObject;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
 import com.draagon.meta.util.DataConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -19,14 +23,32 @@ import java.util.List;
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
 
+@MetaDataTypeHandler(type = "object", subType = "data", description = "Data-based metadata object with protected access and Builder patterns")
 public class DataMetaObject extends PojoMetaObject
 {
-    //private final static Log log = LogFactory.getLog(ValueMetaObject.class);
+    private static final Logger log = LoggerFactory.getLogger(DataMetaObject.class);
 
     public final static String SUBTYPE_DATA = "data";
 
     public static final String ATTR_ALLOWEXTENSIONS = "allowExtensions";
     public static final String ATTR_ISSTRICT = "isStrict";
+
+    // Self-registration with unified registry
+    static {
+        try {
+            MetaDataRegistry.registerType(DataMetaObject.class, def -> def
+                .type("object").subType(SUBTYPE_DATA)
+                .description("Data-based metadata object with dynamic attribute access")
+                .optionalChild("field", "*")
+                .optionalChild("attr", "*")
+                .optionalChild("validator", "*")
+                .optionalChild("key", "*")
+            );
+            log.debug("Registered DataMetaObject type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register DataMetaObject type with unified registry", e);
+        }
+    }
 
     // NOTE:  The PojoMetaObject will keep attempting to use reflection, so this bypasses that
     public final static String CACHE_PARAM_HAS_GETTER_METHOD = "hasGetterMethod";

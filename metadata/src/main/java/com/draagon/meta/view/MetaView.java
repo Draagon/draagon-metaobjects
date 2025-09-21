@@ -4,10 +4,9 @@ import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
-import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 
 public abstract class MetaView extends MetaData {
@@ -23,6 +22,10 @@ public abstract class MetaView extends MetaData {
 
     public MetaView(String subtype, String name) {
         super(TYPE_VIEW, subtype, name);
+    }
+    
+    public MetaView(String type, String subtype, String name) {
+        super(type, subtype, name);
     }
 
     // Note: getMetaDataClass() is now inherited from MetaData base class
@@ -65,7 +68,7 @@ public abstract class MetaView extends MetaData {
      * @return
      */
     public MetaField<?> getMetaField(Object obj) {
-        MetaObject mc = MetaDataRegistry.findMetaObject(obj);
+        MetaObject mc = MetaDataUtil.findMetaObject(obj, this);
         return mc.getMetaField(getParent().getName());
     }
 
@@ -75,7 +78,9 @@ public abstract class MetaView extends MetaData {
     public String getDisplayString(Object obj) {
 
         MetaObject mc = getLoader().getMetaObjectFor(obj);
-        if (mc == null) MetaDataRegistry.findMetaObject(obj);
+        if (mc == null) {
+            mc = MetaDataUtil.findMetaObject(obj, this);
+        }
         MetaField mf = mc.getMetaField(getParent().getName());
         return "" + mf.getString(obj);
     }

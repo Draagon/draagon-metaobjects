@@ -15,7 +15,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.manager.exp.*;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
@@ -169,7 +169,7 @@ public abstract class ObjectManager
 	 */
 	public ObjectRef getObjectRef( Object obj )
 	{
-		MetaObject mc = MetaDataRegistry.findMetaObject( obj );
+		MetaObject mc = MetaDataUtil.findMetaObject( obj, this );
 
 		Collection<MetaField> keys = getPrimaryKeys( mc );
 		if ( keys.size() == 0 )
@@ -655,7 +655,7 @@ public abstract class ObjectManager
 	 */
 	public QueryBuilder query(String className) throws MetaDataException {
 		try {
-			MetaObject metaObject = MetaDataRegistry.findMetaObjectByName(className);
+			MetaObject metaObject = MetaDataUtil.findMetaObjectByName(className, this);
 			return new QueryBuilder(this, metaObject);
 		} catch (Exception e) {
 			throw new MetaDataException("Could not find MetaObject for class: " + className, e);
@@ -1136,7 +1136,7 @@ public abstract class ObjectManager
 		// Check each object for validity
 		for( Object o : objs )
 		{
-			MetaObject mc = MetaDataRegistry.findMetaObject( o );
+			MetaObject mc = MetaDataUtil.findMetaObject( o, null );
 
 			if ( getExpressionResult( mc, exp, o ))
 			{
@@ -1197,7 +1197,7 @@ public abstract class ObjectManager
 	 */
 	public MetaObject getMetaObjectFor( Object o ) throws MetaDataNotFoundException
 	{
-		MetaObject mc = MetaDataRegistry.findMetaObject( o );
+		MetaObject mc = MetaDataUtil.findMetaObject( o, this );
 		if ( mc == null )
 			throw MetaDataNotFoundException.forObject(o.getClass().getSimpleName(), null);
 

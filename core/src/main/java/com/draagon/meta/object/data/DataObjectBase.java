@@ -12,7 +12,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.object.Validatable;
@@ -190,11 +190,11 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware, V
         if ( objectName != null  ) {
             try {
                 if (loaderName != null) {
-                    MetaDataLoader mcl = MetaDataRegistry.getDataLoader(loaderName);
+                    MetaDataLoader mcl = MetaDataUtil.findMetaDataLoaderByName(loaderName, this);
                     if (mcl != null) {
                         metaObject = mcl.getMetaObjectByName(objectName);
                     } else {
-                        metaObject = MetaDataRegistry.findMetaObjectByName(objectName);
+                        metaObject = MetaDataUtil.findMetaObjectByName(objectName, this);
                     }
                 }
 
@@ -203,11 +203,11 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware, V
                 throw new RuntimeException("Could not re-attach MetaObject: " + e.getMessage(), e);
             }
         }
-        // Otherwise, try to find the MetaObject by looking it up in the static MetaDataRegistry method
+        // Otherwise, try to find the MetaObject by looking it up in the OSGi-compatible registry
         else {
             try {
                 // If we find the MetaObject, then attach to this DataObject
-                MetaObject mo = MetaDataRegistry.findMetaObjectByName(objectName);
+                MetaObject mo = MetaDataUtil.findMetaObjectByName(objectName, this);
                 setMetaData( mo );
 
             } catch( MetaDataNotFoundException e ) {

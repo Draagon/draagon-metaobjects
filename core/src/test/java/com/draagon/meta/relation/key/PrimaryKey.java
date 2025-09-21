@@ -24,7 +24,6 @@ public class PrimaryKey extends ObjectKey {
         return getFieldKeys().iterator().next();
     }
 
-    @Override
     public ValidationResult validate() {
         if ( getFieldKeys().size() != 1 ) {
             return ValidationResult.withError("PrimaryKey must have one and only one MetaField with the "+ObjectKey.ATTR_ISKEY+" attribute: " + getFieldKeys());

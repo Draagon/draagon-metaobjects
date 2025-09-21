@@ -52,7 +52,7 @@ public class MetaDataLoaderTest {
     public void testModelMetadata() {
 
         assertEquals("hello attribute from loader", "hello", loader.getChildOfType(MetaAttribute.TYPE_ATTR, "hello").getName());
-        assertEquals("hello attribute from registry", "hello", MetaDataRegistry.getDataLoader("test1").getMetaAttr("hello").getName());
+        assertEquals("hello attribute from registry", "hello", loader.getMetaAttr("hello").getName());
 
         assertEquals("1 foo object", 1, loader.getMetaDataOfType(MetaObject.TYPE_OBJECT).size());
 
@@ -97,28 +97,28 @@ public class MetaDataLoaderTest {
         // foo
         //     .bar
         //        .length = 10
-        // foo-baby (parent->foo)
+        // fooBaby (parent->foo)
         //     .bar (parent->foo.bar)
         //         .length = 11
 
         MetaObject mo = loader.getMetaObjectByName( "foo" );
-        MetaObject baby = MappedMetaObject.create("foo-baby");
+        MetaObject baby = MappedMetaObject.create("fooBaby");
         baby.setSuperObject( mo );
 
         // Create an overlay for bar and length
         MetaField barField = mo.getMetaField( "bar" ).overload(); // overload or extend
         barField.addMetaAttr( IntAttribute.create( "length", 11 ));
-        barField.addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) );
+        barField.addMetaAttr( StringAttribute.create( MetaField.ATTR_DEFAULT_VALUE, "6" ) );
         baby.addMetaField(barField);
 
         Map bo = (Map) baby.newInstance();
         //log.info( "MetaObject: " + bo );
 
-        assertEquals( "foo-baby.bar=6", 6, (int) bo.get( "bar" ));
-        assertEquals( "foo-baby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
+        assertEquals( "fooBaby.bar=6", 6, (int) bo.get( "bar" ));
+        assertEquals( "fooBaby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
         assertEquals( "foo.bar.length=10", "10", mo.getMetaField("bar").getMetaAttr( "length").getValueAsString());
 
-        assertEquals( "foo-baby.bar.abc=def", "def", baby.getMetaField("bar").getMetaAttr( "abc").getValueAsString() );
+        assertEquals( "fooBaby.bar.abc=def", "def", baby.getMetaField("bar").getMetaAttr( "abc").getValueAsString() );
     }
 
     @Test
@@ -127,28 +127,28 @@ public class MetaDataLoaderTest {
         // foo
         //     .bar
         //        .length = 10
-        // foo-baby (parent->foo)
+        // fooBaby (parent->foo)
         //     .bar (parent->foo.bar)
         //         .length = 11
 
         MetaObject mo = loader.getMetaObjectByName( "foo" );
-        MetaObject baby = MappedMetaObject.create("foo-baby");
+        MetaObject baby = MappedMetaObject.create("fooBaby");
         baby.setSuperObject( mo );
 
         // Create an overlay for bar and length
         MetaField barField = mo.getMetaField( "bar" ).overload();
         barField.addMetaAttr( IntAttribute.create( "length", 11 ));
-        barField.addMetaAttr( IntAttribute.create( MetaField.ATTR_DEFAULT_VALUE, 6 ) );
+        barField.addMetaAttr( StringAttribute.create( MetaField.ATTR_DEFAULT_VALUE, "6" ) );
         baby.addMetaField(barField);
 
         Map bo = (Map) baby.newInstance();
         //log.info( "MetaObject: " + bo );
 
-        assertEquals( "foo-baby.bar=6", 6, bo.get( "bar" ));
-        assertEquals( "foo-baby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
+        assertEquals( "fooBaby.bar=6", 6, bo.get( "bar" ));
+        assertEquals( "fooBaby.bar.length=11", "11", baby.getMetaField("bar").getMetaAttr( "length").getValueAsString());
         assertEquals( "foo.bar.length=10", "10", mo.getMetaField("bar").getMetaAttr( "length").getValueAsString());
 
-        assertEquals( "foo-baby.bar.abc=def", "def", baby.getMetaField("bar").getMetaAttr( "abc").getValueAsString() );
+        assertEquals( "fooBaby.bar.abc=def", "def", baby.getMetaField("bar").getMetaAttr( "abc").getValueAsString() );
     }
 
     @Test

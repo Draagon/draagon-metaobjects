@@ -59,15 +59,6 @@ public abstract class ArrayField<A,T extends List> extends MetaField<T> {
         }
     }
 
-    /**
-     * Return the array item type
-     *
-     * @deprecated Use getArrayItemClass()
-     */
-    @Deprecated
-    public Class<A> getItemClass() {
-        return getArrayItemClass();
-    }
 
     /** Return the array item type */
     @SuppressWarnings("unchecked")

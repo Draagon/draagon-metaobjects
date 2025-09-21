@@ -23,6 +23,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>6.0</version>

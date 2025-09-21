@@ -13,6 +13,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.manager.*;
 import com.draagon.meta.manager.db.driver.*;
 import com.draagon.meta.manager.exp.Expression;
+import com.draagon.meta.util.MetaDataUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1226,7 +1227,7 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
                 String className = query.substring(1, i).trim();
                 query = query.substring(i + 1).trim();
 
-                resultClass = com.draagon.meta.loader.MetaDataRegistry.findMetaObjectByName(className);
+                resultClass = MetaDataUtil.findMetaObjectByName(className, this);
             } else {
                 throw new MetaDataException("OQL does not contain a result set definition using []'s or {}'s: [" + query + "]");
             }

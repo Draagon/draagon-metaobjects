@@ -5,14 +5,66 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
 import com.draagon.meta.util.DataConverter;
+import com.draagon.meta.registry.MetaDataRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sound.midi.MetaEventListener;
 import java.util.Map;
 
-public class MappedMetaObject extends MetaObject {
+/**
+ * MappedMetaObject with unified registry registration for Map-based objects.
+ *
+ * @version 6.0
+ */
+public class MappedMetaObject extends MetaObject
+{
+    private static final Logger log = LoggerFactory.getLogger(MappedMetaObject.class);
 
     public final static String OBJECT_SUBTYPE = "map";
     private String metaObjectKey = "metaObject";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(MappedMetaObject.class, def -> def
+                .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
+                .description("Map-based MetaObject with key-value field access")
+                
+                // MAP-SPECIFIC ATTRIBUTES
+                .optionalAttribute(ATTR_OBJECT, "string")
+                .optionalAttribute(ATTR_OBJECT_REF, "string")
+                .optionalAttribute(ATTR_DESCRIPTION, "string")
+                
+                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
+                .optionalAttribute("isAbstract", "string")
+                .optionalAttribute("implements", "string")
+                
+                // MAP OBJECTS CAN CONTAIN ALL FIELD TYPES
+                .optionalChild("field", "string")
+                .optionalChild("field", "int")
+                .optionalChild("field", "long")
+                .optionalChild("field", "double")
+                .optionalChild("field", "float")
+                .optionalChild("field", "short")
+                .optionalChild("field", "byte")
+                .optionalChild("field", "boolean")
+                .optionalChild("field", "date")
+                .optionalChild("field", "object")
+                .optionalChild("field", "class")
+                .optionalChild("field", "stringArray")
+                .optionalChild("field", "objectArray")
+                
+                // REMOVED: Direct attr children should not be allowed via addChild().
+                // Attributes are added via addMetaAttr(), not addChild().
+                // Inherits: name, pkg attributes from MetaObject
+            );
+            
+            log.debug("Registered MappedMetaObject type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register MappedMetaObject type with unified registry", e);
+        }
+    }
 
     public MappedMetaObject(String name) {
         super(OBJECT_SUBTYPE,name);

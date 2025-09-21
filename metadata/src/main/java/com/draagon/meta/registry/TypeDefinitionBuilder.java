@@ -1,0 +1,248 @@
+package com.draagon.meta.registry;
+
+import com.draagon.meta.MetaData;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Fluent builder for creating TypeDefinition instances with integrated child requirements.
+ * 
+ * <p>This builder provides a clean API for defining MetaData types along with their
+ * child requirements, replacing the dual registry pattern with a unified approach.</p>
+ * 
+ * <h3>Usage Examples:</h3>
+ * 
+ * <pre>{@code
+ * // Simple field type with attributes
+ * TypeDefinitionBuilder.forClass(StringField.class)
+ *     .type("field").subType("string")
+ *     .description("String field with pattern validation")
+ *     .optionalAttribute("pattern", "string")
+ *     .optionalAttribute("required", "boolean")
+ *     .build();
+ * 
+ * // Object type accepting any fields
+ * TypeDefinitionBuilder.forClass(MetaObject.class)
+ *     .type("object").subType("base")
+ *     .optionalChild("field", "*", "*")  // Any field, any name
+ *     .build();
+ * }</pre>
+ * 
+ * @since 6.0.0
+ */
+public class TypeDefinitionBuilder {
+    
+    private final Class<? extends MetaData> implementationClass;
+    private String type;
+    private String subType;
+    private String description;
+    private final Map<String, ChildRequirement> childRequirements = new HashMap<>();
+    
+    /**
+     * Create builder for the specified implementation class
+     * 
+     * @param implementationClass Java class that implements this MetaData type
+     */
+    public TypeDefinitionBuilder(Class<? extends MetaData> implementationClass) {
+        this.implementationClass = Objects.requireNonNull(implementationClass, "Implementation class cannot be null");
+    }
+    
+    /**
+     * Create builder for the specified implementation class (static factory)
+     * 
+     * @param implementationClass Java class that implements this MetaData type
+     * @return New TypeDefinitionBuilder
+     */
+    public static TypeDefinitionBuilder forClass(Class<? extends MetaData> implementationClass) {
+        return new TypeDefinitionBuilder(implementationClass);
+    }
+    
+    /**
+     * Set the primary type identifier
+     * 
+     * @param type Primary type like "field", "object", "attr"
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder type(String type) {
+        this.type = Objects.requireNonNull(type, "Type cannot be null");
+        return this;
+    }
+    
+    /**
+     * Set the specific subtype identifier
+     * 
+     * @param subType Specific subtype like "string", "int", "base"
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder subType(String subType) {
+        this.subType = Objects.requireNonNull(subType, "SubType cannot be null");
+        return this;
+    }
+    
+    /**
+     * Set the human-readable description
+     * 
+     * @param description Description of this type
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder description(String description) {
+        this.description = description;
+        return this;
+    }
+    
+    /**
+     * Add a required child with specific type, subType, and name
+     * 
+     * @param childType Expected child type (e.g., "field", "attr")
+     * @param childSubType Expected child subType (e.g., "string", "int") or "*" for any
+     * @param childName Expected child name or "*" for any
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder requiredChild(String childType, String childSubType, String childName) {
+        ChildRequirement requirement = ChildRequirement.required(childName, childType, childSubType);
+        addChildRequirement(requirement);
+        return this;
+    }
+    
+    /**
+     * Add an optional child with specific type, subType, and name
+     * 
+     * @param childType Expected child type (e.g., "field", "attr")
+     * @param childSubType Expected child subType (e.g., "string", "int") or "*" for any
+     * @param childName Expected child name or "*" for any
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder optionalChild(String childType, String childSubType, String childName) {
+        ChildRequirement requirement = ChildRequirement.optional(childName, childType, childSubType);
+        addChildRequirement(requirement);
+        return this;
+    }
+    
+    /**
+     * Add an optional child with wildcard name (accepts any name of specified type.subType)
+     * 
+     * @param childType Expected child type (e.g., "field", "attr")
+     * @param childSubType Expected child subType (e.g., "string", "int") or "*" for any
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder optionalChild(String childType, String childSubType) {
+        return optionalChild(childType, childSubType, "*");
+    }
+    
+    /**
+     * Add a required attribute (convenience method for common case)
+     * 
+     * @param attrName Attribute name
+     * @param attrSubType Attribute subType (e.g., "string", "boolean", "int")
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder requiredAttribute(String attrName, String attrSubType) {
+        return requiredChild("attr", attrSubType, attrName);
+    }
+    
+    /**
+     * Add an optional attribute (convenience method for common case)
+     * 
+     * @param attrName Attribute name
+     * @param attrSubType Attribute subType (e.g., "string", "boolean", "int")
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder optionalAttribute(String attrName, String attrSubType) {
+        return optionalChild("attr", attrSubType, attrName);
+    }
+    
+    /**
+     * Add an optional attribute with wildcard subType (accepts any attribute subType)
+     * 
+     * @param attrName Attribute name
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder optionalAttribute(String attrName) {
+        return optionalAttribute(attrName, "*");
+    }
+    
+    /**
+     * Add a child requirement directly
+     * 
+     * @param requirement Child requirement to add
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder childRequirement(ChildRequirement requirement) {
+        addChildRequirement(requirement);
+        return this;
+    }
+    
+    /**
+     * Internal method to add child requirement with proper key handling
+     */
+    private void addChildRequirement(ChildRequirement requirement) {
+        String key = requirement.getName();
+        if ("*".equals(key)) {
+            // For wildcard requirements, create unique keys to avoid overwrites
+            key = "*:" + requirement.getExpectedType() + ":" + requirement.getExpectedSubType();
+        }
+        
+        ChildRequirement existing = childRequirements.get(key);
+        if (existing != null && !existing.equals(requirement)) {
+            throw new IllegalArgumentException(
+                "Child requirement already exists for key '" + key + 
+                "'. Existing: " + existing + ", New: " + requirement
+            );
+        }
+        
+        childRequirements.put(key, requirement);
+    }
+    
+    /**
+     * Build the immutable TypeDefinition
+     * 
+     * @return New TypeDefinition instance
+     * @throws IllegalStateException if required fields are not set
+     */
+    public TypeDefinition build() {
+        if (type == null) {
+            throw new IllegalStateException("Type must be set");
+        }
+        if (subType == null) {
+            throw new IllegalStateException("SubType must be set");
+        }
+        
+        return new TypeDefinition(implementationClass, type, subType, description, childRequirements);
+    }
+    
+    /**
+     * Get the current type being built (for debugging)
+     * 
+     * @return Current type or null if not set
+     */
+    public String getType() {
+        return type;
+    }
+    
+    /**
+     * Get the current subType being built (for debugging)
+     * 
+     * @return Current subType or null if not set
+     */
+    public String getSubType() {
+        return subType;
+    }
+    
+    /**
+     * Get the number of child requirements currently defined
+     * 
+     * @return Count of child requirements
+     */
+    public int getChildRequirementCount() {
+        return childRequirements.size();
+    }
+    
+    @Override
+    public String toString() {
+        String typeName = (type != null && subType != null) ? type + "." + subType : "undefined";
+        return String.format("TypeDefinitionBuilder[%s -> %s, children=%d]",
+            typeName, implementationClass.getSimpleName(), childRequirements.size());
+    }
+}

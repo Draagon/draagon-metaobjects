@@ -8,7 +8,7 @@
     <!-- Fruit -->
     <object name="Fruit" type="value" dbTable="FRUIT">
     
-      <attr name="object">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
+      <attr name="object" type="string">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
       
       <!-- Id -->
       <field name="id" super="id"/>
@@ -18,7 +18,7 @@
             
       <!-- Name -->
       <field name="name" type="string" dbColumn="name">
-        <attr name="len">50</attr>
+        <attr name="len" type="int">50</attr>
       </field>
       
       <!-- Length -->
@@ -33,7 +33,7 @@
     <object name="Apple" super="Fruit" type="value" dbTable="APPLE" dbView="APPLE_VIEW"
         dbViewSQL="SELECT F.*, A.* FROM FRUIT F, APPLE A WHERE F.id=A.fruit_id AND F.kind=1">
     
-      <attr name="object">com.draagon.meta.manager.db.test.fruit.Apple</attr>
+      <attr name="object" type="string">com.draagon.meta.manager.db.test.fruit.Apple</attr>
           
       <attr name="dbInheritance" type="properties">
         superClass=produce::Fruit
@@ -48,7 +48,7 @@
 
       <!-- Orachard -->
       <field name="orchard" type="string" dbColumn="orchard">
-        <attr name="len">80</attr>
+        <attr name="len" type="int">80</attr>
       </field>
      
       <!-- Worms -->
@@ -60,7 +60,7 @@
     <object name="Orange" super="Fruit" dbTable="ORANGE" dbView="ORANGE_VIEW"
         dbViewSQL="SELECT F.*, O.* FROM FRUIT F, ORANGE O WHERE F.id=O.fruit_id AND F.kind=2">
     
-      <attr name="object">com.draagon.meta.manager.db.test.fruit.Orange</attr>    
+      <attr name="object" type="string">com.draagon.meta.manager.db.test.fruit.Orange</attr>    
             
       <attr name="dbInheritance" type="properties">
         superClass=produce::Fruit
@@ -82,9 +82,7 @@
     <object name="Basket" type="value" package="container" dbTable="BASKET">
           
       <!-- Id -->
-      <field name="id" type="long" dbColumn="id" auto="last">
-          <attr name="isKey">true</attr>
-      </field>      
+      <field name="id" super="produce::id"/>      
     
       <!-- Number of apples -->
       <field name="apples" type="int" dbColumn="apples"/>

@@ -10,7 +10,7 @@ package com.draagon.meta.manager;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
@@ -97,7 +97,7 @@ public class EnhancedObjectManagerExample {
     public void demonstrateAsyncOperations(String className, Object newObj) {
         MetaObject mc;
         try {
-            mc = MetaDataRegistry.findMetaObjectByName(className);
+            mc = MetaDataUtil.findMetaObjectByName(className, this);
         } catch (Exception e) {
             log.error("Could not find MetaObject for class: {}", className, e);
             return;

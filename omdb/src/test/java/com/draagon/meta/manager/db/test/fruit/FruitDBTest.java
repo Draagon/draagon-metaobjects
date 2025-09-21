@@ -15,8 +15,12 @@ import com.draagon.meta.manager.db.test.AbstractOMDBTest;
 import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataLoaderRegistry;
+import com.draagon.meta.registry.ServiceRegistryFactory;
+import com.draagon.meta.loader.MetaDataLoader;
 import org.junit.Test;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 import java.util.Collection;
 import java.util.Date;
@@ -29,11 +33,16 @@ import static org.junit.Assert.*;
  */
 public class FruitDBTest extends AbstractOMDBTest {
 
+    // Use the registry from AbstractOMDBTest
+    private static MetaDataLoaderRegistry getLoaderRegistry() {
+        return registry;  // From AbstractOMDBTest
+    }
+
     //@Test - Disabled due to metadata loading issues with managed types
     public void testApple() throws Exception {
         
         Apple apple = new Apple();
-        MetaObject mo = MetaDataRegistry.findMetaObject( apple );
+        MetaObject mo = getLoaderRegistry().findMetaObject( apple );
         
         assertEquals( "produce::Apple", mo.getName() );
         
@@ -70,13 +79,23 @@ public class FruitDBTest extends AbstractOMDBTest {
         assertTrue( omdb.getObjects(oc, mo).isEmpty() );
 
         // Better be an Orange
-        assertFalse( omdb.getObjects(oc, MetaDataRegistry.findMetaObject( orange )).isEmpty() );    
+        assertFalse( omdb.getObjects(oc, getLoaderRegistry().findMetaObject( orange )).isEmpty() );    
     }
     
     @Test
     public void testBasket() throws Exception {
         
-        MetaObject mo = MetaDataRegistry.findMetaObjectByName( "container::Basket" );        
+        // DEBUG: List all available loaders and their objects
+        System.out.println("=== AVAILABLE METADATALOADERS ===");
+        for (MetaDataLoader loaderItem : getLoaderRegistry().getDataLoaders()) {
+            System.out.println("Loader: " + loaderItem.getName());
+            for (MetaObject obj : loaderItem.getChildren(MetaObject.class)) {
+                System.out.println("  Object: " + obj.getName() + " (type: " + obj.getSubTypeName() + ")");
+            }
+        }
+        System.out.println("=== END METADATALOADERS ===");
+        
+        MetaObject mo = getLoaderRegistry().findMetaObjectByName( "container::Basket" );        
         assertEquals( "container::Basket", mo.getName() );
         
         ValueObject vo = (ValueObject) mo.newInstance();
@@ -92,7 +111,7 @@ public class FruitDBTest extends AbstractOMDBTest {
         assertFalse( "isEmpty", data.isEmpty() );
         assertEquals( Integer.valueOf(12), ((ValueObject) data.iterator().next()).getInt("oranges"));
         
-        MetaObject mo2 = MetaDataRegistry.findMetaObjectByName( "produce::FullBasketView" );
+        MetaObject mo2 = getLoaderRegistry().findMetaObjectByName( "produce::FullBasketView" );
         data = omdb.getObjects(oc, mo2);
         assertFalse( "isEmpty", data.isEmpty() );
         

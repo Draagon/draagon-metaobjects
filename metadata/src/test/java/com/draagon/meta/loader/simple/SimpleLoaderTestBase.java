@@ -11,6 +11,8 @@
 package com.draagon.meta.loader.simple;
 
 
+import com.draagon.meta.validator.RequiredValidator;
+import com.draagon.meta.validator.LengthValidator;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,6 +29,21 @@ public class SimpleLoaderTestBase {
     protected SimpleLoader initLoader(List<URI> sources) {
 
         SimpleLoader loader = null;
+
+        // Trigger validator registrations
+        try {
+            new RequiredValidator("test");
+            new LengthValidator("test");
+        } catch (Exception e) {
+            // Ignore - just triggering static registration
+        }
+        
+        // Trigger view registrations
+        try {
+            Class.forName("com.draagon.meta.view.BasicMetaView");
+        } catch (Exception e) {
+            // Ignore - just triggering static registration
+        }
 
             // Initialize the loader
             loader = new SimpleLoader(

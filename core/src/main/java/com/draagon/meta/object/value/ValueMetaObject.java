@@ -7,10 +7,32 @@
 package com.draagon.meta.object.value;
 
 import com.draagon.meta.object.data.DataMetaObject;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+@MetaDataTypeHandler(type = "object", subType = "value", description = "Value-based metadata object with dynamic attribute access")
 public class ValueMetaObject extends DataMetaObject
 {
+    private static final Logger log = LoggerFactory.getLogger(ValueMetaObject.class);
     public final static String SUBTYPE_VALUE = "value";
+    
+    // Self-registration with unified registry
+    static {
+        try {
+            MetaDataRegistry.registerType(ValueMetaObject.class, def -> def
+                .type("object").subType(SUBTYPE_VALUE)
+                .description("Value-based metadata object")
+                .optionalChild("field", "*")
+                .optionalChild("attr", "*")
+                .optionalChild("validator", "*")
+            );
+            log.debug("Registered ValueMetaObject type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register ValueMetaObject type with unified registry", e);
+        }
+    }
 
     /**
      * Constructs the MetaClassObject for MetaObjects

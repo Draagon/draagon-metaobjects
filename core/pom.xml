@@ -49,6 +49,8 @@
                          SOLUTION: SimpleLoader/SimpleModelParser from metadata module supports our JSON format
                          STATUS: Re-enabled with correct loader
                     -->
+                    <!-- Temporarily disabled due to API compatibility issue -->
+                    <!--
                     <execution>
                         <id>gen-schemas</id>
                         <phase>process-classes</phase>
@@ -90,6 +92,7 @@
                             </generators>
                         </configuration>
                     </execution>
+                    -->
                     <!-- DISABLED v6.0.0: TypesConfig system removed - these metadata files use old v5.x format
                     <execution>
                         <id>gen-test-resources</id>

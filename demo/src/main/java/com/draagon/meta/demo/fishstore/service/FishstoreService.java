@@ -13,8 +13,7 @@ package com.draagon.meta.demo.fishstore.service;
 import com.draagon.meta.manager.ObjectConnection;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.loader.MetaDataRegistry;
-import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.spring.MetaDataService;
 import com.draagon.meta.demo.fishstore.*;
 import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +34,14 @@ public class FishstoreService {
     private ObjectManager om;
     
     @Autowired
-    private MetaDataLoader metaDataLoader;
+    private MetaDataService metaDataService;
     
     /** Initialize the database if needed */     
     public void init() {
         
         ObjectConnection oc = om.getConnection();
         try {
-            MetaObject storeMO = metaDataLoader.getMetaObjectByName("Store");
+            MetaObject storeMO = metaDataService.findMetaObjectByName("Store");
             Collection<?> stores = om.getObjects(oc, storeMO);
             
             if (stores.isEmpty()) {
@@ -54,7 +53,7 @@ public class FishstoreService {
                 createSampleStore(oc, storeMO, "Pet Paradise", 40);
                 
                 // Create sample breeds
-                MetaObject breedMO = metaDataLoader.getMetaObjectByName("Breed");
+                MetaObject breedMO = metaDataService.findMetaObjectByName("Breed");
                 createSampleBreed(oc, breedMO, "Goldfish", 2);
                 createSampleBreed(oc, breedMO, "Angelfish", 3);
                 createSampleBreed(oc, breedMO, "Betta", 5);
@@ -104,7 +103,7 @@ public class FishstoreService {
     public Collection<Store> getAllStores() {
         ObjectConnection oc = om.getConnection();
         try {
-            MetaObject storeMO = metaDataLoader.getMetaObjectByName("Store");
+            MetaObject storeMO = metaDataService.findMetaObjectByName("Store");
             return (Collection<Store>) om.getObjects(oc, storeMO);
         } catch (Exception e) {
             log.error("Error getting stores", e);
@@ -121,7 +120,7 @@ public class FishstoreService {
     public Collection<Breed> getAllBreeds() {
         ObjectConnection oc = om.getConnection();
         try {
-            MetaObject breedMO = metaDataLoader.getMetaObjectByName("Breed");
+            MetaObject breedMO = metaDataService.findMetaObjectByName("Breed");
             return (Collection<Breed>) om.getObjects(oc, breedMO);
         } catch (Exception e) {
             log.error("Error getting breeds", e);

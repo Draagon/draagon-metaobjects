@@ -3,7 +3,7 @@ package com.draagon.meta.object.managed;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
@@ -135,15 +135,15 @@ public class ManagedObject implements Map<String, Object>, Serializable, MetaObj
         if (mMetaObject == null) {
             try {
                 if (mLoaderName != null) {
-                    MetaDataLoader mcl = MetaDataRegistry.getDataLoader(mLoaderName);
+                    MetaDataLoader mcl = MetaDataUtil.findMetaDataLoaderByName(mLoaderName, this);
                     if (mcl != null) {
                         mMetaObject = mcl.getMetaDataByName( MetaObject.class, mObjectName);
                     }
                 }
 
-                // Use registry to find MetaObject if specific loader didn't work
+                // Use utility to find MetaObject if specific loader didn't work
                 if (mMetaObject == null) {
-                    mMetaObject = MetaDataRegistry.findMetaObjectByName(mObjectName);
+                    mMetaObject = MetaDataUtil.findMetaObjectByName(mObjectName, this);
                 }
             } catch (MetaDataNotFoundException e) {
                 throw new RuntimeException("Could not re-attach MetaObject: " + e.getMessage(), e);

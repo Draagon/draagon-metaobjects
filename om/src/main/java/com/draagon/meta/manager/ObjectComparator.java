@@ -9,7 +9,7 @@ package com.draagon.meta.manager;
 
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.manager.exp.SortOrder;
 import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
@@ -47,8 +47,8 @@ public class ObjectComparator implements Comparator<Object>
 
     if ( sort == null ) return 0;
 
-    MetaObject ma = MetaDataRegistry.findMetaObject( a );
-    MetaObject mb = MetaDataRegistry.findMetaObject( b );
+    MetaObject ma = MetaDataUtil.findMetaObject( a, this );
+    MetaObject mb = MetaDataUtil.findMetaObject( b, this );
 
     if ( !ma.equals( mb ))
       throw new MetaDataException( "Objects are not of the same MetaClass: [" + ma + "] != [" + mb + "]" );

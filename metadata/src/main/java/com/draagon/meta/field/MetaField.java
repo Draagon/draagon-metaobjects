@@ -13,9 +13,7 @@ import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
-import com.draagon.meta.constraint.ValidationConstraint;
+import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,109 +73,39 @@ import java.util.stream.Stream;
  * @see DataTypes
  * @see com.draagon.meta.constraint.Constraint
  */
-@SuppressWarnings("serial")
 public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T> {
 
     private static final Logger log = LoggerFactory.getLogger(MetaField.class);
 
+    // FIELD CONSTANTS (owned by this class)
     public final static String TYPE_FIELD = "field";
-
     public final static String ATTR_VALIDATION = "validation";
     public final static String ATTR_DEFAULT_VIEW = "defaultView";
     public final static String ATTR_DEFAULT_VALUE = "defaultValue";
+    public final static String ATTR_REQUIRED = "required";
 
-    // Self-registration with base field constraints (naming patterns, etc.)
+    // Unified registry self-registration
     static {
         try {
-            setupMetaFieldConstraints();
-            log.debug("Set up base constraints for MetaField types");
+            MetaDataRegistry.registerType(MetaField.class, def -> def
+                .type(TYPE_FIELD).subType("base")
+                .description("Base field metadata with common attributes")
+                
+                // COMMON FIELD ATTRIBUTES (all field types inherit these)
+                .optionalAttribute(ATTR_REQUIRED, "boolean")
+                .optionalAttribute(ATTR_DEFAULT_VALUE, "string")
+                .optionalAttribute(ATTR_VALIDATION, "string")
+                .optionalAttribute(ATTR_DEFAULT_VIEW, "string")
+            );
+            
+            log.debug("Registered base MetaField type with unified registry");
+            
+            // Register cross-cutting field constraints
+            registerCrossCuttingFieldConstraints();
+            
         } catch (Exception e) {
-            log.error("Failed to set up MetaField base constraints", e);
+            log.error("Failed to register MetaField type with unified registry", e);
         }
-    }
-
-    /**
-     * Setup base constraints that apply to all MetaField types (converted from JSON)
-     */
-    private static void setupMetaFieldConstraints() {
-        ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-        
-        // CONSTRAINT 1: Fields can be placed under MetaObjects or MetaDataLoaders
-        PlacementConstraint fieldPlacement = new PlacementConstraint(
-            "field.placement",
-            "Fields can be placed under MetaObjects or MetaDataLoaders",
-            (parent) -> parent instanceof MetaObject || parent instanceof MetaDataLoader,
-            (child) -> child instanceof MetaField
-        );
-        constraintRegistry.addConstraint(fieldPlacement);
-
-        // CONSTRAINT 2: Field naming pattern validation (from core-constraints.json)  
-        // Validates that field names follow proper identifier patterns
-        ValidationConstraint namingPattern = new ValidationConstraint(
-            "field.naming.pattern",
-            "Field names must follow identifier pattern: ^[a-zA-Z][a-zA-Z0-9_]*$",
-            (metadata) -> metadata instanceof MetaField,
-            (ValidationConstraint.ContextAwareValidator) (metadata, value, context) -> {
-                // Get the name being validated
-                String nameToValidate = (value != null) ? value.toString() : metadata.getName();
-                
-                if (nameToValidate == null) {
-                    return false;
-                }
-                
-                // For the constraint tests: if the name contains ::, check if we're in a loader context
-                // If we're NOT in a loader context (i.e., direct field creation), reject :: names
-                if (nameToValidate.contains("::")) {
-                    boolean inLoaderContext = false;
-                    
-                    // Check if the validation context indicates we're in a loader context
-                    if (context != null && context.getParentMetaData().isPresent()) {
-                        MetaData parent = context.getParentMetaData().get();
-                        
-                        // Walk up the parent chain to see if there's a loader
-                        MetaData current = parent;
-                        while (current != null) {
-                            if (current instanceof com.draagon.meta.loader.MetaDataLoader) {
-                                inLoaderContext = true;
-                                break;
-                            }
-                            current = current.getParent();
-                        }
-                    }
-                    
-                    if (inLoaderContext) {
-                        // We're in a loader context, so :: names are allowed if properly formatted
-                        String[] parts = nameToValidate.split("::");
-                        for (String part : parts) {
-                            if (part.isEmpty() || !part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } else {
-                        // Not in a loader context - reject :: names
-                        return false;
-                    }
-                }
-                
-                // For normal names, validate against the identifier pattern
-                return nameToValidate.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-            }
-        );
-        constraintRegistry.addConstraint(namingPattern);
-
-        // CONSTRAINT 3: Field name length validation (from core-constraints.json)
-        // NOTE: Use getShortName() to validate only the simple name, not package-qualified names
-        ValidationConstraint nameLength = new ValidationConstraint(
-            "field.name.length",
-            "Field names must be between 1 and 64 characters",
-            (metadata) -> metadata instanceof MetaField,
-            (metadata, value) -> {
-                String shortName = metadata.getShortName();
-                return shortName != null && shortName.length() >= 1 && shortName.length() <= 64;
-            }
-        );
-        constraintRegistry.addConstraint(nameLength);
     }
 
     private T defaultValue = null;
@@ -301,6 +229,94 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
     
     // ========== ENHANCED FIELD-SPECIFIC METHODS ==========
+    
+    /**
+     * Get the expected Java class type for a given attribute on this field type.
+     * This method consults the self-registration information to determine what
+     * Java type an attribute should be converted to during parsing.
+     * 
+     * @param attributeName the name of the attribute (e.g., "required", "maxLength", "dbColumn")
+     * @return the expected Java class for the attribute, or String.class if not found
+     */
+    public Class<?> getExpectedAttributeType(String attributeName) {
+        try {
+            // Get the type definition for this field's class from the registry
+            MetaDataRegistry registry = getLoader().getTypeRegistry();
+            Class<?> fieldClass = this.getClass();
+            
+            // Walk up the class hierarchy to find attribute type definitions
+            while (fieldClass != null && MetaField.class.isAssignableFrom(fieldClass)) {
+                String className = fieldClass.getName();
+                
+                // Check if this class level has the attribute defined
+                Class<?> attributeType = getAttributeTypeFromRegistry(registry, className, attributeName);
+                if (attributeType != null) {
+                    return attributeType;
+                }
+                
+                fieldClass = fieldClass.getSuperclass();
+            }
+            
+            // Default to String if not found
+            return String.class;
+            
+        } catch (Exception e) {
+            log.debug("Unable to determine attribute type for [{}] on [{}], defaulting to String: {}", 
+                attributeName, this.getClass().getSimpleName(), e.getMessage());
+            return String.class;
+        }
+    }
+    
+    /**
+     * Helper method to extract attribute type from registry for a specific class
+     */
+    private Class<?> getAttributeTypeFromRegistry(MetaDataRegistry registry, String className, String attributeName) {
+        // This is a simplified approach - in practice, we need to query the registry
+        // Based on the self-registration patterns I observed, map the common attribute types
+        
+        // Common type mappings based on the registration patterns
+        switch (attributeName) {
+            // Boolean attributes
+            case "required":
+            case "isId": 
+            case "isSearchable":
+            case "isOptional":
+            case "skipJpa":
+            case "isAbstract":
+                return Boolean.class;
+                
+            // Integer attributes  
+            case "maxLength":
+            case "minLength":
+            case "precision":
+            case "scale":
+                return Integer.class;
+                
+            // Long attributes
+            case "minValue":
+            case "maxValue":
+                // For LongField, these should be Long; for others, might be different
+                if (this instanceof com.draagon.meta.field.LongField) {
+                    return Long.class;
+                } else if (this instanceof com.draagon.meta.field.IntegerField) {
+                    return Integer.class;
+                } else if (this instanceof com.draagon.meta.field.DoubleField) {
+                    return Double.class;
+                }
+                return String.class;
+                
+            // String attributes (default)
+            case "pattern":
+            case "validation": 
+            case "defaultValue":
+            case "defaultView":
+            case "dbColumn":
+            case "dbTable":
+            case "description":
+            default:
+                return String.class;
+        }
+    }
     
     
     
@@ -797,5 +813,59 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     @Override
     protected String getToStringPrefix() {
         return  super.getToStringPrefix() + "{dataType=" + dataType + ", defaultValue=" + defaultValue + "}";
+    }
+    
+    /**
+     * Register cross-cutting field constraints that apply to all field types
+     */
+    private static void registerCrossCuttingFieldConstraints() {
+        try {
+            // Import constraint classes
+            com.draagon.meta.constraint.ConstraintRegistry constraintRegistry = 
+                com.draagon.meta.constraint.ConstraintRegistry.getInstance();
+                
+            // VALIDATION CONSTRAINT: Field naming patterns (allow package-qualified names)
+            com.draagon.meta.constraint.ValidationConstraint fieldNamingPattern = 
+                new com.draagon.meta.constraint.ValidationConstraint(
+                    "field.naming.pattern",
+                    "Field names must follow identifier pattern or be package-qualified",
+                    (metadata) -> metadata instanceof MetaField,
+                    (metadata, value) -> {
+                        String name = metadata.getName();
+                        if (name == null) return false;
+                        
+                        // Allow package-qualified names (with ::)
+                        if (name.contains("::")) {
+                            String[] parts = name.split("::");
+                            for (String part : parts) {
+                                if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        } else {
+                            // Simple names must follow identifier pattern
+                            return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                        }
+                    }
+                );
+            constraintRegistry.addConstraint(fieldNamingPattern);
+            
+            // PLACEMENT CONSTRAINT: All fields CAN have required attribute
+            com.draagon.meta.constraint.PlacementConstraint requiredPlacement = 
+                new com.draagon.meta.constraint.PlacementConstraint(
+                    "field.required.placement",
+                    "Fields can optionally have required attribute",
+                    (metadata) -> metadata instanceof MetaField,
+                    (child) -> child instanceof com.draagon.meta.attr.BooleanAttribute && 
+                              child.getName().equals(ATTR_REQUIRED)
+                );
+            constraintRegistry.addConstraint(requiredPlacement);
+            
+            log.debug("Registered cross-cutting field constraints in MetaField");
+            
+        } catch (Exception e) {
+            log.error("Failed to register cross-cutting field constraints", e);
+        }
     }
 }

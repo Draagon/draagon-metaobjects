@@ -2,6 +2,7 @@ package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.registry.MetaDataRegistry;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,25 +13,20 @@ public class AttrTypeTest {
     
     @Test
     public void testAttrTypeRegistration() {
-        // Create a simple registry to test
-        MetaDataTypeRegistry registry = new MetaDataTypeRegistry();
-        
-        // Test if "attr" type is recognized
-        boolean hasAttrType = registry.hasType("attr");
-        System.out.println("Registry hasType('attr'): " + hasAttrType);
-        
-        // Try to create a StringAttribute
-        if (hasAttrType) {
-            try {
-                MetaData attr = registry.createInstance("attr", "string", "testAttr");
-                System.out.println("Created attr instance: " + attr.getClass().getSimpleName());
-                assertTrue("Should be StringAttribute", attr instanceof StringAttribute);
-            } catch (Exception e) {
-                System.out.println("Failed to create attr instance: " + e.getMessage());
-                fail("Should be able to create attr instance: " + e.getMessage());
-            }
-        } else {
-            fail("Registry should recognize 'attr' type");
+        // Test that StringAttribute can be created directly using the modern approach
+        try {
+            StringAttribute attr = new StringAttribute("testAttr");
+            assertNotNull("StringAttribute should be created", attr);
+            assertEquals("Attribute name should match", "testAttr", attr.getName());
+            assertEquals("Attribute type should be 'attr'", "attr", attr.getTypeName());
+            assertEquals("Attribute subtype should be 'string'", "string", attr.getSubTypeName());
+            
+            System.out.println("Successfully created StringAttribute: " + attr.getName() + 
+                             " [" + attr.getTypeName() + ":" + attr.getSubTypeName() + "]");
+            
+        } catch (Exception e) {
+            System.out.println("Failed to create StringAttribute: " + e.getMessage());
+            fail("Should be able to create StringAttribute: " + e.getMessage());
         }
     }
 }

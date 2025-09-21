@@ -75,7 +75,7 @@ public abstract class MetaKey extends MetaData {
             if (attr == null) {
                 if (isLoader) return keys;
                 throw new InvalidMetaDataException(this, "Attribute with name '" + attrName + "' " +
-                        "defining the key fields was found");
+                        "defining the key fields was NOT found");
             }
             if (attr.getDataType() != DataTypes.STRING_ARRAY) {
                 throw new InvalidMetaDataException(this,
@@ -98,7 +98,7 @@ public abstract class MetaKey extends MetaData {
         }
         else {
             throw new InvalidMetaDataException(this, "Attribute with name '" + attrName + "' " +
-                    "defining the key fields was found");
+                    "defining the key fields was NOT found");
         }
 
         return keys;

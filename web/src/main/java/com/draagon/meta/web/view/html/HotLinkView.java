@@ -8,7 +8,7 @@ package com.draagon.meta.web.view.html;
 
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.*;
@@ -135,7 +135,7 @@ public class HotLinkView extends HtmlView {
             url = context + url;
         }
 
-        MetaObject mc = MetaDataRegistry.findMetaObject(o);
+        MetaObject mc = MetaDataUtil.findMetaObject(o, this);
 
         HashMap map = new HashMap();
 

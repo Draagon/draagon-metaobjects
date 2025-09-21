@@ -55,18 +55,18 @@ public class MustacheTemplateGeneratorTest extends GeneratorTestBase {
         generator.execute(loader);
         
         // Verify User.java was generated
-        File userFile = new File(outputDir, "com/example/model/User.java");
+        File userFile = new File(outputDir, "com_example_model/User.java");
         assertTrue("User.java should be generated", userFile.exists());
         
         String content = Files.readString(userFile.toPath());
-        assertTrue("Should contain package declaration", content.contains("package com.example.model"));
+        assertTrue("Should contain package declaration", content.contains("package com_example_model"));
         assertTrue("Should contain class declaration", content.contains("public class User"));
         assertTrue("Should contain username field", content.contains("private String username"));
         assertTrue("Should contain getters", content.contains("getUsername()"));
         assertTrue("Should contain setters", content.contains("setUsername("));
         
         // Verify Product.java was generated
-        File productFile = new File(outputDir, "com/example/model/Product.java");
+        File productFile = new File(outputDir, "com_example_model/Product.java");
         assertTrue("Product.java should be generated", productFile.exists());
         
         String productContent = Files.readString(productFile.toPath());
@@ -87,7 +87,7 @@ public class MustacheTemplateGeneratorTest extends GeneratorTestBase {
         generator.execute(loader);
         
         // Verify User.java was generated with JPA annotations
-        File userFile = new File(outputDir, "com/example/model/User.java");
+        File userFile = new File(outputDir, "com_example_model/User.java");
         assertTrue("User.java should be generated", userFile.exists());
         
         String content = Files.readString(userFile.toPath());
@@ -114,7 +114,7 @@ public class MustacheTemplateGeneratorTest extends GeneratorTestBase {
         generator.execute(loader);
         
         // Verify User.java was generated with ValueObject extension
-        File userFile = new File(outputDir, "com/example/model/User.java");
+        File userFile = new File(outputDir, "com_example_model/User.java");
         assertTrue("User.java should be generated", userFile.exists());
         
         String content = Files.readString(userFile.toPath());
@@ -142,7 +142,7 @@ public class MustacheTemplateGeneratorTest extends GeneratorTestBase {
         
         // Should generate files for discovered templates
         // The exact files depend on which templates are available
-        File userDir = new File(outputDir, "com/example/model");
+        File userDir = new File(outputDir, "com_example_model");
         if (userDir.exists()) {
             File[] files = userDir.listFiles((dir, name) -> name.endsWith(".java"));
             assertTrue("Should generate at least one Java file", files != null && files.length > 0);
@@ -163,12 +163,12 @@ public class MustacheTemplateGeneratorTest extends GeneratorTestBase {
         generator.execute(loader);
         
         // Verify files are generated in prefixed package structure
-        File userFile = new File(outputDir, "org/example/generated/com/example/model/User.java");
+        File userFile = new File(outputDir, "org/example/generated/com_example_model/User.java");
         assertTrue("User.java should be generated in prefixed package", userFile.exists());
         
         String content = Files.readString(userFile.toPath());
         assertTrue("Should contain prefixed package", 
-            content.contains("package org.example.generated.com.example.model"));
+            content.contains("package org.example.generated.com_example_model"));
     }
     
     @Test

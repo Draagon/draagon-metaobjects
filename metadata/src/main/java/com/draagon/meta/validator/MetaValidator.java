@@ -12,7 +12,7 @@ import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 
 /**
@@ -65,7 +65,7 @@ public abstract class MetaValidator extends MetaData {
      * with the specified object.
      */
     public MetaField getMetaField(Object obj) {
-        MetaObject mo = MetaDataRegistry.findMetaObject(obj);
+        MetaObject mo = MetaDataUtil.findMetaObject(obj, this);
         MetaField mf = getDeclaringMetaField();
         if ( mo != null ) {
             return mo.getMetaField(mf.getName());

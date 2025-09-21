@@ -8,6 +8,7 @@ package com.draagon.meta.web.view.html;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
+import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.web.view.*;
 
 import org.slf4j.Logger;
@@ -22,6 +23,23 @@ import javax.servlet.jsp.*;
 public class TextView extends HtmlView
 {
   private static final Logger log = LoggerFactory.getLogger(TextView.class);
+
+  // Unified registry self-registration for web view types
+  static {
+    try {
+      MetaDataRegistry.registerType(TextView.class, def -> def
+        .type("view").subType("text")
+        .description("HTML text input view")
+        .optionalChild("attr", "string")
+        .optionalChild("attr", "int")
+        .optionalChild("attr", "boolean")
+      );
+      
+      log.debug("Registered TextView with unified registry");
+    } catch (Exception e) {
+      log.error("Failed to register TextView with unified registry", e);
+    }
+  }
 
   public TextView(String name) {
         super(name);
