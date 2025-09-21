@@ -72,7 +72,7 @@
 
         <!-- Maven Properties -->
 
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -148,7 +148,7 @@
         <!-- Maven Enforcer Settings: https://maven.apache.org/enforcer/maven-enforcer-plugin -->
         <enforcer.skip>false</enforcer.skip>
         <enforcer.maven-version>[3.5.0,)</enforcer.maven-version>
-        <enforcer.java-version>[21,)</enforcer.java-version>
+        <enforcer.java-version>[17,)</enforcer.java-version>
         <enforcer.failBuild>true</enforcer.failBuild>
 
         <!-- Felix Bundle Plugin: https://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html -->

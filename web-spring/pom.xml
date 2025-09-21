@@ -80,7 +80,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.draagon.meta.web.react.api.*,
                             com.draagon.meta.web.spring.*
                         </Export-Package>
                         <Import-Package>
