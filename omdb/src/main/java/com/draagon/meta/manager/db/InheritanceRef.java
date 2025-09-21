@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.loader.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.field.MetaField;
 
 public class InheritanceRef {
@@ -37,7 +37,7 @@ public class InheritanceRef {
 		if ( !mc.hasMetaField( pj )) throw new IllegalArgumentException( "Inheritance 'joiner' property [" + pj + "] is not a valid MetaField on MetaClass [" + mc.getName() + "]" );
 		joinerField = mc.getMetaField( pj );
 		
-		superClass = MetaDataRegistry.findMetaObjectByName( psc );
+		superClass = MetaDataUtil.findMetaObjectByName( psc, mc );
 		if ( superClass == null ) throw new IllegalArgumentException( "Inheritance 'superClass' property [" + psc + "] is not a valid MetaClass" );
 		
 		if ( !superClass.hasMetaField( psj )) throw new IllegalArgumentException( "Inheritance 'superJoiner' property [" + psj + "] is not a valid MetaField on MetaClass [" + superClass.getName() + "]" );
