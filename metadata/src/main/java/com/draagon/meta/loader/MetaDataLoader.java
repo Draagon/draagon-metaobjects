@@ -228,7 +228,7 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
      * Build a unique key for this loader instance for concurrent loading protection
      */
     private String buildLoaderKey() {
-        return String.format("%s:%s:%s", getClass().getSimpleName(), getSubTypeName(), getName());
+        return String.format("%s:%s:%s", getClass().getSimpleName(), getSubType(), getName());
     }
     
     /**
@@ -945,9 +945,9 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
 
     public String toString() {
         if (getParent() == null) {
-            return getClass().getSimpleName() + "[" + getSubTypeName() + ":" + getName() + "]";
+            return getClass().getSimpleName() + "[" + getSubType() + ":" + getName() + "]";
         } else {
-            return getClass().getSimpleName() + "[" + getSubTypeName() + ":" + getName() + "@" + getParent().toString() + "]";
+            return getClass().getSimpleName() + "[" + getSubType() + ":" + getName() + "@" + getParent().toString() + "]";
         }
     }
 

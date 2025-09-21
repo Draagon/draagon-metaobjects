@@ -343,25 +343,6 @@ public class MetaData implements Cloneable, Serializable {
         return findAttribute(name).isPresent();
     }
 
-    /**
-     * Returns the type identifier of this MetaData (legacy API).
-     * 
-     * <p>The type represents the broad category of metadata such as "field", "object", 
-     * "loader", "view", "validator", etc. This method provides backward compatibility
-     * for existing code.</p>
-     * 
-     * <p><strong>Recommendation:</strong> Use {@link #getType()} for new code as it 
-     * integrates with the modern type system introduced in v6.0.</p>
-     * 
-     * @return the type identifier (e.g., "field", "object", "loader")
-     * @see #getType()
-     * @see #getSubTypeName()
-     * @deprecated Use {@link #getType()} instead for v6.0+ type system integration
-     */
-    @Deprecated
-    public String getTypeName() {
-        return type;
-    }
 
     /**
      * Checks whether this MetaData is of the specified type.
@@ -378,25 +359,6 @@ public class MetaData implements Cloneable, Serializable {
         return this.type.equals( type );
     }
 
-    /**
-     * Returns the subtype identifier of this MetaData (legacy API).
-     * 
-     * <p>The subtype provides more specific categorization within a type, such as
-     * "string", "integer", "mapped", "proxy", etc. This method provides backward 
-     * compatibility for existing code.</p>
-     * 
-     * <p><strong>Recommendation:</strong> Use {@link #getSubType()} for new code as it 
-     * integrates with the modern type system introduced in v6.0.</p>
-     * 
-     * @return the subtype identifier (e.g., "string", "integer", "mapped")
-     * @see #getSubType()
-     * @see #getTypeName()
-     * @deprecated Use {@link #getSubType()} instead for v6.0+ type system integration
-     */
-    @Deprecated
-    public String getSubTypeName() {
-        return subType;
-    }
 
     // ========== NEW v6.0 TYPE SYSTEM METHODS ==========
 
@@ -833,7 +795,7 @@ public class MetaData implements Cloneable, Serializable {
         }
 
         // Don't let the same
-        if ( this.getTypeName().equals( data.getTypeName())) {
+        if ( this.getType().equals( data.getType())) {
             throw new MetaDataException("You cannot add the same MetaData type to another; this [" + toString() + "], added metadata[" + data.toString() + "]");
         }
     }
@@ -848,7 +810,7 @@ public class MetaData implements Cloneable, Serializable {
 
         if (checkExists) {
             try {
-                MetaData d = getChildOfType( data.getTypeName(), data.getName() );
+                MetaData d = getChildOfType( data.getType(), data.getName() );
                 if (d.getParent() == this) {
                     if (deleteOnAdd( d )) {
                         deleteChild(d);
@@ -1044,7 +1006,7 @@ public class MetaData implements Cloneable, Serializable {
      * Creates a unique key for a child MetaData object
      */
     private String createChildKey(MetaData child) {
-        return String.format("%s-%s", child.getTypeName(), child.getName());
+        return String.format("%s-%s", child.getType(), child.getName());
     }
     
     /**
@@ -1265,12 +1227,12 @@ public class MetaData implements Cloneable, Serializable {
                     getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + e.getMessage(), e);
         }
 
-        if (!md.getTypeName().equals(typeName))
-            throw new MetaDataException("Unexpected type ["+md.getTypeName()+"] after creating new MetaData "+
+        if (!md.getType().equals(typeName))
+            throw new MetaDataException("Unexpected type ["+md.getType()+"] after creating new MetaData "+
                     getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + md);
 
-        if (!md.getSubTypeName().equals(subTypeName))
-            throw new MetaDataException("Unexpected subType ["+md.getSubTypeName()+"] after creating new MetaData "+
+        if (!md.getSubType().equals(subTypeName))
+            throw new MetaDataException("Unexpected subType ["+md.getSubType()+"] after creating new MetaData "+
                     getNewInstanceErrorStr(typeName, subTypeName, fullname) + ": " + md);
 
         if (!md.getName().equals(fullname))
@@ -1377,8 +1339,8 @@ public class MetaData implements Cloneable, Serializable {
     /** Get the toString Prefix */
     protected String getToStringPrefix() {
         String className = getClass().getSimpleName();
-        String typeName = getTypeName() != null ? getTypeName() : "null";
-        String subTypeName = getSubTypeName() != null ? getSubTypeName() : "null";
+        String typeName = getType() != null ? getType() : "null";
+        String subTypeName = getSubType() != null ? getSubType() : "null";
         String name = getName() != null ? getName() : "null";
         return className + "[" + typeName +":" + subTypeName + "]{" + name + "}";
     }
