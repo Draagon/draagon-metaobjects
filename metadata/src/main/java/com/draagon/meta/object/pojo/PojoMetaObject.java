@@ -19,6 +19,8 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
 import java.lang.reflect.*;
 
 /**
@@ -44,11 +46,11 @@ public class PojoMetaObject extends MetaObject
             MetaDataRegistry.registerType(PojoMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(SUBTYPE_POJO)
                 .description("POJO MetaObject with reflection-based field access")
-                
-                // POJO-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_OBJECT, "string")
-                .optionalAttribute(ATTR_OBJECT_REF, "string")
-                .optionalAttribute(ATTR_DESCRIPTION, "string")
+
+                // INHERIT FROM BASE OBJECT
+                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+
+                // POJO-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
                 .optionalAttribute(ATTR_CLASS_NAME, "string")
                 .optionalAttribute(ATTR_PACKAGE_NAME, "string")
                 
@@ -58,26 +60,14 @@ public class PojoMetaObject extends MetaObject
                 .optionalAttribute("hasJpa", "boolean")
                 .optionalAttribute("hasValidation", "boolean")
                 .optionalAttribute("implements", "string")
-                
-                // POJO OBJECTS CAN CONTAIN ALL FIELD TYPES
-                .optionalChild("field", "string")
-                .optionalChild("field", "int")
-                .optionalChild("field", "long")
-                .optionalChild("field", "double")
-                .optionalChild("field", "float")
-                .optionalChild("field", "short")
-                .optionalChild("field", "byte")
-                .optionalChild("field", "boolean")
-                .optionalChild("field", "date")
-                .optionalChild("field", "object")
-                .optionalChild("field", "class")
-                .optionalChild("field", "stringArray")
-                .optionalChild("field", "objectArray")
-                
-                // REMOVED: Direct attr children should not be allowed via addChild().
-                // Attributes are added via addMetaAttr(), not addChild().
-                // Specific attributes are defined via .optionalAttribute() calls above.
-                // Inherits: name, pkg attributes from MetaObject
+
+                // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
+                // - All field types (field.*)
+                // - Other objects (object.*)
+                // - Keys (key.*)
+                // - Attributes (attr.*)
+                // - Validators (validator.*)
+                // - Views (view.*)
             );
             
             log.debug("Registered PojoMetaObject type with unified registry");

@@ -7,6 +7,11 @@ import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.constraint.Constraint;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.TypeDefinition;
+import com.draagon.meta.registry.ChildRequirement;
+import com.draagon.meta.util.MetaDataConstants;
+import com.draagon.meta.MetaDataTypeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
@@ -15,14 +20,19 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * v6.0.0: XSD Schema writer that creates schemas for validating metadata files themselves.
- * This generates XSD Schema that validates the structure of metadata XML files,
- * not the data instances they describe.
- * 
- * Reads constraint definitions to understand what constitutes valid metadata structure
- * and generates appropriate validation schemas.
+ * v6.1.0: Registry-driven XSD Schema writer that creates schemas for validating metadata files.
+ * This generates XSD Schema that validates the structure of metadata XML files using dynamic
+ * type discovery from the TypeDefinition registry.
+ *
+ * Features:
+ * - Dynamic type enumeration from MetaDataRegistry
+ * - Inheritance-aware type definitions with annotations
+ * - Type-specific attribute validation
+ * - Automatic plugin type support
+ * - No hardcoded type lists
  */
 public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter> {
 
@@ -31,21 +41,22 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     private String nameSpace;
     private String targetNamespace;
     private String elementFormDefault = "qualified";
-    private List<String> constraintFiles = new ArrayList<>();
-    
-    // Constraint system for accessing programmatic definitions
+
+    // Registry-based type discovery
+    private MetaDataRegistry typeRegistry;
     private ConstraintRegistry constraintRegistry;
     private List<PlacementConstraint> placementConstraints;
     private List<ValidationConstraint> validationConstraints;
 
     public MetaDataFileXSDWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
         super(loader, out);
+        this.typeRegistry = MetaDataRegistry.getInstance();
         this.constraintRegistry = ConstraintRegistry.getInstance();
         this.placementConstraints = new ArrayList<>();
         this.validationConstraints = new ArrayList<>();
-        
-        // Note: Constraint files no longer used - constraints are programmatic
-        // this.constraintFiles.add("META-INF/constraints/core-constraints.json");
+
+        log.info("Initialized registry-driven XSD writer with {} registered types",
+                typeRegistry.getRegisteredTypes().size());
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -66,8 +77,10 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         return this;
     }
 
+    // Registry-based generation - no constraint files needed
+    @Deprecated
     public MetaDataFileXSDWriter addConstraintFile(String constraintFile) {
-        this.constraintFiles.add(constraintFile);
+        log.warn("Constraint files are deprecated - using registry-based type discovery instead");
         return this;
     }
 
@@ -80,7 +93,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
                 "nameSpace='" + nameSpace + '\'' +
                 ", targetNamespace='" + targetNamespace + '\'' +
                 ", elementFormDefault='" + elementFormDefault + '\'' +
-                ", constraintFiles=" + constraintFiles +
+                ", registeredTypes=" + typeRegistry.getRegisteredTypes().size() +
                 '}';
     }
 
@@ -106,17 +119,18 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     }
 
     /**
-     * Load constraint definitions from programmatic constraint registry
+     * Load constraint definitions and type registry data
      */
     private void loadConstraintDefinitions() {
-        log.info("Loading constraint definitions for XSD schema generation from programmatic registry");
-        
+        log.info("Loading registry data for XSD generation: {} types, {} constraints",
+                typeRegistry.getRegisteredTypes().size(),
+                constraintRegistry.getAllConstraints().size());
+
         // Get constraints from the unified registry
         this.placementConstraints = constraintRegistry.getPlacementConstraints();
         this.validationConstraints = constraintRegistry.getValidationConstraints();
-        
-        log.info("Loaded {} placement constraints and {} validation constraints for XSD", 
-            placementConstraints.size(), validationConstraints.size());
+
+        log.debug("Registry types: {}", typeRegistry.getRegisteredTypeNames());
     }
 
     /**
@@ -138,28 +152,21 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         schema.setAttribute("targetNamespace", targetNamespace != null ? targetNamespace : nameSpace);
         schema.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
 
-        // Create root metadata element
+        // Create root metadata element using constants
         Element metadataElement = doc.createElement("xs:element");
-        metadataElement.setAttribute("name", "metadata");
+        metadataElement.setAttribute("name", MetaDataConstants.ATTR_METADATA);
         metadataElement.setAttribute("type", "MetaDataType");
         schema.appendChild(metadataElement);
 
-        // Create MetaDataType complex type
+        // Create core structural types
         schema.appendChild(createMetaDataType(doc));
-        
-        // Create MetaDataChild complex type
         schema.appendChild(createMetaDataChildType(doc));
-        
-        // Create MetaObject complex type
-        schema.appendChild(createMetaObjectType(doc));
-        
-        // Create MetaField complex type
-        schema.appendChild(createMetaFieldType(doc));
-        
+
+        // Create registry-driven type definitions
+        generateDynamicTypeDefinitions(doc, schema);
+
         // Create constraint-based simple types
         schema.appendChild(createNameConstraintType(doc));
-        schema.appendChild(createObjectTypeEnumType(doc));
-        schema.appendChild(createFieldTypeEnumType(doc));
 
         return doc;
     }
@@ -181,9 +188,9 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         Element sequence = doc.createElement("xs:sequence");
         complexType.appendChild(sequence);
         
-        // Children element (required)
+        // Children element (required) - using constants
         Element childrenElement = doc.createElement("xs:element");
-        childrenElement.setAttribute("name", "children");
+        childrenElement.setAttribute("name", MetaDataConstants.ATTR_CHILDREN);
         childrenElement.setAttribute("minOccurs", "1");
         childrenElement.setAttribute("maxOccurs", "1");
         sequence.appendChild(childrenElement);
@@ -201,9 +208,9 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         childElement.setAttribute("maxOccurs", "unbounded");
         childrenSequence.appendChild(childElement);
         
-        // Package attribute (optional)
+        // Package attribute (optional) - using constants
         Element packageAttr = doc.createElement("xs:attribute");
-        packageAttr.setAttribute("name", "package");
+        packageAttr.setAttribute("name", MetaDataConstants.ATTR_PACKAGE);
         packageAttr.setAttribute("type", "xs:string");
         packageAttr.setAttribute("use", "optional");
         complexType.appendChild(packageAttr);
@@ -212,229 +219,229 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     }
 
     /**
-     * Create MetaDataChildType complex type
+     * Create MetaDataChildType complex type with dynamic choice elements from registry
      */
     private Element createMetaDataChildType(Document doc) {
         Element complexType = doc.createElement("xs:complexType");
         complexType.setAttribute("name", "MetaDataChildType");
-        
+
         Element choice = doc.createElement("xs:choice");
         complexType.appendChild(choice);
-        
-        // Object element
-        Element objectElement = doc.createElement("xs:element");
-        objectElement.setAttribute("name", "object");
-        objectElement.setAttribute("type", "MetaObjectType");
-        choice.appendChild(objectElement);
-        
-        // Field element  
-        Element fieldElement = doc.createElement("xs:element");
-        fieldElement.setAttribute("name", "field");
-        fieldElement.setAttribute("type", "MetaFieldType");
-        choice.appendChild(fieldElement);
-        
+
+        // Generate choice elements dynamically from all registered primary types
+        Set<String> primaryTypes = typeRegistry.getAllTypeDefinitions().stream()
+                .map(TypeDefinition::getType)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (String primaryType : primaryTypes) {
+            Element element = doc.createElement("xs:element");
+            element.setAttribute("name", primaryType);
+            element.setAttribute("type", capitalizeFirstLetter(primaryType) + "Type");
+            choice.appendChild(element);
+        }
+
+        log.debug("Generated dynamic child choice for types: {}", primaryTypes);
         return complexType;
     }
 
     /**
-     * Create MetaObjectType complex type
+     * Generate dynamic type definitions from registry
      */
-    private Element createMetaObjectType(Document doc) {
+    private void generateDynamicTypeDefinitions(Document doc, Element schema) {
+        // Group type definitions by primary type
+        Map<String, List<TypeDefinition>> typeGroups = typeRegistry.getAllTypeDefinitions().stream()
+                .collect(Collectors.groupingBy(TypeDefinition::getType));
+
+        for (Map.Entry<String, List<TypeDefinition>> entry : typeGroups.entrySet()) {
+            String primaryType = entry.getKey();
+            List<TypeDefinition> typeDefs = entry.getValue();
+
+            // Create XSD complex type for this primary type
+            Element complexType = createPrimaryTypeComplexType(doc, primaryType, typeDefs);
+            schema.appendChild(complexType);
+
+            // Create enum type for subtypes
+            Element enumType = createSubTypeEnumType(doc, primaryType, typeDefs);
+            schema.appendChild(enumType);
+
+            log.debug("Generated XSD types for '{}' with {} subtypes",
+                    primaryType, typeDefs.size());
+        }
+    }
+
+    /**
+     * Create XSD complex type for a primary type (object, field, etc.)
+     */
+    private Element createPrimaryTypeComplexType(Document doc, String primaryType, List<TypeDefinition> typeDefs) {
         Element complexType = doc.createElement("xs:complexType");
-        complexType.setAttribute("name", "MetaObjectType");
-        
-        // Add constraint annotation
-        Element annotation = createConstraintAnnotation(doc, "MetaObject constraints");
+        complexType.setAttribute("name", capitalizeFirstLetter(primaryType) + "Type");
+
+        // Add registry-based annotation with inheritance info
+        Element annotation = createRegistryAnnotation(doc, primaryType, typeDefs);
         complexType.appendChild(annotation);
-        
-        Element sequence = doc.createElement("xs:sequence");
-        complexType.appendChild(sequence);
-        
-        // Children element (optional)
-        Element childrenElement = doc.createElement("xs:element");
-        childrenElement.setAttribute("name", "children");
-        childrenElement.setAttribute("minOccurs", "0");
-        childrenElement.setAttribute("maxOccurs", "1");
-        sequence.appendChild(childrenElement);
-        
-        Element childrenComplexType = doc.createElement("xs:complexType");
-        childrenElement.appendChild(childrenComplexType);
-        
-        Element childrenSequence = doc.createElement("xs:sequence");
-        childrenComplexType.appendChild(childrenSequence);
-        
-        Element childElement = doc.createElement("xs:element");
-        childElement.setAttribute("name", "child");
-        childElement.setAttribute("type", "MetaDataChildType");
-        childElement.setAttribute("minOccurs", "0");
-        childElement.setAttribute("maxOccurs", "unbounded");
-        childrenSequence.appendChild(childElement);
-        
-        // Name attribute (required, with constraints)
+
+        // Add children sequence if this type accepts children
+        if (hasChildRequirements(typeDefs)) {
+            Element sequence = doc.createElement("xs:sequence");
+            complexType.appendChild(sequence);
+
+            Element childrenElement = doc.createElement("xs:element");
+            childrenElement.setAttribute("name", MetaDataConstants.ATTR_CHILDREN);
+            childrenElement.setAttribute("minOccurs", "0");
+            childrenElement.setAttribute("maxOccurs", "1");
+            sequence.appendChild(childrenElement);
+
+            Element childrenComplexType = doc.createElement("xs:complexType");
+            childrenElement.appendChild(childrenComplexType);
+
+            Element childrenSequence = doc.createElement("xs:sequence");
+            childrenComplexType.appendChild(childrenSequence);
+
+            Element childElement = doc.createElement("xs:element");
+            childElement.setAttribute("name", "child");
+            childElement.setAttribute("type", "MetaDataChildType");
+            childElement.setAttribute("minOccurs", "0");
+            childElement.setAttribute("maxOccurs", "unbounded");
+            childrenSequence.appendChild(childElement);
+        }
+
+        // Name attribute (required, with constraints) - using constants
         Element nameAttr = doc.createElement("xs:attribute");
-        nameAttr.setAttribute("name", "name");
+        nameAttr.setAttribute("name", MetaDataConstants.ATTR_NAME);
         nameAttr.setAttribute("type", "NameConstraintType");
         nameAttr.setAttribute("use", "required");
         complexType.appendChild(nameAttr);
-        
-        // Type attribute (required)
+
+        // Type attribute (required) - using dynamic enum
         Element typeAttr = doc.createElement("xs:attribute");
-        typeAttr.setAttribute("name", "type");
-        typeAttr.setAttribute("type", "ObjectTypeEnum");
+        typeAttr.setAttribute("name", MetaDataConstants.ATTR_TYPE);
+        typeAttr.setAttribute("type", capitalizeFirstLetter(primaryType) + "TypeEnum");
         typeAttr.setAttribute("use", "required");
         complexType.appendChild(typeAttr);
-        
-        // Add support for inline attributes (any additional attributes beyond reserved ones)
+
+        // Add support for inline attributes
         Element anyAttribute = doc.createElement("xs:anyAttribute");
         anyAttribute.setAttribute("processContents", "lax");
         Element anyAttrAnnotation = doc.createElement("xs:annotation");
         Element anyAttrDoc = doc.createElement("xs:documentation");
-        anyAttrDoc.setTextContent("Inline attributes support: Additional attributes are allowed when attr type has default subType configured. Values are type-cast based on content (boolean, number, string).");
+        anyAttrDoc.setTextContent("Inline attributes support: Additional attributes are allowed when attr type has default subType configured.");
         anyAttrAnnotation.appendChild(anyAttrDoc);
         anyAttribute.appendChild(anyAttrAnnotation);
         complexType.appendChild(anyAttribute);
-        
+
         return complexType;
     }
 
     /**
-     * Create MetaFieldType complex type
-     */
-    private Element createMetaFieldType(Document doc) {
-        Element complexType = doc.createElement("xs:complexType");
-        complexType.setAttribute("name", "MetaFieldType");
-        
-        // Add constraint annotation
-        Element annotation = createConstraintAnnotation(doc, "MetaField constraints");
-        complexType.appendChild(annotation);
-        
-        // Name attribute (required, with constraints)
-        Element nameAttr = doc.createElement("xs:attribute");
-        nameAttr.setAttribute("name", "name");
-        nameAttr.setAttribute("type", "NameConstraintType");
-        nameAttr.setAttribute("use", "required");
-        complexType.appendChild(nameAttr);
-        
-        // Type attribute (required)
-        Element typeAttr = doc.createElement("xs:attribute");
-        typeAttr.setAttribute("name", "type");
-        typeAttr.setAttribute("type", "FieldTypeEnum");
-        typeAttr.setAttribute("use", "required");
-        complexType.appendChild(typeAttr);
-        
-        // Add support for inline attributes (any additional attributes beyond reserved ones)
-        Element anyAttribute = doc.createElement("xs:anyAttribute");
-        anyAttribute.setAttribute("processContents", "lax");
-        Element anyAttrAnnotation = doc.createElement("xs:annotation");
-        Element anyAttrDoc = doc.createElement("xs:documentation");
-        anyAttrDoc.setTextContent("Inline attributes support: Additional attributes are allowed when attr type has default subType configured. Values are type-cast based on content (boolean, number, string).");
-        anyAttrAnnotation.appendChild(anyAttrDoc);
-        anyAttribute.appendChild(anyAttrAnnotation);
-        complexType.appendChild(anyAttribute);
-        
-        return complexType;
-    }
-
-    /**
-     * Create name constraint type based on loaded constraints
+     * Create name constraint type using MetaDataConstants
      */
     private Element createNameConstraintType(Document doc) {
         Element simpleType = doc.createElement("xs:simpleType");
         simpleType.setAttribute("name", "NameConstraintType");
-        
+
         Element restriction = doc.createElement("xs:restriction");
         restriction.setAttribute("base", "xs:string");
         simpleType.appendChild(restriction);
-        
-        // Apply standard naming constraints used by programmatic constraints
-        // This is the same pattern enforced by ValidationConstraint in MetaField.java
-        String pattern = "^[a-zA-Z][a-zA-Z0-9_]*$";
-        int minLength = 1;
-        int maxLength = 64;
-        
-        log.debug("Generated name constraint type with pattern validation");
-        
-        // Add pattern facet
+
+        // Use pattern from MetaDataConstants
         Element patternFacet = doc.createElement("xs:pattern");
-        patternFacet.setAttribute("value", pattern);
+        patternFacet.setAttribute("value", MetaDataConstants.VALID_NAME_PATTERN);
         restriction.appendChild(patternFacet);
-        
+
         // Add length facets
         Element minLengthFacet = doc.createElement("xs:minLength");
-        minLengthFacet.setAttribute("value", String.valueOf(minLength));
+        minLengthFacet.setAttribute("value", "1");
         restriction.appendChild(minLengthFacet);
-        
+
         Element maxLengthFacet = doc.createElement("xs:maxLength");
-        maxLengthFacet.setAttribute("value", String.valueOf(maxLength));
+        maxLengthFacet.setAttribute("value", "64");
         restriction.appendChild(maxLengthFacet);
-        
+
         return simpleType;
     }
 
     /**
-     * Create object type enumeration
+     * Create subtype enumeration for a primary type using registry data
      */
-    private Element createObjectTypeEnumType(Document doc) {
+    private Element createSubTypeEnumType(Document doc, String primaryType, List<TypeDefinition> typeDefs) {
         Element simpleType = doc.createElement("xs:simpleType");
-        simpleType.setAttribute("name", "ObjectTypeEnum");
-        
+        simpleType.setAttribute("name", capitalizeFirstLetter(primaryType) + "TypeEnum");
+
         Element restriction = doc.createElement("xs:restriction");
         restriction.setAttribute("base", "xs:string");
         simpleType.appendChild(restriction);
-        
-        String[] objectTypes = {"pojo", "value", "data", "proxy", "mapped"};
-        for (String type : objectTypes) {
+
+        // Generate enumeration values from actual registered subtypes
+        Set<String> subTypes = typeDefs.stream()
+                .map(TypeDefinition::getSubType)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (String subType : subTypes) {
             Element enumeration = doc.createElement("xs:enumeration");
-            enumeration.setAttribute("value", type);
+            enumeration.setAttribute("value", subType);
             restriction.appendChild(enumeration);
         }
-        
+
+        log.debug("Generated enum for {}: {}", primaryType, subTypes);
         return simpleType;
     }
 
     /**
-     * Create field type enumeration
+     * Create registry-based annotation with inheritance and type information
      */
-    private Element createFieldTypeEnumType(Document doc) {
-        Element simpleType = doc.createElement("xs:simpleType");
-        simpleType.setAttribute("name", "FieldTypeEnum");
-        
-        Element restriction = doc.createElement("xs:restriction");
-        restriction.setAttribute("base", "xs:string");
-        simpleType.appendChild(restriction);
-        
-        String[] fieldTypes = {"string", "int", "long", "double", "float", "boolean", "date", "timestamp"};
-        for (String type : fieldTypes) {
-            Element enumeration = doc.createElement("xs:enumeration");
-            enumeration.setAttribute("value", type);
-            restriction.appendChild(enumeration);
-        }
-        
-        return simpleType;
-    }
-
-    /**
-     * Create constraint annotation with constraint information
-     */
-    private Element createConstraintAnnotation(Document doc, String description) {
+    private Element createRegistryAnnotation(Document doc, String primaryType, List<TypeDefinition> typeDefs) {
         Element annotation = doc.createElement("xs:annotation");
         Element documentation = doc.createElement("xs:documentation");
-        
-        StringBuilder constraintInfo = new StringBuilder(description);
-        constraintInfo.append(": ");
-        
-        // Add information about programmatic constraints
-        if (!placementConstraints.isEmpty() || !validationConstraints.isEmpty()) {
-            constraintInfo.append("Programmatic constraints: ");
-            constraintInfo.append(placementConstraints.size()).append(" placement, ");
-            constraintInfo.append(validationConstraints.size()).append(" validation");
-        } else {
-            constraintInfo.append("Standard naming and placement constraints enforced programmatically");
+
+        StringBuilder info = new StringBuilder();
+        info.append(String.format("%s type with %d registered subtypes from registry. ",
+                capitalizeFirstLetter(primaryType), typeDefs.size()));
+
+        // Add inheritance information
+        List<TypeDefinition> inheritedTypes = typeDefs.stream()
+                .filter(def -> def.hasParent())
+                .collect(Collectors.toList());
+
+        if (!inheritedTypes.isEmpty()) {
+            info.append(String.format("Inheritance: %d types inherit from base types. ",
+                    inheritedTypes.size()));
         }
-        
-        documentation.setTextContent(constraintInfo.toString());
+
+        // Add subtype list
+        Set<String> subTypes = typeDefs.stream()
+                .map(TypeDefinition::getSubType)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        info.append(String.format("Subtypes: %s", String.join(", ", subTypes)));
+
+        documentation.setTextContent(info.toString());
         annotation.appendChild(documentation);
-        
+
         return annotation;
+    }
+
+    /**
+     * Helper method to capitalize first letter of a string
+     */
+    private String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    /**
+     * Check if any type definition in the list has child requirements
+     */
+    private boolean hasChildRequirements(List<TypeDefinition> typeDefs) {
+        return typeDefs.stream()
+                .anyMatch(def -> !def.getChildRequirements().isEmpty());
+    }
+
+    /**
+     * Create constraint annotation with constraint information (deprecated - replaced by registry annotation)
+     */
+    @Deprecated
+    private Element createConstraintAnnotation(Document doc, String description) {
+        return createRegistryAnnotation(doc, description, Collections.emptyList());
     }
 }

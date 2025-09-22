@@ -8,8 +8,13 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Float Field with unified registry registration and child requirements.
@@ -17,6 +22,7 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataTypeHandler(type = "field", subType = "float", description = "Float field with numeric and precision validation")
 @SuppressWarnings("serial")
 public class FloatField extends PrimitiveField<Float>
 {
@@ -30,31 +36,34 @@ public class FloatField extends PrimitiveField<Float>
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(FloatField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
                 .description("Float field with numeric and precision validation")
-                
-                // FLOAT-SPECIFIC ATTRIBUTES
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // FLOAT-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_MIN_VALUE, "float")
                 .optionalAttribute(ATTR_MAX_VALUE, "float")
                 .optionalAttribute(ATTR_PRECISION, "int")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
-            
+
             log.debug("Registered FloatField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register FloatField type with unified registry", e);

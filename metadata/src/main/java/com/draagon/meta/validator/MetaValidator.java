@@ -14,6 +14,10 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MetaValidator that performs validations on a MetaField
@@ -21,9 +25,35 @@ import com.draagon.meta.object.MetaObject;
 @SuppressWarnings("serial")
 public abstract class MetaValidator extends MetaData {
 
-    public final static String TYPE_VALIDATOR = "validator";
+    private static final Logger log = LoggerFactory.getLogger(MetaValidator.class);
 
+    public final static String TYPE_VALIDATOR = "validator";
+    public final static String SUBTYPE_BASE = "base";
     public final static String ATTR_MSG = "msg";
+
+    // Base validator type registration
+    static {
+        try {
+            MetaDataRegistry.registerType(MetaValidator.class, def -> def
+                .type(TYPE_VALIDATOR).subType(SUBTYPE_BASE)
+                .description("Base validator metadata with common validator attributes")
+
+                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ABSTRACT, "boolean")
+
+                // VALIDATOR-SPECIFIC ATTRIBUTES
+                .optionalAttribute(ATTR_MSG, "string")
+
+                // VALIDATORS CAN CONTAIN ATTRIBUTES
+                .optionalChild("attr", "*", "*")
+            );
+
+            log.debug("Registered base MetaValidator type with unified registry");
+
+        } catch (Exception e) {
+            log.error("Failed to register MetaValidator type with unified registry", e);
+        }
+    }
 
     public MetaValidator(String subtype, String name) {
         super(TYPE_VALIDATOR, subtype, name);

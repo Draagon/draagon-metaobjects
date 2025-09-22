@@ -8,6 +8,7 @@ import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataConstants;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -26,31 +27,75 @@ public abstract class MetaObject extends MetaData {
 
     private static final Logger log = LoggerFactory.getLogger(MetaObject.class);
 
-    public final static String TYPE_OBJECT = "object";
-    public final static String ATTR_OBJECT = "object";
-    public final static String ATTR_OBJECT_REF = "objectRef";
-    public final static String ATTR_DESCRIPTION = "description";
+    // === TYPE AND SUBTYPE CONSTANTS ===
+    /** Object type constant - references centralized constant */
+    public static final String TYPE_OBJECT = MetaDataConstants.TYPE_OBJECT;
+
+    /** Base object subtype for inheritance */
+    public static final String SUBTYPE_BASE = MetaDataConstants.SUBTYPE_BASE;
+
+    // === OBJECT-LEVEL ATTRIBUTE NAME CONSTANTS ===
+    // These apply to ALL object types and are inherited by concrete object implementations
+
+    /** Abstract object marker attribute - references centralized constant */
+    public static final String ATTR_IS_ABSTRACT = MetaDataConstants.ATTR_IS_ABSTRACT;
+
+    /** Object inheritance specification attribute - references centralized constant */
+    public static final String ATTR_EXTENDS = MetaDataConstants.ATTR_EXTENDS;
+
+    /** Interface implementation specification attribute - references centralized constant */
+    public static final String ATTR_IMPLEMENTS = MetaDataConstants.ATTR_IMPLEMENTS;
+
+    /** Interface marker attribute - references centralized constant */
+    public static final String ATTR_IS_INTERFACE = MetaDataConstants.ATTR_IS_INTERFACE;
+
+    // === OBJECT-SPECIFIC ATTRIBUTES ===
+    /** Object reference attribute for composition */
+    public static final String ATTR_OBJECT_REF = "objectRef";
+
+    /** Object description attribute */
+    public static final String ATTR_DESCRIPTION = "description";
+
+    /** Object type attribute for composition */
+    public static final String ATTR_OBJECT = "object";
 
     // Unified registry self-registration
     static {
         try {
             MetaDataRegistry.registerType(MetaObject.class, def -> def
-                .type(TYPE_OBJECT).subType("base")
-                .description("Object containing fields and attributes")
-                
-                // OBJECTS CONTAIN FIELDS (any field type, any name)
-                .optionalChild("field", "*", "*")
-                
-                // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
-                .optionalChild("object", "*", "*")
-                
-                // OBJECTS CAN CONTAIN KEYS
-                .optionalChild("key", "*", "*")
-                
-                // OBJECTS CAN HAVE ATTRIBUTES
+                .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
+                .description("Base object metadata with common object attributes")
+
+                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
+                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+
+                // OBJECT-LEVEL ATTRIBUTES (all object types inherit these)
+                .optionalAttribute(ATTR_EXTENDS, "string")
+                .optionalAttribute(ATTR_IMPLEMENTS, "string")
+                .optionalAttribute(ATTR_IS_INTERFACE, "boolean")
+
+                // OBJECT-SPECIFIC ATTRIBUTES
                 .optionalAttribute(ATTR_DESCRIPTION, "string")
                 .optionalAttribute(ATTR_OBJECT, "string")
                 .optionalAttribute(ATTR_OBJECT_REF, "string")
+
+                // OBJECTS CONTAIN FIELDS (any field type, any name)
+                .optionalChild("field", "*", "*")
+
+                // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
+                .optionalChild("object", "*", "*")
+
+                // OBJECTS CAN CONTAIN KEYS
+                .optionalChild("key", "*", "*")
+
+                // OBJECTS CAN CONTAIN ATTRIBUTES
+                .optionalChild("attr", "*", "*")
+
+                // OBJECTS CAN CONTAIN VALIDATORS
+                .optionalChild("validator", "*", "*")
+
+                // OBJECTS CAN CONTAIN VIEWS
+                .optionalChild("view", "*", "*")
             );
             
             log.debug("Registered base MetaObject type with unified registry");

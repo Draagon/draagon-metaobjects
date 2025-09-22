@@ -33,11 +33,13 @@ import java.util.Objects;
  * @since 6.0.0
  */
 public class TypeDefinitionBuilder {
-    
+
     private final Class<? extends MetaData> implementationClass;
     private String type;
     private String subType;
     private String description;
+    private String parentType;
+    private String parentSubType;
     private final Map<String, ChildRequirement> childRequirements = new HashMap<>();
     
     /**
@@ -83,7 +85,7 @@ public class TypeDefinitionBuilder {
     
     /**
      * Set the human-readable description
-     * 
+     *
      * @param description Description of this type
      * @return This builder for method chaining
      */
@@ -91,7 +93,38 @@ public class TypeDefinitionBuilder {
         this.description = description;
         return this;
     }
-    
+
+    /**
+     * Specify parent type for inheritance
+     *
+     * @param parentType Parent type (e.g., "field", "object")
+     * @param parentSubType Parent subType (e.g., "base", "string")
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder inheritsFrom(String parentType, String parentSubType) {
+        this.parentType = Objects.requireNonNull(parentType, "Parent type cannot be null");
+        this.parentSubType = Objects.requireNonNull(parentSubType, "Parent subType cannot be null");
+        return this;
+    }
+
+    /**
+     * Convenience method to inherit from base field type
+     *
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder inheritsFromBaseField() {
+        return inheritsFrom("field", "base");
+    }
+
+    /**
+     * Convenience method to inherit from base object type
+     *
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder inheritsFromBaseObject() {
+        return inheritsFrom("object", "base");
+    }
+
     /**
      * Add a required child with specific type, subType, and name
      * 
@@ -197,7 +230,7 @@ public class TypeDefinitionBuilder {
     
     /**
      * Build the immutable TypeDefinition
-     * 
+     *
      * @return New TypeDefinition instance
      * @throws IllegalStateException if required fields are not set
      */
@@ -208,8 +241,9 @@ public class TypeDefinitionBuilder {
         if (subType == null) {
             throw new IllegalStateException("SubType must be set");
         }
-        
-        return new TypeDefinition(implementationClass, type, subType, description, childRequirements);
+
+        return new TypeDefinition(implementationClass, type, subType, description,
+                                 childRequirements, parentType, parentSubType);
     }
     
     /**

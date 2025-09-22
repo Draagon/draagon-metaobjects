@@ -14,8 +14,13 @@ import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.TypeDefinition;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A String Field with unified registry registration and child requirements.
@@ -29,10 +34,19 @@ public class StringField extends PrimitiveField<String> {
 
     private static final Logger log = LoggerFactory.getLogger(StringField.class);
 
-    public final static String SUBTYPE_STRING = "string";
-    public final static String ATTR_PATTERN = "pattern";
-    public final static String ATTR_MAX_LENGTH = "maxLength";
-    public final static String ATTR_MIN_LENGTH = "minLength";
+    // === SUBTYPE CONSTANT ===
+    /** String field subtype constant */
+    public static final String SUBTYPE_STRING = "string";
+
+    // === STRING-SPECIFIC ATTRIBUTE NAME CONSTANTS ===
+    /** Pattern validation attribute for string fields */
+    public static final String ATTR_PATTERN = "pattern";
+
+    /** Maximum length attribute for string fields */
+    public static final String ATTR_MAX_LENGTH = "maxLength";
+
+    /** Minimum length attribute for string fields */
+    public static final String ATTR_MIN_LENGTH = "minLength";
 
     public StringField( String name ) {
         super( SUBTYPE_STRING, name, DataTypes.STRING );
@@ -41,38 +55,32 @@ public class StringField extends PrimitiveField<String> {
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(StringField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING)
-                .description("String field with pattern validation")
-                
-                // STRING-SPECIFIC ATTRIBUTES
+                .description("String field with length and pattern validation")
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // STRING-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_PATTERN, "string")
                 .optionalAttribute(ATTR_MAX_LENGTH, "int")
                 .optionalAttribute(ATTR_MIN_LENGTH, "int")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("isId", "boolean")
-                .optionalAttribute("dbColumn", "string")
-                .optionalAttribute("isSearchable", "boolean")
-                .optionalAttribute("isOptional", "boolean")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS VIEWS
-                .optionalChild("view", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
             
             log.debug("Registered StringField type with unified registry");

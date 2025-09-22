@@ -9,6 +9,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
+import com.draagon.meta.util.MetaDataConstants;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
@@ -77,25 +78,51 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     private static final Logger log = LoggerFactory.getLogger(MetaField.class);
 
-    // FIELD CONSTANTS (owned by this class)
-    public final static String TYPE_FIELD = "field";
-    public final static String ATTR_VALIDATION = "validation";
-    public final static String ATTR_DEFAULT_VIEW = "defaultView";
-    public final static String ATTR_DEFAULT_VALUE = "defaultValue";
-    public final static String ATTR_REQUIRED = "required";
+    // === TYPE AND SUBTYPE CONSTANTS ===
+    /** Field type constant - references centralized constant */
+    public static final String TYPE_FIELD = MetaDataConstants.TYPE_FIELD;
+
+    /** Base field subtype for inheritance */
+    public static final String SUBTYPE_BASE = MetaDataConstants.SUBTYPE_BASE;
+
+    // === FIELD-LEVEL ATTRIBUTE NAME CONSTANTS ===
+    // These apply to ALL field types and are inherited by concrete field implementations
+
+    /** Required field marker attribute - references centralized constant */
+    public static final String ATTR_REQUIRED = MetaDataConstants.ATTR_REQUIRED;
+
+    /** Default value specification attribute - references centralized constant */
+    public static final String ATTR_DEFAULT_VALUE = MetaDataConstants.ATTR_DEFAULT_VALUE;
+
+    /** Validation rules attribute - references centralized constant */
+    public static final String ATTR_VALIDATION = MetaDataConstants.ATTR_VALIDATION;
+
+    /** Default view specification attribute - references centralized constant */
+    public static final String ATTR_DEFAULT_VIEW = MetaDataConstants.ATTR_DEFAULT_VIEW;
+
+    /** Abstract field marker attribute - references centralized constant */
+    public static final String ATTR_IS_ABSTRACT = MetaDataConstants.ATTR_IS_ABSTRACT;
 
     // Unified registry self-registration
     static {
         try {
             MetaDataRegistry.registerType(MetaField.class, def -> def
-                .type(TYPE_FIELD).subType("base")
-                .description("Base field metadata with common attributes")
-                
-                // COMMON FIELD ATTRIBUTES (all field types inherit these)
+                .type(TYPE_FIELD).subType(SUBTYPE_BASE)
+                .description("Base field metadata with common field attributes")
+
+                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
+                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+
+                // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
                 .optionalAttribute(ATTR_REQUIRED, "boolean")
                 .optionalAttribute(ATTR_DEFAULT_VALUE, "string")
                 .optionalAttribute(ATTR_VALIDATION, "string")
                 .optionalAttribute(ATTR_DEFAULT_VIEW, "string")
+
+                // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
+                .optionalChild("attr", "*")
+                .optionalChild("validator", "*")
+                .optionalChild("view", "*")
             );
             
             log.debug("Registered base MetaField type with unified registry");
@@ -277,21 +304,23 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         // Common type mappings based on the registration patterns
         switch (attributeName) {
             // Boolean attributes
-            case "required":
-            case "isId": 
-            case "isSearchable":
-            case "isOptional":
-            case "skipJpa":
-            case "isAbstract":
+            case ATTR_REQUIRED:
+            case MetaDataConstants.ATTR_IS_ID:
+            case MetaDataConstants.ATTR_IS_SEARCHABLE:
+            case MetaDataConstants.ATTR_IS_OPTIONAL:
+            case MetaDataConstants.ATTR_SKIP_JPA:
+            case ATTR_IS_ABSTRACT:
+            case MetaDataConstants.ATTR_DB_NULLABLE:
                 return Boolean.class;
-                
-            // Integer attributes  
+
+            // Integer attributes
             case "maxLength":
             case "minLength":
             case "precision":
             case "scale":
+            case MetaDataConstants.ATTR_DB_LENGTH:
                 return Integer.class;
-                
+
             // Long attributes
             case "minValue":
             case "maxValue":
@@ -304,14 +333,16 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                     return Double.class;
                 }
                 return String.class;
-                
+
             // String attributes (default)
             case "pattern":
-            case "validation": 
-            case "defaultValue":
-            case "defaultView":
-            case "dbColumn":
-            case "dbTable":
+            case ATTR_VALIDATION:
+            case ATTR_DEFAULT_VALUE:
+            case ATTR_DEFAULT_VIEW:
+            case MetaDataConstants.ATTR_DB_COLUMN:
+            case MetaDataConstants.ATTR_DB_TABLE:
+            case MetaDataConstants.ATTR_DB_SCHEMA:
+            case MetaDataConstants.ATTR_DB_TYPE:
             case "description":
             default:
                 return String.class;

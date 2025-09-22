@@ -14,6 +14,7 @@ import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
@@ -37,37 +38,21 @@ public class ProxyMetaObject extends PojoMetaObject
             MetaDataRegistry.registerType(ProxyMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
                 .description("Proxy MetaObject with dynamic proxy field access")
-                
-                // PROXY-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_OBJECT, "string")
-                .optionalAttribute(ATTR_OBJECT_REF, "string")
+
+                // INHERIT FROM BASE OBJECT
+                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+
+                // PROXY-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
                 .optionalAttribute(ATTR_PROXYOBJECT, "string")
                 .optionalAttribute(ATTR_INTERFACE_NAME, "string")
-                .optionalAttribute(ATTR_DESCRIPTION, "string")
-                
-                // PROXY OBJECTS CAN CONTAIN ALL FIELD TYPES
-                .optionalChild("field", "string", "*")
-                .optionalChild("field", "int", "*")
-                .optionalChild("field", "long", "*")
-                .optionalChild("field", "double", "*")
-                .optionalChild("field", "float", "*")
-                .optionalChild("field", "short", "*")
-                .optionalChild("field", "byte", "*")
-                .optionalChild("field", "boolean", "*")
-                .optionalChild("field", "date", "*")
-                .optionalChild("field", "object", "*")
-                .optionalChild("field", "class", "*")
-                .optionalChild("field", "stringArray", "*")
-                .optionalChild("field", "objectArray", "*")
-                
-                // REMOVED: Direct attr children should not be allowed via addChild().
-                // Attributes are added via addMetaAttr(), not addChild().
-                
-                // PROXY OBJECTS CAN CONTAIN KEYS
-                .optionalChild("key", "primary", "*")
-                .optionalChild("key", "foreign", "*")
-                .optionalChild("key", "secondary", "*")
-                // Inherits: name, pkg attributes from MetaObject
+
+                // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
+                // - All field types (field.*)
+                // - Other objects (object.*)
+                // - Keys (key.*)
+                // - Attributes (attr.*)
+                // - Validators (validator.*)
+                // - Views (view.*)
             );
             
             log.debug("Registered ProxyMetaObject type with unified registry");

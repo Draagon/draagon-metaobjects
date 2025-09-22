@@ -14,6 +14,8 @@ import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
+
 /**
  * A Required validator that ensures a field has a value and is not null with unified registry registration.
  *
@@ -33,9 +35,11 @@ public class RequiredValidator extends MetaValidator
             MetaDataRegistry.registerType(RequiredValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_REQUIRED)
                 .description("Required validator ensures field has a value and is not null")
-                
-                // Validators typically don't have children or specific attributes
-                // Inherits from MetaValidator
+
+                // INHERIT FROM BASE VALIDATOR
+                .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
+
+                // NO REQUIRED-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
             );
             
             log.debug("Registered RequiredValidator type with unified registry");

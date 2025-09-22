@@ -2,6 +2,8 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,16 +19,31 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     private static final Logger log = LoggerFactory.getLogger(MetaAttribute.class);
 
     public final static String TYPE_ATTR = "attr";
+    public final static String SUBTYPE_BASE = "base";
 
-    // Cross-cutting attribute constraint registration
+    // Base attribute type registration and constraint registration
     static {
         try {
+            // Register base attribute type
+            MetaDataRegistry.registerType(MetaAttribute.class, def -> def
+                .type(TYPE_ATTR).subType(SUBTYPE_BASE)
+                .description("Base attribute metadata with common attribute properties")
+
+                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ABSTRACT, "boolean")
+
+                // ATTRIBUTES TYPICALLY DON'T HAVE CHILDREN (they are leaf nodes)
+                // No child requirements for base attributes
+            );
+
+            log.debug("Registered base MetaAttribute type with unified registry");
+
             // Register cross-cutting attribute constraints
             registerCrossCuttingAttributeConstraints();
-            
+
             log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
         } catch (Exception e) {
-            log.error("Failed to register cross-cutting attribute constraints", e);
+            log.error("Failed to register base MetaAttribute type and constraints", e);
         }
     }
 

@@ -13,8 +13,13 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Long Field with unified registry registration and child requirements.
@@ -22,6 +27,7 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataTypeHandler(type = "field", subType = "long", description = "Long field with numeric validation")
 @SuppressWarnings("serial")
 public class LongField extends PrimitiveField<Long> {
 
@@ -38,44 +44,38 @@ public class LongField extends PrimitiveField<Long> {
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(LongField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_LONG)
                 .description("Long field with numeric validation")
-                
-                // LONG-SPECIFIC ATTRIBUTES
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // LONG-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_MIN_VALUE, "long")
                 .optionalAttribute(ATTR_MAX_VALUE, "long")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("isId", "boolean")
-                .optionalAttribute("dbColumn", "string")
-                .optionalAttribute("isSearchable", "boolean")
-                .optionalAttribute("isOptional", "boolean")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS VIEWS  
-                .optionalChild("view", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
-            
+
             log.debug("Registered LongField type with unified registry");
-            
+
             // Register LongField-specific constraints
             setupLongFieldConstraints();
-            
+
         } catch (Exception e) {
             log.error("Failed to register LongField type with unified registry", e);
         }
@@ -121,10 +121,10 @@ public class LongField extends PrimitiveField<Long> {
      * @param defaultValue Default value for the field
      * @return New LongField
      */
-    public static LongField create( String name, Integer defaultValue ) {
+    public static LongField create( String name, Long defaultValue ) {
         LongField f = new LongField( name );
         if ( defaultValue != null ) {
-            f.addMetaAttr(StringAttribute.create( ATTR_DEFAULT_VALUE, defaultValue.toString() ));
+            f.addMetaAttr(StringAttribute.create( MetaDataConstants.ATTR_DEFAULT_VALUE, defaultValue.toString() ));
         }
         return f;
     }

@@ -5,6 +5,7 @@ import com.draagon.meta.field.IntegerField;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.attr.IntAttribute;
+import com.draagon.meta.attr.BooleanAttribute;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.After;
@@ -111,7 +112,7 @@ public class UnifiedRegistrySchemaIntegrationTest {
         // Create a valid metadata structure
         PojoMetaObject userObject = new PojoMetaObject("User");
         StringField emailField = new StringField("email");
-        StringAttribute requiredAttr = new StringAttribute("required");
+        BooleanAttribute requiredAttr = new BooleanAttribute("required");
         
         // Test that valid child relationships work
         try {

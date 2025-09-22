@@ -4,8 +4,8 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.StringArrayAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.registry.MetaDataContextRegistry;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import org.slf4j.Logger;
@@ -41,6 +41,17 @@ import static com.draagon.meta.util.MetaDataUtil.expandPackageForPath;
 public abstract class BaseMetaDataParser {
 
     private static final Logger log = LoggerFactory.getLogger(BaseMetaDataParser.class);
+
+    // Ensure critical attribute types are loaded early
+    static {
+        try {
+            // Force class loading and static block execution for StringArrayAttribute
+            Class.forName("com.draagon.meta.attr.StringArrayAttribute");
+            log.debug("Forced loading of StringArrayAttribute class");
+        } catch (ClassNotFoundException e) {
+            log.error("Failed to load StringArrayAttribute class", e);
+        }
+    }
 
     public final static String ATTR_METADATA        = "metadata";
     //public final static String ATTR_TYPESCONFIG     = "typesConfig";
@@ -486,43 +497,47 @@ public abstract class BaseMetaDataParser {
         return null;
     }
 
-    /** v6.0.0: Context-aware attribute creation using MetaDataContextRegistry */
+    /** v6.1.0: Type-aware attribute creation using MetaField's getExpectedAttributeType() */
     protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
 
         String parentType = parentMetaData.getType();
         String parentSubType = parentMetaData.getSubType();
 
-        // v6.0.0: Create attribute using context-aware registry system
+        // v6.1.0: Use type-aware parsing instead of context registry (unified with inline attribute approach)
         MetaAttribute attr = null;
-        
+
         try {
-            // Use context registry to determine appropriate attribute subtype based on parent context
-            String subType = MetaDataContextRegistry.getInstance()
-                    .getContextSpecificAttributeSubType(parentType, parentSubType, attrName);
-            
+            // Use MetaField's type-aware information to determine appropriate attribute subtype
+            String subType = getAttributeSubTypeFromMetaData(parentMetaData, attrName);
+            Class<?> expectedType = getExpectedJavaTypeFromMetaData(parentMetaData, attrName);
+
+            // Convert string value to expected type, then back to string for storage
+            Object castedValue = convertStringToExpectedType(value, expectedType);
+            String finalValue = castedValue != null ? castedValue.toString() : null;
+
             attr = (MetaAttribute) getTypeRegistry().createInstance(
                 MetaAttribute.TYPE_ATTR, subType, attrName);
-            
+
             if (attr != null) {
                 parentMetaData.addChild(attr);
-                
+
                 // Handle array format for StringArrayAttribute types
-                if ("stringarray".equals(subType) && !value.startsWith("[")) {
+                if ("stringarray".equals(subType) && !finalValue.startsWith("[")) {
                     // Convert single value to array format for StringArrayAttribute
-                    attr.setValueAsString("[" + value + "]");
-                    log.debug("Auto-created context-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]", 
+                    attr.setValueAsString("[" + finalValue + "]");
+                    log.debug("Auto-created type-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]",
                              attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
                 } else {
-                    attr.setValueAsString(value);
-                    log.debug("Auto-created context-aware attribute [{}] with subtype [{}] on parent [{}:{}:{}] in file [{}]", 
-                             attrName, subType, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    attr.setValueAsString(finalValue);
+                    log.debug("Auto-created type-aware attribute [{}] with subtype [{}] and expectedType [{}] on parent [{}:{}:{}] in file [{}]",
+                             attrName, subType, expectedType.getSimpleName(), parentType, parentSubType, parentMetaData.getName(), getFilename());
                 }
             }
-            
+
         } catch (Exception e) {
             String errMsg = "Failed to create MetaAttribute [" + attrName + "] on parent record ["
                     + parentType + ":" + parentSubType + ":" + parentMetaData.getName() + "] in file [" + getFilename() + "]";
-            
+
             if (getLoader().getLoaderOptions().isStrict()) {
                 throw new MetaDataException(errMsg + ": " + e.getMessage(), e);
             } else {
@@ -600,7 +615,7 @@ public abstract class BaseMetaDataParser {
      */
     protected String getAttributeSubTypeFromMetaData(MetaData md, String attrName) {
         Class<?> expectedType = getExpectedJavaTypeFromMetaData(md, attrName);
-        
+
         if (expectedType == Boolean.class || expectedType == boolean.class) {
             return "boolean";
         } else if (expectedType == Integer.class || expectedType == int.class) {
@@ -609,6 +624,8 @@ public abstract class BaseMetaDataParser {
             return "long";
         } else if (expectedType == Double.class || expectedType == double.class) {
             return "double";
+        } else if (expectedType == String[].class) {
+            return "stringarray";
         } else {
             return "string";
         }
@@ -623,21 +640,41 @@ public abstract class BaseMetaDataParser {
             com.draagon.meta.field.MetaField<?> field = (com.draagon.meta.field.MetaField<?>) md;
             return field.getExpectedAttributeType(attrName);
         }
-        
+
+        // Handle MetaKey types (PrimaryKey, ForeignKey, SecondaryKey)
+        if ("key".equals(md.getType())) {
+            return getKeyAttributeType(attrName);
+        }
+
         // For other MetaData types (MetaObject, etc.), use basic type mapping
-        // This could be enhanced to consult their registration info as well
         return getBasicAttributeType(attrName);
     }
     
+    /**
+     * Attribute type mapping for MetaKey types (PrimaryKey, ForeignKey, SecondaryKey)
+     */
+    protected Class<?> getKeyAttributeType(String attrName) {
+        switch (attrName) {
+            case "keys":
+                // The 'keys' attribute on key elements should always be StringArray
+                return String[].class; // This will map to stringarray subtype
+            case "foreignObjectRef":
+            case "foreignKey":
+            default:
+                return String.class;
+        }
+    }
+
     /**
      * Basic attribute type mapping for non-field MetaData
      */
     protected Class<?> getBasicAttributeType(String attrName) {
         switch (attrName) {
             case "hasJpa":
-            case "hasAuditing": 
+            case "hasAuditing":
             case "hasValidation":
             case "skipJpa":
+            case "isAbstract":
                 return Boolean.class;
             case "dbTable":
             case "description":

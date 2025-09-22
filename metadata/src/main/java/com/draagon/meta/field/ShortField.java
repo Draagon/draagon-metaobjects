@@ -10,8 +10,12 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Short Field with unified registry registration and child requirements.
@@ -41,7 +45,7 @@ public class ShortField extends PrimitiveField<Short>
                 .optionalAttribute(ATTR_MAX_VALUE, "short")
                 
                 // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
+                .optionalAttribute("isAbstract", "boolean")
                 .optionalAttribute("validation", "string")
                 .optionalAttribute("required", "string")
                 .optionalAttribute("defaultValue", "string")

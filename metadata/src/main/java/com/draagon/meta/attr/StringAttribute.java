@@ -13,6 +13,8 @@ import com.draagon.meta.MetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
+
 /**
  * A String Attribute with unified registry registration.
  */
@@ -35,8 +37,12 @@ public class StringAttribute extends MetaAttribute<String> {
             MetaDataRegistry.registerType(StringAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_STRING)
                 .description("String attribute value")
-                // NO CHILD REQUIREMENTS - just registers identity
-                // Placement rules are defined by parent types that accept string attributes
+
+                // INHERIT FROM BASE ATTRIBUTE
+                .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+
+                // NO STRING-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
+                // Attributes are typically leaf nodes with no children
             );
             
             log.debug("Registered StringAttribute type with unified registry");

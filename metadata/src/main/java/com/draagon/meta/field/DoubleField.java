@@ -14,8 +14,13 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Double Field with unified registry registration and child requirements.
@@ -23,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataTypeHandler(type = "field", subType = "double", description = "Double field with numeric and precision validation")
 @SuppressWarnings("serial")
 public class DoubleField extends PrimitiveField<Double>
 {
@@ -41,43 +47,40 @@ public class DoubleField extends PrimitiveField<Double>
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(DoubleField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
                 .description("Double field with numeric and precision validation")
-                
-                // DOUBLE-SPECIFIC ATTRIBUTES
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // DOUBLE-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_MIN_VALUE, "double")
                 .optionalAttribute(ATTR_MAX_VALUE, "double")
                 .optionalAttribute(ATTR_PRECISION, "int")
                 .optionalAttribute(ATTR_SCALE, "int")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("isId", "boolean")
-                .optionalAttribute("dbColumn", "string")
-                .optionalAttribute("isSearchable", "boolean")
-                .optionalAttribute("isOptional", "boolean")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
-            
+
             log.debug("Registered DoubleField type with unified registry");
-            
+
             // Register DoubleField-specific constraints
             setupDoubleFieldConstraints();
-            
+
         } catch (Exception e) {
             log.error("Failed to register DoubleField type with unified registry", e);
         }

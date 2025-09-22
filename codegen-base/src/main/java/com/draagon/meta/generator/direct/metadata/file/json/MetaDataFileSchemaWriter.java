@@ -7,20 +7,30 @@ import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.constraint.Constraint;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.TypeDefinition;
+import com.draagon.meta.registry.ChildRequirement;
+import com.draagon.meta.util.MetaDataConstants;
+import com.draagon.meta.MetaDataTypeId;
 import com.google.gson.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * v6.0.0: JSON Schema writer that creates schemas for validating metadata files themselves.
- * This generates JSON Schema that validates the structure of metadata JSON files,
- * not the data instances they describe.
- * 
- * Reads constraint definitions to understand what constitutes valid metadata structure
- * and generates appropriate validation schemas.
+ * v6.1.0: Registry-driven JSON Schema writer that creates schemas for validating metadata files.
+ * This generates JSON Schema that validates the structure of metadata JSON files using dynamic
+ * type discovery from the TypeDefinition registry.
+ *
+ * Features:
+ * - Dynamic type enumeration from MetaDataRegistry
+ * - Inheritance-aware attribute schemas
+ * - Type-specific child requirement validation
+ * - Automatic plugin type support
+ * - No hardcoded type lists
  */
 public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchemaWriter> {
 
@@ -30,21 +40,22 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     private String schemaId;
     private String title;
     private String description;
-    private List<String> constraintFiles = new ArrayList<>();
-    
-    // Constraint system for accessing programmatic definitions
+
+    // Registry-based type discovery
+    private MetaDataRegistry typeRegistry;
     private ConstraintRegistry constraintRegistry;
     private List<PlacementConstraint> placementConstraints;
     private List<ValidationConstraint> validationConstraints;
 
     public MetaDataFileSchemaWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
         super(loader, out);
+        this.typeRegistry = MetaDataRegistry.getInstance();
         this.constraintRegistry = ConstraintRegistry.getInstance();
         this.placementConstraints = new ArrayList<>();
         this.validationConstraints = new ArrayList<>();
-        
-        // Note: Constraint files no longer used - constraints are programmatic
-        // this.constraintFiles.add("META-INF/constraints/core-constraints.json");
+
+        log.info("Initialized registry-driven schema writer with {} registered types",
+                typeRegistry.getRegisteredTypes().size());
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -70,8 +81,10 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         return this;
     }
 
+    // Registry-based generation - no constraint files needed
+    @Deprecated
     public MetaDataFileSchemaWriter addConstraintFile(String constraintFile) {
-        this.constraintFiles.add(constraintFile);
+        log.warn("Constraint files are deprecated - using registry-based type discovery instead");
         return this;
     }
 
@@ -85,7 +98,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
                 ", schemaId='" + schemaId + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", constraintFiles=" + constraintFiles +
+                ", registeredTypes=" + typeRegistry.getRegisteredTypes().size() +
                 '}';
     }
 
@@ -108,17 +121,18 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     }
 
     /**
-     * Load constraint definitions from programmatic constraint registry
+     * Load constraint definitions and type registry data
      */
     private void loadConstraintDefinitions() {
-        log.info("Loading constraint definitions for metadata file schema generation from programmatic registry");
-        
+        log.info("Loading registry data for schema generation: {} types, {} constraints",
+                typeRegistry.getRegisteredTypes().size(),
+                constraintRegistry.getAllConstraints().size());
+
         // Get constraints from the unified registry
         this.placementConstraints = constraintRegistry.getPlacementConstraints();
         this.validationConstraints = constraintRegistry.getValidationConstraints();
-        
-        log.info("Loaded {} placement constraints and {} validation constraints for metadata file schema", 
-            placementConstraints.size(), validationConstraints.size());
+
+        log.debug("Registry types: {}", typeRegistry.getRegisteredTypeNames());
     }
 
     /**
@@ -138,14 +152,14 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         
         schema.addProperty("type", "object");
         
-        // Define root metadata object structure
+        // Define root metadata object structure using constants
         JsonObject properties = new JsonObject();
-        properties.add("metadata", createMetaDataObjectSchema());
+        properties.add(MetaDataConstants.ATTR_METADATA, createMetaDataObjectSchema());
         schema.add("properties", properties);
-        
+
         // Require metadata root element
         JsonArray required = new JsonArray();
-        required.add("metadata");
+        required.add(MetaDataConstants.ATTR_METADATA);
         schema.add("required", required);
         
         // Add definitions for reusable components
@@ -162,186 +176,165 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         metaDataSchema.addProperty("type", "object");
         
         JsonObject properties = new JsonObject();
-        
-        // Package property (optional)
+
+        // Package property (optional) - using constants
         JsonObject packageSchema = new JsonObject();
         packageSchema.addProperty("type", "string");
         packageSchema.addProperty("description", "Package name for the metadata");
-        properties.add("package", packageSchema);
-        
-        // Children array (required)
+        properties.add(MetaDataConstants.ATTR_PACKAGE, packageSchema);
+
+        // Children array (required) - using constants
         JsonObject childrenSchema = new JsonObject();
         childrenSchema.addProperty("type", "array");
         childrenSchema.addProperty("description", "Array of metadata children (objects, fields, etc.)");
         JsonObject childrenItems = new JsonObject();
         childrenItems.add("$ref", new JsonPrimitive("#/$defs/MetaDataChild"));
         childrenSchema.add("items", childrenItems);
-        properties.add("children", childrenSchema);
+        properties.add(MetaDataConstants.ATTR_CHILDREN, childrenSchema);
         
         metaDataSchema.add("properties", properties);
         
-        // Children is required
+        // Children is required - using constants
         JsonArray required = new JsonArray();
-        required.add("children");
+        required.add(MetaDataConstants.ATTR_CHILDREN);
         metaDataSchema.add("required", required);
         
         return metaDataSchema;
     }
 
     /**
-     * Create reusable schema definitions
+     * Create reusable schema definitions using registry-based type discovery
      */
     private JsonObject createMetaDataDefinitions() {
         JsonObject definitions = new JsonObject();
-        
-        // MetaDataChild - union of object, field, etc.
+
+        // Core structural definitions
         definitions.add("MetaDataChild", createMetaDataChildSchema());
-        definitions.add("MetaObject", createMetaObjectSchema());
-        definitions.add("MetaField", createMetaFieldSchema());
         definitions.add("NameConstraints", createNameConstraintsSchema());
-        
+
+        // Dynamic type-specific definitions from registry
+        generateTypeSpecificDefinitions(definitions);
+
         return definitions;
     }
 
     /**
-     * Create schema for any metadata child element
+     * Create schema for any metadata child element using dynamic type discovery
      */
     private JsonObject createMetaDataChildSchema() {
         JsonObject childSchema = new JsonObject();
         childSchema.addProperty("type", "object");
-        childSchema.addProperty("description", "A metadata child element (object, field, etc.)");
-        
-        // One of: object, field, attr, etc.
+        childSchema.addProperty("description", "A metadata child element (dynamic types from registry)");
+
+        // Generate oneOf array dynamically from all registered primary types
         JsonArray oneOf = new JsonArray();
-        
-        JsonObject objectWrapper = new JsonObject();
-        JsonObject objectProperty = new JsonObject();
-        objectProperty.add("$ref", new JsonPrimitive("#/$defs/MetaObject"));
-        objectWrapper.add("object", objectProperty);
-        oneOf.add(objectWrapper);
-        
-        JsonObject fieldWrapper = new JsonObject();
-        JsonObject fieldProperty = new JsonObject();
-        fieldProperty.add("$ref", new JsonPrimitive("#/$defs/MetaField"));
-        fieldWrapper.add("field", fieldProperty);
-        oneOf.add(fieldWrapper);
-        
+        Set<String> primaryTypes = typeRegistry.getAllTypeDefinitions().stream()
+                .map(TypeDefinition::getType)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (String primaryType : primaryTypes) {
+            JsonObject wrapper = new JsonObject();
+            JsonObject property = new JsonObject();
+            property.add("$ref", new JsonPrimitive("#/$defs/" + capitalizeFirstLetter(primaryType)));
+            wrapper.add(primaryType, property);
+            oneOf.add(wrapper);
+        }
+
         childSchema.add("oneOf", oneOf);
-        
+        log.debug("Generated dynamic child schema for types: {}", primaryTypes);
+
         return childSchema;
     }
 
     /**
-     * Create schema for MetaObject definitions
+     * Generate type-specific schema definitions dynamically from registry
      */
-    private JsonObject createMetaObjectSchema() {
-        JsonObject objectSchema = new JsonObject();
-        objectSchema.addProperty("type", "object");
-        objectSchema.addProperty("description", "MetaObject definition");
-        
-        JsonObject properties = new JsonObject();
-        
-        // Name (required, with constraints)
-        properties.add("name", createNameConstraintsSchema());
-        
-        // Type (required)
-        JsonObject typeSchema = new JsonObject();
-        typeSchema.addProperty("type", "string");
-        typeSchema.addProperty("description", "Object type (pojo, value, data, etc.)");
-        JsonArray typeEnum = new JsonArray();
-        typeEnum.add("pojo");
-        typeEnum.add("value");
-        typeEnum.add("data");
-        typeEnum.add("proxy");
-        typeEnum.add("mapped");
-        typeSchema.add("enum", typeEnum);
-        properties.add("type", typeSchema);
-        
-        // Children (optional)
-        JsonObject childrenSchema = new JsonObject();
-        childrenSchema.addProperty("type", "array");
-        JsonObject childrenItems = new JsonObject();
-        childrenItems.add("$ref", new JsonPrimitive("#/$defs/MetaDataChild"));
-        childrenSchema.add("items", childrenItems);
-        properties.add("children", childrenSchema);
-        
-        objectSchema.add("properties", properties);
-        
-        // Add pattern properties for inline attributes (@ prefixed)
-        JsonObject patternProperties = new JsonObject();
-        patternProperties.add("^@[a-zA-Z][a-zA-Z0-9_]*$", createInlineAttributeValueSchema());
-        objectSchema.add("patternProperties", patternProperties);
-        
-        // Required properties
-        JsonArray required = new JsonArray();
-        required.add("name");
-        required.add("type");
-        objectSchema.add("required", required);
-        
-        return objectSchema;
+    private void generateTypeSpecificDefinitions(JsonObject definitions) {
+        // Group type definitions by primary type
+        Map<String, List<TypeDefinition>> typeGroups = typeRegistry.getAllTypeDefinitions().stream()
+                .collect(Collectors.groupingBy(TypeDefinition::getType));
+
+        for (Map.Entry<String, List<TypeDefinition>> entry : typeGroups.entrySet()) {
+            String primaryType = entry.getKey();
+            List<TypeDefinition> typeDefs = entry.getValue();
+
+            // Create schema for this primary type
+            JsonObject typeSchema = createPrimaryTypeSchema(primaryType, typeDefs);
+            definitions.add(capitalizeFirstLetter(primaryType), typeSchema);
+
+            log.debug("Generated schema for type '{}' with {} subtypes",
+                    primaryType, typeDefs.size());
+        }
     }
 
     /**
-     * Create schema for MetaField definitions
+     * Create schema for a primary type (object, field, etc.) with dynamic subtype enumeration
      */
-    private JsonObject createMetaFieldSchema() {
-        JsonObject fieldSchema = new JsonObject();
-        fieldSchema.addProperty("type", "object");
-        fieldSchema.addProperty("description", "MetaField definition");
-        
+    private JsonObject createPrimaryTypeSchema(String primaryType, List<TypeDefinition> typeDefs) {
+        JsonObject schema = new JsonObject();
+        schema.addProperty("type", "object");
+        schema.addProperty("description", String.format("%s definition with %d registered subtypes",
+                capitalizeFirstLetter(primaryType), typeDefs.size()));
+
         JsonObject properties = new JsonObject();
-        
-        // Name (required, with constraints)
-        properties.add("name", createNameConstraintsSchema());
-        
-        // Type (required)
+
+        // Name (required, with constraints) - using constants
+        properties.add(MetaDataConstants.ATTR_NAME, createNameConstraintsSchema());
+
+        // Type/SubType (required) - dynamic enumeration from registry
         JsonObject typeSchema = new JsonObject();
         typeSchema.addProperty("type", "string");
-        typeSchema.addProperty("description", "Field data type");
+        typeSchema.addProperty("description", String.format("%s subtype", capitalizeFirstLetter(primaryType)));
+
+        // Generate enum from actual registered subtypes
         JsonArray typeEnum = new JsonArray();
-        typeEnum.add("string");
-        typeEnum.add("int");
-        typeEnum.add("long");
-        typeEnum.add("double");
-        typeEnum.add("float");
-        typeEnum.add("boolean");
-        typeEnum.add("date");
-        typeEnum.add("timestamp");
+        Set<String> subTypes = typeDefs.stream()
+                .map(TypeDefinition::getSubType)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        subTypes.forEach(typeEnum::add);
         typeSchema.add("enum", typeEnum);
-        properties.add("type", typeSchema);
-        
-        fieldSchema.add("properties", properties);
-        
+        properties.add(MetaDataConstants.ATTR_TYPE, typeSchema);
+
+        // Children (optional if this type accepts children)
+        if (hasChildRequirements(typeDefs)) {
+            JsonObject childrenSchema = new JsonObject();
+            childrenSchema.addProperty("type", "array");
+            JsonObject childrenItems = new JsonObject();
+            childrenItems.add("$ref", new JsonPrimitive("#/$defs/MetaDataChild"));
+            childrenSchema.add("items", childrenItems);
+            properties.add(MetaDataConstants.ATTR_CHILDREN, childrenSchema);
+        }
+
+        schema.add("properties", properties);
+
         // Add pattern properties for inline attributes (@ prefixed)
         JsonObject patternProperties = new JsonObject();
-        patternProperties.add("^@[a-zA-Z][a-zA-Z0-9_]*$", createInlineAttributeValueSchema());
-        fieldSchema.add("patternProperties", patternProperties);
-        
-        // Required properties
+        patternProperties.add("^" + MetaDataConstants.JSON_ATTR_PREFIX + "[a-zA-Z][a-zA-Z0-9_]*$",
+                createInlineAttributeValueSchema());
+        schema.add("patternProperties", patternProperties);
+
+        // Required properties - using constants
         JsonArray required = new JsonArray();
-        required.add("name");
-        required.add("type");
-        fieldSchema.add("required", required);
-        
-        return fieldSchema;
+        required.add(MetaDataConstants.ATTR_NAME);
+        required.add(MetaDataConstants.ATTR_TYPE);
+        schema.add("required", required);
+
+        return schema;
     }
 
     /**
-     * Create schema for name constraints based on loaded constraint definitions
+     * Create schema for name constraints using MetaDataConstants
      */
     private JsonObject createNameConstraintsSchema() {
         JsonObject nameSchema = new JsonObject();
         nameSchema.addProperty("type", "string");
         nameSchema.addProperty("description", "Name following MetaData naming constraints");
-        
-        // Apply standard naming pattern used by programmatic constraints
-        // This is the same pattern enforced by ValidationConstraint in MetaField.java
-        nameSchema.addProperty("pattern", "^[a-zA-Z][a-zA-Z0-9_]*$");
+
+        // Use pattern from MetaDataConstants
+        nameSchema.addProperty("pattern", MetaDataConstants.VALID_NAME_PATTERN);
         nameSchema.addProperty("minLength", 1);
         nameSchema.addProperty("maxLength", 64);
-        
-        log.debug("Generated name constraints schema with pattern validation");
-        
+
         return nameSchema;
     }
 
@@ -374,5 +367,23 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         valueSchema.add("anyOf", anyOf);
         
         return valueSchema;
+    }
+
+    /**
+     * Helper method to capitalize first letter of a string
+     */
+    private String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    /**
+     * Check if any type definition in the list has child requirements
+     */
+    private boolean hasChildRequirements(List<TypeDefinition> typeDefs) {
+        return typeDefs.stream()
+                .anyMatch(def -> !def.getChildRequirements().isEmpty());
     }
 }

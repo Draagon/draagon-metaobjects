@@ -5,6 +5,8 @@ import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.BooleanAttribute;
+import com.draagon.meta.validator.RequiredValidator;
+import com.draagon.meta.field.StringField;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.google.gson.JsonObject;
@@ -312,13 +314,17 @@ public class UnifiedFieldRegistryTest {
             assertNotNull("Test object should be loaded", testObject);
             
             // Try to add an invalid child - should be rejected
+            // Get a field from the object and try to add another field to it (invalid)
+            MetaField validField = testObject.getMetaField("validField");
+            assertNotNull("Should have validField", validField);
+
             try {
-                StringAttribute invalidAttr = new StringAttribute("invalidChild");
-                testObject.addChild(invalidAttr);
-                fail("Should reject invalid child type");
+                StringField invalidChild = new StringField("invalidNestedField");
+                validField.addChild(invalidChild);
+                fail("Should reject field as child of field");
             } catch (Exception e) {
-                assertTrue("Should mention constraint violation", 
-                          e.getMessage().toLowerCase().contains("does not accept"));
+                assertTrue("Should reject same type addition (actual: " + e.getMessage() + ")",
+                          e.getMessage().toLowerCase().contains("cannot add the same metadata type"));
             }
             
         } finally {

@@ -30,9 +30,13 @@ public class TextView extends HtmlView
       MetaDataRegistry.registerType(TextView.class, def -> def
         .type("view").subType("text")
         .description("HTML text input view")
-        .optionalChild("attr", "string")
-        .optionalChild("attr", "int")
-        .optionalChild("attr", "boolean")
+
+        // INHERIT FROM BASE VIEW
+        .inheritsFrom("view", "base")
+
+        // NO TEXT-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
+        // CHILD REQUIREMENTS INHERITED FROM BASE VIEW:
+        // - Attributes (attr.*)
       );
       
       log.debug("Registered TextView with unified registry");

@@ -8,7 +8,6 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.parser.BaseMetaDataParser;
 import com.draagon.meta.loader.parser.MetaDataFileParser;
-import com.draagon.meta.registry.MetaDataContextRegistry;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.util.MetaDataUtil;
 import com.google.gson.JsonArray;
@@ -314,37 +313,41 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         String parentType = parentMetaData.getType();
         String parentSubType = parentMetaData.getSubType();
 
-        // Create attribute using context-aware registry system
+        // v6.1.0: Use type-aware parsing instead of context registry (unified with inline attribute approach)
         MetaAttribute attr = null;
-        
+
         try {
-            // Use context registry to determine appropriate attribute subtype based on parent context
-            String subType = MetaDataContextRegistry.getInstance()
-                    .getContextSpecificAttributeSubType(parentType, parentSubType, attrName);
-            
+            // Use MetaField's type-aware information to determine appropriate attribute subtype
+            String subType = getAttributeSubTypeFromMetaData(parentMetaData, attrName);
+            Class<?> expectedType = getExpectedJavaTypeFromMetaData(parentMetaData, attrName);
+
+            // Convert string value to expected type, then back to string for storage
+            Object castedValue = convertStringToExpectedType(value, expectedType);
+            String finalValue = castedValue != null ? castedValue.toString() : null;
+
             attr = (MetaAttribute) getTypeRegistry().createInstance(
                 MetaAttribute.TYPE_ATTR, subType, attrName);
-            
+
             if (attr != null) {
                 parentMetaData.addChild(attr);
-                
+
                 // Handle array format for StringArrayAttribute types
-                if ("stringarray".equals(subType) && !value.startsWith("[")) {
+                if ("stringarray".equals(subType) && !finalValue.startsWith("[")) {
                     // Convert single value to array format for StringArrayAttribute
-                    attr.setValueAsString("[" + value + "]");
-                    log.debug("Auto-created context-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]", 
+                    attr.setValueAsString("[" + finalValue + "]");
+                    log.debug("Auto-created type-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]",
                              attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
                 } else {
-                    attr.setValueAsString(value);
-                    log.debug("Auto-created context-aware attribute [{}] with subtype [{}] on parent [{}:{}:{}] in file [{}]", 
-                             attrName, subType, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    attr.setValueAsString(finalValue);
+                    log.debug("Auto-created type-aware attribute [{}] with subtype [{}] and expectedType [{}] on parent [{}:{}:{}] in file [{}]",
+                             attrName, subType, expectedType.getSimpleName(), parentType, parentSubType, parentMetaData.getName(), getFilename());
                 }
             }
-            
+
         } catch (Exception e) {
             String errMsg = "Failed to create MetaAttribute [" + attrName + "] on parent record ["
                     + parentType + ":" + parentSubType + ":" + parentMetaData.getName() + "] in file [" + getFilename() + "]";
-            
+
             // Log warning (could be made configurable in future)
             log.warn(errMsg + ": " + e.getMessage());
         }

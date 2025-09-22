@@ -11,10 +11,15 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Date Field with unified registry registration and child requirements.
@@ -22,6 +27,7 @@ import java.util.Date;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataTypeHandler(type = "field", subType = "date", description = "Date field with format and range validation")
 @SuppressWarnings("serial")
 public class DateField extends PrimitiveField<Date> {
 
@@ -40,43 +46,40 @@ public class DateField extends PrimitiveField<Date> {
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(DateField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DATE)
                 .description("Date field with format and range validation")
-                
-                // DATE-SPECIFIC ATTRIBUTES
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // DATE-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_DATE_FORMAT, "string")
                 .optionalAttribute(ATTR_FORMAT, "string")
                 .optionalAttribute(ATTR_MIN_DATE, "string")
                 .optionalAttribute(ATTR_MAX_DATE, "string")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("isId", "boolean")
-                .optionalAttribute("dbColumn", "string")
-                .optionalAttribute("isSearchable", "boolean")
-                .optionalAttribute("isOptional", "boolean")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
-            
+
             log.debug("Registered DateField type with unified registry");
-            
+
             // Register DateField-specific constraints
             setupDateFieldConstraints();
-            
+
         } catch (Exception e) {
             log.error("Failed to register DateField type with unified registry", e);
         }

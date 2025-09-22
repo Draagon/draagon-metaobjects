@@ -11,10 +11,15 @@ import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
+
+import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Timestamp Field with unified registry registration and child requirements.
@@ -23,12 +28,12 @@ import java.sql.Timestamp;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataTypeHandler(type = "field", subType = "timestamp", description = "Timestamp field with date/time and precision validation")
 @SuppressWarnings("serial")
 public class TimestampField extends PrimitiveField<java.util.Date> {
 
     private static final Logger log = LoggerFactory.getLogger(TimestampField.class);
 
-    public final static String TYPE_FIELD = "field";
     public final static String SUBTYPE_TIMESTAMP = "timestamp";
     public final static String ATTR_PRECISION = "precision";
     public final static String ATTR_DATE_FORMAT = "dateFormat";
@@ -38,37 +43,40 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(TimestampField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_TIMESTAMP)
                 .description("Timestamp field with date/time and precision validation")
-                
-                // TIMESTAMP-SPECIFIC ATTRIBUTES
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // TIMESTAMP-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_PRECISION, "int")
                 .optionalAttribute(ATTR_DATE_FORMAT, "string")
                 .optionalAttribute(ATTR_MIN_DATE, "string")
                 .optionalAttribute(ATTR_MAX_DATE, "string")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "string")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
+                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
+                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
-            
+
             log.debug("Registered TimestampField type with unified registry");
-            
+
             // Register TimestampField-specific constraints
             setupTimestampFieldConstraints();
-            
+
         } catch (Exception e) {
             log.error("Failed to register TimestampField type with unified registry", e);
         }

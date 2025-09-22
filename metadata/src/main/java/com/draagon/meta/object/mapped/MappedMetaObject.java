@@ -9,6 +9,7 @@ import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
 import javax.sound.midi.MetaEventListener;
 import java.util.Map;
 
@@ -30,34 +31,22 @@ public class MappedMetaObject extends MetaObject
             MetaDataRegistry.registerType(MappedMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
                 .description("Map-based MetaObject with key-value field access")
-                
-                // MAP-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_OBJECT, "string")
-                .optionalAttribute(ATTR_OBJECT_REF, "string")
-                .optionalAttribute(ATTR_DESCRIPTION, "string")
-                
+
+                // INHERIT FROM BASE OBJECT
+                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+
+                // NO MAP-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
+
                 // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("isAbstract", "string")
                 .optionalAttribute("implements", "string")
-                
-                // MAP OBJECTS CAN CONTAIN ALL FIELD TYPES
-                .optionalChild("field", "string")
-                .optionalChild("field", "int")
-                .optionalChild("field", "long")
-                .optionalChild("field", "double")
-                .optionalChild("field", "float")
-                .optionalChild("field", "short")
-                .optionalChild("field", "byte")
-                .optionalChild("field", "boolean")
-                .optionalChild("field", "date")
-                .optionalChild("field", "object")
-                .optionalChild("field", "class")
-                .optionalChild("field", "stringArray")
-                .optionalChild("field", "objectArray")
-                
-                // REMOVED: Direct attr children should not be allowed via addChild().
-                // Attributes are added via addMetaAttr(), not addChild().
-                // Inherits: name, pkg attributes from MetaObject
+
+                // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
+                // - All field types (field.*)
+                // - Other objects (object.*)
+                // - Keys (key.*)
+                // - Attributes (attr.*)
+                // - Validators (validator.*)
+                // - Views (view.*)
             );
             
             log.debug("Registered MappedMetaObject type with unified registry");

@@ -56,6 +56,7 @@ public class MetaDataRegistry {
     private final ServiceRegistry serviceRegistry;
     private final Map<MetaDataTypeId, TypeDefinition> typeDefinitions = new ConcurrentHashMap<>();
     private final Map<String, List<ChildRequirement>> globalRequirements = new ConcurrentHashMap<>();
+    private final Set<TypeDefinition> deferredInheritanceTypes = ConcurrentHashMap.newKeySet();
     private volatile boolean initialized = false;
     
     /**
@@ -107,13 +108,13 @@ public class MetaDataRegistry {
     }
     
     /**
-     * Register a type definition
-     * 
+     * Register a type definition with inheritance resolution
+     *
      * @param definition Complete type definition
      */
     public void register(TypeDefinition definition) {
         MetaDataTypeId typeId = new MetaDataTypeId(definition.getType(), definition.getSubType());
-        
+
         TypeDefinition existing = typeDefinitions.get(typeId);
         if (existing != null && !existing.getImplementationClass().equals(definition.getImplementationClass())) {
             throw new MetaDataException(
@@ -122,10 +123,44 @@ public class MetaDataRegistry {
                 ", New: " + definition.getImplementationClass().getName()
             );
         }
-        
+
+        // Resolve inheritance if this type has a parent
+        resolveInheritance(definition);
+
         typeDefinitions.put(typeId, definition);
-        log.debug("Registered type: {} -> {}", typeId.toQualifiedName(), 
-                 definition.getImplementationClass().getSimpleName());
+        log.debug("Registered type: {} -> {} (parent: {})", typeId.toQualifiedName(),
+                 definition.getImplementationClass().getSimpleName(),
+                 definition.hasParent() ? definition.getParentQualifiedName() : "none");
+
+        // Try to resolve any deferred inheritance that might now be possible
+        if (!deferredInheritanceTypes.isEmpty()) {
+            resolveDeferredInheritance();
+        }
+    }
+
+    /**
+     * Resolve inheritance for a type definition by populating inherited requirements from parent
+     *
+     * @param definition Type definition to resolve inheritance for
+     */
+    private void resolveInheritance(TypeDefinition definition) {
+        if (!definition.hasParent()) {
+            return; // No inheritance to resolve
+        }
+
+        MetaDataTypeId parentTypeId = new MetaDataTypeId(definition.getParentType(), definition.getParentSubType());
+        TypeDefinition parentDefinition = typeDefinitions.get(parentTypeId);
+
+        if (parentDefinition == null) {
+            // Defer inheritance resolution for later when parent might be available
+            deferredInheritanceTypes.add(definition);
+            log.debug("Deferring inheritance for {} - parent {} not yet registered",
+                    definition.getQualifiedName(), parentTypeId.toQualifiedName());
+            return;
+        }
+
+        // Delegate to extracted method for consistency
+        resolveInheritanceForDefinition(definition, parentDefinition);
     }
     
     /**
@@ -182,13 +217,23 @@ public class MetaDataRegistry {
     
     /**
      * Get type definition by type and subtype
-     * 
+     *
      * @param type Primary type
      * @param subType Specific subtype
      * @return TypeDefinition if found, null otherwise
      */
     public TypeDefinition getTypeDefinition(String type, String subType) {
         return typeDefinitions.get(new MetaDataTypeId(type, subType));
+    }
+
+    /**
+     * Get type definition by MetaDataTypeId
+     *
+     * @param typeId Type identifier
+     * @return TypeDefinition if found, null otherwise
+     */
+    public TypeDefinition getTypeDefinition(MetaDataTypeId typeId) {
+        return typeDefinitions.get(typeId);
     }
     
     /**
@@ -509,7 +554,85 @@ public class MetaDataRegistry {
             log.warn("Some core types could not be loaded: {}", e.getMessage());
         }
     }
-    
+
+    /**
+     * Resolve deferred inheritance for types whose parents weren't available during initial registration.
+     * This method should be called after all static type registrations have completed.
+     *
+     * @return Number of deferred types that were successfully resolved
+     */
+    public int resolveDeferredInheritance() {
+        if (deferredInheritanceTypes.isEmpty()) {
+            return 0;
+        }
+
+        Set<TypeDefinition> resolved = new HashSet<>();
+        Set<TypeDefinition> stillDeferred = new HashSet<>();
+
+        for (TypeDefinition definition : deferredInheritanceTypes) {
+            MetaDataTypeId parentTypeId = new MetaDataTypeId(definition.getParentType(), definition.getParentSubType());
+            TypeDefinition parentDefinition = typeDefinitions.get(parentTypeId);
+
+            if (parentDefinition != null) {
+                try {
+                    // Resolve inheritance now that parent is available
+                    resolveInheritanceForDefinition(definition, parentDefinition);
+                    resolved.add(definition);
+                    log.debug("Resolved deferred inheritance for {} from parent {}",
+                            definition.getQualifiedName(), parentTypeId.toQualifiedName());
+                } catch (Exception e) {
+                    log.warn("Failed to resolve deferred inheritance for {}: {}",
+                            definition.getQualifiedName(), e.getMessage());
+                    stillDeferred.add(definition);
+                }
+            } else {
+                stillDeferred.add(definition);
+                log.warn("Parent type {} still not found for {} during deferred resolution",
+                        parentTypeId.toQualifiedName(), definition.getQualifiedName());
+            }
+        }
+
+        // Update deferred set with remaining unresolved types
+        deferredInheritanceTypes.clear();
+        deferredInheritanceTypes.addAll(stillDeferred);
+
+        int resolvedCount = resolved.size();
+        if (resolvedCount > 0) {
+            log.info("Resolved deferred inheritance for {} types, {} still deferred",
+                    resolvedCount, stillDeferred.size());
+        }
+
+        return resolvedCount;
+    }
+
+    /**
+     * Extract the inheritance resolution logic so it can be reused for deferred resolution
+     */
+    private void resolveInheritanceForDefinition(TypeDefinition definition, TypeDefinition parentDefinition) {
+        // Get all requirements from parent (direct + inherited)
+        Map<String, ChildRequirement> parentRequirements = new HashMap<>();
+
+        // Add parent's direct requirements using proper key generation logic
+        for (ChildRequirement req : parentDefinition.getDirectChildRequirements()) {
+            String key = req.getName();
+            if ("*".equals(key)) {
+                // For wildcard requirements, create unique keys to avoid overwrites
+                key = "*:" + req.getExpectedType() + ":" + req.getExpectedSubType();
+            }
+            parentRequirements.put(key, req);
+        }
+
+        // Add parent's inherited requirements (recursive inheritance) - these already use unique keys
+        parentRequirements.putAll(parentDefinition.getInheritedChildRequirements());
+
+        // Populate inherited requirements in the child definition
+        definition.populateInheritedRequirements(parentRequirements);
+
+        log.debug("Inheritance resolved for {}: {} requirements inherited from parent {}",
+                definition.getQualifiedName(), parentRequirements.size(),
+                parentDefinition.getQualifiedName());
+    }
+
     /**
      * Registry statistics record
      */

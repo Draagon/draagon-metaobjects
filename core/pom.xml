@@ -49,7 +49,6 @@
                          SOLUTION: SimpleLoader/SimpleModelParser from metadata module supports our JSON format
                          STATUS: Re-enabled with correct loader
                     -->
-                    <!-- Temporarily disabled due to API compatibility issue -->
                     <!--
                     <execution>
                         <id>gen-schemas</id>
@@ -64,19 +63,17 @@
                             </globals>
                             <loader>
                                 <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
-                                <name>gen-schemas</name>
-                                <sources>
-                                    <source>resource:com/draagon/meta/loader/json/metaobjects-core.json</source>
-                                </sources>
+                                <name>gen-test-resources</name>
+                                <sources/>
                             </loader>
                             <generators>
                                 <generator>
                                     <classname>com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
-                                        <outputFilename>metaobjects-file-schema.json</outputFilename>
+                                        <outputFilename>metaobjects-v6-schema.json</outputFilename>
                                         <schemaVersion>https://json-schema.org/draft/2020-12/schema</schemaVersion>
-                                        <schemaId>https://draagon.com/schemas/metaobjects/6.0.0/metaobjects-file-schema.json</schemaId>
+                                        <schemaId>https://draagon.com/schemas/metaobjects/6.0.0/metaobjects-schema.json</schemaId>
                                         <title>MetaObjects File Schema v6.0.0</title>
                                         <description>JSON Schema for validating MetaData file structure and constraints</description>
                                     </args>
@@ -85,7 +82,7 @@
                                     <classname>com.draagon.meta.generator.direct.metadata.file.xsd.MetaDataFileXSDGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
-                                        <outputFilename>metaobjects-file-schema.xsd</outputFilename>
+                                        <outputFilename>metaobjects-v6-schema.xsd</outputFilename>
                                         <nameSpace>https://draagon.com/schemas/metaobjects/6.0.0</nameSpace>
                                     </args>
                                 </generator>
