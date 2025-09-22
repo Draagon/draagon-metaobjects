@@ -11,7 +11,7 @@ import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataTypeHandler(type = "field", subType = "timestamp", description = "Timestamp field with date/time and precision validation")
+@MetaDataType(type = "field", subType = "timestamp", description = "Timestamp field with date/time and precision validation")
 @SuppressWarnings("serial")
 public class TimestampField extends PrimitiveField<java.util.Date> {
 

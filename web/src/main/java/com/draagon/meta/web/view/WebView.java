@@ -9,7 +9,7 @@ package com.draagon.meta.web.view;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
-@MetaDataTypeHandler(type = "view", subType = "web", description = "Web-based view for HTML form rendering")
+@MetaDataType(type = "view", subType = "web", description = "Web-based view for HTML form rendering")
 public abstract class WebView extends MetaView
 {
   private static final Logger log = LoggerFactory.getLogger(WebView.class);

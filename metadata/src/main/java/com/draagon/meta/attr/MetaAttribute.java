@@ -3,6 +3,7 @@ package com.draagon.meta.attr;
 import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.util.Optional;
 /**
  * An attribute of any MetaDAta with enhanced validation, metrics, and type safety
  */
+@MetaDataType(type = "attr", subType = "base", description = "Base attribute metadata with common attribute properties")
 //@SuppressWarnings("serial")
 public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, MetaDataValueHandler<T> {
     

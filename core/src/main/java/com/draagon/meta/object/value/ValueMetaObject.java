@@ -8,11 +8,11 @@ package com.draagon.meta.object.value;
 
 import com.draagon.meta.object.data.DataMetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@MetaDataTypeHandler(type = "object", subType = "value", description = "Value-based metadata object with dynamic attribute access")
+@MetaDataType(type = "object", subType = "value", description = "Value-based metadata object with dynamic attribute access")
 public class ValueMetaObject extends DataMetaObject
 {
     private static final Logger log = LoggerFactory.getLogger(ValueMetaObject.class);

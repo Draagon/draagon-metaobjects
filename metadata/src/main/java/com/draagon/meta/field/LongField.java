@@ -13,7 +13,7 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataTypeHandler(type = "field", subType = "long", description = "Long field with numeric validation")
+@MetaDataType(type = "field", subType = "long", description = "Long field with numeric validation")
 @SuppressWarnings("serial")
 public class LongField extends PrimitiveField<Long> {
 

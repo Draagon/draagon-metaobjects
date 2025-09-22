@@ -10,6 +10,8 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.InvalidValueException;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 import com.draagon.meta.web.util.Param;
 
@@ -26,6 +28,7 @@ import java.util.Calendar;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
+@MetaDataType(type = "view", subType = "date", description = "HTML date input view")
 public class DateView extends MonthView {
 
     private static final Logger log = LoggerFactory.getLogger(DateView.class);
@@ -33,6 +36,24 @@ public class DateView extends MonthView {
     private final static String ATTR_MAXRANGE = "max.range";
     private final static String ATTR_EMPTYVALUE = "empty.value";
     //private final static String ATTR_USEZERO    = "usezero";
+
+    // Unified registry self-registration
+    static {
+        try {
+            MetaDataRegistry.registerType(DateView.class, def -> def
+                .type("view").subType("date")
+                .inheritsFrom("view", "base")
+                .optionalAttribute(ATTR_MINRANGE, "string")
+                .optionalAttribute(ATTR_MAXRANGE, "string")
+                .optionalAttribute(ATTR_EMPTYVALUE, "string")
+                .description("HTML date input view")
+            );
+
+            log.debug("Registered DateView type with unified registry");
+        } catch (Exception e) {
+            log.error("Failed to register DateView type with unified registry", e);
+        }
+    }
 
     public DateView(String name) {
         super(name);

@@ -2,6 +2,7 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import java.util.Properties;
 /**
  * A Properties Attribute
  */
+@MetaDataType(type = "attr", subType = "properties", description = "Properties attribute for key-value configuration data")
 @SuppressWarnings("serial")
 public class PropertiesAttribute extends MetaAttribute<Properties> {
 

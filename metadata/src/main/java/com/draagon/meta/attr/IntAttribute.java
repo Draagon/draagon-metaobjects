@@ -7,7 +7,7 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.ValidationConstraint;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An Integer Attribute with self-registration and constraint setup.
  */
-@MetaDataTypeHandler(type = "attr", subType = "int", description = "Integer attribute type")
+@MetaDataType(type = "attr", subType = "int", description = "Integer attribute type")
 public class IntAttribute extends MetaAttribute<Integer> {
 
     private static final Logger log = LoggerFactory.getLogger(IntAttribute.class);

@@ -1,9 +1,11 @@
 package com.draagon.meta.key;
 
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@MetaDataType(type = "key", subType = "primary", description = "Primary key for unique record identification")
 public class PrimaryKey extends MetaKey {
 
     private static final Logger log = LoggerFactory.getLogger(PrimaryKey.class);

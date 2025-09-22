@@ -11,6 +11,7 @@ import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +20,10 @@ import java.util.List;
 /**
  * A String Array Attribute with unified registry registration.
  */
+@MetaDataType(type = "attr", subType = "stringarray", description = "String array attribute for multiple text values")
 @SuppressWarnings("serial")
-public class StringArrayAttribute extends MetaAttribute<List<String>> {
-
+public class StringArrayAttribute extends MetaAttribute<List<String>>
+{
     private static final Logger log = LoggerFactory.getLogger(StringArrayAttribute.class);
 
     public final static String SUBTYPE_STRING_ARRAY = "stringarray";

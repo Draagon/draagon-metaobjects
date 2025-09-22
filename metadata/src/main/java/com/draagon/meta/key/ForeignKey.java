@@ -9,12 +9,14 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
+@MetaDataType(type = "key", subType = "foreign", description = "Foreign key for referencing other objects")
 public class ForeignKey extends MetaKey {
 
     private static final Logger log = LoggerFactory.getLogger(ForeignKey.class);

@@ -8,7 +8,7 @@ package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
  *
  * @version 6.0
  */
-@MetaDataTypeHandler(type = "validator", subType = "required", description = "Required validator for field validation")
+@MetaDataType(type = "validator", subType = "required", description = "Required validator for field validation")
 @SuppressWarnings("serial")
 public class RequiredValidator extends MetaValidator
 {

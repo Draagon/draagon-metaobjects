@@ -9,6 +9,7 @@ package com.draagon.meta.web.view.html;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import javax.servlet.jsp.*;
  *   <li>rows - (Optional) The number of rows for the textarea</li>
  * </ul></p>
  */
+@MetaDataType(type = "view", subType = "textarea", description = "HTML textarea input view")
 public class TextAreaView extends TextView
 {
   private static final Logger log = LoggerFactory.getLogger(TextAreaView.class);

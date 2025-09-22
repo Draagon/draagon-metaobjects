@@ -13,7 +13,7 @@ import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.registry.TypeDefinition;
 import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
@@ -28,8 +28,7 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataTypeHandler(type = "field", subType = "string", description = "String field type with length and pattern validation")
-@SuppressWarnings("serial")
+@MetaDataType(type = "field", subType = "string", description = "String field type with length and pattern validation")
 public class StringField extends PrimitiveField<String> {
 
     private static final Logger log = LoggerFactory.getLogger(StringField.class);

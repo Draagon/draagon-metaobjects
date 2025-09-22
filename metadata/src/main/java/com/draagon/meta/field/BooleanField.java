@@ -9,7 +9,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataTypeHandler(type = "field", subType = "boolean", description = "Boolean field for true/false values")
+@MetaDataType(type = "field", subType = "boolean", description = "Boolean field for true/false values")
 @SuppressWarnings("serial")
 public class BooleanField extends PrimitiveField<Boolean> {
 

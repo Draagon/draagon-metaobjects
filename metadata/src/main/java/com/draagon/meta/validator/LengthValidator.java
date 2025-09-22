@@ -9,7 +9,7 @@ package com.draagon.meta.validator;
 import com.draagon.meta.*;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  *
  * @version 6.0
  */
-@MetaDataTypeHandler(type = "validator", subType = "length", description = "Length validator for string field validation")
+@MetaDataType(type = "validator", subType = "length", description = "Length validator for string field validation")
 @SuppressWarnings("serial")
 public class LengthValidator extends MetaValidator
 {

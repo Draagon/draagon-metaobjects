@@ -10,6 +10,7 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
  *
  * @version 6.0
  */
+@MetaDataType(type = "attr", subType = "boolean", description = "Boolean attribute for true/false metadata values")
 @SuppressWarnings("serial")
 public class BooleanAttribute extends MetaAttribute<Boolean>
 {

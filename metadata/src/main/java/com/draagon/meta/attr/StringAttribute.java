@@ -9,6 +9,7 @@ package com.draagon.meta.attr;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.MetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 /**
  * A String Attribute with unified registry registration.
  */
+@MetaDataType(type = "attr", subType = "string", description = "String attribute value")
 public class StringAttribute extends MetaAttribute<String> {
 
     private static final Logger log = LoggerFactory.getLogger(StringAttribute.class);

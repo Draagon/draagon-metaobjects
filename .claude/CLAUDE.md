@@ -394,7 +394,7 @@ public class MetaObject {
 #### **Self-Registration Implementation Pattern**
 
 ```java
-@MetaDataTypeHandler(type = "field", subType = "string", description = "String field type")
+@MetaDataType(type = "field", subType = "string", description = "String field type")
 public class StringField extends PrimitiveField<String> {
 
     // Self-registration with constraint setup
@@ -510,7 +510,7 @@ ValidationConstraint namingPattern = new ValidationConstraint(
 
 #### **✅ Success Criteria Met**
 - ✅ All external constraint JSON files deleted
-- ✅ All MetaData classes have self-registration via @MetaDataTypeHandler + static{}
+- ✅ All MetaData classes have self-registration via @MetaDataType + static{}
 - ✅ All constraints programmatic (PlacementConstraint/ValidationConstraint)
 - ✅ No hardcoded extensibility violations remain
 - ✅ Full build succeeds: `mvn clean compile package`
@@ -520,7 +520,7 @@ ValidationConstraint namingPattern = new ValidationConstraint(
 #### **For Plugin Developers**
 ```java
 // Example: Adding a new CurrencyField type
-@MetaDataTypeHandler(type = "field", subType = "currency", description = "Currency field with precision")
+@MetaDataType(type = "field", subType = "currency", description = "Currency field with precision")
 public class CurrencyField extends PrimitiveField<BigDecimal> {
     
     static {
@@ -2804,7 +2804,7 @@ Based on Maven repository publishing requirements:
 **✅ Cross-Module Inheritance Support:**
 ```java
 // TextView in web module successfully inherits from base type in metadata module
-@MetaDataTypeHandler(type = "view", subType = "text")
+@MetaDataType(type = "view", subType = "text")
 public class TextView extends MetaView {
     static {
         MetaDataRegistry.registerType(TextView.class, def -> def
@@ -2887,7 +2887,7 @@ All existing APIs continue to work while new inheritance relationships provide e
 **Plugin developers can now easily extend base types:**
 ```java
 // Example: Custom CurrencyField extending field.base
-@MetaDataTypeHandler(type = "field", subType = "currency")
+@MetaDataType(type = "field", subType = "currency")
 public class CurrencyField extends PrimitiveField<BigDecimal> {
     static {
         MetaDataRegistry.registerType(CurrencyField.class, def -> def
@@ -2910,6 +2910,96 @@ public class CurrencyField extends PrimitiveField<BigDecimal> {
 - **Copy-on-Write Updates**: Inheritance supports atomic metadata updates
 
 **The inheritance system is now a fundamental part of the MetaObjects architecture, providing clean extensibility while maintaining all performance characteristics of the READ-OPTIMIZED design.**
+
+## 🎯 **ANNOTATION SYSTEM ENHANCEMENT (v6.2.0+)**
+
+### 🚀 **MAJOR IMPROVEMENT: @MetaDataTypeHandler → @MetaDataType Refactoring**
+
+**STATUS: ✅ COMPLETED** - Comprehensive annotation rename for improved clarity and AI-friendliness.
+
+#### **Architectural Motivation**
+
+The original `@MetaDataTypeHandler` annotation was misleading because:
+- **Classes ARE metadata types**, they don't "handle" them
+- **"Handler" suggested processing**, but these are **type definitions**
+- **AI confusion**: Less intuitive for AI understanding of the type system
+
+#### **Enhanced @MetaDataType Annotation**
+
+**New Clear Semantics:**
+```java
+// BEFORE: Confusing - suggests handling
+@MetaDataTypeHandler(type = "field", subType = "string", description = "String field type")
+public class StringField extends MetaField {
+
+// AFTER: Clear - this IS a metadata type
+@MetaDataType(type = "field", subType = "string", description = "String field type")
+public class StringField extends MetaField {
+```
+
+#### **AI-Friendly Benefits**
+
+**For AI assistance, the annotation now:**
+1. **Immediately conveys purpose** - "This defines a metadata type"
+2. **Suggests hierarchical structure** - The `type.subType` pattern
+3. **Indicates discoverability** - Part of a registerable type system
+4. **Self-documents the framework** - Clear metadata framework context
+
+#### **Implementation Scope**
+
+**✅ Complete Framework-Wide Refactoring:**
+- **metadata module**: 20+ classes updated (fields, attributes, validators, keys)
+- **core module**: All MetaData classes updated
+- **om module**: ManagedMetaObject updated
+- **web module**: 5 view classes updated (TextView, DateView, etc.)
+- **Test framework**: Compliance tests and base classes updated
+
+**✅ Backward Compatibility Maintained:**
+```java
+// Deprecated alias provides smooth transition
+@Deprecated
+public @interface MetaDataTypeHandler {
+    // Delegates to @MetaDataType for compatibility
+}
+```
+
+#### **Usage Examples**
+
+**Modern Plugin Development:**
+```java
+@MetaDataType(type = "field", subType = "currency", description = "Currency field with precision")
+public class CurrencyField extends MetaField {
+    static {
+        MetaDataRegistry.registerType(CurrencyField.class, def -> def
+            .type("field").subType("currency")
+            .optionalAttribute("precision", "int")
+            .description("Currency field with precision")
+        );
+    }
+}
+```
+
+**Cross-Module Inheritance:**
+```java
+@MetaDataType(type = "view", subType = "text", description = "HTML text input view")
+public class TextView extends MetaView {
+    static {
+        MetaDataRegistry.registerType(TextView.class, def -> def
+            .type("view").subType("text")
+            .inheritsFrom("view", "base")  // String-based cross-module inheritance
+            .description("HTML text input view")
+        );
+    }
+}
+```
+
+#### **Migration Path**
+
+- **✅ Immediate**: All new code uses `@MetaDataType`
+- **🔄 Transition**: Old `@MetaDataTypeHandler` still works (deprecated)
+- **🚀 Future**: Can remove deprecated alias in next major version
+
+**The @MetaDataType annotation makes the framework significantly more intuitive for both human developers and AI assistants working with the MetaObjects type system.**
 
 ## VERSION MANAGEMENT FOR CLAUDE AI
 

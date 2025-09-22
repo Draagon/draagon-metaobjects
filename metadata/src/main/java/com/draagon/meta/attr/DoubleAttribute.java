@@ -8,12 +8,14 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A Double Attribute
  */
+@MetaDataType(type = "attr", subType = "double", description = "Double attribute for floating-point numeric metadata")
 @SuppressWarnings("serial")
 public class DoubleAttribute extends MetaAttribute<Double> {
     

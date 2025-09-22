@@ -8,12 +8,14 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A Long Attribute
  */
+@MetaDataType(type = "attr", subType = "long", description = "Long attribute for large integer numeric metadata")
 @SuppressWarnings("serial")
 public class LongAttribute extends MetaAttribute<Long> {
     

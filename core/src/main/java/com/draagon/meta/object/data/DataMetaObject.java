@@ -6,11 +6,10 @@
  */
 package com.draagon.meta.object.data;
 
-import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.DataConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ import java.util.List;
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
 
-@MetaDataTypeHandler(type = "object", subType = "data", description = "Data-based metadata object with protected access and Builder patterns")
+@MetaDataType(type = "object", subType = "data", description = "Data-based metadata object with protected access and Builder patterns")
 public class DataMetaObject extends PojoMetaObject
 {
     private static final Logger log = LoggerFactory.getLogger(DataMetaObject.class);

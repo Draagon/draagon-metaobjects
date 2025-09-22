@@ -9,6 +9,7 @@ package com.draagon.meta.web.view.html;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import java.util.Map;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
+@MetaDataType(type = "view", subType = "text", description = "HTML text input view")
 public class TextView extends HtmlView
 {
   private static final Logger log = LoggerFactory.getLogger(TextView.class);

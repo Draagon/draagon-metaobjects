@@ -8,6 +8,8 @@ package com.draagon.meta.web.view.html;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.util.Param;
 import com.draagon.meta.web.view.*;
 
@@ -23,13 +25,29 @@ import java.util.Map;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
+@MetaDataType(type = "view", subType = "month", description = "HTML month selector view")
 public class MonthView extends HtmlView
 {
   private static final Logger log = LoggerFactory.getLogger(MonthView.class);
 
   protected static List<String> months = null;
-  
-  private String emptyString = null; 
+
+  private String emptyString = null;
+
+  // Unified registry self-registration
+  static {
+    try {
+      MetaDataRegistry.registerType(MonthView.class, def -> def
+        .type("view").subType("month")
+        .inheritsFrom("view", "base")
+        .description("HTML month selector view")
+      );
+
+      log.debug("Registered MonthView type with unified registry");
+    } catch (Exception e) {
+      log.error("Failed to register MonthView type with unified registry", e);
+    }
+  } 
 
   static {
     if ( months == null )

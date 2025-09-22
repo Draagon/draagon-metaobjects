@@ -9,7 +9,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataTypeHandler;
+import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataTypeHandler(type = "field", subType = "byte", description = "Byte field with numeric validation")
+@MetaDataType(type = "field", subType = "byte", description = "Byte field with numeric validation")
 @SuppressWarnings("serial")
 public class ByteField extends PrimitiveField<Byte>
 {
