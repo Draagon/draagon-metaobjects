@@ -9,12 +9,12 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
-import com.draagon.meta.util.MetaDataConstants;
 import com.draagon.meta.validator.MetaValidator;
 import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
+import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,29 +79,23 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     private static final Logger log = LoggerFactory.getLogger(MetaField.class);
 
     // === TYPE AND SUBTYPE CONSTANTS ===
-    /** Field type constant - references centralized constant */
-    public static final String TYPE_FIELD = MetaDataConstants.TYPE_FIELD;
+    /** Field type constant - MetaField owns this concept */
+    public static final String TYPE_FIELD = "field";
 
     /** Base field subtype for inheritance */
-    public static final String SUBTYPE_BASE = MetaDataConstants.SUBTYPE_BASE;
+    public static final String SUBTYPE_BASE = "base";
 
     // === FIELD-LEVEL ATTRIBUTE NAME CONSTANTS ===
     // These apply to ALL field types and are inherited by concrete field implementations
 
-    /** Required field marker attribute - references centralized constant */
-    public static final String ATTR_REQUIRED = MetaDataConstants.ATTR_REQUIRED;
+    /** Required field marker attribute - MetaField owns this concept */
+    public static final String ATTR_REQUIRED = "required";
 
-    /** Default value specification attribute - references centralized constant */
-    public static final String ATTR_DEFAULT_VALUE = MetaDataConstants.ATTR_DEFAULT_VALUE;
+    /** Default value specification attribute - MetaField owns this concept */
+    public static final String ATTR_DEFAULT_VALUE = "defaultValue";
 
-    /** Validation rules attribute - references centralized constant */
-    public static final String ATTR_VALIDATION = MetaDataConstants.ATTR_VALIDATION;
-
-    /** Default view specification attribute - references centralized constant */
-    public static final String ATTR_DEFAULT_VIEW = MetaDataConstants.ATTR_DEFAULT_VIEW;
-
-    /** Abstract field marker attribute - references centralized constant */
-    public static final String ATTR_IS_ABSTRACT = MetaDataConstants.ATTR_IS_ABSTRACT;
+    /** Default view specification attribute - MetaField owns this concept */
+    public static final String ATTR_DEFAULT_VIEW = "defaultView";
 
     // Unified registry self-registration
     static {
@@ -116,7 +110,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
                 .optionalAttribute(ATTR_REQUIRED, "boolean")
                 .optionalAttribute(ATTR_DEFAULT_VALUE, "string")
-                .optionalAttribute(ATTR_VALIDATION, "string")
                 .optionalAttribute(ATTR_DEFAULT_VIEW, "string")
 
                 // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
@@ -305,12 +298,12 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         switch (attributeName) {
             // Boolean attributes
             case ATTR_REQUIRED:
-            case MetaDataConstants.ATTR_IS_ID:
-            case MetaDataConstants.ATTR_IS_SEARCHABLE:
-            case MetaDataConstants.ATTR_IS_OPTIONAL:
-            case MetaDataConstants.ATTR_SKIP_JPA:
+            case "isId":
+            case "isSearchable":
+            case "isOptional":
+            case "skipJpa":
             case ATTR_IS_ABSTRACT:
-            case MetaDataConstants.ATTR_DB_NULLABLE:
+            case "dbNullable":
                 return Boolean.class;
 
             // Integer attributes
@@ -318,7 +311,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             case "minLength":
             case "precision":
             case "scale":
-            case MetaDataConstants.ATTR_DB_LENGTH:
+            case "dbLength":
                 return Integer.class;
 
             // Long attributes
@@ -336,13 +329,12 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
             // String attributes (default)
             case "pattern":
-            case ATTR_VALIDATION:
             case ATTR_DEFAULT_VALUE:
             case ATTR_DEFAULT_VIEW:
-            case MetaDataConstants.ATTR_DB_COLUMN:
-            case MetaDataConstants.ATTR_DB_TABLE:
-            case MetaDataConstants.ATTR_DB_SCHEMA:
-            case MetaDataConstants.ATTR_DB_TYPE:
+            case "dbColumn":
+            case "dbTable":
+            case "dbSchema":
+            case "dbType":
             case "description":
             default:
                 return String.class;
@@ -566,26 +558,17 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     /**
-     * Returns validators specified in a 'validation' attribute stringArray
-     *  or returns all the validators attached to this MetaField
+     * Returns all validators attached to this MetaField.
+     * Validation is now calculated based on actual MetaValidator children,
+     * eliminating the need for explicit validation attribute configuration.
+     *
      * @return List of validators to use for default validation checks
      */
     public List<MetaValidator> getDefaultValidatorList() {
 
         return useCache( "getDefaultValidatorList()", () -> {
-
-                List<MetaValidator> validators = new ArrayList<MetaValidator>();
-
-                // See if there is a specified list of validators
-                if (hasMetaAttr(ATTR_VALIDATION)) {
-                    validators = getValidatorList(getMetaAttr(ATTR_VALIDATION).getValueAsString());
-                }
-                // Otherwise grab all the validators
-                else {
-                    validators = getValidators();
-                }
-
-                return validators;
+                // Always use all MetaValidator children - no more attribute-based validation
+                return getValidators();
             });
     }
 

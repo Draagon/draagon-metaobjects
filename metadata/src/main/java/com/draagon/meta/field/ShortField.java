@@ -10,11 +10,10 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
-import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**

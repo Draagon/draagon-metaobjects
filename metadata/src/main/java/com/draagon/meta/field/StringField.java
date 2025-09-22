@@ -15,11 +15,8 @@ import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.registry.TypeDefinition;
-import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
@@ -74,12 +71,6 @@ public class StringField extends PrimitiveField<String> {
                 .optionalAttribute(ATTR_PATTERN, "string")
                 .optionalAttribute(ATTR_MAX_LENGTH, "int")
                 .optionalAttribute(ATTR_MIN_LENGTH, "int")
-
-                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
-                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
-                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
-                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
-                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
             
             log.debug("Registered StringField type with unified registry");

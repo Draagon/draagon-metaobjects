@@ -4,7 +4,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
                 .description("Base attribute metadata with common attribute properties")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(MetaDataConstants.ATTR_IS_ABSTRACT, "boolean")
+                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
 
                 // ATTRIBUTES TYPICALLY DON'T HAVE CHILDREN (they are leaf nodes)
                 // No child requirements for base attributes

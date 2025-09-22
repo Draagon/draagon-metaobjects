@@ -10,11 +10,10 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
-import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
@@ -56,11 +55,6 @@ public class BooleanField extends PrimitiveField<Boolean> {
 
                 // NO BOOLEAN-SPECIFIC ATTRIBUTES - inherits all from MetaField base
 
-                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
-                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
-                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
-                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
-                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
 
             log.debug("Registered BooleanField type with unified registry");
@@ -78,7 +72,7 @@ public class BooleanField extends PrimitiveField<Boolean> {
     public static BooleanField create( String name, Boolean defaultValue ) {
         BooleanField f = new BooleanField( name );
         if ( defaultValue != null ) {
-            f.addMetaAttr(StringAttribute.create( MetaDataConstants.ATTR_DEFAULT_VALUE, defaultValue.toString() ));
+            f.addMetaAttr(StringAttribute.create( ATTR_DEFAULT_VALUE, defaultValue.toString() ));
         }
         return f;
     }

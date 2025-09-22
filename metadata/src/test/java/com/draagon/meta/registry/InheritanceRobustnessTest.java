@@ -9,7 +9,6 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.field.*;
-import com.draagon.meta.util.MetaDataConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;

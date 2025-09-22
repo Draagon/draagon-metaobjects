@@ -48,6 +48,9 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
     protected static final String ATTR_IMPLEMENTS = "implements";
     protected static final String ATTR_OVERLAY = "overlay";
 
+    /** Attribute prefix for inline JSON attributes */
+    public static final String JSON_ATTR_PREFIX = "@";
+
     // Reserved attributes that should not be converted to MetaAttributes
     protected static final List<String> reservedAttributes = Arrays.asList(
             ATTR_TYPE, ATTR_NAME, ATTR_PACKAGE, ATTR_SUPER, ATTR_ISABSTRACT, 

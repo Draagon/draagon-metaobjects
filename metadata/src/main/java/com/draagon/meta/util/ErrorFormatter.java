@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.draagon.meta.util.MetaDataConstants.*;
+import static com.draagon.meta.MetaData.*;
 
 /**
  * Utility class for creating consistent, human-readable error message formatting.
@@ -21,6 +21,23 @@ import static com.draagon.meta.util.MetaDataConstants.*;
  * @since 5.2.0
  */
 public final class ErrorFormatter {
+
+    // === DISPLAY VALUES ===
+
+    /** Display value for null objects */
+    public static final String DISPLAY_NULL = "<null>";
+
+    /** Display value for empty strings */
+    public static final String DISPLAY_EMPTY = "<empty>";
+
+    /** Display value when no items are available */
+    public static final String DISPLAY_NONE = "<none>";
+
+    /** Ellipsis for truncated values */
+    public static final String DISPLAY_ELLIPSIS = "...";
+
+    /** Maximum string length for display before truncation */
+    public static final int MAX_DISPLAY_LENGTH = 100;
 
     private ErrorFormatter() {
         // Utility class - no instantiation
@@ -287,7 +304,7 @@ public final class ErrorFormatter {
 
     /**
      * Capitalizes the first letter of a string.
-     * 
+     *
      * @param str the string to capitalize
      * @return capitalized string
      */
@@ -296,5 +313,24 @@ public final class ErrorFormatter {
             return str;
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    /**
+     * Truncates a display string if it exceeds the maximum length
+     *
+     * @param value the value to format for display
+     * @return truncated string with ellipsis if needed
+     */
+    public static String formatForDisplay(String value) {
+        if (value == null) {
+            return DISPLAY_NULL;
+        }
+        if (value.isEmpty()) {
+            return DISPLAY_EMPTY;
+        }
+        if (value.length() > MAX_DISPLAY_LENGTH) {
+            return value.substring(0, MAX_DISPLAY_LENGTH - DISPLAY_ELLIPSIS.length()) + DISPLAY_ELLIPSIS;
+        }
+        return value;
     }
 }

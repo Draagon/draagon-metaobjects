@@ -8,8 +8,7 @@ import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.util.MetaDataConstants;
-
+import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -28,26 +27,24 @@ public abstract class MetaObject extends MetaData {
     private static final Logger log = LoggerFactory.getLogger(MetaObject.class);
 
     // === TYPE AND SUBTYPE CONSTANTS ===
-    /** Object type constant - references centralized constant */
-    public static final String TYPE_OBJECT = MetaDataConstants.TYPE_OBJECT;
+    /** Object type constant - MetaObject owns this concept */
+    public static final String TYPE_OBJECT = "object";
 
     /** Base object subtype for inheritance */
-    public static final String SUBTYPE_BASE = MetaDataConstants.SUBTYPE_BASE;
+    public static final String SUBTYPE_BASE = "base";
 
     // === OBJECT-LEVEL ATTRIBUTE NAME CONSTANTS ===
     // These apply to ALL object types and are inherited by concrete object implementations
+    // ATTR_IS_ABSTRACT is imported from MetaData (universal attribute)
 
-    /** Abstract object marker attribute - references centralized constant */
-    public static final String ATTR_IS_ABSTRACT = MetaDataConstants.ATTR_IS_ABSTRACT;
+    /** Object inheritance specification attribute - MetaObject owns this concept */
+    public static final String ATTR_EXTENDS = "extends";
 
-    /** Object inheritance specification attribute - references centralized constant */
-    public static final String ATTR_EXTENDS = MetaDataConstants.ATTR_EXTENDS;
+    /** Interface implementation specification attribute - MetaObject owns this concept */
+    public static final String ATTR_IMPLEMENTS = "implements";
 
-    /** Interface implementation specification attribute - references centralized constant */
-    public static final String ATTR_IMPLEMENTS = MetaDataConstants.ATTR_IMPLEMENTS;
-
-    /** Interface marker attribute - references centralized constant */
-    public static final String ATTR_IS_INTERFACE = MetaDataConstants.ATTR_IS_INTERFACE;
+    /** Interface marker attribute - MetaObject owns this concept */
+    public static final String ATTR_IS_INTERFACE = "isInterface";
 
     // === OBJECT-SPECIFIC ATTRIBUTES ===
     /** Object reference attribute for composition */

@@ -28,6 +28,11 @@
         </dependency>
         <dependency>
             <groupId>com.draagon</groupId>
+            <artifactId>metaobjects-database-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.draagon</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>

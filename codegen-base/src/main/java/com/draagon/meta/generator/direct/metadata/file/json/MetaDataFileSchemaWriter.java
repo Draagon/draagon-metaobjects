@@ -10,7 +10,8 @@ import com.draagon.meta.constraint.Constraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
 import com.draagon.meta.registry.ChildRequirement;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.MetaData.*;
+import static com.draagon.meta.loader.parser.json.JsonMetaDataParser.JSON_ATTR_PREFIX;
 import com.draagon.meta.MetaDataTypeId;
 import com.google.gson.*;
 import org.slf4j.Logger;
@@ -154,12 +155,12 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         
         // Define root metadata object structure using constants
         JsonObject properties = new JsonObject();
-        properties.add(MetaDataConstants.ATTR_METADATA, createMetaDataObjectSchema());
+        properties.add(ATTR_METADATA, createMetaDataObjectSchema());
         schema.add("properties", properties);
 
         // Require metadata root element
         JsonArray required = new JsonArray();
-        required.add(MetaDataConstants.ATTR_METADATA);
+        required.add(ATTR_METADATA);
         schema.add("required", required);
         
         // Add definitions for reusable components
@@ -181,7 +182,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         JsonObject packageSchema = new JsonObject();
         packageSchema.addProperty("type", "string");
         packageSchema.addProperty("description", "Package name for the metadata");
-        properties.add(MetaDataConstants.ATTR_PACKAGE, packageSchema);
+        properties.add(ATTR_PACKAGE, packageSchema);
 
         // Children array (required) - using constants
         JsonObject childrenSchema = new JsonObject();
@@ -190,13 +191,13 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         JsonObject childrenItems = new JsonObject();
         childrenItems.add("$ref", new JsonPrimitive("#/$defs/MetaDataChild"));
         childrenSchema.add("items", childrenItems);
-        properties.add(MetaDataConstants.ATTR_CHILDREN, childrenSchema);
+        properties.add(ATTR_CHILDREN, childrenSchema);
         
         metaDataSchema.add("properties", properties);
         
         // Children is required - using constants
         JsonArray required = new JsonArray();
-        required.add(MetaDataConstants.ATTR_CHILDREN);
+        required.add(ATTR_CHILDREN);
         metaDataSchema.add("required", required);
         
         return metaDataSchema;
@@ -279,7 +280,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         JsonObject properties = new JsonObject();
 
         // Name (required, with constraints) - using constants
-        properties.add(MetaDataConstants.ATTR_NAME, createNameConstraintsSchema());
+        properties.add(ATTR_NAME, createNameConstraintsSchema());
 
         // Type/SubType (required) - dynamic enumeration from registry
         JsonObject typeSchema = new JsonObject();
@@ -293,7 +294,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         subTypes.forEach(typeEnum::add);
         typeSchema.add("enum", typeEnum);
-        properties.add(MetaDataConstants.ATTR_TYPE, typeSchema);
+        properties.add(ATTR_TYPE, typeSchema);
 
         // Children (optional if this type accepts children)
         if (hasChildRequirements(typeDefs)) {
@@ -302,21 +303,21 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
             JsonObject childrenItems = new JsonObject();
             childrenItems.add("$ref", new JsonPrimitive("#/$defs/MetaDataChild"));
             childrenSchema.add("items", childrenItems);
-            properties.add(MetaDataConstants.ATTR_CHILDREN, childrenSchema);
+            properties.add(ATTR_CHILDREN, childrenSchema);
         }
 
         schema.add("properties", properties);
 
         // Add pattern properties for inline attributes (@ prefixed)
         JsonObject patternProperties = new JsonObject();
-        patternProperties.add("^" + MetaDataConstants.JSON_ATTR_PREFIX + "[a-zA-Z][a-zA-Z0-9_]*$",
+        patternProperties.add("^" + JSON_ATTR_PREFIX + "[a-zA-Z][a-zA-Z0-9_]*$",
                 createInlineAttributeValueSchema());
         schema.add("patternProperties", patternProperties);
 
         // Required properties - using constants
         JsonArray required = new JsonArray();
-        required.add(MetaDataConstants.ATTR_NAME);
-        required.add(MetaDataConstants.ATTR_TYPE);
+        required.add(ATTR_NAME);
+        required.add(ATTR_TYPE);
         schema.add("required", required);
 
         return schema;
@@ -331,7 +332,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         nameSchema.addProperty("description", "Name following MetaData naming constraints");
 
         // Use pattern from MetaDataConstants
-        nameSchema.addProperty("pattern", MetaDataConstants.VALID_NAME_PATTERN);
+        nameSchema.addProperty("pattern", VALID_NAME_PATTERN);
         nameSchema.addProperty("minLength", 1);
         nameSchema.addProperty("maxLength", 64);
 

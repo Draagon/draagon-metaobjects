@@ -10,7 +10,7 @@ import com.draagon.meta.constraint.Constraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
 import com.draagon.meta.registry.ChildRequirement;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.MetaData.*;
 import com.draagon.meta.MetaDataTypeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +154,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
 
         // Create root metadata element using constants
         Element metadataElement = doc.createElement("xs:element");
-        metadataElement.setAttribute("name", MetaDataConstants.ATTR_METADATA);
+        metadataElement.setAttribute("name", ATTR_METADATA);
         metadataElement.setAttribute("type", "MetaDataType");
         schema.appendChild(metadataElement);
 
@@ -190,7 +190,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         
         // Children element (required) - using constants
         Element childrenElement = doc.createElement("xs:element");
-        childrenElement.setAttribute("name", MetaDataConstants.ATTR_CHILDREN);
+        childrenElement.setAttribute("name", ATTR_CHILDREN);
         childrenElement.setAttribute("minOccurs", "1");
         childrenElement.setAttribute("maxOccurs", "1");
         sequence.appendChild(childrenElement);
@@ -210,7 +210,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         
         // Package attribute (optional) - using constants
         Element packageAttr = doc.createElement("xs:attribute");
-        packageAttr.setAttribute("name", MetaDataConstants.ATTR_PACKAGE);
+        packageAttr.setAttribute("name", ATTR_PACKAGE);
         packageAttr.setAttribute("type", "xs:string");
         packageAttr.setAttribute("use", "optional");
         complexType.appendChild(packageAttr);
@@ -286,7 +286,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
             complexType.appendChild(sequence);
 
             Element childrenElement = doc.createElement("xs:element");
-            childrenElement.setAttribute("name", MetaDataConstants.ATTR_CHILDREN);
+            childrenElement.setAttribute("name", ATTR_CHILDREN);
             childrenElement.setAttribute("minOccurs", "0");
             childrenElement.setAttribute("maxOccurs", "1");
             sequence.appendChild(childrenElement);
@@ -307,14 +307,14 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
 
         // Name attribute (required, with constraints) - using constants
         Element nameAttr = doc.createElement("xs:attribute");
-        nameAttr.setAttribute("name", MetaDataConstants.ATTR_NAME);
+        nameAttr.setAttribute("name", ATTR_NAME);
         nameAttr.setAttribute("type", "NameConstraintType");
         nameAttr.setAttribute("use", "required");
         complexType.appendChild(nameAttr);
 
         // Type attribute (required) - using dynamic enum
         Element typeAttr = doc.createElement("xs:attribute");
-        typeAttr.setAttribute("name", MetaDataConstants.ATTR_TYPE);
+        typeAttr.setAttribute("name", ATTR_TYPE);
         typeAttr.setAttribute("type", capitalizeFirstLetter(primaryType) + "TypeEnum");
         typeAttr.setAttribute("use", "required");
         complexType.appendChild(typeAttr);
@@ -345,7 +345,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
 
         // Use pattern from MetaDataConstants
         Element patternFacet = doc.createElement("xs:pattern");
-        patternFacet.setAttribute("value", MetaDataConstants.VALID_NAME_PATTERN);
+        patternFacet.setAttribute("value", VALID_NAME_PATTERN);
         restriction.appendChild(patternFacet);
 
         // Add length facets

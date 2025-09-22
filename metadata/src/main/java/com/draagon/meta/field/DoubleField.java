@@ -15,11 +15,10 @@ import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
-import com.draagon.meta.util.MetaDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.draagon.meta.util.MetaDataConstants.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
@@ -69,11 +68,6 @@ public class DoubleField extends PrimitiveField<Double>
                 .optionalAttribute(ATTR_PRECISION, "int")
                 .optionalAttribute(ATTR_SCALE, "int")
 
-                // SERVICE-SPECIFIC ATTRIBUTES (for cross-module compatibility)
-                .optionalAttribute(MetaDataConstants.ATTR_IS_ID, "boolean")
-                .optionalAttribute(MetaDataConstants.ATTR_DB_COLUMN, "string")
-                .optionalAttribute(MetaDataConstants.ATTR_IS_SEARCHABLE, "boolean")
-                .optionalAttribute(MetaDataConstants.ATTR_IS_OPTIONAL, "boolean")
             );
 
             log.debug("Registered DoubleField type with unified registry");

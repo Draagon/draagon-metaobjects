@@ -3,7 +3,9 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.StringField;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
+import static com.draagon.meta.field.MetaField.ATTR_REQUIRED;
+import static com.draagon.meta.field.MetaField.ATTR_DEFAULT_VALUE;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -45,13 +47,13 @@ public class TypeDefinitionInheritanceTest {
 
         // Test that StringField accepts inherited attributes from MetaField base
         assertTrue("StringField should accept 'required' attribute (inherited from MetaField)",
-                  stringFieldDef.acceptsChild("attr", "boolean", MetaDataConstants.ATTR_REQUIRED));
+                  stringFieldDef.acceptsChild("attr", "boolean", ATTR_REQUIRED));
 
         assertTrue("StringField should accept 'isAbstract' attribute (inherited from MetaField)",
-                  stringFieldDef.acceptsChild("attr", "boolean", MetaDataConstants.ATTR_IS_ABSTRACT));
+                  stringFieldDef.acceptsChild("attr", "boolean", ATTR_IS_ABSTRACT));
 
         assertTrue("StringField should accept 'defaultValue' attribute (inherited from MetaField)",
-                  stringFieldDef.acceptsChild("attr", "string", MetaDataConstants.ATTR_DEFAULT_VALUE));
+                  stringFieldDef.acceptsChild("attr", "string", ATTR_DEFAULT_VALUE));
 
         // Test that StringField accepts its own specific attributes
         assertTrue("StringField should accept 'maxLength' attribute (StringField-specific)",

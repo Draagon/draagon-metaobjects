@@ -1509,6 +1509,353 @@ The following critical systems have been successfully implemented and tested:
 - Enhanced OSGI registry: `metadata/src/main/java/com/draagon/meta/registry/OSGIServiceRegistry.java`
 - OSGI test suite: `metadata/src/test/java/com/draagon/meta/registry/osgi/OSGILifecycleTest.java`
 
+## 🏗️ **CONSTANTS ORGANIZATION & SERVICE SEPARATION PATTERNS (v6.2.0+)**
+
+### 🚀 **MAJOR ARCHITECTURAL ACHIEVEMENT: Service Pollution Elimination**
+
+**STATUS: ✅ COMPLETED** - Comprehensive elimination of service-specific attribute pollution from core MetaData types and establishment of dependency-driven constants organization.
+
+#### **The Service Pollution Problem**
+
+**CRITICAL DISCOVERY**: Core MetaData types (MetaField, MetaObject) were polluted with service-specific attributes that violated architectural boundaries:
+
+```java
+// ❌ WRONG - Service pollution in core types
+@MetaDataType(type = "field", subType = "string")
+public class StringField extends MetaField {
+    static {
+        MetaDataRegistry.registerType(StringField.class, def -> def
+            // CORE FIELD ATTRIBUTES (appropriate)
+            .optionalAttribute("required", "boolean")
+            .optionalAttribute("defaultValue", "string")
+
+            // ❌ DATABASE SERVICE POLLUTION (inappropriate)
+            .optionalAttribute("dbColumn", "string")
+            .optionalAttribute("isSearchable", "boolean")
+
+            // ❌ CODEGEN SERVICE POLLUTION (inappropriate)
+            .optionalAttribute("hasJpa", "boolean")
+            .optionalAttribute("isOptional", "boolean")
+        );
+    }
+}
+```
+
+#### **The Dependency-Driven Solution**
+
+**ARCHITECTURAL PRINCIPLE**: **"Constants live with the classes that are actually the reason the constant exists in the first place"**
+
+**Implementation Strategy:**
+1. **Eliminate centralized constant files** (deleted MetaDataConstants.java entirely)
+2. **Move constants to owning classes** based on who creates the need for them
+3. **Create service-specific constant files** for cross-cutting concerns
+4. **Use compile-time dependencies** for cross-module constant access
+
+### 🗂️ **Constants Organization Patterns**
+
+#### **Core MetaData Constants → Owning Classes**
+
+```java
+// MetaData.java - Universal constants that apply to ALL metadata
+public class MetaData {
+    // SEPARATORS (MetaData creates package separation concept)
+    public static final String PKG_SEPARATOR = "::";
+
+    // UNIVERSAL ATTRIBUTES (MetaData creates these concepts)
+    public static final String ATTR_NAME = "name";
+    public static final String ATTR_TYPE = "type";
+    public static final String ATTR_SUBTYPE = "subType";
+    public static final String ATTR_PACKAGE = "package";
+    public static final String ATTR_CHILDREN = "children";
+    public static final String ATTR_METADATA = "metadata";
+    public static final String ATTR_IS_ABSTRACT = "isAbstract";
+
+    // VALIDATION PATTERNS (MetaData creates validation concepts)
+    public static final String VALID_NAME_PATTERN = "^[a-zA-Z][a-zA-Z0-9_]*$";
+}
+
+// MetaField.java - Field-specific constants
+public class MetaField {
+    // TYPE CONSTANTS (MetaField creates the field type concept)
+    public static final String TYPE_FIELD = "field";
+    public static final String SUBTYPE_BASE = "base";
+
+    // FIELD ATTRIBUTES (MetaField creates these field concepts)
+    public static final String ATTR_REQUIRED = "required";
+    public static final String ATTR_DEFAULT_VALUE = "defaultValue";
+    public static final String ATTR_DEFAULT_VIEW = "defaultView";
+}
+
+// MetaObject.java - Object-specific constants
+public class MetaObject {
+    // TYPE CONSTANTS (MetaObject creates the object type concept)
+    public static final String TYPE_OBJECT = "object";
+    public static final String SUBTYPE_BASE = "base";
+
+    // OBJECT ATTRIBUTES (MetaObject creates these object concepts)
+    public static final String ATTR_EXTENDS = "extends";
+    public static final String ATTR_IMPLEMENTS = "implements";
+    public static final String ATTR_IS_INTERFACE = "isInterface";
+}
+```
+
+#### **Service-Specific Constants → Service Modules**
+
+```java
+// database-common/DatabaseAttributeConstants.java
+public class DatabaseAttributeConstants {
+    // DATABASE CONCEPTS (Database services create these needs)
+    public static final String ATTR_DB_TABLE = "dbTable";
+    public static final String ATTR_DB_COLUMN = "dbColumn";
+    public static final String ATTR_DB_NULLABLE = "dbNullable";
+    public static final String ATTR_IS_SEARCHABLE = "isSearchable";
+
+    public static boolean isDatabaseAttribute(String attributeName) {
+        return attributeName.startsWith("db") ||
+               ATTR_IS_SEARCHABLE.equals(attributeName);
+    }
+}
+
+// codegen-mustache/JpaConstants.java
+public class JpaConstants {
+    // JPA CONCEPTS (JPA code generation creates these needs)
+    public static final String ATTR_HAS_JPA = "hasJpa";
+    public static final String ATTR_JPA_TABLE = "jpaTable";
+    public static final String ATTR_JPA_COLUMN = "jpaColumn";
+    public static final String ATTR_JPA_ID = "jpaId";
+
+    // JPA ANNOTATIONS
+    public static final String JPA_ENTITY = "Entity";
+    public static final String JPA_TABLE = "Table";
+    public static final String JPA_ID = "Id";
+    public static final String JPA_COLUMN = "Column";
+}
+
+// JsonMetaDataParser.java
+public class JsonMetaDataParser {
+    // JSON PARSING CONCEPTS (JSON parser creates this need)
+    public static final String JSON_ATTR_PREFIX = "@";
+}
+
+// ErrorFormatter.java
+public class ErrorFormatter {
+    // DISPLAY CONCEPTS (Error formatting creates these needs)
+    public static final String DISPLAY_NULL = "<null>";
+    public static final String DISPLAY_EMPTY = "<empty>";
+    public static final String DISPLAY_NONE = "<none>";
+    public static final String DISPLAY_ELLIPSIS = "...";
+    public static final int MAX_DISPLAY_LENGTH = 100;
+
+    public static String formatForDisplay(String value) {
+        // Implementation moved here where it belongs
+    }
+}
+```
+
+#### **Cross-Module Access Pattern**
+
+```java
+// Codegen modules can access database constants via compile-time dependencies
+import static com.draagon.meta.database.common.DatabaseAttributeConstants.*;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.object.MetaObject.TYPE_OBJECT;
+
+public class MetaDataAIDocumentationWriter {
+    private void generateFieldDocumentation() {
+        // Access constants from their owning classes
+        if (TYPE_FIELD.equals(metaData.getType())) {
+            // Check for database attributes
+            if (isDatabaseAttribute(attrName)) {
+                // Handle database-specific documentation
+            }
+        }
+    }
+}
+```
+
+### ⚡ **ATTR_VALIDATION Elimination Pattern**
+
+**MAJOR IMPROVEMENT**: Replaced explicit validation attributes with calculated intelligence.
+
+```java
+// ❌ OLD - Explicit validation attribute
+public class MetaField {
+    public static final String ATTR_VALIDATION = "validation"; // Removed!
+
+    // Had to explicitly configure validation
+    .optionalAttribute(ATTR_VALIDATION, "string")
+}
+
+// ✅ NEW - Calculated validation based on MetaValidator children
+public class MetaField {
+    /**
+     * Returns all validators attached to this MetaField.
+     * Validation is now calculated based on actual MetaValidator children,
+     * eliminating the need for explicit validation attribute configuration.
+     */
+    public List<MetaValidator> getDefaultValidatorList() {
+        return useCache("getDefaultValidatorList()", () -> {
+            // Always use all MetaValidator children - no more attribute-based validation
+            return getValidators();
+        });
+    }
+}
+
+// MetaView.java - Updated validation approach
+public class MetaView {
+    /**
+     * Performs validation before setting the value.
+     * Validation is now calculated based on actual MetaValidator children
+     * of the associated MetaField, eliminating the need for explicit validation attributes.
+     */
+    protected void performValidation(Object obj, Object val) throws MetaDataException {
+        // Use all validators from the associated MetaField
+        MetaField<?> metaField = getMetaField(obj);
+        metaField.getDefaultValidatorList().forEach(v -> v.validate(obj, val));
+    }
+}
+```
+
+### 🏛️ **Service Separation Architecture**
+
+#### **Module Dependency Strategy**
+
+```xml
+<!-- Clean service separation via module dependencies -->
+
+<!-- database-common: Shared database constants -->
+<dependency>
+    <groupId>com.draagon</groupId>
+    <artifactId>metaobjects-database-common</artifactId>
+    <!-- Contains DatabaseAttributeConstants, DatabaseConstraintProvider -->
+</dependency>
+
+<!-- codegen-base: Code generation needs database constants -->
+<dependency>
+    <groupId>com.draagon</groupId>
+    <artifactId>metaobjects-database-common</artifactId>
+    <!-- Can access database constants when generating schemas -->
+</dependency>
+
+<!-- omdb: Database ORM implementation -->
+<dependency>
+    <groupId>com.draagon</groupId>
+    <artifactId>metaobjects-database-common</artifactId>
+    <!-- Uses database constants for ORM mapping -->
+</dependency>
+```
+
+#### **Clean Core Types**
+
+```java
+// ✅ CLEAN - StringField no longer polluted with service concerns
+@MetaDataType(type = "field", subType = "string")
+public class StringField extends PrimitiveField<String> {
+    static {
+        MetaDataRegistry.registerType(StringField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_STRING)
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .description("String field with length and pattern validation")
+
+            // ONLY STRING-SPECIFIC CORE ATTRIBUTES
+            .optionalAttribute(ATTR_PATTERN, "string")
+            .optionalAttribute(ATTR_MAX_LENGTH, "int")
+            .optionalAttribute(ATTR_MIN_LENGTH, "int")
+
+            // NO service-specific pollution - services add their own attributes separately
+        );
+    }
+}
+```
+
+### 🎯 **Constraint System Integration**
+
+**CRITICAL RULE**: **NEVER add rigid validation to core types** - always use the constraint system for extensibility.
+
+#### **Constraint-Based Service Integration**
+
+```java
+// DatabaseConstraintProvider.java - Service adds its own constraints
+public class DatabaseConstraintProvider {
+    static {
+        ConstraintRegistry registry = ConstraintRegistry.getInstance();
+
+        // Database service defines its own placement constraints
+        PlacementConstraint dbTableConstraint = new PlacementConstraint(
+            "database.table.placement",
+            "Objects can optionally have dbTable attribute",
+            (metadata) -> metadata instanceof MetaObject,
+            (child) -> child instanceof StringAttribute &&
+                      child.getName().equals(ATTR_DB_TABLE)
+        );
+        registry.addConstraint(dbTableConstraint);
+    }
+}
+```
+
+#### **Plugin Extensibility Example**
+
+```java
+// Custom CurrencyField extending the system cleanly
+@MetaDataType(type = "field", subType = "currency")
+public class CurrencyField extends PrimitiveField<BigDecimal> {
+    // Currency-specific constants live here
+    public static final String ATTR_PRECISION = "precision";
+    public static final String ATTR_CURRENCY_CODE = "currencyCode";
+
+    static {
+        MetaDataRegistry.registerType(CurrencyField.class, def -> def
+            .type(TYPE_FIELD).subType("currency")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)  // Gets all field.base attributes
+            .optionalAttribute(ATTR_PRECISION, "int")     // Plus currency-specific
+            .optionalAttribute(ATTR_CURRENCY_CODE, "string")
+            .description("Currency field with precision and formatting")
+        );
+
+        // Currency service adds its own constraints
+        setupCurrencyConstraints();
+    }
+}
+```
+
+### 📋 **Mandatory Design Guidelines**
+
+#### **✅ DO - Constants Placement Rules**
+1. **Move constants to the class that creates the need** for that concept
+2. **Use service-specific constant files** for cross-cutting service concerns
+3. **Establish compile-time dependencies** between modules for constant access
+4. **Create constraint providers** for service-specific validation rules
+5. **Use calculated logic** instead of explicit configuration attributes
+
+#### **❌ DON'T - Anti-Patterns**
+1. **Don't create centralized constant files** mixing unrelated concepts
+2. **Don't pollute core types** with service-specific attributes
+3. **Don't hardcode service lists** in core metadata definitions
+4. **Don't use explicit validation attributes** when calculated logic is better
+5. **Don't bypass the constraint system** for extensibility requirements
+
+#### **🔍 Pre-Change Checklist**
+
+**Before adding ANY constants or attributes:**
+
+1. **Who actually creates the need for this constant?** → That's where it belongs
+2. **Is this service-specific?** → Move to service module with proper dependency
+3. **Will this prevent extensibility?** → Use constraint system instead
+4. **Can this be calculated?** → Prefer intelligence over configuration
+5. **Does this violate module boundaries?** → Establish proper dependencies
+
+### 🏆 **Achieved Benefits**
+
+✅ **Clean Architecture**: Core types no longer polluted with service concerns
+✅ **Dependency-Driven Design**: Constants live with classes that create the need
+✅ **Service Separation**: Database constants in database-common, JPA in codegen-mustache
+✅ **Extensibility Preserved**: Plugins can extend without modifying core types
+✅ **Calculated Intelligence**: ATTR_VALIDATION replaced with MetaValidator children logic
+✅ **Compile-Time Safety**: Cross-module constant access via proper dependencies
+✅ **Maintainability**: 24+ files updated, MetaDataConstants.java deleted, all tests passing
+
+**This architectural pattern provides a blueprint for maintaining clean service separation while enabling powerful extensibility through dependency-driven design and the constraint system.**
+
 ## ServiceLoader Issue Resolution (v5.2.0+)
 
 ### 🔧 **ISSUE RESOLVED: Core Module Code Generation**

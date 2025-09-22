@@ -74,9 +74,36 @@ public class MetaData implements Cloneable, Serializable {
 
     // Type-safe class constants for common usage
     public static final Class<MetaData> METADATA_CLASS = MetaData.class;
-    
+
+    // === SEPARATORS ===
     public final static String PKG_SEPARATOR = "::";
     public final static String SEPARATOR = PKG_SEPARATOR;
+
+    // === UNIVERSAL ATTRIBUTE NAMES (apply to all MetaData) ===
+    /** Universal attribute for abstract metadata marker */
+    public static final String ATTR_IS_ABSTRACT = "isAbstract";
+
+    /** Standard attribute name for 'name' */
+    public static final String ATTR_NAME = "name";
+
+    /** Standard attribute name for 'type' */
+    public static final String ATTR_TYPE = "type";
+
+    /** Standard attribute name for 'subType' */
+    public static final String ATTR_SUBTYPE = "subType";
+
+    /** Standard attribute name for 'package' */
+    public static final String ATTR_PACKAGE = "package";
+
+    /** Standard attribute name for 'children' */
+    public static final String ATTR_CHILDREN = "children";
+
+    /** Standard attribute name for 'metadata' (root element) */
+    public static final String ATTR_METADATA = "metadata";
+
+    // === VALIDATION PATTERNS ===
+    /** Valid name pattern for MetaData identifiers */
+    public static final String VALID_NAME_PATTERN = "^[a-zA-Z][a-zA-Z0-9_]*$";
 
     // Unified caching strategy
     private final CacheStrategy cache = new HybridCache();

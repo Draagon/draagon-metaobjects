@@ -9,12 +9,18 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 
+import static com.draagon.meta.generator.constraint.CodegenAttributeConstants.*;
+
 /**
- * Code generation constraint provider for attributes used in template-based code generation.
- * 
- * This provider defines constraints for attributes used by code generators, template engines,
- * and build-time code generation tools. These constraints are cross-cutting concerns that
- * apply to multiple MetaData types for code generation purposes.
+ * Code generation constraint provider for code generation specific attributes.
+ *
+ * <p>This provider defines constraints for attributes used exclusively by code generators,
+ * template engines, and build-time code generation tools. Database-related attributes
+ * (dbTable, dbColumn, etc.) are handled by the shared DatabaseConstraintProvider to avoid
+ * duplication between OMDB and codegen modules.</p>
+ *
+ * <p><strong>Scope:</strong> JPA generation control, field behavior markers, and template
+ * processing attributes only.</p>
  */
 public class CodegenConstraintProvider implements ConstraintProvider {
     
@@ -22,11 +28,8 @@ public class CodegenConstraintProvider implements ConstraintProvider {
     public void registerConstraints(ConstraintRegistry registry) {
         // JPA generation control attributes
         addJpaGenerationConstraints(registry);
-        
-        // Database column mapping attributes  
-        addDatabaseMappingConstraints(registry);
-        
-        // Field behavior attributes
+
+        // Field behavior attributes (codegen-specific)
         addFieldBehaviorConstraints(registry);
     }
     
@@ -36,7 +39,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
             "codegen.skipJpa.object.placement",
             "skipJpa attribute can be placed on MetaObjects to skip JPA generation",
             (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && "skipJpa".equals(child.getName())
+            (child) -> child instanceof MetaAttribute && ATTR_SKIP_JPA.equals(child.getName())
         );
         registry.addConstraint(skipJpaObjectPlacement);
         
@@ -44,7 +47,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
         ValidationConstraint skipJpaObjectValidation = new ValidationConstraint(
             "codegen.skipJpa.object.validation",
             "skipJpa must be a boolean value (true/false)",
-            (metadata) -> metadata instanceof MetaAttribute && "skipJpa".equals(metadata.getName()),
+            (metadata) -> metadata instanceof MetaAttribute && ATTR_SKIP_JPA.equals(metadata.getName()),
             (metadata, value) -> {
                 if (value == null) return true; // Optional
                 String boolValue = value.toString().toLowerCase().trim();
@@ -58,7 +61,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
             "codegen.skipJpa.field.placement",
             "skipJpa attribute can be placed on MetaFields to skip JPA generation",
             (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && "skipJpa".equals(child.getName())
+            (child) -> child instanceof MetaAttribute && ATTR_SKIP_JPA.equals(child.getName())
         );
         registry.addConstraint(skipJpaFieldPlacement);
         
@@ -66,7 +69,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
         ValidationConstraint skipJpaFieldValidation = new ValidationConstraint(
             "codegen.skipJpa.field.validation",
             "skipJpa must be a boolean value (true/false)",
-            (metadata) -> metadata instanceof MetaAttribute && "skipJpa".equals(metadata.getName()),
+            (metadata) -> metadata instanceof MetaAttribute && ATTR_SKIP_JPA.equals(metadata.getName()),
             (metadata, value) -> {
                 if (value == null) return true; // Optional
                 String boolValue = value.toString().toLowerCase().trim();
@@ -76,51 +79,6 @@ public class CodegenConstraintProvider implements ConstraintProvider {
         registry.addConstraint(skipJpaFieldValidation);
     }
     
-    private void addDatabaseMappingConstraints(ConstraintRegistry registry) {
-        // PLACEMENT CONSTRAINT: dbTable attribute can be placed on MetaObjects
-        PlacementConstraint dbTablePlacement = new PlacementConstraint(
-            "codegen.dbTable.placement",
-            "dbTable attribute can be placed on MetaObjects for JPA @Table annotation",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && "dbTable".equals(child.getName())
-        );
-        registry.addConstraint(dbTablePlacement);
-        
-        // VALIDATION CONSTRAINT: dbTable must be valid identifier
-        ValidationConstraint dbTableValidation = new ValidationConstraint(
-            "codegen.dbTable.validation",
-            "dbTable must be a valid SQL table identifier",
-            (metadata) -> metadata instanceof MetaAttribute && "dbTable".equals(metadata.getName()),
-            (metadata, value) -> {
-                if (value == null) return true; // Optional
-                String tableName = value.toString().trim();
-                return tableName.matches("^[a-zA-Z][a-zA-Z0-9_]*$") && tableName.length() >= 1 && tableName.length() <= 64;
-            }
-        );
-        registry.addConstraint(dbTableValidation);
-        
-        // PLACEMENT CONSTRAINT: dbColumn attribute can be placed on MetaFields
-        PlacementConstraint dbColumnPlacement = new PlacementConstraint(
-            "codegen.dbColumn.placement",
-            "dbColumn attribute can be placed on MetaFields for JPA @Column annotation",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && "dbColumn".equals(child.getName())
-        );
-        registry.addConstraint(dbColumnPlacement);
-        
-        // VALIDATION CONSTRAINT: dbColumn must be valid identifier
-        ValidationConstraint dbColumnValidation = new ValidationConstraint(
-            "codegen.dbColumn.validation",
-            "dbColumn must be a valid SQL column identifier",
-            (metadata) -> metadata instanceof MetaAttribute && "dbColumn".equals(metadata.getName()),
-            (metadata, value) -> {
-                if (value == null) return true; // Optional
-                String columnName = value.toString().trim();
-                return columnName.matches("^[a-zA-Z][a-zA-Z0-9_]*$") && columnName.length() >= 1 && columnName.length() <= 64;
-            }
-        );
-        registry.addConstraint(dbColumnValidation);
-    }
     
     private void addFieldBehaviorConstraints(ConstraintRegistry registry) {
         // PLACEMENT CONSTRAINT: collection attribute can be placed on MetaFields
@@ -128,7 +86,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
             "codegen.collection.placement",
             "collection attribute can be placed on MetaFields to indicate collection type",
             (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && "collection".equals(child.getName())
+            (child) -> child instanceof MetaAttribute && ATTR_COLLECTION.equals(child.getName())
         );
         registry.addConstraint(collectionPlacement);
         
@@ -136,7 +94,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
         ValidationConstraint collectionValidation = new ValidationConstraint(
             "codegen.collection.validation",
             "collection must be a boolean value (true/false)",
-            (metadata) -> metadata instanceof MetaAttribute && "collection".equals(metadata.getName()),
+            (metadata) -> metadata instanceof MetaAttribute && ATTR_COLLECTION.equals(metadata.getName()),
             (metadata, value) -> {
                 if (value == null) return true; // Optional
                 String boolValue = value.toString().toLowerCase().trim();
@@ -150,7 +108,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
             "codegen.isSearchable.placement",
             "isSearchable attribute can be placed on MetaFields for search functionality",
             (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && "isSearchable".equals(child.getName())
+            (child) -> child instanceof MetaAttribute && ATTR_IS_SEARCHABLE.equals(child.getName())
         );
         registry.addConstraint(isSearchablePlacement);
         
@@ -158,7 +116,7 @@ public class CodegenConstraintProvider implements ConstraintProvider {
         ValidationConstraint isSearchableValidation = new ValidationConstraint(
             "codegen.isSearchable.validation",
             "isSearchable must be a boolean value (true/false)",
-            (metadata) -> metadata instanceof MetaAttribute && "isSearchable".equals(metadata.getName()),
+            (metadata) -> metadata instanceof MetaAttribute && ATTR_IS_SEARCHABLE.equals(metadata.getName()),
             (metadata, value) -> {
                 if (value == null) return true; // Optional
                 String boolValue = value.toString().toLowerCase().trim();

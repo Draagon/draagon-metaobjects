@@ -2,7 +2,8 @@ package com.draagon.meta.generator.direct.metadata.ai;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.object.MetaObject.TYPE_OBJECT;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -119,9 +120,9 @@ public class MetaDataAIDocumentationTest {
 
         // Check for specific type patterns
         boolean hasFieldTypes = registry.getRegisteredTypeNames().stream()
-                .anyMatch(name -> name.startsWith(MetaDataConstants.TYPE_FIELD + "."));
+                .anyMatch(name -> name.startsWith(TYPE_FIELD + "."));
         boolean hasObjectTypes = registry.getRegisteredTypeNames().stream()
-                .anyMatch(name -> name.startsWith(MetaDataConstants.TYPE_OBJECT + "."));
+                .anyMatch(name -> name.startsWith(TYPE_OBJECT + "."));
 
         log.info("Has field types: {}, Has object types: {}", hasFieldTypes, hasObjectTypes);
 

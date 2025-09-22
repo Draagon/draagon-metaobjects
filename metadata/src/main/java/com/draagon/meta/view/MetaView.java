@@ -9,7 +9,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,6 @@ public abstract class MetaView extends MetaData {
     public final static String TYPE_VIEW = "view";
     public final static String SUBTYPE_BASE = "base";
 
-    public final static String ATTR_VALIDATION = "validation";
 
     // Base view type registration
     static {
@@ -33,10 +32,8 @@ public abstract class MetaView extends MetaData {
                 .description("Base view metadata with common view attributes")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(MetaDataConstants.ATTR_IS_ABSTRACT, "boolean")
+                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
 
-                // VIEW-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_VALIDATION, "string")
 
                 // VIEWS CAN CONTAIN ATTRIBUTES
                 .optionalChild("attr", "*", "*")
@@ -115,15 +112,14 @@ public abstract class MetaView extends MetaData {
     }
 
     /**
-     * Performs validation before setting the value
+     * Performs validation before setting the value.
+     * Validation is now calculated based on actual MetaValidator children
+     * of the associated MetaField, eliminating the need for explicit validation attributes.
      */
     protected void performValidation(Object obj, Object val)
             throws MetaDataException {
-        // Run any defined validators
-        try {
-            String list = getMetaAttr(ATTR_VALIDATION).getValueAsString();
-            getMetaField(obj).getValidatorList(list).forEach(v -> v.validate(obj, val));
-        } catch (MetaDataNotFoundException ignored) {
-        }
+        // Use all validators from the associated MetaField
+        MetaField<?> metaField = getMetaField(obj);
+        metaField.getDefaultValidatorList().forEach(v -> v.validate(obj, val));
     }
 }

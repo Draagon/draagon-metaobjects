@@ -6,7 +6,10 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
 import com.draagon.meta.registry.ChildRequirement;
-import com.draagon.meta.util.MetaDataConstants;
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.object.MetaObject.TYPE_OBJECT;
+import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
 import com.draagon.meta.MetaDataTypeId;
 import com.google.gson.*;
 import org.slf4j.Logger;
@@ -215,7 +218,7 @@ public class MetaDataAIDocumentationWriter extends JsonDirectWriter<MetaDataAIDo
                     JsonArray commonAttrs = new JsonArray();
                     if (parentDef.getChildRequirements() != null) {
                         parentDef.getChildRequirements().stream()
-                                .filter(req -> MetaDataConstants.TYPE_ATTR.equals(req.getExpectedType()))
+                                .filter(req -> TYPE_ATTR.equals(req.getExpectedType()))
                                 .map(ChildRequirement::getName)
                                 .forEach(commonAttrs::add);
                     }
@@ -253,14 +256,14 @@ public class MetaDataAIDocumentationWriter extends JsonDirectWriter<MetaDataAIDo
                 JsonArray inherited = new JsonArray();
                 Map<String, ChildRequirement> inheritedReqs = typeDef.getInheritedChildRequirements();
                 inheritedReqs.values().stream()
-                        .filter(req -> MetaDataConstants.TYPE_ATTR.equals(req.getExpectedType()))
+                        .filter(req -> TYPE_ATTR.equals(req.getExpectedType()))
                         .map(ChildRequirement::getName)
                         .forEach(inherited::add);
                 attributeClassification.add("inherited", inherited);
 
                 JsonArray specific = new JsonArray();
                 typeDef.getDirectChildRequirements().stream()
-                        .filter(req -> MetaDataConstants.TYPE_ATTR.equals(req.getExpectedType()))
+                        .filter(req -> TYPE_ATTR.equals(req.getExpectedType()))
                         .map(ChildRequirement::getName)
                         .forEach(specific::add);
                 attributeClassification.add("specific", specific);
@@ -311,7 +314,7 @@ public class MetaDataAIDocumentationWriter extends JsonDirectWriter<MetaDataAIDo
 
         // Field type extensions
         JsonObject fieldExtensions = new JsonObject();
-        fieldExtensions.addProperty("baseType", MetaDataConstants.TYPE_FIELD);
+        fieldExtensions.addProperty("baseType", TYPE_FIELD);
         fieldExtensions.addProperty("description", "Create custom field types with validation and formatting");
         fieldExtensions.addProperty("example", "CurrencyField, EmailField, PhoneField");
         JsonArray fieldAttributes = new JsonArray();
@@ -323,7 +326,7 @@ public class MetaDataAIDocumentationWriter extends JsonDirectWriter<MetaDataAIDo
 
         // Object type extensions
         JsonObject objectExtensions = new JsonObject();
-        objectExtensions.addProperty("baseType", MetaDataConstants.TYPE_OBJECT);
+        objectExtensions.addProperty("baseType", TYPE_OBJECT);
         objectExtensions.addProperty("description", "Create domain-specific object types");
         objectExtensions.addProperty("example", "AuditableObject, VersionedObject, CacheableObject");
         JsonArray objectAttributes = new JsonArray();
@@ -431,7 +434,7 @@ public class MetaDataAIDocumentationWriter extends JsonDirectWriter<MetaDataAIDo
     private int countExtensionPoints() {
         // Count base types that can be extended
         return (int) typeRegistry.getAllTypeDefinitions().stream()
-                .filter(def -> MetaDataConstants.SUBTYPE_BASE.equals(def.getSubType()))
+                .filter(def -> SUBTYPE_BASE.equals(def.getSubType()))
                 .count();
     }
 }
