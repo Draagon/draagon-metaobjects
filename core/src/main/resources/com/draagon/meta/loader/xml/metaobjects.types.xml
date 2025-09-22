@@ -43,6 +43,7 @@
                     <child type="attr" subType="boolean" name="hasJpa"/>
                     <child type="attr" subType="boolean" name="hasValidation"/>
                     <child type="attr" subType="string" name="implements"/>
+                    <child type="attr" subType="string" name="extends"/>
                     <!-- Key children -->
                     <child type="key" subType="primary" name="primary"/>
                     <child type="key" subType="secondary" name="*"/>

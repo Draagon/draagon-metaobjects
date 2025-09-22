@@ -100,6 +100,12 @@ public class InheritanceCompletionRule implements TransformationRule {
                 if (hasInheritanceRequirements(metaData)) {
                     int completions = completeInheritance(metaData, context);
                     completionsApplied += completions;
+
+                    // Record each transformation for proper counting
+                    if (completions > 0) {
+                        resultBuilder.addTransformation(metaData.getName(),
+                            "Completed inheritance: added " + completions + " required fields");
+                    }
                 }
             }
 
@@ -152,9 +158,9 @@ public class InheritanceCompletionRule implements TransformationRule {
 
         MetaObject metaObject = (MetaObject) metaData;
 
-        // Check if object extends a known base class
-        if (metaObject.hasMetaAttr("extends")) {
-            String baseClass = metaObject.getMetaAttr("extends").getValueAsString();
+        // Check if object implements a known base class
+        if (metaObject.hasMetaAttr("implements")) {
+            String baseClass = metaObject.getMetaAttr("implements").getValueAsString();
             return isKnownBaseClass(baseClass);
         }
 
@@ -170,7 +176,7 @@ public class InheritanceCompletionRule implements TransformationRule {
         }
 
         MetaObject metaObject = (MetaObject) metaData;
-        String baseClass = metaObject.getMetaAttr("extends").getValueAsString();
+        String baseClass = metaObject.getMetaAttr("implements").getValueAsString();
         int fieldsAdded = 0;
 
         switch (baseClass) {
@@ -220,7 +226,7 @@ public class InheritanceCompletionRule implements TransformationRule {
     private int ensureAuditableEntityFields(MetaObject metaObject, TransformationContext context) {
         int fieldsAdded = 0;
 
-        // First ensure BaseEntity requirements (AuditableEntity extends BaseEntity)
+        // First ensure BaseEntity requirements (AuditableEntity implements BaseEntity)
         fieldsAdded += ensureBaseEntityFields(metaObject, context);
 
         // Ensure 'createdDate' field exists
@@ -258,7 +264,7 @@ public class InheritanceCompletionRule implements TransformationRule {
     private int ensureNamedEntityFields(MetaObject metaObject, TransformationContext context) {
         int fieldsAdded = 0;
 
-        // First ensure BaseEntity requirements (NamedEntity extends BaseEntity)
+        // First ensure BaseEntity requirements (NamedEntity implements BaseEntity)
         fieldsAdded += ensureBaseEntityFields(metaObject, context);
 
         // Ensure 'name' field exists
@@ -297,7 +303,7 @@ public class InheritanceCompletionRule implements TransformationRule {
         }
 
         MetaObject metaObject = (MetaObject) metaData;
-        String baseClass = metaObject.getMetaAttr("extends").getValueAsString();
+        String baseClass = metaObject.getMetaAttr("implements").getValueAsString();
         int missingFields = 0;
 
         switch (baseClass) {

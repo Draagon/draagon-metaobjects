@@ -87,6 +87,12 @@ public class JpaEnhancementRule implements TransformationRule {
                 if (shouldEnhanceWithJpa(metaData)) {
                     int enhancements = enhanceWithJpa(metaData, context);
                     enhancementsApplied += enhancements;
+
+                    // Record each transformation for proper counting
+                    if (enhancements > 0) {
+                        resultBuilder.addTransformation(metaData.getName(),
+                            "Applied " + enhancements + " JPA enhancements");
+                    }
                 }
             }
 
@@ -165,27 +171,22 @@ public class JpaEnhancementRule implements TransformationRule {
         MetaObject metaObject = (MetaObject) metaData;
         int enhancementsApplied = 0;
 
-        // Add @Entity annotation if not present
-        if (!metaObject.hasMetaAttr("jpaEntity")) {
+        // Enable JPA for the object if not already set
+        if (!metaObject.hasMetaAttr("hasJpa") ||
+            !"true".equals(metaObject.getMetaAttr("hasJpa").getValueAsString())) {
             if (!context.isPreviewMode()) {
-                StringAttribute entityAttr = new StringAttribute("jpaEntity");
-                entityAttr.setValue("true");
-                metaObject.addMetaAttr(entityAttr);
+                BooleanAttribute jpaAttr = new BooleanAttribute("hasJpa");
+                jpaAttr.setValue(true);
+                metaObject.addMetaAttr(jpaAttr);
             }
-            context.recordTransformation(metaObject, "Added @Entity annotation (jpaEntity=true)");
+            context.recordTransformation(metaObject, "Enabled JPA for object (hasJpa=true)");
             enhancementsApplied++;
         }
 
-        // Add @Table annotation if dbTable is present
-        if (metaObject.hasMetaAttr("dbTable") && !metaObject.hasMetaAttr("jpaTable")) {
+        // Log the table mapping (dbTable attribute is already present and supported)
+        if (metaObject.hasMetaAttr("dbTable")) {
             String tableName = metaObject.getMetaAttr("dbTable").getValueAsString();
-            if (!context.isPreviewMode()) {
-                StringAttribute tableAttr = new StringAttribute("jpaTable");
-                tableAttr.setValue(tableName);
-                metaObject.addMetaAttr(tableAttr);
-            }
-            context.recordTransformation(metaObject, "Added @Table annotation (jpaTable=" + tableName + ")");
-            enhancementsApplied++;
+            context.recordTransformation(metaObject, "JPA table mapping: " + tableName);
         }
 
         // Enhance fields with JPA annotations
@@ -202,42 +203,33 @@ public class JpaEnhancementRule implements TransformationRule {
     private int enhanceFieldWithJpa(MetaField field, TransformationContext context) {
         int enhancementsApplied = 0;
 
-        // Add @Id annotation for primary key fields
-        if (isPrimaryKeyField(field) && !field.hasMetaAttr("jpaId")) {
+        // Mark as ID field for primary key fields
+        if (isPrimaryKeyField(field) && (!field.hasMetaAttr("isId") ||
+            !"true".equals(field.getMetaAttr("isId").getValueAsString()))) {
             if (!context.isPreviewMode()) {
-                BooleanAttribute idAttr = new BooleanAttribute("jpaId");
+                BooleanAttribute idAttr = new BooleanAttribute("isId");
                 idAttr.setValue(true);
                 field.addMetaAttr(idAttr);
             }
-            context.recordTransformation(field, "Added @Id annotation (jpaId=true)");
+            context.recordTransformation(field, "Marked field as ID (isId=true)");
             enhancementsApplied++;
         }
 
-        // Add @Column annotation if dbColumn is present
-        if (field.hasMetaAttr("dbColumn") && !field.hasMetaAttr("jpaColumn")) {
+        // Log column mapping (dbColumn attribute is already present and supported)
+        if (field.hasMetaAttr("dbColumn")) {
             String columnName = field.getMetaAttr("dbColumn").getValueAsString();
-            if (!context.isPreviewMode()) {
-                StringAttribute columnAttr = new StringAttribute("jpaColumn");
-                columnAttr.setValue(columnName);
-                field.addMetaAttr(columnAttr);
-            }
-            context.recordTransformation(field, "Added @Column annotation (jpaColumn=" + columnName + ")");
-            enhancementsApplied++;
+            context.recordTransformation(field, "JPA column mapping: " + columnName);
         }
 
-        // Add @JoinColumn for foreign key fields
-        if (isForeignKeyField(field) && !field.hasMetaAttr("jpaJoinColumn")) {
+        // Log foreign key relationship (using existing objectRef and dbColumn attributes)
+        if (isForeignKeyField(field)) {
             String columnName = field.hasMetaAttr("dbColumn") ?
                 field.getMetaAttr("dbColumn").getValueAsString() :
                 field.getName() + "_id";
+            String objectRef = field.hasMetaAttr("objectRef") ?
+                field.getMetaAttr("objectRef").getValueAsString() : "unknown";
 
-            if (!context.isPreviewMode()) {
-                StringAttribute joinColumnAttr = new StringAttribute("jpaJoinColumn");
-                joinColumnAttr.setValue(columnName);
-                field.addMetaAttr(joinColumnAttr);
-            }
-            context.recordTransformation(field, "Added @JoinColumn annotation (jpaJoinColumn=" + columnName + ")");
-            enhancementsApplied++;
+            context.recordTransformation(field, "JPA foreign key: " + columnName + " -> " + objectRef);
         }
 
         return enhancementsApplied;
