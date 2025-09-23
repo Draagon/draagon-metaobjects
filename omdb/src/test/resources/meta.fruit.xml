@@ -3,39 +3,39 @@
 <metadata package="produce">
 
     <!-- Id -->
-    <field name="id" type="long" isKey="true" dbColumn="id" auto="last" />
+    <field name="id" subType="long" isKey="true" dbColumn="id" auto="last" />
     
     <!-- Fruit -->
-    <object name="Fruit" type="value" dbTable="FRUIT">
+    <object name="Fruit" subType="value" dbTable="FRUIT">
     
-      <attr name="object" type="string">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
+      <attr name="object" subType="string">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
       
       <!-- Id -->
       <field name="id" super="id"/>
 
       <!-- Type -->
-      <field name="kind" type="int" dbColumn="kind" />
+      <field name="kind" subType="int" dbColumn="kind" />
             
       <!-- Name -->
-      <field name="name" type="string" dbColumn="name">
-        <attr name="len" type="int">50</attr>
+      <field name="name" subType="string" dbColumn="name">
+        <attr name="len" subType="int">50</attr>
       </field>
       
       <!-- Length -->
-      <field name="length" type="int" dbColumn="length"/>
+      <field name="length" subType="int" dbColumn="length"/>
 
       <!-- Weight -->
-      <field name="weight" type="int" dbColumn="weight"/>
+      <field name="weight" subType="int" dbColumn="weight"/>
      
     </object>  
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit" type="value" dbTable="APPLE" dbView="APPLE_VIEW"
+    <object name="Apple" super="Fruit" subType="value" dbTable="APPLE" dbView="APPLE_VIEW"
         dbViewSQL="SELECT F.*, A.* FROM FRUIT F, APPLE A WHERE F.id=A.fruit_id AND F.kind=1">
     
-      <attr name="object" type="string">com.draagon.meta.manager.db.test.fruit.Apple</attr>
+      <attr name="object" subType="string">com.draagon.meta.manager.db.test.fruit.Apple</attr>
           
-      <attr name="dbInheritance" type="properties">
+      <attr name="dbInheritance" subType="properties">
         superClass=produce::Fruit
 	superJoiner=id
 	joiner=fruitId
@@ -44,15 +44,15 @@
       </attr>
     
       <!-- Fruit Id -->
-      <field name="fruitId" type="long" dbColumn="FRUIT_ID" isKey="true" />
+      <field name="fruitId" subType="long" dbColumn="FRUIT_ID" isKey="true" />
 
       <!-- Orachard -->
-      <field name="orchard" type="string" dbColumn="orchard">
-        <attr name="len" type="int">80</attr>
+      <field name="orchard" subType="string" dbColumn="orchard">
+        <attr name="len" subType="int">80</attr>
       </field>
      
       <!-- Worms -->
-      <field name="worms" type="short" dbColumn="worms"/>
+      <field name="worms" subType="short" dbColumn="worms"/>
       
     </object>  
 
@@ -60,9 +60,9 @@
     <object name="Orange" super="Fruit" dbTable="ORANGE" dbView="ORANGE_VIEW"
         dbViewSQL="SELECT F.*, O.* FROM FRUIT F, ORANGE O WHERE F.id=O.fruit_id AND F.kind=2">
     
-      <attr name="object" type="string">com.draagon.meta.manager.db.test.fruit.Orange</attr>    
+      <attr name="object" subType="string">com.draagon.meta.manager.db.test.fruit.Orange</attr>    
             
-      <attr name="dbInheritance" type="properties">
+      <attr name="dbInheritance" subType="properties">
         superClass=produce::Fruit
 	superJoiner=id
 	joiner=fruitId
@@ -71,24 +71,24 @@
       </attr>
     
       <!-- Fruit Id -->
-      <field name="fruitId" type="long" dbColumn="FRUIT_ID" isKey="true" />
+      <field name="fruitId" subType="long" dbColumn="FRUIT_ID" isKey="true" />
     
       <!-- Picked Date -->
-      <field name="pickedDate" type="date" dbColumn="picked_dt"/>
+      <field name="pickedDate" subType="date" dbColumn="picked_dt"/>
            
     </object>
     
     <!-- Basket -->
-    <object name="Basket" type="value" package="container" dbTable="BASKET">
+    <object name="Basket" subType="value" package="container" dbTable="BASKET">
           
       <!-- Id -->
       <field name="id" super="produce::id"/>      
     
       <!-- Number of apples -->
-      <field name="apples" type="int" dbColumn="apples"/>
+      <field name="apples" subType="int" dbColumn="apples"/>
     
       <!-- Number of oranges -->
-      <field name="oranges" type="int" dbColumn="oranges"/>
+      <field name="oranges" subType="int" dbColumn="oranges"/>
            
     </object>
     

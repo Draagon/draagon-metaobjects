@@ -7,7 +7,6 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
-import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.LongAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
@@ -17,8 +16,6 @@ import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.draagon.meta.field.MetaField.TYPE_FIELD;
-import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Long Field with unified registry registration and child requirements.
@@ -27,7 +24,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @author Doug Mealing
  */
 @MetaDataType(type = "field", subType = "long", description = "Long field with numeric validation")
-@SuppressWarnings("serial")
 public class LongField extends PrimitiveField<Long> {
 
     private static final Logger log = LoggerFactory.getLogger(LongField.class);
@@ -60,8 +56,8 @@ public class LongField extends PrimitiveField<Long> {
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
                 // LONG-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, "long")
-                .optionalAttribute(ATTR_MAX_VALUE, "long")
+                .optionalAttribute(ATTR_MIN_VALUE, LongAttribute.SUBTYPE_LONG)
+                .optionalAttribute(ATTR_MAX_VALUE, LongAttribute.SUBTYPE_LONG)
 
             );
 

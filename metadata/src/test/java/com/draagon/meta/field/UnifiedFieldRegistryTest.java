@@ -343,42 +343,42 @@ public class UnifiedFieldRegistryTest {
                   {
                     "object": {
                       "name": "AllFieldTypesTest",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "testString",
-                            "type": "string"
+                            "subType": "string"
                           }
                         },
                         {
                           "field": {
                             "name": "testInt",
-                            "type": "int"
+                            "subType": "int"
                           }
                         },
                         {
                           "field": {
                             "name": "testLong",
-                            "type": "long"
+                            "subType": "long"
                           }
                         },
                         {
                           "field": {
                             "name": "testDouble",
-                            "type": "double"
+                            "subType": "double"
                           }
                         },
                         {
                           "field": {
                             "name": "testBoolean",
-                            "type": "boolean"
+                            "subType": "boolean"
                           }
                         },
                         {
                           "field": {
                             "name": "testDate",
-                            "type": "date"
+                            "subType": "date"
                           }
                         }
                       ]
@@ -400,12 +400,12 @@ public class UnifiedFieldRegistryTest {
                   {
                     "object": {
                       "name": "FieldsWithAttributesTest",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "email",
-                            "type": "string",
+                            "subType": "string",
                             "@maxLength": 255,
                             "@pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$"
                           }
@@ -413,7 +413,7 @@ public class UnifiedFieldRegistryTest {
                         {
                           "field": {
                             "name": "price",
-                            "type": "double",
+                            "subType": "double",
                             "@precision": 2,
                             "@minValue": 0.0
                           }
@@ -421,7 +421,7 @@ public class UnifiedFieldRegistryTest {
                         {
                           "field": {
                             "name": "quantity",
-                            "type": "long",
+                            "subType": "long",
                             "@minValue": 1,
                             "@maxValue": 1000
                           }
@@ -445,12 +445,12 @@ public class UnifiedFieldRegistryTest {
                   {
                     "object": {
                       "name": "ConstraintTest",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "validField",
-                            "type": "string"
+                            "subType": "string"
                           }
                         }
                       ]

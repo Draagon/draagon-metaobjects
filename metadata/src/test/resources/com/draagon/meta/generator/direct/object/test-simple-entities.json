@@ -5,36 +5,36 @@
       {
         "name": "Person",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "firstName",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               },
               {
-                "type": "length",
+                "subType": "length",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "1"
                   },
                   {
-                    "type": "int", 
+                    "subType": "int", 
                     "name": "max",
                     "value": "50"
                   }
@@ -44,21 +44,21 @@
           },
           {
             "name": "lastName",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               },
               {
-                "type": "length",
+                "subType": "length",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min", 
                     "value": "1"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "50"
                   }
@@ -68,27 +68,27 @@
           },
           {
             "name": "email",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "email"
+                "subType": "email"
               }
             ]
           },
           {
             "name": "age",
-            "type": "int",
+            "subType": "int",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "0"
                   },
                   {
-                    "type": "int", 
+                    "subType": "int", 
                     "name": "max",
                     "value": "150"
                   }
@@ -98,59 +98,59 @@
           },
           {
             "name": "isActive",
-            "type": "boolean",
-            "defaultValue": "true"
+            "subType": "boolean",
+            "defaultValue": true
           }
         ]
       },
       {
         "name": "Address",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "street",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "city",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "state",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "length",
+                "subType": "length",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "2"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "2"
                   }
@@ -160,13 +160,13 @@
           },
           {
             "name": "zipCode",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "pattern",
+                "subType": "pattern",
                 "attributes": [
                   {
-                    "type": "string",
+                    "subType": "string",
                     "name": "regex",
                     "value": "\\d{5}(-\\d{4})?"
                   }
@@ -176,7 +176,7 @@
           },
           {
             "name": "country",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "USA"
           }
         ]
@@ -184,34 +184,34 @@
       {
         "name": "Company",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean", 
+                "subType": "boolean", 
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "name",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "employees",
-            "type": "objectArray",
+            "subType": "objectArray",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Person"
               }
@@ -219,10 +219,10 @@
           },
           {
             "name": "headquarters",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef", 
                 "value": "Address"
               }

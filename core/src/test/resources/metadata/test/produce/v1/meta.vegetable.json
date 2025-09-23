@@ -1,13 +1,13 @@
 {"metadata": {"package": "produce::v1::vegetable",
   "children": [
 
-    {"object": {"name": "Vegetable", "type": "pojo",
+    {"object": {"name": "Vegetable", "subType": "pojo",
       "children": [
-        {"key": {"name": "primary", "type":"primary",
+        {"key": {"name": "primary", "subType":"primary",
           "children": [
             {"attr": {"name": "keys", "value": "id"}}
           ]}},
-        {"key": {"name": "basketKey", "type":"foreign",
+        {"key": {"name": "basketKey", "subType":"foreign",
           "children": [
             {"attr": {"name": "keys", "value": "basketId"}},
             {"attr": {"name": "foreignObjectRef", "value": "..::container::Basket"}}
@@ -16,8 +16,8 @@
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "basketId", "super": "..::common::id"}},
-        {"field": {"name": "length", "type": "int"}},
-        {"field": {"name": "weight", "type": "int"}}
+        {"field": {"name": "length", "subType": "int"}},
+        {"field": {"name": "weight", "subType": "int"}}
       ]}},
 
     {"object": {"name": "Tomato", "super": "Vegetable",

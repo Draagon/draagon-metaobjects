@@ -7,10 +7,10 @@
         package="produce::v1::fruit">
 
     <!-- Fruit -->
-    <object name="Fruit" type="pojo" _isAbstract="true">
+    <object name="Fruit" subType="pojo" _isAbstract="true">
 
         <key name="primary" keys="id"/>
-        <key type="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
+        <key subType="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
 
         <attr name="object">com.draagon.meta.test.produce.v1.Fruit</attr>
 
@@ -24,10 +24,10 @@
         <field name="basketId" super="..::common::id"/>
 
         <!-- Length -->
-        <field name="length" type="int"/>
+        <field name="length" subType="int"/>
 
         <!-- Weight -->
-        <field name="weight" type="int"/>
+        <field name="weight" subType="int"/>
      
     </object>
 
@@ -37,10 +37,10 @@
         <!-- attr name="object">com.draagon.meta.test.produce.v1.Apple</attr -->
 
         <!-- Orachard -->
-        <field name="orchard" type="string"/>
+        <field name="orchard" subType="string"/>
 
         <!-- Worms -->
-        <field name="worms" type="short"/>
+        <field name="worms" subType="short"/>
       
     </object>  
 
@@ -56,7 +56,7 @@
 
         <attr name="object">com.draagon.meta.test.produce.v1.Orange</attr>
 
-        <field name="pickedDate" type="date"/>
+        <field name="pickedDate" subType="date"/>
            
     </object>
 

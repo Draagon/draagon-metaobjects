@@ -2,14 +2,14 @@
 
   "types": [
 
-    {"type": {"name": "metadata", "class": "com.draagon.meta.MetaData",
+    {"subType": {"name": "metadata", "class": "com.draagon.meta.MetaData",
       "children": [
-        {"child": {"type": "attr", "subType": "string", "name": "farmName"}}
+        {"child": {"subType": "attr", "subType": "string", "name": "farmName"}}
       ]}},
 
-    {"type": {"name": "object", "class": "com.draagon.meta.object.MetaObject",
+    {"subType": {"name": "object", "class": "com.draagon.meta.object.MetaObject",
       "children": [
-          {"child": {"type": "attr", "subType": "boolean", "name": "isEmbedded"}}
+          {"child": {"subType": "attr", "subType": "boolean", "name": "isEmbedded"}}
         ]}}
   ]}
 }

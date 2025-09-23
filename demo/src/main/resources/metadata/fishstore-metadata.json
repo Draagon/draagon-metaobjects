@@ -5,14 +5,14 @@
   "objects": {
     "Base": {
       "name": "Base",
-      "type": "managed",
+      "subType": "managed",
       "displayName": "Base Entity",
       "className": "com.draagon.meta.demo.fishstore.Base",
       "attributes": {},
       "fields": {
         "id": {
           "name": "id",
-          "type": "long",
+          "subType": "long",
           "displayName": "ID",
           "isKey": true,
           "isRequired": true,
@@ -23,7 +23,7 @@
           "views": {
             "numeric": {
               "name": "numeric",
-              "type": "numeric",
+              "subType": "numeric",
               "attributes": {}
             }
           },
@@ -33,7 +33,7 @@
     },
     "Store": {
       "name": "Store",
-      "type": "managed",
+      "subType": "managed",
       "super": "Base",
       "displayName": "Fish Store",
       "className": "com.draagon.meta.demo.fishstore.Store",
@@ -42,7 +42,7 @@
       "fields": {
         "name": {
           "name": "name",
-          "type": "string",
+          "subType": "string",
           "displayName": "Store Name",
           "length": 50,
           "isRequired": true,
@@ -50,11 +50,11 @@
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Store name is required"
             },
             {
-              "type": "length",
+              "subType": "length",
               "message": "Store name must be between 1 and 50 characters",
               "params": { "min": 1, "max": 50 }
             }
@@ -62,7 +62,7 @@
           "views": {
             "text": {
               "name": "text",
-              "type": "text",
+              "subType": "text",
               "attributes": {
                 "placeholder": {
                   "name": "placeholder",
@@ -75,18 +75,18 @@
         },
         "maxTanks": {
           "name": "maxTanks",
-          "type": "int",
+          "subType": "int",
           "displayName": "Maximum Tanks",
           "isRequired": true,
           "dbColumn": "MAX_TANKS",
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Maximum tanks is required"
             },
             {
-              "type": "range",
+              "subType": "range",
               "message": "Maximum tanks must be between 1 and 100",
               "params": { "min": 1, "max": 100 }
             }
@@ -94,7 +94,7 @@
           "views": {
             "numeric": {
               "name": "numeric", 
-              "type": "numeric",
+              "subType": "numeric",
               "attributes": {
                 "min": { "name": "min", "value": 1 },
                 "max": { "name": "max", "value": 100 }
@@ -107,7 +107,7 @@
     },
     "Tank": {
       "name": "Tank",
-      "type": "managed",
+      "subType": "managed",
       "super": "Base",
       "displayName": "Fish Tank",
       "className": "com.draagon.meta.demo.fishstore.Tank",
@@ -116,21 +116,21 @@
       "fields": {
         "num": {
           "name": "num",
-          "type": "int",
+          "subType": "int",
           "displayName": "Tank Number",
           "isRequired": true,
           "dbColumn": "NUM",
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Tank number is required"
             }
           ],
           "views": {
             "numeric": {
               "name": "numeric",
-              "type": "numeric",
+              "subType": "numeric",
               "attributes": {}
             }
           },
@@ -138,18 +138,18 @@
         },
         "maxFish": {
           "name": "maxFish",
-          "type": "int",
+          "subType": "int",
           "displayName": "Maximum Fish",
           "isRequired": true,
           "dbColumn": "MAX_FISH",
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Maximum fish is required"
             },
             {
-              "type": "range",
+              "subType": "range",
               "message": "Maximum fish must be between 1 and 50",
               "params": { "min": 1, "max": 50 }
             }
@@ -157,7 +157,7 @@
           "views": {
             "numeric": {
               "name": "numeric",
-              "type": "numeric",
+              "subType": "numeric",
               "attributes": {
                 "min": { "name": "min", "value": 1 },
                 "max": { "name": "max", "value": 50 }
@@ -170,7 +170,7 @@
     },
     "Breed": {
       "name": "Breed",
-      "type": "managed",
+      "subType": "managed",
       "super": "Base",
       "displayName": "Fish Breed",
       "className": "com.draagon.meta.demo.fishstore.Breed",
@@ -179,7 +179,7 @@
       "fields": {
         "name": {
           "name": "name",
-          "type": "string",
+          "subType": "string",
           "displayName": "Breed Name",
           "length": 100,
           "isRequired": true,
@@ -187,14 +187,14 @@
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Breed name is required"
             }
           ],
           "views": {
             "text": {
               "name": "text",
-              "type": "text",
+              "subType": "text",
               "attributes": {}
             }
           },
@@ -202,18 +202,18 @@
         },
         "agressionLevel": {
           "name": "agressionLevel",
-          "type": "int",
+          "subType": "int",
           "displayName": "Aggression Level",
           "isRequired": true,
           "dbColumn": "AGRESSION_LEVEL",
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Aggression level is required"
             },
             {
-              "type": "range",
+              "subType": "range",
               "message": "Aggression level must be between 1 and 10",
               "params": { "min": 1, "max": 10 }
             }
@@ -221,7 +221,7 @@
           "views": {
             "select": {
               "name": "select",
-              "type": "select",
+              "subType": "select",
               "attributes": {
                 "options": {
                   "name": "options",
@@ -247,7 +247,7 @@
     },
     "Fish": {
       "name": "Fish",
-      "type": "managed",
+      "subType": "managed",
       "super": "Base",
       "displayName": "Fish",
       "className": "com.draagon.meta.demo.fishstore.Fish",
@@ -256,7 +256,7 @@
       "fields": {
         "breedName": {
           "name": "breedName",
-          "type": "string",
+          "subType": "string",
           "displayName": "Breed Name",
           "length": 100,
           "isRequired": true,
@@ -264,14 +264,14 @@
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Breed name is required"
             }
           ],
           "views": {
             "text": {
               "name": "text",
-              "type": "text",
+              "subType": "text",
               "attributes": {}
             }
           },
@@ -279,18 +279,18 @@
         },
         "length": {
           "name": "length",
-          "type": "int",
+          "subType": "int",
           "displayName": "Length (inches)",
           "isRequired": true,
           "dbColumn": "LENGTH",
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Length is required"
             },
             {
-              "type": "range",
+              "subType": "range",
               "message": "Length must be between 1 and 100 inches",
               "params": { "min": 1, "max": 100 }
             }
@@ -298,7 +298,7 @@
           "views": {
             "numeric": {
               "name": "numeric",
-              "type": "numeric",
+              "subType": "numeric",
               "attributes": {
                 "min": { "name": "min", "value": 1 },
                 "max": { "name": "max", "value": 100 }
@@ -309,18 +309,18 @@
         },
         "weight": {
           "name": "weight",
-          "type": "int",
+          "subType": "int",
           "displayName": "Weight (grams)",
           "isRequired": true,
           "dbColumn": "WEIGHT",
           "attributes": {},
           "validators": [
             {
-              "type": "required",
+              "subType": "required",
               "message": "Weight is required"
             },
             {
-              "type": "range",
+              "subType": "range",
               "message": "Weight must be between 1 and 10000 grams",
               "params": { "min": 1, "max": 10000 }
             }
@@ -328,7 +328,7 @@
           "views": {
             "numeric": {
               "name": "numeric",
-              "type": "numeric",
+              "subType": "numeric",
               "attributes": {
                 "min": { "name": "min", "value": 1 },
                 "max": { "name": "max", "value": 10000 }

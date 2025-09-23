@@ -233,19 +233,19 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "User",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "id",
-                            "type": "long",
+                            "subType": "long",
                             "@required": true
                           }
                         },
                         {
                           "field": {
                             "name": "email",
-                            "type": "string",
+                            "subType": "string",
                             "@required": true,
                             "@maxLength": 255
                           }
@@ -268,7 +268,7 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "invalid::name",
-                      "type": "pojo"
+                      "subType": "pojo"
                     }
                   }
                 ]
@@ -287,12 +287,12 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "SimpleUser",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "name",
-                            "type": "string",
+                            "subType": "string",
                             "@required": true,
                             "@maxLength": 100
                           }
@@ -300,7 +300,7 @@ public class UnifiedRegistrySchemaIntegrationTest {
                         {
                           "field": {
                             "name": "age",
-                            "type": "int",
+                            "subType": "int",
                             "@required": false
                           }
                         }
@@ -323,19 +323,19 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "Product",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "id",
-                            "type": "long",
+                            "subType": "long",
                             "@required": true
                           }
                         },
                         {
                           "field": {
                             "name": "name",
-                            "type": "string",
+                            "subType": "string",
                             "@required": true,
                             "@maxLength": 200
                           }
@@ -343,7 +343,7 @@ public class UnifiedRegistrySchemaIntegrationTest {
                         {
                           "field": {
                             "name": "price",
-                            "type": "double",
+                            "subType": "double",
                             "@required": true
                           }
                         }
@@ -353,19 +353,19 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "Order",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "orderId",
-                            "type": "string",
+                            "subType": "string",
                             "@required": true
                           }
                         },
                         {
                           "field": {
                             "name": "customerId",
-                            "type": "long",
+                            "subType": "long",
                             "@required": true
                           }
                         }
@@ -388,31 +388,31 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "Company",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "companyName",
-                            "type": "string",
+                            "subType": "string",
                             "@required": true
                           }
                         },
                         {
                           "object": {
                             "name": "Employee",
-                            "type": "pojo",
+                            "subType": "pojo",
                             "children": [
                               {
                                 "field": {
                                   "name": "employeeId",
-                                  "type": "int",
+                                  "subType": "int",
                                   "@required": true
                                 }
                               },
                               {
                                 "field": {
                                   "name": "firstName",
-                                  "type": "string",
+                                  "subType": "string",
                                   "@required": true
                                 }
                               }
@@ -438,55 +438,55 @@ public class UnifiedRegistrySchemaIntegrationTest {
                   {
                     "object": {
                       "name": "AllFieldTypes",
-                      "type": "pojo",
+                      "subType": "pojo",
                       "children": [
                         {
                           "field": {
                             "name": "stringField",
-                            "type": "string",
+                            "subType": "string",
                             "@maxLength": 50
                           }
                         },
                         {
                           "field": {
                             "name": "intField",
-                            "type": "int"
+                            "subType": "int"
                           }
                         },
                         {
                           "field": {
                             "name": "longField",
-                            "type": "long"
+                            "subType": "long"
                           }
                         },
                         {
                           "field": {
                             "name": "doubleField",
-                            "type": "double"
+                            "subType": "double"
                           }
                         },
                         {
                           "field": {
                             "name": "floatField",
-                            "type": "float"
+                            "subType": "float"
                           }
                         },
                         {
                           "field": {
                             "name": "booleanField",
-                            "type": "boolean"
+                            "subType": "boolean"
                           }
                         },
                         {
                           "field": {
                             "name": "dateField",
-                            "type": "date"
+                            "subType": "date"
                           }
                         },
                         {
                           "field": {
                             "name": "timestampField",
-                            "type": "timestamp"
+                            "subType": "timestamp"
                           }
                         }
                       ]

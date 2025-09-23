@@ -3,7 +3,6 @@ package com.draagon.meta.key;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
-import com.draagon.meta.ValidationResult;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;

@@ -14,9 +14,6 @@ import com.draagon.meta.registry.MetaDataLoaderRegistry;
 import com.draagon.meta.registry.ServiceRegistryFactory;
 import com.draagon.meta.object.MetaObject;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 /**
  * Utility class providing helper methods for MetaData operations.
  * Contains commonly used operations for working with MetaData objects, loaders, and registries.
@@ -28,11 +25,6 @@ public class MetaDataUtil {
 
   public final static String ATTR_OBJECT_REF = MetaObject.ATTR_OBJECT_REF;
   public final static String SEP = MetaDataLoader.PKG_SEPARATOR;
-
-
-
-
-
 
 
   /** Find an actual package traversing parents if needed */

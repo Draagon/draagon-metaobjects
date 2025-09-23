@@ -7,6 +7,9 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.BooleanAttribute;
+import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
@@ -14,11 +17,9 @@ import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.Optional;
@@ -108,14 +109,14 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
 
                 // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
-                .optionalAttribute(ATTR_REQUIRED, "boolean")
+                .optionalAttribute(ATTR_REQUIRED, BooleanAttribute.SUBTYPE_BOOLEAN)
                 .optionalAttribute(ATTR_DEFAULT_VALUE, "string")
-                .optionalAttribute(ATTR_DEFAULT_VIEW, "string")
+                .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
 
                 // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
-                .optionalChild("attr", "*")
-                .optionalChild("validator", "*")
-                .optionalChild("view", "*")
+                .optionalChild(MetaAttribute.TYPE_ATTR, "*")
+                .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
+                .optionalChild(MetaView.TYPE_VIEW, "*")
             );
             
             log.debug("Registered base MetaField type with unified registry");
@@ -149,9 +150,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         this.dataType = dataType;
         
         log.debug("Created MetaField: {}:{}:{} with dataType: {}", TYPE_FIELD, subtype, name, dataType);
-        //addAttributeDef( new AttributeDef( ATTR_LEN, String.class, false, "Length of the field" ));
-        //addAttributeDef( new AttributeDef( ATTR_VALIDATION, String.class, false, "Comma delimited list of validators" ));
-        //addAttributeDef( new AttributeDef( ATTR_DEFAULT_VALUE, String.class, false, "Default value for the MetaField" ));
     }
 
 

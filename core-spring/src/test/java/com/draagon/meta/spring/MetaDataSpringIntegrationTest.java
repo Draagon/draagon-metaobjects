@@ -66,12 +66,12 @@ public class MetaDataSpringIntegrationTest {
                 writer.write("      {\n");
                 writer.write("        \"object\": {\n");
                 writer.write("          \"name\": \"TestObject\",\n");
-                writer.write("          \"type\": \"pojo\",\n");
+                writer.write("          \"subType\": \"pojo\",\n");
                 writer.write("          \"children\": [\n");
                 writer.write("            {\n");
                 writer.write("              \"field\": {\n");
                 writer.write("                \"name\": \"id\",\n");
-                writer.write("                \"type\": \"long\"\n");
+                writer.write("                \"subType\": \"long\"\n");
                 writer.write("              }\n");
                 writer.write("            }\n");
                 writer.write("          ]\n");

@@ -1,21 +1,21 @@
 {"metadata": {"package": "acme::common",
   "children": [
-    {"field": {"name": "id", "type": "long", "@isAbstract": "true", "@validation": "required",
+    {"field": {"name": "id", "subType": "long", "@isAbstract": true, "@validation": "required",
         "children": [
-          {"validator": {"type": "required"}}
+          {"validator": {"subType": "required"}}
         ]
       }
     },
-    {"field": {"name": "name", "type": "string", "@isAbstract": "true", "@validation": "required,length",
+    {"field": {"name": "name", "subType": "string", "@isAbstract": true, "@validation": "required,length",
         "children": [
-          {"validator": {"type": "required"}},
-          {"validator": {"type": "length", "@min": "1", "@max": "100"}}
+          {"validator": {"subType": "required"}},
+          {"validator": {"subType": "length", "@min": "1", "@max": "100"}}
         ]
       }
     },
-    {"field": {"name": "description", "type": "string", "@isAbstract": "true",
+    {"field": {"name": "description", "subType": "string", "@isAbstract": true,
         "children": [
-          {"validator": {"type": "length", "@max": "500"}}
+          {"validator": {"subType": "length", "@max": "500"}}
         ]
       }
     }

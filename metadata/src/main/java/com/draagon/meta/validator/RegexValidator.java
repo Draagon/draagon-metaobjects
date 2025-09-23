@@ -6,11 +6,6 @@
  */
 package com.draagon.meta.validator;
 
-//import com.draagon.meta.attr.AttributeDef;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
@@ -23,7 +18,6 @@ import org.apache.commons.validator.GenericValidator;
  * Regular expression validator, that ensures a field value matches the specific expression mask
  */
 @MetaDataType(type = "validator", subType = "regex", description = "Regular expression validator for pattern matching")
-@SuppressWarnings("serial")
 public class RegexValidator extends MetaValidator {
 
     private static final Logger log = LoggerFactory.getLogger(RegexValidator.class);

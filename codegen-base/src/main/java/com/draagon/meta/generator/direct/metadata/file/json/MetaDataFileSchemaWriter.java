@@ -294,7 +294,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         subTypes.forEach(typeEnum::add);
         typeSchema.add("enum", typeEnum);
-        properties.add(ATTR_TYPE, typeSchema);
+        properties.add(ATTR_SUBTYPE, typeSchema);
 
         // Children (optional if this type accepts children)
         if (hasChildRequirements(typeDefs)) {
@@ -317,7 +317,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         // Required properties - using constants
         JsonArray required = new JsonArray();
         required.add(ATTR_NAME);
-        required.add(ATTR_TYPE);
+        required.add(ATTR_SUBTYPE);
         schema.add("required", required);
 
         return schema;

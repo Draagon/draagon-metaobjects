@@ -1,10 +1,10 @@
 {"metadata": {"package": "produce::v1::common",
     "children": [
-        {"field": {"name": "id", "type": "long"}},
-        {"field": {"name": "name", "type": "string",
+        {"field": {"name": "id", "subType": "long"}},
+        {"field": {"name": "name", "subType": "string",
             "children": [
-                {"validator": {"type": "required"}},
-                {"validator": {"type": "length", "min": 1, "max": 50 }}
+                {"validator": {"subType": "required"}},
+                {"validator": {"subType": "length", "min": 1, "max": 50 }}
             ]}}
     ]}
 }

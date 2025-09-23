@@ -81,7 +81,7 @@ public abstract class BaseMetaDataParser {
         reservedAttributes.add( ATTR_CLASS );
         //reservedAttributes.add( ATTR_TYPES );
         reservedAttributes.add( ATTR_CHILDREN );
-        reservedAttributes.add( ATTR_TYPE );
+        // CHANGED: Using ATTR_SUBTYPE instead of ATTR_TYPE for metadata files
         reservedAttributes.add( ATTR_SUBTYPE );
         reservedAttributes.add( ATTR_SUBTYPES );
         reservedAttributes.add( ATTR_SUPER );
@@ -427,7 +427,7 @@ public abstract class BaseMetaDataParser {
         
         // SubType is required for creating new metadata instances (unless inherited from super or using override)
         if (subTypeName == null) {
-            throw new MetaDataException("No subType specified for type [" + typeName + "] for MetaData [name=" + name + "] in file [" + getFilename() + "]. Either specify a 'type' attribute, use 'super=\"...\"' to inherit type, or use 'override=true' for overlay operations.");
+            throw new MetaDataException("No subType specified for type [" + typeName + "] for MetaData [name=" + name + "] in file [" + getFilename() + "]. Either specify a 'subType' attribute, use 'super=\"...\"' to inherit type, or use 'override=true' for overlay operations.");
         }
 
         // v6.0.0: Create MetaData instance using registry

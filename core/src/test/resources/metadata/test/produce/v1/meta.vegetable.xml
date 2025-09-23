@@ -3,10 +3,10 @@
         package="produce::v1::vegetable">
 
     <!-- Vegetable -->
-    <object name="Vegetable" type="pojo" _isAbstract="true">
+    <object name="Vegetable" subType="pojo" _isAbstract="true">
 
         <key name="primary" keys="id"/>
-        <key type="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
+        <key subType="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
 
         <attr name="object">com.draagon.meta.test.produce.v1.Vegetable</attr>
 
@@ -20,10 +20,10 @@
         <field name="basketId" super="..::common::id"/>
 
         <!-- Length -->
-        <field name="length" type="int"/>
+        <field name="length" subType="int"/>
 
         <!-- Weight -->
-        <field name="weight" type="int"/>
+        <field name="weight" subType="int"/>
 
     </object>
 

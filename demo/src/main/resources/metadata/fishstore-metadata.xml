@@ -13,40 +13,40 @@ http://www.eclipse.org/legal/epl-v10.html
     </types>
     
     <!-- Base -->
-    <object name="Base" type="managed">   
+    <object name="Base" subType="managed">   
         <attr name="object">com.draagon.meta.demo.fishstore.Base</attr>      
-        <field name="id" type="long" isKey="true" auto="last" dbColumn="ID" />
+        <field name="id" subType="long" isKey="true" auto="last" dbColumn="ID" />
     </object>  
         
     <!-- Store -->
     <object name="Store" super="Base" dbTable="STORE">    
         <attr name="object">com.draagon.meta.demo.fishstore.Store</attr>      
-        <field name="name" type="string" len="50" dbColumn="NAME" />
-        <field name="maxTanks" type="int" dbColumn="MAX_TANKS" />
+        <field name="name" subType="string" len="50" dbColumn="NAME" />
+        <field name="maxTanks" subType="int" dbColumn="MAX_TANKS" />
     </object>  
         
     <!-- Tank -->
     <object name="Tank" super="Base" dbTable="TANK">    
         <attr name="object">com.draagon.meta.demo.fishstore.Tank</attr>      
-        <field name="num" type="int" dbColumn="NUM" />
-        <field name="maxFish" type="int" dbColumn="MAX_FISH" />
-        <field name="fishes" type="objectArray" objectRef="fishstore::Fish" />
+        <field name="num" subType="int" dbColumn="NUM" />
+        <field name="maxFish" subType="int" dbColumn="MAX_FISH" />
+        <field name="fishes" subType="objectArray" objectRef="fishstore::Fish" />
     </object>
 
     <!-- Breed -->
     <object name="Breed" super="Base" dbTable="TANK">
         <attr name="object">com.draagon.meta.demo.fishstore.Breed</attr>
-        <field name="name" type="string" len="100" dbColumn="NAME" />
-        <field name="agressionLevel" type="int" dbColumn="AGRESSION_LEVEL" />
+        <field name="name" subType="string" len="100" dbColumn="NAME" />
+        <field name="agressionLevel" subType="int" dbColumn="AGRESSION_LEVEL" />
     </object>
 
     <!-- Fish -->
     <object name="Fish" super="Base" dbTable="TANK">    
         <attr name="object">com.draagon.meta.demo.fishstore.Fish</attr>      
-        <field name="breedName" type="string" len="100" dbColumn="BREED_NAME" />
-        <field name="breed" type="object" objectRef="fishstore::Breed" dbColumn="BREED_ID" />
-        <field name="length" type="int" dbColumn="LENGTH" />
-        <field name="weight" type="int" dbColumn="WEIGHT" />
+        <field name="breedName" subType="string" len="100" dbColumn="BREED_NAME" />
+        <field name="breed" subType="object" objectRef="fishstore::Breed" dbColumn="BREED_ID" />
+        <field name="length" subType="int" dbColumn="LENGTH" />
+        <field name="weight" subType="int" dbColumn="WEIGHT" />
     </object>
                 
 </metadata>

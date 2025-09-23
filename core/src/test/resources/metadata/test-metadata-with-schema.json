@@ -2,19 +2,19 @@
   "$schema": "../generated-resources/schemas/metaobjects-schema.json",
   "objects": [
     {
-      "type": "object",
+      "subType": "object",
       "subType": "value", 
       "name": "TestUser",
       "description": "Test user object with constraint validation",
       "fields": [
         {
-          "type": "field",
+          "subType": "field",
           "subType": "string",
           "name": "username",
           "description": "User login name - must be valid identifier",
           "attributes": [
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string",
               "name": "defaultValue",
               "value": "guest"
@@ -22,19 +22,19 @@
           ]
         },
         {
-          "type": "field",
+          "subType": "field",
           "subType": "string", 
           "name": "email",
           "description": "User email address",
           "attributes": [
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string",
               "name": "htmlInputType",
               "value": "email"
             },
             {
-              "type": "attr", 
+              "subType": "attr", 
               "subType": "string",
               "name": "placeholder",
               "value": "Enter your email address"
@@ -42,13 +42,13 @@
           ]
         },
         {
-          "type": "field",
+          "subType": "field",
           "subType": "int",
           "name": "age",
           "description": "User age in years",
           "attributes": [
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string", 
               "name": "htmlInputType",
               "value": "number"
@@ -58,13 +58,13 @@
       ],
       "attributes": [
         {
-          "type": "attr",
+          "subType": "attr",
           "subType": "string",
           "name": "dbTable",
           "value": "users"
         },
         {
-          "type": "attr",
+          "subType": "attr",
           "subType": "string",
           "name": "dbSchema", 
           "value": "public"
@@ -72,37 +72,37 @@
       ]
     },
     {
-      "type": "object",
+      "subType": "object",
       "subType": "value",
       "name": "TestProduct",
       "description": "Test product with database and web constraints",
       "fields": [
         {
-          "type": "field",
+          "subType": "field",
           "subType": "string",
           "name": "productName",
           "description": "Product display name",
           "attributes": [
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string",
               "name": "dbCol",
               "value": "product_name"
             },
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string",
               "name": "dbType", 
               "value": "VARCHAR"
             },
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "int",
               "name": "dbLength",
               "value": 255
             },
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string",
               "name": "formLabel",
               "value": "Product Name"
@@ -110,31 +110,31 @@
           ]
         },
         {
-          "type": "field",
+          "subType": "field",
           "subType": "double",
           "name": "price",
           "description": "Product price in USD",
           "attributes": [
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string",
               "name": "dbCol",
               "value": "price"
             },
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "string", 
               "name": "dbType",
               "value": "DECIMAL"
             },
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "int",
               "name": "dbPrecision",
               "value": 10
             },
             {
-              "type": "attr",
+              "subType": "attr",
               "subType": "int",
               "name": "dbScale",
               "value": 2
@@ -144,7 +144,7 @@
       ],
       "attributes": [
         {
-          "type": "attr",
+          "subType": "attr",
           "subType": "string",
           "name": "dbTable",
           "value": "products"

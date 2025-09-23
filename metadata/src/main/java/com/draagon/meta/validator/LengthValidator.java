@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  */
 @MetaDataType(type = "validator", subType = "length", description = "Length validator for string field validation")
-@SuppressWarnings("serial")
 public class LengthValidator extends MetaValidator
 {
     private static final Logger log = LoggerFactory.getLogger(LengthValidator.class);
@@ -58,8 +57,6 @@ public class LengthValidator extends MetaValidator
 
     public LengthValidator(String name) {
         super(SUBTYPE_LENGTH, name);
-        //addAttributeDef( new AttributeDef( ATTR_MIN, String.class, false, "Minimum length (0 default)" ));
-        //addAttributeDef( new AttributeDef( ATTR_MAX, String.class, false, "Maximum length (field length default)" ));
     }
 
     /**

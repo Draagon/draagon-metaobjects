@@ -1,11 +1,8 @@
 package com.draagon.meta.key;
 
 import com.draagon.meta.InvalidMetaDataException;
-import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
-import com.draagon.meta.ValidationResult;
 import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.registry.MetaDataRegistry;
@@ -14,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
 
 @MetaDataType(type = "key", subType = "foreign", description = "Foreign key for referencing other objects")
 public class ForeignKey extends MetaKey {

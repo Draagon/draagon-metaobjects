@@ -1,32 +1,32 @@
 {"metadata": {"package": "produce::v1::container",
     "children": [
-        {"object": {"name": "Basket", "type": "value",
+        {"object": {"name": "Basket", "subType": "value",
             "children": [
-                {"key": {"name": "primary", "type":"primary",
+                {"key": {"name": "primary", "subType":"primary",
                     "children": [
                         {"attr": {"name": "keys", "value": "id"}}
                     ]}},
                 {"field": {"name": "id", "super": "..::common::id"}},
                 {"field": {"name": "name", "super": "..::common::name"}},
-                {"field": {"name": "numApples", "type": "int"}},
-                {"field": {"name": "numOranges", "type": "int"}},
-                {"field": {"name": "numVeggies", "type": "int"}},
-                {"field": {"name": "apples", "type": "objectArray", "objectRef":"..::fruit::Apple",
+                {"field": {"name": "numApples", "subType": "int"}},
+                {"field": {"name": "numOranges", "subType": "int"}},
+                {"field": {"name": "numVeggies", "subType": "int"}},
+                {"field": {"name": "apples", "subType": "objectArray", "objectRef":"..::fruit::Apple",
                     "children": [
-                        {"validator": {"type": "array", "minSize": "0", "minSize": "5"}}
+                        {"validator": {"subType": "array", "minSize": "0", "minSize": "5"}}
                         ]}},
-                {"field": {"name": "oranges",  "type": "objectArray", "objectRef":"..::fruit::Orange",
+                {"field": {"name": "oranges",  "subType": "objectArray", "objectRef":"..::fruit::Orange",
                     "children": [
-                        {"validator": {"type": "array", "minSize": "0", "minSize": "3"}}
+                        {"validator": {"subType": "array", "minSize": "0", "minSize": "3"}}
                     ]}},
-                {"field": {"name": "veggies",  "type": "objectArray", "objectRef":"..::fruit::Vegetable",
+                {"field": {"name": "veggies",  "subType": "objectArray", "objectRef":"..::fruit::Vegetable",
                     "children": [
-                        {"validator": {"type": "array", "minSize": "1", "minSize": "2"}}
+                        {"validator": {"subType": "array", "minSize": "1", "minSize": "2"}}
                     ]}}
             ]}},
         {"object": {"package": "..::fruit", "name": "Fruit",
             "children": [
-                {"field": {"name": "inBasket", "type": "boolean"}}
+                {"field": {"name": "inBasket", "subType": "boolean"}}
             ]}}
     ]}
 }

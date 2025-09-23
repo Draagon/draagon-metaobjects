@@ -5,13 +5,13 @@
       {
         "object": {
           "name": "User",
-          "type": "pojo",
+          "subType": "pojo",
           "@dbTable": "users",
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@required": true,
                 "@dbColumn": "user_id"
               }
@@ -19,7 +19,7 @@
             {
               "field": {
                 "name": "username", 
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 50,
                 "@dbColumn": "username"
@@ -28,7 +28,7 @@
             {
               "field": {
                 "name": "email",
-                "type": "string", 
+                "subType": "string", 
                 "@required": true,
                 "@maxLength": 255,
                 "@dbColumn": "email"
@@ -37,7 +37,7 @@
             {
               "field": {
                 "name": "createdDate",
-                "type": "date",
+                "subType": "date",
                 "@dbColumn": "created_date"
               }
             }
@@ -47,13 +47,13 @@
       {
         "object": {
           "name": "Product",
-          "type": "pojo",
+          "subType": "pojo",
           "@dbTable": "products",
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@required": true,
                 "@dbColumn": "product_id"
               }
@@ -61,7 +61,7 @@
             {
               "field": {
                 "name": "name",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 100,
                 "@dbColumn": "product_name"
@@ -70,7 +70,7 @@
             {
               "field": {
                 "name": "price",
-                "type": "double",
+                "subType": "double",
                 "@required": true,
                 "@dbColumn": "price"
               }

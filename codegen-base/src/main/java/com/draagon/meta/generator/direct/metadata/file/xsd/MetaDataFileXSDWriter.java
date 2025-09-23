@@ -314,7 +314,7 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
 
         // Type attribute (required) - using dynamic enum
         Element typeAttr = doc.createElement("xs:attribute");
-        typeAttr.setAttribute("name", ATTR_TYPE);
+        typeAttr.setAttribute("name", ATTR_SUBTYPE);
         typeAttr.setAttribute("type", capitalizeFirstLetter(primaryType) + "TypeEnum");
         typeAttr.setAttribute("use", "required");
         complexType.appendChild(typeAttr);

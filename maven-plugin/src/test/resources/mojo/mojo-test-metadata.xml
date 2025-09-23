@@ -3,21 +3,21 @@
 <metadata package="simple::fruitbasket">
 
     <!-- Id -->
-    <field package="simple::common" name="id" type="long" _isAbstract="true">
-        <attr type="boolean" name="isKey">true</attr>
+    <field package="simple::common" name="id" subType="long" _isAbstract="true">
+        <attr subType="boolean" name="isKey">true</attr>
     </field>
 
     <!-- Name -->
-    <field package="simple::common" name="name" type="string" _isAbstract="true">
-        <validator type="required"/>
-        <validator type="length">
-            <attr type="int" name="min">1</attr>
+    <field package="simple::common" name="name" subType="string" _isAbstract="true">
+        <validator subType="required"/>
+        <validator subType="length">
+            <attr subType="int" name="min">1</attr>
             <attr name="max">50</attr>
         </validator>
     </field>
     
     <!-- Basket -->
-    <object name="Basket" type="map" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
+    <object name="Basket" subType="map" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -26,35 +26,35 @@
         <field name="name" super="..::common::name"/>
 
         <!-- Number of apples -->
-        <field name="numApples" type="int">
-            <validator type="length" min="0" max="10"/>
+        <field name="numApples" subType="int">
+            <validator subType="length" min="0" max="10"/>
         </field>
 
         <!-- Number of oranges -->
-        <field name="numOranges" type="int">
-            <validator type="length" min="0" max="10"/>
+        <field name="numOranges" subType="int">
+            <validator subType="length" min="0" max="10"/>
         </field>
 
         <!-- Number of veggies -->
-        <!-- field name="numVeggies" type="int">
-            <validator type="length" min="0" max="5"/>
+        <!-- field name="numVeggies" subType="int">
+            <validator subType="length" min="0" max="5"/>
         </field -->
 
         <!-- Apples -->
-        <field name="apples" type="objectArray" objectRef="::Apple"/>
+        <field name="apples" subType="objectArray" objectRef="::Apple"/>
 
         <!-- Oranges -->
-        <field name="oranges" type="objectArray" objectRef="::Orange"/>
+        <field name="oranges" subType="objectArray" objectRef="::Orange"/>
 
         <!-- Veggies -->
-        <!-- field name="veggies" type="objectArray">
-            <objectRef type="oneToMany" reference="..::vegetable::Vegetable"/>
+        <!-- field name="veggies" subType="objectArray">
+            <objectRef subType="oneToMany" reference="..::vegetable::Vegetable"/>
         </field -->
 
     </object>
 
     <!-- Fruit -->
-    <object name="Fruit" type="map" _isAbstract="true">
+    <object name="Fruit" subType="map" _isAbstract="true">
 
         <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Fruit</attr>
 
@@ -65,13 +65,13 @@
         <field name="name" super="..::common::name"/>
 
         <!-- Length -->
-        <field name="length" type="int"/>
+        <field name="length" subType="int"/>
 
         <!-- Weight -->
-        <field name="weight" type="int"/>
+        <field name="weight" subType="int"/>
 
         <!-- In Basket -->
-        <field name="inBasket" type="boolean"/>
+        <field name="inBasket" subType="boolean"/>
         
     </object>
 
@@ -81,10 +81,10 @@
         <!-- attr name="object">com.draagon.meta.loader.simple.fruitbasket.Apple</attr -->
 
         <!-- Orachard -->
-        <field name="orchard" type="string"/>
+        <field name="orchard" subType="string"/>
 
         <!-- Worms -->
-        <field name="worms" type="short"/>
+        <field name="worms" subType="short"/>
 
     </object>
 
@@ -100,7 +100,7 @@
 
         <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Orange</attr>
 
-        <field name="pickedDate" type="date"/>
+        <field name="pickedDate" subType="date"/>
 
     </object>
 

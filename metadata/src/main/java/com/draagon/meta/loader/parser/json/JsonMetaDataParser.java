@@ -38,7 +38,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
     // Attribute constants
     protected static final String ATTR_METADATA = "metadata";
     protected static final String ATTR_CHILDREN = "children";
-    protected static final String ATTR_TYPE = "type";
+    // REMOVED: local ATTR_TYPE - using ATTR_SUBTYPE from BaseMetaDataParser
     protected static final String ATTR_NAME = "name";
     protected static final String ATTR_PACKAGE = "package";
     protected static final String ATTR_DEFPACKAGE = "defPackage";
@@ -53,7 +53,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
 
     // Reserved attributes that should not be converted to MetaAttributes
     protected static final List<String> reservedAttributes = Arrays.asList(
-            ATTR_TYPE, ATTR_NAME, ATTR_PACKAGE, ATTR_SUPER, ATTR_ISABSTRACT, 
+            ATTR_SUBTYPE, ATTR_NAME, ATTR_PACKAGE, ATTR_SUPER, ATTR_ISABSTRACT,
             ATTR_ISINTERFACE, ATTR_IMPLEMENTS, ATTR_CHILDREN, ATTR_OVERLAY
     );
 
@@ -117,12 +117,12 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             if (child.isJsonObject()) {
                 JsonObject childObj = child.getAsJsonObject();
                 
-                // New format: {"field": {"name": "...", "type": "..."}}
+                // New format: {"field": {"name": "...", "subType": "..."}}
                 String typeName = childObj.keySet().iterator().next();
                 JsonObject el = childObj.getAsJsonObject(typeName);
 
                 // Extract metadata properties
-                String subTypeName = getValueAsString(el, ATTR_TYPE);
+                String subTypeName = getValueAsString(el, ATTR_SUBTYPE);
                 String name = getValueAsString(el, ATTR_NAME);
                 String packageName = getValueAsString(el, ATTR_PACKAGE);
                 String superName = getValueAsString(el, ATTR_SUPER);

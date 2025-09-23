@@ -5,31 +5,31 @@
       {
         "name": "Customer",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "customerNumber",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               },
               {
-                "type": "pattern",
+                "subType": "pattern",
                 "attributes": [
                   {
-                    "type": "string",
+                    "subType": "string",
                     "name": "regex",
                     "value": "CUST-\\d{6}"
                   }
@@ -39,55 +39,55 @@
           },
           {
             "name": "firstName",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "lastName",
-            "type": "string", 
+            "subType": "string", 
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "email",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "email"
+                "subType": "email"
               }
             ]
           },
           {
             "name": "dateOfBirth",
-            "type": "date"
+            "subType": "date"
           },
           {
             "name": "registrationDate",
-            "type": "date",
+            "subType": "date",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "status",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "ACTIVE"
           },
           {
             "name": "orders",
-            "type": "objectArray",
+            "subType": "objectArray",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Order"
               }
@@ -95,10 +95,10 @@
           },
           {
             "name": "addresses",
-            "type": "objectArray",
+            "subType": "objectArray",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "..::common::Address"
               }
@@ -106,10 +106,10 @@
           },
           {
             "name": "preferredPaymentMethod",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "PaymentMethod"
               }
@@ -120,31 +120,31 @@
       {
         "name": "Order",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "orderNumber",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               },
               {
-                "type": "pattern",
+                "subType": "pattern",
                 "attributes": [
                   {
-                    "type": "string",
+                    "subType": "string",
                     "name": "regex",
                     "value": "ORD-\\d{8}"
                   }
@@ -154,22 +154,22 @@
           },
           {
             "name": "orderDate",
-            "type": "date",
+            "subType": "date",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "totalAmount",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -179,24 +179,24 @@
           },
           {
             "name": "status",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "PENDING"
           },
           {
             "name": "customerId",
-            "type": "long",
+            "subType": "long",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "customer",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Customer"
               }
@@ -204,10 +204,10 @@
           },
           {
             "name": "orderItems",
-            "type": "objectArray",
+            "subType": "objectArray",
             "attributes": [
               {
-                "type": "string", 
+                "subType": "string", 
                 "name": "objectRef",
                 "value": "OrderItem"
               }
@@ -215,10 +215,10 @@
           },
           {
             "name": "shippingAddress",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "..::common::Address"
               }
@@ -226,10 +226,10 @@
           },
           {
             "name": "billingAddress",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "..::common::Address"
               }
@@ -240,43 +240,43 @@
       {
         "name": "OrderItem",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "orderId",
-            "type": "long",
+            "subType": "long",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "productId",
-            "type": "long",
+            "subType": "long",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "product",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Product"
               }
@@ -284,13 +284,13 @@
           },
           {
             "name": "quantity",
-            "type": "int",
+            "subType": "int",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "1"
                   }
@@ -300,13 +300,13 @@
           },
           {
             "name": "unitPrice",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -316,13 +316,13 @@
           },
           {
             "name": "totalPrice",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -335,50 +335,50 @@
       {
         "name": "Product",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "sku",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "name",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "description",
-            "type": "string"
+            "subType": "string"
           },
           {
             "name": "price",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -388,14 +388,14 @@
           },
           {
             "name": "weight",
-            "type": "double"
+            "subType": "double"
           },
           {
             "name": "dimensions",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Dimensions"
               }
@@ -403,10 +403,10 @@
           },
           {
             "name": "category",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Category"
               }
@@ -414,45 +414,45 @@
           },
           {
             "name": "tags",
-            "type": "stringArray"
+            "subType": "stringArray"
           }
         ]
       },
       {
         "name": "Category",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "name",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "description",
-            "type": "string"
+            "subType": "string"
           },
           {
             "name": "parentCategory",
-            "type": "object",
+            "subType": "object",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Category"
               }
@@ -460,10 +460,10 @@
           },
           {
             "name": "childCategories",
-            "type": "objectArray",
+            "subType": "objectArray",
             "attributes": [
               {
-                "type": "string",
+                "subType": "string",
                 "name": "objectRef",
                 "value": "Category"
               }
@@ -474,17 +474,17 @@
       {
         "name": "Dimensions",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "length",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -494,13 +494,13 @@
           },
           {
             "name": "width",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -510,13 +510,13 @@
           },
           {
             "name": "height",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   }
@@ -526,7 +526,7 @@
           },
           {
             "name": "unit",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "inches"
           }
         ]
@@ -534,32 +534,32 @@
       {
         "name": "PaymentMethod",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "type",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "isDefault",
-            "type": "boolean",
-            "defaultValue": "false"
+            "subType": "boolean",
+            "defaultValue": false
           }
         ]
       }
@@ -568,56 +568,56 @@
       {
         "name": "Address",
         "package": "::common",
-        "type": "map",
+        "subType": "map",
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "type",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "BILLING"
           },
           {
             "name": "street",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "city",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "state",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "length",
+                "subType": "length",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "2"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "2"
                   }
@@ -627,13 +627,13 @@
           },
           {
             "name": "zipCode",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "pattern",
+                "subType": "pattern",
                 "attributes": [
                   {
-                    "type": "string",
+                    "subType": "string",
                     "name": "regex",
                     "value": "\\d{5}(-\\d{4})?"
                   }
@@ -643,7 +643,7 @@
           },
           {
             "name": "country",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "USA"
           }
         ]

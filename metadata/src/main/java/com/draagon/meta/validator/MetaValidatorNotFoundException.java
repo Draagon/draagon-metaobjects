@@ -9,7 +9,6 @@ package com.draagon.meta.validator;
 
 import com.draagon.meta.MetaDataNotFoundException;
 
-@SuppressWarnings("serial")
 public class MetaValidatorNotFoundException
   extends MetaDataNotFoundException
 {
@@ -17,15 +16,5 @@ public class MetaValidatorNotFoundException
   {
     super( msg, name );
   }
-
- /*public MetaValidatorNotFoundException( String msg, Throwable cause )
-  {
-    super( msg, cause );
-  }
-
-  public MetaValidatorNotFoundException()
-  {
-    super( "MetaValidator Not Found Exception" );
-  }*/
 }
 

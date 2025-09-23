@@ -1,6 +1,6 @@
 {"metadata": {"package": "test",
   "children": [
-    {"object": {"name": "TestObject", "type": "map", 
+    {"object": {"name": "TestObject", "subType": "map", 
         "children": [
           {"field": {"name": "id", "super": "..::common::id"}}
         ]

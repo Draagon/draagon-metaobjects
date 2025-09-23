@@ -9,20 +9,20 @@ package com.draagon.meta.validator;
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.attr.BooleanAttribute;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * MetaValidator that performs validations on a MetaField
  */
-@SuppressWarnings("serial")
 public abstract class MetaValidator extends MetaData {
 
     private static final Logger log = LoggerFactory.getLogger(MetaValidator.class);
@@ -39,13 +39,13 @@ public abstract class MetaValidator extends MetaData {
                 .description("Base validator metadata with common validator attributes")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+                .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
 
                 // VALIDATOR-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_MSG, "string")
+                .optionalAttribute(ATTR_MSG, StringAttribute.SUBTYPE_STRING)
 
                 // VALIDATORS CAN CONTAIN ATTRIBUTES
-                .optionalChild("attr", "*", "*")
+                .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")
             );
 
             log.debug("Registered base MetaValidator type with unified registry");

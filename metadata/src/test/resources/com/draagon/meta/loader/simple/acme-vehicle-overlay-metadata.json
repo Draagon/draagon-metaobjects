@@ -2,13 +2,13 @@
   "children": [
     {"object": {"package": "::garage", "name": "Garage",
         "children": [
-          {"field": {"name": "premiumLocation", "type": "boolean", "@default": "false"}},
+          {"field": {"name": "premiumLocation", "subType": "boolean", "@default": false}},
           {"field": {"name": "operatingHours", "override": true,
-              "children": [{"validator": {"name": "hoursFormat", "type": "required", "@pattern": "^[0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}$"}}]
+              "children": [{"validator": {"name": "hoursFormat", "subType": "required", "@pattern": "^[0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}$"}}]
             }
           },
           {"field": {"name": "specialFeatures", "override": true,
-              "children": [{"attr": {"name": "specialConfig", "type": "string", "@feature1": "climate-controlled", "@feature2": "security-system", "@maxFeatures": "10"}}]
+              "children": [{"attr": {"name": "specialConfig", "subType": "string", "@feature1": "climate-controlled", "@feature2": "security-system", "@maxFeatures": "10"}}]
             }
           }
         ]
@@ -16,10 +16,10 @@
     },
     {"object": {"package": "::vehicle", "name": "Vehicle",
         "children": [
-          {"field": {"name": "warranty", "type": "boolean", "@default": "true"}},
-          {"field": {"name": "inspectionDate", "type": "date",
+          {"field": {"name": "warranty", "subType": "boolean", "@default": true}},
+          {"field": {"name": "inspectionDate", "subType": "date",
               "children": [
-                {"validator": {"name": "pastDate", "type": "required", "@maxDate": "today"}}
+                {"validator": {"name": "pastDate", "subType": "required", "@maxDate": "today"}}
               ]
             }
           }
@@ -28,11 +28,11 @@
     },
     {"object": {"package": "::vehicle::car::luxury", "name": "Porsche",
         "children": [
-          {"field": {"name": "certifiedPreOwned", "type": "boolean", "@default": "false"}},
+          {"field": {"name": "certifiedPreOwned", "subType": "boolean", "@default": false}},
           {"field": {"name": "specialEdition", "override": true,
               "children": [
-                {"validator": {"name": "editionValidator", "type": "length", "@min": "0", "@max": "50"}},
-                {"attr": {"name": "editionDetails", "type": "string", "@limitedRun": "true", "@serialNumber": "", "@collectible": "false"}}
+                {"validator": {"name": "editionValidator", "subType": "length", "@min": "0", "@max": "50"}},
+                {"attr": {"name": "editionDetails", "subType": "string", "@limitedRun": true, "@serialNumber": "", "@collectible": false}}
               ]
             }
           }
@@ -41,9 +41,9 @@
     },
     {"object": {"package": "::vehicle::motorcycle", "name": "Motorcycle",
         "children": [
-          {"field": {"name": "customPaint", "type": "boolean", "@default": "false"}},
+          {"field": {"name": "customPaint", "subType": "boolean", "@default": false}},
           {"field": {"name": "modifications", "override": true,
-              "children": [{"validator": {"name": "modValidator", "type": "length", "@max": "200"}}]
+              "children": [{"validator": {"name": "modValidator", "subType": "length", "@max": "200"}}]
             }
           }
         ]

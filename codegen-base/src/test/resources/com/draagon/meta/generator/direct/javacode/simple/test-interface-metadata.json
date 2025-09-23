@@ -6,28 +6,28 @@
       {
         "object": {
           "name": "TestInterface",
-          "type": "pojo",
+          "subType": "pojo",
           "package": "com_example_test",
           "@description": "Test object for Java code generation",
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@description": "Unique identifier"
               }
             },
             {
               "field": {
                 "name": "name",
-                "type": "string",
+                "subType": "string",
                 "@description": "Name property"
               }
             },
             {
               "field": {
                 "name": "active",
-                "type": "boolean",
+                "subType": "boolean",
                 "@description": "Active status"
               }
             }
@@ -37,7 +37,7 @@
       {
         "object": {
           "name": "TestImplementation",
-          "type": "pojo",
+          "subType": "pojo",
           "package": "com_example_test",
           "@implements": "TestInterface",
           "@description": "Test implementation for interface",
@@ -45,25 +45,25 @@
             {
               "field": {
                 "name": "id",
-                "type": "long"
+                "subType": "long"
               }
             },
             {
               "field": {
                 "name": "name",
-                "type": "string"
+                "subType": "string"
               }
             },
             {
               "field": {
                 "name": "active",
-                "type": "boolean"
+                "subType": "boolean"
               }
             },
             {
               "field": {
                 "name": "extra",
-                "type": "string",
+                "subType": "string",
                 "@description": "Additional field in implementation"
               }
             }

@@ -13,7 +13,7 @@
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@primaryKey": true,
                 "@dbColumn": "id"
               }
@@ -21,7 +21,7 @@
             {
               "field": {
                 "name": "username",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 50,
                 "@dbColumn": "username",
@@ -31,7 +31,7 @@
             {
               "field": {
                 "name": "email",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 100,
                 "@dbColumn": "email"
@@ -49,7 +49,7 @@
             {
               "field": {
                 "name": "name",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 100
               }
@@ -57,14 +57,14 @@
             {
               "field": {
                 "name": "price",
-                "type": "double",
+                "subType": "double",
                 "@required": true
               }
             },
             {
               "field": {
                 "name": "category",
-                "type": "string",
+                "subType": "string",
                 "@maxLength": 50
               }
             }

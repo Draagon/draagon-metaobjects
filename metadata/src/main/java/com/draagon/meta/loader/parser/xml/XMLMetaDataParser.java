@@ -144,7 +144,7 @@ public class XMLMetaDataParser extends BaseMetaDataParser implements MetaDataFil
         for (Element el : getElements(element)) {
 
             String typeName = el.getNodeName();
-            String subTypeName = el.getAttribute(ATTR_TYPE);
+            String subTypeName = el.getAttribute(ATTR_SUBTYPE);
             String name = el.getAttribute(ATTR_NAME);
 
 

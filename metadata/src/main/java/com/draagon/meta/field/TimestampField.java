@@ -15,11 +15,6 @@ import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
-
-import static com.draagon.meta.field.MetaField.TYPE_FIELD;
-import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
-
 /**
  * A Timestamp Field with unified registry registration and child requirements.
  * Extends DateField to provide timestamp-specific functionality.
@@ -28,7 +23,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @author Doug Mealing
  */
 @MetaDataType(type = "field", subType = "timestamp", description = "Timestamp field with date/time and precision validation")
-@SuppressWarnings("serial")
 public class TimestampField extends PrimitiveField<java.util.Date> {
 
     private static final Logger log = LoggerFactory.getLogger(TimestampField.class);

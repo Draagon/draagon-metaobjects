@@ -5,31 +5,31 @@
       {
         "name": "BaseEntity",
         "package": "::common",
-        "type": "map",
-        "_isAbstract": "true",
+        "subType": "map",
+        "_isAbstract": true,
         "fields": [
           {
             "name": "id",
-            "type": "long",
+            "subType": "long",
             "attributes": [
               {
-                "type": "boolean",
+                "subType": "boolean",
                 "name": "isKey",
-                "value": "true"
+                "value": true
               }
             ]
           },
           {
             "name": "createdAt",
-            "type": "date"
+            "subType": "date"
           },
           {
             "name": "updatedAt", 
-            "type": "date"
+            "subType": "date"
           },
           {
             "name": "version",
-            "type": "int",
+            "subType": "int",
             "defaultValue": "1"
           }
         ]
@@ -37,27 +37,27 @@
       {
         "name": "NamedEntity",
         "package": "::common",
-        "type": "map",
+        "subType": "map",
         "super": "BaseEntity",
-        "_isAbstract": "true",
+        "_isAbstract": true,
         "fields": [
           {
             "name": "name",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               },
               {
-                "type": "length",
+                "subType": "length",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "1"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max", 
                     "value": "100"
                   }
@@ -67,49 +67,49 @@
           },
           {
             "name": "description",
-            "type": "string"
+            "subType": "string"
           }
         ]
       },
       {
         "name": "Vehicle",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "super": "..::common::NamedEntity",
-        "_isAbstract": "true",
+        "_isAbstract": true,
         "fields": [
           {
             "name": "make",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "model",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               }
             ]
           },
           {
             "name": "year",
-            "type": "int",
+            "subType": "int",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "1900"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "2030"
                   }
@@ -119,21 +119,21 @@
           },
           {
             "name": "vin",
-            "type": "string",
+            "subType": "string",
             "validators": [
               {
-                "type": "required"
+                "subType": "required"
               },
               {
-                "type": "length",
+                "subType": "length",
                 "attributes": [
                   {
-                    "type": "int", 
+                    "subType": "int", 
                     "name": "min",
                     "value": "17"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "17"
                   }
@@ -146,23 +146,23 @@
       {
         "name": "Car",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "super": "Vehicle",
         "fields": [
           {
             "name": "numberOfDoors",
-            "type": "int",
+            "subType": "int",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min", 
                     "value": "2"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "5"
                   }
@@ -172,36 +172,36 @@
           },
           {
             "name": "fuelType",
-            "type": "string",
+            "subType": "string",
             "defaultValue": "GASOLINE"
           },
           {
             "name": "isElectric", 
-            "type": "boolean",
-            "defaultValue": "false"
+            "subType": "boolean",
+            "defaultValue": false
           }
         ]
       },
       {
         "name": "Motorcycle",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "super": "Vehicle",
         "fields": [
           {
             "name": "engineSize",
-            "type": "int",
+            "subType": "int",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "min",
                     "value": "50"
                   },
                   {
-                    "type": "int",
+                    "subType": "int",
                     "name": "max",
                     "value": "2000"
                   }
@@ -211,31 +211,31 @@
           },
           {
             "name": "hasSidecar",
-            "type": "boolean",
-            "defaultValue": "false"
+            "subType": "boolean",
+            "defaultValue": false
           }
         ]
       },
       {
         "name": "Truck",
         "package": "::model",
-        "type": "map",
+        "subType": "map",
         "super": "Vehicle",
         "fields": [
           {
             "name": "payloadCapacity",
-            "type": "double",
+            "subType": "double",
             "validators": [
               {
-                "type": "range",
+                "subType": "range",
                 "attributes": [
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "min",
                     "value": "0.0"
                   },
                   {
-                    "type": "double",
+                    "subType": "double",
                     "name": "max", 
                     "value": "50000.0"
                   }
@@ -245,12 +245,12 @@
           },
           {
             "name": "towingCapacity",
-            "type": "double"
+            "subType": "double"
           },
           {
             "name": "isFourWheelDrive",
-            "type": "boolean",
-            "defaultValue": "false"
+            "subType": "boolean",
+            "defaultValue": false
           }
         ]
       }
