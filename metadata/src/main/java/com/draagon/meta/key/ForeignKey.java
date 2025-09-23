@@ -10,6 +10,8 @@ import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.key.MetaKey.SUBTYPE_BASE;
+
 import java.util.List;
 
 @MetaDataType(type = "key", subType = "foreign", description = "Foreign key for referencing other objects")
@@ -25,13 +27,15 @@ public class ForeignKey extends MetaKey {
             MetaDataRegistry.registerType(ForeignKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE)
                 .description("Foreign key for referencing other objects")
-                
-                // FOREIGN KEY ATTRIBUTES
-                .optionalAttribute("keys", "stringArray")
+
+                // INHERIT FROM BASE KEY
+                .inheritsFrom(TYPE_KEY, SUBTYPE_BASE)
+
+                // FOREIGN KEY SPECIFIC ATTRIBUTES (base attributes inherited)
                 .optionalAttribute("foreignObjectRef", "string")
                 .optionalAttribute("foreignKey", "string")
                 .optionalAttribute("foreignKeyMap", "string")
-                .optionalAttribute("description", "string")
+                // Note: keys and description are inherited from key.base
             );
             
             log.debug("Registered ForeignKey type with unified registry");

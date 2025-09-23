@@ -633,6 +633,222 @@ public class MetaDataRegistry {
                 parentDefinition.getQualifiedName());
     }
 
+    // ========== REGISTRY HEALTH VALIDATION ==========
+
+    /**
+     * Validate registry consistency and architectural compliance.
+     * This method performs deferred validation after all registrations complete
+     * to avoid order dependency issues during static initialization.
+     *
+     * @return RegistryHealthReport with validation results and recommendations
+     */
+    public RegistryHealthReport validateConsistency() {
+        RegistryHealthReport report = new RegistryHealthReport();
+
+        // Ensure all types are loaded
+        ensureInitialized();
+
+        // Collect statistics for the report
+        populateRegistryStatistics(report);
+
+        // Validate base type consistency
+        validateBaseTypeConsistency(report);
+
+        // Validate inheritance patterns
+        validateInheritancePatterns(report);
+
+        // Validate structural integrity
+        validateStructuralIntegrity(report);
+
+        return report;
+    }
+
+    /**
+     * Populate registry statistics in the health report
+     */
+    private void populateRegistryStatistics(RegistryHealthReport report) {
+        Map<String, Set<String>> typeToSubTypes = new HashMap<>();
+        Set<String> allTypes = new HashSet<>();
+
+        for (MetaDataTypeId typeId : typeDefinitions.keySet()) {
+            String type = typeId.type();
+            String subType = typeId.subType();
+
+            allTypes.add(type);
+            typeToSubTypes.computeIfAbsent(type, k -> new HashSet<>()).add(subType);
+        }
+
+        report.addMetadata("totalTypes", typeDefinitions.size());
+        report.addMetadata("primaryTypes", allTypes.size());
+        report.addMetadata("typeToSubTypes", typeToSubTypes);
+    }
+
+    /**
+     * Validate that all type families have base subtypes
+     */
+    private void validateBaseTypeConsistency(RegistryHealthReport report) {
+        Map<String, Set<String>> typeToSubTypes = getTypeToSubTypesMap();
+        Set<String> typesWithBase = new HashSet<>();
+        Set<String> typesWithoutBase = new HashSet<>();
+
+        for (String type : typeToSubTypes.keySet()) {
+            if (typeToSubTypes.get(type).contains("base")) {
+                typesWithBase.add(type);
+            } else {
+                typesWithoutBase.add(type);
+            }
+        }
+
+        report.addMetadata("typesWithBase", typesWithBase);
+        report.addMetadata("typesWithoutBase", typesWithoutBase);
+        report.addMetadata("missingBaseTypes", typesWithoutBase);
+
+        // Add warnings for missing base types
+        for (String type : typesWithoutBase) {
+            report.addWarning("Type family '" + type + "' missing recommended base subtype");
+            report.addRecommendation("Consider adding " + type + ".base for inheritance support");
+        }
+
+        // Log success for types with bases
+        if (!typesWithBase.isEmpty()) {
+            report.addMetadata("baseTypeCompliance",
+                String.format("%d/%d type families have base subtypes",
+                    typesWithBase.size(), typeToSubTypes.size()));
+        }
+    }
+
+    /**
+     * Validate inheritance patterns are working correctly
+     */
+    private void validateInheritancePatterns(RegistryHealthReport report) {
+        int typesWithInheritance = 0;
+        int typesInheritingFromBase = 0;
+        List<String> inheritanceChain = new ArrayList<>();
+
+        for (TypeDefinition definition : typeDefinitions.values()) {
+            if (definition.hasParent()) {
+                typesWithInheritance++;
+                inheritanceChain.add(definition.getQualifiedName() + " → " + definition.getParentQualifiedName());
+
+                if ("base".equals(definition.getParentSubType())) {
+                    typesInheritingFromBase++;
+                }
+            }
+        }
+
+        report.addMetadata("typesWithInheritance", typesWithInheritance);
+        report.addMetadata("typesInheritingFromBase", typesInheritingFromBase);
+        report.addMetadata("inheritanceChains", inheritanceChain);
+
+        // Check if inheritance is being utilized effectively
+        if (typesWithInheritance == 0) {
+            report.addWarning("No types use inheritance - consider using base types for shared attributes");
+        } else if (typesInheritingFromBase == 0) {
+            report.addWarning("Types have inheritance but none inherit from base types");
+        }
+
+        // Check for deferred inheritance issues
+        if (!deferredInheritanceTypes.isEmpty()) {
+            report.addError("Unresolved inheritance dependencies: " +
+                deferredInheritanceTypes.size() + " types have missing parent types");
+
+            for (TypeDefinition deferred : deferredInheritanceTypes) {
+                report.addError("Type " + deferred.getQualifiedName() +
+                    " cannot find parent " + deferred.getParentQualifiedName());
+            }
+        }
+    }
+
+    /**
+     * Validate structural integrity of the registry
+     */
+    private void validateStructuralIntegrity(RegistryHealthReport report) {
+        // Check for duplicate implementations
+        Map<Class<?>, List<String>> implementationToTypes = new HashMap<>();
+
+        for (Map.Entry<MetaDataTypeId, TypeDefinition> entry : typeDefinitions.entrySet()) {
+            Class<?> implClass = entry.getValue().getImplementationClass();
+            String typeName = entry.getKey().toQualifiedName();
+
+            implementationToTypes.computeIfAbsent(implClass, k -> new ArrayList<>()).add(typeName);
+        }
+
+        // Report duplicate implementations (usually indicates problems)
+        for (Map.Entry<Class<?>, List<String>> entry : implementationToTypes.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                report.addWarning("Class " + entry.getKey().getSimpleName() +
+                    " implements multiple types: " + entry.getValue());
+            }
+        }
+
+        // Validate core types are present
+        validateCoreTypesPresent(report);
+    }
+
+    /**
+     * Validate that expected core types are registered
+     */
+    private void validateCoreTypesPresent(RegistryHealthReport report) {
+        String[] expectedCoreTypes = {
+            "field.base", "object.base", "attr.base", "validator.base", "key.base"
+        };
+
+        List<String> missingCoreTypes = new ArrayList<>();
+        for (String coreType : expectedCoreTypes) {
+            String[] parts = coreType.split("\\.");
+            if (!isRegistered(parts[0], parts[1])) {
+                missingCoreTypes.add(coreType);
+            }
+        }
+
+        if (!missingCoreTypes.isEmpty()) {
+            report.addError("Missing core base types: " + missingCoreTypes);
+            report.addRecommendation("Ensure all base types are registered during static initialization");
+        } else {
+            report.addMetadata("coreTypesComplete", "All expected core base types present");
+        }
+    }
+
+    /**
+     * Get type to subtypes mapping for analysis
+     */
+    private Map<String, Set<String>> getTypeToSubTypesMap() {
+        Map<String, Set<String>> typeToSubTypes = new HashMap<>();
+
+        for (MetaDataTypeId typeId : typeDefinitions.keySet()) {
+            typeToSubTypes.computeIfAbsent(typeId.type(), k -> new HashSet<>()).add(typeId.subType());
+        }
+
+        return typeToSubTypes;
+    }
+
+    /**
+     * Check if registry has any missing base types
+     *
+     * @return true if any type families are missing base subtypes
+     */
+    public boolean hasMissingBaseTypes() {
+        return !getMissingBaseTypes().isEmpty();
+    }
+
+    /**
+     * Get set of type names that are missing base subtypes
+     *
+     * @return Set of type names missing base subtypes
+     */
+    public Set<String> getMissingBaseTypes() {
+        Map<String, Set<String>> typeToSubTypes = getTypeToSubTypesMap();
+        Set<String> missingBases = new HashSet<>();
+
+        for (String type : typeToSubTypes.keySet()) {
+            if (!typeToSubTypes.get(type).contains("base")) {
+                missingBases.add(type);
+            }
+        }
+
+        return missingBases;
+    }
+
     /**
      * Registry statistics record
      */

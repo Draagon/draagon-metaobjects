@@ -5,6 +5,8 @@ import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.key.MetaKey.SUBTYPE_BASE;
+
 @MetaDataType(type = "key", subType = "secondary", description = "Secondary key for alternative record identification")
 public class SecondaryKey extends MetaKey {
 
@@ -18,10 +20,12 @@ public class SecondaryKey extends MetaKey {
             MetaDataRegistry.registerType(SecondaryKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE)
                 .description("Secondary key for alternative record identification")
-                
-                // SECONDARY KEY ATTRIBUTES
-                .optionalAttribute("keys", "stringArray")
-                .optionalAttribute("description", "string")
+
+                // INHERIT FROM BASE KEY
+                .inheritsFrom(TYPE_KEY, SUBTYPE_BASE)
+
+                // SECONDARY KEY SPECIFIC ATTRIBUTES (base attributes inherited)
+                // Note: keys and description are inherited from key.base
             );
             
             log.debug("Registered SecondaryKey type with unified registry");

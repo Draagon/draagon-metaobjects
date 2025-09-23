@@ -5,6 +5,8 @@ import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.key.MetaKey.SUBTYPE_BASE;
+
 @MetaDataType(type = "key", subType = "primary", description = "Primary key for unique record identification")
 public class PrimaryKey extends MetaKey {
 
@@ -19,10 +21,12 @@ public class PrimaryKey extends MetaKey {
             MetaDataRegistry.registerType(PrimaryKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE)
                 .description("Primary key for unique record identification")
-                
-                // PRIMARY KEY ATTRIBUTES
-                .optionalAttribute("keys", "stringArray")
-                .optionalAttribute("description", "string")
+
+                // INHERIT FROM BASE KEY
+                .inheritsFrom(TYPE_KEY, SUBTYPE_BASE)
+
+                // PRIMARY KEY SPECIFIC ATTRIBUTES (base attributes inherited)
+                // Note: keys and description are inherited from key.base
             );
             
             log.debug("Registered PrimaryKey type with unified registry");
