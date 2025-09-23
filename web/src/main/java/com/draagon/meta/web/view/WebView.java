@@ -31,7 +31,13 @@ public abstract class WebView extends MetaView
           MetaDataRegistry.registerType(WebView.class, def -> def
               .type("view").subType(SUBTYPE_WEB)
               .description("Web-based view for HTML form rendering")
+
+              // INHERIT FROM BASE VIEW
+              .inheritsFrom("view", "base")
+
+              // WEB-SPECIFIC CHILD REQUIREMENTS (base requirements inherited)
               .optionalChild("attr", "*")
+              // Note: Base view attributes are inherited from view.base
           );
           log.debug("Registered WebView type with unified registry");
       } catch (Exception e) {

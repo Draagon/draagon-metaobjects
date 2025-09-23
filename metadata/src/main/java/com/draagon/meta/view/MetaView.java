@@ -9,10 +9,12 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@MetaDataType(type = "view", subType = "base", description = "Base view metadata with common view attributes")
 public abstract class MetaView extends MetaData {
     private static final Logger log = LoggerFactory.getLogger(MetaView.class);
 
