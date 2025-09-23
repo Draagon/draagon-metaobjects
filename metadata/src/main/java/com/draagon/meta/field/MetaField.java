@@ -17,6 +17,8 @@ import com.draagon.meta.validator.MetaValidatorNotFoundException;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.TypeDefinition;
+import com.draagon.meta.registry.ChildRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,90 +252,62 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     /**
      * Get the expected Java class type for a given attribute on this field type.
-     * This method consults the self-registration information to determine what
-     * Java type an attribute should be converted to during parsing.
-     * 
+     * This method consults the MetaDataRegistry to determine what Java type an
+     * attribute should be converted to during parsing.
+     *
      * @param attributeName the name of the attribute (e.g., "required", "maxLength", "dbColumn")
      * @return the expected Java class for the attribute, or String.class if not found
      */
     public Class<?> getExpectedAttributeType(String attributeName) {
         try {
-            // Get the type definition for this field's class from the registry
             MetaDataRegistry registry = getLoader().getTypeRegistry();
-            Class<?> fieldClass = this.getClass();
-            
-            // Walk up the class hierarchy to find attribute type definitions
-            while (fieldClass != null && MetaField.class.isAssignableFrom(fieldClass)) {
-                String className = fieldClass.getName();
-                
-                // Check if this class level has the attribute defined
-                Class<?> attributeType = getAttributeTypeFromRegistry(registry, className, attributeName);
-                if (attributeType != null) {
-                    return attributeType;
+
+            // Get the type definition for this specific field type
+            TypeDefinition typeDef = registry.getTypeDefinition(this.getType(), this.getSubType());
+            if (typeDef != null) {
+                // Look up the child requirement for this attribute
+                ChildRequirement attrReq = typeDef.getChildRequirement(attributeName);
+                if (attrReq != null && "attr".equals(attrReq.getExpectedType())) {
+                    // Map the attribute subType to Java class
+                    return mapAttributeSubTypeToJavaClass(attrReq.getExpectedSubType());
                 }
-                
-                fieldClass = fieldClass.getSuperclass();
             }
-            
-            // Default to String if not found
+
+            // Fallback to String for unknown attributes
             return String.class;
-            
+
         } catch (Exception e) {
-            log.debug("Unable to determine attribute type for [{}] on [{}], defaulting to String: {}", 
+            log.debug("Registry lookup failed for attribute [{}] on [{}], defaulting to String: {}",
                 attributeName, this.getClass().getSimpleName(), e.getMessage());
             return String.class;
         }
     }
     
     /**
-     * Helper method to extract attribute type from registry for a specific class
+     * Map attribute subType to Java class for type-safe parsing.
+     * This method maps the registry's attribute subType definitions to actual Java classes.
+     *
+     * @param subType The subType from the registry (e.g., "boolean", "int", "string")
+     * @return Java class for the subType, defaults to String.class
      */
-    private Class<?> getAttributeTypeFromRegistry(MetaDataRegistry registry, String className, String attributeName) {
-        // This is a simplified approach - in practice, we need to query the registry
-        // Based on the self-registration patterns I observed, map the common attribute types
-        
-        // Common type mappings based on the registration patterns
-        switch (attributeName) {
-            // Boolean attributes
-            case ATTR_REQUIRED:
-            case "isId":
-            case "isSearchable":
-            case "isOptional":
-            case "skipJpa":
-            case ATTR_IS_ABSTRACT:
-            case "dbNullable":
+    private Class<?> mapAttributeSubTypeToJavaClass(String subType) {
+        if (subType == null) {
+            return String.class;
+        }
+
+        switch (subType.toLowerCase()) {
+            case "boolean":
                 return Boolean.class;
-
-            // Integer attributes
-            case "maxLength":
-            case "minLength":
-            case "precision":
-            case "scale":
-            case "dbLength":
+            case "int":
+            case "integer":
                 return Integer.class;
-
-            // Long attributes
-            case "minValue":
-            case "maxValue":
-                // For LongField, these should be Long; for others, might be different
-                if (this instanceof com.draagon.meta.field.LongField) {
-                    return Long.class;
-                } else if (this instanceof com.draagon.meta.field.IntegerField) {
-                    return Integer.class;
-                } else if (this instanceof com.draagon.meta.field.DoubleField) {
-                    return Double.class;
-                }
-                return String.class;
-
-            // String attributes (default)
-            case "pattern":
-            case ATTR_DEFAULT_VALUE:
-            case ATTR_DEFAULT_VIEW:
-            case "dbColumn":
-            case "dbTable":
-            case "dbSchema":
-            case "dbType":
-            case "description":
+            case "long":
+                return Long.class;
+            case "double":
+                return Double.class;
+            case "float":
+                return Float.class;
+            case "string":
             default:
                 return String.class;
         }
