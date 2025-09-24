@@ -7,7 +7,6 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
@@ -17,16 +16,50 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
+
 /**
- * A String Array Attribute with unified registry registration.
+ * A String Array Attribute with unified registry registration and parent acceptance.
+ *
+ * @version 6.2
  */
 @MetaDataType(type = "attr", subType = "stringarray", description = "String array attribute for multiple text values")
-@SuppressWarnings("serial")
 public class StringArrayAttribute extends MetaAttribute<List<String>>
 {
     private static final Logger log = LoggerFactory.getLogger(StringArrayAttribute.class);
 
     public final static String SUBTYPE_STRING_ARRAY = "stringarray";
+
+    // Unified registry self-registration
+    static {
+        try {
+            // Explicitly trigger MetaAttribute static initialization first
+            try {
+                Class.forName(MetaAttribute.class.getName());
+                // Add a small delay to ensure MetaAttribute registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaAttribute class loading", e);
+            }
+
+            MetaDataRegistry.registerType(StringArrayAttribute.class, def -> def
+                .type(TYPE_ATTR).subType(SUBTYPE_STRING_ARRAY)
+                .description("String array attribute for multiple text values")
+
+                // INHERIT FROM BASE ATTRIBUTE
+                .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+            );
+
+            log.debug("Registered StringArrayAttribute type with unified registry");
+
+            // Register StringArrayAttribute-specific validation constraints only
+            setupStringArrayAttributeValidationConstraints();
+
+        } catch (Exception e) {
+            log.error("Failed to register StringArrayAttribute type with unified registry", e);
+        }
+    }
 
     /**
      * Constructs the String Array MetaAttribute
@@ -34,31 +67,12 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
     public StringArrayAttribute(String name ) {
         super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY);
     }
-
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.registerType(StringArrayAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_STRING_ARRAY)
-                .description("String array attribute value")
-                // NO CHILD REQUIREMENTS - just registers identity
-                // Placement rules are defined by parent types that accept string array attributes
-            );
-            
-            log.debug("Registered StringArrayAttribute type with unified registry");
-            
-            // Register StringArrayAttribute-specific constraints
-            setupStringArrayAttributeConstraints();
-            
-        } catch (Exception e) {
-            log.error("Failed to register StringArrayAttribute type with unified registry", e);
-        }
-    }
     
     /**
-     * Setup StringArrayAttribute-specific constraints in the constraint registry
+     * Setup StringArrayAttribute-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void setupStringArrayAttributeConstraints() {
+    private static void setupStringArrayAttributeValidationConstraints() {
         try {
             ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
             

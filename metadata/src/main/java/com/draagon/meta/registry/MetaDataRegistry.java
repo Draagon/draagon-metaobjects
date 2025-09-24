@@ -58,10 +58,11 @@ public class MetaDataRegistry {
     private final Map<String, List<ChildRequirement>> globalRequirements = new ConcurrentHashMap<>();
     private final Set<TypeDefinition> deferredInheritanceTypes = ConcurrentHashMap.newKeySet();
     private volatile boolean initialized = false;
+    private volatile boolean currentlyReloading = false;
     
     /**
      * Get the singleton instance
-     * 
+     *
      * @return Global MetaDataRegistry instance
      */
     public static MetaDataRegistry getInstance() {
@@ -74,6 +75,19 @@ public class MetaDataRegistry {
                 }
             }
         }
+
+        // CRITICAL FIX: Validate registry state and reload if corrupted
+        // Only validate if we're not currently in the middle of a reload to prevent infinite recursion
+        if (!instance.currentlyReloading && instance.initialized && !instance.isRegistryStateValid()) {
+            synchronized (INSTANCE_LOCK) {
+                // Double-check to avoid race conditions
+                if (!instance.currentlyReloading && !instance.isRegistryStateValid()) {
+                    log.warn("Registry state validation failed - reloading providers to fix corruption");
+                    instance.reloadCoreTypes();
+                }
+            }
+        }
+
         return instance;
     }
     
@@ -100,11 +114,162 @@ public class MetaDataRegistry {
      * @param clazz Implementation class
      * @param configurator Configuration function for the type definition
      */
-    public static void registerType(Class<? extends MetaData> clazz, 
+    public static void registerType(Class<? extends MetaData> clazz,
                                    Consumer<TypeDefinitionBuilder> configurator) {
         TypeDefinitionBuilder builder = TypeDefinitionBuilder.forClass(clazz);
         configurator.accept(builder);
         getInstance().register(builder.build());
+    }
+
+    /**
+     * Centralized registration method for all MetaData types using the standardized pattern.
+     * This replaces scattered static blocks with a controlled, testable registration process.
+     *
+     * <p>This method follows the Phase 2 enhancement pattern where each MetaData class
+     * implements a standard {@code registerTypes(MetaDataRegistry)} method that contains
+     * all type and constraint registration logic.</p>
+     *
+     * <h3>Usage Pattern:</h3>
+     * <pre>{@code
+     * // In MetaData classes:
+     * public static void registerTypes(MetaDataRegistry registry) {
+     *     registry.registerType(StringField.class, def -> def
+     *         .type(TYPE_FIELD).subType(SUBTYPE_STRING)
+     *         .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+     *         .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_PATTERN)
+     *     );
+     *
+     *     // Register constraints
+     *     ConstraintRegistry.getInstance().addConstraint(new ValidationConstraint(...));
+     * }
+     * }</pre>
+     *
+     * @param typeClasses Classes that implement the registerTypes(MetaDataRegistry) pattern
+     */
+    public static void registerTypes(Class<? extends MetaData>... typeClasses) {
+        MetaDataRegistry registry = getInstance();
+
+        for (Class<? extends MetaData> clazz : typeClasses) {
+            try {
+                // Use reflection to call the standardized registerTypes(MetaDataRegistry) method
+                var registerMethod = clazz.getDeclaredMethod("registerTypes", MetaDataRegistry.class);
+                registerMethod.setAccessible(true);
+                registerMethod.invoke(null, registry);
+
+                log.debug("Successfully registered types from class: {}", clazz.getSimpleName());
+
+            } catch (NoSuchMethodException e) {
+                log.warn("Class {} does not implement registerTypes(MetaDataRegistry) method - skipping",
+                        clazz.getSimpleName());
+            } catch (Exception e) {
+                log.error("Failed to register types from class {}: {}",
+                         clazz.getSimpleName(), e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Register all core MetaData types using the standardized registerTypes() pattern.
+     * This is called during framework initialization to establish all base types.
+     *
+     * <p><strong>Phase 2 Pattern:</strong> This method calls the standardized {@code registerTypes()}
+     * method on all core MetaData classes, replacing the previous static block approach.</p>
+     *
+     * <h3>Registration Order:</h3>
+     * <ol>
+     *   <li><strong>Base Types:</strong> MetaData, MetaField, MetaObject, MetaAttribute</li>
+     *   <li><strong>Field Types:</strong> StringField, IntegerField, LongField, etc.</li>
+     *   <li><strong>Object Types:</strong> PojoMetaObject, ProxyMetaObject, etc.</li>
+     *   <li><strong>Support Types:</strong> Validators, Keys, Views, Loaders</li>
+     * </ol>
+     */
+    @SuppressWarnings("unchecked")
+    public static void registerAllCoreTypes() {
+        log.info("Starting Phase 2 core type registration using standardized registerTypes() pattern");
+
+        try {
+            // PHASE 1: Base Types (these must be registered first for inheritance)
+            log.debug("Registering base types...");
+            registerTypes(
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.loader.MetaDataLoader"), // metadata.base
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.MetaField"),        // field.base
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.object.MetaObject"),      // object.base
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.MetaAttribute"),     // attr.base
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.validator.MetaValidator"), // validator.base
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.key.MetaKey"),            // key.base
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.view.MetaView")           // view.base
+            );
+
+            // PHASE 2: Field Types (inherit from field.base)
+            log.debug("Registering field types...");
+            registerTypes(
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.StringField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.IntegerField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.LongField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.DoubleField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.FloatField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.BooleanField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.ByteField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.ShortField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.DateField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.ClassField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.ObjectField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.ObjectArrayField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.StringArrayField"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.field.TimestampField")
+            );
+
+            // PHASE 3: Attribute Types (inherit from attr.base)
+            log.debug("Registering attribute types...");
+            registerTypes(
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.StringAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.IntAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.BooleanAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.ClassAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.DoubleAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.LongAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.PropertiesAttribute"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.attr.StringArrayAttribute")
+            );
+
+            // PHASE 4: Object Types (inherit from object.base)
+            log.debug("Registering object types...");
+            registerTypes(
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.object.pojo.PojoMetaObject"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.object.mapped.MappedMetaObject"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.object.proxy.ProxyMetaObject")
+            );
+
+            // PHASE 5: Support Types (validators, keys, views, loaders)
+            log.debug("Registering support types...");
+            registerTypes(
+                // Validators
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.validator.RequiredValidator"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.validator.LengthValidator"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.validator.NumericValidator"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.validator.RegexValidator"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.validator.ArrayValidator"),
+
+                // Keys
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.key.PrimaryKey"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.key.ForeignKey"),
+                (Class<? extends MetaData>) Class.forName("com.draagon.meta.key.SecondaryKey")
+            );
+
+            log.info("Phase 2 core type registration completed successfully - {} types registered",
+                    getInstance().getRegisteredTypes().size());
+
+            // Resolve any deferred inheritance now that all base types are registered
+            int resolvedCount = getInstance().resolveDeferredInheritance();
+            if (resolvedCount > 0) {
+                log.info("Resolved {} deferred inheritance relationships", resolvedCount);
+            }
+
+        } catch (ClassNotFoundException e) {
+            log.error("Failed to load MetaData class during core type registration: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Failed to register core types using standardized pattern: {}", e.getMessage(), e);
+        }
     }
     
     /**
@@ -114,6 +279,11 @@ public class MetaDataRegistry {
      */
     public void register(TypeDefinition definition) {
         MetaDataTypeId typeId = new MetaDataTypeId(definition.getType(), definition.getSubType());
+
+        // CRITICAL: Ensure MetaDataLoader base types are registered first
+        // This prevents deferred inheritance issues when field/object types
+        // try to inherit from metadata.base before it's registered
+        ensureMetaDataLoaderTypesRegistered();
 
         TypeDefinition existing = typeDefinitions.get(typeId);
         if (existing != null && !existing.getImplementationClass().equals(definition.getImplementationClass())) {
@@ -139,6 +309,54 @@ public class MetaDataRegistry {
     }
 
     /**
+     * Extend an existing registered type with additional named attributes/children.
+     * Used by service providers to add service-specific capabilities to existing types.
+     *
+     * @param metaDataClass The implementation class of the type to extend
+     * @param extension Configuration function for additional attributes/children
+     * @return This registry instance for chaining
+     * @throws IllegalArgumentException if the type is not already registered
+     */
+    public MetaDataRegistry extendType(Class<? extends MetaData> metaDataClass, Consumer<TypeDefinitionBuilder> extension) {
+        Objects.requireNonNull(metaDataClass, "MetaData class cannot be null");
+        Objects.requireNonNull(extension, "Extension function cannot be null");
+
+        // Find the registered type definition by implementation class
+        TypeDefinition existing = null;
+        MetaDataTypeId typeIdToExtend = null;
+
+        for (Map.Entry<MetaDataTypeId, TypeDefinition> entry : typeDefinitions.entrySet()) {
+            if (entry.getValue().getImplementationClass().equals(metaDataClass)) {
+                existing = entry.getValue();
+                typeIdToExtend = entry.getKey();
+                break;
+            }
+        }
+
+        if (existing == null) {
+            throw new IllegalArgumentException(
+                "Type must be registered before extension: " + metaDataClass.getName() +
+                ". Available types: " + getRegisteredTypeNames()
+            );
+        }
+
+        // Create a builder from the existing definition
+        TypeDefinitionBuilder builder = TypeDefinitionBuilder.from(existing);
+
+        // Apply the extension
+        extension.accept(builder);
+
+        // Update the registered type with extended definition
+        TypeDefinition extendedDefinition = builder.build();
+        typeDefinitions.put(typeIdToExtend, extendedDefinition);
+
+        log.debug("Extended type: {} with additional attributes/children",
+                 typeIdToExtend.toQualifiedName());
+
+        return this;
+    }
+
+    /**
      * Resolve inheritance for a type definition by populating inherited requirements from parent
      *
      * @param definition Type definition to resolve inheritance for
@@ -159,8 +377,8 @@ public class MetaDataRegistry {
             return;
         }
 
-        // Delegate to extracted method for consistency
-        resolveInheritanceForDefinition(definition, parentDefinition);
+        // Use updated bidirectional inheritance resolution
+        resolveBidirectionalInheritance(definition, parentDefinition);
     }
     
     /**
@@ -454,10 +672,31 @@ public class MetaDataRegistry {
      * Clear all registrations (primarily for testing)
      */
     public void clear() {
-        typeDefinitions.clear();
-        globalRequirements.clear();
-        initialized = false;
-        log.debug("Cleared all type registrations");
+        if (currentlyReloading) {
+            log.debug("Registry clear skipped - reload already in progress");
+            return;
+        }
+
+        try {
+            currentlyReloading = true;
+            typeDefinitions.clear();
+            globalRequirements.clear();
+            deferredInheritanceTypes.clear();
+            initialized = false;
+            log.debug("Cleared all type registrations");
+
+            // CRITICAL FIX: Automatically reload providers to prevent test interference
+            // This ensures ServiceLoader provider discovery is re-triggered after clearing
+            try {
+                log.info("Registry cleared - automatically reloading providers to prevent corruption");
+                loadCoreTypes();
+                log.info("Provider reload completed successfully after registry clear");
+            } catch (Exception e) {
+                log.error("Failed to reload providers after registry clear - this may cause test failures", e);
+            }
+        } finally {
+            currentlyReloading = false;
+        }
     }
     
     /**
@@ -501,19 +740,100 @@ public class MetaDataRegistry {
      * Load service-based extensions that add global child requirements
      */
     private void loadServiceBasedExtensions() {
-        // Plugin system removed - all types now self-register via static blocks
-        // Database attributes are registered via DatabaseAttributeRegistration
-        log.debug("Service-based extension loading completed - using self-registration pattern");
+        try {
+            log.info("Loading service extension providers...");
+
+            // Discover ServiceExtensionProvider implementations via ServiceLoader
+            ServiceLoader<ServiceExtensionProvider> extensionLoader = ServiceLoader.load(ServiceExtensionProvider.class);
+            List<ServiceExtensionProvider> providers = new ArrayList<>();
+
+            // Collect all providers
+            for (ServiceExtensionProvider provider : extensionLoader) {
+                if (provider.supportsCurrentEnvironment()) {
+                    providers.add(provider);
+                    log.debug("Discovered service extension provider: {}", provider.getProviderName());
+                } else {
+                    log.debug("Skipping service extension provider {} (unsupported environment)",
+                             provider.getProviderName());
+                }
+            }
+
+            if (providers.isEmpty()) {
+                log.debug("No ServiceExtensionProvider implementations found - using self-registration pattern only");
+                return;
+            }
+
+            // Sort providers by dependencies and priority
+            List<ServiceExtensionProvider> orderedProviders = sortExtensionProvidersByDependencies(providers);
+
+            // Apply each provider's extensions to existing types
+            for (ServiceExtensionProvider provider : orderedProviders) {
+                try {
+                    log.debug("Applying extensions from provider: {} (priority: {})",
+                             provider.getProviderName(), provider.getPriority());
+
+                    provider.extendTypes(this);
+
+                    log.info("Successfully applied extensions from provider: {} - {}",
+                            provider.getProviderName(), provider.getDescription());
+
+                } catch (Exception e) {
+                    log.error("Failed to apply extensions from provider: {} - {}",
+                             provider.getProviderName(), e.getMessage(), e);
+                    // Continue with other providers rather than failing completely
+                }
+            }
+
+            log.info("Service extension loading completed - {} providers processed", orderedProviders.size());
+
+        } catch (Exception e) {
+            log.error("Failed to load service extension providers: {}", e.getMessage(), e);
+            // Non-fatal - registry can still function without extensions
+        }
     }
     
     
     // Legacy provider loading removed - using unified plugin approach
     
     /**
-     * Force load core types by triggering their static blocks
+     * Load core types using ServiceLoader provider discovery
      */
     private void loadCoreTypes() {
         try {
+            log.info("Loading MetaData types via ServiceLoader provider discovery...");
+
+            // Use the new provider discovery system instead of Class.forName()
+            MetaDataProviderDiscovery.discoverAllProviders(this);
+
+            log.info("Successfully loaded {} registered types via provider discovery",
+                    getRegisteredTypes().size());
+
+            // CRITICAL: Refresh constraint system to pick up all newly registered types
+            log.info("Refreshing constraint system with {} registered types", getRegisteredTypes().size());
+            com.draagon.meta.constraint.ConstraintEnforcer.getInstance().refreshConstraintFlattener();
+            log.info("Constraint system refresh completed");
+
+            // Mark registry as fully initialized
+            initialized = true;
+
+        } catch (Exception e) {
+            log.error("Provider discovery failed, falling back to manual class loading", e);
+
+            // Fallback to manual class loading for backward compatibility
+            fallbackToManualClassLoading();
+
+            // Mark as initialized even after fallback
+            initialized = true;
+        }
+    }
+
+    /**
+     * Fallback method for manual class loading if provider discovery fails
+     */
+    private void fallbackToManualClassLoading() {
+        try {
+            log.warn("Using fallback manual class loading - this may not work in all environments");
+
             // Force loading of core field types
             Class.forName("com.draagon.meta.field.StringField");
             Class.forName("com.draagon.meta.field.IntegerField");
@@ -528,30 +848,30 @@ public class MetaDataRegistry {
             Class.forName("com.draagon.meta.field.ObjectField");
             Class.forName("com.draagon.meta.field.ObjectArrayField");
             Class.forName("com.draagon.meta.field.StringArrayField");
-            
+
             // Force loading of core object types
             Class.forName("com.draagon.meta.object.MetaObject");
             Class.forName("com.draagon.meta.object.pojo.PojoMetaObject");
             Class.forName("com.draagon.meta.object.mapped.MappedMetaObject");
             Class.forName("com.draagon.meta.object.proxy.ProxyMetaObject");
-            
+
             // Force loading of attribute types
             Class.forName("com.draagon.meta.attr.StringAttribute");
             Class.forName("com.draagon.meta.attr.IntAttribute");
             Class.forName("com.draagon.meta.attr.BooleanAttribute");
-            
+
             // Force loading of validator types
             Class.forName("com.draagon.meta.validator.RequiredValidator");
             Class.forName("com.draagon.meta.validator.LengthValidator");
-            
+
             // Force loading of key types
             Class.forName("com.draagon.meta.key.PrimaryKey");
             Class.forName("com.draagon.meta.key.ForeignKey");
             Class.forName("com.draagon.meta.key.SecondaryKey");
-            
-            log.debug("Core types loaded successfully");
+
+            log.debug("Fallback class loading completed");
         } catch (ClassNotFoundException e) {
-            log.warn("Some core types could not be loaded: {}", e.getMessage());
+            log.warn("Some core types could not be loaded via fallback: {}", e.getMessage());
         }
     }
 
@@ -576,7 +896,7 @@ public class MetaDataRegistry {
             if (parentDefinition != null) {
                 try {
                     // Resolve inheritance now that parent is available
-                    resolveInheritanceForDefinition(definition, parentDefinition);
+                    resolveBidirectionalInheritance(definition, parentDefinition);
                     resolved.add(definition);
                     log.debug("Resolved deferred inheritance for {} from parent {}",
                             definition.getQualifiedName(), parentTypeId.toQualifiedName());
@@ -634,6 +954,93 @@ public class MetaDataRegistry {
     }
 
     // ========== REGISTRY HEALTH VALIDATION ==========
+
+    /**
+     * Check if the registry is in a valid state with all expected providers loaded.
+     * This validates that ServiceLoader provider discovery completed successfully
+     * and that core types are properly registered.
+     *
+     * @return true if registry state is valid, false if corruption detected
+     */
+    private boolean isRegistryStateValid() {
+        try {
+            // Check if core object types are registered (these are loaded by ObjectTypeProvider)
+            boolean hasObjectMap = isRegistered("object", "map");
+            boolean hasObjectPojo = isRegistered("object", "pojo");
+            boolean hasObjectProxy = isRegistered("object", "proxy");
+            boolean hasObjectBase = isRegistered("object", "base");
+
+            // Check if core field types are registered
+            boolean hasFieldString = isRegistered("field", "string");
+            boolean hasFieldInt = isRegistered("field", "int");
+            boolean hasFieldLong = isRegistered("field", "long");
+
+            // Check if core attribute types are registered
+            boolean hasAttrString = isRegistered("attr", "string");
+            boolean hasAttrInt = isRegistered("attr", "int");
+            boolean hasAttrBoolean = isRegistered("attr", "boolean");
+
+            // Registry is valid if we have core types from all major providers
+            boolean isValid = hasObjectMap && hasObjectPojo && hasObjectProxy && hasObjectBase &&
+                             hasFieldString && hasFieldInt && hasFieldLong &&
+                             hasAttrString && hasAttrInt && hasAttrBoolean;
+
+            if (!isValid) {
+                log.warn("Registry state validation failed - missing core types. " +
+                        "Object types: map={}, pojo={}, proxy={}, base={}. " +
+                        "Field types: string={}, int={}, long={}. " +
+                        "Attr types: string={}, int={}, boolean={}",
+                        hasObjectMap, hasObjectPojo, hasObjectProxy, hasObjectBase,
+                        hasFieldString, hasFieldInt, hasFieldLong,
+                        hasAttrString, hasAttrInt, hasAttrBoolean);
+            } else {
+                log.debug("Registry state validation passed - all core types present");
+            }
+
+            return isValid;
+
+        } catch (Exception e) {
+            log.warn("Registry state validation failed with exception: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Safely reload core types without corrupting existing state.
+     * This method re-triggers ServiceLoader provider discovery to restore
+     * missing types after test interference or other corruption.
+     */
+    private void reloadCoreTypes() {
+        if (currentlyReloading) {
+            log.debug("Registry reload already in progress, skipping duplicate reload");
+            return;
+        }
+
+        try {
+            currentlyReloading = true;
+            log.info("Reloading core types to fix registry corruption...");
+
+            // Store current registration count for comparison
+            int initialTypeCount = typeDefinitions.size();
+
+            // Re-trigger provider discovery without clearing existing registrations
+            // This allows missing providers to be loaded while preserving valid types
+            MetaDataProviderDiscovery.discoverAllProviders(this);
+
+            int finalTypeCount = typeDefinitions.size();
+            log.info("Core types reload completed. Type count: {} -> {}",
+                    initialTypeCount, finalTypeCount);
+
+            // Refresh constraint system with updated type registry
+            com.draagon.meta.constraint.ConstraintEnforcer.getInstance().refreshConstraintFlattener();
+            log.info("Constraint system refreshed after core types reload");
+
+        } catch (Exception e) {
+            log.error("Failed to reload core types - registry may remain in corrupted state", e);
+        } finally {
+            currentlyReloading = false;
+        }
+    }
 
     /**
      * Validate registry consistency and architectural compliance.
@@ -847,6 +1254,129 @@ public class MetaDataRegistry {
         }
 
         return missingBases;
+    }
+
+    /**
+     * Bidirectional inheritance resolution for the new AcceptsChildrenDeclaration system
+     */
+    private void resolveBidirectionalInheritance(TypeDefinition definition, TypeDefinition parentDefinition) {
+        // Copy AcceptsChildren declarations from parent to child (NEW BIDIRECTIONAL SYSTEM)
+        List<AcceptsChildrenDeclaration> inheritedChildrenDeclarations = new ArrayList<>();
+
+        // Add parent's direct accepts children declarations
+        inheritedChildrenDeclarations.addAll(parentDefinition.getDirectAcceptsChildren());
+
+        // Add parent's inherited accepts children declarations (recursive inheritance)
+        inheritedChildrenDeclarations.addAll(parentDefinition.getInheritedAcceptsChildren());
+
+        // Populate inherited accepts children in the child definition
+        definition.populateInheritedAcceptsChildren(inheritedChildrenDeclarations);
+
+        // Copy AcceptsParents declarations from parent to child (CRITICAL FOR BIDIRECTIONAL CONSTRAINTS)
+        List<AcceptsParentsDeclaration> inheritedParentsDeclarations = new ArrayList<>();
+
+        // Add parent's direct accepts parents declarations
+        inheritedParentsDeclarations.addAll(parentDefinition.getDirectAcceptsParents());
+
+        // Add parent's inherited accepts parents declarations (recursive inheritance)
+        inheritedParentsDeclarations.addAll(parentDefinition.getInheritedAcceptsParents());
+
+        // Populate inherited accepts parents in the child definition
+        definition.populateInheritedAcceptsParents(inheritedParentsDeclarations);
+
+        log.debug("Bidirectional inheritance resolved for {}: {} accepts children + {} accepts parents declarations inherited from parent {}",
+                 definition.getQualifiedName(), inheritedChildrenDeclarations.size(), inheritedParentsDeclarations.size(), parentDefinition.getQualifiedName());
+    }
+
+    private static volatile boolean metaDataLoaderTypesRegistered = false;
+
+    /**
+     * Ensures MetaDataLoader base types are registered before any inheritance attempts.
+     * This method triggers MetaDataLoader class loading to register metadata.base and loader.manual
+     * types, preventing deferred inheritance issues.
+     */
+    private void ensureMetaDataLoaderTypesRegistered() {
+        if (!metaDataLoaderTypesRegistered) {
+            synchronized (INSTANCE_LOCK) {
+                if (!metaDataLoaderTypesRegistered) {
+                    try {
+                        // Force MetaDataLoader class loading to trigger its static block
+                        // which registers metadata.base and loader.manual types
+                        Class.forName("com.draagon.meta.loader.MetaDataLoader");
+                        log.debug("MetaDataLoader types ensured via class loading");
+                        metaDataLoaderTypesRegistered = true;
+                    } catch (ClassNotFoundException e) {
+                        log.warn("Could not load MetaDataLoader class: " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sort service extension providers by dependencies using topological sorting.
+     *
+     * @param providers List of service extension providers to sort
+     * @return Ordered list of providers with dependencies resolved
+     * @throws IllegalArgumentException if circular dependencies are detected
+     */
+    private List<ServiceExtensionProvider> sortExtensionProvidersByDependencies(List<ServiceExtensionProvider> providers) {
+        // Build provider name to provider map
+        Map<String, ServiceExtensionProvider> providerMap = providers.stream()
+            .collect(Collectors.toMap(ServiceExtensionProvider::getProviderName, p -> p));
+
+        // Track visited and being processed states for cycle detection
+        Set<String> visited = new HashSet<>();
+        Set<String> processing = new HashSet<>();
+        List<ServiceExtensionProvider> result = new ArrayList<>();
+
+        // Perform topological sort using DFS
+        for (ServiceExtensionProvider provider : providers) {
+            if (!visited.contains(provider.getProviderName())) {
+                topologicalSortDFS(provider.getProviderName(), providerMap, visited, processing, result);
+            }
+        }
+
+        // Sort by priority within dependency order (higher priority first)
+        result.sort(Comparator.comparing(ServiceExtensionProvider::getPriority).reversed());
+
+        return result;
+    }
+
+    /**
+     * Depth-first search for topological sorting with cycle detection.
+     */
+    private void topologicalSortDFS(String providerName,
+                                   Map<String, ServiceExtensionProvider> providerMap,
+                                   Set<String> visited,
+                                   Set<String> processing,
+                                   List<ServiceExtensionProvider> result) {
+
+        if (processing.contains(providerName)) {
+            throw new IllegalArgumentException(
+                "Circular dependency detected in ServiceExtensionProvider dependencies: " + providerName);
+        }
+
+        if (visited.contains(providerName)) {
+            return;
+        }
+
+        ServiceExtensionProvider provider = providerMap.get(providerName);
+        if (provider == null) {
+            log.warn("Missing dependency provider: {} - continuing with available providers", providerName);
+            return;
+        }
+
+        processing.add(providerName);
+
+        // Process dependencies first
+        for (String dependency : provider.getDependencies()) {
+            topologicalSortDFS(dependency, providerMap, visited, processing, result);
+        }
+
+        processing.remove(providerName);
+        visited.add(providerName);
+        result.add(provider);
     }
 
     /**

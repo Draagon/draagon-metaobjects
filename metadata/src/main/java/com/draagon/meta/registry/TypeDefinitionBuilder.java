@@ -2,35 +2,38 @@ package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaData;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * Fluent builder for creating TypeDefinition instances with integrated child requirements.
- * 
+ * Fluent builder for creating TypeDefinition instances with bidirectional constraint declarations.
+ *
  * <p>This builder provides a clean API for defining MetaData types along with their
- * child requirements, replacing the dual registry pattern with a unified approach.</p>
- * 
+ * bidirectional constraints, replacing the old ChildRequirement system with unified
+ * acceptsChildren/acceptsParents declarations.</p>
+ *
  * <h3>Usage Examples:</h3>
- * 
+ *
  * <pre>{@code
- * // Simple field type with attributes
+ * // String field with specific attributes
  * TypeDefinitionBuilder.forClass(StringField.class)
- *     .type("field").subType("string")
+ *     .type(TYPE_FIELD).subType(SUBTYPE_STRING)
  *     .description("String field with pattern validation")
- *     .optionalAttribute("pattern", "string")
- *     .optionalAttribute("required", "boolean")
+ *     .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+ *     .acceptsNamedChildren(TYPE_ATTR, SUBTYPE_STRING, ATTR_PATTERN)
+ *     .acceptsNamedChildren(TYPE_ATTR, SUBTYPE_INT, ATTR_MAX_LENGTH)
  *     .build();
- * 
+ *
  * // Object type accepting any fields
  * TypeDefinitionBuilder.forClass(MetaObject.class)
- *     .type("object").subType("base")
- *     .optionalChild("field", "*", "*")  // Any field, any name
+ *     .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
+ *     .acceptsChildren(TYPE_FIELD, "*")  // Any field type and subtype
+ *     .acceptsChildren(TYPE_KEY, "*")
  *     .build();
  * }</pre>
- * 
- * @since 6.0.0
+ *
+ * @since 6.2.0
  */
 public class TypeDefinitionBuilder {
 
@@ -40,7 +43,8 @@ public class TypeDefinitionBuilder {
     private String description;
     private String parentType;
     private String parentSubType;
-    private final Map<String, ChildRequirement> childRequirements = new HashMap<>();
+    private final List<AcceptsChildrenDeclaration> acceptsChildren = new ArrayList<>();
+    private final List<AcceptsParentsDeclaration> acceptsParents = new ArrayList<>();
     
     /**
      * Create builder for the specified implementation class
@@ -60,7 +64,32 @@ public class TypeDefinitionBuilder {
     public static TypeDefinitionBuilder forClass(Class<? extends MetaData> implementationClass) {
         return new TypeDefinitionBuilder(implementationClass);
     }
-    
+
+    /**
+     * Create builder from existing TypeDefinition for extension purposes
+     *
+     * @param existing Existing TypeDefinition to copy settings from
+     * @return New TypeDefinitionBuilder with settings copied from existing definition
+     */
+    public static TypeDefinitionBuilder from(TypeDefinition existing) {
+        TypeDefinitionBuilder builder = new TypeDefinitionBuilder(existing.getImplementationClass());
+
+        // Copy basic properties
+        builder.type = existing.getType();
+        builder.subType = existing.getSubType();
+        builder.description = existing.getDescription();
+        builder.parentType = existing.getParentType();
+        builder.parentSubType = existing.getParentSubType();
+
+        // Copy accepts children declarations (direct ones only, not inherited)
+        builder.acceptsChildren.addAll(existing.getDirectAcceptsChildren());
+
+        // Copy accepts parents declarations (direct ones only, not inherited)
+        builder.acceptsParents.addAll(existing.getDirectAcceptsParents());
+
+        return builder;
+    }
+
     /**
      * Set the primary type identifier
      * 
@@ -126,106 +155,123 @@ public class TypeDefinitionBuilder {
     }
 
     /**
-     * Add a required child with specific type, subType, and name
-     * 
-     * @param childType Expected child type (e.g., "field", "attr")
-     * @param childSubType Expected child subType (e.g., "string", "int") or "*" for any
-     * @param childName Expected child name or "*" for any
+     * Declare that this type accepts children of the specified type and subtype (any name)
+     *
+     * @param childType Expected child type (e.g., TYPE_FIELD, TYPE_ATTR)
+     * @param childSubType Expected child subType (e.g., SUBTYPE_STRING, SUBTYPE_INT) or "*" for any
      * @return This builder for method chaining
      */
-    public TypeDefinitionBuilder requiredChild(String childType, String childSubType, String childName) {
-        ChildRequirement requirement = ChildRequirement.required(childName, childType, childSubType);
-        addChildRequirement(requirement);
+    public TypeDefinitionBuilder acceptsChildren(String childType, String childSubType) {
+        acceptsChildren.add(new AcceptsChildrenDeclaration(childType, childSubType, null));
         return this;
     }
-    
+
     /**
-     * Add an optional child with specific type, subType, and name
-     * 
-     * @param childType Expected child type (e.g., "field", "attr")
-     * @param childSubType Expected child subType (e.g., "string", "int") or "*" for any
-     * @param childName Expected child name or "*" for any
+     * Declare that this type accepts children of the specified type, subtype, and specific name
+     *
+     * @param childType Expected child type (e.g., TYPE_FIELD, TYPE_ATTR)
+     * @param childSubType Expected child subType (e.g., SUBTYPE_STRING, SUBTYPE_INT)
+     * @param childName Expected specific child name (e.g., ATTR_MAX_LENGTH)
      * @return This builder for method chaining
      */
-    public TypeDefinitionBuilder optionalChild(String childType, String childSubType, String childName) {
-        ChildRequirement requirement = ChildRequirement.optional(childName, childType, childSubType);
-        addChildRequirement(requirement);
+    public TypeDefinitionBuilder acceptsNamedChildren(String childType, String childSubType, String childName) {
+        acceptsChildren.add(new AcceptsChildrenDeclaration(childType, childSubType, childName));
         return this;
     }
-    
+
     /**
-     * Add an optional child with wildcard name (accepts any name of specified type.subType)
-     * 
-     * @param childType Expected child type (e.g., "field", "attr")
-     * @param childSubType Expected child subType (e.g., "string", "int") or "*" for any
+     * Declare that this type can be placed under parents of the specified type and subtype (any name)
+     *
+     * @param parentType Expected parent type (e.g., TYPE_FIELD, TYPE_OBJECT)
+     * @param parentSubType Expected parent subType (e.g., SUBTYPE_STRING, SUBTYPE_BASE) or "*" for any
      * @return This builder for method chaining
      */
+    public TypeDefinitionBuilder acceptsParents(String parentType, String parentSubType) {
+        acceptsParents.add(new AcceptsParentsDeclaration(parentType, parentSubType, null));
+        return this;
+    }
+
+    /**
+     * Declare that this type can be placed under parents of the specified type and subtype when named specifically
+     *
+     * @param parentType Expected parent type (e.g., TYPE_FIELD, TYPE_OBJECT)
+     * @param parentSubType Expected parent subType (e.g., SUBTYPE_STRING, SUBTYPE_BASE)
+     * @param expectedChildName The name this child expects to have when placed under this parent
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder acceptsNamedParents(String parentType, String parentSubType, String expectedChildName) {
+        acceptsParents.add(new AcceptsParentsDeclaration(parentType, parentSubType, expectedChildName));
+        return this;
+    }
+
+    /**
+     * Convenience method for attribute children (any name)
+     *
+     * @param attrSubType Attribute subType (e.g., SUBTYPE_STRING, SUBTYPE_BOOLEAN, SUBTYPE_INT)
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder acceptsAttributes(String attrSubType) {
+        return acceptsChildren("attr", attrSubType);
+    }
+
+    /**
+     * Convenience method for named attribute children
+     *
+     * @param attrSubType Attribute subType (e.g., SUBTYPE_STRING, SUBTYPE_BOOLEAN, SUBTYPE_INT)
+     * @param attrName Specific attribute name (e.g., ATTR_MAX_LENGTH, ATTR_PATTERN)
+     * @return This builder for method chaining
+     */
+    public TypeDefinitionBuilder acceptsNamedAttributes(String attrSubType, String attrName) {
+        return acceptsNamedChildren("attr", attrSubType, attrName);
+    }
+
+    // ======================================
+    // BACKWARD COMPATIBILITY BRIDGE METHODS
+    // ======================================
+
+    /**
+     * @deprecated Use acceptsChildren(childType, childSubType) instead
+     */
+    @Deprecated
     public TypeDefinitionBuilder optionalChild(String childType, String childSubType) {
-        return optionalChild(childType, childSubType, "*");
+        return acceptsChildren(childType, childSubType);
     }
-    
+
     /**
-     * Add a required attribute (convenience method for common case)
-     * 
-     * @param attrName Attribute name
-     * @param attrSubType Attribute subType (e.g., "string", "boolean", "int")
-     * @return This builder for method chaining
+     * @deprecated Use acceptsNamedChildren(childType, childSubType, childName) instead
      */
-    public TypeDefinitionBuilder requiredAttribute(String attrName, String attrSubType) {
-        return requiredChild("attr", attrSubType, attrName);
+    @Deprecated
+    public TypeDefinitionBuilder optionalChild(String childType, String childSubType, String childName) {
+        if ("*".equals(childName)) {
+            return acceptsChildren(childType, childSubType);
+        } else {
+            return acceptsNamedChildren(childType, childSubType, childName);
+        }
     }
-    
+
     /**
-     * Add an optional attribute (convenience method for common case)
-     * 
-     * @param attrName Attribute name
-     * @param attrSubType Attribute subType (e.g., "string", "boolean", "int")
-     * @return This builder for method chaining
+     * @deprecated Use acceptsNamedChildren(childType, childSubType, childName) instead
      */
-    public TypeDefinitionBuilder optionalAttribute(String attrName, String attrSubType) {
-        return optionalChild("attr", attrSubType, attrName);
+    @Deprecated
+    public TypeDefinitionBuilder requiredChild(String childType, String childSubType, String childName) {
+        // Note: New system doesn't distinguish required vs optional at registration time
+        return optionalChild(childType, childSubType, childName);
     }
-    
+
+    // Deprecated methods removed - use acceptsNamedAttributes(attrSubType, attrName) instead
+
     /**
-     * Add an optional attribute with wildcard subType (accepts any attribute subType)
-     * 
-     * @param attrName Attribute name
-     * @return This builder for method chaining
+     * @deprecated Not needed in new bidirectional constraint system
      */
-    public TypeDefinitionBuilder optionalAttribute(String attrName) {
-        return optionalAttribute(attrName, "*");
-    }
-    
-    /**
-     * Add a child requirement directly
-     * 
-     * @param requirement Child requirement to add
-     * @return This builder for method chaining
-     */
+    @Deprecated
     public TypeDefinitionBuilder childRequirement(ChildRequirement requirement) {
-        addChildRequirement(requirement);
-        return this;
-    }
-    
-    /**
-     * Internal method to add child requirement with proper key handling
-     */
-    private void addChildRequirement(ChildRequirement requirement) {
-        String key = requirement.getName();
-        if ("*".equals(key)) {
-            // For wildcard requirements, create unique keys to avoid overwrites
-            key = "*:" + requirement.getExpectedType() + ":" + requirement.getExpectedSubType();
+        // Convert ChildRequirement to new API
+        String name = "*".equals(requirement.getName()) ? null : requirement.getName();
+        if (name != null) {
+            return acceptsNamedChildren(requirement.getExpectedType(), requirement.getExpectedSubType(), name);
+        } else {
+            return acceptsChildren(requirement.getExpectedType(), requirement.getExpectedSubType());
         }
-        
-        ChildRequirement existing = childRequirements.get(key);
-        if (existing != null && !existing.equals(requirement)) {
-            throw new IllegalArgumentException(
-                "Child requirement already exists for key '" + key + 
-                "'. Existing: " + existing + ", New: " + requirement
-            );
-        }
-        
-        childRequirements.put(key, requirement);
     }
     
     /**
@@ -243,7 +289,7 @@ public class TypeDefinitionBuilder {
         }
 
         return new TypeDefinition(implementationClass, type, subType, description,
-                                 childRequirements, parentType, parentSubType);
+                                 acceptsChildren, acceptsParents, parentType, parentSubType);
     }
     
     /**
@@ -265,18 +311,27 @@ public class TypeDefinitionBuilder {
     }
     
     /**
-     * Get the number of child requirements currently defined
-     * 
-     * @return Count of child requirements
+     * Get the number of child declarations currently defined
+     *
+     * @return Count of accepts children declarations
      */
-    public int getChildRequirementCount() {
-        return childRequirements.size();
+    public int getAcceptsChildrenCount() {
+        return acceptsChildren.size();
+    }
+
+    /**
+     * Get the number of parent declarations currently defined
+     *
+     * @return Count of accepts parents declarations
+     */
+    public int getAcceptsParentsCount() {
+        return acceptsParents.size();
     }
     
     @Override
     public String toString() {
         String typeName = (type != null && subType != null) ? type + "." + subType : "undefined";
-        return String.format("TypeDefinitionBuilder[%s -> %s, children=%d]",
-            typeName, implementationClass.getSimpleName(), childRequirements.size());
+        return String.format("TypeDefinitionBuilder[%s -> %s, acceptsChildren=%d, acceptsParents=%d]",
+            typeName, implementationClass.getSimpleName(), acceptsChildren.size(), acceptsParents.size());
     }
 }

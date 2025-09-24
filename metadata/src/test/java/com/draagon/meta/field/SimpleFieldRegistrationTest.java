@@ -1,8 +1,11 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.SharedTestRegistry;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
@@ -11,10 +14,15 @@ import static org.junit.Assert.*;
  */
 public class SimpleFieldRegistrationTest {
 
+    private static final Logger log = LoggerFactory.getLogger(SimpleFieldRegistrationTest.class);
     private MetaDataRegistry registry;
 
     @Before
     public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("SimpleFieldRegistrationTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         registry = MetaDataRegistry.getInstance();
         
         // Trigger static registrations

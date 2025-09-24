@@ -2,10 +2,7 @@
  "metadata": {"package": "simple::fruitbasket",
   "children": [
 
-    {"field": {"package": "simple::common", "name": "id", "subType": "long", "@isAbstract": true,
-      "children": [
-        {"attr": {"name": "isKey", "subType": "boolean", "value": true}}
-      ]}},
+    {"field": {"package": "simple::common", "name": "id", "subType": "long", "@isAbstract": true}},
 
     {"field": {"package": "simple::common", "name": "name", "subType": "string", "@isAbstract": true,
       "children": [

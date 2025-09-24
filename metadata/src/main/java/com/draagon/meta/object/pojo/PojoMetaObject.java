@@ -6,11 +6,7 @@
  */
 package com.draagon.meta.object.pojo;
 
-import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.InvalidValueException;
-import com.draagon.meta.MetaData;
-import com.draagon.meta.MetaDataException;
-import com.draagon.meta.ValidationResult;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
@@ -20,7 +16,6 @@ import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
 import java.lang.reflect.*;
 
 /**
@@ -28,7 +23,6 @@ import java.lang.reflect.*;
  *
  * @version 6.0
  */
-@SuppressWarnings("serial")
 public class PojoMetaObject extends MetaObject
 {
     private static final Logger log = LoggerFactory.getLogger(PojoMetaObject.class);
@@ -51,15 +45,15 @@ public class PojoMetaObject extends MetaObject
                 .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
 
                 // POJO-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
-                .optionalAttribute(ATTR_CLASS_NAME, "string")
-                .optionalAttribute(ATTR_PACKAGE_NAME, "string")
-                
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("dbTable", "string")
-                .optionalAttribute("hasAuditing", "boolean")
-                .optionalAttribute("hasJpa", "boolean")
-                .optionalAttribute("hasValidation", "boolean")
-                .optionalAttribute("implements", "string")
+                .acceptsNamedAttributes("string", ATTR_CLASS_NAME)
+                .acceptsNamedAttributes("string", ATTR_PACKAGE_NAME)
+
+                // TODO: These test-specific attributes should be removed and handled via service providers
+                // .acceptsNamedAttributes("string", "dbTable")      // Move to DatabaseConstraintProvider
+                // .acceptsNamedAttributes("boolean", "hasAuditing") // Move to AuditingConstraintProvider
+                // .acceptsNamedAttributes("boolean", "hasJpa")      // Move to JpaConstraintProvider
+                // .acceptsNamedAttributes("boolean", "hasValidation") // Move to ValidationConstraintProvider
+                // .acceptsNamedAttributes("string", "implements")   // Move to inheritance handling
 
                 // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
                 // - All field types (field.*)

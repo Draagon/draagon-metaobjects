@@ -3,37 +3,52 @@ package com.draagon.meta.constraint;
 import com.draagon.meta.*;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.object.pojo.PojoMetaObject;
+import com.draagon.meta.registry.SharedTestRegistry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
 /**
  * Comprehensive tests for the constraint system that replaced ValidationChain.
- * 
- * These tests verify that constraints are enforced in real-time during metadata construction,
- * ensuring data integrity without requiring explicit validation calls.
+ *
+ * <p>Uses SharedTestRegistry to eliminate test interference and follow
+ * the READ-OPTIMIZED architecture where registry is loaded once per
+ * application lifetime.</p>
+ *
+ * <p>These tests verify that constraints are enforced in real-time during metadata construction,
+ * ensuring data integrity without requiring explicit validation calls.</p>
  */
 public class ConstraintSystemTest {
 
+    private static final Logger log = LoggerFactory.getLogger(ConstraintSystemTest.class);
     private MetaDataLoader loader;
 
     @Before
     public void setUp() {
-        // Create and initialize a manual loader for testing
-        MetaDataLoader tempLoader = MetaDataLoader.createManual(false, "test-constraint-loader");
-        tempLoader.init();
-        tempLoader.register();
-        loader = tempLoader.getLoader();
+        // Use shared registry - no repeated service discovery
+        SharedTestRegistry.getInstance();
+        log.debug("ConstraintSystemTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
+        // Create a simple loader with a minimal URI for constraint testing
+        SimpleLoader simpleLoader = new SimpleLoader("constraint-test");
+        simpleLoader.setSourceURIs(Arrays.asList(URI.create("model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.json")));
+        simpleLoader.init();
+        loader = simpleLoader;
     }
 
     @After
     public void tearDown() {
-        if (loader != null) {
-            loader.destroy();
-        }
+        // NOTE: Don't destroy loader or reset SharedTestRegistry - preserve for other tests
+        // The READ-OPTIMIZED architecture means loaders are permanent for application lifetime
     }
 
     /**

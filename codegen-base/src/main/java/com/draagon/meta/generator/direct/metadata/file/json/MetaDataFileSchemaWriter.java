@@ -10,6 +10,8 @@ import com.draagon.meta.constraint.Constraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
 import com.draagon.meta.registry.ChildRequirement;
+import com.draagon.meta.registry.AcceptsChildrenDeclaration;
+import com.draagon.meta.registry.AcceptsParentsDeclaration;
 import static com.draagon.meta.MetaData.*;
 import static com.draagon.meta.loader.parser.json.JsonMetaDataParser.JSON_ATTR_PREFIX;
 import com.draagon.meta.MetaDataTypeId;
@@ -274,8 +276,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     private JsonObject createPrimaryTypeSchema(String primaryType, List<TypeDefinition> typeDefs) {
         JsonObject schema = new JsonObject();
         schema.addProperty("type", "object");
-        schema.addProperty("description", String.format("%s definition with %d registered subtypes",
-                capitalizeFirstLetter(primaryType), typeDefs.size()));
+        schema.addProperty("description", generateConstraintAwareDescription(primaryType, typeDefs));
 
         JsonObject properties = new JsonObject();
 
@@ -381,10 +382,105 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     }
 
     /**
-     * Check if any type definition in the list has child requirements
+     * Check if any type definition in the list accepts children using bidirectional constraints
      */
     private boolean hasChildRequirements(List<TypeDefinition> typeDefs) {
         return typeDefs.stream()
-                .anyMatch(def -> !def.getChildRequirements().isEmpty());
+                .anyMatch(def -> !def.getAcceptsChildren().isEmpty());
+    }
+
+    /**
+     * Generate constraint-aware description for a type based on bidirectional constraints
+     */
+    private String generateConstraintAwareDescription(String primaryType, List<TypeDefinition> typeDefs) {
+        StringBuilder description = new StringBuilder();
+        description.append(String.format("%s definition with %d registered subtypes. ",
+                capitalizeFirstLetter(primaryType), typeDefs.size()));
+
+        // Add inheritance information from bidirectional constraints
+        List<TypeDefinition> inheritedTypes = typeDefs.stream()
+                .filter(TypeDefinition::hasParent)
+                .collect(Collectors.toList());
+
+        if (!inheritedTypes.isEmpty()) {
+            description.append(String.format("Inheritance: %d types inherit from base types. ",
+                    inheritedTypes.size()));
+        }
+
+        // Add bidirectional constraint information
+        Map<String, Set<String>> acceptedChildren = getAcceptedChildrenSummary(typeDefs);
+        if (!acceptedChildren.isEmpty()) {
+            description.append("Accepted children: ");
+            acceptedChildren.entrySet().stream()
+                    .map(entry -> entry.getKey() + "(" + String.join(",", entry.getValue()) + ")")
+                    .forEach(desc -> description.append(desc).append(" "));
+        }
+
+        // Add constraint validation information
+        int validationConstraints = constraintRegistry.getValidationConstraints().size();
+        int placementConstraints = constraintRegistry.getPlacementConstraints().size();
+        description.append(String.format("Validation enforced by %d validation + %d placement constraints.",
+                validationConstraints, placementConstraints));
+
+        return description.toString().trim();
+    }
+
+    /**
+     * Get summary of accepted children types from bidirectional constraints
+     */
+    private Map<String, Set<String>> getAcceptedChildrenSummary(List<TypeDefinition> typeDefs) {
+        Map<String, Set<String>> acceptedChildren = new HashMap<>();
+
+        for (TypeDefinition typeDef : typeDefs) {
+            for (AcceptsChildrenDeclaration childDecl : typeDef.getAcceptsChildren()) {
+                String childType = childDecl.getChildType();
+                String childSubType = childDecl.getChildSubType();
+
+                acceptedChildren.computeIfAbsent(childType, k -> new HashSet<>()).add(childSubType);
+            }
+        }
+
+        return acceptedChildren;
+    }
+
+    /**
+     * Generate constraint-based validation properties for inline attributes
+     * This ensures JSON Schema validates constraints from the bidirectional system
+     */
+    private JsonObject generateConstraintBasedValidation(String primaryType) {
+        JsonObject validation = new JsonObject();
+
+        // Add constraint information as schema properties
+        validation.addProperty("description",
+            "Constraint validation: This type follows bidirectional constraint rules from the MetaObjects constraint system");
+
+        // Get all types that can have this type as parent (bidirectional lookup)
+        List<String> validChildren = getValidChildrenForType(primaryType);
+        if (!validChildren.isEmpty()) {
+            JsonArray validChildrenArray = new JsonArray();
+            validChildren.forEach(validChildrenArray::add);
+            validation.add("validChildren", validChildrenArray);
+        }
+
+        return validation;
+    }
+
+    /**
+     * Get valid children types for a parent type based on bidirectional constraints
+     */
+    private List<String> getValidChildrenForType(String parentType) {
+        List<String> validChildren = new ArrayList<>();
+
+        // Find all type definitions that accept this parent type
+        for (TypeDefinition typeDef : typeRegistry.getAllTypeDefinitions()) {
+            for (AcceptsChildrenDeclaration childDecl : typeDef.getAcceptsChildren()) {
+                if ("*".equals(childDecl.getChildType()) ||
+                    parentType.equals(childDecl.getChildType())) {
+                    validChildren.add(typeDef.getQualifiedName());
+                }
+            }
+        }
+
+        return validChildren;
     }
 }

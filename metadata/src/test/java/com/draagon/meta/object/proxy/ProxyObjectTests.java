@@ -6,15 +6,27 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
+import com.draagon.meta.registry.SharedTestRegistry;
 import com.draagon.meta.test.proxy.fruitbasket.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
+import java.net.URI;
 import java.util.*;
 
+/**
+ * Proxy object tests using SharedTestRegistry to prevent test interference.
+ *
+ * <p>Updated to use SharedTestRegistry approach instead of SimpleLoader.createManual()
+ * to ensure proper provider discovery and eliminate constraint violations.</p>
+ */
 public class ProxyObjectTests {
+
+    private static final Logger log = LoggerFactory.getLogger(ProxyObjectTests.class);
 
     protected final String BASKET_TO_FRUIT = "simple::fruitbasket::BasketToFruit";
     protected MetaDataLoader loader = null;
@@ -29,10 +41,18 @@ public class ProxyObjectTests {
 
     @Before
     public void initLoader() throws ClassNotFoundException {
-        loader = SimpleLoader.createManual("proxytest", Arrays.asList(
-                "com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.json"
-        ));
+        // Use SharedTestRegistry to ensure proper provider discovery
+        SharedTestRegistry.getInstance();
+        log.debug("ProxyObjectTests setup with shared registry: {}", SharedTestRegistry.getStatus());
 
+        // Create loader using the same pattern as SimpleLoaderTestBase
+        SimpleLoader simpleLoader = new SimpleLoader("proxytest")
+                .setSourceURIs(Arrays.asList(
+                        URI.create("model:resource:com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.json")
+                ))
+                .init();
+
+        loader = simpleLoader;
         setupData();
     }
 

@@ -11,10 +11,14 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A String Array Field with unified registry registration and child requirements.
@@ -22,24 +26,37 @@ import java.util.List;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataType(type = "field", subType = "stringArray", description = "String array field for lists of string values")
 @SuppressWarnings("serial")
 public class StringArrayField extends ArrayField<String,List<String>> implements StringSerializationHandler
 {
     private static final Logger log = LoggerFactory.getLogger(StringArrayField.class);
 
-    public final static String SUBTYPE_STRING_ARRAY = "stringArray";
+    public final static String SUBTYPE_STRING_ARRAY = "stringarray";
 
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(StringArrayField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING_ARRAY)
                 .description("String array field for lists of string values")
-                
-                // Inherits: required, defaultValue, validation, defaultView from MetaField
-                // Array fields inherit array-specific attributes from ArrayField
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // NO STRING ARRAY-SPECIFIC ATTRIBUTES - inherits all from field.base
+
             );
-            
+
             log.debug("Registered StringArrayField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register StringArrayField type with unified registry", e);

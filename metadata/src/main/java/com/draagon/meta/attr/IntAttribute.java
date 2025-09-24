@@ -7,8 +7,8 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
-
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.ValidationConstraint;
 import org.slf4j.Logger;
@@ -34,28 +34,54 @@ public class IntAttribute extends MetaAttribute<Integer> {
     // Unified registry self-registration
     static {
         try {
-            com.draagon.meta.registry.MetaDataRegistry.registerType(IntAttribute.class, def -> def
+            // Explicitly trigger MetaAttribute static initialization first
+            try {
+                Class.forName(MetaAttribute.class.getName());
+                // Add a small delay to ensure MetaAttribute registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaAttribute class loading", e);
+            }
+
+            MetaDataRegistry.registerType(IntAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_INT)
                 .description("Integer attribute for numeric metadata values")
-                
-                // Integer attributes can be placed under any MetaData
-                // No specific child requirements
+
+                // INHERIT FROM BASE ATTRIBUTE
+                .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+
+                // === CORE INTEGER ATTRIBUTE PARENT ACCEPTANCES ===
+                // Integer attributes can be used for core field attributes
+                .acceptsNamedParents("field", "string", "maxLength")        // String field maxLength
+                .acceptsNamedParents("field", "string", "minLength")        // String field minLength
+                .acceptsNamedParents("field", "int", "minValue")            // Integer field minValue
+                .acceptsNamedParents("field", "int", "maxValue")            // Integer field maxValue
+                .acceptsNamedParents("field", "long", "minValue")           // Long field minValue
+                .acceptsNamedParents("field", "long", "maxValue")           // Long field maxValue
+
+                // === DATABASE INTEGER ATTRIBUTE PARENT ACCEPTANCES ===
+
+                // FIELD-LEVEL DATABASE INTEGER ATTRIBUTES (for MetaFields)
+                .acceptsNamedParents("field", "*", "dbLength")          // Database column length
+                .acceptsNamedParents("field", "*", "dbPrecision")       // Database precision for numeric fields
+                .acceptsNamedParents("field", "*", "dbScale")           // Database scale for numeric fields
             );
-            
+
             log.debug("Registered IntAttribute type with unified registry");
-            
-            // Register IntAttribute-specific constraints
-            setupIntAttributeConstraints();
-            
+
+            // Register IntAttribute-specific validation constraints only
+            setupIntAttributeValidationConstraints();
+
         } catch (Exception e) {
             log.error("Failed to register IntAttribute type with unified registry", e);
         }
     }
     
     /**
-     * Setup IntAttribute-specific constraints in the constraint registry
+     * Setup IntAttribute-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void setupIntAttributeConstraints() {
+    private static void setupIntAttributeValidationConstraints() {
         try {
             ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
             

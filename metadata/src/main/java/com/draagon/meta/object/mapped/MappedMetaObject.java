@@ -4,13 +4,10 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
-import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
-import javax.sound.midi.MetaEventListener;
 import java.util.Map;
 
 /**
@@ -36,9 +33,6 @@ public class MappedMetaObject extends MetaObject
                 .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
 
                 // NO MAP-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
-
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("implements", "string")
 
                 // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
                 // - All field types (field.*)

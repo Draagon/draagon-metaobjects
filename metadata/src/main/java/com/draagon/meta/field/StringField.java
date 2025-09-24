@@ -10,7 +10,8 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
@@ -48,97 +49,71 @@ public class StringField extends PrimitiveField<String> {
         super( SUBTYPE_STRING, name, DataTypes.STRING );
     }
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register field.string type and string-specific constraints using Phase 2 standardized pattern.
+     *
+     * <p>This method replaces the previous static block approach with a controlled, testable
+     * registration process that ensures proper dependency order during initialization.</p>
+     *
+     * @param registry MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            // Register StringField type with inheritance from field.base
+            registry.registerType(StringField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING)
                 .description("String field with length and pattern validation")
 
-                // INHERIT FROM BASE FIELD
+                // INHERIT FROM BASE FIELD (which inherits from metadata.base)
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
-                // STRING-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_PATTERN, "string")
-                .optionalAttribute(ATTR_MAX_LENGTH, "int")
-                .optionalAttribute(ATTR_MIN_LENGTH, "int")
+                // STRING-SPECIFIC ATTRIBUTES (using new API) - CORE ONLY
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_PATTERN)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_MAX_LENGTH)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_MIN_LENGTH)
+
+                // NOTE: Database attributes are declared by DatabaseConstraintProvider
+                // This maintains separation of concerns and extensibility
             );
-            
-            log.debug("Registered StringField type with unified registry");
-            
-            // Register StringField-specific constraints
-            setupStringFieldConstraints();
-            
+
+            log.debug("Registered StringField type using Phase 2 pattern");
+
+            // Register StringField-specific validation constraints only
+            setupStringFieldValidationConstraints();
+
         } catch (Exception e) {
-            log.error("Failed to register StringField type with unified registry", e);
+            log.error("Failed to register StringField type using Phase 2 pattern", e);
+            throw new RuntimeException("StringField type registration failed", e);
         }
     }
     
     /**
-     * Setup StringField-specific constraints in the constraint registry
+     * Setup StringField-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void setupStringFieldConstraints() {
+    private static void setupStringFieldValidationConstraints() {
         try {
             ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
-            // PLACEMENT CONSTRAINT: StringField CAN have maxLength attribute
-            PlacementConstraint maxLengthPlacement = new PlacementConstraint(
-                "stringfield.maxlength.placement",
-                "StringField can optionally have maxLength attribute",
-                (metadata) -> metadata instanceof StringField,
-                (child) -> child instanceof IntAttribute && 
-                          child.getName().equals(ATTR_MAX_LENGTH)
-            );
-            constraintRegistry.addConstraint(maxLengthPlacement);
-            
-            // PLACEMENT CONSTRAINT: StringField CAN have minLength attribute
-            PlacementConstraint minLengthPlacement = new PlacementConstraint(
-                "stringfield.minlength.placement",
-                "StringField can optionally have minLength attribute",
-                (metadata) -> metadata instanceof StringField,
-                (child) -> child instanceof IntAttribute && 
-                          child.getName().equals(ATTR_MIN_LENGTH)
-            );
-            constraintRegistry.addConstraint(minLengthPlacement);
-            
-            // PLACEMENT CONSTRAINT: StringField CAN have pattern attribute
-            PlacementConstraint patternPlacement = new PlacementConstraint(
-                "stringfield.pattern.placement",
-                "StringField can optionally have pattern attribute",
-                (metadata) -> metadata instanceof StringField,
-                (child) -> child instanceof StringAttribute && 
-                          child.getName().equals(ATTR_PATTERN)
-            );
-            constraintRegistry.addConstraint(patternPlacement);
-            
-            // VALIDATION CONSTRAINT: Pattern validation for string fields
+
+            // VALUE VALIDATION CONSTRAINT: Pattern validation for string fields
             ValidationConstraint patternValidation = new ValidationConstraint(
                 "stringfield.pattern.validation",
                 "StringField pattern attribute must be valid regex",
                 (metadata) -> metadata instanceof StringField && metadata.hasMetaAttr(ATTR_PATTERN),
                 (metadata, value) -> {
+                    if (value == null) return true; // Optional
                     try {
-                        String pattern = metadata.getMetaAttr(ATTR_PATTERN).getValueAsString();
-                        if (pattern != null && !pattern.isEmpty()) {
-                            // Test if pattern is valid regex
-                            java.util.regex.Pattern.compile(pattern);
-                        }
+                        Pattern.compile(value.toString());
                         return true;
-                    } catch (java.util.regex.PatternSyntaxException e) {
+                    } catch (PatternSyntaxException e) {
                         return false;
                     }
                 }
             );
             constraintRegistry.addConstraint(patternValidation);
+
+            // Additional validation constraints can be added here
+            // (length validation, etc. - only VALUE validation, not structural)
             
             log.debug("Registered StringField-specific constraints");
             

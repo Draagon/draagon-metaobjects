@@ -10,13 +10,7 @@
           {
             "name": "id",
             "subType": "long",
-            "attributes": [
-              {
-                "subType": "boolean",
-                "name": "isKey",
-                "value": true
-              }
-            ]
+            "attributes": []
           },
           {
             "name": "firstName",
@@ -111,13 +105,7 @@
           {
             "name": "id",
             "subType": "long",
-            "attributes": [
-              {
-                "subType": "boolean",
-                "name": "isKey",
-                "value": true
-              }
-            ]
+            "attributes": []
           },
           {
             "name": "street",

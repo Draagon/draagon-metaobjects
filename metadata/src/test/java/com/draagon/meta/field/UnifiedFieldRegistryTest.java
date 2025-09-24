@@ -1,6 +1,7 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.SharedTestRegistry;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.attr.IntAttribute;
@@ -14,6 +15,8 @@ import com.google.gson.JsonParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -26,20 +29,28 @@ import static org.junit.Assert.*;
 /**
  * Comprehensive test for unified field type registry and metadata loading.
  * Tests that all field types properly self-register and can be loaded from metadata files.
+ *
+ * <p>Updated to use SharedTestRegistry to prevent test interference and ensure
+ * proper provider discovery for all tests.</p>
  */
 public class UnifiedFieldRegistryTest {
 
+    private static final Logger log = LoggerFactory.getLogger(UnifiedFieldRegistryTest.class);
     private MetaDataRegistry registry;
     private Path tempDir;
 
     @Before
     public void setUp() throws IOException {
+        // Use SharedTestRegistry to ensure proper provider discovery
+        SharedTestRegistry.getInstance();
+        log.debug("UnifiedFieldRegistryTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         // Create temp directory for test files
         tempDir = Files.createTempDirectory("unified-field-registry-test");
-        
+
         // Get the unified registry instance
         registry = MetaDataRegistry.getInstance();
-        
+
         // Ensure static registrations are loaded by creating instances
         triggerStaticRegistrations();
     }
@@ -182,63 +193,53 @@ public class UnifiedFieldRegistryTest {
         // Create metadata file with all the field types we've registered
         Path metadataFile = tempDir.resolve("all-field-types-metadata.json");
         createAllFieldTypesMetadata(metadataFile);
-        
-        // Load the metadata using SimpleLoader
-        MetaDataLoader loader = MetaDataLoader.createManual(false, "all-field-types-test")
-                .init()
-                .register()
-                .getLoader();
-        
-        try {
-            SimpleLoader simpleLoader = new SimpleLoader("all-field-types");
-            simpleLoader.setSourceURIs(java.util.Arrays.asList(metadataFile.toUri()));
-            simpleLoader.init();
-            
-            // Debug: Print what children are actually loaded
-            System.out.println("SimpleLoader children: " + simpleLoader.getChildren().size());
-            for (com.draagon.meta.MetaData child : simpleLoader.getChildren()) {
-                System.out.println("  Child: " + child.getName() + " (" + child.getClass().getSimpleName() + ")");
-            }
-            
-            // Verify the metadata loaded successfully  
-            // Try both simple name and fully qualified name
-            com.draagon.meta.object.MetaObject testObject = null;
-            try {
-                testObject = simpleLoader.getMetaObjectByName("AllFieldTypesTest");
-            } catch (Exception e) {
-                // Try fully qualified name
-                testObject = simpleLoader.getMetaObjectByName("test::alltypes::AllFieldTypesTest");
-            }
-            assertNotNull("Test object should be loaded", testObject);
-            
-            // Verify each field type loaded correctly
-            MetaField stringField = testObject.getMetaField("testString");
-            assertNotNull("String field should be loaded", stringField);
-            assertTrue("String field should be StringField", stringField instanceof StringField);
-            
-            MetaField intField = testObject.getMetaField("testInt");
-            assertNotNull("Int field should be loaded", intField);
-            assertTrue("Int field should be IntegerField", intField instanceof IntegerField);
-            
-            MetaField longField = testObject.getMetaField("testLong");
-            assertNotNull("Long field should be loaded", longField);
-            assertTrue("Long field should be LongField", longField instanceof LongField);
-            
-            MetaField doubleField = testObject.getMetaField("testDouble");
-            assertNotNull("Double field should be loaded", doubleField);
-            assertTrue("Double field should be DoubleField", doubleField instanceof DoubleField);
-            
-            MetaField booleanField = testObject.getMetaField("testBoolean");
-            assertNotNull("Boolean field should be loaded", booleanField);
-            assertTrue("Boolean field should be BooleanField", booleanField instanceof BooleanField);
-            
-            MetaField dateField = testObject.getMetaField("testDate");
-            assertNotNull("Date field should be loaded", dateField);
-            assertTrue("Date field should be DateField", dateField instanceof DateField);
-            
-        } finally {
-            loader.destroy();
+
+        // Use SimpleLoader directly with SharedTestRegistry
+        SimpleLoader simpleLoader = new SimpleLoader("all-field-types");
+        simpleLoader.setSourceURIs(java.util.Arrays.asList(metadataFile.toUri()));
+        simpleLoader.init();
+
+        // Debug: Print what children are actually loaded
+        System.out.println("SimpleLoader children: " + simpleLoader.getChildren().size());
+        for (com.draagon.meta.MetaData child : simpleLoader.getChildren()) {
+            System.out.println("  Child: " + child.getName() + " (" + child.getClass().getSimpleName() + ")");
         }
+
+        // Verify the metadata loaded successfully
+        // Try both simple name and fully qualified name
+        com.draagon.meta.object.MetaObject testObject = null;
+        try {
+            testObject = simpleLoader.getMetaObjectByName("AllFieldTypesTest");
+        } catch (Exception e) {
+            // Try fully qualified name
+            testObject = simpleLoader.getMetaObjectByName("test::alltypes::AllFieldTypesTest");
+        }
+        assertNotNull("Test object should be loaded", testObject);
+
+        // Verify each field type loaded correctly
+        MetaField stringField = testObject.getMetaField("testString");
+        assertNotNull("String field should be loaded", stringField);
+        assertTrue("String field should be StringField", stringField instanceof StringField);
+
+        MetaField intField = testObject.getMetaField("testInt");
+        assertNotNull("Int field should be loaded", intField);
+        assertTrue("Int field should be IntegerField", intField instanceof IntegerField);
+
+        MetaField longField = testObject.getMetaField("testLong");
+        assertNotNull("Long field should be loaded", longField);
+        assertTrue("Long field should be LongField", longField instanceof LongField);
+
+        MetaField doubleField = testObject.getMetaField("testDouble");
+        assertNotNull("Double field should be loaded", doubleField);
+        assertTrue("Double field should be DoubleField", doubleField instanceof DoubleField);
+
+        MetaField booleanField = testObject.getMetaField("testBoolean");
+        assertNotNull("Boolean field should be loaded", booleanField);
+        assertTrue("Boolean field should be BooleanField", booleanField instanceof BooleanField);
+
+        MetaField dateField = testObject.getMetaField("testDate");
+        assertNotNull("Date field should be loaded", dateField);
+        assertTrue("Date field should be DateField", dateField instanceof DateField);
     }
 
     @Test
@@ -246,44 +247,35 @@ public class UnifiedFieldRegistryTest {
         // Create metadata file with fields that have attributes
         Path metadataFile = tempDir.resolve("fields-with-attributes-metadata.json");
         createFieldsWithAttributesMetadata(metadataFile);
-        
-        MetaDataLoader loader = MetaDataLoader.createManual(false, "fields-with-attributes-test")
-                .init()
-                .register()
-                .getLoader();
-        
+
+        // Use SimpleLoader directly with SharedTestRegistry
+        SimpleLoader simpleLoader = new SimpleLoader("fields-with-attributes");
+        simpleLoader.setSourceURIs(java.util.Arrays.asList(metadataFile.toUri()));
+        simpleLoader.init();
+
+        // Try both simple name and fully qualified name
+        com.draagon.meta.object.MetaObject testObject = null;
         try {
-            SimpleLoader simpleLoader = new SimpleLoader("fields-with-attributes");
-            simpleLoader.setSourceURIs(java.util.Arrays.asList(metadataFile.toUri()));
-            simpleLoader.init();
-            
-            // Try both simple name and fully qualified name
-            com.draagon.meta.object.MetaObject testObject = null;
-            try {
-                testObject = simpleLoader.getMetaObjectByName("FieldsWithAttributesTest");
-            } catch (Exception e) {
-                // Try fully qualified name (package is test::withattributes)
-                testObject = simpleLoader.getMetaObjectByName("test::withattributes::FieldsWithAttributesTest");
-            }
-            assertNotNull("Test object should be loaded", testObject);
-            
-            // Test string field with attributes
-            StringField emailField = (StringField) testObject.getMetaField("email");
-            assertNotNull("Email field should be loaded", emailField);
-            assertTrue("Email field should have maxLength attribute", 
-                      emailField.hasMetaAttr("maxLength"));
-            assertTrue("Email field should have pattern attribute", 
-                      emailField.hasMetaAttr("pattern"));
-            
-            // Test double field with attributes  
-            DoubleField priceField = (DoubleField) testObject.getMetaField("price");
-            assertNotNull("Price field should be loaded", priceField);
-            assertTrue("Price field should have precision attribute",
-                      priceField.hasMetaAttr("precision"));
-            
-        } finally {
-            loader.destroy();
+            testObject = simpleLoader.getMetaObjectByName("FieldsWithAttributesTest");
+        } catch (Exception e) {
+            // Try fully qualified name (package is test::withattributes)
+            testObject = simpleLoader.getMetaObjectByName("test::withattributes::FieldsWithAttributesTest");
         }
+        assertNotNull("Test object should be loaded", testObject);
+
+        // Test string field with attributes
+        StringField emailField = (StringField) testObject.getMetaField("email");
+        assertNotNull("Email field should be loaded", emailField);
+        assertTrue("Email field should have maxLength attribute",
+                  emailField.hasMetaAttr("maxLength"));
+        assertTrue("Email field should have pattern attribute",
+                  emailField.hasMetaAttr("pattern"));
+
+        // Test double field with attributes
+        DoubleField priceField = (DoubleField) testObject.getMetaField("price");
+        assertNotNull("Price field should be loaded", priceField);
+        assertTrue("Price field should have precision attribute",
+                  priceField.hasMetaAttr("precision"));
     }
 
     @Test
@@ -291,44 +283,35 @@ public class UnifiedFieldRegistryTest {
         // Test that constraint enforcement works during metadata loading
         Path metadataFile = tempDir.resolve("constraint-test-metadata.json");
         createConstraintTestMetadata(metadataFile);
-        
-        MetaDataLoader loader = MetaDataLoader.createManual(false, "constraint-test")
-                .init()
-                .register()
-                .getLoader();
-        
-        try {
-            SimpleLoader simpleLoader = new SimpleLoader("constraint-test");
-            simpleLoader.setSourceURIs(java.util.Arrays.asList(metadataFile.toUri()));
-            simpleLoader.init();
-            
-            // Verify constraint enforcement is working
-            // Try both simple name and fully qualified name
-            com.draagon.meta.object.MetaObject testObject = null;
-            try {
-                testObject = simpleLoader.getMetaObjectByName("ConstraintTest");
-            } catch (Exception e) {
-                // Try fully qualified name (package is test::constraints)
-                testObject = simpleLoader.getMetaObjectByName("test::constraints::ConstraintTest");
-            }
-            assertNotNull("Test object should be loaded", testObject);
-            
-            // Try to add an invalid child - should be rejected
-            // Get a field from the object and try to add another field to it (invalid)
-            MetaField validField = testObject.getMetaField("validField");
-            assertNotNull("Should have validField", validField);
 
-            try {
-                StringField invalidChild = new StringField("invalidNestedField");
-                validField.addChild(invalidChild);
-                fail("Should reject field as child of field");
-            } catch (Exception e) {
-                assertTrue("Should reject same type addition (actual: " + e.getMessage() + ")",
-                          e.getMessage().toLowerCase().contains("cannot add the same metadata type"));
-            }
-            
-        } finally {
-            loader.destroy();
+        // Use SimpleLoader directly with SharedTestRegistry
+        SimpleLoader simpleLoader = new SimpleLoader("constraint-test");
+        simpleLoader.setSourceURIs(java.util.Arrays.asList(metadataFile.toUri()));
+        simpleLoader.init();
+
+        // Verify constraint enforcement is working
+        // Try both simple name and fully qualified name
+        com.draagon.meta.object.MetaObject testObject = null;
+        try {
+            testObject = simpleLoader.getMetaObjectByName("ConstraintTest");
+        } catch (Exception e) {
+            // Try fully qualified name (package is test::constraints)
+            testObject = simpleLoader.getMetaObjectByName("test::constraints::ConstraintTest");
+        }
+        assertNotNull("Test object should be loaded", testObject);
+
+        // Try to add an invalid child - should be rejected
+        // Get a field from the object and try to add another field to it (invalid)
+        MetaField validField = testObject.getMetaField("validField");
+        assertNotNull("Should have validField", validField);
+
+        try {
+            StringField invalidChild = new StringField("invalidNestedField");
+            validField.addChild(invalidChild);
+            fail("Should reject field as child of field");
+        } catch (Exception e) {
+            assertTrue("Should reject same type addition (actual: " + e.getMessage() + ")",
+                      e.getMessage().toLowerCase().contains("cannot add the same metadata type"));
         }
     }
 

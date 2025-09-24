@@ -76,6 +76,12 @@ public final class DatabaseAttributeConstants {
     /** Database foreign key reference attribute for MetaFields */
     public static final String ATTR_DB_FOREIGN_KEY = "dbForeignKey";
 
+    /** Database foreign table reference attribute for MetaFields */
+    public static final String ATTR_DB_FOREIGN_TABLE = "dbForeignTable";
+
+    /** Database foreign column reference attribute for MetaFields */
+    public static final String ATTR_DB_FOREIGN_COLUMN = "dbForeignColumn";
+
     /** Database index marker attribute for MetaFields */
     public static final String ATTR_IS_INDEX = "isIndex";
 
@@ -147,6 +153,8 @@ public final class DatabaseAttributeConstants {
                ATTR_DB_DEFAULT.equals(attributeName) ||
                ATTR_DB_PRIMARY_KEY.equals(attributeName) ||
                ATTR_DB_FOREIGN_KEY.equals(attributeName) ||
+               ATTR_DB_FOREIGN_TABLE.equals(attributeName) ||
+               ATTR_DB_FOREIGN_COLUMN.equals(attributeName) ||
                ATTR_IS_INDEX.equals(attributeName) ||
                ATTR_IS_UNIQUE.equals(attributeName) ||
                ATTR_IS_VIEW_ONLY.equals(attributeName) ||

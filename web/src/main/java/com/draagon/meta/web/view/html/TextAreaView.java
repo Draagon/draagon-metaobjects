@@ -8,6 +8,7 @@ package com.draagon.meta.web.view.html;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
+import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
@@ -39,14 +40,12 @@ public class TextAreaView extends TextView
     try {
       MetaDataRegistry.registerType(TextAreaView.class, def -> def
         .type("view").subType("textarea")
+        .inheritsFrom("view", "base")
+        .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, "cols")
+        .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, "rows")
         .description("HTML textarea input view")
-        .optionalAttribute("cols", "int")
-        .optionalAttribute("rows", "int")
-        .optionalChild("attr", "string")
-        .optionalChild("attr", "int")
-        .optionalChild("attr", "boolean")
       );
-      
+
       log.debug("Registered TextAreaView with unified registry");
     } catch (Exception e) {
       log.error("Failed to register TextAreaView with unified registry", e);

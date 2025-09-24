@@ -1,0 +1,5 @@
+# Database Extension Provider for MetaObjects Framework
+# This file enables ServiceLoader discovery of database extensions that add
+# database-specific attributes to core MetaData types without polluting core.
+
+com.draagon.meta.database.common.DatabaseExtensionProvider

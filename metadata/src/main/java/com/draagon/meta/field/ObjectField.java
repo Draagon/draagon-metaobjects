@@ -7,11 +7,16 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * An Object Field with unified registry registration and child requirements.
@@ -19,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataType(type = "field", subType = "object", description = "Object field with object reference support")
 @SuppressWarnings("serial")
 public class ObjectField extends MetaField<Object>
 {
@@ -30,15 +36,27 @@ public class ObjectField extends MetaField<Object>
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(ObjectField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_OBJECT)
                 .description("Object field with object reference support")
-                
-                // OBJECT-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_OBJECTREF, "string")
-                // Inherits: required, defaultValue, validation, defaultView from MetaField
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // OBJECT-SPECIFIC ATTRIBUTES (using new API)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_OBJECTREF)
+
             );
-            
+
             log.debug("Registered ObjectField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register ObjectField type with unified registry", e);

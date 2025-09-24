@@ -1,5 +1,6 @@
 package com.draagon.meta.registry.osgi;
 
+import com.draagon.meta.registry.SharedTestRegistry;
 import com.draagon.meta.registry.StandardServiceRegistry;
 import org.junit.After;
 import org.junit.Before;
@@ -14,15 +15,18 @@ import static org.junit.Assert.*;
 
 /**
  * Test for preventing ServiceReference leaks and verifying proper WeakReference usage.
- * 
+ *
+ * <p><strong>OSGi Lifecycle Test:</strong> This test specifically tests OSGi bundle lifecycle
+ * scenarios and is allowed to reset the SharedTestRegistry to verify clean startup/shutdown behavior.</p>
+ *
  * <p>These tests specifically focus on memory management aspects of the OSGI integration,
  * ensuring that ServiceReferences are properly released and ClassLoaders can be
  * garbage collected when bundles are unloaded.</p>
- * 
+ *
  * @since 6.0.0
  */
 public class ServiceReferenceLeakTest {
-    
+
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceLeakTest.class);
     
     private MockBundleContext mockBundleContext;

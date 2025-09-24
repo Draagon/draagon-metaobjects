@@ -8,7 +8,6 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.BooleanAttribute;
-import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
@@ -18,7 +17,6 @@ import com.draagon.meta.view.MetaView;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
-import com.draagon.meta.registry.ChildRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,34 +98,44 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     /** Default view specification attribute - MetaField owns this concept */
     public static final String ATTR_DEFAULT_VIEW = "defaultView";
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register field.base type and cross-cutting field constraints using Phase 2 standardized pattern.
+     *
+     * <p>This method replaces the previous static block approach with a controlled, testable
+     * registration process that can be called explicitly during framework initialization.</p>
+     *
+     * @param registry MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.registerType(MetaField.class, def -> def
+            // CRITICAL: Ensure MetaDataLoader base types are registered first
+            registry.registerType(MetaField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BASE)
                 .description("Base field metadata with common field attributes")
+                .inheritsFrom(MetaDataLoader.TYPE_METADATA, MetaDataLoader.SUBTYPE_BASE)
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+                // BIDIRECTIONAL CONSTRAINT: Fields accept metadata.base and all loader types as parents
+                .acceptsParents(MetaDataLoader.TYPE_METADATA, MetaDataLoader.SUBTYPE_BASE)
+                .acceptsParents(MetaDataLoader.TYPE_LOADER, "*")  // Fields can be placed under any loader type
 
-                // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
-                .optionalAttribute(ATTR_REQUIRED, BooleanAttribute.SUBTYPE_BOOLEAN)
-                .optionalAttribute(ATTR_DEFAULT_VALUE, "string")
-                .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
+                // FIELD-SPECIFIC ATTRIBUTES (inherited attributes come from metadata.base)
+                .acceptsNamedAttributes(BooleanAttribute.SUBTYPE_BOOLEAN, ATTR_REQUIRED)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_DEFAULT_VALUE)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_DEFAULT_VIEW)
 
-                // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
-                .optionalChild(MetaAttribute.TYPE_ATTR, "*")
-                .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
-                .optionalChild(MetaView.TYPE_VIEW, "*")
+                // FIELD-SPECIFIC CHILDREN
+                .acceptsChildren(MetaValidator.TYPE_VALIDATOR, "*")  // Fields can have validators
+                .acceptsChildren(MetaView.TYPE_VIEW, "*")            // Fields can have views
             );
-            
-            log.debug("Registered base MetaField type with unified registry");
-            
+
+            log.debug("Registered base MetaField type using Phase 2 pattern");
+
             // Register cross-cutting field constraints
             registerCrossCuttingFieldConstraints();
-            
+
         } catch (Exception e) {
-            log.error("Failed to register MetaField type with unified registry", e);
+            log.error("Failed to register MetaField type using Phase 2 pattern", e);
+            throw new RuntimeException("MetaField type registration failed", e);
         }
     }
 
@@ -260,21 +268,48 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     public Class<?> getExpectedAttributeType(String attributeName) {
         try {
-            MetaDataRegistry registry = getLoader().getTypeRegistry();
+            // Simple attribute type mapping based on common patterns
+            // This replaces the old ChildRequirement system with basic type inference
 
-            // Get the type definition for this specific field type
-            TypeDefinition typeDef = registry.getTypeDefinition(this.getType(), this.getSubType());
-            if (typeDef != null) {
-                // Look up the child requirement for this attribute
-                ChildRequirement attrReq = typeDef.getChildRequirement(attributeName);
-                if (attrReq != null && "attr".equals(attrReq.getExpectedType())) {
-                    // Map the attribute subType to Java class
-                    return mapAttributeSubTypeToJavaClass(attrReq.getExpectedSubType());
-                }
+            switch (attributeName) {
+                case "required":
+                case "isId":
+                case "skipJpa":
+                case "nullable":
+                case "isOptional":
+                case "autoIncrement":
+                case "isInterface":
+                case "isAbstract":
+                case "hasJpa":
+                case "isSearchable":
+                case "isUnique":
+                case "isPrimaryKey":
+                case "isForeignKey":
+                    return Boolean.class;
+
+                case "maxLength":
+                case "minLength":
+                case "precision":
+                case "scale":
+                    return Integer.class;
+
+                case "minValue":
+                case "maxValue":
+                    // For numeric fields, return appropriate numeric type
+                    if ("long".equals(this.getSubType()) || "timestamp".equals(this.getSubType())) {
+                        return Long.class;
+                    } else if ("double".equals(this.getSubType())) {
+                        return Double.class;
+                    } else if ("float".equals(this.getSubType())) {
+                        return Float.class;
+                    } else {
+                        return Integer.class; // Default for int, short, byte
+                    }
+
+                default:
+                    // Fallback to String for unknown attributes
+                    return String.class;
             }
-
-            // Fallback to String for unknown attributes
-            return String.class;
 
         } catch (Exception e) {
             log.debug("Registry lookup failed for attribute [{}] on [{}], defaulting to String: {}",

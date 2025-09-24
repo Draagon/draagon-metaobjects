@@ -3,7 +3,9 @@ package com.draagon.meta.generator.direct.metadata.jsonschema;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator;
 import com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileSchemaWriter;
+import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.registry.SharedTestRegistry;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.After;
@@ -27,11 +29,14 @@ public class MetaDataJsonSchemaGeneratorTest {
 
     @Before
     public void setUp() {
-        // Create a simple test loader with basic configuration
-        testLoader = MetaDataLoader.createManual(false, "json-schema-test")
-                .init()
-                .register()
-                .getLoader();
+        // Use SharedTestRegistry to ensure proper provider discovery
+        SharedTestRegistry.getInstance();
+
+        // Create a simple test loader compatible with SharedTestRegistry
+        testLoader = new MetaDataLoader(
+                LoaderOptions.create(false, false, false),
+                MetaDataLoader.SUBTYPE_MANUAL, "json-schema-test");
+        testLoader.init();
     }
 
     @After

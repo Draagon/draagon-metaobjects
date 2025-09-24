@@ -8,6 +8,8 @@ import static com.draagon.meta.field.MetaField.ATTR_REQUIRED;
 import static com.draagon.meta.field.MetaField.ATTR_DEFAULT_VALUE;
 import org.junit.Test;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
@@ -17,10 +19,16 @@ import static org.junit.Assert.*;
  */
 public class TypeDefinitionInheritanceTest {
 
+    private static final Logger log = LoggerFactory.getLogger(TypeDefinitionInheritanceTest.class);
+
     private MetaDataRegistry registry;
 
     @Before
     public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("TypeDefinitionInheritanceTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         // Use the singleton registry that has the static registrations
         registry = MetaDataRegistry.getInstance();
 

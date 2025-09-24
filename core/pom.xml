@@ -40,7 +40,7 @@
                     </dependency>
                     <dependency>
                         <groupId>com.draagon</groupId>
-                        <artifactId>codegen</artifactId>
+                        <artifactId>metaobjects-codegen-base</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
@@ -49,7 +49,6 @@
                          SOLUTION: SimpleLoader/SimpleModelParser from metadata module supports our JSON format
                          STATUS: Re-enabled with correct loader
                     -->
-                    <!--
                     <execution>
                         <id>gen-schemas</id>
                         <phase>process-classes</phase>
@@ -89,7 +88,6 @@
                             </generators>
                         </configuration>
                     </execution>
-                    -->
                     <!-- DISABLED v6.0.0: TypesConfig system removed - these metadata files use old v5.x format
                     <execution>
                         <id>gen-test-resources</id>

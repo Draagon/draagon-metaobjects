@@ -7,12 +7,17 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
+import static com.draagon.meta.validator.MetaValidator.TYPE_VALIDATOR;
 
 // TODO:  Make this work for numeric fields and even Date fields, or create new validator types
 /**
@@ -39,19 +44,100 @@ public class LengthValidator extends MetaValidator
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaValidator static initialization first
+            try {
+                Class.forName(MetaValidator.class.getName());
+                // Add a small delay to ensure MetaValidator registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaValidator class loading", e);
+            }
+
             MetaDataRegistry.registerType(LengthValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
                 .description("Length validator ensures field value is within min/max length")
-                
-                // LENGTH VALIDATOR ATTRIBUTES
-                .optionalAttribute(ATTR_MIN, "string")
-                .optionalAttribute(ATTR_MAX, "string")
-                // Inherits from MetaValidator
+
+                // INHERIT FROM BASE VALIDATOR
+                .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
+
+                // LengthValidator inherits all parent acceptance from validator.base:
+                // - Can be placed under any field type (especially string fields)
+                // - Can be placed under any object type
+                // - Can be placed under other validators
+                // - Can be placed under loaders as abstract
+
+                // LENGTH-SPECIFIC CHILD ACCEPTANCE DECLARATIONS
+                // LengthValidator can have min and max attributes for length bounds
+                .acceptsNamedChildren("attr", "int", ATTR_MIN)    // Min length attribute
+                .acceptsNamedChildren("attr", "int", ATTR_MAX)    // Max length attribute
+                .acceptsNamedChildren("attr", "string", ATTR_MIN) // Min length as string (legacy support)
+                .acceptsNamedChildren("attr", "string", ATTR_MAX) // Max length as string (legacy support)
+
+                // NO ADDITIONAL CHILD REQUIREMENTS (only uses inherited validator capabilities + min/max)
             );
-            
+
             log.debug("Registered LengthValidator type with unified registry");
+
+            // Register LengthValidator-specific validation constraints only
+            setupLengthValidatorValidationConstraints();
+
         } catch (Exception e) {
             log.error("Failed to register LengthValidator type with unified registry", e);
+        }
+    }
+
+    /**
+     * Setup LengthValidator-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
+     */
+    private static void setupLengthValidatorValidationConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALIDATION CONSTRAINT: Length validator bounds validation
+            ValidationConstraint lengthBoundsValidation = new ValidationConstraint(
+                "lengthvalidator.bounds.validation",
+                "LengthValidator min and max attributes must be valid integers with min <= max",
+                (metadata) -> metadata instanceof LengthValidator,
+                (metadata, value) -> {
+                    if (metadata instanceof LengthValidator) {
+                        LengthValidator validator = (LengthValidator) metadata;
+                        try {
+                            int min = 0;
+                            int max = Integer.MAX_VALUE;
+
+                            // Check min attribute if present
+                            if (validator.hasMetaAttr(ATTR_MIN)) {
+                                String minStr = validator.getMetaAttr(ATTR_MIN).getValueAsString();
+                                min = Integer.parseInt(minStr);
+                                if (min < 0) return false; // Min cannot be negative
+                            }
+
+                            // Check max attribute if present
+                            if (validator.hasMetaAttr(ATTR_MAX)) {
+                                String maxStr = validator.getMetaAttr(ATTR_MAX).getValueAsString();
+                                max = Integer.parseInt(maxStr);
+                                if (max < 0) return false; // Max cannot be negative
+                            }
+
+                            // Min must be <= max
+                            return min <= max;
+
+                        } catch (NumberFormatException e) {
+                            return false; // Invalid number format
+                        } catch (Exception e) {
+                            return false; // Any other error
+                        }
+                    }
+                    return true;
+                }
+            );
+            constraintRegistry.addConstraint(lengthBoundsValidation);
+
+            log.debug("Registered LengthValidator-specific constraints");
+
+        } catch (Exception e) {
+            log.error("Failed to register LengthValidator constraints", e);
         }
     }
 

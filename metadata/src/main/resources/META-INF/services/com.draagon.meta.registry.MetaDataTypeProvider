@@ -1,0 +1,26 @@
+# MetaData Type Providers for metadata module
+# Order is not critical - dependency resolution handles proper loading order
+
+# Core types - highest priority, no dependencies
+com.draagon.meta.registry.CoreTypeProvider
+
+# Field types - depends on core types
+com.draagon.meta.registry.FieldTypeProvider
+
+# Attribute types - depends on core types
+com.draagon.meta.registry.AttributeTypeProvider
+
+# Object types - depends on core types and field types
+com.draagon.meta.registry.ObjectTypeProvider
+
+# Key types - depends on core types
+com.draagon.meta.registry.KeyTypeProvider
+
+# Validator types - depends on core types
+com.draagon.meta.registry.ValidatorTypeProvider
+
+# View types - depends on core types
+com.draagon.meta.registry.ViewTypeProvider
+
+# Loader types - depends on core types
+com.draagon.meta.registry.LoaderTypeProvider

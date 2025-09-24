@@ -1,6 +1,7 @@
 package com.draagon.meta;
 
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.SharedTestRegistry;
 import com.draagon.meta.field.*;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.object.mapped.MappedMetaObject;
@@ -11,6 +12,8 @@ import com.draagon.meta.attr.BooleanAttribute;
 import com.draagon.meta.validator.RequiredValidator;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
@@ -19,10 +22,15 @@ import static org.junit.Assert.*;
  */
 public class AllMetaDataTypesRegistrationTest {
 
+    private static final Logger log = LoggerFactory.getLogger(AllMetaDataTypesRegistrationTest.class);
     private MetaDataRegistry registry;
 
     @Before
     public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("AllMetaDataTypesRegistrationTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         registry = MetaDataRegistry.getInstance();
         
         // Trigger static registrations for ALL field types

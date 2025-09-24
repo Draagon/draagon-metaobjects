@@ -8,9 +8,8 @@ package com.draagon.meta.database.common;
 
 import com.draagon.meta.constraint.ConstraintProvider;
 import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.ValidationConstraint;
-import com.draagon.meta.MetaData;
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
@@ -20,11 +19,13 @@ import java.util.Set;
 import static com.draagon.meta.database.common.DatabaseAttributeConstants.*;
 
 /**
- * Shared database constraint provider for database-related attributes.
+ * Shared database constraint provider for database-related VALUE validation.
  *
- * <p>This provider consolidates database constraints that were previously duplicated between
- * OMDB and code generation modules. It defines constraints for database-specific attributes
- * used in:</p>
+ * <p>v6.2.0 UPDATE: This provider now focuses ONLY on VALUE validation constraints.
+ * STRUCTURAL placement constraints have been moved to the bidirectional constraint
+ * system in core attribute types (StringAttribute, BooleanAttribute, IntAttribute).</p>
+ *
+ * <p>This provider consolidates database VALUE validation that applies across:</p>
  * <ul>
  *   <li><strong>ORM Mapping</strong> - Object-relational mapping for persistence</li>
  *   <li><strong>SQL Generation</strong> - Database schema and query generation</li>
@@ -33,39 +34,158 @@ import static com.draagon.meta.database.common.DatabaseAttributeConstants.*;
  * </ul>
  *
  * <p><strong>Architectural Principle:</strong> Database attributes are cross-cutting concerns
- * that apply to multiple modules. This provider ensures consistent validation and placement
- * rules across all database-aware components.</p>
+ * that apply to multiple modules. This provider ensures consistent VALUE validation
+ * across all database-aware components.</p>
  */
 public class DatabaseConstraintProvider implements ConstraintProvider {
 
     @Override
     public void registerConstraints(ConstraintRegistry registry) {
-        // Table-level constraints (MetaObject attributes)
-        addTableLevelConstraints(registry);
+        // STRUCTURAL PLACEMENT CONSTRAINTS - Database module declares what it can contribute
+        addDatabaseAttributePlacementConstraints(registry);
 
-        // Field-level constraints (MetaField attributes)
-        addFieldLevelConstraints(registry);
-
-        // Database type and schema constraints
-        addTypeAndSchemaConstraints(registry);
-
-        // Database constraint and indexing attributes
-        addConstraintAndIndexConstraints(registry);
-
-        // OMDB-specific operational attributes
-        addOMDBOperationalConstraints(registry);
+        // VALUE VALIDATION CONSTRAINTS - Validate database attribute values
+        addTableLevelValidationConstraints(registry);
+        addFieldLevelValidationConstraints(registry);
+        addTypeAndSchemaValidationConstraints(registry);
+        addConstraintAndIndexValidationConstraints(registry);
+        addOMDBOperationalValidationConstraints(registry);
     }
 
-    private void addTableLevelConstraints(ConstraintRegistry registry) {
-        // === DATABASE TABLE CONSTRAINTS ===
+    private void addDatabaseAttributePlacementConstraints(ConstraintRegistry registry) {
+        // === DATABASE STRUCTURAL PLACEMENT CONSTRAINTS ===
+        // Database module declares what database attributes can be placed on core types
+        // This maintains separation of concerns - core types don't know about database
 
-        // PLACEMENT: dbTable attribute on MetaObjects
+        // STRING DATABASE ATTRIBUTES on ALL FIELD TYPES
         registry.addConstraint(new PlacementConstraint(
-            "database.dbTable.placement",
-            "dbTable attribute can be placed on MetaObjects for table mapping",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_TABLE.equals(child.getName())
+            "database.field.dbColumn.placement",
+            "All field types can have dbColumn string attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_COLUMN.equals(child.getName())
         ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbType.placement",
+            "All field types can have dbType string attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_TYPE.equals(child.getName())
+        ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbDefault.placement",
+            "All field types can have dbDefault string attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_DEFAULT.equals(child.getName())
+        ));
+
+        // BOOLEAN DATABASE ATTRIBUTES on ALL FIELD TYPES
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbNullable.placement",
+            "All field types can have dbNullable boolean attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "boolean".equals(child.getSubType()) &&
+                      ATTR_DB_NULLABLE.equals(child.getName())
+        ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbPrimaryKey.placement",
+            "All field types can have dbPrimaryKey boolean attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "boolean".equals(child.getSubType()) &&
+                      ATTR_DB_PRIMARY_KEY.equals(child.getName())
+        ));
+
+        // INTEGER DATABASE ATTRIBUTES on ALL FIELD TYPES (numeric precision/scale)
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbLength.placement",
+            "All field types can have dbLength int attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "int".equals(child.getSubType()) &&
+                      ATTR_DB_LENGTH.equals(child.getName())
+        ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbPrecision.placement",
+            "All field types can have dbPrecision int attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "int".equals(child.getSubType()) &&
+                      ATTR_DB_PRECISION.equals(child.getName())
+        ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbScale.placement",
+            "All field types can have dbScale int attribute",
+            (metadata) -> metadata instanceof MetaField,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "int".equals(child.getSubType()) &&
+                      ATTR_DB_SCALE.equals(child.getName())
+        ));
+
+        // STRING DATABASE ATTRIBUTES on ALL OBJECT TYPES
+        registry.addConstraint(new PlacementConstraint(
+            "database.object.dbTable.placement",
+            "All object types can have dbTable string attribute",
+            (metadata) -> metadata instanceof MetaObject,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_TABLE.equals(child.getName())
+        ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.object.dbSchema.placement",
+            "All object types can have dbSchema string attribute",
+            (metadata) -> metadata instanceof MetaObject,
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_SCHEMA.equals(child.getName())
+        ));
+
+        // FOREIGN KEY DATABASE ATTRIBUTES on STRING FIELDS
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbForeignTable.placement",
+            "String fields can have dbForeignTable string attribute",
+            (metadata) -> metadata instanceof MetaField && "string".equals(((MetaField) metadata).getSubType()),
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_FOREIGN_TABLE.equals(child.getName())
+        ));
+
+        registry.addConstraint(new PlacementConstraint(
+            "database.field.dbForeignColumn.placement",
+            "String fields can have dbForeignColumn string attribute",
+            (metadata) -> metadata instanceof MetaField && "string".equals(((MetaField) metadata).getSubType()),
+            (child) -> child instanceof MetaAttribute &&
+                      "attr".equals(child.getType()) &&
+                      "string".equals(child.getSubType()) &&
+                      ATTR_DB_FOREIGN_COLUMN.equals(child.getName())
+        ));
+    }
+
+    private void addTableLevelValidationConstraints(ConstraintRegistry registry) {
+        // === DATABASE TABLE VALUE VALIDATION CONSTRAINTS ===
+        // Note: Placement constraints moved to bidirectional constraint system in core attribute types
 
         // VALIDATION: dbTable must be valid SQL identifier
         registry.addConstraint(new ValidationConstraint(
@@ -77,16 +197,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
                 String tableName = value.toString().trim();
                 return isValidSqlIdentifier(tableName) && tableName.length() >= 1 && tableName.length() <= 64;
             }
-        ));
-
-        // === DATABASE SCHEMA CONSTRAINTS ===
-
-        // PLACEMENT: dbSchema attribute on MetaObjects
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbSchema.placement",
-            "dbSchema attribute can be placed on MetaObjects for schema specification",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_SCHEMA.equals(child.getName())
         ));
 
         // VALIDATION: dbSchema must be valid SQL identifier
@@ -101,24 +211,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
             }
         ));
 
-        // === DATABASE VIEW CONSTRAINTS ===
-
-        // PLACEMENT: dbView attribute on MetaObjects
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbView.placement",
-            "dbView attribute can be placed on MetaObjects for view mapping",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_VIEW.equals(child.getName())
-        ));
-
-        // PLACEMENT: dbViewSQL attribute on MetaObjects
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbViewSQL.placement",
-            "dbViewSQL attribute can be placed on MetaObjects for view SQL definition",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_VIEW_SQL.equals(child.getName())
-        ));
-
         // VALIDATION: dbViewSQL length limit
         registry.addConstraint(new ValidationConstraint(
             "database.dbViewSQL.validation",
@@ -131,16 +223,8 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
         ));
     }
 
-    private void addFieldLevelConstraints(ConstraintRegistry registry) {
-        // === DATABASE COLUMN CONSTRAINTS ===
-
-        // PLACEMENT: dbColumn attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbColumn.placement",
-            "dbColumn attribute can be placed on MetaFields for column mapping",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_COLUMN.equals(child.getName())
-        ));
+    private void addFieldLevelValidationConstraints(ConstraintRegistry registry) {
+        // === DATABASE COLUMN VALUE VALIDATION CONSTRAINTS ===
 
         // VALIDATION: dbColumn must be valid SQL identifier
         registry.addConstraint(new ValidationConstraint(
@@ -152,16 +236,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
                 String columnName = value.toString().trim();
                 return isValidSqlIdentifier(columnName) && columnName.length() >= 1 && columnName.length() <= 64;
             }
-        ));
-
-        // === DATABASE NULLABLE CONSTRAINTS ===
-
-        // PLACEMENT: dbNullable attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbNullable.placement",
-            "dbNullable attribute can be placed on MetaFields for null specification",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_NULLABLE.equals(child.getName())
         ));
 
         // VALIDATION: dbNullable must be boolean
@@ -176,16 +250,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
             }
         ));
 
-        // === DATABASE DEFAULT VALUE CONSTRAINTS ===
-
-        // PLACEMENT: dbDefault attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbDefault.placement",
-            "dbDefault attribute can be placed on MetaFields for default value specification",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_DEFAULT.equals(child.getName())
-        ));
-
         // VALIDATION: dbDefault length limit
         registry.addConstraint(new ValidationConstraint(
             "database.dbDefault.validation",
@@ -198,16 +262,8 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
         ));
     }
 
-    private void addTypeAndSchemaConstraints(ConstraintRegistry registry) {
-        // === DATABASE TYPE CONSTRAINTS ===
-
-        // PLACEMENT: dbType attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbType.placement",
-            "dbType attribute can be placed on MetaFields for SQL type specification",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_TYPE.equals(child.getName())
-        ));
+    private void addTypeAndSchemaValidationConstraints(ConstraintRegistry registry) {
+        // === DATABASE TYPE VALUE VALIDATION CONSTRAINTS ===
 
         // VALIDATION: dbType must be valid SQL data type
         registry.addConstraint(new ValidationConstraint(
@@ -219,16 +275,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
                 String dbType = value.toString().toUpperCase().trim();
                 return isValidSqlDataType(dbType);
             }
-        ));
-
-        // === DATABASE LENGTH CONSTRAINTS ===
-
-        // PLACEMENT: dbLength attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbLength.placement",
-            "dbLength attribute can be placed on MetaFields for field length specification",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_LENGTH.equals(child.getName())
         ));
 
         // VALIDATION: dbLength must be within valid range
@@ -247,16 +293,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
             }
         ));
 
-        // === DATABASE PRECISION/SCALE CONSTRAINTS ===
-
-        // PLACEMENT: dbPrecision attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbPrecision.placement",
-            "dbPrecision attribute can be placed on MetaFields for decimal precision",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_PRECISION.equals(child.getName())
-        ));
-
         // VALIDATION: dbPrecision must be within valid range
         registry.addConstraint(new ValidationConstraint(
             "database.dbPrecision.validation",
@@ -271,14 +307,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
                     return false;
                 }
             }
-        ));
-
-        // PLACEMENT: dbScale attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbScale.placement",
-            "dbScale attribute can be placed on MetaFields for decimal scale",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_SCALE.equals(child.getName())
         ));
 
         // VALIDATION: dbScale must be within valid range
@@ -298,16 +326,8 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
         ));
     }
 
-    private void addConstraintAndIndexConstraints(ConstraintRegistry registry) {
-        // === PRIMARY KEY CONSTRAINTS ===
-
-        // PLACEMENT: dbPrimaryKey attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbPrimaryKey.placement",
-            "dbPrimaryKey attribute can be placed on MetaFields for primary key specification",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_PRIMARY_KEY.equals(child.getName())
-        ));
+    private void addConstraintAndIndexValidationConstraints(ConstraintRegistry registry) {
+        // === PRIMARY KEY VALUE VALIDATION CONSTRAINTS ===
 
         // VALIDATION: dbPrimaryKey must be boolean
         registry.addConstraint(new ValidationConstraint(
@@ -321,16 +341,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
             }
         ));
 
-        // === INDEX CONSTRAINTS ===
-
-        // PLACEMENT: isIndex attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.isIndex.placement",
-            "isIndex attribute can be placed on MetaFields for database index creation",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_IS_INDEX.equals(child.getName())
-        ));
-
         // VALIDATION: isIndex must be boolean
         registry.addConstraint(new ValidationConstraint(
             "database.isIndex.validation",
@@ -341,16 +351,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
                 String boolValue = value.toString().toLowerCase().trim();
                 return "true".equals(boolValue) || "false".equals(boolValue);
             }
-        ));
-
-        // === UNIQUE CONSTRAINTS ===
-
-        // PLACEMENT: isUnique attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.isUnique.placement",
-            "isUnique attribute can be placed on MetaFields for unique constraint",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_IS_UNIQUE.equals(child.getName())
         ));
 
         // VALIDATION: isUnique must be boolean
@@ -366,16 +366,8 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
         ));
     }
 
-    private void addOMDBOperationalConstraints(ConstraintRegistry registry) {
-        // === VIEW-ONLY CONSTRAINTS ===
-
-        // PLACEMENT: isViewOnly attribute on MetaFields
-        registry.addConstraint(new PlacementConstraint(
-            "database.isViewOnly.placement",
-            "isViewOnly attribute can be placed on MetaFields for read-only fields",
-            (parent) -> parent instanceof MetaField,
-            (child) -> child instanceof MetaAttribute && ATTR_IS_VIEW_ONLY.equals(child.getName())
-        ));
+    private void addOMDBOperationalValidationConstraints(ConstraintRegistry registry) {
+        // === VIEW-ONLY VALUE VALIDATION CONSTRAINTS ===
 
         // VALIDATION: isViewOnly must be boolean
         registry.addConstraint(new ValidationConstraint(
@@ -389,16 +381,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
             }
         ));
 
-        // === DIRTY WRITE CONSTRAINTS ===
-
-        // PLACEMENT: allowDirtyWrite attribute on MetaObjects
-        registry.addConstraint(new PlacementConstraint(
-            "database.allowDirtyWrite.placement",
-            "allowDirtyWrite attribute can be placed on MetaObjects for dirty write control",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && ATTR_ALLOW_DIRTY_WRITE.equals(child.getName())
-        ));
-
         // VALIDATION: allowDirtyWrite must be boolean
         registry.addConstraint(new ValidationConstraint(
             "database.allowDirtyWrite.validation",
@@ -409,16 +391,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
                 String boolValue = value.toString().toLowerCase().trim();
                 return "true".equals(boolValue) || "false".equals(boolValue);
             }
-        ));
-
-        // === DATABASE INHERITANCE CONSTRAINTS ===
-
-        // PLACEMENT: dbInheritance attribute on MetaObjects
-        registry.addConstraint(new PlacementConstraint(
-            "database.dbInheritance.placement",
-            "dbInheritance attribute can be placed on MetaObjects for inheritance mapping",
-            (parent) -> parent instanceof MetaObject,
-            (child) -> child instanceof MetaAttribute && ATTR_DB_INHERITANCE.equals(child.getName())
         ));
 
         // VALIDATION: dbInheritance value length limit
@@ -484,6 +456,6 @@ public class DatabaseConstraintProvider implements ConstraintProvider {
 
     @Override
     public String getDescription() {
-        return "Shared database constraints for ORM mapping, SQL generation, and JPA code generation";
+        return "Shared database VALUE validation constraints for ORM mapping, SQL generation, and JPA code generation (v6.2.0: structural constraints moved to bidirectional system)";
     }
 }

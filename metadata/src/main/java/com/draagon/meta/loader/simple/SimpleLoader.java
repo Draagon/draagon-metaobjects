@@ -6,6 +6,9 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.parser.json.JsonMetaDataParser;
 import com.draagon.meta.loader.uri.URIHelper;
 import com.draagon.meta.registry.MetaDataRegistry;
+import static com.draagon.meta.loader.MetaDataLoader.TYPE_LOADER;
+import static com.draagon.meta.loader.MetaDataLoader.TYPE_METADATA;
+import static com.draagon.meta.loader.MetaDataLoader.SUBTYPE_BASE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,35 +32,22 @@ public class SimpleLoader extends MetaDataLoader
     // Unified registry self-registration
     static {
         try {
+            log.info("SimpleLoader static block executing - about to register loader.simple");
             MetaDataRegistry.registerType(SimpleLoader.class, def -> def
                 .type(TYPE_LOADER).subType(SUBTYPE_SIMPLE)
                 .description("Simple JSON-based metadata loader")
-                
-                // LOADER ACCEPTS ALL FIELD TYPES
-                .optionalChild("field", "string")
-                .optionalChild("field", "int")
-                .optionalChild("field", "long")
-                .optionalChild("field", "double")
-                .optionalChild("field", "float")
-                .optionalChild("field", "short")
-                .optionalChild("field", "byte")
-                .optionalChild("field", "boolean")
-                .optionalChild("field", "date")
-                .optionalChild("field", "object")
-                .optionalChild("field", "class")
-                .optionalChild("field", "stringArray")
-                .optionalChild("field", "objectArray")
-                
-                // LOADER ACCEPTS ALL OBJECT TYPES
-                .optionalChild("object", "base")
-                .optionalChild("object", "pojo")
-                .optionalChild("object", "map")
-                .optionalChild("object", "proxy")
-                
-                // LOADER ACCEPTS ALL ATTRIBUTE TYPES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // INHERIT FROM BASE METADATA (metadata.base)
+                .inheritsFrom(TYPE_METADATA, SUBTYPE_BASE)
+
+                // LOADER ACCEPTS ALL METADATA TYPES (using new bidirectional API)
+                .acceptsChildren("field", "*")      // Accept any field type
+                .acceptsChildren("object", "*")     // Accept any object type
+                .acceptsChildren("attr", "*")       // Accept any attribute type
+                .acceptsChildren("validator", "*")  // Accept any validator type
+                .acceptsChildren("view", "*")       // Accept any view type
+                .acceptsChildren("key", "*")        // Accept any key type
+                .acceptsChildren("loader", "*")     // Accept nested loaders
             );
             
             log.debug("Registered SimpleLoader type with unified registry");

@@ -10,6 +10,8 @@ import com.draagon.meta.constraint.Constraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
 import com.draagon.meta.registry.ChildRequirement;
+import com.draagon.meta.registry.AcceptsChildrenDeclaration;
+import com.draagon.meta.registry.AcceptsParentsDeclaration;
 import static com.draagon.meta.MetaData.*;
 import com.draagon.meta.MetaDataTypeId;
 import org.slf4j.Logger;
@@ -407,6 +409,21 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
                     inheritedTypes.size()));
         }
 
+        // Add bidirectional constraint information
+        Map<String, Set<String>> acceptedChildren = getAcceptedChildrenSummary(typeDefs);
+        if (!acceptedChildren.isEmpty()) {
+            info.append("Accepted children: ");
+            acceptedChildren.entrySet().stream()
+                    .map(entry -> entry.getKey() + "(" + String.join(",", entry.getValue()) + ")")
+                    .forEach(desc -> info.append(desc).append(" "));
+        }
+
+        // Add constraint validation information
+        int validationConstraints = constraintRegistry.getValidationConstraints().size();
+        int placementConstraints = constraintRegistry.getPlacementConstraints().size();
+        info.append(String.format("Validation enforced by %d validation + %d placement constraints. ",
+                validationConstraints, placementConstraints));
+
         // Add subtype list
         Set<String> subTypes = typeDefs.stream()
                 .map(TypeDefinition::getSubType)
@@ -430,11 +447,29 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     }
 
     /**
-     * Check if any type definition in the list has child requirements
+     * Check if any type definition in the list accepts children using bidirectional constraints
      */
     private boolean hasChildRequirements(List<TypeDefinition> typeDefs) {
         return typeDefs.stream()
-                .anyMatch(def -> !def.getChildRequirements().isEmpty());
+                .anyMatch(def -> !def.getAcceptsChildren().isEmpty());
+    }
+
+    /**
+     * Get summary of accepted children types from bidirectional constraints
+     */
+    private Map<String, Set<String>> getAcceptedChildrenSummary(List<TypeDefinition> typeDefs) {
+        Map<String, Set<String>> acceptedChildren = new HashMap<>();
+
+        for (TypeDefinition typeDef : typeDefs) {
+            for (AcceptsChildrenDeclaration childDecl : typeDef.getAcceptsChildren()) {
+                String childType = childDecl.getChildType();
+                String childSubType = childDecl.getChildSubType();
+
+                acceptedChildren.computeIfAbsent(childType, k -> new HashSet<>()).add(childSubType);
+            }
+        }
+
+        return acceptedChildren;
     }
 
     /**

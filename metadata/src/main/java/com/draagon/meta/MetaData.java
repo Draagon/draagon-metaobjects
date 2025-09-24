@@ -833,6 +833,13 @@ public class MetaData implements Cloneable, Serializable {
      */
     public void addChild(MetaData data, boolean checkExists)  throws InvalidMetaDataException {
 
+        // Validate that MetaDataLoader has been initialized before metadata operations
+        if (!com.draagon.meta.loader.MetaDataLoader.isMetaDataLoaderInitialized()) {
+            log.warn("MetaData operation (addChild) without MetaDataLoader initialization detected. " +
+                    "Create a MetaDataLoader instance first to ensure proper type discovery and " +
+                    "inheritance resolution. This may cause constraint validation failures.");
+        }
+
         checkValidChild( data );
 
         if (checkExists) {

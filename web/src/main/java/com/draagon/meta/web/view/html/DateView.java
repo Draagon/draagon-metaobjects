@@ -43,9 +43,9 @@ public class DateView extends MonthView {
             MetaDataRegistry.registerType(DateView.class, def -> def
                 .type("view").subType("date")
                 .inheritsFrom("view", "base")
-                .optionalAttribute(ATTR_MINRANGE, "string")
-                .optionalAttribute(ATTR_MAXRANGE, "string")
-                .optionalAttribute(ATTR_EMPTYVALUE, "string")
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_MINRANGE)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_MAXRANGE)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_EMPTYVALUE)
                 .description("HTML date input view")
             );
 

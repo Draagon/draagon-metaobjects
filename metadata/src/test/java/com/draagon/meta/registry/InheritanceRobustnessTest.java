@@ -9,6 +9,7 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaDataTypeId;
 import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.field.*;
+import com.draagon.meta.registry.SharedTestRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -38,6 +39,10 @@ public class InheritanceRobustnessTest {
 
     @Before
     public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("InheritanceRobustnessTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         registry = MetaDataRegistry.getInstance();
         constraintRegistry = ConstraintRegistry.getInstance();
 

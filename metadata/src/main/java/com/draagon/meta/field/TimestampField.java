@@ -8,12 +8,18 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
+
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Timestamp Field with unified registry registration and child requirements.
@@ -52,18 +58,18 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
                 // INHERIT FROM BASE FIELD
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
-                // TIMESTAMP-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_PRECISION, "int")
-                .optionalAttribute(ATTR_DATE_FORMAT, "string")
-                .optionalAttribute(ATTR_MIN_DATE, "string")
-                .optionalAttribute(ATTR_MAX_DATE, "string")
+                // TIMESTAMP-SPECIFIC ATTRIBUTES (using new API)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_PRECISION)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_DATE_FORMAT)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_MIN_DATE)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_MAX_DATE)
 
             );
 
             log.debug("Registered TimestampField type with unified registry");
 
-            // Register TimestampField-specific constraints
-            setupTimestampFieldConstraints();
+            // Register TimestampField-specific validation constraints only
+            setupTimestampFieldValidationConstraints();
 
         } catch (Exception e) {
             log.error("Failed to register TimestampField type with unified registry", e);
@@ -71,24 +77,77 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
     }
     
     /**
-     * Setup TimestampField-specific constraints in the constraint registry
+     * Setup TimestampField-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void setupTimestampFieldConstraints() {
+    private static void setupTimestampFieldValidationConstraints() {
         try {
             ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
-            // PLACEMENT CONSTRAINT: TimestampField CAN have precision attribute
-            PlacementConstraint timestampPrecisionPlacement = new PlacementConstraint(
-                "timestampfield.precision.placement",
-                "TimestampField can optionally have precision attribute",
-                (metadata) -> metadata instanceof TimestampField,
-                (child) -> child instanceof IntAttribute && 
-                          child.getName().equals(ATTR_PRECISION)
+
+            // VALUE VALIDATION CONSTRAINT: Date format validation for timestamps
+            ValidationConstraint formatValidation = new ValidationConstraint(
+                "timestampfield.format.validation",
+                "TimestampField dateFormat attribute must be a valid SimpleDateFormat pattern",
+                (metadata) -> metadata instanceof TimestampField && metadata.hasMetaAttr(ATTR_DATE_FORMAT),
+                (metadata, value) -> {
+                    try {
+                        String format = metadata.getMetaAttr(ATTR_DATE_FORMAT).getValueAsString();
+                        if (format != null && !format.isEmpty()) {
+                            new SimpleDateFormat(format); // Validate format pattern
+                        }
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false; // Invalid date format pattern
+                    }
+                }
             );
-            constraintRegistry.addConstraint(timestampPrecisionPlacement);
-            
+            constraintRegistry.addConstraint(formatValidation);
+
+            // VALUE VALIDATION CONSTRAINT: Date range validation for timestamps
+            ValidationConstraint rangeValidation = new ValidationConstraint(
+                "timestampfield.range.validation",
+                "TimestampField minDate must be less than or equal to maxDate",
+                (metadata) -> metadata instanceof TimestampField &&
+                              (metadata.hasMetaAttr(ATTR_MIN_DATE) || metadata.hasMetaAttr(ATTR_MAX_DATE)),
+                (metadata, value) -> {
+                    if (!metadata.hasMetaAttr(ATTR_MIN_DATE) || !metadata.hasMetaAttr(ATTR_MAX_DATE)) {
+                        return true; // Only one bound specified - always valid
+                    }
+
+                    try {
+                        String minDateStr = metadata.getMetaAttr(ATTR_MIN_DATE).getValueAsString();
+                        String maxDateStr = metadata.getMetaAttr(ATTR_MAX_DATE).getValueAsString();
+
+                        if (minDateStr != null && maxDateStr != null) {
+                            // Basic lexicographic comparison for ISO timestamp strings
+                            return minDateStr.compareTo(maxDateStr) <= 0;
+                        }
+                        return true;
+                    } catch (Exception e) {
+                        return false; // Invalid timestamp format
+                    }
+                }
+            );
+            constraintRegistry.addConstraint(rangeValidation);
+
+            // VALUE VALIDATION CONSTRAINT: Precision validation for timestamps
+            ValidationConstraint precisionValidation = new ValidationConstraint(
+                "timestampfield.precision.validation",
+                "TimestampField precision must be a non-negative integer (0-9 for timestamp precision)",
+                (metadata) -> metadata instanceof TimestampField && metadata.hasMetaAttr(ATTR_PRECISION),
+                (metadata, value) -> {
+                    try {
+                        int precision = Integer.parseInt(metadata.getMetaAttr(ATTR_PRECISION).getValueAsString());
+                        return precision >= 0 && precision <= 9; // Typical timestamp precision range
+                    } catch (NumberFormatException e) {
+                        return false; // Invalid number format
+                    }
+                }
+            );
+            constraintRegistry.addConstraint(precisionValidation);
+
             log.debug("Registered TimestampField-specific constraints");
-            
+
         } catch (Exception e) {
             log.error("Failed to register TimestampField constraints", e);
         }

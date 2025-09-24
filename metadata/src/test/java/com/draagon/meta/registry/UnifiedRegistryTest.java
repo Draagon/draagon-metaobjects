@@ -8,6 +8,7 @@ import com.draagon.meta.attr.StringArrayAttribute;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.InvalidMetaDataException;
+import com.draagon.meta.registry.SharedTestRegistry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -38,13 +39,17 @@ public class UnifiedRegistryTest {
     
     @Before
     public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("UnifiedRegistryTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         registry = MetaDataRegistry.getInstance();
-        
+
         // Trigger static registration by creating instances
         new StringField("triggerRegistration");
         new IntegerField("triggerRegistration");
         new StringAttribute("triggerRegistration");
-        
+
         log.info("Set up unified registry test with triggered static registrations");
     }
     

@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,28 +85,157 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     private static final long DEFAULT_LOADING_TIMEOUT_MS = 30000; // 30 seconds
 
     public final static String TYPE_LOADER = "loader";
+    public final static String TYPE_METADATA = "metadata";  // Base type for all metadata
+    public final static String SUBTYPE_BASE = "base";
     public final static String SUBTYPE_MANUAL = "manual";
 
-    // Unified registry self-registration
+    // Unified registry self-registration - MetaDataLoader is the base type for all metadata
     static {
         try {
+            // Register metadata.base - the root type that all metadata inherits from
+            MetaDataRegistry.registerType(MetaDataLoader.class, def -> def
+                .type(TYPE_METADATA).subType(SUBTYPE_BASE)
+                .description("Base metadata type - root of all metadata inheritance")
+
+                // BASE TYPE ACCEPTS ALL CHILDREN
+                .acceptsChildren("attr", "*")       // All metadata can have attributes
+                .acceptsChildren("object", "*")     // Can contain any object type
+                .acceptsChildren("field", "*")      // Can contain any field type
+                .acceptsChildren("view", "*")       // Can contain any view type
+                .acceptsChildren("validator", "*")  // Can contain any validator type
+                .acceptsChildren("key", "*")        // Can contain any key type
+                .acceptsChildren("loader", "*")     // Can contain nested loaders
+            );
+
+            // Also register loader.manual for backward compatibility
             MetaDataRegistry.registerType(MetaDataLoader.class, def -> def
                 .type(TYPE_LOADER).subType(SUBTYPE_MANUAL)
                 .description("Manual metadata loader")
-                
-                // ACCEPTS ALL METADATA TYPES
-                .optionalChild("object", "*")     // Any object type
-                .optionalChild("field", "*")      // Any field type
-                .optionalChild("attr", "*")       // Any attribute type
-                .optionalChild("view", "*")       // Any view type
-                .optionalChild("validator", "*")  // Any validator type
-                .optionalChild("loader", "*")     // Any loader type
+                .inheritsFrom(TYPE_METADATA, SUBTYPE_BASE)  // Inherits all base capabilities
             );
-            
-            log.debug("Registered MetaDataLoader type with unified registry");
+
+            log.info("MetaDataLoader static block executed - registered metadata.base and loader.manual types");
         } catch (Exception e) {
             log.error("Failed to register MetaDataLoader type with unified registry", e);
         }
+    }
+
+    // Type discovery and initialization management
+    private static final AtomicBoolean METADATA_TYPES_DISCOVERED = new AtomicBoolean(false);
+    private static final AtomicBoolean METADATA_LOADER_INITIALIZED = new AtomicBoolean(false);
+
+    /**
+     * Ensures all MetaData types are discovered and registered before any metadata operations.
+     * This method is called from MetaDataLoader constructor to guarantee proper initialization order.
+     * Triggers class loading to activate static registration blocks in key MetaData classes.
+     */
+    private static void ensureMetaDataTypesInitialized() {
+        if (METADATA_TYPES_DISCOVERED.compareAndSet(false, true)) {
+            try {
+                log.info("Triggering MetaData type registration via class loading...");
+
+                MetaDataRegistry registry = MetaDataRegistry.getInstance();
+
+                // CRITICAL: Ensure MetaDataLoader static block has executed first
+                // to register metadata.base before any inheritance attempts
+                log.info("Ensuring MetaDataLoader static initialization is complete...");
+                // Force static block execution by accessing a static field
+                String baseType = MetaDataLoader.TYPE_METADATA;
+                log.info("MetaDataLoader base type: {}", baseType);
+
+                // Trigger registration of core field types
+                triggerClassLoading("com.draagon.meta.field.StringField");
+                triggerClassLoading("com.draagon.meta.field.IntegerField");
+                triggerClassLoading("com.draagon.meta.field.LongField");
+                triggerClassLoading("com.draagon.meta.field.DoubleField");
+                triggerClassLoading("com.draagon.meta.field.BooleanField");
+                triggerClassLoading("com.draagon.meta.field.DateField");
+                triggerClassLoading("com.draagon.meta.field.ByteField");
+                triggerClassLoading("com.draagon.meta.field.FloatField");
+                triggerClassLoading("com.draagon.meta.field.ShortField");
+                triggerClassLoading("com.draagon.meta.field.TimestampField");
+                triggerClassLoading("com.draagon.meta.field.StringArrayField");
+                triggerClassLoading("com.draagon.meta.field.ObjectArrayField");
+                triggerClassLoading("com.draagon.meta.field.ObjectField");
+                triggerClassLoading("com.draagon.meta.field.ClassField");
+
+                // Trigger registration of core attribute types
+                triggerClassLoading("com.draagon.meta.attr.StringAttribute");
+                triggerClassLoading("com.draagon.meta.attr.IntAttribute");
+                triggerClassLoading("com.draagon.meta.attr.BooleanAttribute");
+                triggerClassLoading("com.draagon.meta.attr.DoubleAttribute");
+                triggerClassLoading("com.draagon.meta.attr.LongAttribute");
+                triggerClassLoading("com.draagon.meta.attr.ClassAttribute");
+                triggerClassLoading("com.draagon.meta.attr.PropertiesAttribute");
+
+                // Trigger registration of validator types
+                triggerClassLoading("com.draagon.meta.validator.RequiredValidator");
+                triggerClassLoading("com.draagon.meta.validator.LengthValidator");
+                triggerClassLoading("com.draagon.meta.validator.NumericValidator");
+                triggerClassLoading("com.draagon.meta.validator.RegexValidator");
+                triggerClassLoading("com.draagon.meta.validator.ArrayValidator");
+
+                // Trigger registration of key types
+                triggerClassLoading("com.draagon.meta.key.PrimaryKey");
+                triggerClassLoading("com.draagon.meta.key.ForeignKey");
+                triggerClassLoading("com.draagon.meta.key.SecondaryKey");
+
+                // Trigger registration of view types (if available)
+                triggerClassLoading("com.draagon.meta.view.MetaView");
+
+                // Trigger registration of object types
+                triggerClassLoading("com.draagon.meta.object.pojo.PojoMetaObject");
+                triggerClassLoading("com.draagon.meta.object.mapped.MappedMetaObject");
+                triggerClassLoading("com.draagon.meta.object.proxy.ProxyMetaObject");
+
+                // Trigger registration of SimpleLoader itself
+                triggerClassLoading("com.draagon.meta.loader.simple.SimpleLoader");
+
+                // Resolve all inheritance relationships after type registration
+                int resolved = registry.resolveDeferredInheritance();
+                log.info("Resolved {} deferred inheritance relationships", resolved);
+
+                log.info("MetaData type registration via class loading completed successfully");
+
+            } catch (Exception e) {
+                log.error("Failed to trigger MetaData type registration", e);
+                // Reset flag to allow retry on next MetaDataLoader creation
+                METADATA_TYPES_DISCOVERED.set(false);
+                throw new RuntimeException("MetaData type registration failed", e);
+            }
+        }
+    }
+
+    /**
+     * Triggers class loading for a specific class to activate its static registration block.
+     * Ignores ClassNotFoundException for optional classes that may not be available.
+     */
+    private static void triggerClassLoading(String className) {
+        try {
+            Class.forName(className);
+            log.debug("Triggered registration for: {}", className);
+        } catch (ClassNotFoundException e) {
+            // Some classes may not be available (e.g., in different modules)
+            log.debug("Class not found (optional): {}", className);
+        } catch (Exception e) {
+            log.warn("Failed to load class {}: {}", className, e.getMessage());
+        }
+    }
+
+    /**
+     * Marks that a MetaDataLoader has been initialized, enabling validation warnings
+     * for MetaData operations that occur without proper loader initialization.
+     */
+    private static void markMetaDataLoaderInitialized() {
+        METADATA_LOADER_INITIALIZED.set(true);
+    }
+
+    /**
+     * Checks if any MetaDataLoader has been initialized.
+     * Used for validation warnings in MetaData operations.
+     */
+    public static boolean isMetaDataLoaderInitialized() {
+        return METADATA_LOADER_INITIALIZED.get();
     }
 
     // TODO:  Allow for custom configurations for overloaded MetaDataLoaders
@@ -138,6 +269,13 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     public MetaDataLoader(LoaderOptions loaderOptions, String subtype, String name ) {
         super( TYPE_LOADER, subtype, name );
         this.loaderOptions = loaderOptions;
+
+        // CRITICAL: Ensure all MetaData types are discovered and inheritance is resolved
+        // before any metadata operations. This guarantees proper initialization order.
+        ensureMetaDataTypesInitialized();
+        markMetaDataLoaderInitialized();
+
+        log.debug("MetaDataLoader [{}] initialized with type discovery completed", name);
     }
 
     /**

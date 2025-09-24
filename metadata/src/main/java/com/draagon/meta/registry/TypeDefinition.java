@@ -3,15 +3,16 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Immutable definition of a MetaData type including its implementation class,
- * identity information, and child requirements.
- * 
- * <p>This replaces the dual registry pattern by integrating type registration
- * and child requirement definitions into a single cohesive structure.</p>
- * 
- * @since 6.0.0
+ * identity information, and bidirectional constraint declarations.
+ *
+ * <p>This replaces the old ChildRequirement system with bidirectional constraints
+ * where types declare what children they accept and what parents they accept.</p>
+ *
+ * @since 6.2.0
  */
 public class TypeDefinition {
 
@@ -21,18 +22,20 @@ public class TypeDefinition {
     private final String description;
     private final String parentType;
     private final String parentSubType;
-    private final Map<String, ChildRequirement> childRequirements;
-    private final List<ChildRequirement> wildcardRequirements;
-    private final Map<String, ChildRequirement> inheritedChildRequirements;
+    private final List<AcceptsChildrenDeclaration> acceptsChildren;
+    private final List<AcceptsParentsDeclaration> acceptsParents;
+    private final List<AcceptsChildrenDeclaration> inheritedAcceptsChildren;
+    private final List<AcceptsParentsDeclaration> inheritedAcceptsParents;
 
     /**
-     * Create a type definition with child requirements and optional inheritance
+     * Create a type definition with bidirectional constraints and optional inheritance
      *
      * @param implementationClass Java class that implements this type
      * @param type Primary type identifier (e.g., "field", "object")
      * @param subType Specific subtype identifier (e.g., "string", "base")
      * @param description Human-readable description
-     * @param childRequirements Map of child name to requirement (direct requirements)
+     * @param acceptsChildren List of children this type accepts
+     * @param acceptsParents List of parents this type can be placed under
      * @param parentType Parent type for inheritance (can be null)
      * @param parentSubType Parent subType for inheritance (can be null)
      */
@@ -40,7 +43,8 @@ public class TypeDefinition {
                          String type,
                          String subType,
                          String description,
-                         Map<String, ChildRequirement> childRequirements,
+                         List<AcceptsChildrenDeclaration> acceptsChildren,
+                         List<AcceptsParentsDeclaration> acceptsParents,
                          String parentType,
                          String parentSubType) {
         this.implementationClass = Objects.requireNonNull(implementationClass, "Implementation class cannot be null");
@@ -49,81 +53,69 @@ public class TypeDefinition {
         this.description = description != null ? description : "";
         this.parentType = parentType;
         this.parentSubType = parentSubType;
+        this.acceptsChildren = acceptsChildren != null ? List.copyOf(acceptsChildren) : List.of();
+        this.acceptsParents = acceptsParents != null ? List.copyOf(acceptsParents) : List.of();
 
-        // Separate named requirements from wildcard requirements for efficient lookup
-        Map<String, ChildRequirement> named = new HashMap<>();
-        List<ChildRequirement> wildcards = new ArrayList<>();
-
-        if (childRequirements != null) {
-            for (ChildRequirement req : childRequirements.values()) {
-                if ("*".equals(req.getName())) {
-                    wildcards.add(req);
-                } else {
-                    named.put(req.getName(), req);
-                }
-            }
-        }
-
-        this.childRequirements = Map.copyOf(named);
-        this.wildcardRequirements = List.copyOf(wildcards);
-
-        // Resolve inherited requirements (will be populated later during registry resolution)
-        this.inheritedChildRequirements = Collections.synchronizedMap(new HashMap<>());
+        // Inherited constraints (will be populated later during registry resolution)
+        this.inheritedAcceptsChildren = Collections.synchronizedList(new ArrayList<>());
+        this.inheritedAcceptsParents = Collections.synchronizedList(new ArrayList<>());
     }
 
     /**
-     * Create a type definition without inheritance (backward compatibility)
+     * Create a type definition without inheritance (convenience constructor)
      *
      * @param implementationClass Java class that implements this type
      * @param type Primary type identifier (e.g., "field", "object")
      * @param subType Specific subtype identifier (e.g., "string", "base")
      * @param description Human-readable description
-     * @param childRequirements Map of child name to requirement
+     * @param acceptsChildren List of children this type accepts
+     * @param acceptsParents List of parents this type can be placed under
      */
     public TypeDefinition(Class<? extends MetaData> implementationClass,
                          String type,
                          String subType,
                          String description,
-                         Map<String, ChildRequirement> childRequirements) {
-        this(implementationClass, type, subType, description, childRequirements, null, null);
+                         List<AcceptsChildrenDeclaration> acceptsChildren,
+                         List<AcceptsParentsDeclaration> acceptsParents) {
+        this(implementationClass, type, subType, description, acceptsChildren, acceptsParents, null, null);
     }
-    
+
     /**
      * Get the implementation class for this type
-     * 
+     *
      * @return Java class that implements this MetaData type
      */
     public Class<? extends MetaData> getImplementationClass() {
         return implementationClass;
     }
-    
+
     /**
      * Get the primary type identifier
-     * 
+     *
      * @return Type identifier like "field", "object", "attr"
      */
     public String getType() {
         return type;
     }
-    
+
     /**
      * Get the specific subtype identifier
-     * 
+     *
      * @return SubType identifier like "string", "int", "base"
      */
     public String getSubType() {
         return subType;
     }
-    
+
     /**
      * Get the human-readable description
-     * 
+     *
      * @return Description of this type
      */
     public String getDescription() {
         return description;
     }
-    
+
     /**
      * Get qualified type name for display and logging
      *
@@ -168,58 +160,67 @@ public class TypeDefinition {
     public String getParentQualifiedName() {
         return hasParent() ? parentType + "." + parentSubType : null;
     }
-    
+
     /**
-     * Get all child requirements for this type (including inherited)
+     * Get all children declarations for this type (including inherited)
      *
-     * @return List of all child requirements (direct + inherited + wildcards)
+     * @return List of all accepts children declarations (direct + inherited)
      */
-    public List<ChildRequirement> getChildRequirements() {
-        List<ChildRequirement> all = new ArrayList<>(childRequirements.values());
-        all.addAll(wildcardRequirements);
-        all.addAll(inheritedChildRequirements.values());
+    public List<AcceptsChildrenDeclaration> getAcceptsChildren() {
+        List<AcceptsChildrenDeclaration> all = new ArrayList<>(acceptsChildren);
+        all.addAll(inheritedAcceptsChildren);
         return Collections.unmodifiableList(all);
     }
 
     /**
-     * Get all direct child requirements (excluding inherited)
+     * Get direct children declarations (excluding inherited)
      *
-     * @return List of direct child requirements only
+     * @return List of direct accepts children declarations only
      */
-    public List<ChildRequirement> getDirectChildRequirements() {
-        List<ChildRequirement> all = new ArrayList<>(childRequirements.values());
-        all.addAll(wildcardRequirements);
+    public List<AcceptsChildrenDeclaration> getDirectAcceptsChildren() {
+        return Collections.unmodifiableList(acceptsChildren);
+    }
+
+    /**
+     * Get inherited children declarations
+     *
+     * @return List of inherited accepts children declarations
+     */
+    public List<AcceptsChildrenDeclaration> getInheritedAcceptsChildren() {
+        return Collections.unmodifiableList(inheritedAcceptsChildren);
+    }
+
+    /**
+     * Get direct parents declarations (excluding inherited)
+     *
+     * @return List of direct accepts parents declarations only
+     */
+    public List<AcceptsParentsDeclaration> getDirectAcceptsParents() {
+        return Collections.unmodifiableList(acceptsParents);
+    }
+
+    /**
+     * Get inherited parents declarations
+     *
+     * @return List of inherited accepts parents declarations
+     */
+    public List<AcceptsParentsDeclaration> getInheritedAcceptsParents() {
+        return Collections.unmodifiableList(inheritedAcceptsParents);
+    }
+
+    /**
+     * Get all parent declarations for this type (including inherited)
+     *
+     * @return List of all accepts parents declarations (direct + inherited)
+     */
+    public List<AcceptsParentsDeclaration> getAcceptsParents() {
+        List<AcceptsParentsDeclaration> all = new ArrayList<>(acceptsParents);
+        all.addAll(inheritedAcceptsParents);
         return Collections.unmodifiableList(all);
     }
 
     /**
-     * Get all inherited child requirements
-     *
-     * @return Map of inherited child requirements
-     */
-    public Map<String, ChildRequirement> getInheritedChildRequirements() {
-        return Collections.unmodifiableMap(inheritedChildRequirements);
-    }
-
-    /**
-     * Get a specific child requirement by name (checks direct first, then inherited)
-     *
-     * @param childName Name of the child to look up
-     * @return ChildRequirement if found, null otherwise
-     */
-    public ChildRequirement getChildRequirement(String childName) {
-        // Check direct requirements first (they override inherited)
-        ChildRequirement direct = childRequirements.get(childName);
-        if (direct != null) {
-            return direct;
-        }
-
-        // Check inherited requirements
-        return inheritedChildRequirements.get(childName);
-    }
-    
-    /**
-     * Check if a child is acceptable for this type (checks direct and inherited requirements)
+     * Check if a child is acceptable for this type based on bidirectional constraints
      *
      * @param childType Actual child type
      * @param childSubType Actual child subType
@@ -227,139 +228,311 @@ public class TypeDefinition {
      * @return true if this type accepts the specified child
      */
     public boolean acceptsChild(String childType, String childSubType, String childName) {
-        // Check direct named requirement first (overrides inherited)
-        ChildRequirement namedReq = childRequirements.get(childName);
-        if (namedReq != null) {
-            return namedReq.matches(childType, childSubType, childName);
-        }
-
-        // Check direct wildcard requirements
-        for (ChildRequirement wildcardReq : wildcardRequirements) {
-            if (wildcardReq.matches(childType, childSubType, childName)) {
+        // Check direct declarations first
+        for (AcceptsChildrenDeclaration declaration : acceptsChildren) {
+            if (declaration.matches(childType, childSubType, childName)) {
                 return true;
             }
         }
 
-        // Check inherited named requirement
-        ChildRequirement inheritedNamedReq = inheritedChildRequirements.get(childName);
-        if (inheritedNamedReq != null) {
-            return inheritedNamedReq.matches(childType, childSubType, childName);
-        }
-
-        // Check inherited wildcard requirements
-        for (ChildRequirement inheritedReq : inheritedChildRequirements.values()) {
-            if ("*".equals(inheritedReq.getName()) && inheritedReq.matches(childType, childSubType, childName)) {
+        // Check inherited declarations
+        for (AcceptsChildrenDeclaration declaration : inheritedAcceptsChildren) {
+            if (declaration.matches(childType, childSubType, childName)) {
                 return true;
             }
         }
 
         return false;
     }
-    
+
     /**
-     * Get all required children that are missing
-     * 
-     * @param existingChildren Names of children that already exist
-     * @return List of required ChildRequirements that are not satisfied
+     * Check if this type can be placed under a specific parent
+     *
+     * @param parentType Actual parent type
+     * @param parentSubType Actual parent subType
+     * @param proposedChildName Proposed name for this child
+     * @return true if this type can be placed under the specified parent
      */
-    public List<ChildRequirement> getMissingRequiredChildren(Set<String> existingChildren) {
-        List<ChildRequirement> missing = new ArrayList<>();
-        
-        // Check named required children
-        for (ChildRequirement req : childRequirements.values()) {
-            if (req.isRequired() && !existingChildren.contains(req.getName())) {
-                missing.add(req);
+    public boolean acceptsParent(String parentType, String parentSubType, String proposedChildName) {
+        // Check direct declarations first
+        for (AcceptsParentsDeclaration declaration : acceptsParents) {
+            if (declaration.matches(parentType, parentSubType, proposedChildName)) {
+                return true;
             }
         }
-        
-        // Wildcard requirements cannot be "missing" since they don't specify names
-        
-        return missing;
+
+        // Check inherited declarations
+        for (AcceptsParentsDeclaration declaration : inheritedAcceptsParents) {
+            if (declaration.matches(parentType, parentSubType, proposedChildName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
-    
+
     /**
      * Get human-readable description of supported children for error messages
-     * 
-     * @return Description like "Supports: pattern (optional string attribute), required (optional boolean attribute)"
+     *
+     * @return Description like "Accepts: attr.string (any name), attr.int:maxLength"
      */
     public String getSupportedChildrenDescription() {
-        if (childRequirements.isEmpty() && wildcardRequirements.isEmpty()) {
-            return "No children supported";
+        List<AcceptsChildrenDeclaration> allChildren = getAcceptsChildren();
+        if (allChildren.isEmpty()) {
+            return "No children accepted";
         }
-        
-        StringBuilder desc = new StringBuilder("Supports: ");
+
+        StringBuilder desc = new StringBuilder("Accepts: ");
         List<String> parts = new ArrayList<>();
-        
-        // Named requirements
-        for (ChildRequirement req : childRequirements.values()) {
-            parts.add(req.getDescription());
+
+        for (AcceptsChildrenDeclaration declaration : allChildren) {
+            String typeInfo = declaration.getChildType() + "." + declaration.getChildSubType();
+            if (declaration.getChildName() != null) {
+                typeInfo += ":" + declaration.getChildName();
+            } else {
+                typeInfo += " (any name)";
+            }
+            parts.add(typeInfo);
         }
-        
-        // Wildcard requirements
-        for (ChildRequirement req : wildcardRequirements) {
-            parts.add(req.getDescription());
-        }
-        
+
         desc.append(String.join(", ", parts));
         return desc.toString();
     }
 
     /**
-     * Internal method to populate inherited child requirements.
+     * Get human-readable description of acceptable parents for error messages
+     *
+     * @return Description like "Can be placed under: field.string, object.*"
+     */
+    public String getAcceptableParentsDescription() {
+        if (acceptsParents.isEmpty()) {
+            return "No parent restrictions";
+        }
+
+        StringBuilder desc = new StringBuilder("Can be placed under: ");
+        List<String> parts = new ArrayList<>();
+
+        for (AcceptsParentsDeclaration declaration : acceptsParents) {
+            String typeInfo = declaration.getParentType() + "." + declaration.getParentSubType();
+            if (declaration.getExpectedChildName() != null) {
+                typeInfo += " as:" + declaration.getExpectedChildName();
+            }
+            parts.add(typeInfo);
+        }
+
+        desc.append(String.join(", ", parts));
+        return desc.toString();
+    }
+
+    /**
+     * Internal method to populate inherited children declarations.
      * This is called by MetaDataRegistry during type registration to resolve inheritance chains.
      *
-     * @param parentRequirements Child requirements from the parent type
+     * @param parentAcceptsChildren Children declarations from the parent type
      */
-    void populateInheritedRequirements(Map<String, ChildRequirement> parentRequirements) {
-        if (parentRequirements != null) {
-            // Clear any existing inherited requirements
-            inheritedChildRequirements.clear();
+    void populateInheritedConstraints(List<AcceptsChildrenDeclaration> parentAcceptsChildren) {
+        if (parentAcceptsChildren != null) {
+            // Clear any existing inherited constraints
+            inheritedAcceptsChildren.clear();
 
-            // Add all parent requirements that are not overridden by direct requirements
-            for (Map.Entry<String, ChildRequirement> entry : parentRequirements.entrySet()) {
-                String parentKey = entry.getKey();
-                ChildRequirement parentReq = entry.getValue();
-
-                // Only inherit if not overridden by direct requirement with same key
-                if (!childRequirements.containsKey(parentKey)) {
-                    inheritedChildRequirements.put(parentKey, parentReq);
+            // Add all parent constraints that are not overridden by direct constraints
+            for (AcceptsChildrenDeclaration parentDeclaration : parentAcceptsChildren) {
+                if (!isOverriddenByDirectDeclaration(parentDeclaration)) {
+                    inheritedAcceptsChildren.add(parentDeclaration);
                 }
             }
         }
     }
 
     /**
-     * Create a unique key for a ChildRequirement that includes all identifying fields
-     * to avoid conflicts between wildcards with same name but different types
+     * Check if a parent declaration is overridden by any direct declaration
      */
-    private String createUniqueKey(ChildRequirement req) {
-        return req.getName() + ":" + req.getExpectedType() + ":" + req.getExpectedSubType();
+    private boolean isOverriddenByDirectDeclaration(AcceptsChildrenDeclaration parentDeclaration) {
+        for (AcceptsChildrenDeclaration directDeclaration : acceptsChildren) {
+            // Simple override logic: same type and subtype means override
+            if (directDeclaration.getChildType().equals(parentDeclaration.getChildType()) &&
+                directDeclaration.getChildSubType().equals(parentDeclaration.getChildSubType())) {
+
+                // If names are both specific, they must match to be an override
+                if (directDeclaration.getChildName() != null && parentDeclaration.getChildName() != null) {
+                    return directDeclaration.getChildName().equals(parentDeclaration.getChildName());
+                }
+
+                // If either is unnamed, consider it an override
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        
+
         TypeDefinition that = (TypeDefinition) obj;
         return implementationClass.equals(that.implementationClass) &&
                type.equals(that.type) &&
                subType.equals(that.subType) &&
                description.equals(that.description) &&
-               childRequirements.equals(that.childRequirements) &&
-               wildcardRequirements.equals(that.wildcardRequirements);
+               acceptsChildren.equals(that.acceptsChildren) &&
+               acceptsParents.equals(that.acceptsParents);
     }
-    
+
     @Override
     public int hashCode() {
-        return Objects.hash(implementationClass, type, subType, description, 
-                          childRequirements, wildcardRequirements);
+        return Objects.hash(implementationClass, type, subType, description,
+                          acceptsChildren, acceptsParents);
     }
-    
+
+    // ======================================
+    // BACKWARD COMPATIBILITY BRIDGE METHODS
+    // ======================================
+
+    /**
+     * Bridge method for backward compatibility.
+     * Converts new AcceptsChildrenDeclaration to old ChildRequirement format.
+     *
+     * @deprecated Use getAcceptsChildren() instead
+     */
+    @Deprecated
+    public List<ChildRequirement> getChildRequirements() {
+        List<ChildRequirement> bridgeRequirements = new ArrayList<>();
+
+        // Convert direct accepts children
+        for (AcceptsChildrenDeclaration declaration : acceptsChildren) {
+            ChildRequirement bridgeReq = convertToChildRequirement(declaration);
+            bridgeRequirements.add(bridgeReq);
+        }
+
+        // Convert inherited accepts children
+        for (AcceptsChildrenDeclaration declaration : inheritedAcceptsChildren) {
+            ChildRequirement bridgeReq = convertToChildRequirement(declaration);
+            bridgeRequirements.add(bridgeReq);
+        }
+
+        return bridgeRequirements;
+    }
+
+    /**
+     * Bridge method for backward compatibility.
+     *
+     * @deprecated Use getDirectAcceptsChildren() instead
+     */
+    @Deprecated
+    public List<ChildRequirement> getDirectChildRequirements() {
+        return acceptsChildren.stream()
+                .map(this::convertToChildRequirement)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Bridge method for backward compatibility.
+     *
+     * @deprecated Use getInheritedAcceptsChildren() instead
+     */
+    @Deprecated
+    public Map<String, ChildRequirement> getInheritedChildRequirements() {
+        Map<String, ChildRequirement> inherited = new HashMap<>();
+        for (AcceptsChildrenDeclaration declaration : inheritedAcceptsChildren) {
+            ChildRequirement bridgeReq = convertToChildRequirement(declaration);
+            String key = bridgeReq.getName() != null ? bridgeReq.getName() : "*:" + bridgeReq.getExpectedType() + ":" + bridgeReq.getExpectedSubType();
+            inherited.put(key, bridgeReq);
+        }
+        return inherited;
+    }
+
+    /**
+     * Bridge method for backward compatibility.
+     *
+     * @deprecated Use acceptsChild() instead
+     */
+    @Deprecated
+    public ChildRequirement getChildRequirement(String childName) {
+        // Look for a named child acceptance
+        for (AcceptsChildrenDeclaration declaration : acceptsChildren) {
+            if (childName.equals(declaration.getChildName())) {
+                return convertToChildRequirement(declaration);
+            }
+        }
+
+        // Look for a wildcard acceptance
+        for (AcceptsChildrenDeclaration declaration : acceptsChildren) {
+            if (declaration.getChildName() == null) {
+                return convertToChildRequirement(declaration);
+            }
+        }
+
+        // Check inherited
+        for (AcceptsChildrenDeclaration declaration : inheritedAcceptsChildren) {
+            if (childName.equals(declaration.getChildName()) || declaration.getChildName() == null) {
+                return convertToChildRequirement(declaration);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Bridge method for backward compatibility.
+     *
+     * @deprecated Use populateInheritedConstraints() instead
+     */
+    @Deprecated
+    void populateInheritedRequirements(Map<String, ChildRequirement> parentRequirements) {
+        // Convert ChildRequirements back to AcceptsChildrenDeclarations
+        List<AcceptsChildrenDeclaration> parentDeclarations = new ArrayList<>();
+        if (parentRequirements != null) {
+            for (ChildRequirement req : parentRequirements.values()) {
+                AcceptsChildrenDeclaration declaration = convertFromChildRequirement(req);
+                parentDeclarations.add(declaration);
+            }
+        }
+        populateInheritedConstraints(parentDeclarations);
+    }
+
+    /**
+     * Convert AcceptsChildrenDeclaration to ChildRequirement for backward compatibility
+     */
+    private ChildRequirement convertToChildRequirement(AcceptsChildrenDeclaration declaration) {
+        String name = declaration.getChildName() != null ? declaration.getChildName() : "*";
+        return ChildRequirement.optional(name, declaration.getChildType(), declaration.getChildSubType());
+    }
+
+    /**
+     * Convert ChildRequirement to AcceptsChildrenDeclaration
+     */
+    private AcceptsChildrenDeclaration convertFromChildRequirement(ChildRequirement requirement) {
+        String name = "*".equals(requirement.getName()) ? null : requirement.getName();
+        return new AcceptsChildrenDeclaration(requirement.getExpectedType(), requirement.getExpectedSubType(), name);
+    }
+
+    /**
+     * Populate inherited accepts children declarations from parent type
+     * Used by inheritance resolution system
+     *
+     * @param inheritedDeclarations List of accepts children declarations to inherit
+     */
+    public void populateInheritedAcceptsChildren(List<AcceptsChildrenDeclaration> inheritedDeclarations) {
+        this.inheritedAcceptsChildren.clear();
+        this.inheritedAcceptsChildren.addAll(inheritedDeclarations);
+    }
+
+    /**
+     * Populate inherited accepts parents declarations from parent type
+     * Used by inheritance resolution system
+     *
+     * @param inheritedDeclarations List of accepts parents declarations to inherit
+     */
+    public void populateInheritedAcceptsParents(List<AcceptsParentsDeclaration> inheritedDeclarations) {
+        this.inheritedAcceptsParents.clear();
+        this.inheritedAcceptsParents.addAll(inheritedDeclarations);
+    }
+
     @Override
     public String toString() {
-        return String.format("TypeDefinition[%s -> %s, children=%d]",
+        return String.format("TypeDefinition[%s -> %s, accepts=%d children, %d parents]",
             getQualifiedName(), implementationClass.getSimpleName(),
-            childRequirements.size() + wildcardRequirements.size());
+            acceptsChildren.size(), acceptsParents.size());
     }
 }

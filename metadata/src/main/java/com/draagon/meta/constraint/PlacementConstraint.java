@@ -60,17 +60,29 @@ public class PlacementConstraint implements Constraint {
     }
     
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) 
+    public String getName() {
+        return id;
+    }
+
+    @Override
+    public boolean appliesTo(MetaData metaData) {
+        // PlacementConstraints apply to parent-child relationships, not single MetaData
+        // This is a compatibility method - the real logic is in appliesTo(parent, child)
+        return false;
+    }
+
+    @Override
+    public void validate(MetaData metaData, ValidationContext context)
             throws ConstraintViolationException {
         // PlacementConstraints are validated during addChild operations, not during value validation
         // This method is here to satisfy the Constraint interface but shouldn't be called for placement
         throw new UnsupportedOperationException(
             "PlacementConstraint validation should be called via isPlacementAllowed(), not validate()");
     }
-    
+
     @Override
-    public String getType() {
-        return "placement";
+    public String generateErrorMessage(MetaData metaData, ValidationContext context) {
+        return String.format("Placement constraint violated: %s. %s", id, description);
     }
     
     @Override

@@ -9,13 +9,17 @@ import com.draagon.meta.io.object.json.JsonObjectWriter;
 //import com.draagon.meta.io.object.xml.XMLObjectReader;
 //import com.draagon.meta.io.object.xml.XMLObjectWriter;
 //import com.draagon.meta.io.xml.XMLIOConstants;
+import com.draagon.meta.loader.LoaderOptions;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.mapped.MappedMetaObject;
 import com.draagon.meta.object.mapped.MappedObject;
+import com.draagon.meta.registry.SharedTestRegistry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -65,9 +69,16 @@ public abstract class ObjectIOTestBase {
 
     @Before
     public void setup() {
-        MetaDataLoader tempLoader = MetaDataLoader.createManual( false, "json-MappedObject-io-test" );
+        // Use SharedTestRegistry to ensure proper provider discovery
+        SharedTestRegistry.getInstance();
+        Logger log = LoggerFactory.getLogger(ObjectIOTestBase.class);
+        log.debug("ObjectIOTestBase setup with shared registry: {}", SharedTestRegistry.getStatus());
+
+        // Create a manual loader compatible with SharedTestRegistry
+        MetaDataLoader tempLoader = new MetaDataLoader(
+                LoaderOptions.create(false, false, false),
+                MetaDataLoader.SUBTYPE_MANUAL, "json-MappedObject-io-test");
         tempLoader.init();
-        tempLoader.register();
         
         // Create basket object
         MappedMetaObject basket = MappedMetaObject.create(MD.OBJ_BASKET);

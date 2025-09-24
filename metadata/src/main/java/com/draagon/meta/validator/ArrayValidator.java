@@ -1,9 +1,11 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.InvalidMetaDataException;
+import com.draagon.meta.MetaDataException;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -11,6 +13,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
+import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
+import static com.draagon.meta.validator.MetaValidator.TYPE_VALIDATOR;
+
+/**
+ * Array Validator that ensures collection/array sizes meet constraints with unified registry registration.
+ *
+ * @version 6.2
+ */
 @MetaDataType(type = "validator", subType = "array", description = "Array validator for size constraints")
 public class ArrayValidator extends MetaValidator {
 
@@ -24,17 +34,90 @@ public class ArrayValidator extends MetaValidator {
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaValidator static initialization first
+            try {
+                Class.forName(MetaValidator.class.getName());
+                // Add a small delay to ensure MetaValidator registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaValidator class loading", e);
+            }
+
             MetaDataRegistry.registerType(ArrayValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
-                .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-                .optionalAttribute(ATTR_MINSIZE, "int")
-                .optionalAttribute(ATTR_MAXSIZE, "int")
                 .description("Array validator for size constraints")
+
+                // INHERIT FROM BASE VALIDATOR
+                .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
+
+                // ArrayValidator inherits all parent acceptance from validator.base:
+                // - Can be placed under any field type (especially array/collection fields)
+                // - Can be placed under any object type
+                // - Can be placed under other validators
+                // - Can be placed under loaders as abstract
+
+                // ARRAY-SPECIFIC CHILD ACCEPTANCE DECLARATIONS
+                // ArrayValidator can have minSize and maxSize attributes for size constraints
+                .acceptsNamedChildren("attr", "int", ATTR_MINSIZE)    // Min size attribute
+                .acceptsNamedChildren("attr", "int", ATTR_MAXSIZE)    // Max size attribute
+
+                // NO ADDITIONAL CHILD REQUIREMENTS (only uses inherited validator capabilities + size constraints)
             );
 
             log.debug("Registered ArrayValidator type with unified registry");
+
+            // Register ArrayValidator-specific validation constraints only
+            setupArrayValidatorValidationConstraints();
+
         } catch (Exception e) {
             log.error("Failed to register ArrayValidator type with unified registry", e);
+        }
+    }
+
+    /**
+     * Setup ArrayValidator-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
+     */
+    private static void setupArrayValidatorValidationConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALIDATION CONSTRAINT: Array validator size bounds validation
+            ValidationConstraint arraySizeBoundsValidation = new ValidationConstraint(
+                "arrayvalidator.size.bounds.validation",
+                "ArrayValidator minSize and maxSize attributes must be valid with minSize <= maxSize",
+                (metadata) -> metadata instanceof ArrayValidator,
+                (metadata, value) -> {
+                    if (metadata instanceof ArrayValidator) {
+                        ArrayValidator validator = (ArrayValidator) metadata;
+                        try {
+                            int minSize = validator.getMinSize();
+                            Integer maxSize = validator.getMaxSize();
+
+                            // Min size cannot be negative
+                            if (minSize < 0) return false;
+
+                            // If maxSize is specified, it cannot be negative and must be >= minSize
+                            if (maxSize != null) {
+                                if (maxSize < 0) return false;
+                                if (maxSize < minSize) return false;
+                            }
+
+                            return true;
+
+                        } catch (Exception e) {
+                            return false; // Any error in validation
+                        }
+                    }
+                    return true;
+                }
+            );
+            constraintRegistry.addConstraint(arraySizeBoundsValidation);
+
+            log.debug("Registered ArrayValidator-specific constraints");
+
+        } catch (Exception e) {
+            log.error("Failed to register ArrayValidator constraints", e);
         }
     }
 
@@ -60,7 +143,7 @@ public class ArrayValidator extends MetaValidator {
                     cachedMinSize = getAttrValueAsInt(attr);
                 }
                 catch(NumberFormatException e ) {
-                    throw new InvalidMetaDataException( attr, "Invalid min value of ["+attr.getValueAsString()+"]");
+                    throw new MetaDataException( "Invalid min value of ["+attr.getValueAsString()+"] for attribute: " + attr.getName());
                 }
             } else {
                 cachedMinSize = 0;
@@ -91,7 +174,7 @@ public class ArrayValidator extends MetaValidator {
                     cachedMaxSize = getAttrValueAsInt(attr);
                 }
                 catch(NumberFormatException e ) {
-                    throw new InvalidMetaDataException( attr, "Invalid max value of ["+attr.getValueAsString()+"]");
+                    throw new MetaDataException( "Invalid max value of ["+attr.getValueAsString()+"] for attribute: " + attr.getName());
                 }
             } else {
                 cachedMaxSize = null;

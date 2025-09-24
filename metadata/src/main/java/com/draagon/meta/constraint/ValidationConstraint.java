@@ -109,33 +109,43 @@ public class ValidationConstraint implements Constraint {
     }
     
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) 
+    public String getName() {
+        return id;
+    }
+
+    @Override
+    public void validate(MetaData metaData, ValidationContext context)
+            throws ConstraintViolationException {
+        // ValidationConstraint doesn't know about specific values in this context
+        // The validation logic needs to be adapted for the new interface
+        // For now, we'll throw an UnsupportedOperationException since this method signature
+        // doesn't match the ValidationConstraint's design (which needs the value parameter)
+        throw new UnsupportedOperationException(
+            "ValidationConstraint requires value parameter - use validate(MetaData, Object, ValidationContext) instead");
+    }
+
+    @Override
+    public String generateErrorMessage(MetaData metaData, ValidationContext context) {
+        return String.format("Validation constraint '%s' failed for %s. %s",
+            id, metaData.getName(), description);
+    }
+
+    // Legacy method kept for backward compatibility
+    public void validate(MetaData metaData, Object value, ValidationContext context)
             throws ConstraintViolationException {
         if (appliesTo(metaData) && !isValid(metaData, value, context)) {
             throw new ConstraintViolationException(
-                String.format("Validation constraint '%s' failed for %s with value: %s", 
+                String.format("Validation constraint '%s' failed for %s with value: %s",
                     id, metaData.getName(), value),
-                getType(),
-                value,
-                context
+                id,
+                metaData
             );
         }
     }
-    
-    @Override
-    public String getType() {
-        return "validation";
-    }
-    
+
     @Override
     public String getDescription() {
         return description;
-    }
-    
-    @Override
-    public boolean isApplicableTo(String metaDataType) {
-        // ValidationConstraints determine applicability dynamically via the applicableTo predicate
-        return true; // Let the predicate decide during actual validation
     }
     
     /**

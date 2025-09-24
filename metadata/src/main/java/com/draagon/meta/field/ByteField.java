@@ -7,7 +7,10 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -51,15 +54,56 @@ public class ByteField extends PrimitiveField<Byte>
                 // INHERIT FROM BASE FIELD
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
-                // BYTE-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, "byte")
-                .optionalAttribute(ATTR_MAX_VALUE, "byte")
+                // BYTE-SPECIFIC ATTRIBUTES (using new API)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_MIN_VALUE)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_MAX_VALUE)
 
             );
 
             log.debug("Registered ByteField type with unified registry");
+
+            // Register ByteField-specific validation constraints only
+            setupByteFieldValidationConstraints();
+
         } catch (Exception e) {
             log.error("Failed to register ByteField type with unified registry", e);
+        }
+    }
+
+    /**
+     * Setup ByteField-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
+     */
+    private static void setupByteFieldValidationConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALUE VALIDATION CONSTRAINT: Range validation for byte fields
+            ValidationConstraint rangeValidation = new ValidationConstraint(
+                "bytefield.range.validation",
+                "ByteField minValue must be less than or equal to maxValue",
+                (metadata) -> metadata instanceof ByteField &&
+                              (metadata.hasMetaAttr(ATTR_MIN_VALUE) || metadata.hasMetaAttr(ATTR_MAX_VALUE)),
+                (metadata, value) -> {
+                    if (!metadata.hasMetaAttr(ATTR_MIN_VALUE) || !metadata.hasMetaAttr(ATTR_MAX_VALUE)) {
+                        return true; // Only one bound specified - always valid
+                    }
+
+                    try {
+                        byte minValue = Byte.parseByte(metadata.getMetaAttr(ATTR_MIN_VALUE).getValueAsString());
+                        byte maxValue = Byte.parseByte(metadata.getMetaAttr(ATTR_MAX_VALUE).getValueAsString());
+                        return minValue <= maxValue;
+                    } catch (NumberFormatException e) {
+                        return false; // Invalid number format
+                    }
+                }
+            );
+            constraintRegistry.addConstraint(rangeValidation);
+
+            log.debug("Registered ByteField-specific constraints");
+
+        } catch (Exception e) {
+            log.error("Failed to register ByteField constraints", e);
         }
     }
 

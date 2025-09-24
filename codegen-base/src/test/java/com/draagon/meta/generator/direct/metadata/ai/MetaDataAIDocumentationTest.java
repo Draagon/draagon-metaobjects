@@ -1,6 +1,7 @@
 package com.draagon.meta.generator.direct.metadata.ai;
 
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.SharedTestRegistry;
 import com.draagon.meta.registry.TypeDefinition;
 import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.object.MetaObject.TYPE_OBJECT;
@@ -30,6 +31,10 @@ public class MetaDataAIDocumentationTest {
 
     @Before
     public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("MetaDataAIDocumentationTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+
         registry = MetaDataRegistry.getInstance();
         outputStream = new ByteArrayOutputStream();
 

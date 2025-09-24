@@ -13,13 +13,28 @@ public class ConstraintViolationException extends MetaDataException {
     private final Object violatingValue;
     private final ValidationContext validationContext;
     private final MetaData metaData;
-    
+
     public ConstraintViolationException(String message, String constraintType, Object violatingValue) {
         super(message);
         this.constraintType = constraintType;
         this.violatingValue = violatingValue;
         this.validationContext = null;
         this.metaData = null;
+    }
+
+    /**
+     * Constructor for new concrete constraint pattern.
+     *
+     * @param message Error message describing the violation
+     * @param constraintName Name of the constraint that was violated
+     * @param violatingMetaData The MetaData object that failed validation
+     */
+    public ConstraintViolationException(String message, String constraintName, MetaData violatingMetaData) {
+        super(message);
+        this.constraintType = constraintName; // Store constraint name as constraint type
+        this.violatingValue = violatingMetaData != null ? violatingMetaData.getName() : null;
+        this.validationContext = null;
+        this.metaData = violatingMetaData;
     }
     
     public ConstraintViolationException(String message, String constraintType, Object violatingValue, ValidationContext context) {
@@ -56,6 +71,15 @@ public class ConstraintViolationException extends MetaDataException {
     
     public ValidationContext getValidationContext() {
         return validationContext;
+    }
+
+    /**
+     * Get the MetaData object that failed validation.
+     *
+     * @return The MetaData that caused the constraint violation, or null if not available
+     */
+    public MetaData getViolatingMetaData() {
+        return metaData;
     }
     
     @Override

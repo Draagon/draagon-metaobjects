@@ -3,6 +3,7 @@ package com.draagon.meta.registry;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.MetaDataTypeId;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,13 @@ import static org.junit.Assert.*;
 public class DebugInheritanceTest {
 
     private static final Logger log = LoggerFactory.getLogger(DebugInheritanceTest.class);
+
+    @Before
+    public void setUp() {
+        // Use SharedTestRegistry to ensure proper provider discovery timing
+        SharedTestRegistry.getInstance();
+        log.debug("DebugInheritanceTest setup with shared registry: {}", SharedTestRegistry.getStatus());
+    }
 
     @Test
     public void debugFieldInheritance() {

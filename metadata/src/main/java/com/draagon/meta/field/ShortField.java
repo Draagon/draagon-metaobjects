@@ -7,14 +7,14 @@
 package com.draagon.meta.field;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.draagon.meta.field.MetaField.TYPE_FIELD;
-import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Short Field with unified registry registration and child requirements.
@@ -23,7 +23,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @author Doug Mealing
  */
 @MetaDataType(type = "field", subType = "short", description = "Short field type with numeric validation")
-@SuppressWarnings("serial")
 public class ShortField extends PrimitiveField<Short>
 {
     private static final Logger log = LoggerFactory.getLogger(ShortField.class);
@@ -35,42 +34,72 @@ public class ShortField extends PrimitiveField<Short>
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(ShortField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_SHORT)
                 .description("Short field with numeric validation")
-                
-                // SHORT-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_MIN_VALUE, "short")
-                .optionalAttribute(ATTR_MAX_VALUE, "short")
-                
-                // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "boolean")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // DATABASE ATTRIBUTES (for database mapping)
-                .optionalAttribute("isId", "boolean")
-                .optionalAttribute("dbColumn", "string")
-                .optionalAttribute("isSearchable", "boolean")
-                .optionalAttribute("isOptional", "boolean")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS VIEWS
-                .optionalChild("view", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // SHORT-SPECIFIC ATTRIBUTES (using new API)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_MIN_VALUE)
+                .acceptsNamedAttributes(IntAttribute.SUBTYPE_INT, ATTR_MAX_VALUE)
+
             );
-            
+
             log.debug("Registered ShortField type with unified registry");
+
+            // Register ShortField-specific validation constraints only
+            setupShortFieldValidationConstraints();
+
         } catch (Exception e) {
             log.error("Failed to register ShortField type with unified registry", e);
+        }
+    }
+
+    /**
+     * Setup ShortField-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
+     */
+    private static void setupShortFieldValidationConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALUE VALIDATION CONSTRAINT: Range validation for short fields
+            ValidationConstraint rangeValidation = new ValidationConstraint(
+                "shortfield.range.validation",
+                "ShortField minValue must be less than or equal to maxValue",
+                (metadata) -> metadata instanceof ShortField &&
+                              (metadata.hasMetaAttr(ATTR_MIN_VALUE) || metadata.hasMetaAttr(ATTR_MAX_VALUE)),
+                (metadata, value) -> {
+                    if (!metadata.hasMetaAttr(ATTR_MIN_VALUE) || !metadata.hasMetaAttr(ATTR_MAX_VALUE)) {
+                        return true; // Only one bound specified - always valid
+                    }
+
+                    try {
+                        short minValue = Short.parseShort(metadata.getMetaAttr(ATTR_MIN_VALUE).getValueAsString());
+                        short maxValue = Short.parseShort(metadata.getMetaAttr(ATTR_MAX_VALUE).getValueAsString());
+                        return minValue <= maxValue;
+                    } catch (NumberFormatException e) {
+                        return false; // Invalid number format
+                    }
+                }
+            );
+            constraintRegistry.addConstraint(rangeValidation);
+
+            log.debug("Registered ShortField-specific constraints");
+
+        } catch (Exception e) {
+            log.error("Failed to register ShortField constraints", e);
         }
     }
 

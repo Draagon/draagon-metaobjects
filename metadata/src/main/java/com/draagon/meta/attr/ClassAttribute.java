@@ -7,13 +7,18 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.MetaDataException;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Java Class Attribute
+ * A Java Class Attribute with unified registry registration and parent acceptance.
+ *
+ * @version 6.2
  */
 @MetaDataType(type = "attr", subType = "class", description = "Class attribute for Java class metadata")
 @SuppressWarnings("serial")
@@ -26,14 +31,70 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaAttribute static initialization first
+            try {
+                Class.forName(MetaAttribute.class.getName());
+                // Add a small delay to ensure MetaAttribute registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaAttribute class loading", e);
+            }
+
             MetaDataRegistry.registerType(ClassAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_CLASS)
-                .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
                 .description("Class attribute for Java class metadata")
+
+                // INHERIT FROM BASE ATTRIBUTE
+                .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
             );
+
             log.debug("Registered ClassAttribute type with unified registry");
+
+            // Register ClassAttribute-specific validation constraints only
+            setupClassAttributeValidationConstraints();
+
         } catch (Exception e) {
             log.error("Failed to register ClassAttribute type with unified registry", e);
+        }
+    }
+
+    /**
+     * Setup ClassAttribute-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
+     */
+    private static void setupClassAttributeValidationConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALIDATION CONSTRAINT: Class attribute values
+            ValidationConstraint classAttributeValidation = new ValidationConstraint(
+                "classattribute.value.validation",
+                "ClassAttribute values must be valid Java class names or null",
+                (metadata) -> metadata instanceof ClassAttribute,
+                (metadata, value) -> {
+                    if (metadata instanceof ClassAttribute) {
+                        ClassAttribute classAttr = (ClassAttribute) metadata;
+                        String valueStr = classAttr.getValueAsString();
+                        if (valueStr == null || valueStr.isEmpty()) {
+                            return true;
+                        }
+                        try {
+                            // Try to load the class to validate it exists
+                            ClassAttribute.loadClassFromName(valueStr);
+                            return true;
+                        } catch (ClassNotFoundException e) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            );
+            constraintRegistry.addConstraint(classAttributeValidation);
+
+            log.debug("Registered ClassAttribute-specific constraints");
+
+        } catch (Exception e) {
+            log.error("Failed to register ClassAttribute constraints", e);
         }
     }
 
@@ -78,7 +139,7 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
             setValue( (Class<?>) value );
         }
         else {
-            throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
+            throw new MetaDataException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
         }
     }
 
@@ -88,11 +149,18 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
             if ( value == null ) {
                 setValue( null );
             } else {
-                setValue( (Class<?>) loadClass(value));
+                setValue( (Class<?>) loadClassFromName(value));
             }
         } catch (ClassNotFoundException e) {
-            throw new InvalidAttributeValueException("Invalid Class Name [" + value + "] for ClassAttribute");
+            throw new MetaDataException("Invalid Class Name [" + value + "] for ClassAttribute");
         }
+    }
+
+    /**
+     * Load a class by name using the current thread's context classloader
+     */
+    public static Class<?> loadClassFromName(String className) throws ClassNotFoundException {
+        return Thread.currentThread().getContextClassLoader().loadClass(className);
     }
 
     @Override

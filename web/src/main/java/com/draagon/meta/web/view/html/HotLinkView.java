@@ -50,8 +50,8 @@ public class HotLinkView extends HtmlView {
             MetaDataRegistry.registerType(HotLinkView.class, def -> def
                 .type("view").subType("hotlink")
                 .inheritsFrom("view", "base")
-                .optionalAttribute(ATTR_LINKCLASS, "string")
-                .optionalAttribute(ATTR_URL, "string")
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_LINKCLASS)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_URL)
                 .description("HTML hotlink view")
             );
 

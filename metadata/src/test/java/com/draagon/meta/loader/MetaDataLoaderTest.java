@@ -7,8 +7,10 @@ import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.IntegerField;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.field.StringField;
+import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.mapped.MappedMetaObject;
+import com.draagon.meta.registry.SharedTestRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -28,31 +30,45 @@ public class MetaDataLoaderTest {
 
     @Before
     public void buildModel() {
-        MetaDataLoader tempLoader = MetaDataLoader.createManual( false, "test1" );
-        tempLoader.init();
-        tempLoader.register();
-        tempLoader.addMetaAttr( StringAttribute.create( "hello", "world" ));
-        
+        // Use SharedTestRegistry to ensure proper provider discovery
+        SharedTestRegistry.getInstance();
+        log.debug("MetaDataLoaderTest setup with shared registry");
+
+        // Create a manual loader and add test objects programmatically
+        loader = MetaDataLoader.createManual(false, "test1");
+
+        // Initialize the loader (required before use)
+        loader.init();
+
+        // Add a description attribute to the loader (this is supported)
+        loader.addMetaAttr(StringAttribute.create("description", "hello"));  // Use "description" instead of "hello"
+
+        // Create the expected "foo" object with proper constraints
         MappedMetaObject foo = MappedMetaObject.create("foo");
-        IntegerField bar = IntegerField.create( "bar", 5 );
-        bar.addMetaAttr( IntAttribute.create("length", 10));
-        bar.addMetaAttr( StringAttribute.create("abc", "def"));
+
+        // Create "bar" field with valid attributes
+        IntegerField bar = IntegerField.create("bar", 5);
+        bar.addMetaAttr(IntAttribute.create("minValue", 10));  // Use "minValue" instead of "length"
+        bar.addMetaAttr(StringAttribute.create("defaultValue", "def"));
         foo.addMetaField(bar);
-        
-        tempLoader.addChild(foo);
-        loader = tempLoader.getLoader();
+
+        // Add the object to the loader
+        loader.addChild(foo);
+
+        log.debug("MetaDataLoaderTest model built with constraint-compliant objects");
     }
 
     @After
     public void destroyModel() {
-        loader.destroy();
+        // NOTE: Don't destroy loader - preserve for other tests using SharedTestRegistry
+        // The READ-OPTIMIZED architecture means loaders are permanent for application lifetime
     }
 
     @Test
     public void testModelMetadata() {
 
-        assertEquals("hello attribute from loader", "hello", loader.getChildOfType(MetaAttribute.TYPE_ATTR, "hello").getName());
-        assertEquals("hello attribute from registry", "hello", loader.getMetaAttr("hello").getName());
+        assertEquals("description attribute from loader", "description", loader.getChildOfType(MetaAttribute.TYPE_ATTR, "description").getName());
+        assertEquals("description attribute from registry", "description", loader.getMetaAttr("description").getName());
 
         assertEquals("1 foo object", 1, loader.getMetaDataOfType(MetaObject.TYPE_OBJECT).size());
 
@@ -61,8 +77,8 @@ public class MetaDataLoaderTest {
 
         assertEquals( "find foo", mo, mo2 );
         assertEquals( "foo.bar", "bar", mo.getMetaField("bar").getName() );
-        assertEquals( "foo.bar.length=\"10\"", "10", mo.getMetaField("bar").getMetaAttr( "length").getValueAsString() );
-        assertEquals( "foo.bar.length=10", 10, (int) mo.getMetaField("bar").getMetaAttr( "length").getValue() );
+        assertEquals( "foo.bar.minValue=\"10\"", "10", mo.getMetaField("bar").getMetaAttr( "minValue").getValueAsString() );
+        assertEquals( "foo.bar.minValue=10", 10, (int) mo.getMetaField("bar").getMetaAttr( "minValue").getValue() );
 
         Map o = (Map) mo.newInstance();
         //log.info( "MetaObject: " + o );

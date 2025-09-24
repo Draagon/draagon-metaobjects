@@ -8,6 +8,11 @@ import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.loader.MetaDataLoader;
+import com.draagon.meta.attr.BooleanAttribute;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.validator.MetaValidator;
+import com.draagon.meta.view.MetaView;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -56,52 +61,45 @@ public abstract class MetaObject extends MetaData {
     /** Object type attribute for composition */
     public static final String ATTR_OBJECT = "object";
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register object.base type and cross-cutting object constraints using Phase 2 standardized pattern.
+     *
+     * @param registry MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.registerType(MetaObject.class, def -> def
+            registry.registerType(MetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
                 .description("Base object metadata with common object attributes")
+                .inheritsFrom(MetaDataLoader.TYPE_METADATA, MetaDataLoader.SUBTYPE_BASE)
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+                // BIDIRECTIONAL CONSTRAINT: Objects accept metadata.base as parent
+                .acceptsParents(MetaDataLoader.TYPE_METADATA, MetaDataLoader.SUBTYPE_BASE)
 
-                // OBJECT-LEVEL ATTRIBUTES (all object types inherit these)
-                .optionalAttribute(ATTR_EXTENDS, "string")
-                .optionalAttribute(ATTR_IMPLEMENTS, "string")
-                .optionalAttribute(ATTR_IS_INTERFACE, "boolean")
+                // OBJECT-SPECIFIC ATTRIBUTES (using new API)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_EXTENDS)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_IMPLEMENTS)
+                .acceptsNamedAttributes(BooleanAttribute.SUBTYPE_BOOLEAN, ATTR_IS_INTERFACE)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_DESCRIPTION)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_OBJECT)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_OBJECT_REF)
 
-                // OBJECT-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_DESCRIPTION, "string")
-                .optionalAttribute(ATTR_OBJECT, "string")
-                .optionalAttribute(ATTR_OBJECT_REF, "string")
-
-                // OBJECTS CONTAIN FIELDS (any field type, any name)
-                .optionalChild("field", "*", "*")
-
-                // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
-                .optionalChild("object", "*", "*")
-
-                // OBJECTS CAN CONTAIN KEYS
-                .optionalChild("key", "*", "*")
-
-                // OBJECTS CAN CONTAIN ATTRIBUTES
-                .optionalChild("attr", "*", "*")
-
-                // OBJECTS CAN CONTAIN VALIDATORS
-                .optionalChild("validator", "*", "*")
-
-                // OBJECTS CAN CONTAIN VIEWS
-                .optionalChild("view", "*", "*")
+                // OBJECTS CONTAIN STRUCTURE (using new API)
+                .acceptsChildren(MetaField.TYPE_FIELD, "*")           // Any field type
+                .acceptsChildren(TYPE_OBJECT, "*")                    // Composition
+                .acceptsChildren(MetaKey.TYPE_KEY, "*")               // Any key type
+                .acceptsChildren(MetaValidator.TYPE_VALIDATOR, "*")   // Any validator type
+                .acceptsChildren(MetaView.TYPE_VIEW, "*")             // Any view type
             );
-            
-            log.debug("Registered base MetaObject type with unified registry");
-            
+
+            log.debug("Registered base MetaObject type using Phase 2 pattern");
+
             // Register cross-cutting object constraints
             registerCrossCuttingObjectConstraints();
-            
+
         } catch (Exception e) {
-            log.error("Failed to register MetaObject type with unified registry", e);
+            log.error("Failed to register MetaObject type using Phase 2 pattern", e);
+            throw new RuntimeException("MetaObject type registration failed", e);
         }
     }
 

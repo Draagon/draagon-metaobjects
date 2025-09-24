@@ -13,6 +13,7 @@ import com.draagon.meta.io.json.JsonSerializationHandler;
 import com.draagon.meta.io.string.StringSerializationHandler;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataType;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
@@ -22,12 +23,16 @@ import org.w3c.dom.Element;
 
 import java.io.IOException;
 
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+
 /**
  * A Class Field with unified registry registration and child requirements.
  *
  * @version 6.0
  * @author Doug Mealing
  */
+@MetaDataType(type = "field", subType = "class", description = "Class field for class type references")
 @SuppressWarnings("serial")
 public class ClassField extends MetaField<Class> implements StringSerializationHandler // XMLSerializationHandler, JsonSerializationHandler
 {
@@ -38,14 +43,26 @@ public class ClassField extends MetaField<Class> implements StringSerializationH
     // Unified registry self-registration
     static {
         try {
+            // Explicitly trigger MetaField static initialization first
+            try {
+                Class.forName(MetaField.class.getName());
+                // Add a small delay to ensure MetaField registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaField class loading", e);
+            }
+
             MetaDataRegistry.registerType(ClassField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_CLASS)
                 .description("Class field for class type references")
-                
-                // Inherits: required, defaultValue, validation, defaultView from MetaField
-                // No class-specific attributes needed
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // NO CLASS-SPECIFIC ATTRIBUTES - inherits all from field.base
+
             );
-            
+
             log.debug("Registered ClassField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register ClassField type with unified registry", e);

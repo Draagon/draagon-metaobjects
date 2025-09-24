@@ -10,7 +10,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.LongAttribute;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -55,16 +55,18 @@ public class LongField extends PrimitiveField<Long> {
                 // INHERIT FROM BASE FIELD
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
-                // LONG-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, LongAttribute.SUBTYPE_LONG)
-                .optionalAttribute(ATTR_MAX_VALUE, LongAttribute.SUBTYPE_LONG)
+                // LONG-SPECIFIC ATTRIBUTES (using new API) - CORE ONLY
+                .acceptsNamedAttributes(LongAttribute.SUBTYPE_LONG, ATTR_MIN_VALUE)
+                .acceptsNamedAttributes(LongAttribute.SUBTYPE_LONG, ATTR_MAX_VALUE)
 
+                // NOTE: Database attributes are declared by DatabaseConstraintProvider
+                // This maintains separation of concerns and extensibility
             );
 
             log.debug("Registered LongField type with unified registry");
 
-            // Register LongField-specific constraints
-            setupLongFieldConstraints();
+            // Register LongField-specific validation constraints only
+            setupLongFieldValidationConstraints();
 
         } catch (Exception e) {
             log.error("Failed to register LongField type with unified registry", e);
@@ -72,31 +74,34 @@ public class LongField extends PrimitiveField<Long> {
     }
     
     /**
-     * Setup LongField-specific constraints in the constraint registry
+     * Setup LongField-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void setupLongFieldConstraints() {
+    private static void setupLongFieldValidationConstraints() {
         try {
             ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
-            // PLACEMENT CONSTRAINT: LongField CAN have minValue attribute
-            PlacementConstraint minValuePlacement = new PlacementConstraint(
-                "longfield.minvalue.placement",
-                "LongField can optionally have minValue attribute",
-                (metadata) -> metadata instanceof LongField,
-                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) && 
-                          child.getName().equals(ATTR_MIN_VALUE)
+
+            // VALUE VALIDATION CONSTRAINT: Range validation for long fields
+            ValidationConstraint rangeValidation = new ValidationConstraint(
+                "longfield.range.validation",
+                "LongField minValue must be less than or equal to maxValue",
+                (metadata) -> metadata instanceof LongField &&
+                              (metadata.hasMetaAttr(ATTR_MIN_VALUE) || metadata.hasMetaAttr(ATTR_MAX_VALUE)),
+                (metadata, value) -> {
+                    if (!metadata.hasMetaAttr(ATTR_MIN_VALUE) || !metadata.hasMetaAttr(ATTR_MAX_VALUE)) {
+                        return true; // Only one bound specified - always valid
+                    }
+
+                    try {
+                        long minValue = Long.parseLong(metadata.getMetaAttr(ATTR_MIN_VALUE).getValueAsString());
+                        long maxValue = Long.parseLong(metadata.getMetaAttr(ATTR_MAX_VALUE).getValueAsString());
+                        return minValue <= maxValue;
+                    } catch (NumberFormatException e) {
+                        return false; // Invalid number format
+                    }
+                }
             );
-            constraintRegistry.addConstraint(minValuePlacement);
-            
-            // PLACEMENT CONSTRAINT: LongField CAN have maxValue attribute
-            PlacementConstraint maxValuePlacement = new PlacementConstraint(
-                "longfield.maxvalue.placement",
-                "LongField can optionally have maxValue attribute",
-                (metadata) -> metadata instanceof LongField,
-                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) && 
-                          child.getName().equals(ATTR_MAX_VALUE)
-            );
-            constraintRegistry.addConstraint(maxValuePlacement);
+            constraintRegistry.addConstraint(rangeValidation);
             
             log.debug("Registered LongField-specific constraints");
             

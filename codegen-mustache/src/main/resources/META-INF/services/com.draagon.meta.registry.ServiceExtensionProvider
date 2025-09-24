@@ -1,0 +1,5 @@
+# JPA Extension Provider for MetaObjects Framework
+# This file enables ServiceLoader discovery of JPA extensions that add
+# JPA-specific code generation attributes to core MetaData types.
+
+com.draagon.meta.generator.mustache.JpaExtensionProvider

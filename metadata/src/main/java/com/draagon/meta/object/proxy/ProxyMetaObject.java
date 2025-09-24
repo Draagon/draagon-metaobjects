@@ -43,8 +43,8 @@ public class ProxyMetaObject extends PojoMetaObject
                 .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
 
                 // PROXY-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
-                .optionalAttribute(ATTR_PROXYOBJECT, "string")
-                .optionalAttribute(ATTR_INTERFACE_NAME, "string")
+                .acceptsNamedAttributes("string", ATTR_PROXYOBJECT)
+                .acceptsNamedAttributes("string", ATTR_INTERFACE_NAME)
 
                 // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
                 // - All field types (field.*)
@@ -140,7 +140,7 @@ public class ProxyMetaObject extends PojoMetaObject
     @Override
     public Class<?> getObjectClass() {
 
-        if ( hasObjectAttr()) {
+        if ( hasObjectInstanceAttr()) {
             try {
                 Class<?> c = getObjectClassFromAttr();
                 if ( !c.isInterface() ) {

@@ -2,6 +2,7 @@ package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +35,32 @@ public class ConstraintEnforcer {
     private static final Object INIT_LOCK = new Object();
     
     private final ConstraintRegistry constraintRegistry;
+    private final ConstraintFlattener constraintFlattener;
     private final ConcurrentMap<String, Boolean> constraintCheckingEnabled;
     private boolean globalConstraintCheckingEnabled;
-    
+
     private ConstraintEnforcer() {
         this.constraintRegistry = ConstraintRegistry.getInstance();
+        this.constraintFlattener = new ConstraintFlattener(MetaDataRegistry.getInstance());
         this.constraintCheckingEnabled = new ConcurrentHashMap<>();
         this.globalConstraintCheckingEnabled = true;
+
+        // Initialize the constraint flattener with current registry state
+        initializeConstraintFlattener();
     }
+
+    /**
+     * Initialize the constraint flattener with current bidirectional constraints
+     */
+    private void initializeConstraintFlattener() {
+        try {
+            constraintFlattener.flattenAllConstraints();
+            log.info("ConstraintFlattener initialized with flattened bidirectional constraints");
+        } catch (Exception e) {
+            log.warn("Failed to initialize ConstraintFlattener: " + e.getMessage(), e);
+        }
+    }
+
     
     /**
      * Get the singleton instance of ConstraintEnforcer
@@ -59,7 +78,7 @@ public class ConstraintEnforcer {
     }
     
     /**
-     * Enforce constraints when adding a child to metadata (unified approach)
+     * Enforce constraints when adding a child to metadata (v6.2.0: bidirectional approach)
      * @param parent The parent metadata object
      * @param child The child being added
      * @throws ConstraintViolationException If constraints are violated
@@ -68,52 +87,35 @@ public class ConstraintEnforcer {
         if (!isConstraintCheckingEnabled(parent)) {
             return;
         }
-        
+
         ValidationContext context = ValidationContext.forAddChild(parent, child);
-        
-        // UNIFIED: Single enforcement path for all constraints
+
+        log.debug("Enforcing bidirectional constraints for adding [{}] to [{}]",
+            child.toString(), parent.toString());
+
+        // STEP 1: BIDIRECTIONAL CONSTRAINT CHECKING
+        // Both parent and child must agree on the placement
+        boolean placementAllowed = constraintFlattener.isPlacementAllowed(
+            parent.getType(), parent.getSubType(),
+            child.getType(), child.getSubType(),
+            child.getName()
+        );
+
+        if (!placementAllowed) {
+            // Generate helpful error message with constraint information
+            String supportedChildren = getSupportedChildrenDescription(parent);
+            String message = String.format(
+                "Bidirectional constraint violation: %s.%s does not accept child '%s' of type %s.%s. %s",
+                parent.getType(), parent.getSubType(), child.getName(),
+                child.getType(), child.getSubType(), supportedChildren);
+            throw new ConstraintViolationException(message, "bidirectional", child.getName(), context);
+        }
+
+        log.trace("Bidirectional constraint check passed for [{}] -> [{}]", parent, child);
+
+        // STEP 2: VALUE VALIDATION CONSTRAINTS
+        // Process validation constraints on the child (unchanged)
         List<Constraint> allConstraints = constraintRegistry.getAllConstraints();
-        
-        if (allConstraints.isEmpty()) {
-            log.trace("No constraints registered - allowing operation");
-            return;
-        }
-        
-        log.debug("Enforcing {} constraints for adding [{}] to [{}]", 
-            allConstraints.size(), child.toString(), parent.toString());
-        
-        // Process placement constraints first (they determine if child can be added)
-        List<PlacementConstraint> applicablePlacementConstraints = new ArrayList<>();
-        for (Constraint constraint : allConstraints) {
-            if (constraint instanceof PlacementConstraint) {
-                PlacementConstraint pc = (PlacementConstraint) constraint;
-                if (pc.appliesTo(parent, child)) {
-                    applicablePlacementConstraints.add(pc);
-                }
-            }
-        }
-        
-        // Apply placement constraint logic (open policy - allow if any constraint permits)
-        if (!applicablePlacementConstraints.isEmpty()) {
-            boolean placementAllowed = false;
-            for (PlacementConstraint pc : applicablePlacementConstraints) {
-                if (pc.isPlacementAllowed(parent, child)) {
-                    log.trace("Placement constraint '{}' allows this placement", pc.getId());
-                    placementAllowed = true;
-                    break;
-                }
-            }
-            
-            if (!placementAllowed) {
-                String message = String.format("Placement not allowed: No constraints permit adding %s to %s", 
-                    child.getName(), parent.getName());
-                throw new ConstraintViolationException(message, "placement", child.getName(), context);
-            }
-        } else {
-            log.trace("No placement constraints apply to this parent-child relationship - allowing placement");
-        }
-        
-        // Process validation constraints on the child
         for (Constraint constraint : allConstraints) {
             if (constraint instanceof ValidationConstraint) {
                 ValidationConstraint vc = (ValidationConstraint) constraint;
@@ -122,6 +124,17 @@ public class ConstraintEnforcer {
                 }
             }
         }
+
+        log.trace("All constraints satisfied for adding [{}] to [{}]", child.getName(), parent.getName());
+    }
+
+    /**
+     * Generate a description of supported children for error messages
+     */
+    private String getSupportedChildrenDescription(MetaData parent) {
+        String parentQualified = parent.getType() + "." + parent.getSubType();
+        return String.format("Supported children: %s",
+            constraintFlattener.getValidChildTypes(parent.getType(), parent.getSubType()));
     }
     
     
@@ -165,6 +178,23 @@ public class ConstraintEnforcer {
      */
     public ConstraintRegistry getConstraintRegistry() {
         return constraintRegistry;
+    }
+
+    /**
+     * Get the constraint flattener used by this enforcer
+     * @return The constraint flattener
+     */
+    public ConstraintFlattener getConstraintFlattener() {
+        return constraintFlattener;
+    }
+
+    /**
+     * Refresh the constraint flattener when new types are registered
+     * Should be called when the type registry is updated
+     */
+    public void refreshConstraintFlattener() {
+        log.info("Refreshing constraint flattener due to type registry changes");
+        initializeConstraintFlattener();
     }
     
     /**

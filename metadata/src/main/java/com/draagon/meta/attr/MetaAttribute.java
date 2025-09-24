@@ -1,6 +1,9 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.*;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
+import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
@@ -23,29 +26,35 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     public final static String TYPE_ATTR = "attr";
     public final static String SUBTYPE_BASE = "base";
 
-    // Base attribute type registration and constraint registration
-    static {
+    /**
+     * Register attr.base type and attribute constraints using Phase 2 standardized pattern.
+     *
+     * @param registry MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register base attribute type
-            MetaDataRegistry.registerType(MetaAttribute.class, def -> def
+            registry.registerType(MetaAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_BASE)
                 .description("Base attribute metadata with common attribute properties")
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+                // INHERIT FROM UNIVERSAL BASE
+                .inheritsFrom(MetaDataLoader.TYPE_METADATA, MetaDataLoader.SUBTYPE_BASE)
+
+                // ATTRIBUTES CAN BE PLACED UNDER ANY METADATA (using new API)
+                .acceptsParents("*", "*")   // Any metadata type
 
                 // ATTRIBUTES TYPICALLY DON'T HAVE CHILDREN (they are leaf nodes)
-                // No child requirements for base attributes
             );
 
-            log.debug("Registered base MetaAttribute type with unified registry");
+            log.debug("Registered base MetaAttribute type using Phase 2 pattern");
 
-            // Register cross-cutting attribute constraints
-            registerCrossCuttingAttributeConstraints();
+            // Register attribute-specific validation constraints only
+            registerAttributeValidationConstraints();
 
-            log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
         } catch (Exception e) {
-            log.error("Failed to register base MetaAttribute type and constraints", e);
+            log.error("Failed to register base MetaAttribute type using Phase 2 pattern", e);
+            throw new RuntimeException("MetaAttribute type registration failed", e);
         }
     }
 
@@ -217,41 +226,56 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     }
     
     /**
-     * Register cross-cutting attribute constraints that apply to all attribute types
+     * Register attribute-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void registerCrossCuttingAttributeConstraints() {
+    private static void registerAttributeValidationConstraints() {
         try {
-            // Import constraint classes
-            com.draagon.meta.constraint.ConstraintRegistry constraintRegistry = 
-                com.draagon.meta.constraint.ConstraintRegistry.getInstance();
-                
-            // PLACEMENT CONSTRAINT: Attributes can be placed on any MetaData
-            com.draagon.meta.constraint.PlacementConstraint universalAttributePlacement = 
-                new com.draagon.meta.constraint.PlacementConstraint(
-                    "attribute.universal.placement",
-                    "Attributes can be placed on any MetaData",
-                    (metadata) -> metadata instanceof MetaData,
-                    (child) -> child instanceof MetaAttribute
-                );
-            constraintRegistry.addConstraint(universalAttributePlacement);
-            
-            // VALIDATION CONSTRAINT: Attribute naming patterns
-            com.draagon.meta.constraint.ValidationConstraint attributeNamingPattern = 
-                new com.draagon.meta.constraint.ValidationConstraint(
-                    "attribute.naming.pattern",
-                    "Attribute names must follow identifier pattern",
-                    (metadata) -> metadata instanceof MetaAttribute,
-                    (metadata, value) -> {
-                        String name = metadata.getName();
-                        return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                    }
-                );
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALUE VALIDATION CONSTRAINT: Attribute naming patterns
+            ValidationConstraint attributeNamingPattern = new ValidationConstraint(
+                "attribute.naming.pattern",
+                "Attribute names must follow identifier pattern",
+                (metadata) -> metadata instanceof MetaAttribute,
+                (metadata, value) -> {
+                    String name = metadata.getName();
+                    return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                }
+            );
             constraintRegistry.addConstraint(attributeNamingPattern);
-            
-            log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
-            
+
+            // VALUE VALIDATION CONSTRAINT: Attribute value consistency
+            ValidationConstraint attributeValueConsistency = new ValidationConstraint(
+                "attribute.value.consistency",
+                "Attribute values must be consistent with their declared DataType",
+                (metadata) -> metadata instanceof MetaAttribute,
+                (metadata, value) -> {
+                    if (metadata instanceof MetaAttribute) {
+                        MetaAttribute<?> attr = (MetaAttribute<?>) metadata;
+                        Object attrValue = attr.getValue();
+                        DataTypes dataType = attr.getDataType();
+
+                        // If no value set, always valid
+                        if (attrValue == null) return true;
+
+                        // Check if value matches expected data type
+                        try {
+                            Class<?> expectedClass = dataType.getValueClass();
+                            return expectedClass.isInstance(attrValue);
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            );
+            constraintRegistry.addConstraint(attributeValueConsistency);
+
+            log.debug("Registered attribute validation constraints in MetaAttribute");
+
         } catch (Exception e) {
-            log.error("Failed to register cross-cutting attribute constraints", e);
+            log.error("Failed to register attribute validation constraints", e);
         }
     }
 }

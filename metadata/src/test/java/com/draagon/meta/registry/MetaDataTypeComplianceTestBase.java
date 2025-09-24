@@ -25,6 +25,15 @@ public class MetaDataTypeComplianceTestBase {
     private static final Logger log = LoggerFactory.getLogger(MetaDataTypeComplianceTestBase.class);
 
     /**
+     * Initialize SharedTestRegistry to ensure proper provider discovery timing.
+     * Subclasses should call this in their @Before setUp() method.
+     */
+    protected void initializeSharedTestRegistry() {
+        SharedTestRegistry.getInstance();
+        log.debug("MetaDataTypeComplianceTestBase initialized with shared registry: {}", SharedTestRegistry.getStatus());
+    }
+
+    /**
      * Scan for all concrete MetaData subclasses in the given package prefixes
      */
     protected Set<Class<?>> scanForMetaDataClasses(String... packagePrefixes) {

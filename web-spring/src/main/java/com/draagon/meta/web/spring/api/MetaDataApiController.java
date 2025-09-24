@@ -3,6 +3,7 @@ package com.draagon.meta.web.spring.api;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.field.MetaField;
+import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.io.object.json.JsonObjectWriter;
 import com.draagon.meta.MetaDataNotFoundException;
 
@@ -168,9 +169,8 @@ public class MetaDataApiController {
                 wrapper.put("length", Integer.parseInt(field.getMetaAttr("len").getValueAsString()));
             } catch (NumberFormatException ignored) {}
         }
-        if (field.hasMetaAttr("isKey")) {
-            wrapper.put("isKey", Boolean.parseBoolean(field.getMetaAttr("isKey").getValueAsString()));
-        }
+        // Calculate isKey based on PrimaryKey metadata, not explicit attribute
+        wrapper.put("isKey", isKeyField(field));
         if (field.hasMetaAttr("dbColumn")) {
             attributes.put("dbColumn", field.getMetaAttr("dbColumn").getValueAsString());
         }
@@ -181,6 +181,50 @@ public class MetaDataApiController {
         wrapper.put("views", new HashMap<>());
         
         return wrapper;
+    }
+
+    /**
+     * Calculates whether a field is a key field based on PrimaryKey metadata.
+     * This replaces the deprecated "isKey" attribute approach.
+     */
+    private boolean isKeyField(MetaField field) {
+        // FIRST: Check if this field is part of a PrimaryKey metadata (preferred approach)
+        MetaObject metaObject = (MetaObject) field.getParent();
+        if (metaObject != null) {
+            List<PrimaryKey> primaryKeys = metaObject.getChildren(PrimaryKey.class);
+            for (PrimaryKey primaryKey : primaryKeys) {
+                List<MetaField> keyFields = primaryKey.getKeyFields();
+                if (keyFields.contains(field)) {
+                    return true;
+                }
+            }
+        }
+
+        // INFERENCE: Use intelligent naming and pattern inference
+        return inferIdFieldFromPatterns(field);
+    }
+
+    private boolean inferIdFieldFromPatterns(MetaField field) {
+        String fieldName = field.getName();
+        String dbColumn = field.hasMetaAttr("dbColumn") ? field.getMetaAttr("dbColumn").getValueAsString() : "";
+
+        // Common ID field naming patterns
+        if ("id".equals(fieldName)) return true;
+        if (fieldName != null && fieldName.endsWith("Id")) return true;
+        if (fieldName != null && fieldName.endsWith("ID")) return true;
+
+        // Database column naming patterns
+        if (dbColumn.endsWith("_id")) return true;
+        if (dbColumn.endsWith("_ID")) return true;
+        if ("id".equals(dbColumn)) return true;
+
+        // Type-based inference for numeric ID fields
+        if (("id".equals(fieldName) || fieldName.endsWith("Id")) &&
+            (field.getSubType().equals("long") || field.getSubType().equals("int"))) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -1,9 +1,10 @@
 package com.draagon.meta.view;
 
-import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataNotFoundException;
+import com.draagon.meta.constraint.ConstraintRegistry;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
@@ -11,6 +12,9 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.loader.MetaDataLoader.TYPE_METADATA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,22 +33,74 @@ public abstract class MetaView extends MetaData {
     // Base view type registration
     static {
         try {
+            // Explicitly trigger MetaDataLoader static initialization first
+            try {
+                Class.forName(MetaDataLoader.class.getName());
+                // Add a small delay to ensure MetaDataLoader registration completes
+                Thread.sleep(1);
+            } catch (ClassNotFoundException | InterruptedException e) {
+                log.warn("Could not force MetaDataLoader class loading", e);
+            }
+
             MetaDataRegistry.registerType(MetaView.class, def -> def
                 .type(TYPE_VIEW).subType(SUBTYPE_BASE)
                 .description("Base view metadata with common view attributes")
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+                // INHERIT FROM BASE METADATA
+                .inheritsFrom(TYPE_METADATA, "base")
 
+                // VIEW PARENT ACCEPTANCE DECLARATIONS
+                // Views can be placed under fields and loaders
+                .acceptsParents(TYPE_FIELD, "*")                     // Any field type
+                .acceptsParents(TYPE_METADATA, "*")                  // Any metadata (loaders)
 
-                // VIEWS CAN CONTAIN ATTRIBUTES
-                .optionalChild("attr", "*", "*")
+                // VIEW CHILD ACCEPTANCE DECLARATIONS
+                // Views can contain attributes
+                .acceptsChildren(TYPE_ATTR, "*")                    // Any attribute type
+
+                // Universal fallback for any view
+                .acceptsParents("*", "*")  // MetaView can be used under any parent that needs views
+
             );
 
-            log.debug("Registered base MetaView type with unified registry");
+            log.debug("Registered MetaView type with unified registry");
+
+            // Register MetaView-specific validation constraints only
+            setupMetaViewValidationConstraints();
 
         } catch (Exception e) {
             log.error("Failed to register MetaView type with unified registry", e);
+        }
+    }
+
+    /**
+     * Setup MetaView-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
+     */
+    private static void setupMetaViewValidationConstraints() {
+        try {
+            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
+
+            // VALIDATION CONSTRAINT: View placement validation
+            ValidationConstraint viewPlacementValidation = new ValidationConstraint(
+                "metaview.placement.validation",
+                "MetaView can only be placed under MetaFields or MetaDataLoaders",
+                (metadata) -> metadata instanceof MetaView,
+                (metadata, value) -> {
+                    if (metadata instanceof MetaView) {
+                        MetaView metaView = (MetaView) metadata;
+                        MetaData parent = metaView.getParent();
+                        return parent instanceof MetaField || parent instanceof MetaDataLoader;
+                    }
+                    return true;
+                }
+            );
+            constraintRegistry.addConstraint(viewPlacementValidation);
+
+            log.debug("Registered MetaView-specific constraints");
+
+        } catch (Exception e) {
+            log.error("Failed to register MetaView constraints", e);
         }
     }
 
@@ -77,7 +133,7 @@ public abstract class MetaView extends MetaData {
     public MetaField getDeclaringMetaField() {
         if (getParent() instanceof MetaDataLoader) return null;
         if (getParent() instanceof MetaField) return (MetaField) getParent();
-        throw new InvalidMetaDataException(this, "MetaViews can only be attached to MetaFields " +
+        throw new MetaDataException("MetaViews can only be attached to MetaFields " +
                 "or MetaDataLoaders as abstracts");
     }
 

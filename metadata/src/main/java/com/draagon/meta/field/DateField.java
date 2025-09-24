@@ -9,12 +9,13 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static com.draagon.meta.field.MetaField.TYPE_FIELD;
@@ -61,18 +62,18 @@ public class DateField extends PrimitiveField<Date> {
                 // INHERIT FROM BASE FIELD
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
-                // DATE-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_DATE_FORMAT, "string")
-                .optionalAttribute(ATTR_FORMAT, "string")
-                .optionalAttribute(ATTR_MIN_DATE, "string")
-                .optionalAttribute(ATTR_MAX_DATE, "string")
+                // DATE-SPECIFIC ATTRIBUTES (using new API)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_DATE_FORMAT)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_FORMAT)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_MIN_DATE)
+                .acceptsNamedAttributes(StringAttribute.SUBTYPE_STRING, ATTR_MAX_DATE)
 
             );
 
             log.debug("Registered DateField type with unified registry");
 
-            // Register DateField-specific constraints
-            setupDateFieldConstraints();
+            // Register DateField-specific validation constraints only
+            setupDateFieldValidationConstraints();
 
         } catch (Exception e) {
             log.error("Failed to register DateField type with unified registry", e);
@@ -80,24 +81,61 @@ public class DateField extends PrimitiveField<Date> {
     }
     
     /**
-     * Setup DateField-specific constraints in the constraint registry
+     * Setup DateField-specific validation constraints only.
+     * Structural constraints are now handled by the bidirectional constraint system.
      */
-    private static void setupDateFieldConstraints() {
+    private static void setupDateFieldValidationConstraints() {
         try {
             ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
-            // PLACEMENT CONSTRAINT: DateField CAN have format attribute
-            PlacementConstraint dateFormatPlacement = new PlacementConstraint(
-                "datefield.format.placement",
-                "DateField can optionally have format attribute",
-                (metadata) -> metadata instanceof DateField,
-                (child) -> child instanceof StringAttribute && 
-                          child.getName().equals(ATTR_FORMAT)
+
+            // VALUE VALIDATION CONSTRAINT: Date format validation
+            ValidationConstraint formatValidation = new ValidationConstraint(
+                "datefield.format.validation",
+                "DateField format attribute must be a valid SimpleDateFormat pattern",
+                (metadata) -> metadata instanceof DateField && metadata.hasMetaAttr(ATTR_FORMAT),
+                (metadata, value) -> {
+                    try {
+                        String format = metadata.getMetaAttr(ATTR_FORMAT).getValueAsString();
+                        if (format != null && !format.isEmpty()) {
+                            new SimpleDateFormat(format); // Validate format pattern
+                        }
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false; // Invalid date format pattern
+                    }
+                }
             );
-            constraintRegistry.addConstraint(dateFormatPlacement);
-            
+            constraintRegistry.addConstraint(formatValidation);
+
+            // VALUE VALIDATION CONSTRAINT: Date range validation
+            ValidationConstraint rangeValidation = new ValidationConstraint(
+                "datefield.range.validation",
+                "DateField minDate must be less than or equal to maxDate",
+                (metadata) -> metadata instanceof DateField &&
+                              (metadata.hasMetaAttr(ATTR_MIN_DATE) || metadata.hasMetaAttr(ATTR_MAX_DATE)),
+                (metadata, value) -> {
+                    if (!metadata.hasMetaAttr(ATTR_MIN_DATE) || !metadata.hasMetaAttr(ATTR_MAX_DATE)) {
+                        return true; // Only one bound specified - always valid
+                    }
+
+                    try {
+                        String minDateStr = metadata.getMetaAttr(ATTR_MIN_DATE).getValueAsString();
+                        String maxDateStr = metadata.getMetaAttr(ATTR_MAX_DATE).getValueAsString();
+
+                        if (minDateStr != null && maxDateStr != null) {
+                            // Basic lexicographic comparison for ISO date strings
+                            return minDateStr.compareTo(maxDateStr) <= 0;
+                        }
+                        return true;
+                    } catch (Exception e) {
+                        return false; // Invalid date format
+                    }
+                }
+            );
+            constraintRegistry.addConstraint(rangeValidation);
+
             log.debug("Registered DateField-specific constraints");
-            
+
         } catch (Exception e) {
             log.error("Failed to register DateField constraints", e);
         }
