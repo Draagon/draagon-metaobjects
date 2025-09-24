@@ -45,6 +45,22 @@ public class ConstraintViolationException extends MetaDataException {
         this.validationContext = context;
         this.metaData = context != null ? context.getParentMetaData().orElse(null) : null;
     }
+
+    /**
+     * Constructor for constraint violations with explicit MetaData reference.
+     * This is commonly used by concrete constraint implementations.
+     *
+     * @param message Descriptive error message
+     * @param constraintName Unique constraint identifier
+     * @param metaData The MetaData object that failed validation
+     */
+    public ConstraintViolationException(String message, String constraintName, MetaData metaData) {
+        super(message);
+        this.constraintType = constraintName;
+        this.violatingValue = null;
+        this.validationContext = null;
+        this.metaData = metaData;
+    }
     
     public String getConstraintType() {
         return constraintType;
@@ -56,6 +72,15 @@ public class ConstraintViolationException extends MetaDataException {
     
     public ValidationContext getValidationContext() {
         return validationContext;
+    }
+
+    /**
+     * Get the MetaData object that failed validation.
+     *
+     * @return The MetaData object, or null if not available
+     */
+    public MetaData getMetaData() {
+        return metaData;
     }
     
     @Override

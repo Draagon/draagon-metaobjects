@@ -12,8 +12,7 @@ import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.ValidationResult;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
@@ -72,8 +71,8 @@ public class PojoMetaObject extends MetaObject
             
             log.debug("Registered PojoMetaObject type with unified registry");
             
-            // Register PojoMetaObject-specific constraints
-            setupPojoMetaObjectConstraints();
+            // Register PojoMetaObject-specific constraints using consolidated registry
+            setupPojoMetaObjectConstraints(MetaDataRegistry.getInstance());
             
         } catch (Exception e) {
             log.error("Failed to register PojoMetaObject type with unified registry", e);
@@ -81,34 +80,32 @@ public class PojoMetaObject extends MetaObject
     }
     
     /**
-     * Setup PojoMetaObject-specific constraints in the constraint registry
+     * Setup PojoMetaObject-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupPojoMetaObjectConstraints() {
+    private static void setupPojoMetaObjectConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: POJO objects CAN have className attribute
-            PlacementConstraint pojoClassNamePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "pojoobject.classname.placement",
                 "POJO objects can have className attribute",
                 (metadata) -> metadata instanceof PojoMetaObject,
-                (child) -> child instanceof StringAttribute && 
+                (child) -> child instanceof StringAttribute &&
                           child.getName().equals(ATTR_CLASS_NAME)
             );
-            constraintRegistry.addConstraint(pojoClassNamePlacement);
-            
+
             // PLACEMENT CONSTRAINT: POJO objects CAN have packageName attribute
-            PlacementConstraint pojoPackageNamePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "pojoobject.packagename.placement",
                 "POJO objects can have packageName attribute",
                 (metadata) -> metadata instanceof PojoMetaObject,
-                (child) -> child instanceof StringAttribute && 
+                (child) -> child instanceof StringAttribute &&
                           child.getName().equals(ATTR_PACKAGE_NAME)
             );
-            constraintRegistry.addConstraint(pojoPackageNamePlacement);
-            
-            log.debug("Registered PojoMetaObject-specific constraints");
-            
+
+            log.debug("Registered PojoMetaObject-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register PojoMetaObject constraints", e);
         }

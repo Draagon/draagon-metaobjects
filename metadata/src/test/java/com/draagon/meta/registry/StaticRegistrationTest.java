@@ -15,20 +15,25 @@ import static org.junit.Assert.*;
 
 /**
  * Test to verify that static registration blocks execute when classes are instantiated.
- * 
+ *
+ * ⚠️ ISOLATED TEST: This test manipulates the shared MetaDataRegistry directly
+ * by clearing and restoring it. It must run in isolation from other tests
+ * to prevent registry conflicts.
+ *
  * @since 6.0.0
  */
-public class StaticRegistrationTest {
-    
+@IsolatedTest("Clears and restores shared MetaDataRegistry state")
+public class StaticRegistrationTest extends SharedRegistryTestBase {
+
     private static final Logger log = LoggerFactory.getLogger(StaticRegistrationTest.class);
-    
-    private MetaDataRegistry registry;
-    
+
     private Map<String, TypeDefinition> backupRegistry;
-    
+
     @Before
     public void setUp() {
-        registry = MetaDataRegistry.getInstance();
+        // Use the shared registry but back up its state for isolation
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Backup existing registrations instead of clearing
         backupRegistry = new HashMap<>();
         for (String typeName : registry.getRegisteredTypeNames()) {
@@ -40,13 +45,14 @@ public class StaticRegistrationTest {
                 }
             }
         }
-        // Now clear for clean test state
+        // Now clear for clean test state (ISOLATION REQUIRED)
         registry.clear();
-        log.info("Set up static registration test with clean registry (backed up {} types)", backupRegistry.size());
+        log.info("Set up isolated registry test with clean registry (backed up {} types)", backupRegistry.size());
     }
-    
+
     @After
     public void tearDown() {
+        MetaDataRegistry registry = getSharedRegistry();
         if (registry != null) {
             registry.clear();
             // Restore original registrations
@@ -61,6 +67,7 @@ public class StaticRegistrationTest {
     @Test
     public void testInstanceCreationTriggersRegistration() {
         // Clear registry to ensure clean state
+        MetaDataRegistry registry = getSharedRegistry();
         registry.clear();
         
         log.info("Creating StringField instance to trigger static registration...");
@@ -98,12 +105,14 @@ public class StaticRegistrationTest {
      */
     @Test
     public void testMultipleFieldTypesRegistration() {
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Create instances to trigger static registration
         StringField stringField = new StringField("stringField");
         IntegerField intField = new IntegerField("intField");
-        
+
         log.info("Created field instances: {} and {}", stringField.getName(), intField.getName());
-        
+
         // Verify or manually register if needed
         TypeDefinition stringDef = registry.getTypeDefinition("field", "string");
         if (stringDef == null) {
@@ -115,7 +124,7 @@ public class StaticRegistrationTest {
             );
             stringDef = registry.getTypeDefinition("field", "string");
         }
-        
+
         TypeDefinition intDef = registry.getTypeDefinition("field", "int");
         if (intDef == null) {
             MetaDataRegistry.registerType(IntegerField.class, def -> def
@@ -139,12 +148,14 @@ public class StaticRegistrationTest {
      */
     @Test
     public void testAttributeTypesRegistration() {
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Create instances to trigger static registration
         StringAttribute stringAttr = new StringAttribute("stringAttr");
         StringArrayAttribute stringArrayAttr = new StringArrayAttribute("stringArrayAttr");
-        
+
         log.info("Created attribute instances: {} and {}", stringAttr.getName(), stringArrayAttr.getName());
-        
+
         // Verify or manually register if needed
         TypeDefinition stringAttrDef = registry.getTypeDefinition("attr", "string");
         if (stringAttrDef == null) {
@@ -154,7 +165,7 @@ public class StaticRegistrationTest {
             );
             stringAttrDef = registry.getTypeDefinition("attr", "string");
         }
-        
+
         TypeDefinition stringArrayAttrDef = registry.getTypeDefinition("attr", "stringarray");
         if (stringArrayAttrDef == null) {
             MetaDataRegistry.registerType(StringArrayAttribute.class, def -> def
@@ -181,10 +192,12 @@ public class StaticRegistrationTest {
      */
     @Test
     public void testChildValidationWithRegisteredTypes() {
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Ensure types are registered (create instances first)
         StringField stringField = new StringField("emailField");
         StringAttribute patternAttr = new StringAttribute("pattern");
-        
+
         // Ensure registration (manual fallback if static didn't work)
         if (registry.getTypeDefinition("field", "string") == null) {
             MetaDataRegistry.registerType(StringField.class, def -> def
@@ -193,14 +206,14 @@ public class StaticRegistrationTest {
                 .optionalAttribute("pattern", "string")
             );
         }
-        
+
         if (registry.getTypeDefinition("attr", "string") == null) {
             MetaDataRegistry.registerType(StringAttribute.class, def -> def
                 .type("attr").subType("string")
                 .description("String attribute")
             );
         }
-        
+
         // Test that the field accepts the pattern attribute
         boolean accepts = registry.acceptsChild("field", "string", "attr", "string", "pattern");
         assertTrue("StringField should accept pattern attribute", accepts);
@@ -228,6 +241,8 @@ public class StaticRegistrationTest {
      */
     @Test
     public void testUnsupportedChildErrorMessages() {
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Ensure StringField is registered
         StringField stringField = new StringField("testField");
         if (registry.getTypeDefinition("field", "string") == null) {
@@ -237,18 +252,18 @@ public class StaticRegistrationTest {
                 .optionalAttribute("pattern", "string")
             );
         }
-        
+
         // Test rejection of unsupported child
         boolean rejects = registry.acceptsChild("field", "string", "attr", "string", "unsupportedAttr");
         assertFalse("StringField should reject unsupported attribute", rejects);
-        
+
         // Test error message
         String description = registry.getSupportedChildrenDescription("field", "string");
         assertNotNull("Error description should be provided", description);
-        assertTrue("Description should mention support info", 
-                  description.toLowerCase().contains("supports") || 
+        assertTrue("Description should mention support info",
+                  description.toLowerCase().contains("supports") ||
                   description.toLowerCase().contains("pattern"));
-        
+
         log.info("Error message for unsupported children: {}", description);
     }
     
@@ -257,9 +272,11 @@ public class StaticRegistrationTest {
      */
     @Test
     public void testInstanceCreationThroughRegistry() {
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Create instance to trigger registration
         StringField originalField = new StringField("original");
-        
+
         // Ensure registration
         if (registry.getTypeDefinition("field", "string") == null) {
             MetaDataRegistry.registerType(StringField.class, def -> def
@@ -267,20 +284,20 @@ public class StaticRegistrationTest {
                 .description("String field")
             );
         }
-        
+
         try {
             // Create through registry
             StringField registryField = registry.createInstance("field", "string", "registryCreated");
             assertNotNull("Registry-created field should not be null", registryField);
-            assertEquals("Registry-created field should have correct name", 
+            assertEquals("Registry-created field should have correct name",
                        "registryCreated", registryField.getName());
-            assertEquals("Registry-created field should have correct type", 
+            assertEquals("Registry-created field should have correct type",
                        "field", registryField.getType());
-            assertEquals("Registry-created field should have correct subType", 
+            assertEquals("Registry-created field should have correct subType",
                        "string", registryField.getSubType());
-            
+
             log.info("Successfully created field through registry: {}", registryField);
-            
+
         } catch (Exception e) {
             log.warn("Registry instance creation failed (constructor compatibility issue): {}", e.getMessage());
             // Don't fail test - constructor patterns might need adjustment
@@ -291,6 +308,7 @@ public class StaticRegistrationTest {
      * Restore registry from backup taken during setUp
      */
     private void restoreRegistryFromBackup() {
+        MetaDataRegistry registry = getSharedRegistry();
         try {
             for (Map.Entry<String, TypeDefinition> entry : backupRegistry.entrySet()) {
                 String typeName = entry.getKey();

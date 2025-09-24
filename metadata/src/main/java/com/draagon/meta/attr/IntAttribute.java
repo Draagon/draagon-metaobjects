@@ -8,9 +8,7 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataType;
-
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.ValidationConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +42,8 @@ public class IntAttribute extends MetaAttribute<Integer> {
             
             log.debug("Registered IntAttribute type with unified registry");
             
-            // Register IntAttribute-specific constraints
-            setupIntAttributeConstraints();
+            // Register IntAttribute-specific constraints using consolidated registry
+            setupIntAttributeConstraints(com.draagon.meta.registry.MetaDataRegistry.getInstance());
             
         } catch (Exception e) {
             log.error("Failed to register IntAttribute type with unified registry", e);
@@ -53,14 +51,14 @@ public class IntAttribute extends MetaAttribute<Integer> {
     }
     
     /**
-     * Setup IntAttribute-specific constraints in the constraint registry
+     * Setup IntAttribute-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupIntAttributeConstraints() {
+    private static void setupIntAttributeConstraints(com.draagon.meta.registry.MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // VALIDATION CONSTRAINT: Integer attribute values
-            ValidationConstraint intAttributeValidation = new ValidationConstraint(
+            registry.registerValidationConstraint(
                 "intattribute.value.validation",
                 "IntAttribute values must be valid integers",
                 (metadata) -> metadata instanceof IntAttribute,
@@ -81,10 +79,9 @@ public class IntAttribute extends MetaAttribute<Integer> {
                     return true;
                 }
             );
-            constraintRegistry.addConstraint(intAttributeValidation);
-            
-            log.debug("Registered IntAttribute-specific constraints");
-            
+
+            log.debug("Registered IntAttribute-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register IntAttribute constraints", e);
         }

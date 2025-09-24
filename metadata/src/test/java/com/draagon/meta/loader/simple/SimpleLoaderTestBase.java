@@ -10,49 +10,24 @@
  */
 package com.draagon.meta.loader.simple;
 
-
-import com.draagon.meta.validator.RequiredValidator;
-import com.draagon.meta.validator.LengthValidator;
+import com.draagon.meta.registry.SharedRegistryTestBase;
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * Base class for SimpleLoader tests that uses the shared registry approach
+ * to prevent registry conflicts between tests.
  *
  * @author dmealing
  */
-public class SimpleLoaderTestBase {
+public class SimpleLoaderTestBase extends SharedRegistryTestBase {
 
-    //protected static MetaDataLoader loaderStatic = null;
-    private static AtomicInteger i = new AtomicInteger();
-
+    /**
+     * Initialize a loader with specific sources while using the shared registry.
+     * This prevents registry conflicts that cause missing type registrations.
+     */
     protected SimpleLoader initLoader(List<URI> sources) {
-
-        SimpleLoader loader = null;
-
-        // Trigger validator registrations
-        try {
-            new RequiredValidator("test");
-            new LengthValidator("test");
-        } catch (Exception e) {
-            // Ignore - just triggering static registration
-        }
-        
-        // Trigger view registrations
-        try {
-            Class.forName("com.draagon.meta.view.BasicMetaView");
-        } catch (Exception e) {
-            // Ignore - just triggering static registration
-        }
-
-            // Initialize the loader
-            loader = new SimpleLoader(
-                    getClass().getSimpleName() + "-" + i.incrementAndGet())
-                    .setSourceURIs(sources)
-                    .init();
-
-        return loader;
+        // Use the shared registry approach to create a loader with specific sources
+        return createTestLoader(getClass().getSimpleName(), sources);
     }
-
-
 }

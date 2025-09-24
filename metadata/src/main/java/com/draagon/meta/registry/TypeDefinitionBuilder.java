@@ -60,7 +60,31 @@ public class TypeDefinitionBuilder {
     public static TypeDefinitionBuilder forClass(Class<? extends MetaData> implementationClass) {
         return new TypeDefinitionBuilder(implementationClass);
     }
-    
+
+    /**
+     * Create builder from existing TypeDefinition for extension purposes
+     *
+     * @param existing Existing TypeDefinition to copy settings from
+     * @return New TypeDefinitionBuilder with settings copied from existing definition
+     */
+    public static TypeDefinitionBuilder from(TypeDefinition existing) {
+        TypeDefinitionBuilder builder = new TypeDefinitionBuilder(existing.getImplementationClass());
+
+        // Copy basic properties
+        builder.type = existing.getType();
+        builder.subType = existing.getSubType();
+        builder.description = existing.getDescription();
+        builder.parentType = existing.getParentType();
+        builder.parentSubType = existing.getParentSubType();
+
+        // Copy direct child requirements (not inherited ones)
+        for (ChildRequirement req : existing.getDirectChildRequirements()) {
+            builder.childRequirements.put(req.getName(), req);
+        }
+
+        return builder;
+    }
+
     /**
      * Set the primary type identifier
      * 

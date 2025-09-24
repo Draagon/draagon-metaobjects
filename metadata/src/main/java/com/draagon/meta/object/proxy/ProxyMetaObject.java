@@ -4,8 +4,7 @@ import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
@@ -57,8 +56,8 @@ public class ProxyMetaObject extends PojoMetaObject
             
             log.debug("Registered ProxyMetaObject type with unified registry");
             
-            // Register ProxyMetaObject-specific constraints
-            setupProxyMetaObjectConstraints();
+            // Register ProxyMetaObject-specific constraints using consolidated registry
+            setupProxyMetaObjectConstraints(MetaDataRegistry.getInstance());
             
         } catch (Exception e) {
             log.error("Failed to register ProxyMetaObject type with unified registry", e);
@@ -66,24 +65,23 @@ public class ProxyMetaObject extends PojoMetaObject
     }
     
     /**
-     * Setup ProxyMetaObject-specific constraints in the constraint registry
+     * Setup ProxyMetaObject-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupProxyMetaObjectConstraints() {
+    private static void setupProxyMetaObjectConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: ProxyMetaObject CAN have interfaceName attribute
-            PlacementConstraint proxyInterfaceNamePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "proxyobject.interfacename.placement",
                 "ProxyMetaObject can have interfaceName attribute",
                 (metadata) -> metadata instanceof ProxyMetaObject,
-                (child) -> child instanceof StringAttribute && 
+                (child) -> child instanceof StringAttribute &&
                           child.getName().equals(ATTR_INTERFACE_NAME)
             );
-            constraintRegistry.addConstraint(proxyInterfaceNamePlacement);
-            
-            log.debug("Registered ProxyMetaObject-specific constraints");
-            
+
+            log.debug("Registered ProxyMetaObject-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register ProxyMetaObject constraints", e);
         }

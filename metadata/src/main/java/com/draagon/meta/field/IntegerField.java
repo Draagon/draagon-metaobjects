@@ -9,8 +9,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -35,23 +34,28 @@ public class IntegerField extends PrimitiveField<Integer> {
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
 
+    // Static registration block - automatically registers when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register IntegerField type during class loading", e);
+        }
+    }
+
     public IntegerField( String name ) {
         super( SUBTYPE_INT, name, DataTypes.INT );
     }
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register IntegerField type and constraints with the registry
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.registerType(IntegerField.class, def -> def
+            // Register the type definition
+            registry.registerType(IntegerField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_INT)
                 .description("Integer field with range validation")
 
@@ -65,8 +69,8 @@ public class IntegerField extends PrimitiveField<Integer> {
 
             log.debug("Registered IntegerField type with unified registry");
 
-            // Register IntegerField-specific constraints
-            setupIntegerFieldConstraints();
+            // Register IntegerField-specific constraints using concrete constraint classes
+            registerIntegerFieldConstraints(registry);
 
         } catch (Exception e) {
             log.error("Failed to register IntegerField type with unified registry", e);
@@ -74,34 +78,32 @@ public class IntegerField extends PrimitiveField<Integer> {
     }
     
     /**
-     * Setup IntegerField-specific constraints in the constraint registry
+     * Register IntegerField-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupIntegerFieldConstraints() {
+    private static void registerIntegerFieldConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: IntegerField CAN have minValue attribute
-            PlacementConstraint minValuePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "integerfield.minvalue.placement",
                 "IntegerField can optionally have minValue attribute",
                 (metadata) -> metadata instanceof IntegerField,
-                (child) -> (child instanceof IntAttribute || child instanceof StringAttribute) && 
+                (child) -> (child instanceof IntAttribute || child instanceof StringAttribute) &&
                           child.getName().equals(ATTR_MIN_VALUE)
             );
-            constraintRegistry.addConstraint(minValuePlacement);
-            
+
             // PLACEMENT CONSTRAINT: IntegerField CAN have maxValue attribute
-            PlacementConstraint maxValuePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "integerfield.maxvalue.placement",
                 "IntegerField can optionally have maxValue attribute",
                 (metadata) -> metadata instanceof IntegerField,
-                (child) -> (child instanceof IntAttribute || child instanceof StringAttribute) && 
+                (child) -> (child instanceof IntAttribute || child instanceof StringAttribute) &&
                           child.getName().equals(ATTR_MAX_VALUE)
             );
-            constraintRegistry.addConstraint(maxValuePlacement);
-            
-            log.debug("Registered IntegerField-specific constraints");
-            
+
+            log.debug("Registered IntegerField-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register IntegerField constraints", e);
         }

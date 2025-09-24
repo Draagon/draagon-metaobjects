@@ -8,8 +8,7 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -38,23 +37,28 @@ public class DateField extends PrimitiveField<Date> {
     public final static String ATTR_MIN_DATE = "minDate";
     public final static String ATTR_MAX_DATE = "maxDate";
 
+    // Static registration block - automatically registers when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register DateField type during class loading", e);
+        }
+    }
+
     public DateField( String name ) {
         super( SUBTYPE_DATE, name, DataTypes.DATE );
     }
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register DateField type and constraints with the registry
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.registerType(DateField.class, def -> def
+            // Register the type definition
+            registry.registerType(DateField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DATE)
                 .description("Date field with format and range validation")
 
@@ -66,13 +70,12 @@ public class DateField extends PrimitiveField<Date> {
                 .optionalAttribute(ATTR_FORMAT, "string")
                 .optionalAttribute(ATTR_MIN_DATE, "string")
                 .optionalAttribute(ATTR_MAX_DATE, "string")
-
             );
 
             log.debug("Registered DateField type with unified registry");
 
-            // Register DateField-specific constraints
-            setupDateFieldConstraints();
+            // Register DateField-specific constraints using concrete constraint classes
+            registerDateFieldConstraints(registry);
 
         } catch (Exception e) {
             log.error("Failed to register DateField type with unified registry", e);
@@ -80,24 +83,23 @@ public class DateField extends PrimitiveField<Date> {
     }
     
     /**
-     * Setup DateField-specific constraints in the constraint registry
+     * Register DateField-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupDateFieldConstraints() {
+    private static void registerDateFieldConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: DateField CAN have format attribute
-            PlacementConstraint dateFormatPlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "datefield.format.placement",
                 "DateField can optionally have format attribute",
                 (metadata) -> metadata instanceof DateField,
-                (child) -> child instanceof StringAttribute && 
+                (child) -> child instanceof StringAttribute &&
                           child.getName().equals(ATTR_FORMAT)
             );
-            constraintRegistry.addConstraint(dateFormatPlacement);
-            
-            log.debug("Registered DateField-specific constraints");
-            
+
+            log.debug("Registered DateField-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register DateField constraints", e);
         }

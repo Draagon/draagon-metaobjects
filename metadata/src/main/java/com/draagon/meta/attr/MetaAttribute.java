@@ -40,8 +40,8 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
 
             log.debug("Registered base MetaAttribute type with unified registry");
 
-            // Register cross-cutting attribute constraints
-            registerCrossCuttingAttributeConstraints();
+            // Register cross-cutting attribute constraints using consolidated registry
+            registerCrossCuttingAttributeConstraints(MetaDataRegistry.getInstance());
 
             log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
         } catch (Exception e) {
@@ -217,39 +217,33 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     }
     
     /**
-     * Register cross-cutting attribute constraints that apply to all attribute types
+     * Register cross-cutting attribute constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void registerCrossCuttingAttributeConstraints() {
+    private static void registerCrossCuttingAttributeConstraints(MetaDataRegistry registry) {
         try {
-            // Import constraint classes
-            com.draagon.meta.constraint.ConstraintRegistry constraintRegistry = 
-                com.draagon.meta.constraint.ConstraintRegistry.getInstance();
-                
             // PLACEMENT CONSTRAINT: Attributes can be placed on any MetaData
-            com.draagon.meta.constraint.PlacementConstraint universalAttributePlacement = 
-                new com.draagon.meta.constraint.PlacementConstraint(
-                    "attribute.universal.placement",
-                    "Attributes can be placed on any MetaData",
-                    (metadata) -> metadata instanceof MetaData,
-                    (child) -> child instanceof MetaAttribute
-                );
-            constraintRegistry.addConstraint(universalAttributePlacement);
-            
+            registry.registerPlacementConstraint(
+                "attribute.universal.placement",
+                "Attributes can be placed on any MetaData",
+                (metadata) -> metadata instanceof MetaData,
+                (child) -> child instanceof MetaAttribute
+            );
+
             // VALIDATION CONSTRAINT: Attribute naming patterns
-            com.draagon.meta.constraint.ValidationConstraint attributeNamingPattern = 
-                new com.draagon.meta.constraint.ValidationConstraint(
-                    "attribute.naming.pattern",
-                    "Attribute names must follow identifier pattern",
-                    (metadata) -> metadata instanceof MetaAttribute,
-                    (metadata, value) -> {
-                        String name = metadata.getName();
-                        return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                    }
-                );
-            constraintRegistry.addConstraint(attributeNamingPattern);
-            
-            log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
-            
+            registry.registerValidationConstraint(
+                "attribute.naming.pattern",
+                "Attribute names must follow identifier pattern",
+                (metadata) -> metadata instanceof MetaAttribute,
+                (metadata, value) -> {
+                    String name = metadata.getName();
+                    return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                }
+            );
+
+            log.debug("Registered cross-cutting attribute constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register cross-cutting attribute constraints", e);
         }

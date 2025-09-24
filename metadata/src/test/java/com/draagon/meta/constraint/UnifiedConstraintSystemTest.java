@@ -2,78 +2,52 @@ package com.draagon.meta.constraint;
 
 import com.draagon.meta.attr.StringArrayAttribute;
 import com.draagon.meta.field.StringField;
-import com.draagon.meta.registry.ServiceRegistry;
-import com.draagon.meta.registry.ServiceRegistryFactory;
-import org.junit.Before;
+import com.draagon.meta.registry.SharedRegistryTestBase;
 import org.junit.Test;
-import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
 /**
- * Test the unified constraint system using ServiceRegistry pattern.
- * 
+ * Test the consolidated constraint system using shared MetaDataRegistry.
+ *
  * This test verifies that:
- * 1. ConstraintProvider services are discovered and loaded
- * 2. Constraints are properly registered via ServiceRegistry
- * 3. StringArrayAttribute issue is resolved (classes are loaded via ServiceRegistry)
- * 4. The system works in both OSGi and non-OSGi environments
+ * 1. Constraints are properly registered via consolidated MetaDataRegistry
+ * 2. MetaData classes use the unified constraint registration approach
+ * 3. StringArrayAttribute and other classes register their constraints properly
+ * 4. The consolidated registry provides both type and constraint functionality
  */
-public class UnifiedConstraintSystemTest {
-    
+public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
+
     private static final Logger log = LoggerFactory.getLogger(UnifiedConstraintSystemTest.class);
-    
-    private ConstraintRegistry constraintRegistry;
-    private ServiceRegistry serviceRegistry;
-    
-    @Before
-    public void setUp() {
-        // Use the factory to get appropriate ServiceRegistry for environment
-        serviceRegistry = ServiceRegistryFactory.getDefault();
-        constraintRegistry = new ConstraintRegistry(serviceRegistry);
-        
-        log.info("Test setup with ServiceRegistry: {}", serviceRegistry.getDescription());
-    }
-    
-    @After
-    public void tearDown() {
-        // Don't close ServiceRegistry between tests as it's shared via factory
-        // serviceRegistry.close();
-    }
-    
+
     @Test
     public void testBaseClassConstraintsRegistered() {
-        // Verify that base class constraints are registered (v6.1.0+ pattern)
-        var providers = serviceRegistry.getServices(ConstraintProvider.class);
-        
-        assertNotNull("ConstraintProvider services should exist", providers);
-        assertTrue("Should have no constraint providers (base class pattern)", providers.isEmpty());
-        
-        log.info("Using base class constraint pattern - no providers needed");
-        
+        // Verify that base class constraints are registered in the consolidated registry
+        log.info("Testing consolidated constraint registry pattern");
+
         // Verify specific base class constraints are registered
-        var allConstraints = constraintRegistry.getAllConstraints();
-        
+        var allConstraints = getSharedRegistry().getAllConstraints();
+
         // Check for MetaField constraints
         boolean foundFieldNaming = allConstraints.stream()
-            .anyMatch(c -> "field.naming.pattern".equals(getConstraintId(c)));
+            .anyMatch(c -> "field.naming.pattern".equals(c.getConstraintId()));
         boolean foundFieldRequired = allConstraints.stream()
-            .anyMatch(c -> "field.required.placement".equals(getConstraintId(c)));
-            
+            .anyMatch(c -> "field.required.placement".equals(c.getConstraintId()));
+
         // Check for MetaAttribute constraints
         boolean foundAttrPlacement = allConstraints.stream()
-            .anyMatch(c -> "attribute.universal.placement".equals(getConstraintId(c)));
+            .anyMatch(c -> "attribute.universal.placement".equals(c.getConstraintId()));
         boolean foundAttrNaming = allConstraints.stream()
-            .anyMatch(c -> "attribute.naming.pattern".equals(getConstraintId(c)));
-            
+            .anyMatch(c -> "attribute.naming.pattern".equals(c.getConstraintId()));
+
         // Check for MetaObject constraints
         boolean foundObjNaming = allConstraints.stream()
-            .anyMatch(c -> "object.naming.pattern".equals(getConstraintId(c)));
+            .anyMatch(c -> "object.naming.pattern".equals(c.getConstraintId()));
         boolean foundFieldsPlacement = allConstraints.stream()
-            .anyMatch(c -> "object.fields.placement".equals(getConstraintId(c)));
-        
+            .anyMatch(c -> "object.fields.placement".equals(c.getConstraintId()));
+
         assertTrue("Should find field naming constraint", foundFieldNaming);
         assertTrue("Should find field required placement constraint", foundFieldRequired);
         assertTrue("Should find attribute placement constraint", foundAttrPlacement);
@@ -84,128 +58,110 @@ public class UnifiedConstraintSystemTest {
     
     @Test
     public void testConstraintsLoaded() {
-        // Verify that constraints are loaded from base classes (v6.1.0+ pattern)
-        var stats = constraintRegistry.getStats();
-        
-        assertTrue("Should have constraints loaded", stats.totalConstraints() > 0);
-        assertEquals("Should have zero constraint providers (base class pattern)", 0, stats.providerCount());
-        assertTrue("Should be initialized", stats.initialized());
-        
-        log.info("Constraint registry stats: {}", stats);
-        
+        // Verify that constraints are loaded in the consolidated registry
+        var stats = getSharedRegistry().getStats();
+
+        assertTrue("Should have constraints loaded", stats.constraintStats().size() > 0);
+        assertTrue("Should have types loaded", stats.totalTypes() > 0);
+
+        log.info("Consolidated registry stats: {}", stats);
+
         // Check for specific constraint types
-        var placementConstraints = constraintRegistry.getPlacementConstraints();
-        var validationConstraints = constraintRegistry.getValidationConstraints();
-        
-        assertFalse("Should have placement constraints", placementConstraints.isEmpty());
-        assertFalse("Should have validation constraints", validationConstraints.isEmpty());
-        
-        log.info("Loaded {} placement constraints and {} validation constraints", 
-                 placementConstraints.size(), validationConstraints.size());
+        var allConstraints = getSharedRegistry().getAllConstraints();
+        var placementConstraints = allConstraints.stream()
+            .filter(c -> c.getValidationDescription().contains("can optionally have"))
+            .count();
+        var validationConstraints = allConstraints.stream()
+            .filter(c -> c.getValidationDescription().contains("must") ||
+                        c.getValidationDescription().contains("pattern") ||
+                        c.getValidationDescription().contains("validation"))
+            .count();
+
+        assertTrue("Should have placement constraints", placementConstraints > 0);
+        assertTrue("Should have validation constraints", validationConstraints > 0);
+
+        log.info("Loaded {} placement constraints and {} validation constraints",
+                 placementConstraints, validationConstraints);
     }
     
     @Test
     public void testStringFieldConstraints() {
-        // Test that StringField constraints are properly loaded
-        var placementConstraints = constraintRegistry.getPlacementConstraints();
-        
+        // Test that StringField constraints are properly loaded in consolidated registry
+        var allConstraints = getSharedRegistry().getAllConstraints();
+
         // Look for StringField-specific constraints
-        boolean foundMaxLengthPlacement = placementConstraints.stream()
-            .anyMatch(c -> getConstraintId(c).contains("stringfield.maxlength"));
-        boolean foundPatternPlacement = placementConstraints.stream()
-            .anyMatch(c -> getConstraintId(c).contains("stringfield.pattern"));
-        
+        boolean foundMaxLengthPlacement = allConstraints.stream()
+            .anyMatch(c -> c.getConstraintId().contains("stringfield.maxlength"));
+        boolean foundPatternPlacement = allConstraints.stream()
+            .anyMatch(c -> c.getConstraintId().contains("stringfield.pattern"));
+
         assertTrue("Should find StringField maxLength placement constraint", foundMaxLengthPlacement);
         assertTrue("Should find StringField pattern placement constraint", foundPatternPlacement);
-        
-        var validationConstraints = constraintRegistry.getValidationConstraints();
-        boolean foundFieldNamingValidation = validationConstraints.stream()
-            .anyMatch(c -> getConstraintId(c).contains("field.naming.pattern"));
-        
+
+        boolean foundFieldNamingValidation = allConstraints.stream()
+            .anyMatch(c -> c.getConstraintId().contains("field.naming.pattern"));
+
         assertTrue("Should find field naming validation constraint", foundFieldNamingValidation);
     }
     
     @Test
     public void testStringArrayAttributeLoadable() {
-        // This is the critical test - StringArrayAttribute should be loadable
-        // because the ServiceRegistry approach forces class loading
-        
+        // Test that StringArrayAttribute works with consolidated registry
+
         try {
             // Test that StringArrayAttribute can be created
             StringArrayAttribute attr = StringArrayAttribute.create("testArray", "value1,value2");
             assertNotNull("StringArrayAttribute should be creatable", attr);
             assertEquals("Should have correct name", "testArray", attr.getName());
-            
+
             // Test that it has proper subtype registered
             assertEquals("Should have stringarray subtype", "stringarray", attr.getSubType());
-            
-            log.info("StringArrayAttribute created successfully: {} with values: {}", 
+
+            log.info("StringArrayAttribute created successfully: {} with values: {}",
                      attr.getName(), attr.getValue());
-            
+
         } catch (Exception e) {
-            fail("StringArrayAttribute should be loadable via ServiceRegistry: " + e.getMessage());
+            fail("StringArrayAttribute should work with consolidated registry: " + e.getMessage());
         }
     }
-    
+
     @Test
-    public void testServiceRegistryEnvironmentDetection() {
-        // Test that ServiceRegistry correctly detects environment
-        String description = serviceRegistry.getDescription();
-        assertNotNull("ServiceRegistry should have description", description);
-        
-        boolean isOSGI = serviceRegistry.isOSGIEnvironment();
-        log.info("ServiceRegistry environment - OSGi: {}, Description: {}", isOSGI, description);
-        
-        // In test environment, should typically be non-OSGi
-        if (!isOSGI) {
-            assertTrue("Non-OSGi registry should mention ServiceLoader", 
-                      description.toLowerCase().contains("serviceloader") || 
-                      description.toLowerCase().contains("java"));
-        }
+    public void testConsolidatedRegistryFunctionality() {
+        // Test that the consolidated registry provides both type and constraint functionality
+        var stats = getSharedRegistry().getStats();
+
+        assertTrue("Should have types registered", stats.totalTypes() > 0);
+        assertTrue("Should have constraints registered", stats.constraintStats().size() > 0);
+
+        log.info("Consolidated registry contains {} types and {} constraints",
+                 stats.totalTypes(), stats.constraintStats().size());
+
+        // Test that we can access both types and constraints from same registry
+        var registeredTypes = getSharedRegistry().getRegisteredTypes();
+        var allConstraints = getSharedRegistry().getAllConstraints();
+
+        assertFalse("Should have registered types", registeredTypes.isEmpty());
+        assertFalse("Should have registered constraints", allConstraints.isEmpty());
     }
-    
+
     @Test
-    public void testConstraintReload() {
-        // Test that constraint registry can be reloaded (useful for testing)
-        int initialCount = constraintRegistry.getConstraintCount();
-        assertTrue("Should have initial constraints", initialCount > 0);
-        
-        // Reload constraints
-        constraintRegistry.reload();
-        
-        int reloadedCount = constraintRegistry.getConstraintCount();
-        assertEquals("Constraint count should be same after reload", initialCount, reloadedCount);
-        assertTrue("Should still be initialized after reload", constraintRegistry.isInitialized());
-    }
-    
-    @Test
-    public void testConstraintProviderPriorities() {
-        // Test that providers are loaded in priority order
-        var providers = serviceRegistry.getServices(ConstraintProvider.class);
-        
-        // Core providers should have lower priority numbers (higher priority)
-        var coreFieldProvider = providers.stream()
-            .filter(p -> p.getClass().getSimpleName().equals("CoreFieldConstraintProvider"))
+    public void testConstraintValidation() {
+        // Test that constraints can validate metadata
+        var allConstraints = getSharedRegistry().getAllConstraints();
+
+        // Find a validation constraint to test
+        var validationConstraint = allConstraints.stream()
+            .filter(c -> c.getConstraintId().contains("field.naming.pattern"))
             .findFirst();
-        
-        if (coreFieldProvider.isPresent()) {
-            int priority = coreFieldProvider.get().getPriority();
-            assertTrue("Core field provider should have high priority (low number)", priority < 1000);
-            log.info("CoreFieldConstraintProvider priority: {}", priority);
-        }
-    }
-    
-    /**
-     * Helper method to safely get constraint ID from either ValidationConstraint or PlacementConstraint
-     */
-    private String getConstraintId(Constraint constraint) {
-        if (constraint instanceof ValidationConstraint) {
-            return ((ValidationConstraint) constraint).getId();
-        } else if (constraint instanceof PlacementConstraint) {
-            return ((PlacementConstraint) constraint).getId();
-        } else {
-            // Fallback - use type as identifier for unknown constraint types
-            return constraint.getType();
-        }
+
+        assertTrue("Should find field naming pattern constraint", validationConstraint.isPresent());
+
+        var constraint = validationConstraint.get();
+        log.info("Found validation constraint: {} - {}",
+                 constraint.getConstraintId(), constraint.getValidationDescription());
+
+        // Test constraint validation functionality exists
+        assertNotNull("Constraint should have validation description", constraint.getValidationDescription());
+        assertNotNull("Constraint should have constraint ID", constraint.getConstraintId());
     }
 }

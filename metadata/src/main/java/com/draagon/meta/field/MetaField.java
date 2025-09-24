@@ -101,7 +101,13 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     public static final String ATTR_DEFAULT_VIEW = "defaultView";
 
     // Unified registry self-registration
-    static {
+    /**
+     * Register MetaField types using the standardized registerTypes() pattern.
+     * This method registers the base field type that other field types inherit from.
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
             MetaDataRegistry.registerType(MetaField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BASE)
@@ -120,14 +126,30 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
                 .optionalChild(MetaView.TYPE_VIEW, "*")
             );
-            
+
             log.debug("Registered base MetaField type with unified registry");
-            
-            // Register cross-cutting field constraints
-            registerCrossCuttingFieldConstraints();
-            
+
+            // Register cross-cutting field constraints using consolidated registry
+            registerCrossCuttingFieldConstraints(registry);
+
         } catch (Exception e) {
             log.error("Failed to register MetaField type with unified registry", e);
+        }
+    }
+
+    /**
+     * Alternative registerTypes() method with no parameters for backward compatibility.
+     */
+    public static void registerTypes() {
+        registerTypes(MetaDataRegistry.getInstance());
+    }
+
+    // Static registration block - automatically registers the base field type when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register base MetaField type during class loading", e);
         }
     }
 
@@ -802,54 +824,48 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
     
     /**
-     * Register cross-cutting field constraints that apply to all field types
+     * Register cross-cutting field constraints that apply to all field types using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void registerCrossCuttingFieldConstraints() {
+    private static void registerCrossCuttingFieldConstraints(MetaDataRegistry registry) {
         try {
-            // Import constraint classes
-            com.draagon.meta.constraint.ConstraintRegistry constraintRegistry = 
-                com.draagon.meta.constraint.ConstraintRegistry.getInstance();
-                
             // VALIDATION CONSTRAINT: Field naming patterns (allow package-qualified names)
-            com.draagon.meta.constraint.ValidationConstraint fieldNamingPattern = 
-                new com.draagon.meta.constraint.ValidationConstraint(
-                    "field.naming.pattern",
-                    "Field names must follow identifier pattern or be package-qualified",
-                    (metadata) -> metadata instanceof MetaField,
-                    (metadata, value) -> {
-                        String name = metadata.getName();
-                        if (name == null) return false;
-                        
-                        // Allow package-qualified names (with ::)
-                        if (name.contains("::")) {
-                            String[] parts = name.split("::");
-                            for (String part : parts) {
-                                if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
-                                    return false;
-                                }
+            registry.registerValidationConstraint(
+                "field.naming.pattern",
+                "Field names must follow identifier pattern or be package-qualified",
+                (metadata) -> metadata instanceof MetaField,
+                (metadata, value) -> {
+                    String name = metadata.getName();
+                    if (name == null) return false;
+
+                    // Allow package-qualified names (with ::)
+                    if (name.contains("::")) {
+                        String[] parts = name.split("::");
+                        for (String part : parts) {
+                            if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
+                                return false;
                             }
-                            return true;
-                        } else {
-                            // Simple names must follow identifier pattern
-                            return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
                         }
+                        return true;
+                    } else {
+                        // Simple names must follow identifier pattern
+                        return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
                     }
-                );
-            constraintRegistry.addConstraint(fieldNamingPattern);
-            
+                }
+            );
+
             // PLACEMENT CONSTRAINT: All fields CAN have required attribute
-            com.draagon.meta.constraint.PlacementConstraint requiredPlacement = 
-                new com.draagon.meta.constraint.PlacementConstraint(
-                    "field.required.placement",
-                    "Fields can optionally have required attribute",
-                    (metadata) -> metadata instanceof MetaField,
-                    (child) -> child instanceof com.draagon.meta.attr.BooleanAttribute && 
-                              child.getName().equals(ATTR_REQUIRED)
-                );
-            constraintRegistry.addConstraint(requiredPlacement);
-            
-            log.debug("Registered cross-cutting field constraints in MetaField");
-            
+            registry.registerPlacementConstraint(
+                "field.required.placement",
+                "Fields can optionally have required attribute",
+                (metadata) -> metadata instanceof MetaField,
+                (child) -> child instanceof com.draagon.meta.attr.BooleanAttribute &&
+                          child.getName().equals(ATTR_REQUIRED)
+            );
+
+            log.debug("Registered cross-cutting field constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register cross-cutting field constraints", e);
         }

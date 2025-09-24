@@ -3,6 +3,8 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataTypeId;
+import com.draagon.meta.constraint.ValidationContext;
+import com.draagon.meta.constraint.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +12,8 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 
@@ -57,6 +61,8 @@ public class MetaDataRegistry {
     private final Map<MetaDataTypeId, TypeDefinition> typeDefinitions = new ConcurrentHashMap<>();
     private final Map<String, List<ChildRequirement>> globalRequirements = new ConcurrentHashMap<>();
     private final Set<TypeDefinition> deferredInheritanceTypes = ConcurrentHashMap.newKeySet();
+    // Unified constraint storage using enhanced ChildRequirement
+    private final List<ChildRequirement> allConstraints = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean initialized = false;
     
     /**
@@ -100,13 +106,174 @@ public class MetaDataRegistry {
      * @param clazz Implementation class
      * @param configurator Configuration function for the type definition
      */
-    public static void registerType(Class<? extends MetaData> clazz, 
+    public static void registerType(Class<? extends MetaData> clazz,
                                    Consumer<TypeDefinitionBuilder> configurator) {
         TypeDefinitionBuilder builder = TypeDefinitionBuilder.forClass(clazz);
         configurator.accept(builder);
         getInstance().register(builder.build());
     }
-    
+
+    /**
+     * Extend an existing registered type with additional attributes/children.
+     * This allows service providers to add their own attributes to core types
+     * without modifying the core type definitions.
+     *
+     * @param metaDataClass The implementation class of the type to extend
+     * @param extension Configuration function for additional attributes/children
+     * @return This registry instance for chaining
+     * @throws IllegalArgumentException if the type is not already registered
+     */
+    public MetaDataRegistry extendType(Class<? extends MetaData> metaDataClass, Consumer<TypeDefinitionBuilder> extension) {
+        Objects.requireNonNull(metaDataClass, "MetaData class cannot be null");
+        Objects.requireNonNull(extension, "Extension function cannot be null");
+
+        // Find the registered type definition by implementation class
+        TypeDefinition existing = null;
+        MetaDataTypeId typeIdToExtend = null;
+
+        for (Map.Entry<MetaDataTypeId, TypeDefinition> entry : typeDefinitions.entrySet()) {
+            if (entry.getValue().getImplementationClass().equals(metaDataClass)) {
+                existing = entry.getValue();
+                typeIdToExtend = entry.getKey();
+                break;
+            }
+        }
+
+        if (existing == null) {
+            throw new IllegalArgumentException(
+                "Type must be registered before extension: " + metaDataClass.getName() +
+                ". Available types: " + getRegisteredTypeNames()
+            );
+        }
+
+        // Create a builder from the existing definition
+        TypeDefinitionBuilder builder = TypeDefinitionBuilder.from(existing);
+
+        // Apply the extension
+        extension.accept(builder);
+
+        // Update the registered type with extended definition
+        TypeDefinition extendedDefinition = builder.build();
+        typeDefinitions.put(typeIdToExtend, extendedDefinition);
+
+        log.debug("Extended type: {} with additional attributes/children",
+                 typeIdToExtend.toQualifiedName());
+
+        return this;
+    }
+
+    /**
+     * Register multiple types that use standardized registerTypes() pattern.
+     * This method calls the static registerTypes() method on each class if it exists.
+     *
+     * @param typeClasses Classes that implement the registerTypes() pattern
+     */
+    @SafeVarargs
+    public static void registerTypes(Class<? extends MetaData>... typeClasses) {
+        for (Class<? extends MetaData> typeClass : typeClasses) {
+            if (typeClass == null) {
+                continue; // Skip null classes from getClassSafely()
+            }
+
+            try {
+                // Look for a static registerTypes(MetaDataRegistry) method
+                var registerMethod = typeClass.getMethod("registerTypes", MetaDataRegistry.class);
+                registerMethod.invoke(null, getInstance());
+            } catch (NoSuchMethodException e) {
+                // Fallback: Try to find static registerTypes() method with no parameters
+                try {
+                    var singleRegisterMethod = typeClass.getMethod("registerTypes");
+                    singleRegisterMethod.invoke(null);
+                } catch (NoSuchMethodException e2) {
+                    log.warn("Class {} does not have registerTypes() method - skipping", typeClass.getName());
+                } catch (Exception e2) {
+                    log.error("Failed to call registerTypes() on {}: {}", typeClass.getName(), e2.getMessage(), e2);
+                }
+            } catch (Exception e) {
+                log.error("Failed to register types from {}: {}", typeClass.getName(), e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Register all core MetaData types using the standardized registerTypes() pattern.
+     * This is a centralized method for registering all core types in proper order.
+     */
+    public static void registerAllCoreTypes() {
+        try {
+            log.info("Registering all core MetaData types using standardized registerTypes() pattern...");
+
+            // PHASE 1: Base Types (foundation types that others inherit from)
+            log.debug("Registering base types...");
+            // Note: Base types would be registered here if they had registerTypes() methods
+
+            // PHASE 2: Field Types
+            log.debug("Registering field types...");
+            registerTypes(
+                getClassSafely("com.draagon.meta.field.MetaField"),
+                getClassSafely("com.draagon.meta.field.StringField"),
+                getClassSafely("com.draagon.meta.field.IntegerField"),
+                getClassSafely("com.draagon.meta.field.LongField"),
+                getClassSafely("com.draagon.meta.field.DoubleField"),
+                getClassSafely("com.draagon.meta.field.FloatField"),
+                getClassSafely("com.draagon.meta.field.BooleanField"),
+                getClassSafely("com.draagon.meta.field.ByteField"),
+                getClassSafely("com.draagon.meta.field.ShortField"),
+                getClassSafely("com.draagon.meta.field.DateField"),
+                getClassSafely("com.draagon.meta.field.ClassField"),
+                getClassSafely("com.draagon.meta.field.ObjectField"),
+                getClassSafely("com.draagon.meta.field.ObjectArrayField"),
+                getClassSafely("com.draagon.meta.field.StringArrayField"),
+                getClassSafely("com.draagon.meta.field.TimestampField")
+            );
+
+            // PHASE 3: Attribute Types
+            log.debug("Registering attribute types...");
+            registerTypes(
+                getClassSafely("com.draagon.meta.attr.MetaAttribute"),
+                getClassSafely("com.draagon.meta.attr.StringAttribute"),
+                getClassSafely("com.draagon.meta.attr.IntAttribute"),
+                getClassSafely("com.draagon.meta.attr.BooleanAttribute"),
+                getClassSafely("com.draagon.meta.attr.ClassAttribute"),
+                getClassSafely("com.draagon.meta.attr.DoubleAttribute"),
+                getClassSafely("com.draagon.meta.attr.LongAttribute"),
+                getClassSafely("com.draagon.meta.attr.PropertiesAttribute"),
+                getClassSafely("com.draagon.meta.attr.StringArrayAttribute")
+            );
+
+            // PHASE 4: Object Types
+            log.debug("Registering object types...");
+            registerTypes(
+                getClassSafely("com.draagon.meta.object.MetaObject"),
+                getClassSafely("com.draagon.meta.object.pojo.PojoMetaObject"),
+                getClassSafely("com.draagon.meta.object.mapped.MappedMetaObject"),
+                getClassSafely("com.draagon.meta.object.proxy.ProxyMetaObject")
+            );
+
+            log.info("Core type registration completed successfully - {} types registered",
+                    getInstance().getRegisteredTypes().size());
+
+        } catch (Exception e) {
+            log.error("Failed to register core types using standardized pattern: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Safely get a class by name, filtering out missing classes.
+     *
+     * @param className Full class name
+     * @return Class instance, or null if not found
+     */
+    @SuppressWarnings("unchecked")
+    private static Class<? extends MetaData> getClassSafely(String className) {
+        try {
+            return (Class<? extends MetaData>) Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            log.debug("Class {} not available - skipping", className);
+            return null;
+        }
+    }
+
     /**
      * Register a type definition with inheritance resolution
      *
@@ -347,7 +514,7 @@ public class MetaDataRegistry {
     
     /**
      * Add a global child requirement (used by service providers)
-     * 
+     *
      * @param parentType Parent type pattern ("field", "object", "*")
      * @param parentSubType Parent subType pattern ("string", "base", "*")
      * @param requirement Child requirement to add
@@ -355,8 +522,163 @@ public class MetaDataRegistry {
     public void addGlobalChildRequirement(String parentType, String parentSubType, ChildRequirement requirement) {
         String key = parentType + "." + parentSubType;
         globalRequirements.computeIfAbsent(key, k -> new ArrayList<>()).add(requirement);
-        
+
         log.debug("Added global child requirement: {} accepts {}", key, requirement.getDescription());
+    }
+
+    // ========== UNIFIED CONSTRAINT SUPPORT ==========
+
+    /**
+     * Register a placement constraint using the unified constraint system
+     *
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description of the placement rule
+     * @param parentMatcher Predicate to test if a parent MetaData can contain the child
+     * @param childMatcher Predicate to test if a child MetaData can be placed under the parent
+     */
+    public void registerPlacementConstraint(String constraintId, String description,
+                                           Predicate<MetaData> parentMatcher,
+                                           Predicate<MetaData> childMatcher) {
+        ChildRequirement constraint = ChildRequirement.placementConstraint(
+            constraintId, description, parentMatcher, childMatcher);
+        allConstraints.add(constraint);
+        log.debug("Registered placement constraint: {} - {}", constraintId, description);
+    }
+
+    /**
+     * Register a validation constraint using the unified constraint system
+     *
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description of the validation rule
+     * @param applicabilityTest Predicate to determine which MetaData this constraint applies to
+     * @param valueValidator Custom value validation logic
+     */
+    public void registerValidationConstraint(String constraintId, String description,
+                                            Predicate<MetaData> applicabilityTest,
+                                            BiPredicate<MetaData, Object> valueValidator) {
+        ChildRequirement constraint = ChildRequirement.validationConstraint(
+            constraintId, description, applicabilityTest, valueValidator);
+        allConstraints.add(constraint);
+        log.debug("Registered validation constraint: {} - {}", constraintId, description);
+    }
+
+    /**
+     * Register a constraint directly using ChildRequirement
+     *
+     * @param constraint The constraint to register
+     */
+    public void registerConstraint(ChildRequirement constraint) {
+        if (constraint == null) {
+            log.warn("Attempted to register null constraint - ignoring");
+            return;
+        }
+        allConstraints.add(constraint);
+        log.debug("Registered constraint: {} - {}", constraint.getConstraintId(), constraint.getDescription());
+    }
+
+    /**
+     * Get all registered constraints
+     *
+     * @return List of all constraints (read-only view)
+     */
+    public List<ChildRequirement> getAllConstraints() {
+        return Collections.unmodifiableList(allConstraints);
+    }
+
+    /**
+     * Get all placement constraints
+     *
+     * @return List of placement constraints
+     */
+    public List<ChildRequirement> getPlacementConstraints() {
+        return allConstraints.stream()
+            .filter(ChildRequirement::isPlacementConstraint)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all validation constraints
+     *
+     * @return List of validation constraints
+     */
+    public List<ChildRequirement> getValidationConstraints() {
+        return allConstraints.stream()
+            .filter(ChildRequirement::isValidationConstraint)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Validate a parent-child placement using unified constraint system
+     *
+     * @param parent The parent MetaData
+     * @param child The child MetaData to be added
+     * @throws ConstraintViolationException If placement is not allowed
+     */
+    public void validatePlacement(MetaData parent, MetaData child) throws ConstraintViolationException {
+        // First check traditional child requirements
+        boolean allowedByChildRequirements = acceptsChild(
+            parent.getType(), parent.getSubType(),
+            child.getType(), child.getSubType(), child.getName());
+
+        // Then check placement constraints
+        List<ChildRequirement> placementConstraints = getPlacementConstraints();
+        boolean allowedByPlacementConstraints = placementConstraints.isEmpty(); // Default allow if no constraints
+
+        for (ChildRequirement constraint : placementConstraints) {
+            if (constraint.isPlacementAllowed(parent, child)) {
+                allowedByPlacementConstraints = true;
+                break; // At least one constraint allows it
+            }
+        }
+
+        if (!allowedByChildRequirements && !allowedByPlacementConstraints) {
+            throw new ConstraintViolationException(
+                String.format("Child %s[%s] cannot be placed under parent %s[%s]",
+                    child.getClass().getSimpleName(), child.getName(),
+                    parent.getClass().getSimpleName(), parent.getName()),
+                "placement.validation",
+                parent
+            );
+        }
+    }
+
+    /**
+     * Validate a value using unified constraint system
+     *
+     * @param metaData The metadata object being validated
+     * @param value The value being validated
+     * @param context Validation context
+     * @throws ConstraintViolationException If validation fails
+     */
+    public void validateValue(MetaData metaData, Object value, ValidationContext context)
+            throws ConstraintViolationException {
+        List<ChildRequirement> validationConstraints = getValidationConstraints();
+
+        for (ChildRequirement constraint : validationConstraints) {
+            try {
+                constraint.validateValue(metaData, value, context);
+            } catch (ConstraintViolationException e) {
+                // Re-throw with additional context
+                throw new ConstraintViolationException(
+                    e.getMessage() + " (constraint: " + constraint.getConstraintId() + ")",
+                    e.getConstraintType(),
+                    e.getMetaData()
+                );
+            }
+        }
+    }
+
+    /**
+     * Get constraint statistics
+     *
+     * @return Map of constraint types to counts
+     */
+    public Map<String, Integer> getConstraintStats() {
+        Map<String, Integer> stats = new HashMap<>();
+        stats.put("total", allConstraints.size());
+        stats.put("placement", (int) allConstraints.stream().filter(ChildRequirement::isPlacementConstraint).count());
+        stats.put("validation", (int) allConstraints.stream().filter(ChildRequirement::isValidationConstraint).count());
+        return stats;
     }
     
     /**
@@ -479,7 +801,8 @@ public class MetaDataRegistry {
             typeDefinitions.size(),
             typesByPrimary,
             globalRequirementCount,
-            serviceRegistry.getDescription()
+            serviceRegistry.getDescription(),
+            getConstraintStats()
         );
     }
     
@@ -850,12 +1173,13 @@ public class MetaDataRegistry {
     }
 
     /**
-     * Registry statistics record
+     * Registry statistics record with constraint information
      */
     public record RegistryStats(
         int totalTypes,
         Map<String, Integer> typesByPrimary,
         int globalRequirements,
-        String serviceRegistryDescription
+        String serviceRegistryDescription,
+        Map<String, Integer> constraintStats
     ) {}
 }

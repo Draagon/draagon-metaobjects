@@ -30,23 +30,28 @@ public class BooleanField extends PrimitiveField<Boolean> {
 
     public final static String SUBTYPE_BOOLEAN = "boolean";
 
+    // Static registration block - automatically registers when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register BooleanField type during class loading", e);
+        }
+    }
+
     public BooleanField(String name ) {
         super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN );
     }
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register BooleanField type with the registry
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.registerType(BooleanField.class, def -> def
+            // Register the type definition
+            registry.registerType(BooleanField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BOOLEAN)
                 .description("Boolean field for true/false values")
 
@@ -54,7 +59,6 @@ public class BooleanField extends PrimitiveField<Boolean> {
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
                 // NO BOOLEAN-SPECIFIC ATTRIBUTES - inherits all from MetaField base
-
             );
 
             log.debug("Registered BooleanField type with unified registry");

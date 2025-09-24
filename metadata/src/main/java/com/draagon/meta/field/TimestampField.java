@@ -8,8 +8,7 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -62,8 +61,8 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
 
             log.debug("Registered TimestampField type with unified registry");
 
-            // Register TimestampField-specific constraints
-            setupTimestampFieldConstraints();
+            // Register TimestampField-specific constraints using consolidated registry
+            setupTimestampFieldConstraints(MetaDataRegistry.getInstance());
 
         } catch (Exception e) {
             log.error("Failed to register TimestampField type with unified registry", e);
@@ -71,24 +70,23 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
     }
     
     /**
-     * Setup TimestampField-specific constraints in the constraint registry
+     * Setup TimestampField-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupTimestampFieldConstraints() {
+    private static void setupTimestampFieldConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: TimestampField CAN have precision attribute
-            PlacementConstraint timestampPrecisionPlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "timestampfield.precision.placement",
                 "TimestampField can optionally have precision attribute",
                 (metadata) -> metadata instanceof TimestampField,
-                (child) -> child instanceof IntAttribute && 
+                (child) -> child instanceof IntAttribute &&
                           child.getName().equals(ATTR_PRECISION)
             );
-            constraintRegistry.addConstraint(timestampPrecisionPlacement);
-            
-            log.debug("Registered TimestampField-specific constraints");
-            
+
+            log.debug("Registered TimestampField-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register TimestampField constraints", e);
         }

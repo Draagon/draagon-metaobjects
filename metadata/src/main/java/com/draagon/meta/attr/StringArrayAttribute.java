@@ -8,8 +8,7 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.MetaDataTypeId;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.ValidationConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -47,8 +46,8 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
             
             log.debug("Registered StringArrayAttribute type with unified registry");
             
-            // Register StringArrayAttribute-specific constraints
-            setupStringArrayAttributeConstraints();
+            // Register StringArrayAttribute-specific constraints using consolidated registry
+            setupStringArrayAttributeConstraints(MetaDataRegistry.getInstance());
             
         } catch (Exception e) {
             log.error("Failed to register StringArrayAttribute type with unified registry", e);
@@ -56,14 +55,14 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
     }
     
     /**
-     * Setup StringArrayAttribute-specific constraints in the constraint registry
+     * Setup StringArrayAttribute-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupStringArrayAttributeConstraints() {
+    private static void setupStringArrayAttributeConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // VALIDATION CONSTRAINT: String array attribute format
-            ValidationConstraint stringArrayAttributeValidation = new ValidationConstraint(
+            registry.registerValidationConstraint(
                 "stringarrayattribute.format.validation",
                 "StringArrayAttribute values must be properly formatted",
                 (metadata) -> metadata instanceof StringArrayAttribute,
@@ -81,10 +80,9 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
                     return true;
                 }
             );
-            constraintRegistry.addConstraint(stringArrayAttributeValidation);
-            
-            log.debug("Registered StringArrayAttribute-specific constraints");
-            
+
+            log.debug("Registered StringArrayAttribute-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register StringArrayAttribute constraints", e);
         }

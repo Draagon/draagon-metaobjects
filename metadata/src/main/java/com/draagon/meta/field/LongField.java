@@ -9,12 +9,14 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.LongAttribute;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 
 /**
@@ -32,23 +34,28 @@ public class LongField extends PrimitiveField<Long> {
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
 
+    // Static registration block - automatically registers when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register LongField type during class loading", e);
+        }
+    }
+
     public LongField( String name ) {
         super( SUBTYPE_LONG, name, DataTypes.LONG );
     }
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register LongField type and constraints with the registry
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.registerType(LongField.class, def -> def
+            // Register the type definition
+            registry.registerType(LongField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_LONG)
                 .description("Long field with numeric validation")
 
@@ -58,13 +65,12 @@ public class LongField extends PrimitiveField<Long> {
                 // LONG-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_MIN_VALUE, LongAttribute.SUBTYPE_LONG)
                 .optionalAttribute(ATTR_MAX_VALUE, LongAttribute.SUBTYPE_LONG)
-
             );
 
             log.debug("Registered LongField type with unified registry");
 
-            // Register LongField-specific constraints
-            setupLongFieldConstraints();
+            // Register LongField-specific constraints using concrete constraint classes
+            registerLongFieldConstraints(registry);
 
         } catch (Exception e) {
             log.error("Failed to register LongField type with unified registry", e);
@@ -72,34 +78,32 @@ public class LongField extends PrimitiveField<Long> {
     }
     
     /**
-     * Setup LongField-specific constraints in the constraint registry
+     * Register LongField-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupLongFieldConstraints() {
+    private static void registerLongFieldConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: LongField CAN have minValue attribute
-            PlacementConstraint minValuePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "longfield.minvalue.placement",
                 "LongField can optionally have minValue attribute",
                 (metadata) -> metadata instanceof LongField,
-                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) && 
+                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) &&
                           child.getName().equals(ATTR_MIN_VALUE)
             );
-            constraintRegistry.addConstraint(minValuePlacement);
-            
+
             // PLACEMENT CONSTRAINT: LongField CAN have maxValue attribute
-            PlacementConstraint maxValuePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "longfield.maxvalue.placement",
                 "LongField can optionally have maxValue attribute",
                 (metadata) -> metadata instanceof LongField,
-                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) && 
+                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) &&
                           child.getName().equals(ATTR_MAX_VALUE)
             );
-            constraintRegistry.addConstraint(maxValuePlacement);
-            
-            log.debug("Registered LongField-specific constraints");
-            
+
+            log.debug("Registered LongField-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register LongField constraints", e);
         }

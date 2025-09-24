@@ -15,18 +15,25 @@ import static org.junit.Assert.*;
 
 /**
  * Debug test to understand why static blocks aren't executing.
- * 
+ *
+ * ⚠️ ISOLATED TEST: This test manipulates the shared MetaDataRegistry directly
+ * by clearing and restoring it. It must run in isolation from other tests
+ * to prevent registry conflicts.
+ *
  * @since 6.0.0
  */
-public class StaticBlockDebugTest {
-    
+@IsolatedTest("Clears and restores shared MetaDataRegistry state")
+public class StaticBlockDebugTest extends SharedRegistryTestBase {
+
     private static final Logger log = LoggerFactory.getLogger(StaticBlockDebugTest.class);
-    
+
     private Map<String, TypeDefinition> backupRegistry;
-    
+
     @Before
     public void setUp() {
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+        // Use the shared registry but back up its state for isolation
+        MetaDataRegistry registry = getSharedRegistry();
+
         // Backup existing registrations before this test runs
         backupRegistry = new HashMap<>();
         for (String typeName : registry.getRegisteredTypeNames()) {
@@ -38,18 +45,18 @@ public class StaticBlockDebugTest {
                 }
             }
         }
-        log.info("Set up StaticBlockDebugTest with backup of {} types", backupRegistry.size());
+        log.info("Set up isolated registry test with backup of {} types", backupRegistry.size());
     }
-    
+
     @After
     public void tearDown() {
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+        MetaDataRegistry registry = getSharedRegistry();
         if (registry != null) {
             registry.clear();
             // Restore original registrations
             restoreRegistryFromBackup();
         }
-        log.info("Tore down StaticBlockDebugTest with registry restored");
+        log.info("Tore down isolated registry test with registry restored");
     }
     
     /**
@@ -58,9 +65,9 @@ public class StaticBlockDebugTest {
     @Test
     public void testDirectStaticBlockExecution() {
         log.info("Testing direct static block execution...");
-        
+
         // Clear registry
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+        MetaDataRegistry registry = getSharedRegistry();
         registry.clear();
         
         // Force class loading and static block execution
@@ -90,8 +97,8 @@ public class StaticBlockDebugTest {
     @Test
     public void testManualStaticBlockEquivalent() {
         log.info("Testing manual execution of static block equivalent...");
-        
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+
+        MetaDataRegistry registry = getSharedRegistry();
         registry.clear();
         
         try {
@@ -124,8 +131,8 @@ public class StaticBlockDebugTest {
     @Test
     public void testStaticBlockOnInstanceCreation() {
         log.info("Testing static block execution on instance creation...");
-        
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+
+        MetaDataRegistry registry = getSharedRegistry();
         registry.clear();
         
         log.info("Registry cleared. Current types: {}", registry.getRegisteredTypeNames().size());
@@ -151,10 +158,10 @@ public class StaticBlockDebugTest {
     @Test
     public void testInitializationOrder() {
         log.info("Testing initialization order issues...");
-        
+
         try {
             // Create registry instance first
-            MetaDataRegistry registry = MetaDataRegistry.getInstance();
+            MetaDataRegistry registry = getSharedRegistry();
             registry.clear();
             log.info("Registry created and cleared");
             
@@ -186,8 +193,8 @@ public class StaticBlockDebugTest {
     @Test
     public void testMultipleClassRegistration() {
         log.info("Testing multiple class registration...");
-        
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+
+        MetaDataRegistry registry = getSharedRegistry();
         registry.clear();
         
         // Manually register multiple types to ensure the registry itself works
@@ -242,7 +249,7 @@ public class StaticBlockDebugTest {
      */
     private void restoreRegistryFromBackup() {
         try {
-            MetaDataRegistry registry = MetaDataRegistry.getInstance();
+            MetaDataRegistry registry = getSharedRegistry();
             for (Map.Entry<String, TypeDefinition> entry : backupRegistry.entrySet()) {
                 String typeName = entry.getKey();
                 TypeDefinition def = entry.getValue();

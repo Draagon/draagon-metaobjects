@@ -11,8 +11,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.DoubleAttribute;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.PlacementConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -39,23 +38,28 @@ public class DoubleField extends PrimitiveField<Double>
     public final static String ATTR_PRECISION = "precision";
     public final static String ATTR_SCALE = "scale";
 
+    // Static registration block - automatically registers when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register DoubleField type during class loading", e);
+        }
+    }
+
     public DoubleField( String name ) {
         super( SUBTYPE_DOUBLE, name, DataTypes.DOUBLE );
     }
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register DoubleField type and constraints with the registry
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.registerType(DoubleField.class, def -> def
+            // Register the type definition
+            registry.registerType(DoubleField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
                 .description("Double field with numeric and precision validation")
 
@@ -67,13 +71,12 @@ public class DoubleField extends PrimitiveField<Double>
                 .optionalAttribute(ATTR_MAX_VALUE, "double")
                 .optionalAttribute(ATTR_PRECISION, "int")
                 .optionalAttribute(ATTR_SCALE, "int")
-
             );
 
             log.debug("Registered DoubleField type with unified registry");
 
-            // Register DoubleField-specific constraints
-            setupDoubleFieldConstraints();
+            // Register DoubleField-specific constraints using concrete constraint classes
+            registerDoubleFieldConstraints(registry);
 
         } catch (Exception e) {
             log.error("Failed to register DoubleField type with unified registry", e);
@@ -81,54 +84,50 @@ public class DoubleField extends PrimitiveField<Double>
     }
     
     /**
-     * Setup DoubleField-specific constraints in the constraint registry
+     * Register DoubleField-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupDoubleFieldConstraints() {
+    private static void registerDoubleFieldConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // PLACEMENT CONSTRAINT: DoubleField CAN have minValue attribute
-            PlacementConstraint minValuePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "doublefield.minvalue.placement",
                 "DoubleField can optionally have minValue attribute",
                 (metadata) -> metadata instanceof DoubleField,
-                (child) -> (child instanceof DoubleAttribute || child instanceof StringAttribute) && 
+                (child) -> (child instanceof DoubleAttribute || child instanceof StringAttribute) &&
                           child.getName().equals(ATTR_MIN_VALUE)
             );
-            constraintRegistry.addConstraint(minValuePlacement);
-            
+
             // PLACEMENT CONSTRAINT: DoubleField CAN have maxValue attribute
-            PlacementConstraint maxValuePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "doublefield.maxvalue.placement",
                 "DoubleField can optionally have maxValue attribute",
                 (metadata) -> metadata instanceof DoubleField,
-                (child) -> (child instanceof DoubleAttribute || child instanceof StringAttribute) && 
+                (child) -> (child instanceof DoubleAttribute || child instanceof StringAttribute) &&
                           child.getName().equals(ATTR_MAX_VALUE)
             );
-            constraintRegistry.addConstraint(maxValuePlacement);
-            
+
             // PLACEMENT CONSTRAINT: DoubleField CAN have precision attribute
-            PlacementConstraint precisionPlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "doublefield.precision.placement",
                 "DoubleField can optionally have precision attribute",
                 (metadata) -> metadata instanceof DoubleField,
-                (child) -> child instanceof IntAttribute && 
+                (child) -> child instanceof IntAttribute &&
                           child.getName().equals(ATTR_PRECISION)
             );
-            constraintRegistry.addConstraint(precisionPlacement);
-            
+
             // PLACEMENT CONSTRAINT: DoubleField CAN have scale attribute
-            PlacementConstraint scalePlacement = new PlacementConstraint(
+            registry.registerPlacementConstraint(
                 "doublefield.scale.placement",
                 "DoubleField can optionally have scale attribute",
                 (metadata) -> metadata instanceof DoubleField,
-                (child) -> child instanceof IntAttribute && 
+                (child) -> child instanceof IntAttribute &&
                           child.getName().equals(ATTR_SCALE)
             );
-            constraintRegistry.addConstraint(scalePlacement);
-            
-            log.debug("Registered DoubleField-specific constraints");
-            
+
+            log.debug("Registered DoubleField-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register DoubleField constraints", e);
         }

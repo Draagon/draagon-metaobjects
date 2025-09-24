@@ -7,8 +7,7 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.constraint.ConstraintRegistry;
-import com.draagon.meta.constraint.ValidationConstraint;
+// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -40,8 +39,8 @@ public class BooleanAttribute extends MetaAttribute<Boolean>
             
             log.debug("Registered BooleanAttribute type with unified registry");
             
-            // Register BooleanAttribute-specific constraints
-            setupBooleanAttributeConstraints();
+            // Register BooleanAttribute-specific constraints using consolidated registry
+            setupBooleanAttributeConstraints(MetaDataRegistry.getInstance());
             
         } catch (Exception e) {
             log.error("Failed to register BooleanAttribute type with unified registry", e);
@@ -49,14 +48,14 @@ public class BooleanAttribute extends MetaAttribute<Boolean>
     }
     
     /**
-     * Setup BooleanAttribute-specific constraints in the constraint registry
+     * Setup BooleanAttribute-specific constraints using consolidated registry
+     *
+     * @param registry The MetaDataRegistry to use for constraint registration
      */
-    private static void setupBooleanAttributeConstraints() {
+    private static void setupBooleanAttributeConstraints(MetaDataRegistry registry) {
         try {
-            ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-            
             // VALIDATION CONSTRAINT: Boolean attribute values
-            ValidationConstraint booleanAttributeValidation = new ValidationConstraint(
+            registry.registerValidationConstraint(
                 "booleanattribute.value.validation",
                 "BooleanAttribute values must be valid boolean strings",
                 (metadata) -> metadata instanceof BooleanAttribute,
@@ -64,17 +63,16 @@ public class BooleanAttribute extends MetaAttribute<Boolean>
                     if (metadata instanceof BooleanAttribute) {
                         BooleanAttribute boolAttr = (BooleanAttribute) metadata;
                         String valueStr = boolAttr.getValueAsString();
-                        return valueStr == null || 
-                               "true".equalsIgnoreCase(valueStr) || 
+                        return valueStr == null ||
+                               "true".equalsIgnoreCase(valueStr) ||
                                "false".equalsIgnoreCase(valueStr);
                     }
                     return true;
                 }
             );
-            constraintRegistry.addConstraint(booleanAttributeValidation);
-            
-            log.debug("Registered BooleanAttribute-specific constraints");
-            
+
+            log.debug("Registered BooleanAttribute-specific constraints using consolidated registry");
+
         } catch (Exception e) {
             log.error("Failed to register BooleanAttribute constraints", e);
         }
