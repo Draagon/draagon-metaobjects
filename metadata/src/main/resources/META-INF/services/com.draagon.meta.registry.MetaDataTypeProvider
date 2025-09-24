@@ -1,1 +1,2 @@
 com.draagon.meta.core.CoreTypeMetaDataProvider
+com.draagon.meta.database.CoreDBMetaDataProvider

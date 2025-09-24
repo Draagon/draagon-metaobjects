@@ -29,7 +29,6 @@
 
     <modules>
         <module>metadata</module>
-        <module>database-common</module>
         <module>codegen-base</module>
         <module>codegen-mustache</module>
         <module>codegen-plantuml</module>

@@ -92,4 +92,26 @@ public class TextAreaView extends TextView
     else if ( mode == HIDE )
       HtmlViewHelper.drawHidden( page, params );
   }
+
+  ///////////////////////////////////////////////////
+  // Service Provider Pattern Registration
+
+  // Text area view attribute constants
+  public static final String TEXTAREA_COLS = "textareaCols";
+  public static final String TEXTAREA_ROWS = "textareaRows";
+  public static final String TEXTAREA_WRAP = "textareaWrap";
+  public static final String TEXTAREA_MAX_LENGTH = "textareaMaxLength";
+
+  /**
+   * Registers text area view attributes for use by the service provider pattern.
+   * Called by WebMetaDataProvider to extend existing MetaData types with text area view-specific attributes.
+   */
+  public static void registerTextAreaViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+      // Text area specific attributes
+      registry.findType("field", "string")
+          .optionalAttribute(TEXTAREA_COLS, "int")
+          .optionalAttribute(TEXTAREA_ROWS, "int")
+          .optionalAttribute(TEXTAREA_WRAP, "string")
+          .optionalAttribute(TEXTAREA_MAX_LENGTH, "int");
+  }
 }

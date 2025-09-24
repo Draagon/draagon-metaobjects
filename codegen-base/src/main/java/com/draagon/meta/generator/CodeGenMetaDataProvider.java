@@ -1,23 +1,23 @@
 package com.draagon.meta.generator;
 
-import com.draagon.meta.generator.service.XSDGeneratorService;
-import com.draagon.meta.generator.service.JsonSchemaGeneratorService;
-import com.draagon.meta.generator.service.AIDocGeneratorService;
+import com.draagon.meta.generator.direct.metadata.file.xsd.MetaDataFileXSDGenerator;
+import com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator;
+import com.draagon.meta.generator.direct.metadata.ai.MetaDataAIDocumentationGenerator;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
 
 /**
- * Code Generation MetaData provider that registers type extensions for code generation services.
+ * Code Generation MetaData provider that registers type extensions for code generation.
  *
- * <p>This provider delegates to service classes that contain the actual extension logic
+ * <p>This provider delegates to existing generator classes that contain the actual extension logic
  * and constants. It supports XSD generation, JSON Schema generation, and AI documentation
  * generation by extending existing MetaData types with generation-specific attributes.</p>
  *
- * <h3>Services Provided:</h3>
+ * <h3>Generators Supported:</h3>
  * <ul>
- * <li><strong>XSDGeneratorService:</strong> Attributes for XSD schema generation</li>
- * <li><strong>JsonSchemaGeneratorService:</strong> Attributes for JSON Schema generation</li>
- * <li><strong>AIDocGeneratorService:</strong> Attributes for AI documentation generation</li>
+ * <li><strong>MetaDataFileXSDGenerator:</strong> Attributes for XSD schema generation</li>
+ * <li><strong>MetaDataFileJsonSchemaGenerator:</strong> Attributes for JSON Schema generation</li>
+ * <li><strong>MetaDataAIDocumentationGenerator:</strong> Attributes for AI documentation generation</li>
  * </ul>
  *
  * <h3>Priority:</h3>
@@ -30,16 +30,16 @@ public class CodeGenMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Delegate to service classes that contain the extension logic and constants
+        // Delegate to existing generator classes that contain the extension logic and constants
 
         // Register XSD generation type extensions
-        XSDGeneratorService.registerTypeExtensions(registry);
+        MetaDataFileXSDGenerator.registerXSDAttributes(registry);
 
         // Register JSON Schema generation type extensions
-        JsonSchemaGeneratorService.registerTypeExtensions(registry);
+        MetaDataFileJsonSchemaGenerator.registerJsonSchemaAttributes(registry);
 
         // Register AI Documentation generation type extensions
-        AIDocGeneratorService.registerTypeExtensions(registry);
+        MetaDataAIDocumentationGenerator.registerAIDocAttributes(registry);
     }
 
     @Override

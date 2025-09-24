@@ -110,4 +110,26 @@ public class TextView extends HtmlView
     // Set the value on the object
     mf.setString( o, value );
   }
+
+  ///////////////////////////////////////////////////
+  // Service Provider Pattern Registration
+
+  // Text view attribute constants
+  public static final String TEXT_MAX_LENGTH = "textMaxLength";
+  public static final String TEXT_SIZE = "textSize";
+  public static final String TEXT_PATTERN = "textPattern";
+  public static final String TEXT_AUTOCOMPLETE = "textAutocomplete";
+
+  /**
+   * Registers text view attributes for use by the service provider pattern.
+   * Called by WebMetaDataProvider to extend existing MetaData types with text view-specific attributes.
+   */
+  public static void registerTextViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+      // Text input specific attributes
+      registry.findType("field", "string")
+          .optionalAttribute(TEXT_MAX_LENGTH, "int")
+          .optionalAttribute(TEXT_SIZE, "int")
+          .optionalAttribute(TEXT_PATTERN, "string")
+          .optionalAttribute(TEXT_AUTOCOMPLETE, "string");
+  }
 }

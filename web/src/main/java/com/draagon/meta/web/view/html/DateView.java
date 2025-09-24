@@ -264,4 +264,26 @@ public class DateView extends MonthView {
             HtmlViewHelper.drawHidden(page, params);
         }
     }
+
+    ///////////////////////////////////////////////////
+    // Service Provider Pattern Registration
+
+    // Date view attribute constants
+    public static final String DATE_MIN_YEAR = "dateMinYear";
+    public static final String DATE_MAX_YEAR = "dateMaxYear";
+    public static final String DATE_FORMAT = "dateFormat";
+    public static final String DATE_PICKER_TYPE = "datePickerType";
+
+    /**
+     * Registers date view attributes for use by the service provider pattern.
+     * Called by WebMetaDataProvider to extend existing MetaData types with date view-specific attributes.
+     */
+    public static void registerDateViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+        // Date input specific attributes
+        registry.findType("field", "date")
+            .optionalAttribute(DATE_MIN_YEAR, "int")
+            .optionalAttribute(DATE_MAX_YEAR, "int")
+            .optionalAttribute(DATE_FORMAT, "string")
+            .optionalAttribute(DATE_PICKER_TYPE, "string");
+    }
 }

@@ -89,6 +89,48 @@ public abstract class WebView extends MetaView
     }
 
     return "UNKNOWN";
-  }  
+  }
+
+  ///////////////////////////////////////////////////
+  // Service Provider Pattern Registration
+
+  // Base web view attribute constants
+  public static final String WEB_LABEL = "webLabel";
+  public static final String WEB_PLACEHOLDER = "webPlaceholder";
+  public static final String WEB_CSS_CLASS = "webCssClass";
+  public static final String WEB_INPUT_TYPE = "webInputType";
+  public static final String WEB_VALIDATION_MESSAGE = "webValidationMessage";
+  public static final String WEB_REQUIRED = "webRequired";
+  public static final String WEB_READONLY = "webReadonly";
+  public static final String WEB_HIDDEN = "webHidden";
+
+  /**
+   * Registers base web view attributes for use by the service provider pattern.
+   * Called by WebMetaDataProvider to extend existing MetaData types with base web view attributes.
+   */
+  public static void registerWebViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+      // Object-level web attributes
+      registry.findType("object", "base")
+          .optionalAttribute(WEB_CSS_CLASS, "string")
+          .optionalAttribute(WEB_VALIDATION_MESSAGE, "string");
+
+      registry.findType("object", "pojo")
+          .optionalAttribute(WEB_CSS_CLASS, "string");
+
+      // Field-level web attributes
+      registry.findType("field", "base")
+          .optionalAttribute(WEB_LABEL, "string")
+          .optionalAttribute(WEB_PLACEHOLDER, "string")
+          .optionalAttribute(WEB_CSS_CLASS, "string")
+          .optionalAttribute(WEB_INPUT_TYPE, "string")
+          .optionalAttribute(WEB_VALIDATION_MESSAGE, "string")
+          .optionalAttribute(WEB_REQUIRED, "boolean")
+          .optionalAttribute(WEB_READONLY, "boolean")
+          .optionalAttribute(WEB_HIDDEN, "boolean");
+
+      registry.findType("field", "string")
+          .optionalAttribute(WEB_PLACEHOLDER, "string")
+          .optionalAttribute(WEB_INPUT_TYPE, "string");
+  }
 }
 

@@ -141,4 +141,54 @@ public class MetaDataAIDocumentationGenerator extends SingleJsonDirectGeneratorB
         summary.append("  Cross-Language Info: ").append(includeCrossLanguageInfo ? "Enabled" : "Disabled");
         return summary.toString();
     }
+
+    ///////////////////////////////////////////////////
+    // Service Provider Pattern Registration
+
+    // AI Documentation generation attribute constants
+    public static final String AI_VERSION = "aiVersion";
+    public static final String AI_DESCRIPTION = "aiDescription";
+    public static final String AI_BUSINESS_RULE = "aiBusinessRule";
+    public static final String AI_USAGE_CONTEXT = "aiUsageContext";
+    public static final String AI_VALIDATION_RULES = "aiValidationRules";
+    public static final String AI_EXAMPLES = "aiExamples";
+    public static final String AI_CONSTRAINTS = "aiConstraints";
+    public static final String AI_EXTENSION_GUIDANCE = "aiExtensionGuidance";
+    public static final String AI_CROSS_LANGUAGE_INFO = "aiCrossLanguageInfo";
+
+    /**
+     * Registers AI Documentation generation attributes for use by the service provider pattern.
+     * Called by CodeGenMetaDataProvider to extend existing MetaData types with AI documentation-specific attributes.
+     */
+    public static void registerAIDocAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+        // Object-level AI Documentation attributes
+        registry.findType("object", "base")
+            .optionalAttribute(AI_VERSION, "string")
+            .optionalAttribute(AI_DESCRIPTION, "string")
+            .optionalAttribute(AI_BUSINESS_RULE, "string")
+            .optionalAttribute(AI_USAGE_CONTEXT, "string")
+            .optionalAttribute(AI_EXTENSION_GUIDANCE, "string")
+            .optionalAttribute(AI_CROSS_LANGUAGE_INFO, "string");
+
+        registry.findType("object", "pojo")
+            .optionalAttribute(AI_DESCRIPTION, "string")
+            .optionalAttribute(AI_BUSINESS_RULE, "string");
+
+        // Field-level AI Documentation attributes
+        registry.findType("field", "base")
+            .optionalAttribute(AI_DESCRIPTION, "string")
+            .optionalAttribute(AI_BUSINESS_RULE, "string")
+            .optionalAttribute(AI_USAGE_CONTEXT, "string")
+            .optionalAttribute(AI_VALIDATION_RULES, "string")
+            .optionalAttribute(AI_EXAMPLES, "string")
+            .optionalAttribute(AI_CONSTRAINTS, "string");
+
+        registry.findType("field", "string")
+            .optionalAttribute(AI_EXAMPLES, "string")
+            .optionalAttribute(AI_VALIDATION_RULES, "string");
+
+        registry.findType("field", "int")
+            .optionalAttribute(AI_CONSTRAINTS, "string")
+            .optionalAttribute(AI_EXAMPLES, "string");
+    }
 }

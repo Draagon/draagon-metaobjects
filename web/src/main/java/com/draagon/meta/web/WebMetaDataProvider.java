@@ -1,19 +1,25 @@
 package com.draagon.meta.web;
 
-import com.draagon.meta.web.service.WebService;
+import com.draagon.meta.web.view.html.TextView;
+import com.draagon.meta.web.view.html.DateView;
+import com.draagon.meta.web.view.html.TextAreaView;
+import com.draagon.meta.web.view.WebView;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
 
 /**
- * Web MetaData provider that registers type extensions for web framework services.
+ * Web MetaData provider that registers type extensions for web view components.
  *
- * <p>This provider delegates to service classes that contain the actual extension logic
+ * <p>This provider delegates to existing web view classes that contain the actual extension logic
  * and constants for web UI generation and form handling. It extends existing MetaData types
  * with web-specific attributes needed for HTML form generation and web component rendering.</p>
  *
- * <h3>Services Provided:</h3>
+ * <h3>Web Views Supported:</h3>
  * <ul>
- * <li><strong>WebService:</strong> Web framework attributes (labels, inputs, styling, validation)</li>
+ * <li><strong>TextView:</strong> Text input view attributes</li>
+ * <li><strong>DateView:</strong> Date picker view attributes</li>
+ * <li><strong>TextAreaView:</strong> Multi-line text area attributes</li>
+ * <li><strong>WebView:</strong> Base web view attributes</li>
  * </ul>
  *
  * <h3>Priority:</h3>
@@ -26,8 +32,15 @@ public class WebMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Delegate to service class that contains the extension logic and constants
-        WebService.registerTypeExtensions(registry);
+        // Delegate to existing web view classes that contain the extension logic and constants
+
+        // Register base web view attributes
+        WebView.registerWebViewAttributes(registry);
+
+        // Register specific view type attributes
+        TextView.registerTextViewAttributes(registry);
+        DateView.registerDateViewAttributes(registry);
+        TextAreaView.registerTextAreaViewAttributes(registry);
     }
 
     @Override

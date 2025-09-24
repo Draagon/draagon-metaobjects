@@ -226,4 +226,47 @@ public class XMLObjectWriter extends XMLMetaDataWriter {
             throw new MetaDataIOException(this, "Custom DataType and does not implement XMLSerializationHandler [" + mf + "]");
         }
     }
+
+    ///////////////////////////////////////////////////
+    // Service Provider Pattern Registration
+
+    // XML object serialization attribute constants
+    public static final String XML_ELEMENT_NAME = "xmlElementName";
+    public static final String XML_ATTRIBUTE_NAME = "xmlAttributeName";
+    public static final String XML_NAMESPACE = "xmlNamespace";
+    public static final String XML_CDATA = "xmlCdata";
+    public static final String XML_WRAPPER_ELEMENT = "xmlWrapperElement";
+    public static final String XML_SKIP_EMPTY = "xmlSkipEmpty";
+    public static final String XML_DATE_FORMAT = "xmlDateFormat";
+
+    /**
+     * Registers XML object serialization attributes for use by the service provider pattern.
+     * Called by CoreMetaDataProvider to extend existing MetaData types with XML object-specific attributes.
+     */
+    public static void registerXMLObjectAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+        // Object-level XML attributes
+        registry.findType("object", "base")
+            .optionalAttribute(XML_ELEMENT_NAME, "string")
+            .optionalAttribute(XML_NAMESPACE, "string")
+            .optionalAttribute(XML_WRAPPER_ELEMENT, "string");
+
+        registry.findType("object", "pojo")
+            .optionalAttribute(XML_ELEMENT_NAME, "string")
+            .optionalAttribute(XML_WRAPPER_ELEMENT, "string");
+
+        // Field-level XML attributes
+        registry.findType("field", "base")
+            .optionalAttribute(XML_ELEMENT_NAME, "string")
+            .optionalAttribute(XML_ATTRIBUTE_NAME, "string")
+            .optionalAttribute(XML_NAMESPACE, "string")
+            .optionalAttribute(XML_CDATA, "boolean")
+            .optionalAttribute(XML_SKIP_EMPTY, "boolean");
+
+        registry.findType("field", "string")
+            .optionalAttribute(XML_CDATA, "boolean")
+            .optionalAttribute(XML_SKIP_EMPTY, "boolean");
+
+        registry.findType("field", "date")
+            .optionalAttribute(XML_DATE_FORMAT, "string");
+    }
 }

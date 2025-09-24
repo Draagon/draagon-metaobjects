@@ -73,4 +73,38 @@ public class MetaDataFileXSDGenerator extends SingleXMLDirectGeneratorBase {
         sb.append('}');
         return sb.toString();
     }
+
+    ///////////////////////////////////////////////////
+    // Service Provider Pattern Registration
+
+    // XSD generation attribute constants
+    public static final String XSD_NAMESPACE = "xsdNamespace";
+    public static final String XSD_TARGET_NAMESPACE = "xsdTargetNamespace";
+    public static final String XSD_ELEMENT_FORM_DEFAULT = "xsdElementFormDefault";
+    public static final String XSD_ELEMENT_NAME = "xsdElementName";
+    public static final String XSD_TYPE_NAME = "xsdTypeName";
+
+    /**
+     * Registers XSD generation attributes for use by the service provider pattern.
+     * Called by CodeGenMetaDataProvider to extend existing MetaData types with XSD-specific attributes.
+     */
+    public static void registerXSDAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+        // Object-level XSD attributes
+        registry.findType("object", "base")
+            .optionalAttribute(XSD_NAMESPACE, "string")
+            .optionalAttribute(XSD_TARGET_NAMESPACE, "string")
+            .optionalAttribute(XSD_ELEMENT_FORM_DEFAULT, "string");
+
+        registry.findType("object", "pojo")
+            .optionalAttribute(XSD_ELEMENT_NAME, "string")
+            .optionalAttribute(XSD_TYPE_NAME, "string");
+
+        // Field-level XSD attributes
+        registry.findType("field", "base")
+            .optionalAttribute(XSD_ELEMENT_NAME, "string")
+            .optionalAttribute(XSD_TYPE_NAME, "string");
+
+        registry.findType("field", "string")
+            .optionalAttribute(XSD_ELEMENT_NAME, "string");
+    }
 }

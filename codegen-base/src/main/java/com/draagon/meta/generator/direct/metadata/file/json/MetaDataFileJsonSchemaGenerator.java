@@ -75,4 +75,55 @@ public class MetaDataFileJsonSchemaGenerator extends SingleJsonDirectGeneratorBa
         sb.append('}');
         return sb.toString();
     }
+
+    ///////////////////////////////////////////////////
+    // Service Provider Pattern Registration
+
+    // JSON Schema generation attribute constants
+    public static final String JSON_SCHEMA_VERSION = "jsonSchemaVersion";
+    public static final String JSON_SCHEMA_ID = "jsonSchemaId";
+    public static final String JSON_TITLE = "jsonTitle";
+    public static final String JSON_DESCRIPTION = "jsonDescription";
+    public static final String JSON_FORMAT = "jsonFormat";
+    public static final String JSON_PATTERN = "jsonPattern";
+    public static final String JSON_ENUM = "jsonEnum";
+    public static final String JSON_MINIMUM = "jsonMinimum";
+    public static final String JSON_MAXIMUM = "jsonMaximum";
+
+    /**
+     * Registers JSON Schema generation attributes for use by the service provider pattern.
+     * Called by CodeGenMetaDataProvider to extend existing MetaData types with JSON Schema-specific attributes.
+     */
+    public static void registerJsonSchemaAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
+        // Object-level JSON Schema attributes
+        registry.findType("object", "base")
+            .optionalAttribute(JSON_SCHEMA_VERSION, "string")
+            .optionalAttribute(JSON_SCHEMA_ID, "string")
+            .optionalAttribute(JSON_TITLE, "string")
+            .optionalAttribute(JSON_DESCRIPTION, "string");
+
+        registry.findType("object", "pojo")
+            .optionalAttribute(JSON_TITLE, "string")
+            .optionalAttribute(JSON_DESCRIPTION, "string");
+
+        // Field-level JSON Schema attributes
+        registry.findType("field", "base")
+            .optionalAttribute(JSON_TITLE, "string")
+            .optionalAttribute(JSON_DESCRIPTION, "string")
+            .optionalAttribute(JSON_FORMAT, "string")
+            .optionalAttribute(JSON_PATTERN, "string")
+            .optionalAttribute(JSON_ENUM, "string");
+
+        registry.findType("field", "string")
+            .optionalAttribute(JSON_PATTERN, "string")
+            .optionalAttribute(JSON_FORMAT, "string");
+
+        registry.findType("field", "int")
+            .optionalAttribute(JSON_MINIMUM, "int")
+            .optionalAttribute(JSON_MAXIMUM, "int");
+
+        registry.findType("field", "long")
+            .optionalAttribute(JSON_MINIMUM, "long")
+            .optionalAttribute(JSON_MAXIMUM, "long");
+    }
 }
