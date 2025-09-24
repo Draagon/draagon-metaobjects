@@ -29,7 +29,7 @@ public class SimpleLoader extends MetaDataLoader
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(SimpleLoader.class, def -> def
+            MetaDataRegistry.getInstance().registerType(SimpleLoader.class, def -> def
                 .type(TYPE_LOADER).subType(SUBTYPE_SIMPLE)
                 .description("Simple JSON-based metadata loader")
                 

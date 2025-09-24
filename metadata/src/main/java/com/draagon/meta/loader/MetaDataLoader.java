@@ -88,7 +88,7 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(MetaDataLoader.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaDataLoader.class, def -> def
                 .type(TYPE_LOADER).subType(SUBTYPE_MANUAL)
                 .description("Manual metadata loader")
                 

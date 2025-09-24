@@ -36,7 +36,7 @@ public class StringAttribute extends MetaAttribute<String> {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(StringAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_STRING)
                 .description("String attribute value")
 

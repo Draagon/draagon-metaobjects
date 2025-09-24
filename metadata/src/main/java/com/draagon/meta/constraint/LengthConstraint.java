@@ -83,7 +83,7 @@ public class LengthConstraint implements Constraint {
     }
 
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) throws ConstraintViolationException {
+    public void validate(MetaData metaData, Object value) throws ConstraintViolationException {
         if (value == null) {
             return; // Null values are allowed - use separate RequiredConstraint for non-null validation
         }
@@ -93,7 +93,7 @@ public class LengthConstraint implements Constraint {
 
         if (minLength != null && length < minLength) {
             throw new ConstraintViolationException(
-                generateMinLengthErrorMessage(metaData, stringValue, length, context),
+                generateMinLengthErrorMessage(metaData, stringValue, length),
                 name,
                 metaData
             );
@@ -101,7 +101,7 @@ public class LengthConstraint implements Constraint {
 
         if (maxLength != null && length > maxLength) {
             throw new ConstraintViolationException(
-                generateMaxLengthErrorMessage(metaData, stringValue, length, context),
+                generateMaxLengthErrorMessage(metaData, stringValue, length),
                 name,
                 metaData
             );
@@ -137,7 +137,7 @@ public class LengthConstraint implements Constraint {
     /**
      * Generate error message for minimum length violation.
      */
-    private String generateMinLengthErrorMessage(MetaData metaData, String value, int actualLength, ValidationContext context) {
+    private String generateMinLengthErrorMessage(MetaData metaData, String value, int actualLength) {
         return String.format(
             "Value '%s' for %s '%s' is too short: %d characters (minimum: %d)",
             truncateForDisplay(value),
@@ -151,7 +151,7 @@ public class LengthConstraint implements Constraint {
     /**
      * Generate error message for maximum length violation.
      */
-    private String generateMaxLengthErrorMessage(MetaData metaData, String value, int actualLength, ValidationContext context) {
+    private String generateMaxLengthErrorMessage(MetaData metaData, String value, int actualLength) {
         return String.format(
             "Value '%s' for %s '%s' is too long: %d characters (maximum: %d)",
             truncateForDisplay(value),

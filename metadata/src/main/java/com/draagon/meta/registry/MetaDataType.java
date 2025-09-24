@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  *
  *     static {
  *         // Self-registration with type system
- *         MetaDataRegistry.registerType(StringField.class, def -> def
+ *         MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
  *             .type("field").subType("string")
  *             .description("String field with length validation")
  *         );
@@ -57,7 +57,7 @@ import java.lang.annotation.Target;
  *
  *     static {
  *         // Self-register custom type
- *         MetaDataRegistry.registerType(CurrencyField.class, def -> def
+ *         MetaDataRegistry.getInstance().registerType(CurrencyField.class, def -> def
  *             .type("field").subType("currency")
  *             .optionalAttribute("precision", "int")
  *             .description("Currency field with precision")

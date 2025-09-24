@@ -60,7 +60,7 @@ public class PlacementConstraint implements Constraint {
     }
     
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) 
+    public void validate(MetaData metaData, Object value)
             throws ConstraintViolationException {
         // PlacementConstraints are validated during addChild operations, not during value validation
         // This method is here to satisfy the Constraint interface but shouldn't be called for placement

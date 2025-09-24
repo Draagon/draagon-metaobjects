@@ -28,7 +28,7 @@ public class MappedMetaObject extends MetaObject
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(MappedMetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MappedMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
                 .description("Map-based MetaObject with key-value field access")
 

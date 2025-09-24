@@ -35,7 +35,7 @@ public class DataMetaObject extends PojoMetaObject
     // Self-registration with unified registry
     static {
         try {
-            MetaDataRegistry.registerType(DataMetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(DataMetaObject.class, def -> def
                 .type("object").subType(SUBTYPE_DATA)
                 .description("Data-based metadata object with dynamic attribute access")
                 .optionalChild("field", "*")

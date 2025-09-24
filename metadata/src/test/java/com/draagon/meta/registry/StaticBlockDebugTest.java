@@ -104,7 +104,7 @@ public class StaticBlockDebugTest extends SharedRegistryTestBase {
         try {
             // Manually execute what the StringField static block should do
             log.info("Manually registering StringField...");
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field with pattern validation")
                 .optionalAttribute("pattern", "string")
@@ -202,21 +202,21 @@ public class StaticBlockDebugTest extends SharedRegistryTestBase {
             log.info("Manually registering multiple types...");
             
             // Register StringField
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field")
                 .optionalAttribute("pattern", "string")
             );
             
             // Register IntegerField
-            MetaDataRegistry.registerType(IntegerField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(IntegerField.class, def -> def
                 .type("field").subType("int") 
                 .description("Integer field")
                 .optionalAttribute("minValue", "int")
             );
             
             // Register StringAttribute
-            MetaDataRegistry.registerType(StringAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
                 .type("attr").subType("string")
                 .description("String attribute")
             );

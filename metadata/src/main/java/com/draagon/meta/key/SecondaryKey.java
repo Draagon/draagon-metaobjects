@@ -17,7 +17,7 @@ public class SecondaryKey extends MetaKey {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(SecondaryKey.class, def -> def
+            MetaDataRegistry.getInstance().registerType(SecondaryKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE)
                 .description("Secondary key for alternative record identification")
 

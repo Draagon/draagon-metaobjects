@@ -63,7 +63,7 @@ public class StringField extends PrimitiveField<String> {
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING)
                 .description("String field with length and pattern validation")
 

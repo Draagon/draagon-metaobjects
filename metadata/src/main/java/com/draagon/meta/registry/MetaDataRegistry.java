@@ -3,7 +3,6 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataTypeId;
-import com.draagon.meta.constraint.ValidationContext;
 import com.draagon.meta.constraint.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ import java.util.Comparator;
  * 
  * <pre>{@code
  * // Register a field type with attributes
- * MetaDataRegistry.registerType(StringField.class, def -> def
+ * MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
  *     .type("field").subType("string")
  *     .description("String field with pattern validation")
  *     .optionalAttribute("pattern", "string")
@@ -42,7 +41,7 @@ import java.util.Comparator;
  * );
  * 
  * // Register an object type that accepts fields
- * MetaDataRegistry.registerType(MetaObject.class, def -> def
+ * MetaDataRegistry.getInstance().registerType(MetaObject.class, def -> def
  *     .type("object").subType("base")
  *     .optionalChild("field", "*", "*")  // Any field type, any name
  * );
@@ -106,11 +105,11 @@ public class MetaDataRegistry {
      * @param clazz Implementation class
      * @param configurator Configuration function for the type definition
      */
-    public static void registerType(Class<? extends MetaData> clazz,
+    public void registerType(Class<? extends MetaData> clazz,
                                    Consumer<TypeDefinitionBuilder> configurator) {
         TypeDefinitionBuilder builder = TypeDefinitionBuilder.forClass(clazz);
         configurator.accept(builder);
-        getInstance().register(builder.build());
+        this.register(builder.build());
     }
 
     /**
@@ -647,21 +646,21 @@ public class MetaDataRegistry {
      *
      * @param metaData The metadata object being validated
      * @param value The value being validated
-     * @param context Validation context
      * @throws ConstraintViolationException If validation fails
      */
-    public void validateValue(MetaData metaData, Object value, ValidationContext context)
+    public void validateValue(MetaData metaData, Object value)
             throws ConstraintViolationException {
         List<ChildRequirement> validationConstraints = getValidationConstraints();
 
         for (ChildRequirement constraint : validationConstraints) {
             try {
-                constraint.validateValue(metaData, value, context);
+                constraint.validateValue(metaData, value);
             } catch (ConstraintViolationException e) {
                 // Re-throw with additional context
                 throw new ConstraintViolationException(
                     e.getMessage() + " (constraint: " + constraint.getConstraintId() + ")",
                     e.getConstraintType(),
+                    e.getViolatingValue(),
                     e.getMetaData()
                 );
             }

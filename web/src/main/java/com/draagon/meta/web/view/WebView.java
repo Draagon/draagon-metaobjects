@@ -28,7 +28,7 @@ public abstract class WebView extends MetaView
   // Self-registration with unified registry
   static {
       try {
-          MetaDataRegistry.registerType(WebView.class, def -> def
+          MetaDataRegistry.getInstance().registerType(WebView.class, def -> def
               .type("view").subType(SUBTYPE_WEB)
               .description("Web-based view for HTML form rendering")
 

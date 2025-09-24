@@ -29,7 +29,7 @@ public class BooleanAttribute extends MetaAttribute<Boolean>
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(BooleanAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(BooleanAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_BOOLEAN)
                 .description("Boolean attribute for true/false metadata values")
                 

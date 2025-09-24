@@ -34,7 +34,7 @@ public abstract class MetaValidator extends MetaData {
     // Base validator type registration
     static {
         try {
-            MetaDataRegistry.registerType(MetaValidator.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_BASE)
                 .description("Base validator metadata with common validator attributes")
 

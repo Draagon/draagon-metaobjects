@@ -32,7 +32,7 @@ public class RequiredValidator extends MetaValidator
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(RequiredValidator.class, def -> def
+            MetaDataRegistry.getInstance().registerType(RequiredValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_REQUIRED)
                 .description("Required validator ensures field has a value and is not null")
 

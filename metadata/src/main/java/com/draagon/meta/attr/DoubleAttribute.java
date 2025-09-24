@@ -27,7 +27,7 @@ public class DoubleAttribute extends MetaAttribute<Double> {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(DoubleAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(DoubleAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_DOUBLE)
                 .description("Double attribute for floating-point numeric metadata")
             );

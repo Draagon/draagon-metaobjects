@@ -69,8 +69,6 @@ public class ConstraintEnforcer {
             return;
         }
         
-        ValidationContext context = ValidationContext.forAddChild(parent, child);
-        
         // UNIFIED: Single enforcement path for all constraints
         List<Constraint> allConstraints = constraintRegistry.getAllConstraints();
         
@@ -105,9 +103,9 @@ public class ConstraintEnforcer {
             }
             
             if (!placementAllowed) {
-                String message = String.format("Placement not allowed: No constraints permit adding %s to %s", 
+                String message = String.format("Placement not allowed: No constraints permit adding %s to %s",
                     child.getName(), parent.getName());
-                throw new ConstraintViolationException(message, "placement", child.getName(), context);
+                throw new ConstraintViolationException(message, "placement", child.getName(), parent);
             }
         } else {
             log.trace("No placement constraints apply to this parent-child relationship - allowing placement");
@@ -118,7 +116,7 @@ public class ConstraintEnforcer {
             if (constraint instanceof ValidationConstraint) {
                 ValidationConstraint vc = (ValidationConstraint) constraint;
                 if (vc.appliesTo(child)) {
-                    vc.validate(child, child.getName(), context);
+                    vc.validate(child, child.getName());
                 }
             }
         }

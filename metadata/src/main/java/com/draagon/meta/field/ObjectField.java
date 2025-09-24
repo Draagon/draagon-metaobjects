@@ -30,7 +30,7 @@ public class ObjectField extends MetaField<Object>
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ObjectField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ObjectField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_OBJECT)
                 .description("Object field with object reference support")
                 

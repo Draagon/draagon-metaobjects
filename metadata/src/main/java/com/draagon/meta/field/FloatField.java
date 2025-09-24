@@ -44,7 +44,7 @@ public class FloatField extends PrimitiveField<Float>
                 log.warn("Could not force MetaField class loading", e);
             }
 
-            MetaDataRegistry.registerType(FloatField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(FloatField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
                 .description("Float field with numeric and precision validation")
 

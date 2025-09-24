@@ -51,7 +51,7 @@ public class BooleanField extends PrimitiveField<Boolean> {
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(BooleanField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(BooleanField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BOOLEAN)
                 .description("Boolean field for true/false values")
 

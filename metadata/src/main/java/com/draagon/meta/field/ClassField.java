@@ -38,7 +38,7 @@ public class ClassField extends MetaField<Class> implements StringSerializationH
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ClassField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ClassField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_CLASS)
                 .description("Class field for class type references")
                 

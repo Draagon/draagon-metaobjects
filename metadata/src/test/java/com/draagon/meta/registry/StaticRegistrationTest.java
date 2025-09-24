@@ -91,7 +91,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
         } else {
             log.warn("Static registration didn't happen when creating StringField instance");
             // Don't fail test - we'll manually register for compatibility
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field with pattern validation")
                 .optionalAttribute("pattern", "string")
@@ -116,7 +116,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
         // Verify or manually register if needed
         TypeDefinition stringDef = registry.getTypeDefinition("field", "string");
         if (stringDef == null) {
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field")
                 .optionalAttribute("pattern", "string")
@@ -127,7 +127,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
 
         TypeDefinition intDef = registry.getTypeDefinition("field", "int");
         if (intDef == null) {
-            MetaDataRegistry.registerType(IntegerField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(IntegerField.class, def -> def
                 .type("field").subType("int")
                 .description("Integer field")
                 .optionalAttribute("minValue", "int")
@@ -159,7 +159,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
         // Verify or manually register if needed
         TypeDefinition stringAttrDef = registry.getTypeDefinition("attr", "string");
         if (stringAttrDef == null) {
-            MetaDataRegistry.registerType(StringAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
                 .type("attr").subType("string")
                 .description("String attribute value")
             );
@@ -168,7 +168,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
 
         TypeDefinition stringArrayAttrDef = registry.getTypeDefinition("attr", "stringarray");
         if (stringArrayAttrDef == null) {
-            MetaDataRegistry.registerType(StringArrayAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringArrayAttribute.class, def -> def
                 .type("attr").subType("stringarray")
                 .description("String array attribute value")
             );
@@ -200,7 +200,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
 
         // Ensure registration (manual fallback if static didn't work)
         if (registry.getTypeDefinition("field", "string") == null) {
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field")
                 .optionalAttribute("pattern", "string")
@@ -208,7 +208,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
         }
 
         if (registry.getTypeDefinition("attr", "string") == null) {
-            MetaDataRegistry.registerType(StringAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
                 .type("attr").subType("string")
                 .description("String attribute")
             );
@@ -246,7 +246,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
         // Ensure StringField is registered
         StringField stringField = new StringField("testField");
         if (registry.getTypeDefinition("field", "string") == null) {
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field")
                 .optionalAttribute("pattern", "string")
@@ -279,7 +279,7 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
 
         // Ensure registration
         if (registry.getTypeDefinition("field", "string") == null) {
-            MetaDataRegistry.registerType(StringField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field")
             );

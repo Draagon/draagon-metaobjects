@@ -26,7 +26,7 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ClassAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ClassAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_CLASS)
                 .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
                 .description("Class attribute for Java class metadata")

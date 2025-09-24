@@ -47,7 +47,7 @@ public class HotLinkView extends HtmlView {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(HotLinkView.class, def -> def
+            MetaDataRegistry.getInstance().registerType(HotLinkView.class, def -> def
                 .type("view").subType("hotlink")
                 .inheritsFrom("view", "base")
                 .optionalAttribute(ATTR_LINKCLASS, "string")

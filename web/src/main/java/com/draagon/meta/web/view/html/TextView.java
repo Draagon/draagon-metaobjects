@@ -29,7 +29,7 @@ public class TextView extends HtmlView
   // Unified registry self-registration for web view types
   static {
     try {
-      MetaDataRegistry.registerType(TextView.class, def -> def
+      MetaDataRegistry.getInstance().registerType(TextView.class, def -> def
         .type("view").subType("text")
         .description("HTML text input view")
 

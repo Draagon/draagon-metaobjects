@@ -37,7 +37,7 @@ public class MonthView extends HtmlView
   // Unified registry self-registration
   static {
     try {
-      MetaDataRegistry.registerType(MonthView.class, def -> def
+      MetaDataRegistry.getInstance().registerType(MonthView.class, def -> def
         .type("view").subType("month")
         .inheritsFrom("view", "base")
         .description("HTML month selector view")

@@ -30,7 +30,7 @@ public class NumericValidator extends MetaValidator {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(NumericValidator.class, def -> def
+            MetaDataRegistry.getInstance().registerType(NumericValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_NUMERIC)
                 .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
                 .description("Numeric validator ensuring values are numbers")

@@ -37,7 +37,7 @@ public class TextAreaView extends TextView
   // Unified registry self-registration for textarea view
   static {
     try {
-      MetaDataRegistry.registerType(TextAreaView.class, def -> def
+      MetaDataRegistry.getInstance().registerType(TextAreaView.class, def -> def
         .type("view").subType("textarea")
         .description("HTML textarea input view")
         .optionalAttribute("cols", "int")

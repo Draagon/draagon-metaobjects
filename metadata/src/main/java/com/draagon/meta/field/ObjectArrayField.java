@@ -30,7 +30,7 @@ public class ObjectArrayField extends ArrayField<Object,List<Object>>
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ObjectArrayField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ObjectArrayField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_OBJECT_ARRAY)
                 .description("Object array field for lists of object references")
                 

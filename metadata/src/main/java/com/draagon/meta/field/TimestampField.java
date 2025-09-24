@@ -44,7 +44,7 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
                 log.warn("Could not force MetaField class loading", e);
             }
 
-            MetaDataRegistry.registerType(TimestampField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(TimestampField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_TIMESTAMP)
                 .description("Timestamp field with date/time and precision validation")
 

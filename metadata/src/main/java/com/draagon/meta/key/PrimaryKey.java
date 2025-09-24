@@ -18,7 +18,7 @@ public class PrimaryKey extends MetaKey {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(PrimaryKey.class, def -> def
+            MetaDataRegistry.getInstance().registerType(PrimaryKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE)
                 .description("Primary key for unique record identification")
 

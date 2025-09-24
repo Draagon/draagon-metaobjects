@@ -37,7 +37,7 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(StringArrayAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringArrayAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_STRING_ARRAY)
                 .description("String array attribute value")
                 // NO CHILD REQUIREMENTS - just registers identity

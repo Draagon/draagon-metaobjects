@@ -25,7 +25,7 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ManagedMetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ManagedMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType("managed")
                 .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
                 .description("Managed MetaObject with state awareness and object manager integration")

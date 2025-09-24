@@ -58,7 +58,7 @@ public class DateField extends PrimitiveField<Date> {
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(DateField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(DateField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DATE)
                 .description("Date field with format and range validation")
 

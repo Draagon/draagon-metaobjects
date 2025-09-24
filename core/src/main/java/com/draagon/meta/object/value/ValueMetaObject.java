@@ -21,7 +21,7 @@ public class ValueMetaObject extends DataMetaObject
     // Self-registration with unified registry
     static {
         try {
-            MetaDataRegistry.registerType(ValueMetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ValueMetaObject.class, def -> def
                 .type("object").subType(SUBTYPE_VALUE)
                 .description("Value-based metadata object")
                 .optionalChild("field", "*")

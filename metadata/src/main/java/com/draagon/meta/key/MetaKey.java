@@ -37,7 +37,7 @@ public abstract class MetaKey extends MetaData {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(MetaKey.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE_BASE)
                 .description("Base key metadata with common key attributes")
 

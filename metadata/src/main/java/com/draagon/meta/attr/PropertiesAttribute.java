@@ -23,7 +23,7 @@ public class PropertiesAttribute extends MetaAttribute<Properties> {
     // Self-registration with unified registry
     static {
         try {
-            MetaDataRegistry.registerType(PropertiesAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(PropertiesAttribute.class, def -> def
                 .type("attr").subType(SUBTYPE_PROPERTIES)
                 .description("Properties attribute for key-value configuration data")
             );

@@ -30,7 +30,7 @@ public class RegexValidator extends MetaValidator {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(RegexValidator.class, def -> def
+            MetaDataRegistry.getInstance().registerType(RegexValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_REGEX)
                 .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
                 .requiredAttribute(ATTR_MASK, "string")

@@ -109,7 +109,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.registerType(MetaField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BASE)
                 .description("Base field metadata with common field attributes")
 

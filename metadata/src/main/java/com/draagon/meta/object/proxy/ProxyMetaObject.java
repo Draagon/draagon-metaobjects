@@ -34,7 +34,7 @@ public class ProxyMetaObject extends PojoMetaObject
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ProxyMetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ProxyMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
                 .description("Proxy MetaObject with dynamic proxy field access")
 

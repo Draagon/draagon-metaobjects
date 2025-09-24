@@ -69,7 +69,7 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register a simple type manually
-        MetaDataRegistry.registerType(StringField.class, def -> def
+        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("Test string field")
             .optionalAttribute("pattern", "string")
@@ -93,13 +93,13 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register types with child requirements
-        MetaDataRegistry.registerType(StringField.class, def -> def
+        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("String field with pattern attribute")
             .optionalAttribute("pattern", "string")
         );
 
-        MetaDataRegistry.registerType(StringAttribute.class, def -> def
+        MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
             .type("attr").subType("string")
             .description("String attribute")
         );
@@ -122,7 +122,7 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register a type with specific requirements
-        MetaDataRegistry.registerType(StringField.class, def -> def
+        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("String field")
             .optionalAttribute("pattern", "string")
@@ -147,7 +147,7 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register StringField type
-        MetaDataRegistry.registerType(StringField.class, def -> def
+        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("String field")
         );

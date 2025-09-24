@@ -44,7 +44,7 @@ public class ByteField extends PrimitiveField<Byte>
                 log.warn("Could not force MetaField class loading", e);
             }
 
-            MetaDataRegistry.registerType(ByteField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ByteField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BYTE)
                 .description("Byte field with numeric validation")
 

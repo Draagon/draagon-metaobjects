@@ -64,7 +64,7 @@ public class RegexValidationConstraint implements Constraint {
     }
 
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) throws ConstraintViolationException {
+    public void validate(MetaData metaData, Object value) throws ConstraintViolationException {
         if (value == null) {
             return; // Null values are allowed - use separate RequiredConstraint for non-null validation
         }
@@ -72,7 +72,7 @@ public class RegexValidationConstraint implements Constraint {
         String stringValue = value.toString();
         if (!pattern.matcher(stringValue).matches()) {
             throw new ConstraintViolationException(
-                generateErrorMessage(metaData, stringValue, context),
+                generateErrorMessage(metaData, stringValue),
                 name,
                 metaData
             );
@@ -110,10 +110,9 @@ public class RegexValidationConstraint implements Constraint {
      *
      * @param metaData The MetaData that failed validation
      * @param invalidValue The value that failed validation
-     * @param context Validation context with additional error details
      * @return Descriptive error message for the constraint violation
      */
-    public String generateErrorMessage(MetaData metaData, String invalidValue, ValidationContext context) {
+    public String generateErrorMessage(MetaData metaData, String invalidValue) {
         return String.format(
             "Value '%s' for %s '%s' does not match required pattern: %s",
             invalidValue,

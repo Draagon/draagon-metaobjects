@@ -59,7 +59,7 @@ public class DoubleField extends PrimitiveField<Double>
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(DoubleField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(DoubleField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
                 .description("Double field with numeric and precision validation")
 

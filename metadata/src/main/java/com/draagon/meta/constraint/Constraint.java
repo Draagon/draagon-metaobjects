@@ -13,10 +13,9 @@ public interface Constraint {
      * Validate a metadata value against this constraint
      * @param metaData The metadata object being validated
      * @param value The value being validated (can be null)
-     * @param context Additional context for validation
      * @throws ConstraintViolationException If the constraint is violated
      */
-    void validate(MetaData metaData, Object value, ValidationContext context) throws ConstraintViolationException;
+    void validate(MetaData metaData, Object value) throws ConstraintViolationException;
     
     /**
      * Get the constraint type name

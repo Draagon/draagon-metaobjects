@@ -27,7 +27,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     static {
         try {
             // Register base attribute type
-            MetaDataRegistry.registerType(MetaAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_BASE)
                 .description("Base attribute metadata with common attribute properties")
 

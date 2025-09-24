@@ -24,7 +24,7 @@ public class ForeignKey extends MetaKey {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ForeignKey.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ForeignKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE)
                 .description("Foreign key for referencing other objects")
 

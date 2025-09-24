@@ -24,7 +24,7 @@ public class ArrayValidator extends MetaValidator {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ArrayValidator.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ArrayValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
                 .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
                 .optionalAttribute(ATTR_MINSIZE, "int")

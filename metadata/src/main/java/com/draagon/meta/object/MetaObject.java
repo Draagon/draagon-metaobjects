@@ -59,7 +59,7 @@ public abstract class MetaObject extends MetaData {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(MetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
                 .description("Base object metadata with common object attributes")
 

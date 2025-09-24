@@ -32,7 +32,7 @@ public class StringArrayField extends ArrayField<String,List<String>> implements
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(StringArrayField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(StringArrayField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING_ARRAY)
                 .description("String array field for lists of string values")
                 

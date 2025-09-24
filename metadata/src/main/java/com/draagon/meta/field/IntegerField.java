@@ -55,7 +55,7 @@ public class IntegerField extends PrimitiveField<Integer> {
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(IntegerField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(IntegerField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_INT)
                 .description("Integer field with range validation")
 

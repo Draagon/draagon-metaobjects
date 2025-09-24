@@ -55,7 +55,7 @@ public class LongField extends PrimitiveField<Long> {
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(LongField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(LongField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_LONG)
                 .description("Long field with numeric validation")
 

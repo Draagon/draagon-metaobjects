@@ -29,7 +29,7 @@ public abstract class MetaView extends MetaData {
     // Base view type registration
     static {
         try {
-            MetaDataRegistry.registerType(MetaView.class, def -> def
+            MetaDataRegistry.getInstance().registerType(MetaView.class, def -> def
                 .type(TYPE_VIEW).subType(SUBTYPE_BASE)
                 .description("Base view metadata with common view attributes")
 

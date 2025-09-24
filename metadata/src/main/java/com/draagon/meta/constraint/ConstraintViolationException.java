@@ -11,39 +11,34 @@ public class ConstraintViolationException extends MetaDataException {
     
     private final String constraintType;
     private final Object violatingValue;
-    private final ValidationContext validationContext;
     private final MetaData metaData;
     
     public ConstraintViolationException(String message, String constraintType, Object violatingValue) {
         super(message);
         this.constraintType = constraintType;
         this.violatingValue = violatingValue;
-        this.validationContext = null;
         this.metaData = null;
     }
     
-    public ConstraintViolationException(String message, String constraintType, Object violatingValue, ValidationContext context) {
+    public ConstraintViolationException(String message, String constraintType, Object violatingValue, MetaData metaData) {
         super(message);
         this.constraintType = constraintType;
         this.violatingValue = violatingValue;
-        this.validationContext = context;
-        this.metaData = context != null ? context.getParentMetaData().orElse(null) : null;
+        this.metaData = metaData;
     }
     
     public ConstraintViolationException(String message, String constraintType, Object violatingValue, Throwable cause) {
         super(message, cause);
         this.constraintType = constraintType;
         this.violatingValue = violatingValue;
-        this.validationContext = null;
         this.metaData = null;
     }
     
-    public ConstraintViolationException(String message, String constraintType, Object violatingValue, ValidationContext context, Throwable cause) {
+    public ConstraintViolationException(String message, String constraintType, Object violatingValue, MetaData metaData, Throwable cause) {
         super(message, cause);
         this.constraintType = constraintType;
         this.violatingValue = violatingValue;
-        this.validationContext = context;
-        this.metaData = context != null ? context.getParentMetaData().orElse(null) : null;
+        this.metaData = metaData;
     }
 
     /**
@@ -58,7 +53,6 @@ public class ConstraintViolationException extends MetaDataException {
         super(message);
         this.constraintType = constraintName;
         this.violatingValue = null;
-        this.validationContext = null;
         this.metaData = metaData;
     }
     
@@ -70,9 +64,6 @@ public class ConstraintViolationException extends MetaDataException {
         return violatingValue;
     }
     
-    public ValidationContext getValidationContext() {
-        return validationContext;
-    }
 
     /**
      * Get the MetaData object that failed validation.
@@ -86,27 +77,23 @@ public class ConstraintViolationException extends MetaDataException {
     @Override
     public String getMessage() {
         StringBuilder msg = new StringBuilder(super.getMessage());
-        
+
         if (constraintType != null) {
             msg.append(" (constraint: ").append(constraintType).append(")");
         }
-        
+
         if (violatingValue != null) {
             msg.append(" (value: ").append(violatingValue).append(")");
         }
-        
-        if (validationContext != null && validationContext.getOperation().isPresent()) {
-            msg.append(" (operation: ").append(validationContext.getOperation().get()).append(")");
-        }
-        
+
         return msg.toString();
     }
     
     /**
-     * Factory method for creating constraint violations with context
+     * Factory method for creating constraint violations
      */
-    public static ConstraintViolationException forConstraint(String constraintType, String message, Object value, ValidationContext context) {
-        return new ConstraintViolationException(message, constraintType, value, context);
+    public static ConstraintViolationException forConstraint(String constraintType, String message, Object value, MetaData metaData) {
+        return new ConstraintViolationException(message, constraintType, value, metaData);
     }
     
     /**
@@ -114,26 +101,21 @@ public class ConstraintViolationException extends MetaDataException {
      */
     public static ConstraintViolationException requiredField(String fieldName, MetaData metaData) {
         String message = String.format("Required field '%s' is missing or null in %s", fieldName, metaData.getName());
-        ValidationContext context = ValidationContext.builder()
-            .operation("validation")
-            .parentMetaData(metaData)
-            .fieldName(fieldName)
-            .build();
-        return new ConstraintViolationException(message, "required", null, context);
+        return new ConstraintViolationException(message, "required", null, metaData);
     }
     
     /**
      * Factory method for pattern violations
      */
-    public static ConstraintViolationException patternMismatch(String pattern, Object value, ValidationContext context) {
+    public static ConstraintViolationException patternMismatch(String pattern, Object value, MetaData metaData) {
         String message = String.format("Value '%s' does not match required pattern: %s", value, pattern);
-        return new ConstraintViolationException(message, "pattern", value, context);
+        return new ConstraintViolationException(message, "pattern", value, metaData);
     }
     
     /**
      * Factory method for length violations
      */
-    public static ConstraintViolationException lengthViolation(int minLength, int maxLength, int actualLength, Object value, ValidationContext context) {
+    public static ConstraintViolationException lengthViolation(int minLength, int maxLength, int actualLength, Object value, MetaData metaData) {
         String message;
         if (minLength > 0 && maxLength > 0) {
             message = String.format("Value length %d is not between %d and %d (value: '%s')", actualLength, minLength, maxLength, value);
@@ -142,6 +124,6 @@ public class ConstraintViolationException extends MetaDataException {
         } else {
             message = String.format("Value length %d exceeds maximum %d (value: '%s')", actualLength, maxLength, value);
         }
-        return new ConstraintViolationException(message, "length", value, context);
+        return new ConstraintViolationException(message, "length", value, metaData);
     }
 }

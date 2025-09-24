@@ -1,7 +1,6 @@
 package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.constraint.ValidationContext;
 import com.draagon.meta.constraint.ConstraintViolationException;
 
 import java.util.function.Predicate;
@@ -239,10 +238,9 @@ public class ChildRequirement {
      *
      * @param metaData The metadata object being validated
      * @param value The value being validated (can be null)
-     * @param context Additional context for validation
      * @throws ConstraintViolationException If the constraint is violated
      */
-    public void validateValue(MetaData metaData, Object value, ValidationContext context)
+    public void validateValue(MetaData metaData, Object value)
             throws ConstraintViolationException {
         if (!isValidationConstraint()) {
             return; // No validation constraint means valid

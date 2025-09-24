@@ -35,7 +35,7 @@ public class ShortField extends PrimitiveField<Short>
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(ShortField.class, def -> def
+            MetaDataRegistry.getInstance().registerType(ShortField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_SHORT)
                 .description("Short field with numeric validation")
                 

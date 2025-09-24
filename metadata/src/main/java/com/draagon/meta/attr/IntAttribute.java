@@ -32,7 +32,7 @@ public class IntAttribute extends MetaAttribute<Integer> {
     // Unified registry self-registration
     static {
         try {
-            com.draagon.meta.registry.MetaDataRegistry.registerType(IntAttribute.class, def -> def
+            com.draagon.meta.registry.MetaDataRegistry.getInstance().registerType(IntAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_INT)
                 .description("Integer attribute for numeric metadata values")
                 

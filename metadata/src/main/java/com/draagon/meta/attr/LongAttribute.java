@@ -27,7 +27,7 @@ public class LongAttribute extends MetaAttribute<Long> {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(LongAttribute.class, def -> def
+            MetaDataRegistry.getInstance().registerType(LongAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_LONG)
                 .description("Long attribute for numeric metadata")
             );

@@ -42,7 +42,7 @@ public class PojoMetaObject extends MetaObject
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(PojoMetaObject.class, def -> def
+            MetaDataRegistry.getInstance().registerType(PojoMetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(SUBTYPE_POJO)
                 .description("POJO MetaObject with reflection-based field access")
 

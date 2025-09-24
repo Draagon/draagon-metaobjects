@@ -39,7 +39,7 @@ public class LengthValidator extends MetaValidator
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(LengthValidator.class, def -> def
+            MetaDataRegistry.getInstance().registerType(LengthValidator.class, def -> def
                 .type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
                 .description("Length validator ensures field value is within min/max length")
                 

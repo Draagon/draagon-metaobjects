@@ -33,7 +33,7 @@ public class FileMetaDataLoader extends MetaDataLoader {
     // Self-registration with unified registry
     static {
         try {
-            MetaDataRegistry.registerType(FileMetaDataLoader.class, def -> def
+            MetaDataRegistry.getInstance().registerType(FileMetaDataLoader.class, def -> def
                 .type("loader").subType(SUBTYPE_FILE)
                 .description("File-based metadata loader for XML and JSON files")
                 .optionalChild("field", "*")

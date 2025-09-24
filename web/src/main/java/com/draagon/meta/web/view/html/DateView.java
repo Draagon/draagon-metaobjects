@@ -40,7 +40,7 @@ public class DateView extends MonthView {
     // Unified registry self-registration
     static {
         try {
-            MetaDataRegistry.registerType(DateView.class, def -> def
+            MetaDataRegistry.getInstance().registerType(DateView.class, def -> def
                 .type("view").subType("date")
                 .inheritsFrom("view", "base")
                 .optionalAttribute(ATTR_MINRANGE, "string")

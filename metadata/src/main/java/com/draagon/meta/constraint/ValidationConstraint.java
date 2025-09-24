@@ -15,22 +15,13 @@ import java.util.function.Predicate;
  */
 public class ValidationConstraint implements Constraint {
     
-    /**
-     * Functional interface for context-aware validation
-     */
-    @FunctionalInterface
-    public interface ContextAwareValidator {
-        boolean test(MetaData metaData, Object value, ValidationContext context);
-    }
-    
     private final String id;
     private final String description;
     private final Predicate<MetaData> applicableTo;
     private final BiPredicate<MetaData, Object> validator;
-    private final ContextAwareValidator contextAwareValidator;
     
     /**
-     * Create a validation constraint (legacy constructor)
+     * Create a validation constraint
      * @param id Unique identifier for this constraint
      * @param description Human-readable description of the validation rule
      * @param applicableTo Predicate to test if this constraint applies to a MetaData type
@@ -43,24 +34,6 @@ public class ValidationConstraint implements Constraint {
         this.description = description;
         this.applicableTo = applicableTo;
         this.validator = validator;
-        this.contextAwareValidator = null;
-    }
-    
-    /**
-     * Create a validation constraint with context-aware validator
-     * @param id Unique identifier for this constraint
-     * @param description Human-readable description of the validation rule
-     * @param applicableTo Predicate to test if this constraint applies to a MetaData type
-     * @param contextAwareValidator Validator that can use ValidationContext for more sophisticated validation
-     */
-    public ValidationConstraint(String id, String description,
-                               Predicate<MetaData> applicableTo,
-                               ContextAwareValidator contextAwareValidator) {
-        this.id = id;
-        this.description = description;
-        this.applicableTo = applicableTo;
-        this.validator = null;
-        this.contextAwareValidator = contextAwareValidator;
     }
     
     /**
@@ -73,34 +46,13 @@ public class ValidationConstraint implements Constraint {
     }
     
     /**
-     * Validate a value against this constraint (without context)
+     * Validate a value against this constraint
      * @param metaData The MetaData context for validation
      * @param value The value to validate
      * @return True if the value is valid according to this constraint
      */
     public boolean isValid(MetaData metaData, Object value) {
-        if (contextAwareValidator != null) {
-            // Use context-aware validator with null context
-            return contextAwareValidator.test(metaData, value, null);
-        } else if (validator != null) {
-            return validator.test(metaData, value);
-        } else {
-            // No validator configured - assume valid
-            return true;
-        }
-    }
-    
-    /**
-     * Validate a value against this constraint (with context)
-     * @param metaData The MetaData context for validation
-     * @param value The value to validate
-     * @param context The validation context
-     * @return True if the value is valid according to this constraint
-     */
-    public boolean isValid(MetaData metaData, Object value, ValidationContext context) {
-        if (contextAwareValidator != null) {
-            return contextAwareValidator.test(metaData, value, context);
-        } else if (validator != null) {
+        if (validator != null) {
             return validator.test(metaData, value);
         } else {
             // No validator configured - assume valid
@@ -109,15 +61,14 @@ public class ValidationConstraint implements Constraint {
     }
     
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) 
+    public void validate(MetaData metaData, Object value)
             throws ConstraintViolationException {
-        if (appliesTo(metaData) && !isValid(metaData, value, context)) {
+        if (appliesTo(metaData) && !isValid(metaData, value)) {
             throw new ConstraintViolationException(
-                String.format("Validation constraint '%s' failed for %s with value: %s", 
+                String.format("Validation constraint '%s' failed for %s with value: %s",
                     id, metaData.getName(), value),
                 getType(),
-                value,
-                context
+                metaData
             );
         }
     }

@@ -86,7 +86,7 @@ public class EnumConstraint implements Constraint {
     }
 
     @Override
-    public void validate(MetaData metaData, Object value, ValidationContext context) throws ConstraintViolationException {
+    public void validate(MetaData metaData, Object value) throws ConstraintViolationException {
         if (value == null) {
             return; // Null values are allowed - use separate RequiredConstraint for non-null validation
         }
@@ -96,7 +96,7 @@ public class EnumConstraint implements Constraint {
 
         if (!allowedValues.contains(valueToCheck)) {
             throw new ConstraintViolationException(
-                generateErrorMessage(metaData, stringValue, context),
+                generateErrorMessage(metaData, stringValue),
                 name,
                 metaData
             );
@@ -134,10 +134,9 @@ public class EnumConstraint implements Constraint {
      *
      * @param metaData The MetaData that failed validation
      * @param invalidValue The value that failed validation
-     * @param context Validation context with additional error details
      * @return Descriptive error message for the constraint violation
      */
-    public String generateErrorMessage(MetaData metaData, String invalidValue, ValidationContext context) {
+    public String generateErrorMessage(MetaData metaData, String invalidValue) {
         List<String> sortedValues = new ArrayList<>(getOriginalAllowedValues());
         Collections.sort(sortedValues);
 
