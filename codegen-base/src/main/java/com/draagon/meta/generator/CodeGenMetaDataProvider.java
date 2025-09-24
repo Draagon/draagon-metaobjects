@@ -1,0 +1,55 @@
+package com.draagon.meta.generator;
+
+import com.draagon.meta.generator.service.XSDGeneratorService;
+import com.draagon.meta.generator.service.JsonSchemaGeneratorService;
+import com.draagon.meta.generator.service.AIDocGeneratorService;
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeProvider;
+
+/**
+ * Code Generation MetaData provider that registers type extensions for code generation services.
+ *
+ * <p>This provider delegates to service classes that contain the actual extension logic
+ * and constants. It supports XSD generation, JSON Schema generation, and AI documentation
+ * generation by extending existing MetaData types with generation-specific attributes.</p>
+ *
+ * <h3>Services Provided:</h3>
+ * <ul>
+ * <li><strong>XSDGeneratorService:</strong> Attributes for XSD schema generation</li>
+ * <li><strong>JsonSchemaGeneratorService:</strong> Attributes for JSON Schema generation</li>
+ * <li><strong>AIDocGeneratorService:</strong> Attributes for AI documentation generation</li>
+ * </ul>
+ *
+ * <h3>Priority:</h3>
+ * <p>Priority 200 - Runs after database services (100-199) but before web services (300+).
+ * This ensures that code generation attributes are available for web framework extensions.</p>
+ *
+ * @since 6.0.0
+ */
+public class CodeGenMetaDataProvider implements MetaDataTypeProvider {
+
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        // Delegate to service classes that contain the extension logic and constants
+
+        // Register XSD generation type extensions
+        XSDGeneratorService.registerTypeExtensions(registry);
+
+        // Register JSON Schema generation type extensions
+        JsonSchemaGeneratorService.registerTypeExtensions(registry);
+
+        // Register AI Documentation generation type extensions
+        AIDocGeneratorService.registerTypeExtensions(registry);
+    }
+
+    @Override
+    public int getPriority() {
+        // Priority 200: After database services (100-199), before web services (300+)
+        return 200;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Code Generation MetaData Provider - XSD, JSON Schema, and AI Documentation extensions";
+    }
+}

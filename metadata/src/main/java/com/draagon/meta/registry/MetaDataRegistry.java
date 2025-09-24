@@ -872,8 +872,104 @@ public class MetaDataRegistry {
             Class.forName("com.draagon.meta.key.SecondaryKey");
             
             log.debug("Core types loaded successfully");
+
+            // Load service providers after core types are available
+            loadServiceProviders();
+
         } catch (ClassNotFoundException e) {
             log.warn("Some core types could not be loaded: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Find a type for extension by type and subtype.
+     *
+     * <p>This method returns a TypeExtensionBuilder that allows service providers
+     * to add optional attributes and child requirements to existing types.</p>
+     *
+     * @param type The primary type (e.g., "field", "object")
+     * @param subType The subtype (e.g., "string", "pojo")
+     * @return TypeExtensionBuilder for extending the type
+     * @throws IllegalArgumentException if the type is not found
+     */
+    public TypeExtensionBuilder findType(String type, String subType) {
+        MetaDataTypeId typeId = new MetaDataTypeId(type, subType);
+        TypeDefinition existing = typeDefinitions.get(typeId);
+
+        if (existing == null) {
+            // Try to be helpful with error message
+            String availableTypes = typeDefinitions.keySet().stream()
+                .filter(id -> id.type().equals(type))
+                .map(id -> id.type() + "." + id.subType())
+                .collect(Collectors.joining(", "));
+
+            if (availableTypes.isEmpty()) {
+                availableTypes = typeDefinitions.keySet().stream()
+                    .limit(10)
+                    .map(id -> id.type() + "." + id.subType())
+                    .collect(Collectors.joining(", "));
+                throw new IllegalArgumentException(
+                    "Type '" + type + "." + subType + "' not found. No types with primary type '" + type + "' are registered. " +
+                    "Available types include: " + availableTypes);
+            } else {
+                throw new IllegalArgumentException(
+                    "Type '" + type + "." + subType + "' not found. Available " + type + " types: " + availableTypes);
+            }
+        }
+
+        return new TypeExtensionBuilder(this, existing, typeId);
+    }
+
+    /**
+     * Load service providers via ServiceLoader to extend MetaData types.
+     *
+     * <p>This method discovers MetaDataTypeProvider implementations from META-INF/services files
+     * and delegates to them to extend existing MetaData types with service-specific attributes.</p>
+     *
+     * <p>Providers are loaded in priority order (lower = higher priority) to ensure proper
+     * dependency ordering for type extensions.</p>
+     */
+    private void loadServiceProviders() {
+        try {
+            // Get all MetaDataTypeProvider implementations via ServiceLoader
+            Collection<MetaDataTypeProvider> providers = serviceRegistry.getServices(MetaDataTypeProvider.class);
+
+            if (providers.isEmpty()) {
+                log.debug("No MetaDataTypeProvider services found");
+                return;
+            }
+
+            // Sort providers by priority (lower = higher priority)
+            List<MetaDataTypeProvider> sortedProviders = providers.stream()
+                .sorted(Comparator.comparing(MetaDataTypeProvider::getPriority))
+                .collect(Collectors.toList());
+
+            log.info("Loading {} MetaDataTypeProvider services in priority order", sortedProviders.size());
+
+            // Register type extensions from each provider
+            for (MetaDataTypeProvider provider : sortedProviders) {
+                try {
+                    long startTime = System.currentTimeMillis();
+                    provider.registerTypes(this);
+                    long duration = System.currentTimeMillis() - startTime;
+
+                    log.debug("Loaded provider: {} (priority {}) in {}ms - {}",
+                             provider.getClass().getSimpleName(),
+                             provider.getPriority(),
+                             duration,
+                             provider.getDescription());
+
+                } catch (Exception e) {
+                    log.error("Failed to load MetaDataTypeProvider: {} - {}",
+                             provider.getClass().getName(), e.getMessage(), e);
+                    // Continue with other providers - don't fail completely
+                }
+            }
+
+            log.info("Successfully loaded {} MetaDataTypeProvider services", sortedProviders.size());
+
+        } catch (Exception e) {
+            log.error("Error during service provider loading: {}", e.getMessage(), e);
         }
     }
 
