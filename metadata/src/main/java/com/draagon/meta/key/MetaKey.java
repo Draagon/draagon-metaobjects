@@ -40,6 +40,7 @@ public abstract class MetaKey extends MetaData {
             MetaDataRegistry.getInstance().registerType(MetaKey.class, def -> def
                 .type(TYPE_KEY).subType(SUBTYPE_BASE)
                 .description("Base key metadata with common key attributes")
+                .inheritsFrom("metadata", "base")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
                 .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")

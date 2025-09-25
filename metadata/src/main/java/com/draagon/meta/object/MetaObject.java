@@ -62,6 +62,7 @@ public abstract class MetaObject extends MetaData {
             MetaDataRegistry.getInstance().registerType(MetaObject.class, def -> def
                 .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
                 .description("Base object metadata with common object attributes")
+                .inheritsFrom("metadata", "base")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
                 .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
@@ -541,30 +542,6 @@ public abstract class MetaObject extends MetaData {
      */
     private static void registerCrossCuttingObjectConstraints(MetaDataRegistry registry) {
         try {
-            // VALIDATION CONSTRAINT: Object naming patterns (allow package-qualified names)
-            registry.registerValidationConstraint(
-                "object.naming.pattern",
-                "Object names must follow identifier pattern or be package-qualified",
-                (metadata) -> metadata instanceof MetaObject,
-                (metadata, value) -> {
-                    String name = metadata.getName();
-                    if (name == null) return false;
-
-                    // Allow package-qualified names (with ::)
-                    if (name.contains("::")) {
-                        String[] parts = name.split("::");
-                        for (String part : parts) {
-                            if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } else {
-                        // Simple names must follow identifier pattern
-                        return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                    }
-                }
-            );
 
             // PLACEMENT CONSTRAINT: Objects CAN contain fields
             registry.registerPlacementConstraint(
@@ -632,6 +609,17 @@ public abstract class MetaObject extends MetaData {
                 }
             );
 
+            // VALIDATION CONSTRAINT: Object names must follow identifier pattern
+            registry.registerValidationConstraint(
+                "object.naming.pattern",
+                "Object names must follow identifier pattern",
+                (metadata) -> metadata instanceof MetaObject,
+                (metadata, value) -> {
+                    String name = metadata.getName();
+                    if (name == null) return false;
+                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                }
+            );
             log.debug("Registered cross-cutting object constraints using consolidated registry");
 
         } catch (Exception e) {

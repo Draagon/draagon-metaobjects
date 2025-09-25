@@ -91,21 +91,32 @@ public class ConstraintEnforcer {
                 }
             }
         }
-        
+
         // Apply placement constraint logic (open policy - allow if any constraint permits)
         if (!applicablePlacementConstraints.isEmpty()) {
             boolean placementAllowed = false;
             for (PlacementConstraint pc : applicablePlacementConstraints) {
-                if (pc.isPlacementAllowed(parent, child)) {
-                    log.trace("Placement constraint '{}' allows this placement", pc.getId());
-                    placementAllowed = true;
-                    break;
+                if (pc.isAllowed()) {
+                    // Check abstract requirements for this placement constraint
+                    if (checkAbstractRequirement(pc, child)) {
+                        log.trace("Placement constraint allows this placement with proper abstract requirement: {}", pc);
+                        placementAllowed = true;
+                        break;
+                    } else {
+                        log.debug("Placement constraint failed abstract requirement check: {}", pc);
+                    }
+                } else {
+                    // FORBIDDEN constraint - check if this applies and fail if it does
+                    log.debug("Placement constraint forbids this placement: {}", pc);
+                    String message = String.format("Placement forbidden: Constraint forbids adding %s.%s to %s.%s",
+                        child.getType(), child.getSubType(), parent.getType(), parent.getSubType());
+                    throw new ConstraintViolationException(message, "placement", child.getName(), parent);
                 }
             }
-            
+
             if (!placementAllowed) {
-                String message = String.format("Placement not allowed: No constraints permit adding %s to %s",
-                    child.getName(), parent.getName());
+                String message = String.format("Placement not allowed: No constraints permit adding %s.%s to %s.%s (check abstract requirements)",
+                    child.getType(), child.getSubType(), parent.getType(), parent.getSubType());
                 throw new ConstraintViolationException(message, "placement", child.getName(), parent);
             }
         } else {
@@ -120,6 +131,53 @@ public class ConstraintEnforcer {
                     vc.validate(child, child.getName());
                 }
             }
+        }
+    }
+
+    /**
+     * Check if a child meets the abstract requirement of a placement constraint
+     * @param constraint The placement constraint with abstract requirements
+     * @param child The child metadata being added
+     * @return true if the abstract requirement is met
+     */
+    private boolean checkAbstractRequirement(PlacementConstraint constraint, MetaData child) {
+        AbstractRequirement requirement = constraint.getAbstractRequirement();
+        
+        switch (requirement) {
+            case ANY:
+                // Any abstract state is allowed
+                return true;
+                
+            case MUST_BE_ABSTRACT:
+                // Child must have isAbstract=true
+                return isChildAbstract(child);
+                
+            case MUST_BE_CONCRETE:
+                // Child must have isAbstract=false or no isAbstract attribute
+                return !isChildAbstract(child);
+                
+            default:
+                log.warn("Unknown abstract requirement: {}", requirement);
+                return true; // Default to allow
+        }
+    }
+
+    /**
+     * Check if a child metadata has isAbstract=true
+     * @param child The child metadata to check
+     * @return true if the child is marked as abstract
+     */
+    private boolean isChildAbstract(MetaData child) {
+        if (!child.hasMetaAttr(MetaData.ATTR_IS_ABSTRACT)) {
+            return false; // No isAbstract attribute = concrete
+        }
+        
+        try {
+            String isAbstractValue = child.getMetaAttr(MetaData.ATTR_IS_ABSTRACT).getValueAsString();
+            return Boolean.parseBoolean(isAbstractValue);
+        } catch (Exception e) {
+            log.debug("Failed to parse isAbstract attribute for {}: {}", child.getName(), e.getMessage());
+            return false; // Default to concrete if parsing fails
         }
     }
     

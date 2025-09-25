@@ -32,6 +32,7 @@ public abstract class MetaView extends MetaData {
             MetaDataRegistry.getInstance().registerType(MetaView.class, def -> def
                 .type(TYPE_VIEW).subType(SUBTYPE_BASE)
                 .description("Base view metadata with common view attributes")
+                .inheritsFrom("metadata", "base")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
                 .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")

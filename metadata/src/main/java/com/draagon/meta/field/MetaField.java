@@ -112,13 +112,14 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             MetaDataRegistry.getInstance().registerType(MetaField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BASE)
                 .description("Base field metadata with common field attributes")
+                // INHERIT FROM ROOT METADATA TYPE
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+                .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
 
                 // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
                 .optionalAttribute(ATTR_REQUIRED, BooleanAttribute.SUBTYPE_BOOLEAN)
-                .optionalAttribute(ATTR_DEFAULT_VALUE, "string")
+                .optionalAttribute(ATTR_DEFAULT_VALUE,StringAttribute.SUBTYPE_STRING)
                 .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
 
                 // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
@@ -830,30 +831,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     private static void registerCrossCuttingFieldConstraints(MetaDataRegistry registry) {
         try {
-            // VALIDATION CONSTRAINT: Field naming patterns (allow package-qualified names)
-            registry.registerValidationConstraint(
-                "field.naming.pattern",
-                "Field names must follow identifier pattern or be package-qualified",
-                (metadata) -> metadata instanceof MetaField,
-                (metadata, value) -> {
-                    String name = metadata.getName();
-                    if (name == null) return false;
-
-                    // Allow package-qualified names (with ::)
-                    if (name.contains("::")) {
-                        String[] parts = name.split("::");
-                        for (String part : parts) {
-                            if (!part.matches("^[a-zA-Z][a-zA-Z0-9_]*$")) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    } else {
-                        // Simple names must follow identifier pattern
-                        return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                    }
-                }
-            );
 
             // PLACEMENT CONSTRAINT: All fields CAN have required attribute
             registry.registerPlacementConstraint(
@@ -864,6 +841,17 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                           child.getName().equals(ATTR_REQUIRED)
             );
 
+            // VALIDATION CONSTRAINT: Field names must follow identifier pattern
+            registry.registerValidationConstraint(
+                "field.naming.pattern",
+                "Field names must follow identifier pattern",
+                (metadata) -> metadata instanceof MetaField,
+                (metadata, value) -> {
+                    String name = metadata.getName();
+                    if (name == null) return false;
+                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                }
+            );
             log.debug("Registered cross-cutting field constraints using consolidated registry");
 
         } catch (Exception e) {

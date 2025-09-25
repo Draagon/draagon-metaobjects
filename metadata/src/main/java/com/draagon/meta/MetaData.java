@@ -11,6 +11,9 @@ import com.draagon.meta.loader.MetaDataLoader;
 // Using unified registry instead
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.constraint.ConstraintEnforcer;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.PlacementPolicy;
+import com.draagon.meta.constraint.AbstractRequirement;
 import com.draagon.meta.cache.CacheStrategy;
 import com.draagon.meta.cache.HybridCache;
 import com.draagon.meta.collections.IndexedMetaDataCollection;
@@ -105,6 +108,123 @@ public class MetaData implements Cloneable, Serializable {
     /** Valid name pattern for MetaData identifiers */
     public static final String VALID_NAME_PATTERN = "^[a-zA-Z][a-zA-Z0-9_]*$";
 
+    // === ROOT TYPE CONSTANTS ===
+    /** Root metadata type constant - MetaData owns this concept */
+    public static final String TYPE_METADATA = "metadata";
+
+    /** Root metadata subtype for metadata file structure */
+    public static final String SUBTYPE_BASE = "base";
+
+    // Unified registry self-registration for root metadata type
+    /**
+     * Register MetaData as metadata.base with abstract requirements constraints.
+     * This creates metadata.base which defines metadata file structure and enforces
+     * that most metadata types must be abstract under the root (except objects).
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        try {
+            
+            MetaDataRegistry.getInstance().registerType(MetaData.class, def -> def
+                .type(TYPE_METADATA).subType(SUBTYPE_BASE)
+                .description("Base metadata type for inheritance hierarchy - enforces abstract requirements")
+
+                // ROOT LEVEL can contain top-level metadata types
+                .optionalChild("object", "*", "*")      // Any object type
+                .optionalChild("field", "*", "*")       // Any field type (if abstract)
+                .optionalChild("attr", "*", "*")        // Any attribute (if abstract)
+                .optionalChild("validator", "*", "*")   // Any validator (if abstract)
+                .optionalChild("view", "*", "*")        // Any view (if abstract)
+                .optionalChild("key", "*", "*")         // Any key (if abstract)
+            );
+
+            log.debug("Registered root MetaData type (metadata.base) with unified registry");
+            
+            // Setup abstract requirements constraints
+            setupRootAbstractConstraints();
+
+        } catch (Exception e) {
+            log.error("Failed to register root MetaData type with unified registry", e);
+        }
+    }
+    
+    /**
+     * Setup abstract requirements constraints for metadata.base children.
+     * Future defaults: new metadata types must be abstract under metadata.base.
+     */
+    private static void setupRootAbstractConstraints() {
+        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+
+        // OBJECTS can be abstract or concrete under metadata.base
+        registry.addConstraint(new PlacementConstraint(
+            TYPE_METADATA + "." + SUBTYPE_BASE,    // metadata.base can contain
+            "object.*",                            // object.* (concrete OK)
+            PlacementPolicy.ALLOWED,
+            AbstractRequirement.ANY                // Can be abstract OR concrete
+        ));
+
+        // FIELDS must be abstract under metadata.base  
+        registry.addConstraint(new PlacementConstraint(
+            TYPE_METADATA + "." + SUBTYPE_BASE,    // metadata.base can contain
+            "field.*",                             // field.* ONLY if abstract
+            PlacementPolicy.ALLOWED,
+            AbstractRequirement.MUST_BE_ABSTRACT
+        ));
+
+        // ATTRIBUTES must be abstract under metadata.base
+        registry.addConstraint(new PlacementConstraint(
+            TYPE_METADATA + "." + SUBTYPE_BASE,
+            "attr.*",
+            PlacementPolicy.ALLOWED,
+            AbstractRequirement.MUST_BE_ABSTRACT
+        ));
+
+        // VALIDATORS must be abstract under metadata.base
+        registry.addConstraint(new PlacementConstraint(
+            TYPE_METADATA + "." + SUBTYPE_BASE,
+            "validator.*",
+            PlacementPolicy.ALLOWED,
+            AbstractRequirement.MUST_BE_ABSTRACT
+        ));
+
+        // VIEWS must be abstract under metadata.base
+        registry.addConstraint(new PlacementConstraint(
+            TYPE_METADATA + "." + SUBTYPE_BASE,
+            "view.*",
+            PlacementPolicy.ALLOWED,
+            AbstractRequirement.MUST_BE_ABSTRACT
+        ));
+
+        // KEYS must be abstract under metadata.base
+        registry.addConstraint(new PlacementConstraint(
+            TYPE_METADATA + "." + SUBTYPE_BASE,
+            "key.*", 
+            PlacementPolicy.ALLOWED,
+            AbstractRequirement.MUST_BE_ABSTRACT
+        ));
+        
+        // FUTURE DEFAULT: Any new metadata types must be abstract under metadata.base
+        // (Individual new types can override this by adding their own constraints)
+        
+        log.debug("Set up abstract requirements constraints for metadata.base");
+    }
+
+    /**
+     * Alternative registerTypes() method with no parameters for backward compatibility.
+     */
+    public static void registerTypes() {
+        registerTypes(MetaDataRegistry.getInstance());
+    }
+
+    // Static registration block - automatically registers the root metadata type when class is loaded
+    static {
+        try {
+            registerTypes(MetaDataRegistry.getInstance());
+        } catch (Exception e) {
+            log.error("Failed to register root MetaData type during class loading", e);
+        }
+    }
     // Unified caching strategy
     private final CacheStrategy cache = new HybridCache();
     

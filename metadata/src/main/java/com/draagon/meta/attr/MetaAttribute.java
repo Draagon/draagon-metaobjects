@@ -30,6 +30,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             MetaDataRegistry.getInstance().registerType(MetaAttribute.class, def -> def
                 .type(TYPE_ATTR).subType(SUBTYPE_BASE)
                 .description("Base attribute metadata with common attribute properties")
+                .inheritsFrom("metadata", "base")
 
                 // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
                 .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
@@ -43,6 +44,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             // Register cross-cutting attribute constraints using consolidated registry
             registerCrossCuttingAttributeConstraints(MetaDataRegistry.getInstance());
 
+// VALIDATION CONSTRAINT: Attribute names must follow identifier pattern            registry.registerValidationConstraint(                "attribute.naming.pattern",                "Attribute names must follow identifier pattern",                (metadata) -> metadata instanceof MetaAttribute,                (metadata, value) -> {                    String name = metadata.getName();                    if (name == null) return false;                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");                }            );
             log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
         } catch (Exception e) {
             log.error("Failed to register base MetaAttribute type and constraints", e);
@@ -231,14 +233,15 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
                 (child) -> child instanceof MetaAttribute
             );
 
-            // VALIDATION CONSTRAINT: Attribute naming patterns
+            // VALIDATION CONSTRAINT: Attribute names must follow identifier pattern
             registry.registerValidationConstraint(
                 "attribute.naming.pattern",
                 "Attribute names must follow identifier pattern",
                 (metadata) -> metadata instanceof MetaAttribute,
                 (metadata, value) -> {
                     String name = metadata.getName();
-                    return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+                    if (name == null) return false;
+                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
                 }
             );
 

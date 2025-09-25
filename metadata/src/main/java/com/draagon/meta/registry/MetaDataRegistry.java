@@ -1292,7 +1292,6 @@ public class MetaDataRegistry {
 
             try {
                 // Load essential constraints using concrete classes
-                loadNamingConstraints();
                 loadPlacementConstraints();
 
                 // Load all constraints previously provided by ConstraintProviders
@@ -1313,32 +1312,6 @@ public class MetaDataRegistry {
     /**
      * Load naming pattern constraints
      */
-    private void loadNamingConstraints() {
-        // Field naming pattern constraint
-        addConstraint(new ValidationConstraint(
-            "field.naming.pattern",
-            "Field names must follow identifier pattern or be package-qualified",
-            (metadata) -> metadata instanceof com.draagon.meta.field.MetaField,
-            (metadata, value) -> {
-                String name = metadata.getName();
-                if (name == null) return false;
-                // Allow package-qualified names (contain ::) or identifier pattern
-                return name.contains("::") || name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-            }
-        ));
-
-        // Object naming pattern constraint
-        addConstraint(new ValidationConstraint(
-            "object.naming.pattern",
-            "Object names must follow identifier pattern or be package-qualified",
-            (metadata) -> metadata instanceof com.draagon.meta.object.MetaObject,
-            (metadata, value) -> {
-                String name = metadata.getName();
-                if (name == null) return false;
-                return name.contains("::") || name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-            }
-        ));
-    }
 
     /**
      * Load placement constraints
