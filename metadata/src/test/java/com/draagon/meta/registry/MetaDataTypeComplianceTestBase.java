@@ -69,20 +69,19 @@ public class MetaDataTypeComplianceTestBase {
     }
 
     /**
-     * Validate @MetaDataType annotations on a set of classes
+     * Validate provider-based registration pattern (registerTypes method)
      */
     protected List<String> validateAnnotationPresence(Set<Class<?>> metaDataClasses) {
         List<String> violations = new ArrayList<>();
 
         for (Class<?> clazz : metaDataClasses) {
-            MetaDataType annotation = clazz.getAnnotation(MetaDataType.class);
-
-            if (annotation == null) {
-                violations.add("❌ MISSING @MetaDataType: " + clazz.getSimpleName() +
+            // Check for registerTypes method instead of @MetaDataType annotation
+            try {
+                clazz.getDeclaredMethod("registerTypes", MetaDataRegistry.class);
+                log.debug("✅ Found registerTypes method: {} ({})", clazz.getSimpleName(), clazz.getName());
+            } catch (NoSuchMethodException e) {
+                violations.add("❌ MISSING registerTypes method: " + clazz.getSimpleName() +
                               " (" + clazz.getName() + ")");
-            } else {
-                // Validate annotation values
-                validateAnnotationValues(annotation, clazz, violations);
             }
         }
 

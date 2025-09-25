@@ -11,6 +11,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
+import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,28 +30,26 @@ import javax.servlet.jsp.*;
  *   <li>rows - (Optional) The number of rows for the textarea</li>
  * </ul></p>
  */
-@MetaDataType(type = "view", subType = "textarea", description = "HTML textarea input view")
 public class TextAreaView extends TextView
 {
   private static final Logger log = LoggerFactory.getLogger(TextAreaView.class);
 
-  // Unified registry self-registration for textarea view
-  static {
-    try {
-      MetaDataRegistry.getInstance().registerType(TextAreaView.class, def -> def
-        .type("view").subType("textarea")
-        .description("HTML textarea input view")
-        .optionalAttribute("cols", "int")
-        .optionalAttribute("rows", "int")
-        .optionalChild("attr", "string")
-        .optionalChild("attr", "int")
-        .optionalChild("attr", "boolean")
-      );
-      
-      log.debug("Registered TextAreaView with unified registry");
-    } catch (Exception e) {
-      log.error("Failed to register TextAreaView with unified registry", e);
-    }
+  /**
+   * Register TextAreaView type with registry.
+   * Called by WebMetaDataProvider during service discovery.
+   */
+  public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(TextAreaView.class, def -> def
+      .type(TYPE_VIEW).subType("textarea")
+      .description("HTML textarea input view")
+      .optionalAttribute("cols", "int")
+      .optionalAttribute("rows", "int")
+      .optionalChild("attr", "string")
+      .optionalChild("attr", "int")
+      .optionalChild("attr", "boolean")
+    );
+
+    log.debug("Registered TextAreaView with unified registry");
   }
 
   public TextAreaView(String name) {

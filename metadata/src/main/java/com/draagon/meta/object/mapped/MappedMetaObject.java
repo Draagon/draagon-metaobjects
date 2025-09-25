@@ -25,34 +25,33 @@ public class MappedMetaObject extends MetaObject
     public final static String OBJECT_SUBTYPE = "map";
     private String metaObjectKey = "metaObject";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(MappedMetaObject.class, def -> def
-                .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
-                .description("Map-based MetaObject with key-value field access")
+    /**
+     * Register MappedMetaObject type with registry.
+     * Called by ObjectTypesMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(MappedMetaObject.class, def -> def
+            .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
+            .description("Map-based MetaObject with key-value field access")
 
-                // INHERIT FROM BASE OBJECT
-                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+            // INHERIT FROM BASE OBJECT
+            .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
 
-                // NO MAP-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
+            // NO MAP-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
 
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("implements", "string")
+            // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
+            .optionalAttribute("implements", "string")
 
-                // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
-                // - All field types (field.*)
-                // - Other objects (object.*)
-                // - Keys (key.*)
-                // - Attributes (attr.*)
-                // - Validators (validator.*)
-                // - Views (view.*)
-            );
-            
-            log.debug("Registered MappedMetaObject type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register MappedMetaObject type with unified registry", e);
-        }
+            // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
+            // - All field types (field.*)
+            // - Other objects (object.*)
+            // - Keys (key.*)
+            // - Attributes (attr.*)
+            // - Validators (validator.*)
+            // - Views (view.*)
+        );
+
+        log.debug("Registered MappedMetaObject type with unified registry");
     }
 
     public MappedMetaObject(String name) {

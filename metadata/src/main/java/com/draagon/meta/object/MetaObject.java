@@ -56,54 +56,52 @@ public abstract class MetaObject extends MetaData {
     /** Object type attribute for composition */
     public static final String ATTR_OBJECT = "object";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(MetaObject.class, def -> def
-                .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
-                .description("Base object metadata with common object attributes")
-                .inheritsFrom("metadata", "base")
+    /**
+     * Register MetaObject type and constraints with registry.
+     * Called by ObjectTypesMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(MetaObject.class, def -> def
+            .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
+            .description("Base object metadata with common object attributes")
+            .inheritsFrom("metadata", "base")
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+            // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
+            .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
 
-                // OBJECT-LEVEL ATTRIBUTES (all object types inherit these)
-                .optionalAttribute(ATTR_EXTENDS, "string")
-                .optionalAttribute(ATTR_IMPLEMENTS, "string")
-                .optionalAttribute(ATTR_IS_INTERFACE, "boolean")
+            // OBJECT-LEVEL ATTRIBUTES (all object types inherit these)
+            .optionalAttribute(ATTR_EXTENDS, "string")
+            .optionalAttribute(ATTR_IMPLEMENTS, "string")
+            .optionalAttribute(ATTR_IS_INTERFACE, "boolean")
 
-                // OBJECT-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_DESCRIPTION, "string")
-                .optionalAttribute(ATTR_OBJECT, "string")
-                .optionalAttribute(ATTR_OBJECT_REF, "string")
+            // OBJECT-SPECIFIC ATTRIBUTES
+            .optionalAttribute(ATTR_DESCRIPTION, "string")
+            .optionalAttribute(ATTR_OBJECT, "string")
+            .optionalAttribute(ATTR_OBJECT_REF, "string")
 
-                // OBJECTS CONTAIN FIELDS (any field type, any name)
-                .optionalChild("field", "*", "*")
+            // OBJECTS CONTAIN FIELDS (any field type, any name)
+            .optionalChild("field", "*", "*")
 
-                // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
-                .optionalChild("object", "*", "*")
+            // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
+            .optionalChild("object", "*", "*")
 
-                // OBJECTS CAN CONTAIN KEYS
-                .optionalChild("key", "*", "*")
+            // OBJECTS CAN CONTAIN KEYS
+            .optionalChild("key", "*", "*")
 
-                // OBJECTS CAN CONTAIN ATTRIBUTES
-                .optionalChild("attr", "*", "*")
+            // OBJECTS CAN CONTAIN ATTRIBUTES
+            .optionalChild("attr", "*", "*")
 
-                // OBJECTS CAN CONTAIN VALIDATORS
-                .optionalChild("validator", "*", "*")
+            // OBJECTS CAN CONTAIN VALIDATORS
+            .optionalChild("validator", "*", "*")
 
-                // OBJECTS CAN CONTAIN VIEWS
-                .optionalChild("view", "*", "*")
-            );
-            
-            log.debug("Registered base MetaObject type with unified registry");
-            
-            // Register cross-cutting object constraints using consolidated registry
-            registerCrossCuttingObjectConstraints(MetaDataRegistry.getInstance());
-            
-        } catch (Exception e) {
-            log.error("Failed to register MetaObject type with unified registry", e);
-        }
+            // OBJECTS CAN CONTAIN VIEWS
+            .optionalChild("view", "*", "*")
+        );
+
+        log.debug("Registered base MetaObject type with unified registry");
+
+        // Register cross-cutting object constraints using consolidated registry
+        registerCrossCuttingObjectConstraints(registry);
     }
 
     /**

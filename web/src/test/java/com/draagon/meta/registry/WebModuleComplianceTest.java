@@ -42,11 +42,11 @@ public class WebModuleComplianceTest extends com.draagon.meta.registry.MetaDataT
         if (!annotationViolations.isEmpty()) {
             String report = createComplianceReport("web", metaDataClasses, annotationViolations, List.of(), List.of());
             log.error("\n{}", report);
-            fail("❌ Web module has @MetaDataType annotation violations:\n" +
+            fail("❌ Web module has provider registration violations:\n" +
                  annotationViolations.stream().reduce((a, b) -> a + "\n" + b).orElse(""));
         }
 
-        log.info("✅ All MetaData classes in web module have proper @MetaDataType annotations");
+        log.info("✅ All MetaData classes in web module have proper registerTypes methods");
     }
 
     /**

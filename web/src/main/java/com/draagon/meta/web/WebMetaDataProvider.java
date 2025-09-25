@@ -1,5 +1,6 @@
 package com.draagon.meta.web;
 
+import com.draagon.meta.view.MetaView;
 import com.draagon.meta.web.view.html.TextView;
 import com.draagon.meta.web.view.html.DateView;
 import com.draagon.meta.web.view.html.TextAreaView;
@@ -32,15 +33,14 @@ public class WebMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Delegate to existing web view classes that contain the extension logic and constants
+        // Register base view type first
+        MetaView.registerTypes(registry);
 
-        // Register base web view attributes
-        WebView.registerWebViewAttributes(registry);
-
-        // Register specific view type attributes
-        TextView.registerTextViewAttributes(registry);
-        DateView.registerDateViewAttributes(registry);
-        TextAreaView.registerTextAreaViewAttributes(registry);
+        // Register web view types
+        WebView.registerTypes(registry);
+        TextView.registerTypes(registry);
+        DateView.registerTypes(registry);
+        TextAreaView.registerTypes(registry);
     }
 
     @Override

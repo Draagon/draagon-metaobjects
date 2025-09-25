@@ -39,44 +39,42 @@ public class PojoMetaObject extends MetaObject
     public final static String CACHE_PARAM_GETTER_METHOD = "getterMethod";
     public final static String CACHE_PARAM_SETTER_METHOD = "setterMethod";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(PojoMetaObject.class, def -> def
-                .type(TYPE_OBJECT).subType(SUBTYPE_POJO)
-                .description("POJO MetaObject with reflection-based field access")
+    /**
+     * Register PojoMetaObject type and constraints with registry.
+     * Called by ObjectTypesMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(PojoMetaObject.class, def -> def
+            .type(TYPE_OBJECT).subType(SUBTYPE_POJO)
+            .description("POJO MetaObject with reflection-based field access")
 
-                // INHERIT FROM BASE OBJECT
-                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+            // INHERIT FROM BASE OBJECT
+            .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
 
-                // POJO-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
-                .optionalAttribute(ATTR_CLASS_NAME, "string")
-                .optionalAttribute(ATTR_PACKAGE_NAME, "string")
-                
-                // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
-                .optionalAttribute("dbTable", "string")
-                .optionalAttribute("hasAuditing", "boolean")
-                .optionalAttribute("hasJpa", "boolean")
-                .optionalAttribute("hasValidation", "boolean")
-                .optionalAttribute("implements", "string")
+            // POJO-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
+            .optionalAttribute(ATTR_CLASS_NAME, "string")
+            .optionalAttribute(ATTR_PACKAGE_NAME, "string")
 
-                // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
-                // - All field types (field.*)
-                // - Other objects (object.*)
-                // - Keys (key.*)
-                // - Attributes (attr.*)
-                // - Validators (validator.*)
-                // - Views (view.*)
-            );
-            
-            log.debug("Registered PojoMetaObject type with unified registry");
-            
-            // Register PojoMetaObject-specific constraints using consolidated registry
-            setupPojoMetaObjectConstraints(MetaDataRegistry.getInstance());
-            
-        } catch (Exception e) {
-            log.error("Failed to register PojoMetaObject type with unified registry", e);
-        }
+            // TEST-SPECIFIC ATTRIBUTES (for codegen tests)
+            .optionalAttribute("dbTable", "string")
+            .optionalAttribute("hasAuditing", "boolean")
+            .optionalAttribute("hasJpa", "boolean")
+            .optionalAttribute("hasValidation", "boolean")
+            .optionalAttribute("implements", "string")
+
+            // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
+            // - All field types (field.*)
+            // - Other objects (object.*)
+            // - Keys (key.*)
+            // - Attributes (attr.*)
+            // - Validators (validator.*)
+            // - Views (view.*)
+        );
+
+        log.debug("Registered PojoMetaObject type with unified registry");
+
+        // Register PojoMetaObject-specific constraints using consolidated registry
+        setupPojoMetaObjectConstraints(registry);
     }
     
     /**

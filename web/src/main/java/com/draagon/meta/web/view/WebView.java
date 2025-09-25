@@ -10,6 +10,7 @@ import com.draagon.meta.view.MetaView;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
+import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,31 +19,29 @@ import java.util.Map;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
-@MetaDataType(type = "view", subType = "web", description = "Web-based view for HTML form rendering")
 public abstract class WebView extends MetaView
 {
   private static final Logger log = LoggerFactory.getLogger(WebView.class);
   
   public final static String SUBTYPE_WEB = "web";
 
-  // Self-registration with unified registry
-  static {
-      try {
-          MetaDataRegistry.getInstance().registerType(WebView.class, def -> def
-              .type("view").subType(SUBTYPE_WEB)
-              .description("Web-based view for HTML form rendering")
+  /**
+   * Register WebView type with registry.
+   * Called by WebMetaDataProvider during service discovery.
+   */
+  public static void registerTypes(MetaDataRegistry registry) {
+      registry.registerType(WebView.class, def -> def
+          .type(TYPE_VIEW).subType(SUBTYPE_WEB)
+          .description("Web-based view for HTML form rendering")
 
-              // INHERIT FROM BASE VIEW
-              .inheritsFrom("view", "base")
+          // INHERIT FROM BASE VIEW
+          .inheritsFrom("view", "base")
 
-              // WEB-SPECIFIC CHILD REQUIREMENTS (base requirements inherited)
-              .optionalChild("attr", "*")
-              // Note: Base view attributes are inherited from view.base
-          );
-          log.debug("Registered WebView type with unified registry");
-      } catch (Exception e) {
-          log.error("Failed to register WebView type with unified registry", e);
-      }
+          // WEB-SPECIFIC CHILD REQUIREMENTS (base requirements inherited)
+          .optionalChild("attr", "*")
+          // Note: Base view attributes are inherited from view.base
+      );
+      log.debug("Registered WebView type with unified registry");
   }
 
   public WebView( String name )

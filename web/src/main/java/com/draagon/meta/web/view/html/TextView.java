@@ -11,6 +11,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
+import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,30 +22,28 @@ import java.util.Map;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
-@MetaDataType(type = "view", subType = "text", description = "HTML text input view")
 public class TextView extends HtmlView
 {
   private static final Logger log = LoggerFactory.getLogger(TextView.class);
 
-  // Unified registry self-registration for web view types
-  static {
-    try {
-      MetaDataRegistry.getInstance().registerType(TextView.class, def -> def
-        .type("view").subType("text")
-        .description("HTML text input view")
+  /**
+   * Register TextView type with registry.
+   * Called by WebMetaDataProvider during service discovery.
+   */
+  public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(TextView.class, def -> def
+      .type(TYPE_VIEW).subType("text")
+      .description("HTML text input view")
 
-        // INHERIT FROM BASE VIEW
-        .inheritsFrom("view", "base")
+      // INHERIT FROM BASE VIEW
+      .inheritsFrom("view", "base")
 
-        // NO TEXT-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
-        // CHILD REQUIREMENTS INHERITED FROM BASE VIEW:
-        // - Attributes (attr.*)
-      );
-      
-      log.debug("Registered TextView with unified registry");
-    } catch (Exception e) {
-      log.error("Failed to register TextView with unified registry", e);
-    }
+      // NO TEXT-SPECIFIC ATTRIBUTES (only uses inherited base attributes)
+      // CHILD REQUIREMENTS INHERITED FROM BASE VIEW:
+      // - Attributes (attr.*)
+    );
+
+    log.debug("Registered TextView with unified registry");
   }
 
   public TextView(String name) {

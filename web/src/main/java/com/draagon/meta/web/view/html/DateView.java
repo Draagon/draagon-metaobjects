@@ -14,6 +14,7 @@ import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 import com.draagon.meta.web.util.Param;
+import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,6 @@ import java.util.Calendar;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 
-@MetaDataType(type = "view", subType = "date", description = "HTML date input view")
 public class DateView extends MonthView {
 
     private static final Logger log = LoggerFactory.getLogger(DateView.class);
@@ -37,22 +37,21 @@ public class DateView extends MonthView {
     private final static String ATTR_EMPTYVALUE = "empty.value";
     //private final static String ATTR_USEZERO    = "usezero";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(DateView.class, def -> def
-                .type("view").subType("date")
-                .inheritsFrom("view", "base")
-                .optionalAttribute(ATTR_MINRANGE, "string")
-                .optionalAttribute(ATTR_MAXRANGE, "string")
-                .optionalAttribute(ATTR_EMPTYVALUE, "string")
-                .description("HTML date input view")
-            );
+    /**
+     * Register DateView type with registry.
+     * Called by WebMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(DateView.class, def -> def
+            .type(TYPE_VIEW).subType("date")
+            .inheritsFrom("view", "base")
+            .optionalAttribute(ATTR_MINRANGE, "string")
+            .optionalAttribute(ATTR_MAXRANGE, "string")
+            .optionalAttribute(ATTR_EMPTYVALUE, "string")
+            .description("HTML date input view")
+        );
 
-            log.debug("Registered DateView type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register DateView type with unified registry", e);
-        }
+        log.debug("Registered DateView type with unified registry");
     }
 
     public DateView(String name) {

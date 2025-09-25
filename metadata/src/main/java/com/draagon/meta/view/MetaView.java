@@ -14,7 +14,6 @@ import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@MetaDataType(type = "view", subType = "base", description = "Base view metadata with common view attributes")
 public abstract class MetaView extends MetaData {
     private static final Logger log = LoggerFactory.getLogger(MetaView.class);
 
@@ -26,27 +25,24 @@ public abstract class MetaView extends MetaData {
     public final static String SUBTYPE_BASE = "base";
 
 
-    // Base view type registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(MetaView.class, def -> def
-                .type(TYPE_VIEW).subType(SUBTYPE_BASE)
-                .description("Base view metadata with common view attributes")
-                .inheritsFrom("metadata", "base")
+    /**
+     * Register MetaView base type with registry.
+     * Called by WebMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(MetaView.class, def -> def
+            .type(TYPE_VIEW).subType(SUBTYPE_BASE)
+            .description("Base view metadata with common view attributes")
+            .inheritsFrom("metadata", "base")
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+            // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
+            .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
 
+            // VIEWS CAN CONTAIN ATTRIBUTES
+            .optionalChild("attr", "*", "*")
+        );
 
-                // VIEWS CAN CONTAIN ATTRIBUTES
-                .optionalChild("attr", "*", "*")
-            );
-
-            log.debug("Registered base MetaView type with unified registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register MetaView type with unified registry", e);
-        }
+        log.debug("Registered base MetaView type with unified registry");
     }
 
     public MetaView(String subtype, String name) {

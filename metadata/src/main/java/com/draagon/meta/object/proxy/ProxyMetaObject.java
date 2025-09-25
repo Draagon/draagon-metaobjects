@@ -31,37 +31,35 @@ public class ProxyMetaObject extends PojoMetaObject
     public final static String ATTR_PROXYOBJECT = "proxyObject";
     public final static String ATTR_INTERFACE_NAME = "interfaceName";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(ProxyMetaObject.class, def -> def
-                .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
-                .description("Proxy MetaObject with dynamic proxy field access")
+    /**
+     * Register ProxyMetaObject type and constraints with registry.
+     * Called by ObjectTypesMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ProxyMetaObject.class, def -> def
+            .type(TYPE_OBJECT).subType(OBJECT_SUBTYPE)
+            .description("Proxy MetaObject with dynamic proxy field access")
 
-                // INHERIT FROM BASE OBJECT
-                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+            // INHERIT FROM BASE OBJECT
+            .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
 
-                // PROXY-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
-                .optionalAttribute(ATTR_PROXYOBJECT, "string")
-                .optionalAttribute(ATTR_INTERFACE_NAME, "string")
+            // PROXY-SPECIFIC ATTRIBUTES ONLY (base attributes inherited)
+            .optionalAttribute(ATTR_PROXYOBJECT, "string")
+            .optionalAttribute(ATTR_INTERFACE_NAME, "string")
 
-                // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
-                // - All field types (field.*)
-                // - Other objects (object.*)
-                // - Keys (key.*)
-                // - Attributes (attr.*)
-                // - Validators (validator.*)
-                // - Views (view.*)
-            );
-            
-            log.debug("Registered ProxyMetaObject type with unified registry");
-            
-            // Register ProxyMetaObject-specific constraints using consolidated registry
-            setupProxyMetaObjectConstraints(MetaDataRegistry.getInstance());
-            
-        } catch (Exception e) {
-            log.error("Failed to register ProxyMetaObject type with unified registry", e);
-        }
+            // CHILD REQUIREMENTS INHERITED FROM BASE OBJECT:
+            // - All field types (field.*)
+            // - Other objects (object.*)
+            // - Keys (key.*)
+            // - Attributes (attr.*)
+            // - Validators (validator.*)
+            // - Views (view.*)
+        );
+
+        log.debug("Registered ProxyMetaObject type with unified registry");
+
+        // Register ProxyMetaObject-specific constraints using consolidated registry
+        setupProxyMetaObjectConstraints(registry);
     }
     
     /**
