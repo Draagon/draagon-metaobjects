@@ -1,4 +1,4 @@
-package com.draagon.meta;
+package com.draagon.meta.io;
 
 import com.draagon.meta.object.data.DataMetaObject;
 import com.draagon.meta.object.value.ValueMetaObject;
@@ -8,12 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Core MetaData provider for core module types.
+ * IO MetaData provider for core module types.
  * Registers types that are specific to the core module.
  */
-public class CoreMetaDataProvider implements MetaDataTypeProvider {
+public class IOMetaDataProvider implements MetaDataTypeProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(CoreMetaDataProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(IOMetaDataProvider.class);
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
@@ -39,6 +39,6 @@ public class CoreMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public String getDescription() {
-        return "Core MetaData Provider - Registers core module specific types";
+        return "IO MetaData Provider - Registers core module specific types";
     }
 }

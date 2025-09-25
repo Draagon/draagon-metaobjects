@@ -1,4 +1,4 @@
-package com.draagon.meta.core;
+package com.draagon.meta.object;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;

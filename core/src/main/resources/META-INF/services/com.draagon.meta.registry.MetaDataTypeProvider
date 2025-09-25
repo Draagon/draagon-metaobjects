@@ -1,2 +1,2 @@
-com.draagon.meta.core.CoreObjectsMetaDataProvider
-com.draagon.meta.CoreMetaDataProvider
+com.draagon.meta.object.CoreObjectsMetaDataProvider
+com.draagon.meta.io.IOMetaDataProvider
