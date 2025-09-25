@@ -12,8 +12,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.constraint.ConstraintEnforcer;
 import com.draagon.meta.constraint.PlacementConstraint;
-import com.draagon.meta.constraint.PlacementPolicy;
-import com.draagon.meta.constraint.AbstractRequirement;
 import com.draagon.meta.cache.CacheStrategy;
 import com.draagon.meta.cache.HybridCache;
 import com.draagon.meta.collections.IndexedMetaDataCollection;
@@ -158,50 +156,56 @@ public class MetaData implements Cloneable, Serializable {
 
         // OBJECTS can be abstract or concrete under metadata.base
         registry.addConstraint(new PlacementConstraint(
-            TYPE_METADATA + "." + SUBTYPE_BASE,    // metadata.base can contain
-            "object.*",                            // object.* (concrete OK)
-            PlacementPolicy.ALLOWED,
-            AbstractRequirement.ANY                // Can be abstract OR concrete
+            "metadata.base.objects",
+            "metadata.base can contain objects",
+            "metadata.base",        // Parent pattern
+            "object.*",             // Child pattern
+            true                    // Allowed
         ));
 
-        // FIELDS must be abstract under metadata.base  
+        // FIELDS under metadata.base
         registry.addConstraint(new PlacementConstraint(
-            TYPE_METADATA + "." + SUBTYPE_BASE,    // metadata.base can contain
-            "field.*",                             // field.* ONLY if abstract
-            PlacementPolicy.ALLOWED,
-            AbstractRequirement.MUST_BE_ABSTRACT
+            "metadata.base.fields",
+            "metadata.base can contain fields",
+            "metadata.base",        // Parent pattern
+            "field.*",              // Child pattern
+            true                    // Allowed
         ));
 
-        // ATTRIBUTES must be abstract under metadata.base
+        // ATTRIBUTES under metadata.base
         registry.addConstraint(new PlacementConstraint(
-            TYPE_METADATA + "." + SUBTYPE_BASE,
-            "attr.*",
-            PlacementPolicy.ALLOWED,
-            AbstractRequirement.MUST_BE_ABSTRACT
+            "metadata.base.attributes",
+            "metadata.base can contain attributes",
+            "metadata.base",        // Parent pattern
+            "attr.*",               // Child pattern
+            true                    // Allowed
         ));
 
-        // VALIDATORS must be abstract under metadata.base
+        // VALIDATORS under metadata.base
         registry.addConstraint(new PlacementConstraint(
-            TYPE_METADATA + "." + SUBTYPE_BASE,
-            "validator.*",
-            PlacementPolicy.ALLOWED,
-            AbstractRequirement.MUST_BE_ABSTRACT
+            "metadata.base.validators",
+            "metadata.base can contain validators",
+            "metadata.base",        // Parent pattern
+            "validator.*",          // Child pattern
+            true                    // Allowed
         ));
 
-        // VIEWS must be abstract under metadata.base
+        // VIEWS under metadata.base
         registry.addConstraint(new PlacementConstraint(
-            TYPE_METADATA + "." + SUBTYPE_BASE,
-            "view.*",
-            PlacementPolicy.ALLOWED,
-            AbstractRequirement.MUST_BE_ABSTRACT
+            "metadata.base.views",
+            "metadata.base can contain views",
+            "metadata.base",        // Parent pattern
+            "view.*",               // Child pattern
+            true                    // Allowed
         ));
 
-        // KEYS must be abstract under metadata.base
+        // KEYS under metadata.base
         registry.addConstraint(new PlacementConstraint(
-            TYPE_METADATA + "." + SUBTYPE_BASE,
-            "key.*", 
-            PlacementPolicy.ALLOWED,
-            AbstractRequirement.MUST_BE_ABSTRACT
+            "metadata.base.keys",
+            "metadata.base can contain keys",
+            "metadata.base",        // Parent pattern
+            "key.*",                // Child pattern
+            true                    // Allowed
         ));
         
         // FUTURE DEFAULT: Any new metadata types must be abstract under metadata.base

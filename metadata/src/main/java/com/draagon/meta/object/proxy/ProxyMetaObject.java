@@ -5,6 +5,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.object.MetaObjectAware;
@@ -70,13 +71,13 @@ public class ProxyMetaObject extends PojoMetaObject
     private static void setupProxyMetaObjectConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: ProxyMetaObject CAN have interfaceName attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "proxyobject.interfacename.placement",
                 "ProxyMetaObject can have interfaceName attribute",
-                (metadata) -> metadata instanceof ProxyMetaObject,
-                (child) -> child instanceof StringAttribute &&
-                          child.getName().equals(ATTR_INTERFACE_NAME)
-            );
+                "object.proxy",               // Parent pattern
+                "attr.string[interfaceName]", // Child pattern
+                true                          // Allowed
+            ));
 
             log.debug("Registered ProxyMetaObject-specific constraints using consolidated registry");
 

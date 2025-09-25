@@ -12,6 +12,7 @@ import com.draagon.meta.attr.DoubleAttribute;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -81,40 +82,40 @@ public class DoubleField extends PrimitiveField<Double>
     private static void registerDoubleFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: DoubleField CAN have minValue attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "doublefield.minvalue.placement",
                 "DoubleField can optionally have minValue attribute",
-                (metadata) -> metadata instanceof DoubleField,
-                (child) -> (child instanceof DoubleAttribute || child instanceof StringAttribute) &&
-                          child.getName().equals(ATTR_MIN_VALUE)
-            );
+                "field.double",           // Parent pattern
+                "attr.*[minValue]",       // Child pattern (allows double or string)
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: DoubleField CAN have maxValue attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "doublefield.maxvalue.placement",
                 "DoubleField can optionally have maxValue attribute",
-                (metadata) -> metadata instanceof DoubleField,
-                (child) -> (child instanceof DoubleAttribute || child instanceof StringAttribute) &&
-                          child.getName().equals(ATTR_MAX_VALUE)
-            );
+                "field.double",           // Parent pattern
+                "attr.*[maxValue]",       // Child pattern (allows double or string)
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: DoubleField CAN have precision attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "doublefield.precision.placement",
                 "DoubleField can optionally have precision attribute",
-                (metadata) -> metadata instanceof DoubleField,
-                (child) -> child instanceof IntAttribute &&
-                          child.getName().equals(ATTR_PRECISION)
-            );
+                "field.double",           // Parent pattern
+                "attr.int[precision]",    // Child pattern
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: DoubleField CAN have scale attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "doublefield.scale.placement",
                 "DoubleField can optionally have scale attribute",
-                (metadata) -> metadata instanceof DoubleField,
-                (child) -> child instanceof IntAttribute &&
-                          child.getName().equals(ATTR_SCALE)
-            );
+                "field.double",           // Parent pattern
+                "attr.int[scale]",        // Child pattern
+                true                      // Allowed
+            ));
 
             log.debug("Registered DoubleField-specific constraints using consolidated registry");
 

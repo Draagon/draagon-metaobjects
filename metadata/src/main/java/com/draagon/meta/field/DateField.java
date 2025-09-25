@@ -9,6 +9,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -89,13 +90,13 @@ public class DateField extends PrimitiveField<Date> {
     private static void registerDateFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: DateField CAN have format attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "datefield.format.placement",
                 "DateField can optionally have format attribute",
-                (metadata) -> metadata instanceof DateField,
-                (child) -> child instanceof StringAttribute &&
-                          child.getName().equals(ATTR_FORMAT)
-            );
+                "field.date",           // Parent pattern
+                "attr.string[format]",  // Child pattern
+                true                    // Allowed
+            ));
 
             log.debug("Registered DateField-specific constraints using consolidated registry");
 

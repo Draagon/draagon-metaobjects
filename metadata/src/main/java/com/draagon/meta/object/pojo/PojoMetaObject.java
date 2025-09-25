@@ -13,6 +13,7 @@ import com.draagon.meta.MetaDataException;
 import com.draagon.meta.ValidationResult;
 import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
@@ -83,22 +84,22 @@ public class PojoMetaObject extends MetaObject
     private static void setupPojoMetaObjectConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: POJO objects CAN have className attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "pojoobject.classname.placement",
                 "POJO objects can have className attribute",
-                (metadata) -> metadata instanceof PojoMetaObject,
-                (child) -> child instanceof StringAttribute &&
-                          child.getName().equals(ATTR_CLASS_NAME)
-            );
+                "object.pojo",            // Parent pattern
+                "attr.string[className]", // Child pattern
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: POJO objects CAN have packageName attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "pojoobject.packagename.placement",
                 "POJO objects can have packageName attribute",
-                (metadata) -> metadata instanceof PojoMetaObject,
-                (child) -> child instanceof StringAttribute &&
-                          child.getName().equals(ATTR_PACKAGE_NAME)
-            );
+                "object.pojo",              // Parent pattern
+                "attr.string[packageName]", // Child pattern
+                true                        // Allowed
+            ));
 
             // Registered PojoMetaObject-specific constraints using consolidated registry
 

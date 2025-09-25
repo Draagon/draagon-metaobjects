@@ -1,6 +1,8 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.*;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.RegexConstraint;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
@@ -211,24 +213,24 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     private static void registerCrossCuttingAttributeConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: Attributes can be placed on any MetaData
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "attribute.universal.placement",
                 "Attributes can be placed on any MetaData",
-                (metadata) -> metadata instanceof MetaData,
-                (child) -> child instanceof MetaAttribute
-            );
+                "*.*",                      // Parent pattern (any metadata)
+                "attr.*",                   // Child pattern (any attribute)
+                true                        // Allowed
+            ));
 
             // VALIDATION CONSTRAINT: Attribute names must follow identifier pattern
-            registry.registerValidationConstraint(
+            registry.addConstraint(new RegexConstraint(
                 "attribute.naming.pattern",
                 "Attribute names must follow identifier pattern",
-                (metadata) -> metadata instanceof MetaAttribute,
-                (metadata, value) -> {
-                    String name = metadata.getName();
-                    if (name == null) return false;
-                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                }
-            );
+                "attr",                     // Target type
+                "*",                        // Any subtype
+                "*",                        // Any name
+                "^[a-zA-Z][a-zA-Z0-9_]*$",  // Pattern
+                false                       // Don't allow null (required)
+            ));
 
             // Registered cross-cutting attribute constraints using consolidated registry
 

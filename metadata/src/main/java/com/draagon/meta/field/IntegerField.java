@@ -10,6 +10,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -75,22 +76,22 @@ public class IntegerField extends PrimitiveField<Integer> {
     private static void registerIntegerFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: IntegerField CAN have minValue attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "integerfield.minvalue.placement",
                 "IntegerField can optionally have minValue attribute",
-                (metadata) -> metadata instanceof IntegerField,
-                (child) -> (child instanceof IntAttribute || child instanceof StringAttribute) &&
-                          child.getName().equals(ATTR_MIN_VALUE)
-            );
+                "field.int",              // Parent pattern
+                "attr.*[minValue]",       // Child pattern (allows int or string)
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: IntegerField CAN have maxValue attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "integerfield.maxvalue.placement",
                 "IntegerField can optionally have maxValue attribute",
-                (metadata) -> metadata instanceof IntegerField,
-                (child) -> (child instanceof IntAttribute || child instanceof StringAttribute) &&
-                          child.getName().equals(ATTR_MAX_VALUE)
-            );
+                "field.int",              // Parent pattern
+                "attr.*[maxValue]",       // Child pattern (allows int or string)
+                true                      // Allowed
+            ));
 
             log.debug("Registered IntegerField-specific constraints using consolidated registry");
 

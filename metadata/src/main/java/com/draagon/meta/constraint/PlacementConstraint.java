@@ -1,142 +1,89 @@
 package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
-import java.util.function.Predicate;
 
 /**
- * PlacementConstraint defines WHERE a MetaData type can be placed in the metadata hierarchy.
- * Supports both simple string patterns (for easy generator integration) and predicate-based
- * matching (for existing code compatibility).
+ * Placement constraint that's easy to serialize to schemas.
+ * Uses string patterns instead of functional predicates to define where
+ * metadata can be placed in the hierarchy.
  *
- * Pattern Examples:
- * - "object.*" - any object subtype
- * - "field.string" - specific field.string subtype
- * - "metadata.root" - specific metadata root type
+ * Pattern syntax:
+ * - "field.*" - any field subtype
+ * - "object.pojo" - specific object.pojo type
+ * - "attr.string[maxLength]" - specific attr.string with name "maxLength"
+ * - "*" - matches anything
  *
- * Abstract Requirements:
- * - MUST_BE_ABSTRACT: Child must have isAbstract=true (default for metadata.root)
- * - MUST_BE_CONCRETE: Child must have isAbstract=false
- * - ANY: Can be abstract or concrete (default for most cases)
+ * Example usage:
+ * - Allow maxLength on string fields:
+ *   new PlacementConstraint("field.string.maxLength", "String fields can have maxLength",
+ *                          "field.string", "attr.int[maxLength]", true)
+ * - Forbid script tags on string fields:
+ *   new PlacementConstraint("field.string.script", "String fields cannot contain script",
+ *                          "field.string", "attr.*[script]", false)
  */
 public class PlacementConstraint implements Constraint {
 
-    // Pattern-based fields (for simple generator integration)
+    private final String constraintId;
+    private final String description;
     private final String parentPattern;
     private final String childPattern;
-    private final PlacementPolicy policy;
-    private final AbstractRequirement abstractRequirement;
-
-    // Predicate-based fields (for existing code compatibility)
-    private final String id;
-    private final String description;
-    private final Predicate<MetaData> parentMatcher;
-    private final Predicate<MetaData> childMatcher;
-
-    // Track which constructor was used
-    private final boolean usePatterns;
+    private final boolean allowed;
 
     /**
-     * Create a placement constraint with simple pattern matching (NEW APPROACH)
-     * @param parentPattern Pattern for parent type (e.g., "object.*", "metadata.root")
-     * @param childPattern Pattern for child type (e.g., "field.*", "attr.string")
-     * @param policy Whether this placement is ALLOWED or FORBIDDEN
-     */
-    public PlacementConstraint(String parentPattern, String childPattern, PlacementPolicy policy) {
-        this(parentPattern, childPattern, policy, AbstractRequirement.ANY);
-    }
-
-    /**
-     * Create a placement constraint with abstract requirements (NEW APPROACH)
-     * @param parentPattern Pattern for parent type (e.g., "object.*", "metadata.root")
-     * @param childPattern Pattern for child type (e.g., "field.*", "attr.string")
-     * @param policy Whether this placement is ALLOWED or FORBIDDEN
-     * @param abstractRequirement Whether child must be abstract, concrete, or either
-     */
-    public PlacementConstraint(String parentPattern, String childPattern,
-                              PlacementPolicy policy, AbstractRequirement abstractRequirement) {
-        this.parentPattern = parentPattern;
-        this.childPattern = childPattern;
-        this.policy = policy;
-        this.abstractRequirement = abstractRequirement;
-
-        // Pattern-based approach
-        this.usePatterns = true;
-        this.id = null;
-        this.description = null;
-        this.parentMatcher = null;
-        this.childMatcher = null;
-    }
-
-    /**
-     * Create a placement constraint with predicate matching (EXISTING CODE COMPATIBILITY)
-     * @param id Unique constraint identifier
+     * Create a placement constraint
+     * @param constraintId Unique identifier
      * @param description Human-readable description
-     * @param parentMatcher Predicate to match parent MetaData
-     * @param childMatcher Predicate to match child MetaData
+     * @param parentPattern Pattern for parent type (e.g., "field.string", "object.*")
+     * @param childPattern Pattern for child type (e.g., "attr.int[maxLength]", "field.*")
+     * @param allowed Whether this placement is allowed (true) or forbidden (false)
      */
-    public PlacementConstraint(String id, String description,
-                              Predicate<MetaData> parentMatcher,
-                              Predicate<MetaData> childMatcher) {
-        // Predicate-based approach
-        this.id = id;
+    public PlacementConstraint(String constraintId, String description,
+                              String parentPattern, String childPattern, boolean allowed) {
+        this.constraintId = constraintId;
         this.description = description;
-        this.parentMatcher = parentMatcher;
-        this.childMatcher = childMatcher;
-        this.usePatterns = false;
-
-        // Default values for pattern-based fields
-        this.parentPattern = null;
-        this.childPattern = null;
-        this.policy = PlacementPolicy.ALLOWED; // Default to ALLOWED
-        this.abstractRequirement = AbstractRequirement.ANY; // Default to ANY
+        this.parentPattern = parentPattern != null ? parentPattern : "*";
+        this.childPattern = childPattern != null ? childPattern : "*";
+        this.allowed = allowed;
     }
 
     /**
-     * Check if a parent matches this constraint
-     * @param parent The parent MetaData
-     * @return True if parent matches this constraint
-     */
-    public boolean matchesParentPattern(MetaData parent) {
-        if (usePatterns) {
-            return matchesPattern(parent, parentPattern);
-        } else {
-            return parentMatcher != null && parentMatcher.test(parent);
-        }
-    }
-
-    /**
-     * Check if a child matches this constraint
-     * @param child The child MetaData
-     * @return True if child matches this constraint
-     */
-    public boolean matchesChildPattern(MetaData child) {
-        if (usePatterns) {
-            return matchesPattern(child, childPattern);
-        } else {
-            return childMatcher != null && childMatcher.test(child);
-        }
-    }
-
-    /**
-     * Check if this constraint applies to the given parent-child relationship
+     * Check if this constraint applies to a parent-child relationship
      * @param parent The parent MetaData
      * @param child The child MetaData
-     * @return True if this constraint should be checked for this relationship
+     * @return True if this constraint should be checked
      */
     public boolean appliesTo(MetaData parent, MetaData child) {
-        return matchesParentPattern(parent) && matchesChildPattern(child);
+        return matchesPattern(parent, parentPattern) && matchesPattern(child, childPattern);
     }
 
     /**
-     * Check if a MetaData matches a pattern like "object.*" or "field.string"
-     * @param metaData The MetaData to check
-     * @param pattern The pattern to match (type.subtype or type.*)
-     * @return True if the MetaData matches the pattern
+     * Check if a MetaData matches a pattern
+     * Supported patterns:
+     * - "type.*" - any subtype of type
+     * - "type.subtype" - specific type.subtype
+     * - "type.subtype[name]" - specific type.subtype with specific name
+     * - "*" - matches anything
+     *
+     * @param metaData MetaData to check
+     * @param pattern Pattern to match
+     * @return True if matches
      */
     private boolean matchesPattern(MetaData metaData, String pattern) {
-        if (pattern == null) return false;
+        if ("*".equals(pattern)) return true;
+        if (metaData == null || pattern == null) return false;
 
-        String[] parts = pattern.split("\\.");
+        // Extract name constraint if present: "type.subtype[name]"
+        String nameConstraint = null;
+        String typePattern = pattern;
+
+        if (pattern.contains("[") && pattern.endsWith("]")) {
+            int bracketIndex = pattern.indexOf("[");
+            typePattern = pattern.substring(0, bracketIndex);
+            nameConstraint = pattern.substring(bracketIndex + 1, pattern.length() - 1);
+        }
+
+        // Parse type.subtype pattern
+        String[] parts = typePattern.split("\\.");
         if (parts.length != 2) {
             return false; // Invalid pattern
         }
@@ -145,21 +92,27 @@ public class PlacementConstraint implements Constraint {
         String patternSubType = parts[1];
 
         // Check type match
-        if (!patternType.equals(metaData.getType())) {
+        if (!"*".equals(patternType) && !patternType.equals(metaData.getType())) {
             return false;
         }
 
-        // Check subtype match (* means any subtype)
-        if ("*".equals(patternSubType)) {
-            return true;
+        // Check subtype match
+        if (!"*".equals(patternSubType) && !patternSubType.equals(metaData.getSubType())) {
+            return false;
         }
 
-        return patternSubType.equals(metaData.getSubType());
+        // Check name constraint if present
+        if (nameConstraint != null) {
+            if (!"*".equals(nameConstraint) && !nameConstraint.equals(metaData.getName())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
-    public void validate(MetaData metaData, Object value)
-            throws ConstraintViolationException {
+    public void validate(MetaData metaData, Object value) throws ConstraintViolationException {
         // PlacementConstraints are validated during addChild operations, not during value validation
         throw new UnsupportedOperationException(
             "PlacementConstraint validation should be called via appliesTo(), not validate()");
@@ -172,93 +125,57 @@ public class PlacementConstraint implements Constraint {
 
     @Override
     public String getDescription() {
-        if (usePatterns) {
-            return String.format("%s %s can %s %s",
-                parentPattern,
-                policy == PlacementPolicy.ALLOWED ? "can contain" : "cannot contain",
-                abstractRequirement == AbstractRequirement.MUST_BE_ABSTRACT ? "abstract" :
-                abstractRequirement == AbstractRequirement.MUST_BE_CONCRETE ? "concrete" : "any",
-                childPattern);
-        } else {
-            return description != null ? description : "Predicate-based placement constraint";
-        }
+        return description;
     }
 
     /**
-     * Get the constraint ID (for predicate-based constraints)
-     * @return The constraint ID or a generated one for pattern-based constraints
+     * Get the constraint ID
+     * @return Unique constraint identifier
      */
-    public String getId() {
-        if (usePatterns) {
-            return parentPattern + "->" + childPattern;
-        } else {
-            return id;
-        }
+    public String getConstraintId() {
+        return constraintId;
     }
 
     /**
-     * Get the parent pattern (for pattern-based constraints)
-     * @return The parent pattern string (e.g., "object.*")
+     * Get the parent pattern
+     * @return Pattern for parent types
      */
     public String getParentPattern() {
         return parentPattern;
     }
 
     /**
-     * Get the child pattern (for pattern-based constraints)
-     * @return The child pattern string (e.g., "field.*")
+     * Get the child pattern
+     * @return Pattern for child types
      */
     public String getChildPattern() {
         return childPattern;
     }
 
     /**
-     * Get the placement policy
-     * @return Whether this placement is ALLOWED or FORBIDDEN
-     */
-    public PlacementPolicy getPolicy() {
-        return policy;
-    }
-
-    /**
      * Check if this placement is allowed
-     * @return True if policy is ALLOWED
+     * @return True if allowed, false if forbidden
      */
     public boolean isAllowed() {
-        return policy == PlacementPolicy.ALLOWED;
+        return allowed;
     }
 
     /**
-     * Get the abstract requirement
-     * @return The abstract requirement for this placement
+     * Check if this placement is forbidden
+     * @return True if forbidden, false if allowed
      */
-    public AbstractRequirement getAbstractRequirement() {
-        return abstractRequirement;
-    }
-
-    /**
-     * Check if this constraint uses pattern-based matching
-     * @return True if pattern-based, false if predicate-based
-     */
-    public boolean usePatternMatching() {
-        return usePatterns;
+    public boolean isForbidden() {
+        return !allowed;
     }
 
     @Override
     public String toString() {
-        if (usePatterns) {
-            return "PlacementConstraint{" +
-                   "parent='" + parentPattern + '\'' +
-                   ", child='" + childPattern + '\'' +
-                   ", policy=" + policy +
-                   ", abstract=" + abstractRequirement +
-                   '}';
-        } else {
-            return "PlacementConstraint{" +
-                   "id='" + id + '\'' +
-                   ", description='" + description + '\'' +
-                   ", predicate-based=true" +
-                   '}';
-        }
+        return "PlacementConstraint{" +
+               "id='" + constraintId + '\'' +
+               ", parent='" + parentPattern + '\'' +
+               ", child='" + childPattern + '\'' +
+               ", allowed=" + allowed +
+               ", description='" + description + '\'' +
+               '}';
     }
 }

@@ -10,6 +10,8 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.BooleanAttribute;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.RegexConstraint;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.validator.MetaValidator;
@@ -833,25 +835,24 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         try {
 
             // PLACEMENT CONSTRAINT: All fields CAN have required attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "field.required.placement",
                 "Fields can optionally have required attribute",
-                (metadata) -> metadata instanceof MetaField,
-                (child) -> child instanceof com.draagon.meta.attr.BooleanAttribute &&
-                          child.getName().equals(ATTR_REQUIRED)
-            );
+                "field.*",                  // Parent pattern (any field subtype)
+                "attr.boolean[required]",   // Child pattern
+                true                        // Allowed
+            ));
 
             // VALIDATION CONSTRAINT: Field names must follow identifier pattern
-            registry.registerValidationConstraint(
+            registry.addConstraint(new RegexConstraint(
                 "field.naming.pattern",
                 "Field names must follow identifier pattern",
-                (metadata) -> metadata instanceof MetaField,
-                (metadata, value) -> {
-                    String name = metadata.getName();
-                    if (name == null) return false;
-                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                }
-            );
+                "field",                    // Target type
+                "*",                        // Any subtype
+                "*",                        // Any field name
+                "^[a-zA-Z][a-zA-Z0-9_]*$",  // Identifier pattern
+                false                       // Don't allow null (required)
+            ));
             log.debug("Registered cross-cutting field constraints using consolidated registry");
 
         } catch (Exception e) {

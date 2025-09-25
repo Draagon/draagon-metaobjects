@@ -4,7 +4,7 @@ import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.json.JsonDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.constraint.PlacementConstraint;
-import com.draagon.meta.constraint.ValidationConstraint;
+import com.draagon.meta.constraint.CustomConstraint;
 import com.draagon.meta.constraint.Constraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.TypeDefinition;
@@ -44,7 +44,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
     // Registry-based type discovery
     private MetaDataRegistry typeRegistry;
     private List<PlacementConstraint> placementConstraints;
-    private List<ValidationConstraint> validationConstraints;
+    private List<CustomConstraint> validationConstraints;
 
     public MetaDataFileSchemaWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
         super(loader, out);

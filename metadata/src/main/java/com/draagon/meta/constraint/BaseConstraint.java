@@ -1,14 +1,13 @@
-package com.draagon.meta.constraint.simple;
+package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.constraint.Constraint;
 
 /**
- * Base class for simple, schema-friendly constraints.
+ * Base class for schema-friendly constraints.
  * These constraints use declarative data instead of functional interfaces,
  * making them easy to serialize to XSD, JSON Schema, and AI documentation.
  *
- * Simple constraints specify their target via string patterns instead of predicates:
+ * Constraints specify their target via string patterns instead of predicates:
  * - targetType: "field", "object", "attr", etc.
  * - targetSubType: "string", "int", "*" (for any subtype)
  * - targetName: "maxLength", "required", "*" (for any name)
@@ -16,7 +15,7 @@ import com.draagon.meta.constraint.Constraint;
  * This allows schema generators to easily extract constraint information
  * without needing to execute functional interface logic.
  */
-public abstract class SimpleConstraint implements Constraint {
+public abstract class BaseConstraint implements Constraint {
 
     protected final String constraintId;
     protected final String description;
@@ -25,15 +24,15 @@ public abstract class SimpleConstraint implements Constraint {
     protected final String targetName;
 
     /**
-     * Create a simple constraint
+     * Create a base constraint
      * @param constraintId Unique identifier for this constraint
      * @param description Human-readable description
      * @param targetType MetaData type this applies to ("field", "object", "attr", "*")
      * @param targetSubType MetaData subType this applies to ("string", "int", "*")
      * @param targetName MetaData name this applies to ("maxLength", "required", "*")
      */
-    protected SimpleConstraint(String constraintId, String description,
-                             String targetType, String targetSubType, String targetName) {
+    protected BaseConstraint(String constraintId, String description,
+                           String targetType, String targetSubType, String targetName) {
         this.constraintId = constraintId;
         this.description = description;
         this.targetType = targetType != null ? targetType : "*";

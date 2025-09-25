@@ -9,6 +9,8 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.constraint.CustomConstraint;
+import com.draagon.meta.constraint.PlacementConstraint;
 // Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
@@ -91,34 +93,34 @@ public class StringField extends PrimitiveField<String> {
     private static void setupStringFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: StringField CAN have maxLength attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "stringfield.maxlength.placement",
                 "StringField can optionally have maxLength attribute",
-                (metadata) -> metadata instanceof StringField,
-                (child) -> child instanceof IntAttribute &&
-                          child.getName().equals(ATTR_MAX_LENGTH)
-            );
+                "field.string",           // Parent pattern
+                "attr.int[maxLength]",    // Child pattern
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: StringField CAN have minLength attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "stringfield.minlength.placement",
                 "StringField can optionally have minLength attribute",
-                (metadata) -> metadata instanceof StringField,
-                (child) -> child instanceof IntAttribute &&
-                          child.getName().equals(ATTR_MIN_LENGTH)
-            );
+                "field.string",           // Parent pattern
+                "attr.int[minLength]",    // Child pattern
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: StringField CAN have pattern attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "stringfield.pattern.placement",
                 "StringField can optionally have pattern attribute",
-                (metadata) -> metadata instanceof StringField,
-                (child) -> child instanceof StringAttribute &&
-                          child.getName().equals(ATTR_PATTERN)
-            );
+                "field.string",           // Parent pattern
+                "attr.string[pattern]",   // Child pattern
+                true                      // Allowed
+            ));
 
-            // VALIDATION CONSTRAINT: Pattern validation for string fields
-            registry.registerValidationConstraint(
+            // CUSTOM CONSTRAINT: Pattern validation for string fields (cannot be done declaratively)
+            registry.addConstraint(new CustomConstraint(
                 "stringfield.pattern.validation",
                 "StringField pattern attribute must be valid regex",
                 (metadata) -> metadata instanceof StringField && metadata.hasMetaAttr(ATTR_PATTERN),
@@ -133,8 +135,9 @@ public class StringField extends PrimitiveField<String> {
                     } catch (java.util.regex.PatternSyntaxException e) {
                         return false;
                     }
-                }
-            );
+                },
+                "Validates regex pattern syntax using Pattern.compile()"
+            ));
 
             log.debug("Registered StringField-specific constraints using consolidated registry");
 

@@ -1,18 +1,17 @@
-package com.draagon.meta.constraint.simple;
+package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.constraint.ConstraintViolationException;
 
 /**
- * Simple required field validation constraint that's easy to serialize to schemas.
+ * Required field validation constraint that's easy to serialize to schemas.
  *
  * Example usage:
- * - Field names required: new SimpleRequiredConstraint("field.name.required", "Field names are required",
- *                                                     "field", "*", "name")
- * - Type required: new SimpleRequiredConstraint("metadata.type.required", "Type is required",
- *                                               "*", "*", "type")
+ * - Field names required: new RequiredConstraint("field.name.required", "Field names are required",
+ *                                               "field", "*", "name")
+ * - Type required: new RequiredConstraint("metadata.type.required", "Type is required",
+ *                                         "*", "*", "type")
  */
-public class SimpleRequiredConstraint extends SimpleConstraint {
+public class RequiredConstraint extends BaseConstraint {
 
     /**
      * Create a required constraint
@@ -22,8 +21,8 @@ public class SimpleRequiredConstraint extends SimpleConstraint {
      * @param targetSubType Target subtype pattern
      * @param targetName Target name pattern
      */
-    public SimpleRequiredConstraint(String constraintId, String description,
-                                  String targetType, String targetSubType, String targetName) {
+    public RequiredConstraint(String constraintId, String description,
+                             String targetType, String targetSubType, String targetName) {
         super(constraintId, description, targetType, targetSubType, targetName);
     }
 
@@ -54,7 +53,7 @@ public class SimpleRequiredConstraint extends SimpleConstraint {
 
     @Override
     public String getType() {
-        return "simple-required";
+        return "required";
     }
 
     /**
@@ -67,7 +66,7 @@ public class SimpleRequiredConstraint extends SimpleConstraint {
 
     @Override
     public String toString() {
-        return "SimpleRequiredConstraint{" +
+        return "RequiredConstraint{" +
                "id='" + constraintId + '\'' +
                ", target=" + getTargetDescription() +
                ", description='" + description + '\'' +

@@ -10,6 +10,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.LongAttribute;
 import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -75,22 +76,22 @@ public class LongField extends PrimitiveField<Long> {
     private static void registerLongFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: LongField CAN have minValue attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "longfield.minvalue.placement",
                 "LongField can optionally have minValue attribute",
-                (metadata) -> metadata instanceof LongField,
-                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) &&
-                          child.getName().equals(ATTR_MIN_VALUE)
-            );
+                "field.long",             // Parent pattern
+                "attr.*[minValue]",       // Child pattern (allows long or string)
+                true                      // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: LongField CAN have maxValue attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "longfield.maxvalue.placement",
                 "LongField can optionally have maxValue attribute",
-                (metadata) -> metadata instanceof LongField,
-                (child) -> (child instanceof LongAttribute || child instanceof StringAttribute) &&
-                          child.getName().equals(ATTR_MAX_VALUE)
-            );
+                "field.long",             // Parent pattern
+                "attr.*[maxValue]",       // Child pattern (allows long or string)
+                true                      // Allowed
+            ));
 
             log.debug("Registered LongField-specific constraints using consolidated registry");
 

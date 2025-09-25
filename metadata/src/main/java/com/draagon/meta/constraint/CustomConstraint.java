@@ -1,8 +1,6 @@
-package com.draagon.meta.constraint.simple;
+package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.constraint.Constraint;
-import com.draagon.meta.constraint.ConstraintViolationException;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -16,16 +14,16 @@ import java.util.function.Predicate;
  * that cannot be serialized to XSD or JSON Schema.
  *
  * Usage guidelines:
- * - Use simple constraints (SimpleRegexConstraint, SimpleLengthConstraint, etc.) whenever possible
- * - Only use CustomLogicConstraint when validation logic cannot be expressed declaratively
- * - Schema generators will skip CustomLogicConstraints and document them as "custom validation"
+ * - Use simple constraints (RegexConstraint, LengthConstraint, etc.) whenever possible
+ * - Only use CustomConstraint when validation logic cannot be expressed declaratively
+ * - Schema generators will skip CustomConstraints and document them as "custom validation"
  *
  * Example usage:
  * - Cross-reference validation: Ensure foreign key references exist
  * - Complex business rules: Validate field combinations based on state
  * - Dynamic validation: Rules that depend on runtime configuration
  */
-public class CustomLogicConstraint implements Constraint {
+public class CustomConstraint implements Constraint {
 
     private final String constraintId;
     private final String description;
@@ -41,7 +39,7 @@ public class CustomLogicConstraint implements Constraint {
      * @param validator Predicate to validate values
      * @param logicDescription Description of the custom logic for documentation
      */
-    public CustomLogicConstraint(String constraintId, String description,
+    public CustomConstraint(String constraintId, String description,
                                Predicate<MetaData> applicabilityTest,
                                BiPredicate<MetaData, Object> validator,
                                String logicDescription) {
@@ -50,6 +48,19 @@ public class CustomLogicConstraint implements Constraint {
         this.applicabilityTest = applicabilityTest;
         this.validator = validator;
         this.logicDescription = logicDescription != null ? logicDescription : "Custom validation logic";
+    }
+
+    /**
+     * Create a custom constraint (for backwards compatibility)
+     * @param constraintId Unique identifier
+     * @param description Human-readable description
+     * @param applicabilityTest Predicate to determine which MetaData this applies to
+     * @param validator Predicate to validate values
+     */
+    public CustomConstraint(String constraintId, String description,
+                               Predicate<MetaData> applicabilityTest,
+                               BiPredicate<MetaData, Object> validator) {
+        this(constraintId, description, applicabilityTest, validator, "Custom validation logic");
     }
 
     /**
@@ -88,7 +99,7 @@ public class CustomLogicConstraint implements Constraint {
 
     @Override
     public String getType() {
-        return "custom-logic";
+        return "custom";
     }
 
     @Override
@@ -138,7 +149,7 @@ public class CustomLogicConstraint implements Constraint {
 
     @Override
     public String toString() {
-        return "CustomLogicConstraint{" +
+        return "CustomConstraint{" +
                "id='" + constraintId + '\'' +
                ", logicDescription='" + logicDescription + '\'' +
                ", description='" + description + '\'' +

@@ -2,6 +2,9 @@ package com.draagon.meta.object;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.constraint.CustomConstraint;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.RegexConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
@@ -550,55 +553,61 @@ public abstract class MetaObject extends MetaData {
         try {
 
             // PLACEMENT CONSTRAINT: Objects CAN contain fields
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "object.fields.placement",
                 "Objects can contain fields",
-                (metadata) -> metadata instanceof MetaObject,
-                (child) -> child instanceof MetaField
-            );
+                "object.*",     // Parent pattern (any object subtype)
+                "field.*",      // Child pattern (any field subtype)
+                true            // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain attributes
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "object.attributes.placement",
                 "Objects can contain attributes",
-                (metadata) -> metadata instanceof MetaObject,
-                (child) -> child instanceof MetaAttribute
-            );
+                "object.*",     // Parent pattern (any object subtype)
+                "attr.*",       // Child pattern (any attribute subtype)
+                true            // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain keys
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "object.keys.placement",
                 "Objects can contain keys (primary, foreign, secondary)",
-                (metadata) -> metadata instanceof MetaObject,
-                (child) -> child instanceof MetaKey
-            );
+                "object.*",     // Parent pattern (any object subtype)
+                "key.*",        // Child pattern (any key subtype)
+                true            // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain validators
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "object.validators.placement",
                 "Objects can contain validators",
-                (metadata) -> metadata instanceof MetaObject,
-                (child) -> child instanceof com.draagon.meta.validator.MetaValidator
-            );
+                "object.*",     // Parent pattern (any object subtype)
+                "validator.*",  // Child pattern (any validator subtype)
+                true            // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain views
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "object.views.placement",
                 "Objects can contain views",
-                (metadata) -> metadata instanceof MetaObject,
-                (child) -> child instanceof com.draagon.meta.view.MetaView
-            );
+                "object.*",     // Parent pattern (any object subtype)
+                "view.*",       // Child pattern (any view subtype)
+                true            // Allowed
+            ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain nested objects
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "object.nested.placement",
                 "Objects can contain nested objects",
-                (metadata) -> metadata instanceof MetaObject,
-                (child) -> child instanceof MetaObject
-            );
+                "object.*",     // Parent pattern (any object subtype)
+                "object.*",     // Child pattern (any object subtype)
+                true            // Allowed
+            ));
 
-            // VALIDATION CONSTRAINT: Unique field names within object (applies to all objects)
-            registry.registerValidationConstraint(
+            // CUSTOM CONSTRAINT: Unique field names within object (complex business logic)
+            registry.addConstraint(new CustomConstraint(
                 "object.field.uniqueness",
                 "Field names must be unique within an object",
                 (metadata) -> metadata instanceof MetaObject,
@@ -612,20 +621,20 @@ public abstract class MetaObject extends MetaData {
                         return fieldNames.size() == fieldList.size(); // No duplicates
                     }
                     return true;
-                }
-            );
+                },
+                "Cross-field uniqueness validation requiring field collection comparison"
+            ));
 
             // VALIDATION CONSTRAINT: Object names must follow identifier pattern
-            registry.registerValidationConstraint(
+            registry.addConstraint(new RegexConstraint(
                 "object.naming.pattern",
                 "Object names must follow identifier pattern",
-                (metadata) -> metadata instanceof MetaObject,
-                (metadata, value) -> {
-                    String name = metadata.getName();
-                    if (name == null) return false;
-                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-                }
-            );
+                "object",                   // Target type
+                "*",                        // Any subtype
+                "*",                        // Any object name
+                "^[a-zA-Z][a-zA-Z0-9_]*$",  // Identifier pattern
+                false                       // Don't allow null (required)
+            ));
             if (log != null) {
                 log.debug("Registered cross-cutting object constraints using consolidated registry");
             }

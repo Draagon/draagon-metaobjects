@@ -28,7 +28,7 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
         log.info("Testing consolidated constraint registry pattern");
 
         // Verify specific base class constraints are registered
-        var allConstraints = getSharedRegistry().getAllConstraints();
+        var allConstraints = getSharedRegistry().getAllValidationConstraints();
 
         // Check for MetaField constraints
         boolean foundFieldNaming = allConstraints.stream()
@@ -67,14 +67,14 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
         log.info("Consolidated registry stats: {}", stats);
 
         // Check for specific constraint types
-        var allConstraints = getSharedRegistry().getAllConstraints();
+        var allConstraints = getSharedRegistry().getAllValidationConstraints();
         var placementConstraints = allConstraints.stream()
-            .filter(c -> c.getValidationDescription().contains("can optionally have"))
+            .filter(c -> c.getDescription().contains("can optionally have"))
             .count();
         var validationConstraints = allConstraints.stream()
-            .filter(c -> c.getValidationDescription().contains("must") ||
-                        c.getValidationDescription().contains("pattern") ||
-                        c.getValidationDescription().contains("validation"))
+            .filter(c -> c.getDescription().contains("must") ||
+                        c.getDescription().contains("pattern") ||
+                        c.getDescription().contains("validation"))
             .count();
 
         assertTrue("Should have placement constraints", placementConstraints > 0);
@@ -87,7 +87,7 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
     @Test
     public void testStringFieldConstraints() {
         // Test that StringField constraints are properly loaded in consolidated registry
-        var allConstraints = getSharedRegistry().getAllConstraints();
+        var allConstraints = getSharedRegistry().getAllValidationConstraints();
 
         // Look for StringField-specific constraints
         boolean foundMaxLengthPlacement = allConstraints.stream()
@@ -138,7 +138,7 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
 
         // Test that we can access both types and constraints from same registry
         var registeredTypes = getSharedRegistry().getRegisteredTypes();
-        var allConstraints = getSharedRegistry().getAllConstraints();
+        var allConstraints = getSharedRegistry().getAllValidationConstraints();
 
         assertFalse("Should have registered types", registeredTypes.isEmpty());
         assertFalse("Should have registered constraints", allConstraints.isEmpty());
@@ -147,7 +147,7 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
     @Test
     public void testConstraintValidation() {
         // Test that constraints can validate metadata
-        var allConstraints = getSharedRegistry().getAllConstraints();
+        var allConstraints = getSharedRegistry().getAllValidationConstraints();
 
         // Find a validation constraint to test
         var validationConstraint = allConstraints.stream()
@@ -158,10 +158,10 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
 
         var constraint = validationConstraint.get();
         log.info("Found validation constraint: {} - {}",
-                 constraint.getConstraintId(), constraint.getValidationDescription());
+                 constraint.getConstraintId(), constraint.getDescription());
 
         // Test constraint validation functionality exists
-        assertNotNull("Constraint should have validation description", constraint.getValidationDescription());
+        assertNotNull("Constraint should have validation description", constraint.getDescription());
         assertNotNull("Constraint should have constraint ID", constraint.getConstraintId());
     }
 }

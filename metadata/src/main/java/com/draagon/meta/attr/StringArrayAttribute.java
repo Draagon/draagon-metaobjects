@@ -7,6 +7,7 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.constraint.CustomConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 
 import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
@@ -49,8 +50,8 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
      * @param registry The MetaDataRegistry to use for constraint registration
      */
     private static void setupStringArrayAttributeConstraints(MetaDataRegistry registry) {
-        // VALIDATION CONSTRAINT: String array attribute format
-        registry.registerValidationConstraint(
+        // CUSTOM CONSTRAINT: String array attribute format (requires parsing)
+        registry.addConstraint(new CustomConstraint(
             "stringarrayattribute.format.validation",
             "StringArrayAttribute values must be properly formatted",
             (metadata) -> metadata instanceof StringArrayAttribute,
@@ -66,8 +67,9 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
                     }
                 }
                 return true;
-            }
-        );
+            },
+            "Validates array parsing using getValue()"
+        ));
     }
 
     /**

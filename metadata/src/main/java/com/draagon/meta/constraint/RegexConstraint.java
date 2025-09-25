@@ -1,21 +1,20 @@
-package com.draagon.meta.constraint.simple;
+package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
-import com.draagon.meta.constraint.ConstraintViolationException;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * Simple regex validation constraint that's easy to serialize to schemas.
+ * Regex validation constraint that's easy to serialize to schemas.
  *
  * Example usage:
- * - Field naming: new SimpleRegexConstraint("field.naming", "Field names must be identifiers",
- *                                          "field", "*", "*", "^[a-zA-Z][a-zA-Z0-9_]*$")
- * - Email validation: new SimpleRegexConstraint("email.format", "Must be valid email",
- *                                               "field", "string", "email", "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$")
+ * - Field naming: new RegexConstraint("field.naming", "Field names must be identifiers",
+ *                                     "field", "*", "*", "^[a-zA-Z][a-zA-Z0-9_]*$")
+ * - Email validation: new RegexConstraint("email.format", "Must be valid email",
+ *                                         "field", "string", "email", "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$")
  */
-public class SimpleRegexConstraint extends SimpleConstraint {
+public class RegexConstraint extends BaseConstraint {
 
     private final String regexPattern;
     private final Pattern compiledPattern;
@@ -30,9 +29,9 @@ public class SimpleRegexConstraint extends SimpleConstraint {
      * @param targetName Target name pattern
      * @param regexPattern Regular expression pattern to validate
      */
-    public SimpleRegexConstraint(String constraintId, String description,
-                               String targetType, String targetSubType, String targetName,
-                               String regexPattern) {
+    public RegexConstraint(String constraintId, String description,
+                          String targetType, String targetSubType, String targetName,
+                          String regexPattern) {
         this(constraintId, description, targetType, targetSubType, targetName, regexPattern, false);
     }
 
@@ -46,9 +45,9 @@ public class SimpleRegexConstraint extends SimpleConstraint {
      * @param regexPattern Regular expression pattern to validate
      * @param allowNull Whether null values are allowed
      */
-    public SimpleRegexConstraint(String constraintId, String description,
-                               String targetType, String targetSubType, String targetName,
-                               String regexPattern, boolean allowNull) {
+    public RegexConstraint(String constraintId, String description,
+                          String targetType, String targetSubType, String targetName,
+                          String regexPattern, boolean allowNull) {
         super(constraintId, description, targetType, targetSubType, targetName);
         this.regexPattern = regexPattern;
         this.allowNull = allowNull;
@@ -86,7 +85,7 @@ public class SimpleRegexConstraint extends SimpleConstraint {
 
     @Override
     public String getType() {
-        return "simple-regex";
+        return "regex";
     }
 
     /**
@@ -115,7 +114,7 @@ public class SimpleRegexConstraint extends SimpleConstraint {
 
     @Override
     public String toString() {
-        return "SimpleRegexConstraint{" +
+        return "RegexConstraint{" +
                "id='" + constraintId + '\'' +
                ", pattern='" + regexPattern + '\'' +
                ", target=" + getTargetDescription() +

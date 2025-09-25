@@ -7,6 +7,7 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.constraint.RegexConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 
 import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
@@ -47,27 +48,15 @@ public class IntAttribute extends MetaAttribute<Integer> {
      */
     private static void setupIntAttributeConstraints(com.draagon.meta.registry.MetaDataRegistry registry) {
         // VALIDATION CONSTRAINT: Integer attribute values
-        registry.registerValidationConstraint(
+        registry.addConstraint(new RegexConstraint(
             "intattribute.value.validation",
             "IntAttribute values must be valid integers",
-            (metadata) -> metadata instanceof IntAttribute,
-            (metadata, value) -> {
-                if (metadata instanceof IntAttribute) {
-                    IntAttribute intAttr = (IntAttribute) metadata;
-                    String valueStr = intAttr.getValueAsString();
-                    if (valueStr == null || valueStr.isEmpty()) {
-                        return true;
-                    }
-                    try {
-                        Integer.parseInt(valueStr);
-                        return true;
-                    } catch (NumberFormatException e) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        );
+            "attr",                     // Target type
+            "int",                      // Integer subtype
+            "*",                        // Any name
+            "^-?\\d+$",                 // Integer pattern (optional negative sign, digits)
+            true                        // Allow null/empty
+        ));
     }
 
     /**

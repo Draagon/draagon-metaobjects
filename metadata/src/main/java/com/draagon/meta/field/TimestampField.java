@@ -9,6 +9,7 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
@@ -76,13 +77,13 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
     private static void setupTimestampFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: TimestampField CAN have precision attribute
-            registry.registerPlacementConstraint(
+            registry.addConstraint(new PlacementConstraint(
                 "timestampfield.precision.placement",
                 "TimestampField can optionally have precision attribute",
-                (metadata) -> metadata instanceof TimestampField,
-                (child) -> child instanceof IntAttribute &&
-                          child.getName().equals(ATTR_PRECISION)
-            );
+                "field.timestamp",        // Parent pattern
+                "attr.int[precision]",    // Child pattern
+                true                      // Allowed
+            ));
 
             log.debug("Registered TimestampField-specific constraints using consolidated registry");
 

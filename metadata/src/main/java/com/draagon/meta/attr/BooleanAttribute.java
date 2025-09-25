@@ -7,7 +7,9 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
+import com.draagon.meta.constraint.EnumConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
+import java.util.Set;
 
 import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
 import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
@@ -31,21 +33,16 @@ public class BooleanAttribute extends MetaAttribute<Boolean>
         );
 
         // Register BooleanAttribute-specific constraints
-        registry.registerValidationConstraint(
+        registry.addConstraint(new EnumConstraint(
             "booleanattribute.value.validation",
             "BooleanAttribute values must be valid boolean strings",
-            (metadata) -> metadata instanceof BooleanAttribute,
-            (metadata, value) -> {
-                if (metadata instanceof BooleanAttribute) {
-                    BooleanAttribute boolAttr = (BooleanAttribute) metadata;
-                    String valueStr = boolAttr.getValueAsString();
-                    return valueStr == null ||
-                           "true".equalsIgnoreCase(valueStr) ||
-                           "false".equalsIgnoreCase(valueStr);
-                }
-                return true;
-            }
-        );
+            "attr",                     // Target type
+            "boolean",                  // Target subtype
+            "*",                        // Any name
+            Set.of("true", "false"),    // Allowed values
+            true,                       // Case insensitive
+            true                        // Allow null
+        ));
     }
 
     /**

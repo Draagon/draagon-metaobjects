@@ -28,7 +28,13 @@ public interface Constraint {
      * @return Description of what this constraint validates
      */
     String getDescription();
-    
+
+    /**
+     * Get the constraint ID
+     * @return Unique constraint identifier
+     */
+    String getConstraintId();
+
     /**
      * Check if this constraint is applicable to the given metadata type
      * @param metaDataType The metadata type to check
