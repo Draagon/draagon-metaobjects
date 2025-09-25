@@ -246,9 +246,9 @@ public class TypeDefinition {
             return inheritedNamedReq.matches(childType, childSubType, childName);
         }
 
-        // Check inherited wildcard requirements
+        // Check all inherited requirements (both named and wildcard)
         for (ChildRequirement inheritedReq : inheritedChildRequirements.values()) {
-            if ("*".equals(inheritedReq.getName()) && inheritedReq.matches(childType, childSubType, childName)) {
+            if (inheritedReq.matches(childType, childSubType, childName)) {
                 return true;
             }
         }

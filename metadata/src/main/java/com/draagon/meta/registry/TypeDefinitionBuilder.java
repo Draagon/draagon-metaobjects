@@ -77,9 +77,14 @@ public class TypeDefinitionBuilder {
         builder.parentType = existing.getParentType();
         builder.parentSubType = existing.getParentSubType();
 
-        // Copy direct child requirements (not inherited ones)
-        for (ChildRequirement req : existing.getDirectChildRequirements()) {
-            builder.childRequirements.put(req.getName(), req);
+        // Copy ALL child requirements (including inherited ones)
+        for (ChildRequirement req : existing.getChildRequirements()) {
+            String keyToUse = req.getName();
+            if ("*".equals(keyToUse)) {
+                // For wildcard requirements, create unique keys to avoid overwrites
+                keyToUse = "*:" + req.getExpectedType() + ":" + req.getExpectedSubType();
+            }
+            builder.childRequirements.put(keyToUse, req);
         }
 
         return builder;
