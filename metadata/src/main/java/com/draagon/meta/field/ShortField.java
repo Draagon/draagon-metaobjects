@@ -22,7 +22,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "short", description = "Short field type with numeric validation")
 @SuppressWarnings("serial")
 public class ShortField extends PrimitiveField<Short>
 {

@@ -22,7 +22,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "boolean", description = "Boolean field for true/false values")
 @SuppressWarnings("serial")
 public class BooleanField extends PrimitiveField<Boolean> {
 

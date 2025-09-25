@@ -26,7 +26,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "double", description = "Double field with numeric and precision validation")
 @SuppressWarnings("serial")
 public class DoubleField extends PrimitiveField<Double>
 {
@@ -37,15 +36,6 @@ public class DoubleField extends PrimitiveField<Double>
     public final static String ATTR_MAX_VALUE = "maxValue";
     public final static String ATTR_PRECISION = "precision";
     public final static String ATTR_SCALE = "scale";
-
-    // Static registration block - automatically registers when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register DoubleField type during class loading", e);
-        }
-    }
 
     public DoubleField( String name ) {
         super( SUBTYPE_DOUBLE, name, DataTypes.DOUBLE );

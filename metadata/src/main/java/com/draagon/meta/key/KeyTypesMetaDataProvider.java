@@ -1,0 +1,48 @@
+package com.draagon.meta.key;
+
+import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.registry.MetaDataTypeProvider;
+
+/**
+ * Key Types MetaData provider that registers all concrete key type implementations.
+ *
+ * <p>This provider registers all the concrete key types that extend key.base.
+ * It calls the registerTypes() methods on each concrete key class to ensure proper registration.</p>
+ *
+ * <h3>Key Types Registered:</h3>
+ * <ul>
+ * <li><strong>key.primary:</strong> Primary key definitions</li>
+ * <li><strong>key.foreign:</strong> Foreign key relationships</li>
+ * <li><strong>key.secondary:</strong> Secondary keys and indexes</li>
+ * </ul>
+ *
+ * <h3>Priority:</h3>
+ * <p>Priority 25 - Runs after validator types (20) but before object types (30).
+ * This ensures key.base is available before concrete key types are registered.</p>
+ *
+ * @since 6.0.0
+ */
+public class KeyTypesMetaDataProvider implements MetaDataTypeProvider {
+
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        // Register concrete key types - no more static initializers
+
+        PrimaryKey.registerTypes(registry);
+        ForeignKey.registerTypes(registry);
+        SecondaryKey.registerTypes(registry);
+
+        System.out.println("Info: Key types registered via provider");
+    }
+
+    @Override
+    public int getPriority() {
+        // Priority 25: After validator types (20), before object types (30)
+        return 25;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Key Types MetaData Provider - Registers all concrete key type implementations";
+    }
+}

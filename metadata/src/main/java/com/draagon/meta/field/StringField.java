@@ -22,7 +22,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "string", description = "String field type with length and pattern validation")
 public class StringField extends PrimitiveField<String> {
 
     private static final Logger log = LoggerFactory.getLogger(StringField.class);
@@ -40,15 +39,6 @@ public class StringField extends PrimitiveField<String> {
 
     /** Minimum length attribute for string fields */
     public static final String ATTR_MIN_LENGTH = "minLength";
-
-    // Static registration block - automatically registers when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register StringField type during class loading", e);
-        }
-    }
 
     public StringField( String name ) {
         super( SUBTYPE_STRING, name, DataTypes.STRING );
@@ -71,9 +61,9 @@ public class StringField extends PrimitiveField<String> {
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
                 // STRING-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_PATTERN, "string")
-                .optionalAttribute(ATTR_MAX_LENGTH, "int")
-                .optionalAttribute(ATTR_MIN_LENGTH, "int")
+                .optionalAttribute(ATTR_PATTERN, StringAttribute.SUBTYPE_STRING)
+                .optionalAttribute(ATTR_MAX_LENGTH, IntAttribute.SUBTYPE_INT)
+                .optionalAttribute(ATTR_MIN_LENGTH, IntAttribute.SUBTYPE_INT)
             );
 
             log.debug("Registered StringField type with unified registry");

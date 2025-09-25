@@ -24,7 +24,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "int", description = "Integer field with range validation")
 @SuppressWarnings("serial")
 public class IntegerField extends PrimitiveField<Integer> {
 
@@ -33,15 +32,6 @@ public class IntegerField extends PrimitiveField<Integer> {
     public final static String SUBTYPE_INT = "int";
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
-
-    // Static registration block - automatically registers when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register IntegerField type during class loading", e);
-        }
-    }
 
     public IntegerField( String name ) {
         super( SUBTYPE_INT, name, DataTypes.INT );

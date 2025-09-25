@@ -21,7 +21,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "float", description = "Float field with numeric and precision validation")
 @SuppressWarnings("serial")
 public class FloatField extends PrimitiveField<Float>
 {
@@ -32,18 +31,15 @@ public class FloatField extends PrimitiveField<Float>
     public final static String ATTR_MAX_VALUE = "maxValue";
     public final static String ATTR_PRECISION = "precision";
 
-    // Unified registry self-registration
-    static {
-        try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
+    public FloatField( String name ) {
+        super( SUBTYPE_FLOAT, name, DataTypes.FLOAT );
+    }
 
+    /**
+     * Register FloatField type using the standardized registerTypes() pattern.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        try {
             MetaDataRegistry.getInstance().registerType(FloatField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
                 .description("Float field with numeric and precision validation")
@@ -64,9 +60,6 @@ public class FloatField extends PrimitiveField<Float>
         }
     }
 
-    public FloatField( String name ) {
-        super( SUBTYPE_FLOAT, name, DataTypes.FLOAT );
-    }
 
     /**
      * Manually Create a FloatField

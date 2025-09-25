@@ -25,7 +25,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "long", description = "Long field with numeric validation")
 public class LongField extends PrimitiveField<Long> {
 
     private static final Logger log = LoggerFactory.getLogger(LongField.class);
@@ -33,15 +32,6 @@ public class LongField extends PrimitiveField<Long> {
     public final static String SUBTYPE_LONG = "long";
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
-
-    // Static registration block - automatically registers when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register LongField type during class loading", e);
-        }
-    }
 
     public LongField( String name ) {
         super( SUBTYPE_LONG, name, DataTypes.LONG );

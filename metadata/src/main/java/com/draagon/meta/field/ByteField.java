@@ -22,7 +22,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "byte", description = "Byte field with numeric validation")
 @SuppressWarnings("serial")
 public class ByteField extends PrimitiveField<Byte>
 {

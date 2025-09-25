@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  * @author Doug Mealing
  */
-@MetaDataType(type = "field", subType = "timestamp", description = "Timestamp field with date/time and precision validation")
 public class TimestampField extends PrimitiveField<java.util.Date> {
 
     private static final Logger log = LoggerFactory.getLogger(TimestampField.class);
