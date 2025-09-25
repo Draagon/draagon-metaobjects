@@ -3,7 +3,6 @@ package com.draagon.meta.generator.direct.metadata.file.xsd;
 import com.draagon.meta.generator.GeneratorIOException;
 import com.draagon.meta.generator.direct.metadata.xml.XMLDirectWriter;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.constraint.Constraint;
@@ -44,14 +43,12 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
 
     // Registry-based type discovery
     private MetaDataRegistry typeRegistry;
-    private ConstraintRegistry constraintRegistry;
     private List<PlacementConstraint> placementConstraints;
     private List<ValidationConstraint> validationConstraints;
 
     public MetaDataFileXSDWriter(MetaDataLoader loader, OutputStream out) throws GeneratorIOException {
         super(loader, out);
         this.typeRegistry = MetaDataRegistry.getInstance();
-        this.constraintRegistry = ConstraintRegistry.getInstance();
         this.placementConstraints = new ArrayList<>();
         this.validationConstraints = new ArrayList<>();
 
@@ -124,11 +121,11 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
     private void loadConstraintDefinitions() {
         log.info("Loading registry data for XSD generation: {} types, {} constraints",
                 typeRegistry.getRegisteredTypes().size(),
-                constraintRegistry.getAllConstraints().size());
+                typeRegistry.getAllValidationConstraints().size());
 
         // Get constraints from the unified registry
-        this.placementConstraints = constraintRegistry.getPlacementConstraints();
-        this.validationConstraints = constraintRegistry.getValidationConstraints();
+        this.placementConstraints = typeRegistry.getPlacementValidationConstraints();
+        this.validationConstraints = typeRegistry.getFieldValidationConstraints();
 
         log.debug("Registry types: {}", typeRegistry.getRegisteredTypeNames());
     }

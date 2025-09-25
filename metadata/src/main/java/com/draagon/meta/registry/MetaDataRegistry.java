@@ -3,6 +3,9 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataTypeId;
+import com.draagon.meta.constraint.Constraint;
+import com.draagon.meta.constraint.PlacementConstraint;
+import com.draagon.meta.constraint.ValidationConstraint;
 import com.draagon.meta.constraint.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +65,11 @@ public class MetaDataRegistry {
     private final Set<TypeDefinition> deferredInheritanceTypes = ConcurrentHashMap.newKeySet();
     // Unified constraint storage using enhanced ChildRequirement
     private final List<ChildRequirement> allConstraints = Collections.synchronizedList(new ArrayList<>());
+
+    // Integrated constraint system (merged from ConstraintRegistry)
+    private final List<Constraint> constraints = Collections.synchronizedList(new ArrayList<>());
+    private volatile boolean constraintsInitialized = false;
+
     private volatile boolean initialized = false;
     
     /**
@@ -1265,6 +1273,199 @@ public class MetaDataRegistry {
         }
 
         return missingBases;
+    }
+
+    // ====================== INTEGRATED CONSTRAINT SYSTEM ======================
+
+    /**
+     * Load core constraints into the registry (migrated from ConstraintRegistry)
+     */
+    private void loadCoreConstraints() {
+        if (constraintsInitialized) {
+            return;
+        }
+
+        synchronized (this) {
+            if (constraintsInitialized) {
+                return;
+            }
+
+            try {
+                // Load essential constraints using concrete classes
+                loadNamingConstraints();
+                loadPlacementConstraints();
+
+                log.info("Loaded {} core constraints using concrete constraint classes",
+                         constraints.size());
+                constraintsInitialized = true;
+
+            } catch (Exception e) {
+                log.error("Error loading core constraints: {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Load naming pattern constraints
+     */
+    private void loadNamingConstraints() {
+        // Field naming pattern constraint
+        addConstraint(new ValidationConstraint(
+            "field.naming.pattern",
+            "Field names must follow identifier pattern or be package-qualified",
+            (metadata) -> metadata instanceof com.draagon.meta.field.MetaField,
+            (metadata, value) -> {
+                String name = metadata.getName();
+                if (name == null) return false;
+                // Allow package-qualified names (contain ::) or identifier pattern
+                return name.contains("::") || name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+            }
+        ));
+
+        // Object naming pattern constraint
+        addConstraint(new ValidationConstraint(
+            "object.naming.pattern",
+            "Object names must follow identifier pattern or be package-qualified",
+            (metadata) -> metadata instanceof com.draagon.meta.object.MetaObject,
+            (metadata, value) -> {
+                String name = metadata.getName();
+                if (name == null) return false;
+                return name.contains("::") || name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+            }
+        ));
+    }
+
+    /**
+     * Load placement constraints
+     */
+    private void loadPlacementConstraints() {
+        // StringField can optionally have maxLength attribute
+        addConstraint(new PlacementConstraint(
+            "stringfield.maxlength.placement",
+            "String fields can optionally have maxLength attribute",
+            (parent) -> parent.getClass().getSimpleName().equals("StringField"),
+            (child) -> child instanceof com.draagon.meta.attr.IntAttribute &&
+                      "maxLength".equals(child.getName())
+        ));
+
+        // MetaField can optionally have required attribute
+        addConstraint(new PlacementConstraint(
+            "field.required.placement",
+            "Fields can optionally have required attribute",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.BooleanAttribute &&
+                      "required".equals(child.getName())
+        ));
+    }
+
+    /**
+     * Add a constraint to the registry
+     * @param constraint The constraint to add
+     */
+    public void addConstraint(Constraint constraint) {
+        if (constraint == null) {
+            log.warn("Attempted to add null constraint");
+            return;
+        }
+
+        constraints.add(constraint);
+        log.debug("Added constraint: {} [{}]", constraint.getType(), constraint.getDescription());
+    }
+
+    /**
+     * Get all validation constraints (unified constraint system)
+     * @return List of all registered validation constraints
+     */
+    public List<Constraint> getAllValidationConstraints() {
+        if (!constraintsInitialized) {
+            loadCoreConstraints();
+        }
+        return new ArrayList<>(constraints);
+    }
+
+    /**
+     * Get placement validation constraints (unified constraint system)
+     * @return List of placement constraints
+     */
+    public List<PlacementConstraint> getPlacementValidationConstraints() {
+        return getAllValidationConstraints().stream()
+            .filter(c -> c instanceof PlacementConstraint)
+            .map(c -> (PlacementConstraint) c)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get field validation constraints (unified constraint system)
+     * @return List of validation constraints
+     */
+    public List<ValidationConstraint> getFieldValidationConstraints() {
+        return getAllValidationConstraints().stream()
+            .filter(c -> c instanceof ValidationConstraint)
+            .map(c -> (ValidationConstraint) c)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get validation constraints by type
+     * @param constraintType The constraint type to filter by
+     * @return List of constraints matching the type
+     */
+    public List<Constraint> getValidationConstraintsByType(String constraintType) {
+        return getAllValidationConstraints().stream()
+            .filter(c -> constraintType.equals(c.getType()))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get total number of registered validation constraints
+     * @return Count of all validation constraints
+     */
+    public int getValidationConstraintCount() {
+        if (!constraintsInitialized) {
+            loadCoreConstraints();
+        }
+        return constraints.size();
+    }
+
+    /**
+     * Get summary of validation constraint types and counts
+     * @return Map of constraint type to count
+     */
+    public Map<String, Integer> getValidationConstraintTypeSummary() {
+        return getAllValidationConstraints().stream()
+            .collect(Collectors.groupingBy(
+                Constraint::getType,
+                Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+            ));
+    }
+
+    /**
+     * Register a constraint using concrete constraint classes
+     *
+     * @param constraint The constraint to register
+     */
+    public void registerConstraint(Constraint constraint) {
+        addConstraint(constraint);
+    }
+
+    /**
+     * Check if constraint providers have been loaded
+     *
+     * @return true if providers have been loaded
+     */
+    public boolean isConstraintsInitialized() {
+        return constraintsInitialized;
+    }
+
+    /**
+     * Force reload of constraint providers (primarily for testing)
+     */
+    public void reloadConstraints() {
+        synchronized (this) {
+            constraints.clear();
+            constraintsInitialized = false;
+            loadCoreConstraints();
+        }
     }
 
     /**

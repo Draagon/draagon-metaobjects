@@ -342,7 +342,7 @@ public void validateSubType(String subType) {
 ```java
 // ALWAYS search these first before adding validation:
 // 1. Self-registration static blocks in MetaData classes
-// 2. ConstraintRegistry programmatic constraints
+// 2. MetaDataRegistry integrated constraint system
 // 3. Existing PlacementConstraint/ValidationConstraint patterns
 
 // If validation needed, extend self-registration pattern:
@@ -417,17 +417,17 @@ public class StringField extends PrimitiveField<String> {
     }
 
     private static void setupStringFieldConstraints() {
-        ConstraintRegistry constraintRegistry = ConstraintRegistry.getInstance();
-        
+        MetaDataRegistry metaDataRegistry = MetaDataRegistry.getInstance();
+
         // PLACEMENT CONSTRAINT: StringField CAN have maxLength attribute
         PlacementConstraint maxLengthPlacement = new PlacementConstraint(
             "stringfield.maxlength.placement",
             "StringField can optionally have maxLength attribute",
             (metadata) -> metadata instanceof StringField,
-            (child) -> child instanceof IntAttribute && 
+            (child) -> child instanceof IntAttribute &&
                       child.getName().equals(MAX_LENGTH_ATTR_NAME)
         );
-        constraintRegistry.addConstraint(maxLengthPlacement);
+        metaDataRegistry.addValidationConstraint(maxLengthPlacement);
         
         // VALIDATION CONSTRAINT: Field naming patterns
         ValidationConstraint namingPattern = new ValidationConstraint(
@@ -439,7 +439,7 @@ public class StringField extends PrimitiveField<String> {
                 return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
             }
         );
-        constraintRegistry.addConstraint(namingPattern);
+        metaDataRegistry.addValidationConstraint(namingPattern);
     }
 }
 ```
@@ -466,10 +466,11 @@ ValidationConstraint constraint = new ValidationConstraint(
 );
 ```
 
-##### **3. Enhanced ConstraintRegistry**
-- **addConstraint()**: Programmatic constraint registration
-- **getProgrammaticConstraints()**: Query registered constraints
-- **Disabled JSON loading**: No external constraint files needed
+##### **3. Integrated Constraint System in MetaDataRegistry**
+- **addValidationConstraint()**: Programmatic constraint registration in MetaDataRegistry
+- **getAllValidationConstraints()**: Query all registered constraints from unified registry
+- **getPlacementValidationConstraints()**: Query placement constraints specifically
+- **Unified Architecture**: Constraint system integrated into MetaDataRegistry (no separate ConstraintRegistry)
 
 #### **Classes with Self-Registration Implemented**
 - ✅ **StringField**: maxLength, pattern, minLength constraints via IntAttribute/StringAttribute
@@ -544,38 +545,38 @@ public class CurrencyField extends PrimitiveField<BigDecimal> {
             (child) -> child instanceof IntAttribute && 
                       child.getName().equals("precision")
         );
-        ConstraintRegistry.getInstance().addConstraint(precisionPlacement);
+        MetaDataRegistry.getInstance().addValidationConstraint(precisionPlacement);
     }
 }
 ```
 
 **Result**: Plugin can extend the type system without modifying core code or external configuration files.
 
-## 🚀 **Constraint System Unification (v6.0.0+)**
+## 🚀 **Constraint System Integration (v6.2.0+)**
 
-### 🎯 **MAJOR ENHANCEMENT: Unified Constraint Architecture**
+### 🎯 **MAJOR ENHANCEMENT: Complete Registry Integration**
 
-**STATUS: ✅ COMPLETED** - Constraint system fully unified from dual-pattern to single-pattern approach with 3x performance improvement.
+**STATUS: ✅ COMPLETED** - Constraint system fully integrated into MetaDataRegistry, eliminating separate ConstraintRegistry and ConstraintProvider architecture.
 
-#### **What Was Unified**
-- **Before**: Dual storage (JSON + programmatic) with separate enforcement paths
-- **After**: Single `List<Constraint>` storage with unified enforcement loop
-- **Result**: 3x fewer constraint checking calls + ~500 lines dead code removed + better maintainability
+#### **What Was Integrated**
+- **Before**: Separate ConstraintRegistry with ConstraintProvider service discovery
+- **After**: Constraint system embedded directly within MetaDataRegistry
+- **Result**: Unified architecture + eliminated service provider complexity + simplified API + removed obsolete classes
 
 #### **Architectural Improvements**
 
-**Single Storage Pattern:**
+**Integrated Registry Pattern:**
 ```java
-public class ConstraintRegistry {
-    // UNIFIED: Single storage for all constraints
-    private final List<Constraint> allConstraints;
-    
-    // SIMPLIFIED: Single method to add any constraint
-    public void addConstraint(Constraint constraint) { ... }
-    
-    // FILTERED: Type-specific getters
-    public List<PlacementConstraint> getPlacementConstraints() { ... }
-    public List<ValidationConstraint> getValidationConstraints() { ... }
+public class MetaDataRegistry {
+    // INTEGRATED: Constraint storage within MetaDataRegistry
+    private final List<Constraint> constraints = Collections.synchronizedList(new ArrayList<>());
+
+    // UNIFIED: Single method to add constraints to registry
+    public void addValidationConstraint(Constraint constraint) { ... }
+
+    // FILTERED: Type-specific getters integrated into registry
+    public List<PlacementConstraint> getPlacementValidationConstraints() { ... }
+    public List<ValidationConstraint> getAllValidationConstraints() { ... }
 }
 ```
 
@@ -584,8 +585,8 @@ public class ConstraintRegistry {
 public void enforceConstraintsOnAddChild(MetaData parent, MetaData child) {
     ValidationContext context = ValidationContext.forAddChild(parent, child);
     
-    // UNIFIED: Single enforcement path for all constraints
-    List<Constraint> allConstraints = constraintRegistry.getAllConstraints();
+    // INTEGRATED: Single enforcement path using MetaDataRegistry
+    List<Constraint> allConstraints = metaDataRegistry.getAllValidationConstraints();
     
     // Process placement constraints (determine if child can be added)
     for (Constraint constraint : allConstraints) {
@@ -699,19 +700,19 @@ public class CustomBusinessConstraint implements Constraint {
 }
 
 // Register during plugin initialization
-ConstraintRegistry.getInstance().addConstraint(new CustomBusinessConstraint(...));
+MetaDataRegistry.getInstance().addValidationConstraint(new CustomBusinessConstraint(...));
 ```
 
-#### **Migration Benefits Summary**
+#### **Integration Benefits Summary**
 
-✅ **Performance**: 3x fewer constraint checking calls  
-✅ **Maintainability**: ~500 lines dead code removed  
-✅ **Architecture**: Single clear enforcement path  
-✅ **Extensibility**: Simplified plugin constraint registration  
-✅ **Compatibility**: All existing APIs preserved with @Deprecated  
-✅ **Testing**: All 129+ tests continue to pass  
+✅ **Unified Architecture**: Single MetaDataRegistry handles both types and constraints
+✅ **Simplified API**: No separate ConstraintRegistry or ConstraintProvider needed
+✅ **Reduced Complexity**: Eliminated service provider discovery complexity
+✅ **Clean Codebase**: Removed obsolete ConstraintRegistry, ConstraintFactory, ConstraintCreationException classes
+✅ **Simplified Dependencies**: No META-INF/services files for ConstraintProvider needed
+✅ **Testing**: All tests continue to pass with integrated architecture
 
-**The constraint system is now a clean, unified, high-performance architecture that maintains full backward compatibility while providing significantly better performance and maintainability.**
+**The constraint system is now fully integrated into the MetaDataRegistry architecture, eliminating separate registries while maintaining all functionality and performance characteristics.**
 
 ## Project Overview
 
@@ -1382,9 +1383,9 @@ GeneratorException.forTemplate("user.java.vm", metaObject, templateException);
 
 #### **How It Works**
 ```java
-// Constraints are loaded automatically at startup
-ConstraintRegistry.load("META-INF/constraints/core-constraints.json");      // 5 constraints
-ConstraintRegistry.load("META-INF/constraints/database-constraints.json");  // 11 constraints
+// Constraints are loaded automatically during MetaDataRegistry initialization
+MetaDataRegistry.getInstance().loadCoreConstraints();  // Core constraints loaded automatically
+// No external JSON files needed - constraints registered programmatically
 
 // Constraints enforce during construction - no explicit validation needed
 StringField field = new StringField("invalid::name"); // Contains :: violates pattern
@@ -1414,8 +1415,8 @@ loader.addChild(obj); // ❌ FAILS HERE - constraint violation immediately detec
    # Search all constraint files
    find . -name "*constraints*.json" -exec grep -l "your_validation_concept" {} \;
    
-   # Check constraint registry implementation
-   grep -r "ConstraintRegistry\|constraint" metadata/src/main/java/
+   # Check constraint implementation in MetaDataRegistry
+   grep -r "addValidationConstraint\|getAllValidationConstraints\|constraint" metadata/src/main/java/
    ```
 
 2. **Check Extensibility Impact**:
@@ -1544,7 +1545,7 @@ StringField field = new StringField("user_name_123");
 **STATUS: ALL MAJOR SYSTEMS OPERATIONAL ✅**
 
 The following critical systems have been successfully implemented and tested:
-1. **Constraint System Migration**: ✅ COMPLETE - ValidationChain → Constraint system
+1. **Constraint System Integration**: ✅ COMPLETE - ConstraintProvider eliminated, ConstraintRegistry integrated into MetaDataRegistry
 2. **ServiceLoader Issue**: ✅ FIXED - Maven plugin discovering services properly  
 3. **Code Generation**: ✅ OPERATIONAL - MetaDataFile generators working
 4. **Inline Attribute Support**: ✅ COMPLETE - JSON (@ prefix) and XML (no prefix) formats
@@ -1561,8 +1562,8 @@ The following critical systems have been successfully implemented and tested:
 2. **Inline Attributes**: Reduces metadata verbosity by ~60% with type casting support
 3. **Parse-Time Validation**: Immediate error detection for inline attribute usage
 4. **XSD Schema Support**: Updated to allow additional attributes for XML validation
-5. **Streamlined Constraints**: Removed unnecessary constraint factory architecture
-6. **Code Cleanup**: Eliminated 8+ obsolete classes (TypeConfig + MetaModel abstractions)
+5. **Constraint System Integration**: Eliminated ConstraintProvider pattern, integrated ConstraintRegistry into MetaDataRegistry
+6. **Code Cleanup**: Eliminated 11+ obsolete classes (ConstraintRegistry, ConstraintFactory, ConstraintCreationException, TypeConfig + MetaModel abstractions)
 7. **Complete Test Suite Success**: All Vehicle tests (6/6) + full cross-file reference resolution
 8. **Enhanced JsonMetaDataParser**: 296 lines of advanced inline attribute and format support
 9. **Unified Parsing**: XML and JSON parsers share consistent inline attribute handling
@@ -1847,15 +1848,15 @@ public class StringField extends PrimitiveField<String> {
 
 **CRITICAL RULE**: **NEVER add rigid validation to core types** - always use the constraint system for extensibility.
 
-#### **Constraint-Based Service Integration**
+#### **Integrated Constraint Registration**
 
 ```java
-// DatabaseConstraintProvider.java - Service adds its own constraints
-public class DatabaseConstraintProvider {
+// Database constraints registered directly in MetaDataRegistry during service initialization
+public class DatabaseServiceInitializer {
     static {
-        ConstraintRegistry registry = ConstraintRegistry.getInstance();
+        MetaDataRegistry registry = MetaDataRegistry.getInstance();
 
-        // Database service defines its own placement constraints
+        // Database service defines its own placement constraints integrated into registry
         PlacementConstraint dbTableConstraint = new PlacementConstraint(
             "database.table.placement",
             "Objects can optionally have dbTable attribute",
@@ -1863,7 +1864,7 @@ public class DatabaseConstraintProvider {
             (child) -> child instanceof StringAttribute &&
                       child.getName().equals(ATTR_DB_TABLE)
         );
-        registry.addConstraint(dbTableConstraint);
+        registry.addValidationConstraint(dbTableConstraint);
     }
 }
 ```

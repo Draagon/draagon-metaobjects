@@ -2,6 +2,7 @@ package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,12 @@ public class ConstraintEnforcer {
     private static volatile ConstraintEnforcer instance;
     private static final Object INIT_LOCK = new Object();
     
-    private final ConstraintRegistry constraintRegistry;
+    private final MetaDataRegistry metaDataRegistry;
     private final ConcurrentMap<String, Boolean> constraintCheckingEnabled;
     private boolean globalConstraintCheckingEnabled;
-    
+
     private ConstraintEnforcer() {
-        this.constraintRegistry = ConstraintRegistry.getInstance();
+        this.metaDataRegistry = MetaDataRegistry.getInstance();
         this.constraintCheckingEnabled = new ConcurrentHashMap<>();
         this.globalConstraintCheckingEnabled = true;
     }
@@ -70,7 +71,7 @@ public class ConstraintEnforcer {
         }
         
         // UNIFIED: Single enforcement path for all constraints
-        List<Constraint> allConstraints = constraintRegistry.getAllConstraints();
+        List<Constraint> allConstraints = metaDataRegistry.getAllValidationConstraints();
         
         if (allConstraints.isEmpty()) {
             log.trace("No constraints registered - allowing operation");
@@ -158,11 +159,11 @@ public class ConstraintEnforcer {
     }
     
     /**
-     * Get the constraint registry used by this enforcer
-     * @return The constraint registry
+     * Get the metadata registry used by this enforcer (which includes constraint functionality)
+     * @return The metadata registry
      */
-    public ConstraintRegistry getConstraintRegistry() {
-        return constraintRegistry;
+    public MetaDataRegistry getMetaDataRegistry() {
+        return metaDataRegistry;
     }
     
     /**

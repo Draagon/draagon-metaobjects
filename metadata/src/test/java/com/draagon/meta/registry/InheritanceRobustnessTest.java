@@ -7,7 +7,6 @@
 package com.draagon.meta.registry;
 
 import com.draagon.meta.MetaDataTypeId;
-import com.draagon.meta.constraint.ConstraintRegistry;
 import com.draagon.meta.field.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,12 +33,10 @@ public class InheritanceRobustnessTest {
     private static final Logger log = LoggerFactory.getLogger(InheritanceRobustnessTest.class);
 
     private MetaDataRegistry registry;
-    private ConstraintRegistry constraintRegistry;
 
     @Before
     public void setUp() {
         registry = MetaDataRegistry.getInstance();
-        constraintRegistry = ConstraintRegistry.getInstance();
 
         // Force registration of field types to ensure inheritance is set up
         MetaField.class.getName();
@@ -279,8 +276,10 @@ public class InheritanceRobustnessTest {
     public void testConstraintSystemIntegrationWithInheritance() {
         log.info("Testing constraint system integration with inheritance...");
 
-        // Verify constraint registry is operational
-        assertNotNull("Constraint registry should exist", constraintRegistry);
+        // Verify constraint system is operational within MetaDataRegistry
+        assertNotNull("MetaData registry should exist", registry);
+        assertTrue("Registry should have validation constraints",
+            registry.getAllValidationConstraints().size() > 0);
 
         // Create test field instances to verify inheritance + constraints work together
         try {
