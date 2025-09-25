@@ -10,9 +10,12 @@ import com.draagon.meta.field.IntegerField;
 import com.draagon.meta.field.LongField;
 import com.draagon.meta.field.StringField;
 import com.draagon.meta.manager.exp.Expression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExpressionParser
 {
+  private static final Logger log = LoggerFactory.getLogger(ExpressionParser.class);
   private static ExpressionParser instance = null;
 
   protected class ExpResult
@@ -108,7 +111,7 @@ public class ExpressionParser
         //if ( str.charAt( r.getEnd() ) != ')' )
         x = r.getEnd();
 
-        System.out.println( "END: [" + str.charAt( x ) + "] " + str.substring( x ));
+        log.debug("END: [{}] {}", str.charAt(x), str.substring(x));
 
         n = x;
       }
@@ -268,6 +271,6 @@ public class ExpressionParser
     mc.addMetaField( d );
 
     Expression exp = ExpressionParser.getInstance().parse( mc, "( time > = '10/12/2006 14:55' and ( ( id = 5 or name = 'test me!' ) and value <> 20))" );
-    System.out.println( "EXPRESSION: " + exp );
+    log.debug("EXPRESSION: {}", exp);
   }
 }

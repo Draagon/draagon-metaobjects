@@ -2,6 +2,8 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Attribute Types MetaData provider that registers all concrete attribute type implementations.
@@ -29,6 +31,8 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
  */
 public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(AttributeTypesMetaDataProvider.class);
+
     @Override
     public void registerTypes(MetaDataRegistry registry) {
         // FIRST: Register the base attribute type that all others inherit from
@@ -44,7 +48,7 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
         ClassAttribute.registerTypes(registry);
         PropertiesAttribute.registerTypes(registry);
 
-        System.out.println("Info: Attribute types registered via provider");
+        log.info("Attribute types registered via provider");
     }
 
     @Override

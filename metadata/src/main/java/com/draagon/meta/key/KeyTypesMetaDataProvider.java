@@ -2,6 +2,8 @@ package com.draagon.meta.key;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Key Types MetaData provider that registers all concrete key type implementations.
@@ -24,6 +26,8 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
  */
 public class KeyTypesMetaDataProvider implements MetaDataTypeProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(KeyTypesMetaDataProvider.class);
+
     @Override
     public void registerTypes(MetaDataRegistry registry) {
         // FIRST: Register the base key type that all others inherit from
@@ -34,7 +38,7 @@ public class KeyTypesMetaDataProvider implements MetaDataTypeProvider {
         ForeignKey.registerTypes(registry);
         SecondaryKey.registerTypes(registry);
 
-        System.out.println("Info: Key types registered via provider");
+        log.info("Key types registered via provider");
     }
 
     @Override

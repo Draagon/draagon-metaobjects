@@ -2,6 +2,8 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Field Types MetaData provider that registers all concrete field type implementations.
@@ -31,6 +33,8 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
  */
 public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(FieldTypesMetaDataProvider.class);
+
     @Override
     public void registerTypes(MetaDataRegistry registry) {
         // FIRST: Register the base field type that all others inherit from
@@ -48,7 +52,7 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
         ByteField.registerTypes(registry);
         ShortField.registerTypes(registry);
 
-        System.out.println("Info: Field types registered via provider");
+        log.info("Field types registered via provider");
     }
 
     @Override

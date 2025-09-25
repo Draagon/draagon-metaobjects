@@ -2,6 +2,8 @@ package com.draagon.meta.validator;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Validator Types MetaData provider that registers all concrete validator type implementations.
@@ -26,6 +28,8 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
  */
 public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(ValidatorTypesMetaDataProvider.class);
+
     @Override
     public void registerTypes(MetaDataRegistry registry) {
         // FIRST: Register the base validator type that all others inherit from
@@ -38,7 +42,7 @@ public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
         NumericValidator.registerTypes(registry);
         ArrayValidator.registerTypes(registry);
 
-        System.out.println("Info: Validator types registered via provider");
+        log.info("Validator types registered via provider");
     }
 
     @Override

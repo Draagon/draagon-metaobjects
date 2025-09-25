@@ -2,6 +2,8 @@ package com.draagon.meta.object.managed;
 
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * OM (Object Manager) MetaData provider that registers managed object types.
@@ -22,12 +24,14 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
  */
 public class OMMetaDataProvider implements MetaDataTypeProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(OMMetaDataProvider.class);
+
     @Override
     public void registerTypes(MetaDataRegistry registry) {
         // Register managed object type
         ManagedMetaObject.registerTypes(registry);
 
-        System.out.println("Info: OM managed types registered via provider");
+        log.info("OM managed types registered via provider");
     }
 
     @Override
