@@ -42,7 +42,7 @@ public abstract class MetaView extends MetaData {
             .optionalChild("attr", "*", "*")
         );
 
-        log.debug("Registered base MetaView type with unified registry");
+        // Registered base MetaView type with unified registry
     }
 
     public MetaView(String subtype, String name) {

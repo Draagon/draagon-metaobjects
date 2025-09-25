@@ -8,34 +8,27 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 
 /**
- * A Long Attribute
+ * A Long Attribute with provider-based registration.
  */
-@MetaDataType(type = "attr", subType = "long", description = "Long attribute for large integer numeric metadata")
 @SuppressWarnings("serial")
 public class LongAttribute extends MetaAttribute<Long> {
-    
-    private static final Logger log = LoggerFactory.getLogger(LongAttribute.class);
-    
-    public final static String TYPE_ATTR = "attr";
+
     public final static String SUBTYPE_LONG = "long";
-    
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(LongAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_LONG)
-                .description("Long attribute for numeric metadata")
-            );
-            
-            log.debug("Registered LongAttribute type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register LongAttribute type with unified registry", e);
-        }
+
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(LongAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_LONG)
+            .description("Long attribute for large integer numeric metadata")
+            .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+        );
     }
 
     /**

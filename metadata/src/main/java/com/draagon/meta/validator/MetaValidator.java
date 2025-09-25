@@ -31,29 +31,18 @@ public abstract class MetaValidator extends MetaData {
     public final static String SUBTYPE_BASE = "base";
     public final static String ATTR_MSG = "msg";
 
-    // Base validator type registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(MetaValidator.class, def -> def
-                .type(TYPE_VALIDATOR).subType(SUBTYPE_BASE)
-                .description("Base validator metadata with common validator attributes")
-                .inheritsFrom("metadata", "base")
-
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
-
-                // VALIDATOR-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_MSG, StringAttribute.SUBTYPE_STRING)
-
-                // VALIDATORS CAN CONTAIN ATTRIBUTES
-                .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")
-            );
-
-            log.debug("Registered base MetaValidator type with unified registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register MetaValidator type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(MetaValidator.class, def -> def
+            .type(TYPE_VALIDATOR).subType(SUBTYPE_BASE)
+            .description("Base validator metadata with common validator attributes")
+            .inheritsFrom("metadata", "base")
+            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
+            .optionalAttribute(ATTR_MSG, StringAttribute.SUBTYPE_STRING)
+            .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")
+        );
     }
 
     public MetaValidator(String subtype, String name) {

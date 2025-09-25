@@ -8,39 +8,31 @@ package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.commons.validator.GenericValidator;
 
-/**
- * Regular expression validator, that ensures a field value matches the specific expression mask
- */
-@MetaDataType(type = "validator", subType = "regex", description = "Regular expression validator for pattern matching")
-public class RegexValidator extends MetaValidator {
+import static com.draagon.meta.validator.MetaValidator.TYPE_VALIDATOR;
+import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
 
-    private static final Logger log = LoggerFactory.getLogger(RegexValidator.class);
+/**
+ * Regular expression validator that ensures a field value matches the specific expression mask.
+ */
+public class RegexValidator extends MetaValidator {
 
     public final static String SUBTYPE_REGEX = "regex";
 
     /** Mask attribute */
     public final static String ATTR_MASK = "mask";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(RegexValidator.class, def -> def
-                .type(TYPE_VALIDATOR).subType(SUBTYPE_REGEX)
-                .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-                .requiredAttribute(ATTR_MASK, "string")
-                .description("Regular expression validator for pattern matching")
-            );
-
-            log.debug("Registered RegexValidator type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register RegexValidator type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(RegexValidator.class, def -> def
+            .type(TYPE_VALIDATOR).subType(SUBTYPE_REGEX)
+            .description("Regular expression validator for pattern matching")
+            .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
+            .requiredAttribute(ATTR_MASK, "string")
+        );
     }
 
     public RegexValidator(String name) {

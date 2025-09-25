@@ -38,13 +38,25 @@ public class CoreMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
+    public String getProviderId() {
+        return "core-io-extensions";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // Depends on field-types and object-types for basic metadata structure
+        return new String[]{"field-types", "object-types"};
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 100: After basic types, before database services (150+)
+        // DEPRECATED: Use getDependencies() instead
         return 100;
     }
 
     @Override
     public String getDescription() {
-        return "Core MetaData Provider - Object creation, ValueObject, DataObject, and I/O extensions";
+        return "Core MetaData Provider - XML I/O and serialization extensions";
     }
 }

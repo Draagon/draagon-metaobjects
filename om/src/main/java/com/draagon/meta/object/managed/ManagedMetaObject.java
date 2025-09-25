@@ -7,34 +7,31 @@ import com.draagon.meta.manager.ObjectManager;
 import com.draagon.meta.manager.StateAwareMetaObject;
 import com.draagon.meta.object.pojo.PojoMetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.util.DataConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.object.MetaObject.TYPE_OBJECT;
+import static com.draagon.meta.object.MetaObject.SUBTYPE_BASE;
 
 import java.lang.reflect.Method;
 
-@MetaDataType(type = "object", subType = "managed", description = "Managed MetaObject with state awareness and object manager integration")
+/**
+ * Managed MetaObject with state awareness and object manager integration.
+ */
 @SuppressWarnings("serial")
 public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaObject, ManagerAwareMetaObject
 {
-    private static final Logger log = LoggerFactory.getLogger(ManagedMetaObject.class);
     public final static String CACHE_PARAM_HAS_GETTER_METHOD = "hasGetterMethod";
     public final static String CACHE_PARAM_HAS_SETTER_METHOD = "hasSetterMethod";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(ManagedMetaObject.class, def -> def
-                .type(TYPE_OBJECT).subType("managed")
-                .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
-                .description("Managed MetaObject with state awareness and object manager integration")
-            );
-
-            log.debug("Registered ManagedMetaObject type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register ManagedMetaObject type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ManagedMetaObject.class, def -> def
+            .type(TYPE_OBJECT).subType("managed")
+            .description("Managed MetaObject with state awareness and object manager integration")
+            .inheritsFrom(TYPE_OBJECT, SUBTYPE_BASE)
+        );
     }
 
     /**

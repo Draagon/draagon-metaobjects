@@ -13,16 +13,15 @@ import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.MetaDataNotFoundException;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.ViewHelper;
 import com.draagon.meta.web.view.WebView;
 import com.draagon.meta.web.view.WebViewException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.PageContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,28 +36,25 @@ import java.util.Map;
  * to the field's to insert the value from</li> <li>linkClass - (Optional) The
  * class to assign the <a> html tag</li> </ul></p>
  */
-@MetaDataType(type = "view", subType = "hotlink", description = "HTML hotlink view")
 public class HotLinkView extends HtmlView {
 
     private static final Logger log = LoggerFactory.getLogger(HotLinkView.class);
     public final static String ATTR_LINKCLASS = "linkClass";
     public final static String ATTR_URL = "url";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(HotLinkView.class, def -> def
-                .type("view").subType("hotlink")
-                .inheritsFrom("view", "base")
-                .optionalAttribute(ATTR_LINKCLASS, "string")
-                .optionalAttribute(ATTR_URL, "string")
-                .description("HTML hotlink view")
-            );
-
-            log.debug("Registered HotLinkView type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register HotLinkView type with unified registry", e);
-        }
+    /**
+     * Register HotLinkView type with registry.
+     * Called by WebMetaDataProvider during service discovery.
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(HotLinkView.class, def -> def
+            .type("view").subType("hotlink")
+            .inheritsFrom("view", "base")
+            .optionalAttribute(ATTR_LINKCLASS, "string")
+            .optionalAttribute(ATTR_URL, "string")
+            .description("HTML hotlink view")
+        );
+        // Registered HotLinkView type with unified registry
     }
 
     public HotLinkView(String name) {

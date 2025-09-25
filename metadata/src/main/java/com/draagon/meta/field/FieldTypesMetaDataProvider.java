@@ -33,8 +33,10 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Register concrete field types - no more static initializers
+        // FIRST: Register the base field type that all others inherit from
+        MetaField.registerTypes(registry);
 
+        // THEN: Register concrete field types that inherit from field.base
         StringField.registerTypes(registry);
         IntegerField.registerTypes(registry);
         LongField.registerTypes(registry);
@@ -50,8 +52,20 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
+    public String getProviderId() {
+        return "field-types";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // No dependencies - field.base inherits from metadata.base which is auto-registered
+        return new String[0];
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 10: After base types (0), before extensions (50+)
+        // DEPRECATED: Use getDependencies() instead
         return 10;
     }
 

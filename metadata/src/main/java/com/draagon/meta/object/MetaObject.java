@@ -98,7 +98,9 @@ public abstract class MetaObject extends MetaData {
             .optionalChild("view", "*", "*")
         );
 
-        log.debug("Registered base MetaObject type with unified registry");
+        if (log != null) {
+            log.debug("Registered base MetaObject type with unified registry");
+        }
 
         // Register cross-cutting object constraints using consolidated registry
         registerCrossCuttingObjectConstraints(registry);
@@ -110,7 +112,9 @@ public abstract class MetaObject extends MetaData {
     public MetaObject(String subtype, String name ) {
         super( TYPE_OBJECT, subtype, name );
         
-        log.debug("Created MetaObject: {}:{}:{}", TYPE_OBJECT, subtype, name);
+        if (log != null) {
+            log.debug("Created MetaObject: {}:{}:{}", TYPE_OBJECT, subtype, name);
+        }
     }
 
     // Note: getMetaDataClass() is now inherited from MetaData base class
@@ -197,12 +201,16 @@ public abstract class MetaObject extends MetaData {
             Object instance = newInstance(); // Call existing method
             
             
-            log.debug("Successfully created instance of {}", getName());
-            
+            if (log != null) {
+                log.debug("Successfully created instance of {}", getName());
+            }
+
             return instance;
         } catch (Exception e) {
-            
-            log.error("Failed to create instance of {}: {}", getName(), e.getMessage(), e);
+
+            if (log != null) {
+                log.error("Failed to create instance of {}: {}", getName(), e.getMessage(), e);
+            }
             throw e; // Re-throw to maintain existing behavior
         }
     }
@@ -618,10 +626,14 @@ public abstract class MetaObject extends MetaData {
                     return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
                 }
             );
-            log.debug("Registered cross-cutting object constraints using consolidated registry");
+            if (log != null) {
+                log.debug("Registered cross-cutting object constraints using consolidated registry");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register cross-cutting object constraints", e);
+            if (log != null) {
+                log.error("Failed to register cross-cutting object constraints", e);
+            }
         }
     }
 }

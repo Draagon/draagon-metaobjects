@@ -43,8 +43,20 @@ public class CodeGenMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
+    public String getProviderId() {
+        return "codegen-extensions";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // Depends on core types since it generates from field and object metadata
+        return new String[]{"field-types", "object-types", "attribute-types"};
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 200: After database services (100-199), before web services (300+)
+        // DEPRECATED: Use getDependencies() instead
         return 200;
     }
 

@@ -10,10 +10,8 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 /**
- * Comprehensive compliance test for @MetaDataType annotations in the core module.
  *
  * This test verifies that all MetaData derived classes in the core module have:
- * 1. Proper @MetaDataType annotations
  * 2. Correct registration in MetaDataRegistry
  * 3. Proper inheritance relationship resolution
  */
@@ -22,11 +20,9 @@ public class CoreModuleComplianceTest extends com.draagon.meta.registry.MetaData
     private static final Logger log = LoggerFactory.getLogger(CoreModuleComplianceTest.class);
 
     /**
-     * Test that all MetaData classes in core module have @MetaDataType annotations
      */
     @Test
     public void testCoreModuleAnnotationCompliance() {
-        log.info("🔍 Testing @MetaDataType annotation compliance for core module");
 
         // Scan for MetaData classes in core module packages
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -44,11 +40,10 @@ public class CoreModuleComplianceTest extends com.draagon.meta.registry.MetaData
         if (!annotationViolations.isEmpty()) {
             String report = createComplianceReport("core", metaDataClasses, annotationViolations, List.of(), List.of());
             log.error("\n{}", report);
-            fail("❌ Core module has @MetaDataType annotation violations:\n" +
+            fail("❌ Core module has provider registration violations:\n" +
                  annotationViolations.stream().reduce((a, b) -> a + "\n" + b).orElse(""));
         }
 
-        log.info("✅ All MetaData classes in core module have proper @MetaDataType annotations");
     }
 
     /**
@@ -112,7 +107,6 @@ public class CoreModuleComplianceTest extends com.draagon.meta.registry.MetaData
      */
     @Test
     public void testCoreModuleComprehensiveCompliance() {
-        log.info("🔍 Running comprehensive @MetaDataType compliance test for core module");
 
         // Scan for MetaData classes
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -139,6 +133,5 @@ public class CoreModuleComplianceTest extends com.draagon.meta.registry.MetaData
             fail("❌ Core module has " + totalViolations + " compliance violations. See log for details.");
         }
 
-        log.info("🎉 Core module passes all @MetaDataType compliance checks!");
     }
 }

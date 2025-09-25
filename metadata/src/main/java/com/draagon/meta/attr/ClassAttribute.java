@@ -8,33 +8,27 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 
 /**
- * A Java Class Attribute
+ * A Java Class Attribute with provider-based registration.
  */
-@MetaDataType(type = "attr", subType = "class", description = "Class attribute for Java class metadata")
 @SuppressWarnings("serial")
 public class ClassAttribute extends MetaAttribute<Class<?>> {
 
-    private static final Logger log = LoggerFactory.getLogger(ClassAttribute.class);
-
     public final static String SUBTYPE_CLASS = "class";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(ClassAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_CLASS)
-                .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
-                .description("Class attribute for Java class metadata")
-            );
-            log.debug("Registered ClassAttribute type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register ClassAttribute type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ClassAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_CLASS)
+            .description("Class attribute for Java class metadata")
+            .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+        );
     }
 
     /**

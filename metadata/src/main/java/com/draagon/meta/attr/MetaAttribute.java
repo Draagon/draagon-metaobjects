@@ -3,7 +3,6 @@ package com.draagon.meta.attr;
 import com.draagon.meta.*;
 import com.draagon.meta.util.DataConverter;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,41 +13,27 @@ import java.util.Optional;
 /**
  * An attribute of any MetaDAta with enhanced validation, metrics, and type safety
  */
-@MetaDataType(type = "attr", subType = "base", description = "Base attribute metadata with common attribute properties")
-//@SuppressWarnings("serial")
 public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, MetaDataValueHandler<T> {
-    
+
     private static final Logger log = LoggerFactory.getLogger(MetaAttribute.class);
 
     public final static String TYPE_ATTR = "attr";
     public final static String SUBTYPE_BASE = "base";
 
-    // Base attribute type registration and constraint registration
-    static {
-        try {
-            // Register base attribute type
-            MetaDataRegistry.getInstance().registerType(MetaAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_BASE)
-                .description("Base attribute metadata with common attribute properties")
-                .inheritsFrom("metadata", "base")
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        // Register base attribute type
+        registry.registerType(MetaAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_BASE)
+            .description("Base attribute metadata with common attribute properties")
+            .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
+            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.ATTR_SUBTYPE)
+        );
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
-
-                // ATTRIBUTES TYPICALLY DON'T HAVE CHILDREN (they are leaf nodes)
-                // No child requirements for base attributes
-            );
-
-            log.debug("Registered base MetaAttribute type with unified registry");
-
-            // Register cross-cutting attribute constraints using consolidated registry
-            registerCrossCuttingAttributeConstraints(MetaDataRegistry.getInstance());
-
-// VALIDATION CONSTRAINT: Attribute names must follow identifier pattern            registry.registerValidationConstraint(                "attribute.naming.pattern",                "Attribute names must follow identifier pattern",                (metadata) -> metadata instanceof MetaAttribute,                (metadata, value) -> {                    String name = metadata.getName();                    if (name == null) return false;                    return name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");                }            );
-            log.debug("Registered cross-cutting attribute constraints in MetaAttribute");
-        } catch (Exception e) {
-            log.error("Failed to register base MetaAttribute type and constraints", e);
-        }
+        // Register cross-cutting attribute constraints
+        registerCrossCuttingAttributeConstraints(registry);
     }
 
     private T value = null;
@@ -245,10 +230,11 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
                 }
             );
 
-            log.debug("Registered cross-cutting attribute constraints using consolidated registry");
+            // Registered cross-cutting attribute constraints using consolidated registry
 
         } catch (Exception e) {
-            log.error("Failed to register cross-cutting attribute constraints", e);
+            // Failed to register cross-cutting attribute constraints - logging not available during provider registration
+            throw new RuntimeException("Failed to register cross-cutting attribute constraints", e);
         }
     }
 }

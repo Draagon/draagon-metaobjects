@@ -7,24 +7,19 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.MetaDataTypeId;
-// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 
 import java.util.List;
 
 /**
- * A String Array Attribute with unified registry registration.
+ * A String Array Attribute with provider-based registration.
  */
-@MetaDataType(type = "attr", subType = "stringarray", description = "String array attribute for multiple text values")
 @SuppressWarnings("serial")
 public class StringArrayAttribute extends MetaAttribute<List<String>>
 {
-    private static final Logger log = LoggerFactory.getLogger(StringArrayAttribute.class);
-
     public final static String SUBTYPE_STRING_ARRAY = "stringarray";
 
     /**
@@ -34,24 +29,18 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
         super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY);
     }
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(StringArrayAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_STRING_ARRAY)
-                .description("String array attribute value")
-                // NO CHILD REQUIREMENTS - just registers identity
-                // Placement rules are defined by parent types that accept string array attributes
-            );
-            
-            log.debug("Registered StringArrayAttribute type with unified registry");
-            
-            // Register StringArrayAttribute-specific constraints using consolidated registry
-            setupStringArrayAttributeConstraints(MetaDataRegistry.getInstance());
-            
-        } catch (Exception e) {
-            log.error("Failed to register StringArrayAttribute type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(StringArrayAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_STRING_ARRAY)
+            .description("String array attribute for multiple text values")
+            .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+        );
+
+        // Register StringArrayAttribute-specific constraints
+        setupStringArrayAttributeConstraints(registry);
     }
     
     /**
@@ -60,32 +49,25 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
      * @param registry The MetaDataRegistry to use for constraint registration
      */
     private static void setupStringArrayAttributeConstraints(MetaDataRegistry registry) {
-        try {
-            // VALIDATION CONSTRAINT: String array attribute format
-            registry.registerValidationConstraint(
-                "stringarrayattribute.format.validation",
-                "StringArrayAttribute values must be properly formatted",
-                (metadata) -> metadata instanceof StringArrayAttribute,
-                (metadata, value) -> {
-                    if (metadata instanceof StringArrayAttribute) {
-                        StringArrayAttribute arrayAttr = (StringArrayAttribute) metadata;
-                        try {
-                            // Test if the value can be parsed as a string array
-                            arrayAttr.getValue();
-                            return true;
-                        } catch (Exception e) {
-                            return false;
-                        }
+        // VALIDATION CONSTRAINT: String array attribute format
+        registry.registerValidationConstraint(
+            "stringarrayattribute.format.validation",
+            "StringArrayAttribute values must be properly formatted",
+            (metadata) -> metadata instanceof StringArrayAttribute,
+            (metadata, value) -> {
+                if (metadata instanceof StringArrayAttribute) {
+                    StringArrayAttribute arrayAttr = (StringArrayAttribute) metadata;
+                    try {
+                        // Test if the value can be parsed as a string array
+                        arrayAttr.getValue();
+                        return true;
+                    } catch (Exception e) {
+                        return false;
                     }
-                    return true;
                 }
-            );
-
-            log.debug("Registered StringArrayAttribute-specific constraints using consolidated registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register StringArrayAttribute constraints", e);
-        }
+                return true;
+            }
+        );
     }
 
     /**

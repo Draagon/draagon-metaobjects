@@ -31,8 +31,10 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Register concrete attribute types - no more static initializers
+        // FIRST: Register the base attribute type that all others inherit from
+        MetaAttribute.registerTypes(registry);
 
+        // THEN: Register concrete attribute types that inherit from attr.base
         StringAttribute.registerTypes(registry);
         IntAttribute.registerTypes(registry);
         LongAttribute.registerTypes(registry);
@@ -46,8 +48,20 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
+    public String getProviderId() {
+        return "attribute-types";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // No dependencies - attr.base inherits from metadata.base which is auto-registered
+        return new String[0];
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 15: After field types (10), before validators (20)
+        // DEPRECATED: Use getDependencies() instead
         return 15;
     }
 

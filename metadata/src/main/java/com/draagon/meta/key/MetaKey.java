@@ -8,7 +8,6 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,9 @@ import java.util.List;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import static com.draagon.meta.object.MetaObject.ATTR_DESCRIPTION;
 
-@MetaDataType(type = "key", subType = "base", description = "Base key metadata with common key attributes")
+/**
+ * Base key metadata with common key attributes.
+ */
 public abstract class MetaKey extends MetaData {
 
     private static final Logger log = LoggerFactory.getLogger(MetaKey.class);
@@ -34,30 +35,21 @@ public abstract class MetaKey extends MetaData {
     /** Keys attribute that defines which fields form the key */
     public final static String ATTR_KEYS = "keys";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(MetaKey.class, def -> def
-                .type(TYPE_KEY).subType(SUBTYPE_BASE)
-                .description("Base key metadata with common key attributes")
-                .inheritsFrom("metadata", "base")
-
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
-
-                // KEY-LEVEL ATTRIBUTES (all key types inherit these)
-                .optionalAttribute(ATTR_KEYS, "stringArray")
-                .optionalAttribute(ATTR_DESCRIPTION, "string")
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(MetaKey.class, def -> def
+            .type(TYPE_KEY).subType(SUBTYPE_BASE)
+            .description("Base key metadata with common key attributes")
+            .inheritsFrom("metadata", "base")
+            .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+            .optionalAttribute(ATTR_KEYS, "stringArray")
+            .optionalAttribute(ATTR_DESCRIPTION, "string")
 
                 // ACCEPTS ANY ATTRIBUTES (all key types inherit these)
                 .optionalChild("attr", "*", "*")
-            );
-
-            log.debug("Registered base MetaKey type with unified registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register MetaKey type with unified registry", e);
-        }
+        );
     }
 
     public enum KeyTypes {UNKNOWN, PRIMARY, SECONDARY, LOCAL_FOREIGN, FOREIGN};

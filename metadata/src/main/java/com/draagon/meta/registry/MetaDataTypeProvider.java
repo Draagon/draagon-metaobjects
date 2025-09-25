@@ -7,24 +7,24 @@ package com.draagon.meta.registry;
  * from META-INF/services files. This enables dynamic type registration and extension
  * without configuration files or static dependencies.</p>
  *
- * <h3>Architecture Pattern:</h3>
- * <p>Provider classes should delegate to service classes that contain the actual
- * extension logic and constants. This follows the pattern:</p>
- * <pre>
- * Provider → Service Classes → registry.findType().optionalAttribute()
- * </pre>
- *
- * <h3>Implementation Guidelines:</h3>
- *
- * <p><strong>For Java ServiceLoader:</strong> Add your implementation to
- * {@code META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider}</p>
- *
- * <p><strong>For OSGI:</strong> Register as a service in your bundle activator or
- * use declarative services with {@code @Component}</p>
+ * <h3>Dependency-Based Loading:</h3>
+ * <p>Providers specify explicit dependencies instead of fragile priority numbers.
+ * The system automatically resolves the dependency graph using topological sorting
+ * to ensure proper load order.</p>
  *
  * <h3>Example Implementation:</h3>
  * <pre>{@code
  * public class DatabaseMetaDataProvider implements MetaDataTypeProvider {
+ *
+ *     @Override
+ *     public String getProviderId() {
+ *         return "database-extensions";
+ *     }
+ *
+ *     @Override
+ *     public String[] getDependencies() {
+ *         return new String[]{"core-types", "field-types"};  // Explicit dependencies
+ *     }
  *
  *     @Override
  *     public void registerTypes(MetaDataRegistry registry) {
@@ -32,39 +32,27 @@ package com.draagon.meta.registry;
  *         DatabaseService.registerTypeExtensions(registry);
  *         PostgreSQLService.registerTypeExtensions(registry);
  *     }
- *
- *     @Override
- *     public int getPriority() {
- *         return 200; // After core types (100), before plugins (300+)
- *     }
  * }
  * }</pre>
  *
- * <h3>Service Class Pattern:</h3>
- * <pre>{@code
- * public class DatabaseService {
- *     // Constants for attribute names
- *     public static final String DB_TABLE = "dbTable";
- *     public static final String DB_COLUMN = "dbColumn";
- *
- *     public static void registerTypeExtensions(MetaDataRegistry registry) {
- *         // Extend existing field types
- *         registry.findType("field", "string")
- *             .optionalAttribute(DB_COLUMN, "string");
- *
- *         registry.findType("object", "pojo")
- *             .optionalAttribute(DB_TABLE, "string");
- *     }
- * }
- * }</pre>
- *
- * <h3>Extension Priority Levels:</h3>
+ * <h3>Dependency Benefits:</h3>
  * <ul>
- * <li><strong>Core Types (0-99):</strong> Basic field, object, attribute, validator, view types</li>
- * <li><strong>Database Services (100-199):</strong> Database attributes and constraints</li>
- * <li><strong>Codegen Services (200-299):</strong> Code generation attributes</li>
- * <li><strong>Web Services (300-399):</strong> Web framework attributes</li>
- * <li><strong>Business Plugins (400+):</strong> Custom business logic extensions</li>
+ * <li><strong>Explicit Dependencies:</strong> Clear what each provider needs</li>
+ * <li><strong>Automatic Resolution:</strong> System calculates correct load order</li>
+ * <li><strong>Circular Detection:</strong> Prevents dependency cycles</li>
+ * <li><strong>Missing Detection:</strong> Warns about unresolved dependencies</li>
+ * <li><strong>Maintainable:</strong> Easy to add new providers without priority conflicts</li>
+ * </ul>
+ *
+ * <h3>Common Provider IDs:</h3>
+ * <ul>
+ * <li><strong>core-types:</strong> Basic metadata.base type</li>
+ * <li><strong>field-types:</strong> All concrete field types</li>
+ * <li><strong>object-types:</strong> All concrete object types</li>
+ * <li><strong>attribute-types:</strong> All attribute types</li>
+ * <li><strong>validator-types:</strong> All validator types</li>
+ * <li><strong>key-types:</strong> All key types</li>
+ * <li><strong>web-types:</strong> All web view types</li>
  * </ul>
  *
  * @since 6.0.0
@@ -87,23 +75,62 @@ public interface MetaDataTypeProvider {
     void registerTypes(MetaDataRegistry registry);
 
     /**
-     * Get the priority of this provider (optional).
+     * Get the unique identifier for this provider.
      *
-     * <p>Lower numbers = higher priority. Providers with higher priority
-     * are processed first during registration. This ensures proper dependency
-     * order for type extensions.</p>
+     * <p>Used for dependency resolution. Should be a short, descriptive name
+     * that other providers can reference in their getDependencies() method.</p>
      *
-     * <h3>Recommended Priority Ranges:</h3>
+     * <h3>Naming Convention:</h3>
      * <ul>
-     * <li><strong>0-99:</strong> Core types and base implementations</li>
-     * <li><strong>100-199:</strong> Database and persistence services</li>
-     * <li><strong>200-299:</strong> Code generation and schema services</li>
-     * <li><strong>300-399:</strong> Web and UI framework services</li>
-     * <li><strong>400+:</strong> Business plugins and custom extensions</li>
+     * <li>Use kebab-case: "field-types", "database-extensions"</li>
+     * <li>Be descriptive: "web-view-types" not "web"</li>
+     * <li>Include scope: "om-managed-types" not "managed"</li>
      * </ul>
      *
-     * @return Priority value (lower = higher priority)
+     * @return Unique provider identifier
      */
+    default String getProviderId() {
+        return getClass().getSimpleName().toLowerCase()
+               .replaceAll("metadataprovider$", "")
+               .replaceAll("provider$", "")
+               .replaceAll("([a-z])([A-Z])", "$1-$2")
+               .toLowerCase();
+    }
+
+    /**
+     * Get the providers that this provider depends on.
+     *
+     * <p>The dependency resolution system will ensure these providers
+     * are loaded before this provider. Returns empty array if no dependencies.</p>
+     *
+     * <h3>Dependency Examples:</h3>
+     * <ul>
+     * <li><strong>Field types</strong> depend on: ["core-types"] (for field.base)</li>
+     * <li><strong>Object types</strong> depend on: ["core-types"] (for object.base)</li>
+     * <li><strong>OM types</strong> depend on: ["object-types"] (for object.base)</li>
+     * <li><strong>Web types</strong> depend on: ["view-types"] (for view.base)</li>
+     * </ul>
+     *
+     * @return Array of provider IDs this provider depends on
+     */
+    default String[] getDependencies() {
+        return new String[0];  // No dependencies by default
+    }
+
+    /**
+     * Get the priority of this provider (DEPRECATED).
+     *
+     * <p><strong>⚠️ DEPRECATED:</strong> Use getDependencies() instead of priorities.
+     * Priority-based ordering is fragile and hard to maintain. The dependency-based
+     * system automatically calculates the correct load order.</p>
+     *
+     * <p>This method is maintained for backward compatibility but will be removed
+     * in a future version. New providers should only implement getDependencies().</p>
+     *
+     * @return Priority value (lower = higher priority)
+     * @deprecated Use {@link #getDependencies()} instead
+     */
+    @Deprecated
     default int getPriority() {
         return 100;
     }

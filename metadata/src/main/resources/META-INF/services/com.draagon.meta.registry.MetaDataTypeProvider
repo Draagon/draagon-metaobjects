@@ -1,3 +1,4 @@
+com.draagon.meta.core.CoreTypeMetaDataProvider
 com.draagon.meta.object.ObjectTypesMetaDataProvider
 com.draagon.meta.field.FieldTypesMetaDataProvider
 com.draagon.meta.attr.AttributeTypesMetaDataProvider

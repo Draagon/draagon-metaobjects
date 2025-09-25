@@ -7,75 +7,45 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
-// Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 
 /**
- * A Boolean Attribute with unified registry registration.
- *
- * @version 6.0
+ * A Boolean Attribute with provider-based registration.
  */
-@MetaDataType(type = "attr", subType = "boolean", description = "Boolean attribute for true/false metadata values")
 @SuppressWarnings("serial")
 public class BooleanAttribute extends MetaAttribute<Boolean>
 {
-    private static final Logger log = LoggerFactory.getLogger(BooleanAttribute.class);
-
     public final static String SUBTYPE_BOOLEAN = "boolean";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(BooleanAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_BOOLEAN)
-                .description("Boolean attribute for true/false metadata values")
-                
-                // Boolean attributes can be placed under any MetaData
-                // No specific child requirements
-            );
-            
-            log.debug("Registered BooleanAttribute type with unified registry");
-            
-            // Register BooleanAttribute-specific constraints using consolidated registry
-            setupBooleanAttributeConstraints(MetaDataRegistry.getInstance());
-            
-        } catch (Exception e) {
-            log.error("Failed to register BooleanAttribute type with unified registry", e);
-        }
-    }
-    
     /**
-     * Setup BooleanAttribute-specific constraints using consolidated registry
-     *
-     * @param registry The MetaDataRegistry to use for constraint registration
+     * Register this type with the MetaDataRegistry (called by provider)
      */
-    private static void setupBooleanAttributeConstraints(MetaDataRegistry registry) {
-        try {
-            // VALIDATION CONSTRAINT: Boolean attribute values
-            registry.registerValidationConstraint(
-                "booleanattribute.value.validation",
-                "BooleanAttribute values must be valid boolean strings",
-                (metadata) -> metadata instanceof BooleanAttribute,
-                (metadata, value) -> {
-                    if (metadata instanceof BooleanAttribute) {
-                        BooleanAttribute boolAttr = (BooleanAttribute) metadata;
-                        String valueStr = boolAttr.getValueAsString();
-                        return valueStr == null ||
-                               "true".equalsIgnoreCase(valueStr) ||
-                               "false".equalsIgnoreCase(valueStr);
-                    }
-                    return true;
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(BooleanAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_BOOLEAN)
+            .description("Boolean attribute for true/false metadata values")
+            .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+        );
+
+        // Register BooleanAttribute-specific constraints
+        registry.registerValidationConstraint(
+            "booleanattribute.value.validation",
+            "BooleanAttribute values must be valid boolean strings",
+            (metadata) -> metadata instanceof BooleanAttribute,
+            (metadata, value) -> {
+                if (metadata instanceof BooleanAttribute) {
+                    BooleanAttribute boolAttr = (BooleanAttribute) metadata;
+                    String valueStr = boolAttr.getValueAsString();
+                    return valueStr == null ||
+                           "true".equalsIgnoreCase(valueStr) ||
+                           "false".equalsIgnoreCase(valueStr);
                 }
-            );
-
-            log.debug("Registered BooleanAttribute-specific constraints using consolidated registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register BooleanAttribute constraints", e);
-        }
+                return true;
+            }
+        );
     }
 
     /**

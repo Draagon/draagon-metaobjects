@@ -15,8 +15,8 @@ import com.draagon.meta.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import jakarta.servlet.jsp.*;
+import jakarta.servlet.jsp.tagext.*;
 
 public class MetaIfValueTag extends TagSupport
 {

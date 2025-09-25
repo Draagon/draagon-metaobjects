@@ -9,7 +9,6 @@ package com.draagon.meta.web.view.html;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.util.Param;
 import com.draagon.meta.web.view.*;
 
@@ -22,10 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.jsp.*;
 
-@MetaDataType(type = "view", subType = "month", description = "HTML month selector view")
 public class MonthView extends HtmlView
 {
   private static final Logger log = LoggerFactory.getLogger(MonthView.class);
@@ -34,20 +32,20 @@ public class MonthView extends HtmlView
 
   private String emptyString = null;
 
-  // Unified registry self-registration
-  static {
-    try {
-      MetaDataRegistry.getInstance().registerType(MonthView.class, def -> def
-        .type("view").subType("month")
-        .inheritsFrom("view", "base")
-        .description("HTML month selector view")
-      );
+  /**
+   * Register MonthView type with registry.
+   * Called by WebMetaDataProvider during service discovery.
+   */
+  public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(MonthView.class, def -> def
+      .type("view").subType("month")
+      .inheritsFrom("view", "base")
+      .description("HTML month selector view")
+    );
+    // Registered MonthView type with unified registry
+  }
 
-      log.debug("Registered MonthView type with unified registry");
-    } catch (Exception e) {
-      log.error("Failed to register MonthView type with unified registry", e);
-    }
-  } 
+ 
 
   static {
     if ( months == null )

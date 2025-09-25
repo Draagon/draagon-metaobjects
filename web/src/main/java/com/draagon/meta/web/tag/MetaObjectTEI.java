@@ -10,7 +10,7 @@ package com.draagon.meta.web.tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.jsp.tagext.*;
+import jakarta.servlet.jsp.tagext.*;
 
 public class MetaObjectTEI extends TagExtraInfo
 {

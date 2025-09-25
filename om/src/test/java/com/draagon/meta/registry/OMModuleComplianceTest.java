@@ -10,10 +10,8 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 /**
- * Comprehensive compliance test for @MetaDataType annotations in the om module.
  *
  * This test verifies that all MetaData derived classes in the om module have:
- * 1. Proper @MetaDataType annotations
  * 2. Correct registration in MetaDataRegistry
  * 3. Proper inheritance relationship resolution
  */
@@ -22,11 +20,9 @@ public class OMModuleComplianceTest extends com.draagon.meta.registry.MetaDataTy
     private static final Logger log = LoggerFactory.getLogger(OMModuleComplianceTest.class);
 
     /**
-     * Test that all MetaData classes in om module have @MetaDataType annotations
      */
     @Test
     public void testOMModuleAnnotationCompliance() {
-        log.info("🔍 Testing @MetaDataType annotation compliance for om module");
 
         // Scan for MetaData classes in om module packages
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -42,11 +38,10 @@ public class OMModuleComplianceTest extends com.draagon.meta.registry.MetaDataTy
         if (!annotationViolations.isEmpty()) {
             String report = createComplianceReport("om", metaDataClasses, annotationViolations, List.of(), List.of());
             log.error("\n{}", report);
-            fail("❌ OM module has @MetaDataType annotation violations:\n" +
+            fail("❌ OM module has provider registration violations:\n" +
                  annotationViolations.stream().reduce((a, b) -> a + "\n" + b).orElse(""));
         }
 
-        log.info("✅ All MetaData classes in om module have proper @MetaDataType annotations");
     }
 
     /**
@@ -106,7 +101,6 @@ public class OMModuleComplianceTest extends com.draagon.meta.registry.MetaDataTy
      */
     @Test
     public void testOMModuleComprehensiveCompliance() {
-        log.info("🔍 Running comprehensive @MetaDataType compliance test for om module");
 
         // Scan for MetaData classes
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -131,6 +125,5 @@ public class OMModuleComplianceTest extends com.draagon.meta.registry.MetaDataTy
             fail("❌ OM module has " + totalViolations + " compliance violations. See log for details.");
         }
 
-        log.info("🎉 OM module passes all @MetaDataType compliance checks!");
     }
 }

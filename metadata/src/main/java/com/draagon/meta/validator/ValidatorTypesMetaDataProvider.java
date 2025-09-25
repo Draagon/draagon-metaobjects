@@ -28,8 +28,10 @@ public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Register concrete validator types - no more static initializers
+        // FIRST: Register the base validator type that all others inherit from
+        MetaValidator.registerTypes(registry);
 
+        // THEN: Register concrete validator types that inherit from validator.base
         RequiredValidator.registerTypes(registry);
         LengthValidator.registerTypes(registry);
         RegexValidator.registerTypes(registry);
@@ -40,8 +42,20 @@ public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
+    public String getProviderId() {
+        return "validator-types";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // No dependencies - validator.base inherits from metadata.base which is auto-registered
+        return new String[0];
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 20: After attribute types (15), before key types (25)
+        // DEPRECATED: Use getDependencies() instead
         return 20;
     }
 

@@ -6,42 +6,31 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import static com.draagon.meta.key.MetaKey.TYPE_KEY;
 import static com.draagon.meta.key.MetaKey.SUBTYPE_BASE;
 
 import java.util.List;
 
-@MetaDataType(type = "key", subType = "foreign", description = "Foreign key for referencing other objects")
+/**
+ * Foreign key for referencing other objects.
+ */
 public class ForeignKey extends MetaKey {
-
-    private static final Logger log = LoggerFactory.getLogger(ForeignKey.class);
 
     public final static String SUBTYPE = "foreign";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(ForeignKey.class, def -> def
-                .type(TYPE_KEY).subType(SUBTYPE)
-                .description("Foreign key for referencing other objects")
-
-                // INHERIT FROM BASE KEY
-                .inheritsFrom(TYPE_KEY, SUBTYPE_BASE)
-
-                // FOREIGN KEY SPECIFIC ATTRIBUTES (base attributes inherited)
-                .optionalAttribute("foreignObjectRef", "string")
-                .optionalAttribute("foreignKey", "string")
-                .optionalAttribute("foreignKeyMap", "string")
-                // Note: keys and description are inherited from key.base
-            );
-            
-            log.debug("Registered ForeignKey type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register ForeignKey type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ForeignKey.class, def -> def
+            .type(TYPE_KEY).subType(SUBTYPE)
+            .description("Foreign key for referencing other objects")
+            .inheritsFrom(TYPE_KEY, SUBTYPE_BASE)
+            .optionalAttribute("foreignObjectRef", "string")
+            .optionalAttribute("foreignKey", "string")
+            .optionalAttribute("foreignKeyMap", "string")
+        );
     }
 
     public final static String ATTR_FOREIGNOBJECTREF = "foreignObjectRef";

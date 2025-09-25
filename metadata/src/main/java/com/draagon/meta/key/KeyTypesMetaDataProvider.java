@@ -26,8 +26,10 @@ public class KeyTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Register concrete key types - no more static initializers
+        // FIRST: Register the base key type that all others inherit from
+        MetaKey.registerTypes(registry);
 
+        // THEN: Register concrete key types that inherit from key.base
         PrimaryKey.registerTypes(registry);
         ForeignKey.registerTypes(registry);
         SecondaryKey.registerTypes(registry);
@@ -36,8 +38,20 @@ public class KeyTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
+    public String getProviderId() {
+        return "key-types";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // No dependencies - key.base inherits from metadata.base which is auto-registered
+        return new String[0];
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 25: After validator types (20), before object types (30)
+        // DEPRECATED: Use getDependencies() instead
         return 25;
     }
 

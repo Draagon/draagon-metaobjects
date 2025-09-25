@@ -14,18 +14,30 @@ public class ObjectTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
-        // Register base object type first
+        // FIRST: Register the base object type that all others inherit from
         MetaObject.registerTypes(registry);
 
-        // Register concrete object types
+        // THEN: Register concrete object types that inherit from object.base
         PojoMetaObject.registerTypes(registry);
         ProxyMetaObject.registerTypes(registry);
         MappedMetaObject.registerTypes(registry);
     }
 
     @Override
+    public String getProviderId() {
+        return "object-types";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // No dependencies - object.base inherits from metadata.base which is auto-registered
+        return new String[0];
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 5: After core metadata (0), before fields (10)
+        // DEPRECATED: Use getDependencies() instead
         return 5;
     }
 

@@ -71,8 +71,6 @@ public class PojoMetaObject extends MetaObject
             // - Views (view.*)
         );
 
-        log.debug("Registered PojoMetaObject type with unified registry");
-
         // Register PojoMetaObject-specific constraints using consolidated registry
         setupPojoMetaObjectConstraints(registry);
     }
@@ -102,10 +100,11 @@ public class PojoMetaObject extends MetaObject
                           child.getName().equals(ATTR_PACKAGE_NAME)
             );
 
-            log.debug("Registered PojoMetaObject-specific constraints using consolidated registry");
+            // Registered PojoMetaObject-specific constraints using consolidated registry
 
         } catch (Exception e) {
-            log.error("Failed to register PojoMetaObject constraints", e);
+            // Failed to register PojoMetaObject constraints - logging not available during provider registration
+            throw new RuntimeException("Failed to register PojoMetaObject constraints", e);
         }
     }
 

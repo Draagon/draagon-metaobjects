@@ -9,7 +9,6 @@ package com.draagon.meta.web.view.html;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.jsp.*;
+import jakarta.servlet.jsp.*;
 
 /**
  * <p>Renders a textarea view.</p>
@@ -49,7 +48,7 @@ public class TextAreaView extends TextView
       .optionalChild("attr", "boolean")
     );
 
-    log.debug("Registered TextAreaView with unified registry");
+    // Registered TextAreaView with unified registry
   }
 
   public TextAreaView(String name) {

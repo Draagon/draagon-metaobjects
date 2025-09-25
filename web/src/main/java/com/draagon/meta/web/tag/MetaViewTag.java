@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import jakarta.servlet.jsp.*;
+import jakarta.servlet.jsp.tagext.*;
 
 public class MetaViewTag extends TagSupport
 {

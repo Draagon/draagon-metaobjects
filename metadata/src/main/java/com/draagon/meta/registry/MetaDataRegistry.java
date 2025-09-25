@@ -934,8 +934,8 @@ public class MetaDataRegistry {
      * <p>This method discovers MetaDataTypeProvider implementations from META-INF/services files
      * and delegates to them to extend existing MetaData types with service-specific attributes.</p>
      *
-     * <p>Providers are loaded in priority order (lower = higher priority) to ensure proper
-     * dependency ordering for type extensions.</p>
+     * <p>Providers are loaded in dependency order using topological sorting to ensure proper
+     * dependency resolution. This replaces the fragile priority-based system with explicit dependencies.</p>
      */
     private void loadServiceProviders() {
         try {
@@ -947,23 +947,25 @@ public class MetaDataRegistry {
                 return;
             }
 
-            // Sort providers by priority (lower = higher priority)
-            List<MetaDataTypeProvider> sortedProviders = providers.stream()
-                .sorted(Comparator.comparing(MetaDataTypeProvider::getPriority))
-                .collect(Collectors.toList());
+            // Resolve dependencies using topological sort
+            List<MetaDataTypeProvider> resolvedProviders = resolveDependencies(providers);
 
-            log.info("Loading {} MetaDataTypeProvider services in priority order", sortedProviders.size());
+            log.info("Loading {} MetaDataTypeProvider services in dependency order", resolvedProviders.size());
 
-            // Register type extensions from each provider
-            for (MetaDataTypeProvider provider : sortedProviders) {
+            // Register type extensions from each provider in dependency order
+            for (MetaDataTypeProvider provider : resolvedProviders) {
                 try {
                     long startTime = System.currentTimeMillis();
                     provider.registerTypes(this);
                     long duration = System.currentTimeMillis() - startTime;
 
-                    log.debug("Loaded provider: {} (priority {}) in {}ms - {}",
+                    String depsStr = provider.getDependencies().length > 0 ?
+                        String.join(",", provider.getDependencies()) : "none";
+
+                    log.debug("Loaded provider: {} (id: {}, deps: {}) in {}ms - {}",
                              provider.getClass().getSimpleName(),
-                             provider.getPriority(),
+                             provider.getProviderId(),
+                             depsStr,
                              duration,
                              provider.getDescription());
 
@@ -974,11 +976,112 @@ public class MetaDataRegistry {
                 }
             }
 
-            log.info("Successfully loaded {} MetaDataTypeProvider services", sortedProviders.size());
+            log.info("Successfully loaded {} MetaDataTypeProvider services", resolvedProviders.size());
 
         } catch (Exception e) {
             log.error("Error during service provider loading: {}", e.getMessage(), e);
         }
+    }
+
+    /**
+     * Resolve provider dependencies using topological sorting.
+     *
+     * <p>This algorithm ensures that providers are loaded in the correct order
+     * by analyzing their dependency graph. It detects circular dependencies and
+     * missing dependencies to prevent runtime errors.</p>
+     *
+     * @param providers Collection of providers to sort
+     * @return List of providers in dependency order
+     * @throws IllegalStateException if circular dependencies are detected
+     */
+    private List<MetaDataTypeProvider> resolveDependencies(Collection<MetaDataTypeProvider> providers) {
+        // Build provider map by ID for fast lookup
+        Map<String, MetaDataTypeProvider> providerMap = new HashMap<>();
+        for (MetaDataTypeProvider provider : providers) {
+            String id = provider.getProviderId();
+            if (providerMap.containsKey(id)) {
+                log.warn("Duplicate provider ID '{}': {} and {}. Using first occurrence.",
+                        id, providerMap.get(id).getClass().getName(), provider.getClass().getName());
+            } else {
+                providerMap.put(id, provider);
+            }
+        }
+
+        // Validate dependencies and detect missing ones
+        Set<String> missingDeps = new HashSet<>();
+        for (MetaDataTypeProvider provider : providers) {
+            for (String dep : provider.getDependencies()) {
+                if (!providerMap.containsKey(dep)) {
+                    missingDeps.add(dep + " (required by " + provider.getProviderId() + ")");
+                }
+            }
+        }
+
+        if (!missingDeps.isEmpty()) {
+            log.warn("Missing provider dependencies: {}. These will be ignored.", String.join(", ", missingDeps));
+        }
+
+        // Perform topological sort using Kahn's algorithm
+        List<MetaDataTypeProvider> result = new ArrayList<>();
+        Set<String> visited = new HashSet<>();
+        Set<String> visiting = new HashSet<>();
+
+        // Try to visit each provider
+        for (MetaDataTypeProvider provider : providers) {
+            if (!visited.contains(provider.getProviderId())) {
+                topologicalSort(provider, providerMap, visited, visiting, result);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Recursive topological sort implementation with cycle detection.
+     *
+     * @param provider Current provider being processed
+     * @param providerMap Map of provider ID to provider instance
+     * @param visited Set of completely processed providers
+     * @param visiting Set of providers currently being processed (for cycle detection)
+     * @param result Result list in topological order
+     * @throws IllegalStateException if a circular dependency is detected
+     */
+    private void topologicalSort(MetaDataTypeProvider provider,
+                                Map<String, MetaDataTypeProvider> providerMap,
+                                Set<String> visited,
+                                Set<String> visiting,
+                                List<MetaDataTypeProvider> result) {
+
+        String providerId = provider.getProviderId();
+
+        // Check for circular dependency
+        if (visiting.contains(providerId)) {
+            throw new IllegalStateException("Circular dependency detected involving provider: " + providerId);
+        }
+
+        // Skip if already processed
+        if (visited.contains(providerId)) {
+            return;
+        }
+
+        // Mark as currently being processed
+        visiting.add(providerId);
+
+        // Process dependencies first
+        for (String depId : provider.getDependencies()) {
+            MetaDataTypeProvider dependency = providerMap.get(depId);
+            if (dependency != null) {
+                topologicalSort(dependency, providerMap, visited, visiting, result);
+            }
+            // Note: Missing dependencies are already logged in resolveDependencies()
+        }
+
+        // Mark as completely processed
+        visiting.remove(providerId);
+        visited.add(providerId);
+
+        // Add to result
+        result.add(provider);
     }
 
     /**

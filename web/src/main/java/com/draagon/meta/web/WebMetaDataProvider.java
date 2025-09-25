@@ -4,6 +4,8 @@ import com.draagon.meta.view.MetaView;
 import com.draagon.meta.web.view.html.TextView;
 import com.draagon.meta.web.view.html.DateView;
 import com.draagon.meta.web.view.html.TextAreaView;
+import com.draagon.meta.web.view.html.MonthView;
+import com.draagon.meta.web.view.html.HotLinkView;
 import com.draagon.meta.web.view.WebView;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataTypeProvider;
@@ -41,11 +43,25 @@ public class WebMetaDataProvider implements MetaDataTypeProvider {
         TextView.registerTypes(registry);
         DateView.registerTypes(registry);
         TextAreaView.registerTypes(registry);
+        MonthView.registerTypes(registry);
+        HotLinkView.registerTypes(registry);
     }
 
     @Override
+    public String getProviderId() {
+        return "web-view-types";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // No dependencies - calls MetaView.registerTypes() to create view.base, which inherits from metadata.base
+        return new String[0];
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
-        // Priority 300: After database (150) and code generation (200), before business plugins (400+)
+        // DEPRECATED: Use getDependencies() instead
         return 300;
     }
 

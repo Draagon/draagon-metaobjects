@@ -10,10 +10,8 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 /**
- * Comprehensive compliance test for @MetaDataType annotations in the web module.
  *
  * This test verifies that all MetaData derived classes in the web module have:
- * 1. Proper @MetaDataType annotations
  * 2. Correct registration in MetaDataRegistry
  * 3. Proper inheritance relationship resolution
  */
@@ -22,11 +20,9 @@ public class WebModuleComplianceTest extends com.draagon.meta.registry.MetaDataT
     private static final Logger log = LoggerFactory.getLogger(WebModuleComplianceTest.class);
 
     /**
-     * Test that all MetaData classes in web module have @MetaDataType annotations
      */
     @Test
     public void testWebModuleAnnotationCompliance() {
-        log.info("🔍 Testing @MetaDataType annotation compliance for web module");
 
         // Scan for MetaData classes in web module packages
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -106,7 +102,6 @@ public class WebModuleComplianceTest extends com.draagon.meta.registry.MetaDataT
      */
     @Test
     public void testWebModuleComprehensiveCompliance() {
-        log.info("🔍 Running comprehensive @MetaDataType compliance test for web module");
 
         // Scan for MetaData classes
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -131,6 +126,5 @@ public class WebModuleComplianceTest extends com.draagon.meta.registry.MetaDataT
             fail("❌ Web module has " + totalViolations + " compliance violations. See log for details.");
         }
 
-        log.info("🎉 Web module passes all @MetaDataType compliance checks!");
     }
 }

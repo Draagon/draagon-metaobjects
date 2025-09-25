@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
+import jakarta.servlet.jsp.*;
+import jakarta.servlet.jsp.tagext.*;
 
 public class MetaArrayTag extends TagSupport
 {

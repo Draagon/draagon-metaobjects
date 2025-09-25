@@ -10,10 +10,8 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 /**
- * Comprehensive compliance test for @MetaDataType annotations in the metadata module.
  *
  * This test verifies that all MetaData derived classes in the metadata module have:
- * 1. Proper @MetaDataType annotations
  * 2. Correct registration in MetaDataRegistry
  * 3. Proper inheritance relationship resolution
  */
@@ -22,11 +20,9 @@ public class MetaDataModuleComplianceTest extends MetaDataTypeComplianceTestBase
     private static final Logger log = LoggerFactory.getLogger(MetaDataModuleComplianceTest.class);
 
     /**
-     * Test that all MetaData classes in metadata module have @MetaDataType annotations
      */
     @Test
     public void testMetaDataModuleAnnotationCompliance() {
-        log.info("🔍 Testing @MetaDataType annotation compliance for metadata module");
 
         // Scan for MetaData classes in metadata module packages
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -48,11 +44,10 @@ public class MetaDataModuleComplianceTest extends MetaDataTypeComplianceTestBase
         if (!annotationViolations.isEmpty()) {
             String report = createComplianceReport("metadata", metaDataClasses, annotationViolations, List.of(), List.of());
             log.error("\n{}", report);
-            fail("❌ Metadata module has @MetaDataType annotation violations:\n" +
+            fail("❌ Metadata module has provider registration violations:\n" +
                  annotationViolations.stream().reduce((a, b) -> a + "\n" + b).orElse(""));
         }
 
-        log.info("✅ All MetaData classes in metadata module have proper @MetaDataType annotations");
     }
 
     /**
@@ -124,7 +119,6 @@ public class MetaDataModuleComplianceTest extends MetaDataTypeComplianceTestBase
      */
     @Test
     public void testMetaDataModuleComprehensiveCompliance() {
-        log.info("🔍 Running comprehensive @MetaDataType compliance test for metadata module");
 
         // Scan for MetaData classes
         Set<Class<?>> metaDataClasses = scanForMetaDataClasses(
@@ -155,6 +149,5 @@ public class MetaDataModuleComplianceTest extends MetaDataTypeComplianceTestBase
             fail("❌ Metadata module has " + totalViolations + " compliance violations. See log for details.");
         }
 
-        log.info("🎉 Metadata module passes all @MetaDataType compliance checks!");
     }
 }

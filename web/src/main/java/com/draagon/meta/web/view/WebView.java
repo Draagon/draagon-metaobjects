@@ -9,15 +9,14 @@ package com.draagon.meta.web.view;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.jsp.*;
 
 public abstract class WebView extends MetaView
 {
@@ -41,7 +40,7 @@ public abstract class WebView extends MetaView
           .optionalChild("attr", "*")
           // Note: Base view attributes are inherited from view.base
       );
-      log.debug("Registered WebView type with unified registry");
+      // Registered WebView type with unified registry
   }
 
   public WebView( String name )

@@ -270,3 +270,116 @@ When working with this codebase, remember:
    - Concurrent Readers: Unlimited (no lock contention)
 
 The architecture is sophisticated and follows enterprise patterns for metadata-driven development with high-performance read characteristics.
+
+## Global Development Rules
+
+These universally applicable principles should be followed for any software development:
+
+### Systematic Problem-Solving Methodology
+- Apply "THINK HARD THROUGH THIS STEP BY STEP" approach to complex problems
+- Break down problems into logical phases with clear objectives
+- Identify root causes before applying solutions
+- Use incremental validation at each step
+- Maintain zero-regression policy during major changes
+
+### Security & Quality
+- **Address CVE vulnerabilities immediately** using dependency exclusion + secure replacement
+- **Never use unsafe generic casting** - use stream-based conversion instead
+- **Prefer Optional-based APIs** for null-safe programming
+- **Use modern exception patterns** with rich context and suggestions
+
+### Testing Strategy
+- **Use shared registry patterns** to prevent test conflicts
+- **Achieve 100% test success rate** before considering features complete
+- **Validate incrementally**: Unit → Integration → Build → Regression → Performance
+- **Create `@IsolatedTest` annotations** for tests that manipulate shared state
+
+### Architecture & Documentation
+- **Design for enterprise publishing** with proper dependency management
+- **Use service discovery over hard-coding** with META-INF/services patterns
+- **Preserve APIs through deprecation** - never break backward compatibility
+- **Keep architecture documentation current** with every major change
+- **Categorize enhancements systematically**: HIGH/MEDIUM/LOW priority with clear success criteria
+
+### Performance & Scalability
+- **Optimize for the primary use case** (99% case, accommodate 1%)
+- **Use appropriate data structures** for access patterns
+- **Implement lock-free algorithms** where possible
+- **Support unlimited concurrent readers** when appropriate
+
+## MetaObjects Project-Specific Rules
+
+These rules are specific to MetaObjects architecture and should NOT be applied to other projects:
+
+### READ-OPTIMIZED WITH CONTROLLED MUTABILITY Architecture
+- **MetaData objects follow ClassLoader pattern**: Load once, permanent in memory, thread-safe reads
+- **Optimize for 99.9% reads, 0.1% updates** - this is NOT a mutable domain model
+- **Use Copy-on-Write patterns** for infrequent metadata updates
+- **Performance expectations**: Loading 100ms-1s, Runtime reads 1-10μs, Unlimited concurrent readers
+
+### OSGI Bundle Lifecycle Compatibility
+- **Use WeakHashMap for computed caches** - allows cleanup when bundles unload
+- **Implement ServiceReference leak prevention** with proper cleanup patterns
+- **Use WeakReference patterns** for ClassLoader cleanup
+- **Never use global static state** that breaks modularization
+
+### Cache Strategy Requirements
+- **Respect dual cache strategy**: ConcurrentHashMap (permanent) + WeakHashMap (computed)
+- **Never replace WeakHashMap with strong references** - breaks OSGI compatibility
+- **Cache computed values can be GC'd and recomputed** during memory pressure
+- **Permanent cache for core metadata lookups** never gets GC'd
+
+### Provider-Based Registration System
+- **Use service discovery for type registration** via META-INF/services
+- **Implement priority-based provider loading**: 0=base, 10=concrete, 50+=extensions
+- **Enable extensibility without modifying parent classes**
+- **Support dynamic registration and cleanup**
+
+### Constraint System Integration
+- **Use programmatic self-registration** - no external JSON constraint files
+- **Check constraint system before adding validation** anywhere in codebase
+- **Use PlacementConstraint for "X CAN be placed under Y" rules**
+- **Use ValidationConstraint for value validation rules**
+- **Never add validation to type definitions, annotations, or constructors**
+
+### Constants Organization
+- **Constants live with classes that create the need for them**
+- **Core MetaData constants go in owning classes** (MetaData.java, MetaField.java)
+- **Service-specific constants go in service modules** (DatabaseAttributeConstants, JpaConstants)
+- **Never create centralized constant files** that violate dependency relationships
+
+### Anti-Patterns to Avoid
+- **❌ DON'T treat MetaData as mutable domain objects** - they're like Java Class objects
+- **❌ DON'T create MetaDataLoader instances frequently** - one per application context
+- **❌ DON'T add rigid validation to core types** - use constraint system instead
+- **❌ DON'T synchronize read operations after loading** - kills concurrent performance
+- **❌ DON'T add service-specific attributes to core types** - violates separation of concerns
+
+### Testing Patterns Specific to MetaObjects
+- **Use single static MetaDataRegistry shared across ALL tests**
+- **Don't tear down registry between tests** - creates conflicts
+- **All tests inherit from SharedRegistryTestBase**
+- **Use @IsolatedTest for tests that manipulate registry directly**
+- **Field names must follow pattern**: `^[a-zA-Z][a-zA-Z0-9_]*$` (no :: allowed)
+
+### API Usage Patterns
+- **Use existing Optional-based APIs**: `findString()`, `requireString()`, `getFieldsStream()`
+- **Use ObjectManager API correctly**: `om.createObject(connection, object)`
+- **Use MetaObjects exception constructors**: `new MetaDataNotFoundException("msg", name)`
+- **Prefer inline attributes in JSON**: `"@required": true, "@maxLength": 255`
+
+### Architecture Compliance Validation
+Before making ANY changes to MetaObjects code, verify:
+- Does it respect READ-OPTIMIZED WITH CONTROLLED MUTABILITY pattern?
+- Does it maintain OSGI compatibility with WeakHashMap design?
+- Does it optimize for read-heavy workloads (99.9% reads, 0.1% updates)?
+- Does it support future dynamic metadata updates without blocking readers?
+- Does it preserve extensibility without breaking existing functionality?
+
+### Success Criteria for MetaObjects Development
+- ✅ **100% test success rate**: All 199+ tests must pass consistently
+- ✅ **Registry health**: 33-35+ types properly registered without conflicts  
+- ✅ **Architecture compliance**: READ-OPTIMIZED pattern maintained
+- ✅ **OSGI compatibility**: WeakHashMap patterns and service discovery working
+- ✅ **Constraint system**: Programmatic constraints enforcing without external files
+- ✅ **Provider registration**: Service-based type discovery functioning correctly

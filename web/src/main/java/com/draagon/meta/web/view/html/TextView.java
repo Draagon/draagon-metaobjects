@@ -9,7 +9,6 @@ package com.draagon.meta.web.view.html;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
@@ -19,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.jsp.*;
 
 public class TextView extends HtmlView
 {
@@ -43,7 +42,7 @@ public class TextView extends HtmlView
       // - Attributes (attr.*)
     );
 
-    log.debug("Registered TextView with unified registry");
+    // Registered TextView with unified registry
   }
 
   public TextView(String name) {

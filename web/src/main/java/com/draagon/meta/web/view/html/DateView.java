@@ -11,7 +11,6 @@ import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.web.view.*;
 import com.draagon.meta.web.util.Param;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
@@ -26,8 +25,8 @@ import java.util.Map;
 import java.util.Date;
 import java.util.Calendar;
 
-import javax.servlet.http.*;
-import javax.servlet.jsp.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.jsp.*;
 
 public class DateView extends MonthView {
 
@@ -51,7 +50,7 @@ public class DateView extends MonthView {
             .description("HTML date input view")
         );
 
-        log.debug("Registered DateView type with unified registry");
+        // Registered DateView type with unified registry
     }
 
     public DateView(String name) {

@@ -15,7 +15,20 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
 public class CoreObjectsMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
+    public String getProviderId() {
+        return "core-object-extensions";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // Depends on object-types since it extends object.base and object.pojo
+        return new String[]{"object-types"};
+    }
+
+    @Override
+    @Deprecated
     public int getPriority() {
+        // DEPRECATED: Use getDependencies() instead
         return 50; // After base types (0), before other core providers (100+)
     }
 
@@ -76,5 +89,10 @@ public class CoreObjectsMetaDataProvider implements MetaDataTypeProvider {
                 .optionalAttribute(VALUE_OBJECT_TYPE, "string")
                 .optionalAttribute(VALUE_EQUALS_BY, "string");
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return "Core Objects MetaData Provider - DataObject and ValueObject attribute extensions";
     }
 }

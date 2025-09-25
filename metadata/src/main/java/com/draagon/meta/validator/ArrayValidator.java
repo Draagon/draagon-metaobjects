@@ -5,37 +5,33 @@ import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.validator.MetaValidator.TYPE_VALIDATOR;
+import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
 
 import java.util.Collection;
 
-@MetaDataType(type = "validator", subType = "array", description = "Array validator for size constraints")
+/**
+ * Array validator for size constraints on collections and arrays.
+ */
 public class ArrayValidator extends MetaValidator {
-
-    private static final Logger log = LoggerFactory.getLogger(ArrayValidator.class);
 
     public final static String SUBTYPE_ARRAY = "array";
 
     public final static String ATTR_MINSIZE = "minSize";
     public final static String ATTR_MAXSIZE = "maxSize";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(ArrayValidator.class, def -> def
-                .type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
-                .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-                .optionalAttribute(ATTR_MINSIZE, "int")
-                .optionalAttribute(ATTR_MAXSIZE, "int")
-                .description("Array validator for size constraints")
-            );
-
-            log.debug("Registered ArrayValidator type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register ArrayValidator type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ArrayValidator.class, def -> def
+            .type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
+            .description("Array validator for size constraints")
+            .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_MINSIZE, "int")
+            .optionalAttribute(ATTR_MAXSIZE, "int")
+        );
     }
 
     // Cache for frequently accessed size values

@@ -2,35 +2,31 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
 /**
- * A Properties Attribute
+ * A Properties Attribute with provider-based registration.
  */
-@MetaDataType(type = "attr", subType = "properties", description = "Properties attribute for key-value configuration data")
 @SuppressWarnings("serial")
 public class PropertiesAttribute extends MetaAttribute<Properties> {
 
-    private static final Logger log = LoggerFactory.getLogger(PropertiesAttribute.class);
     public final static String SUBTYPE_PROPERTIES = "properties";
 
-    // Self-registration with unified registry
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(PropertiesAttribute.class, def -> def
-                .type("attr").subType(SUBTYPE_PROPERTIES)
-                .description("Properties attribute for key-value configuration data")
-            );
-            log.debug("Registered PropertiesAttribute type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register PropertiesAttribute type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(PropertiesAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_PROPERTIES)
+            .description("Properties attribute for key-value configuration data")
+            .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+        );
     }
 
     public PropertiesAttribute(String name ) {

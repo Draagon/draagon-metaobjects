@@ -9,22 +9,16 @@ package com.draagon.meta.validator;
 import com.draagon.meta.*;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.apache.commons.validator.GenericValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-// TODO:  Make this work for numeric fields and even Date fields, or create new validator types
+import static com.draagon.meta.validator.MetaValidator.TYPE_VALIDATOR;
+import static com.draagon.meta.validator.MetaValidator.SUBTYPE_BASE;
+
 /**
- * A length validator with unified registry registration that ensures the string representation of a field value is of the min or max length.
- *
- * @version 6.0
+ * A length validator that ensures the string representation of a field value is of the min or max length.
  */
-@MetaDataType(type = "validator", subType = "length", description = "Length validator for string field validation")
 public class LengthValidator extends MetaValidator
 {
-    private static final Logger log = LoggerFactory.getLogger(LengthValidator.class);
-
     public final static String SUBTYPE_LENGTH = "length";
 
     /**
@@ -36,23 +30,17 @@ public class LengthValidator extends MetaValidator
      */
     public final static String ATTR_MAX = "max";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(LengthValidator.class, def -> def
-                .type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
-                .description("Length validator ensures field value is within min/max length")
-                
-                // LENGTH VALIDATOR ATTRIBUTES
-                .optionalAttribute(ATTR_MIN, "string")
-                .optionalAttribute(ATTR_MAX, "string")
-                // Inherits from MetaValidator
-            );
-            
-            log.debug("Registered LengthValidator type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register LengthValidator type with unified registry", e);
-        }
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(LengthValidator.class, def -> def
+            .type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
+            .description("Length validator ensures field value is within min/max length")
+            .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_MIN, "string")
+            .optionalAttribute(ATTR_MAX, "string")
+        );
     }
 
     public LengthValidator(String name) {

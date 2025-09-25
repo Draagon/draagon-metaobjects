@@ -8,34 +8,27 @@ package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
+import static com.draagon.meta.attr.MetaAttribute.SUBTYPE_BASE;
 
 /**
- * A Double Attribute
+ * A Double Attribute with provider-based registration.
  */
-@MetaDataType(type = "attr", subType = "double", description = "Double attribute for floating-point numeric metadata")
 @SuppressWarnings("serial")
 public class DoubleAttribute extends MetaAttribute<Double> {
-    
-    private static final Logger log = LoggerFactory.getLogger(DoubleAttribute.class);
-    
-    public final static String TYPE_ATTR = "attr";
+
     public final static String SUBTYPE_DOUBLE = "double";
-    
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(DoubleAttribute.class, def -> def
-                .type(TYPE_ATTR).subType(SUBTYPE_DOUBLE)
-                .description("Double attribute for floating-point numeric metadata")
-            );
-            
-            log.debug("Registered DoubleAttribute type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register DoubleAttribute type with unified registry", e);
-        }
+
+    /**
+     * Register this type with the MetaDataRegistry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(DoubleAttribute.class, def -> def
+            .type(TYPE_ATTR).subType(SUBTYPE_DOUBLE)
+            .description("Double attribute for floating-point numeric metadata")
+            .inheritsFrom(TYPE_ATTR, SUBTYPE_BASE)
+        );
     }
 
     /**
