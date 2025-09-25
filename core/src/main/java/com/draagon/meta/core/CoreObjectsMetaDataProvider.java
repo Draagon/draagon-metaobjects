@@ -26,13 +26,6 @@ public class CoreObjectsMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 50; // After base types (0), before other core providers (100+)
-    }
-
-    @Override
     public void registerTypes(MetaDataRegistry registry) {
         // Delegate to DataObject and ValueObject registration methods
         DataObjectExtensions.registerDataObjectAttributes(registry);

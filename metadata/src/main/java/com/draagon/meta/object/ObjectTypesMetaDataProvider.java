@@ -35,13 +35,6 @@ public class ObjectTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 5;
-    }
-
-    @Override
     public String getDescription() {
         return "Object Types MetaData Provider - Registers MetaObject and concrete object implementations";
     }

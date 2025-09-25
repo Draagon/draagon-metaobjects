@@ -49,13 +49,6 @@ public class KeyTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 25;
-    }
-
-    @Override
     public String getDescription() {
         return "Key Types MetaData Provider - Registers all concrete key type implementations";
     }

@@ -54,13 +54,6 @@ public class CodeGenMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 200;
-    }
-
-    @Override
     public String getDescription() {
         return "Code Generation MetaData Provider - XSD, JSON Schema, and AI Documentation extensions";
     }

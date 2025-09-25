@@ -44,13 +44,6 @@ public class CoreTypeMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 0;
-    }
-
-    @Override
     public String getDescription() {
         return "Core Type MetaData Provider - Registers fundamental metadata.base type";
     }

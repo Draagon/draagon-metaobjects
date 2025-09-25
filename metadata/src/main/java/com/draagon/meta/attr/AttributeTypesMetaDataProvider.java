@@ -59,13 +59,6 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 15;
-    }
-
-    @Override
     public String getDescription() {
         return "Attribute Types MetaData Provider - Registers all concrete attribute type implementations";
     }

@@ -42,13 +42,6 @@ public class OMMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 35;
-    }
-
-    @Override
     public String getDescription() {
         return "OM MetaData Provider - Registers managed object types with state awareness";
     }

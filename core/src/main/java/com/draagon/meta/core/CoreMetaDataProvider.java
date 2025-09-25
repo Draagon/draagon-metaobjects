@@ -49,13 +49,6 @@ public class CoreMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 100;
-    }
-
-    @Override
     public String getDescription() {
         return "Core MetaData Provider - XML I/O and serialization extensions";
     }

@@ -38,13 +38,6 @@ public class CoreMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 30;
-    }
-
-    @Override
     public String getDescription() {
         return "Core MetaData Provider - Registers core module specific types";
     }

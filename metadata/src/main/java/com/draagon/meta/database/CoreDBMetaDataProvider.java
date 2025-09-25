@@ -27,13 +27,24 @@ public class CoreDBMetaDataProvider implements MetaDataTypeProvider {
     public static final String DB_SCALE = "dbScale";
 
     @Override
-    public int getPriority() {
-        return 150; // After core types (0-100), before code generation (200+)
+    public String getProviderId() {
+        return "database-extensions";
+    }
+
+    @Override
+    public String[] getDependencies() {
+        // Depends on field types and object types for extending field.base and object.base
+        return new String[]{"field-types", "object-types"};
     }
 
     @Override
     public void registerTypes(MetaDataRegistry registry) {
         registerDatabaseAttributes(registry);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Database MetaData Provider - Common database attributes for JPA and ObjectManager";
     }
 
     /**

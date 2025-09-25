@@ -117,23 +117,6 @@ public interface MetaDataTypeProvider {
         return new String[0];  // No dependencies by default
     }
 
-    /**
-     * Get the priority of this provider (DEPRECATED).
-     *
-     * <p><strong>⚠️ DEPRECATED:</strong> Use getDependencies() instead of priorities.
-     * Priority-based ordering is fragile and hard to maintain. The dependency-based
-     * system automatically calculates the correct load order.</p>
-     *
-     * <p>This method is maintained for backward compatibility but will be removed
-     * in a future version. New providers should only implement getDependencies().</p>
-     *
-     * @return Priority value (lower = higher priority)
-     * @deprecated Use {@link #getDependencies()} instead
-     */
-    @Deprecated
-    default int getPriority() {
-        return 100;
-    }
 
     /**
      * Get a description of this provider (optional).

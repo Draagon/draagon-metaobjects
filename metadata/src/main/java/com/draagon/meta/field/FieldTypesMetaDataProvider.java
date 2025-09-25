@@ -62,12 +62,6 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
         return new String[0];
     }
 
-    @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 10;
-    }
 
     @Override
     public String getDescription() {

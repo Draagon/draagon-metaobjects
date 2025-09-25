@@ -53,13 +53,6 @@ public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 20;
-    }
-
-    @Override
     public String getDescription() {
         return "Validator Types MetaData Provider - Registers all concrete validator type implementations";
     }

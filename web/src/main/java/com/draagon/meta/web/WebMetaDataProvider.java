@@ -59,13 +59,6 @@ public class WebMetaDataProvider implements MetaDataTypeProvider {
     }
 
     @Override
-    @Deprecated
-    public int getPriority() {
-        // DEPRECATED: Use getDependencies() instead
-        return 300;
-    }
-
-    @Override
     public String getDescription() {
         return "Web MetaData Provider - HTML form generation and web component extensions";
     }
