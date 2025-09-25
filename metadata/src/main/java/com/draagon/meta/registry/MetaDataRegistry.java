@@ -1295,6 +1295,11 @@ public class MetaDataRegistry {
                 loadNamingConstraints();
                 loadPlacementConstraints();
 
+                // Load all constraints previously provided by ConstraintProviders
+                loadCodegenConstraints();
+                loadCoreIOConstraints();
+                loadWebConstraints();
+
                 log.info("Loaded {} core constraints using concrete constraint classes",
                          constraints.size());
                 constraintsInitialized = true;
@@ -1356,6 +1361,380 @@ public class MetaDataRegistry {
             (child) -> child instanceof com.draagon.meta.attr.BooleanAttribute &&
                       "required".equals(child.getName())
         ));
+    }
+
+    /**
+     * Load code generation constraints (from former CodegenConstraintProvider)
+     */
+    private void loadCodegenConstraints() {
+        // JPA generation control attributes
+        addJpaGenerationConstraints();
+
+        // Field behavior attributes (codegen-specific)
+        addFieldBehaviorConstraints();
+    }
+
+    private void addJpaGenerationConstraints() {
+        // PLACEMENT CONSTRAINT: skipJpa attribute can be placed on MetaObjects
+        addConstraint(new PlacementConstraint(
+            "codegen.skipJpa.object.placement",
+            "skipJpa attribute can be placed on MetaObjects to skip JPA generation",
+            (parent) -> parent instanceof com.draagon.meta.object.MetaObject,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "skipJpa".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: skipJpa must be boolean
+        addConstraint(new ValidationConstraint(
+            "codegen.skipJpa.object.validation",
+            "skipJpa must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "skipJpa".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: skipJpa attribute can be placed on MetaFields
+        addConstraint(new PlacementConstraint(
+            "codegen.skipJpa.field.placement",
+            "skipJpa attribute can be placed on MetaFields to skip JPA generation",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "skipJpa".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: skipJpa must be boolean for fields too
+        addConstraint(new ValidationConstraint(
+            "codegen.skipJpa.field.validation",
+            "skipJpa must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "skipJpa".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+    }
+
+    private void addFieldBehaviorConstraints() {
+        // PLACEMENT CONSTRAINT: collection attribute can be placed on MetaFields
+        addConstraint(new PlacementConstraint(
+            "codegen.collection.placement",
+            "collection attribute can be placed on MetaFields to indicate collection type",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "collection".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: collection must be boolean
+        addConstraint(new ValidationConstraint(
+            "codegen.collection.validation",
+            "collection must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "collection".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: isSearchable attribute can be placed on MetaFields
+        addConstraint(new PlacementConstraint(
+            "codegen.isSearchable.placement",
+            "isSearchable attribute can be placed on MetaFields for search functionality",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "isSearchable".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: isSearchable must be boolean
+        addConstraint(new ValidationConstraint(
+            "codegen.isSearchable.validation",
+            "isSearchable must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "isSearchable".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+    }
+
+    /**
+     * Load core I/O constraints (from former CoreIOConstraintProvider)
+     */
+    private void loadCoreIOConstraints() {
+        // XML name mapping attributes
+        addXmlNamingConstraints();
+
+        // XML behavior control attributes
+        addXmlBehaviorConstraints();
+    }
+
+    private void addXmlNamingConstraints() {
+        // PLACEMENT CONSTRAINT: xmlName attribute can be placed on any MetaData
+        addConstraint(new PlacementConstraint(
+            "coreio.xmlName.placement",
+            "xmlName attribute can be placed on any MetaData for XML element naming",
+            (parent) -> parent instanceof com.draagon.meta.MetaData,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "xmlName".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: xmlName must be valid XML identifier
+        addConstraint(new ValidationConstraint(
+            "coreio.xmlName.validation",
+            "xmlName must be a valid XML element name",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "xmlName".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String xmlName = value.toString().trim();
+                // XML name pattern: must start with letter/underscore, followed by letters/digits/hyphens/underscores/periods
+                return xmlName.matches("^[a-zA-Z_][a-zA-Z0-9_.-]*$") && xmlName.length() >= 1 && xmlName.length() <= 100;
+            }
+        ));
+    }
+
+    private void addXmlBehaviorConstraints() {
+        // PLACEMENT CONSTRAINT: xmlTyped attribute can be placed on MetaObjects
+        addConstraint(new PlacementConstraint(
+            "coreio.xmlTyped.placement",
+            "xmlTyped attribute can be placed on MetaObjects for type information in XML",
+            (parent) -> parent instanceof com.draagon.meta.object.MetaObject,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "xmlTyped".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: xmlTyped must be boolean
+        addConstraint(new ValidationConstraint(
+            "coreio.xmlTyped.validation",
+            "xmlTyped must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "xmlTyped".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: xmlWrap attribute can be placed on MetaFields
+        addConstraint(new PlacementConstraint(
+            "coreio.xmlWrap.placement",
+            "xmlWrap attribute can be placed on MetaFields for XML wrapping behavior",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "xmlWrap".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: xmlWrap must be boolean
+        addConstraint(new ValidationConstraint(
+            "coreio.xmlWrap.validation",
+            "xmlWrap must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "xmlWrap".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: xmlIgnore attribute can be placed on MetaFields
+        addConstraint(new PlacementConstraint(
+            "coreio.xmlIgnore.placement",
+            "xmlIgnore attribute can be placed on MetaFields to exclude from XML serialization",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "xmlIgnore".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: xmlIgnore must be boolean
+        addConstraint(new ValidationConstraint(
+            "coreio.xmlIgnore.validation",
+            "xmlIgnore must be a boolean value (true/false)",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "xmlIgnore".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true; // Optional
+                String boolValue = value.toString().toLowerCase().trim();
+                return "true".equals(boolValue) || "false".equals(boolValue);
+            }
+        ));
+    }
+
+    /**
+     * Load web constraints (from former WebConstraintProvider)
+     */
+    private void loadWebConstraints() {
+        // HTML input type validation for form generation
+        addHtmlInputTypeConstraints();
+
+        // CSS class and HTML ID validation
+        addCssAndHtmlConstraints();
+
+        // Form label and UI text constraints
+        addFormTextConstraints();
+
+        // Security constraints for web content
+        addSecurityConstraints();
+    }
+
+    private void addHtmlInputTypeConstraints() {
+        // PLACEMENT CONSTRAINT: htmlInputType attribute can be placed on string fields
+        addConstraint(new PlacementConstraint(
+            "web.htmlInputType.placement",
+            "htmlInputType attribute can be placed on string fields for form generation",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField && "string".equals(((com.draagon.meta.field.MetaField) parent).getSubType()),
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "htmlInputType".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: htmlInputType must be valid HTML input type
+        addConstraint(new ValidationConstraint(
+            "web.htmlInputType.validation",
+            "htmlInputType must be a valid HTML input type",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "htmlInputType".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                String inputType = value.toString().toLowerCase();
+                return isValidHtmlInputType(inputType);
+            }
+        ));
+    }
+
+    private void addCssAndHtmlConstraints() {
+        // PLACEMENT CONSTRAINT: CSS class attributes
+        addConstraint(new PlacementConstraint(
+            "web.cssClass.placement",
+            "cssClass attribute can be placed on any MetaData for styling",
+            (parent) -> parent instanceof com.draagon.meta.MetaData,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "cssClass".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: CSS class names must follow valid pattern
+        addConstraint(new ValidationConstraint(
+            "web.cssClass.validation",
+            "CSS class names must follow valid CSS identifier pattern",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "cssClass".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                String cssClass = value.toString();
+                return cssClass.matches("^[a-zA-Z]([a-zA-Z0-9_-])*$") && cssClass.length() <= 50;
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: HTML ID attributes
+        addConstraint(new PlacementConstraint(
+            "web.htmlId.placement",
+            "htmlId attribute can be placed on any MetaData for DOM identification",
+            (parent) -> parent instanceof com.draagon.meta.MetaData,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "htmlId".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: HTML ID must follow valid pattern
+        addConstraint(new ValidationConstraint(
+            "web.htmlId.validation",
+            "HTML ID must follow valid HTML identifier pattern",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "htmlId".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                String htmlId = value.toString();
+                return htmlId.matches("^[a-zA-Z]([a-zA-Z0-9_-])*$");
+            }
+        ));
+    }
+
+    private void addFormTextConstraints() {
+        // PLACEMENT CONSTRAINT: Form label attributes
+        addConstraint(new PlacementConstraint(
+            "web.formLabel.placement",
+            "formLabel attribute can be placed on fields for form generation",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "formLabel".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: Form labels must be non-empty and within length limits
+        addConstraint(new ValidationConstraint(
+            "web.formLabel.validation",
+            "Form labels must be non-empty and within 1-100 characters",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "formLabel".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return false; // Required
+                String label = value.toString().trim();
+                return !label.isEmpty() && label.length() >= 1 && label.length() <= 100;
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: Placeholder text attributes
+        addConstraint(new PlacementConstraint(
+            "web.placeholder.placement",
+            "placeholder attribute can be placed on string fields for input hints",
+            (parent) -> parent instanceof com.draagon.meta.field.MetaField && "string".equals(((com.draagon.meta.field.MetaField) parent).getSubType()),
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "placeholder".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: Placeholder text length limits
+        addConstraint(new ValidationConstraint(
+            "web.placeholder.validation",
+            "Placeholder text must be within 200 character limit",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "placeholder".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                return value.toString().length() <= 200;
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: Validation message attributes
+        addConstraint(new PlacementConstraint(
+            "web.validationMessage.placement",
+            "validationMessage attribute can be placed on any MetaData for error display",
+            (parent) -> parent instanceof com.draagon.meta.MetaData,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "validationMessage".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: Validation message length limits
+        addConstraint(new ValidationConstraint(
+            "web.validationMessage.validation",
+            "Validation messages must be within 500 character limit",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "validationMessage".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                return value.toString().length() <= 500;
+            }
+        ));
+
+        // PLACEMENT CONSTRAINT: Help text attributes
+        addConstraint(new PlacementConstraint(
+            "web.helpText.placement",
+            "helpText attribute can be placed on any MetaData for user guidance",
+            (parent) -> parent instanceof com.draagon.meta.MetaData,
+            (child) -> child instanceof com.draagon.meta.attr.MetaAttribute && "helpText".equals(child.getName())
+        ));
+
+        // VALIDATION CONSTRAINT: Help text length limits
+        addConstraint(new ValidationConstraint(
+            "web.helpText.validation",
+            "Help text must be within 1000 character limit",
+            (metadata) -> metadata instanceof com.draagon.meta.attr.MetaAttribute && "helpText".equals(metadata.getName()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                return value.toString().length() <= 1000;
+            }
+        ));
+    }
+
+    private void addSecurityConstraints() {
+        // VALIDATION CONSTRAINT: String fields should not contain script tags (XSS prevention)
+        addConstraint(new ValidationConstraint(
+            "web.xss.validation",
+            "String fields should not contain script tags for security",
+            (metadata) -> metadata instanceof com.draagon.meta.field.MetaField && "string".equals(((com.draagon.meta.field.MetaField) metadata).getSubType()),
+            (metadata, value) -> {
+                if (value == null) return true;
+                String stringValue = value.toString().toLowerCase();
+                return !stringValue.contains("<script");
+            }
+        ));
+    }
+
+    private boolean isValidHtmlInputType(String inputType) {
+        java.util.List<String> validTypes = java.util.Arrays.asList(
+            "text", "password", "email", "url", "tel", "search",
+            "number", "range", "date", "datetime-local", "time", "month", "week",
+            "color", "file", "image", "hidden", "checkbox", "radio", "submit", "button", "reset"
+        );
+        return validTypes.contains(inputType);
     }
 
     /**
