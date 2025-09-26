@@ -6,8 +6,13 @@ import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.validator.MetaValidator;
-import com.draagon.meta.registry.DatabaseNamingUtils;
+import com.draagon.meta.validator.RequiredValidator;
+import com.draagon.meta.validator.LengthValidator;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
@@ -24,7 +29,9 @@ import java.util.function.Function;
  * .claude/archive/template-system/TEMPLATE_IMPLEMENTATION_GUIDE.md
  */
 public class HelperRegistry {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(HelperRegistry.class);
+
     private final Map<String, Function<Object, Object>> helpers = new HashMap<>();
     
     public HelperRegistry() {
@@ -207,8 +214,8 @@ public class HelperRegistry {
     private Object getDbColumnName(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            // Use DatabaseNamingUtils for intelligent defaults with snake_case conversion
-            return DatabaseNamingUtils.getColumnName(field);
+            // Use inlined database naming logic for intelligent defaults with snake_case conversion
+            return getColumnName(field);
         }
         return null;
     }
@@ -216,8 +223,8 @@ public class HelperRegistry {
     private Object getDbTableName(Object input) {
         if (input instanceof MetaObject) {
             MetaObject metaObject = (MetaObject) input;
-            // Use DatabaseNamingUtils for intelligent defaults with snake_case conversion
-            return DatabaseNamingUtils.getTableName(metaObject);
+            // Use inlined database naming logic for intelligent defaults with snake_case conversion
+            return getTableName(metaObject);
         }
         return null;
     }
@@ -314,8 +321,8 @@ public class HelperRegistry {
     private Object isNullable(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            // Use DatabaseNamingUtils for intelligent nullable detection based on validators
-            return DatabaseNamingUtils.isNullable(field);
+            // Use inlined database naming logic for intelligent nullable detection based on validators
+            return isFieldNullable(field);
         }
         return true;
     }
@@ -456,8 +463,8 @@ public class HelperRegistry {
     private Object getColumnLength(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            // Use DatabaseNamingUtils to intelligently determine column length from validators
-            return DatabaseNamingUtils.getColumnLength(field).orElse(null);
+            // Use inlined database naming logic to intelligently determine column length from validators
+            return getFieldColumnLength(field).orElse(null);
         }
         return null;
     }
@@ -466,7 +473,7 @@ public class HelperRegistry {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
             // Check if a column length constraint exists
-            return DatabaseNamingUtils.getColumnLength(field).isPresent();
+            return getFieldColumnLength(field).isPresent();
         }
         return false;
     }
@@ -474,8 +481,8 @@ public class HelperRegistry {
     private Object getPrecision(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            // Use DatabaseNamingUtils to get precision for numeric fields
-            return DatabaseNamingUtils.getPrecision(field).orElse(null);
+            // Use inlined database naming logic to get precision for numeric fields
+            return getFieldPrecision(field).orElse(null);
         }
         return null;
     }
@@ -483,9 +490,242 @@ public class HelperRegistry {
     private Object getScale(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            // Use DatabaseNamingUtils to get scale for numeric fields
-            return DatabaseNamingUtils.getScale(field).orElse(null);
+            // Use inlined database naming logic to get scale for numeric fields
+            return getFieldScale(field).orElse(null);
         }
         return null;
+    }
+
+    // ========================================
+    // Inlined Database Naming Utility Methods
+    // ========================================
+
+    /**
+     * Get the database column name for a MetaField.
+     * Returns the explicit dbColumn attribute if present, otherwise converts
+     * the field name from camelCase to snake_case.
+     */
+    private String getColumnName(MetaField metaField) {
+        // Check for explicit dbColumn attribute first
+        if (metaField.hasMetaAttr("dbColumn")) {
+            String explicitColumn = metaField.getMetaAttr("dbColumn").getValueAsString();
+            if (explicitColumn != null && !explicitColumn.trim().isEmpty()) {
+                log.debug("Using explicit dbColumn: {} for field: {}", explicitColumn, metaField.getName());
+                return explicitColumn.trim();
+            }
+        }
+
+        // Default: Convert field name from camelCase to snake_case
+        String fieldName = metaField.getName();
+        String columnName = camelCaseToSnakeCase(fieldName);
+        log.debug("Generated column name: {} from field: {}", columnName, fieldName);
+        return columnName;
+    }
+
+    /**
+     * Get the database table name for a MetaObject.
+     * Returns the explicit dbTable attribute if present, otherwise converts
+     * the object name from camelCase to snake_case.
+     */
+    private String getTableName(MetaObject metaObject) {
+        // Check for explicit dbTable attribute first
+        if (metaObject.hasMetaAttr("dbTable")) {
+            String explicitTable = metaObject.getMetaAttr("dbTable").getValueAsString();
+            if (explicitTable != null && !explicitTable.trim().isEmpty()) {
+                log.debug("Using explicit dbTable: {} for object: {}", explicitTable, metaObject.getName());
+                return explicitTable.trim();
+            }
+        }
+
+        // Default: Convert object name from camelCase to snake_case
+        String objectName = metaObject.getName();
+        String tableName = camelCaseToSnakeCase(objectName);
+        log.debug("Generated table name: {} from object: {}", tableName, objectName);
+        return tableName;
+    }
+
+    /**
+     * Determine if a field should be nullable based on validators.
+     * Returns the explicit dbNullable attribute if present, otherwise analyzes
+     * the field's validators to determine if it's required (not nullable).
+     */
+    private boolean isFieldNullable(MetaField metaField) {
+        // Check for explicit dbNullable attribute first
+        if (metaField.hasMetaAttr("dbNullable")) {
+            try {
+                boolean explicitNullable = Boolean.parseBoolean(
+                    metaField.getMetaAttr("dbNullable").getValueAsString());
+                log.debug("Using explicit dbNullable: {} for field: {}", explicitNullable, metaField.getName());
+                return explicitNullable;
+            } catch (Exception e) {
+                log.warn("Invalid dbNullable value for field {}, falling back to validator analysis",
+                    metaField.getName());
+            }
+        }
+
+        // Default: Analyze validators to determine if field is required
+        boolean hasRequiredValidator = hasValidator(metaField, RequiredValidator.class);
+        boolean nullable = !hasRequiredValidator;
+
+        log.debug("Inferred nullable: {} for field: {} (hasRequiredValidator: {})",
+            nullable, metaField.getName(), hasRequiredValidator);
+        return nullable;
+    }
+
+    /**
+     * Get the database column length for a field.
+     * Returns the explicit dbLength attribute if present, otherwise analyzes
+     * validators to determine appropriate length constraints.
+     */
+    private Optional<Integer> getFieldColumnLength(MetaField metaField) {
+        // Check for explicit dbLength attribute first
+        if (metaField.hasMetaAttr("dbLength")) {
+            try {
+                int explicitLength = Integer.parseInt(
+                    metaField.getMetaAttr("dbLength").getValueAsString());
+                log.debug("Using explicit dbLength: {} for field: {}", explicitLength, metaField.getName());
+                return Optional.of(explicitLength);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid dbLength value for field {}, falling back to validator analysis",
+                    metaField.getName());
+            }
+        }
+
+        // Default: Analyze LengthValidator to determine maximum length
+        Optional<Integer> validatorLength = getMaxLengthFromValidators(metaField);
+        if (validatorLength.isPresent()) {
+            log.debug("Inferred length: {} from validators for field: {}",
+                validatorLength.get(), metaField.getName());
+            return validatorLength;
+        }
+
+        // Check for maxLength attribute (common pattern)
+        if (metaField.hasMetaAttr("maxLength")) {
+            try {
+                int maxLength = Integer.parseInt(
+                    metaField.getMetaAttr("maxLength").getValueAsString());
+                log.debug("Using maxLength attribute: {} for field: {}", maxLength, metaField.getName());
+                return Optional.of(maxLength);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid maxLength value for field {}", metaField.getName());
+            }
+        }
+
+        log.debug("No length constraint found for field: {}", metaField.getName());
+        return Optional.empty();
+    }
+
+    /**
+     * Get the database precision for numeric fields.
+     * Returns the explicit dbPrecision attribute if present, otherwise returns
+     * empty Optional as precision is typically database-specific.
+     */
+    private Optional<Integer> getFieldPrecision(MetaField metaField) {
+        if (metaField.hasMetaAttr("dbPrecision")) {
+            try {
+                int precision = Integer.parseInt(
+                    metaField.getMetaAttr("dbPrecision").getValueAsString());
+                log.debug("Using explicit dbPrecision: {} for field: {}", precision, metaField.getName());
+                return Optional.of(precision);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid dbPrecision value for field {}", metaField.getName());
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Get the database scale for numeric fields.
+     * Returns the explicit dbScale attribute if present, otherwise returns
+     * empty Optional as scale is typically database-specific.
+     */
+    private Optional<Integer> getFieldScale(MetaField metaField) {
+        if (metaField.hasMetaAttr("dbScale")) {
+            try {
+                int scale = Integer.parseInt(
+                    metaField.getMetaAttr("dbScale").getValueAsString());
+                log.debug("Using explicit dbScale: {} for field: {}", scale, metaField.getName());
+                return Optional.of(scale);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid dbScale value for field {}", metaField.getName());
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert camelCase or PascalCase to snake_case.
+     * Handles various edge cases:
+     * - UserAccount → user_account
+     * - firstName → first_name
+     * - XMLParser → xml_parser
+     * - accountID → account_id
+     * - IOUtils → io_utils
+     */
+    private static String camelCaseToSnakeCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder result = new StringBuilder();
+        char[] chars = input.toCharArray();
+
+        for (int i = 0; i < chars.length; i++) {
+            char current = chars[i];
+
+            // Add underscore before uppercase letters (except first character)
+            if (i > 0 && Character.isUpperCase(current)) {
+                // Handle consecutive uppercase letters (like "XMLParser" or "IOUtils")
+                if (i < chars.length - 1 && Character.isLowerCase(chars[i + 1])) {
+                    // Current is start of a new word (XML|Parser, IO|Utils)
+                    result.append('_');
+                } else if (i > 0 && Character.isLowerCase(chars[i - 1])) {
+                    // Transition from lowercase to uppercase (first|Name, account|ID)
+                    result.append('_');
+                }
+            }
+
+            result.append(Character.toLowerCase(current));
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Check if a MetaField has a validator of the specified type.
+     */
+    private static boolean hasValidator(MetaField metaField, Class<? extends MetaValidator> validatorClass) {
+        List<MetaValidator> validators = metaField.getChildren(MetaValidator.class);
+        return validators.stream()
+            .anyMatch(validator -> validatorClass.isInstance(validator));
+    }
+
+    /**
+     * Extract maximum length from LengthValidator or similar validators.
+     */
+    private static Optional<Integer> getMaxLengthFromValidators(MetaField metaField) {
+        List<MetaValidator> validators = metaField.getChildren(MetaValidator.class);
+
+        for (MetaValidator validator : validators) {
+            if (validator instanceof LengthValidator) {
+                LengthValidator lengthValidator = (LengthValidator) validator;
+                // LengthValidator typically has getMaxLength() method
+                try {
+                    // Use reflection to call getMaxLength() if it exists
+                    java.lang.reflect.Method getMaxLength = lengthValidator.getClass().getMethod("getMaxLength");
+                    Object maxLength = getMaxLength.invoke(lengthValidator);
+                    if (maxLength instanceof Integer) {
+                        return Optional.of((Integer) maxLength);
+                    }
+                } catch (Exception e) {
+                    log.debug("Could not extract max length from LengthValidator for field: {}",
+                        metaField.getName());
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 }

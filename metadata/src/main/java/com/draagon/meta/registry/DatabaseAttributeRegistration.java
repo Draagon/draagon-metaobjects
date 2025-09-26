@@ -38,7 +38,7 @@ public final class DatabaseAttributeRegistration {
      * 
      * <p>This method is idempotent and can be called multiple times safely.
      * All database attributes are optional - when not specified, intelligent defaults
-     * are provided by {@link DatabaseNamingUtils}:</p>
+     * are provided by the code generation system:</p>
      * 
      * <h3>Object-Level Database Attributes (Optional):</h3>
      * <ul>
@@ -58,7 +58,7 @@ public final class DatabaseAttributeRegistration {
      * </ul>
      * 
      * <p><strong>Note:</strong> These attributes are no longer globally required.
-     * The system uses {@link DatabaseNamingUtils} to provide intelligent defaults
+     * The system uses intelligent naming logic to provide defaults
      * when attributes are not explicitly specified.</p>
      */
     public static synchronized void registerDatabaseAttributes() {
