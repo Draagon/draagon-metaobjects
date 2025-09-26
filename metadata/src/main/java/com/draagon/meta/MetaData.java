@@ -8,7 +8,10 @@ package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.field.MetaField;
+import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.validator.MetaValidator;
+import com.draagon.meta.view.MetaView;
 import com.draagon.meta.loader.MetaDataLoader;
 // Using unified registry instead
 import com.draagon.meta.registry.MetaDataRegistry;
@@ -176,36 +179,40 @@ public class MetaData implements Cloneable, Serializable {
         registry.addConstraint(new PlacementConstraint(
             "metadata.base.attributes",
             "metadata.base can contain attributes",
-            "metadata.base",        // Parent pattern
-            "attr.*",               // Child pattern
-            true                    // Allowed
+            TYPE_METADATA, SUBTYPE_BASE,    // Parent: metadata.base
+            MetaAttribute.TYPE_ATTR, "*",   // Child: attr.*
+            null,                           // No name constraint
+            true                            // Allowed
         ));
 
         // VALIDATORS under metadata.base
         registry.addConstraint(new PlacementConstraint(
             "metadata.base.validators",
             "metadata.base can contain validators",
-            "metadata.base",        // Parent pattern
-            "validator.*",          // Child pattern
-            true                    // Allowed
+            TYPE_METADATA, SUBTYPE_BASE,         // Parent: metadata.base
+            MetaValidator.TYPE_VALIDATOR, "*",   // Child: validator.*
+            null,                                // No name constraint
+            true                                 // Allowed
         ));
 
         // VIEWS under metadata.base
         registry.addConstraint(new PlacementConstraint(
             "metadata.base.views",
             "metadata.base can contain views",
-            "metadata.base",        // Parent pattern
-            "view.*",               // Child pattern
-            true                    // Allowed
+            TYPE_METADATA, SUBTYPE_BASE,    // Parent: metadata.base
+            MetaView.TYPE_VIEW, "*",        // Child: view.*
+            null,                           // No name constraint
+            true                            // Allowed
         ));
 
         // KEYS under metadata.base
         registry.addConstraint(new PlacementConstraint(
             "metadata.base.keys",
             "metadata.base can contain keys",
-            "metadata.base",        // Parent pattern
-            "key.*",                // Child pattern
-            true                    // Allowed
+            TYPE_METADATA, SUBTYPE_BASE,    // Parent: metadata.base
+            MetaKey.TYPE_KEY, "*",          // Child: key.*
+            null,                           // No name constraint
+            true                            // Allowed
         ));
         
         // FUTURE DEFAULT: Any new metadata types must be abstract under metadata.base

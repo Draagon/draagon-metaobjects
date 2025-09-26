@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
 
 /**
  * A Timestamp Field with unified registry registration and child requirements.
@@ -62,36 +63,36 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
         registry.addConstraint(new PlacementConstraint(
             "timestampfield.precision.placement",
             "TimestampField can optionally have precision attribute",
-            "field.timestamp",             // Parent pattern
-            "attr.int[precision]",         // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_TIMESTAMP,                    // Parent: field.timestamp
+            TYPE_ATTR, IntAttribute.SUBTYPE_INT, "precision", // Child: attr.int[precision]
+            true                                              // Allowed
         ));
 
         // PLACEMENT CONSTRAINT: TimestampField CAN have dateFormat attribute
         registry.addConstraint(new PlacementConstraint(
             "timestampfield.dateformat.placement",
             "TimestampField can optionally have dateFormat attribute",
-            "field.timestamp",             // Parent pattern
-            "attr.string[dateFormat]",     // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_TIMESTAMP,                       // Parent: field.timestamp
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, "dateFormat", // Child: attr.string[dateFormat]
+            true                                                 // Allowed
         ));
 
         // PLACEMENT CONSTRAINT: TimestampField CAN have minDate attribute
         registry.addConstraint(new PlacementConstraint(
             "timestampfield.mindate.placement",
             "TimestampField can optionally have minDate attribute",
-            "field.timestamp",             // Parent pattern
-            "attr.string[minDate]",        // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_TIMESTAMP,                   // Parent: field.timestamp
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, "minDate", // Child: attr.string[minDate]
+            true                                             // Allowed
         ));
 
         // PLACEMENT CONSTRAINT: TimestampField CAN have maxDate attribute
         registry.addConstraint(new PlacementConstraint(
             "timestampfield.maxdate.placement",
             "TimestampField can optionally have maxDate attribute",
-            "field.timestamp",             // Parent pattern
-            "attr.string[maxDate]",        // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_TIMESTAMP,                   // Parent: field.timestamp
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, "maxDate", // Child: attr.string[maxDate]
+            true                                             // Allowed
         ));
     }
 

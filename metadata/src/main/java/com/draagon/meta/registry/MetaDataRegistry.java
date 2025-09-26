@@ -3,7 +3,12 @@ package com.draagon.meta.registry;
 import com.draagon.meta.MetaData;
 import com.draagon.meta.MetaDataException;
 import com.draagon.meta.MetaDataTypeId;
+import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.attr.BooleanAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.*;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.object.MetaObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +63,6 @@ public class MetaDataRegistry {
     private final Map<MetaDataTypeId, TypeDefinition> typeDefinitions = new ConcurrentHashMap<>();
     private final Map<String, List<ChildRequirement>> globalRequirements = new ConcurrentHashMap<>();
     private final Set<TypeDefinition> deferredInheritanceTypes = ConcurrentHashMap.newKeySet();
-    // Unified constraint storage using enhanced ChildRequirement
-    private final List<ChildRequirement> allConstraints = Collections.synchronizedList(new ArrayList<>());
 
     // Integrated constraint system (merged from ConstraintRegistry)
     private final List<Constraint> constraints = Collections.synchronizedList(new ArrayList<>());
@@ -77,8 +80,8 @@ public class MetaDataRegistry {
             synchronized (INSTANCE_LOCK) {
                 if (instance == null) {
                     instance = new MetaDataRegistry();
-                    // Load core types to ensure they're available for parsing
-                    instance.loadCoreTypes();
+                    // Load service providers to ensure they're available for parsing
+                    instance.ensureInitialized();
                 }
             }
         }
@@ -164,117 +167,6 @@ public class MetaDataRegistry {
         return this;
     }
 
-    /**
-     * Register multiple types that use standardized registerTypes() pattern.
-     * This method calls the static registerTypes() method on each class if it exists.
-     *
-     * @param typeClasses Classes that implement the registerTypes() pattern
-     */
-    @SafeVarargs
-    public static void registerTypes(Class<? extends MetaData>... typeClasses) {
-        for (Class<? extends MetaData> typeClass : typeClasses) {
-            if (typeClass == null) {
-                continue; // Skip null classes from getClassSafely()
-            }
-
-            try {
-                // Look for a static registerTypes(MetaDataRegistry) method
-                var registerMethod = typeClass.getMethod("registerTypes", MetaDataRegistry.class);
-                registerMethod.invoke(null, getInstance());
-            } catch (NoSuchMethodException e) {
-                // Fallback: Try to find static registerTypes() method with no parameters
-                try {
-                    var singleRegisterMethod = typeClass.getMethod("registerTypes");
-                    singleRegisterMethod.invoke(null);
-                } catch (NoSuchMethodException e2) {
-                    log.warn("Class {} does not have registerTypes() method - skipping", typeClass.getName());
-                } catch (Exception e2) {
-                    log.error("Failed to call registerTypes() on {}: {}", typeClass.getName(), e2.getMessage(), e2);
-                }
-            } catch (Exception e) {
-                log.error("Failed to register types from {}: {}", typeClass.getName(), e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * Register all core MetaData types using the standardized registerTypes() pattern.
-     * This is a centralized method for registering all core types in proper order.
-     */
-    public static void registerAllCoreTypes() {
-        try {
-            log.info("Registering all core MetaData types using standardized registerTypes() pattern...");
-
-            // PHASE 1: Base Types (foundation types that others inherit from)
-            log.debug("Registering base types...");
-            // Note: Base types would be registered here if they had registerTypes() methods
-
-            // PHASE 2: Field Types
-            log.debug("Registering field types...");
-            registerTypes(
-                getClassSafely("com.draagon.meta.field.MetaField"),
-                getClassSafely("com.draagon.meta.field.StringField"),
-                getClassSafely("com.draagon.meta.field.IntegerField"),
-                getClassSafely("com.draagon.meta.field.LongField"),
-                getClassSafely("com.draagon.meta.field.DoubleField"),
-                getClassSafely("com.draagon.meta.field.FloatField"),
-                getClassSafely("com.draagon.meta.field.BooleanField"),
-                getClassSafely("com.draagon.meta.field.ByteField"),
-                getClassSafely("com.draagon.meta.field.ShortField"),
-                getClassSafely("com.draagon.meta.field.DateField"),
-                getClassSafely("com.draagon.meta.field.ClassField"),
-                getClassSafely("com.draagon.meta.field.ObjectField"),
-                getClassSafely("com.draagon.meta.field.ObjectArrayField"),
-                getClassSafely("com.draagon.meta.field.StringArrayField"),
-                getClassSafely("com.draagon.meta.field.TimestampField")
-            );
-
-            // PHASE 3: Attribute Types
-            log.debug("Registering attribute types...");
-            registerTypes(
-                getClassSafely("com.draagon.meta.attr.MetaAttribute"),
-                getClassSafely("com.draagon.meta.attr.StringAttribute"),
-                getClassSafely("com.draagon.meta.attr.IntAttribute"),
-                getClassSafely("com.draagon.meta.attr.BooleanAttribute"),
-                getClassSafely("com.draagon.meta.attr.ClassAttribute"),
-                getClassSafely("com.draagon.meta.attr.DoubleAttribute"),
-                getClassSafely("com.draagon.meta.attr.LongAttribute"),
-                getClassSafely("com.draagon.meta.attr.PropertiesAttribute"),
-                getClassSafely("com.draagon.meta.attr.StringArrayAttribute")
-            );
-
-            // PHASE 4: Object Types
-            log.debug("Registering object types...");
-            registerTypes(
-                getClassSafely("com.draagon.meta.object.MetaObject"),
-                getClassSafely("com.draagon.meta.object.pojo.PojoMetaObject"),
-                getClassSafely("com.draagon.meta.object.mapped.MappedMetaObject"),
-                getClassSafely("com.draagon.meta.object.proxy.ProxyMetaObject")
-            );
-
-            log.info("Core type registration completed successfully - {} types registered",
-                    getInstance().getRegisteredTypes().size());
-
-        } catch (Exception e) {
-            log.error("Failed to register core types using standardized pattern: {}", e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Safely get a class by name, filtering out missing classes.
-     *
-     * @param className Full class name
-     * @return Class instance, or null if not found
-     */
-    @SuppressWarnings("unchecked")
-    private static Class<? extends MetaData> getClassSafely(String className) {
-        try {
-            return (Class<? extends MetaData>) Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            log.debug("Class {} not available - skipping", className);
-            return null;
-        }
-    }
 
     /**
      * Register a type definition with inheritance resolution
@@ -300,11 +192,6 @@ public class MetaDataRegistry {
         log.debug("Registered type: {} -> {} (parent: {})", typeId.toQualifiedName(),
                  definition.getImplementationClass().getSimpleName(),
                  definition.hasParent() ? definition.getParentQualifiedName() : "none");
-
-        // Try to resolve any deferred inheritance that might now be possible
-        if (!deferredInheritanceTypes.isEmpty()) {
-            resolveDeferredInheritance();
-        }
     }
 
     /**
@@ -554,124 +441,7 @@ public class MetaDataRegistry {
         // No-op for backward compatibility during migration
     }
 
-    /**
-     * Register a constraint directly using ChildRequirement
-     *
-     * @param constraint The constraint to register
-     */
-    public void registerConstraint(ChildRequirement constraint) {
-        if (constraint == null) {
-            log.warn("Attempted to register null constraint - ignoring");
-            return;
-        }
-        allConstraints.add(constraint);
-        log.debug("Registered constraint: {} - {}", constraint.getConstraintId(), constraint.getDescription());
-    }
 
-    /**
-     * Get all registered constraints
-     *
-     * @return List of all constraints (read-only view)
-     */
-    public List<ChildRequirement> getAllConstraints() {
-        return Collections.unmodifiableList(allConstraints);
-    }
-
-    /**
-     * Get all placement constraints
-     *
-     * @return List of placement constraints
-     */
-    public List<ChildRequirement> getPlacementConstraints() {
-        return allConstraints.stream()
-            .filter(ChildRequirement::isPlacementConstraint)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get all validation constraints
-     *
-     * @return List of validation constraints
-     */
-    public List<ChildRequirement> getValidationConstraints() {
-        return allConstraints.stream()
-            .filter(ChildRequirement::isValidationConstraint)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Validate a parent-child placement using unified constraint system
-     *
-     * @param parent The parent MetaData
-     * @param child The child MetaData to be added
-     * @throws ConstraintViolationException If placement is not allowed
-     */
-    public void validatePlacement(MetaData parent, MetaData child) throws ConstraintViolationException {
-        // First check traditional child requirements
-        boolean allowedByChildRequirements = acceptsChild(
-            parent.getType(), parent.getSubType(),
-            child.getType(), child.getSubType(), child.getName());
-
-        // Then check placement constraints
-        List<ChildRequirement> placementConstraints = getPlacementConstraints();
-        boolean allowedByPlacementConstraints = placementConstraints.isEmpty(); // Default allow if no constraints
-
-        for (ChildRequirement constraint : placementConstraints) {
-            if (constraint.isPlacementAllowed(parent, child)) {
-                allowedByPlacementConstraints = true;
-                break; // At least one constraint allows it
-            }
-        }
-
-        if (!allowedByChildRequirements && !allowedByPlacementConstraints) {
-            throw new ConstraintViolationException(
-                String.format("Child %s[%s] cannot be placed under parent %s[%s]",
-                    child.getClass().getSimpleName(), child.getName(),
-                    parent.getClass().getSimpleName(), parent.getName()),
-                "placement.validation",
-                parent
-            );
-        }
-    }
-
-    /**
-     * Validate a value using unified constraint system
-     *
-     * @param metaData The metadata object being validated
-     * @param value The value being validated
-     * @throws ConstraintViolationException If validation fails
-     */
-    public void validateValue(MetaData metaData, Object value)
-            throws ConstraintViolationException {
-        List<ChildRequirement> validationConstraints = getValidationConstraints();
-
-        for (ChildRequirement constraint : validationConstraints) {
-            try {
-                constraint.validateValue(metaData, value);
-            } catch (ConstraintViolationException e) {
-                // Re-throw with additional context
-                throw new ConstraintViolationException(
-                    e.getMessage() + " (constraint: " + constraint.getConstraintId() + ")",
-                    e.getConstraintType(),
-                    e.getViolatingValue(),
-                    e.getMetaData()
-                );
-            }
-        }
-    }
-
-    /**
-     * Get constraint statistics
-     *
-     * @return Map of constraint types to counts
-     */
-    public Map<String, Integer> getConstraintStats() {
-        Map<String, Integer> stats = new HashMap<>();
-        stats.put("total", allConstraints.size());
-        stats.put("placement", (int) allConstraints.stream().filter(ChildRequirement::isPlacementConstraint).count());
-        stats.put("validation", (int) allConstraints.stream().filter(ChildRequirement::isValidationConstraint).count());
-        return stats;
-    }
     
     /**
      * Get human-readable description of supported children for error messages
@@ -794,7 +564,7 @@ public class MetaDataRegistry {
             typesByPrimary,
             globalRequirementCount,
             serviceRegistry.getDescription(),
-            getConstraintStats()
+            getValidationConstraintTypeSummary()
         );
     }
     
@@ -805,74 +575,17 @@ public class MetaDataRegistry {
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
-                    loadServiceBasedExtensions();
+                    loadServiceProviders();
                     initialized = true;
                 }
             }
         }
     }
     
-    /**
-     * Load service-based extensions that add global child requirements
-     */
-    private void loadServiceBasedExtensions() {
-        // Plugin system removed - all types now self-register via static blocks
-        // Database attributes are registered via DatabaseAttributeRegistration
-        log.debug("Service-based extension loading completed - using self-registration pattern");
-    }
     
     
     // Legacy provider loading removed - using unified plugin approach
     
-    /**
-     * Force load core types by triggering their static blocks
-     */
-    private void loadCoreTypes() {
-        try {
-            // Force loading of core field types
-            Class.forName("com.draagon.meta.field.StringField");
-            Class.forName("com.draagon.meta.field.IntegerField");
-            Class.forName("com.draagon.meta.field.LongField");
-            Class.forName("com.draagon.meta.field.DoubleField");
-            Class.forName("com.draagon.meta.field.FloatField");
-            Class.forName("com.draagon.meta.field.BooleanField");
-            Class.forName("com.draagon.meta.field.ByteField");
-            Class.forName("com.draagon.meta.field.ShortField");
-            Class.forName("com.draagon.meta.field.DateField");
-            Class.forName("com.draagon.meta.field.ClassField");
-            Class.forName("com.draagon.meta.field.ObjectField");
-            Class.forName("com.draagon.meta.field.ObjectArrayField");
-            Class.forName("com.draagon.meta.field.StringArrayField");
-            
-            // Force loading of core object types
-            Class.forName("com.draagon.meta.object.MetaObject");
-            Class.forName("com.draagon.meta.object.pojo.PojoMetaObject");
-            Class.forName("com.draagon.meta.object.mapped.MappedMetaObject");
-            Class.forName("com.draagon.meta.object.proxy.ProxyMetaObject");
-            
-            // Force loading of attribute types
-            Class.forName("com.draagon.meta.attr.StringAttribute");
-            Class.forName("com.draagon.meta.attr.IntAttribute");
-            Class.forName("com.draagon.meta.attr.BooleanAttribute");
-            
-            // Force loading of validator types
-            Class.forName("com.draagon.meta.validator.RequiredValidator");
-            Class.forName("com.draagon.meta.validator.LengthValidator");
-            
-            // Force loading of key types
-            Class.forName("com.draagon.meta.key.PrimaryKey");
-            Class.forName("com.draagon.meta.key.ForeignKey");
-            Class.forName("com.draagon.meta.key.SecondaryKey");
-            
-            log.debug("Core types loaded successfully");
-
-            // Load service providers after core types are available
-            loadServiceProviders();
-
-        } catch (ClassNotFoundException e) {
-            log.warn("Some core types could not be loaded: {}", e.getMessage());
-        }
-    }
 
     /**
      * Find a type for extension by type and subtype.
@@ -942,6 +655,12 @@ public class MetaDataRegistry {
                 try {
                     long startTime = System.currentTimeMillis();
                     provider.registerTypes(this);
+
+                    // Resolve any deferred inheritance after each provider completes
+                    if (!deferredInheritanceTypes.isEmpty()) {
+                        resolveDeferredInheritance();
+                    }
+
                     long duration = System.currentTimeMillis() - startTime;
 
                     String depsStr = provider.getDependencies().length > 0 ?
@@ -1418,9 +1137,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "field.required.placement",
             "Fields can have required attribute",
-            "field.*",              // Parent pattern (any field subtype)
-            "attr.boolean[required]", // Child pattern
-            true                    // Allowed
+            MetaField.TYPE_FIELD, "*",                          // Parent: field.*
+            MetaAttribute.TYPE_ATTR, BooleanAttribute.SUBTYPE_BOOLEAN, "required", // Child: attr.boolean[required]
+            true                                                // Allowed
         ));
     }
 
@@ -1440,9 +1159,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "codegen.skipJpa.object.placement",
             "skipJpa attribute can be placed on MetaObjects to skip JPA generation",
-            "object.*",             // Parent pattern
-            "attr.*[skipJpa]",      // Child pattern
-            true                    // Allowed
+            MetaObject.TYPE_OBJECT, "*",            // Parent: object.*
+            MetaAttribute.TYPE_ATTR, "*", "skipJpa", // Child: attr.*[skipJpa]
+            true                                    // Allowed
         ));
 
         // VALIDATION CONSTRAINT: skipJpa must be boolean
@@ -1461,9 +1180,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "codegen.skipJpa.field.placement",
             "skipJpa attribute can be placed on MetaFields to skip JPA generation",
-            "field.*",              // Parent pattern
-            "attr.*[skipJpa]",      // Child pattern
-            true                    // Allowed
+            MetaField.TYPE_FIELD, "*",              // Parent: field.*
+            MetaAttribute.TYPE_ATTR, "*", "skipJpa", // Child: attr.*[skipJpa]
+            true                                    // Allowed
         ));
     }
 
@@ -1472,9 +1191,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "codegen.collection.placement",
             "collection attribute can be placed on MetaFields to indicate collection type",
-            "field.*",                  // Parent pattern (any field subtype)
-            "attr.*[collection]",       // Child pattern
-            true                        // Allowed
+            MetaField.TYPE_FIELD, "*",                  // Parent: field.*
+            MetaAttribute.TYPE_ATTR, "*", "collection", // Child: attr.*[collection]
+            true                                        // Allowed
         ));
 
         // VALIDATION CONSTRAINT: collection must be boolean
@@ -1493,9 +1212,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "codegen.isSearchable.placement",
             "isSearchable attribute can be placed on MetaFields for search functionality",
-            "field.*",                  // Parent pattern (any field subtype)
-            "attr.*[isSearchable]",     // Child pattern
-            true                        // Allowed
+            MetaField.TYPE_FIELD, "*",                      // Parent: field.*
+            MetaAttribute.TYPE_ATTR, "*", "isSearchable",   // Child: attr.*[isSearchable]
+            true                                            // Allowed
         ));
 
         // VALIDATION CONSTRAINT: isSearchable must be boolean
@@ -1527,9 +1246,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "coreio.xmlName.placement",
             "xmlName attribute can be placed on any MetaData for XML element naming",
-            "*.*",                      // Parent pattern (any metadata)
-            "attr.*[xmlName]",          // Child pattern
-            true                        // Allowed
+            "*", "*",                               // Parent: *.* (any metadata)
+            MetaAttribute.TYPE_ATTR, "*", "xmlName", // Child: attr.*[xmlName]
+            true                                    // Allowed
         ));
 
         // VALIDATION CONSTRAINT: xmlName must be valid XML identifier
@@ -1549,9 +1268,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "coreio.xmlTyped.placement",
             "xmlTyped attribute can be placed on MetaObjects for type information in XML",
-            "object.*",                 // Parent pattern (any object subtype)
-            "attr.*[xmlTyped]",         // Child pattern
-            true                        // Allowed
+            MetaObject.TYPE_OBJECT, "*",                // Parent: object.*
+            MetaAttribute.TYPE_ATTR, "*", "xmlTyped",   // Child: attr.*[xmlTyped]
+            true                                        // Allowed
         ));
 
         // VALIDATION CONSTRAINT: xmlTyped must be boolean
@@ -1570,9 +1289,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "coreio.xmlWrap.placement",
             "xmlWrap attribute can be placed on MetaFields for XML wrapping behavior",
-            "field.*",                  // Parent pattern (any field subtype)
-            "attr.*[xmlWrap]",          // Child pattern
-            true                        // Allowed
+            MetaField.TYPE_FIELD, "*",              // Parent: field.*
+            MetaAttribute.TYPE_ATTR, "*", "xmlWrap", // Child: attr.*[xmlWrap]
+            true                                    // Allowed
         ));
 
         // VALIDATION CONSTRAINT: xmlWrap must be boolean
@@ -1591,9 +1310,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "coreio.xmlIgnore.placement",
             "xmlIgnore attribute can be placed on MetaFields to exclude from XML serialization",
-            "field.*",                  // Parent pattern (any field subtype)
-            "attr.*[xmlIgnore]",        // Child pattern
-            true                        // Allowed
+            MetaField.TYPE_FIELD, "*",                  // Parent: field.*
+            MetaAttribute.TYPE_ATTR, "*", "xmlIgnore",  // Child: attr.*[xmlIgnore]
+            true                                        // Allowed
         ));
 
         // VALIDATION CONSTRAINT: xmlIgnore must be boolean
@@ -1657,9 +1376,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "web.cssClass.placement",
             "cssClass attribute can be placed on any MetaData for styling",
-            "*.*",                      // Parent pattern (any metadata)
-            "attr.*[cssClass]",         // Child pattern
-            true                        // Allowed
+            "*", "*",                                   // Parent: *.* (any metadata)
+            MetaAttribute.TYPE_ATTR, "*", "cssClass",   // Child: attr.*[cssClass]
+            true                                        // Allowed
         ));
 
         // VALIDATION CONSTRAINT: CSS class names must follow valid pattern with length limit
@@ -1677,9 +1396,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "web.htmlId.placement",
             "htmlId attribute can be placed on any MetaData for DOM identification",
-            "*.*",                      // Parent pattern (any metadata)
-            "attr.*[htmlId]",           // Child pattern
-            true                        // Allowed
+            "*", "*",                               // Parent: *.* (any metadata)
+            MetaAttribute.TYPE_ATTR, "*", "htmlId", // Child: attr.*[htmlId]
+            true                                    // Allowed
         ));
 
         // VALIDATION CONSTRAINT: HTML ID must follow valid pattern
@@ -1699,9 +1418,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "web.formLabel.placement",
             "formLabel attribute can be placed on fields for form generation",
-            "field.*",                  // Parent pattern (any field subtype)
-            "attr.*[formLabel]",        // Child pattern
-            true                        // Allowed
+            MetaField.TYPE_FIELD, "*",                      // Parent: field.*
+            MetaAttribute.TYPE_ATTR, "*", "formLabel",      // Child: attr.*[formLabel]
+            true                                            // Allowed
         ));
 
         // VALIDATION CONSTRAINT: Form labels must be non-empty and within length limits
@@ -1741,9 +1460,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "web.validationMessage.placement",
             "validationMessage attribute can be placed on any MetaData for error display",
-            "*.*",                      // Parent pattern (any metadata)
-            "attr.*[validationMessage]", // Child pattern
-            true                        // Allowed
+            "*", "*",                                           // Parent: *.* (any metadata)
+            MetaAttribute.TYPE_ATTR, "*", "validationMessage", // Child: attr.*[validationMessage]
+            true                                                // Allowed
         ));
 
         // VALIDATION CONSTRAINT: Validation message length limits
@@ -1762,9 +1481,9 @@ public class MetaDataRegistry {
         addConstraint(new PlacementConstraint(
             "web.helpText.placement",
             "helpText attribute can be placed on any MetaData for user guidance",
-            "*.*",                      // Parent pattern (any metadata)
-            "attr.*[helpText]",         // Child pattern
-            true                        // Allowed
+            "*", "*",                               // Parent: *.* (any metadata)
+            MetaAttribute.TYPE_ATTR, "*", "helpText", // Child: attr.*[helpText]
+            true                                    // Allowed
         ));
 
         // VALIDATION CONSTRAINT: Help text length limits

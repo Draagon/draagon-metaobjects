@@ -11,6 +11,8 @@ import com.draagon.meta.key.MetaKey;
 import com.draagon.meta.key.PrimaryKey;
 import com.draagon.meta.key.SecondaryKey;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.validator.MetaValidator;
+import com.draagon.meta.view.MetaView;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -556,54 +558,60 @@ public abstract class MetaObject extends MetaData {
             registry.addConstraint(new PlacementConstraint(
                 "object.fields.placement",
                 "Objects can contain fields",
-                "object.*",     // Parent pattern (any object subtype)
-                "field.*",      // Child pattern (any field subtype)
-                true            // Allowed
+                TYPE_OBJECT, "*",               // Parent: object.*
+                MetaField.TYPE_FIELD, "*",      // Child: field.*
+                null,                           // No name constraint
+                true                            // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain attributes
             registry.addConstraint(new PlacementConstraint(
                 "object.attributes.placement",
                 "Objects can contain attributes",
-                "object.*",     // Parent pattern (any object subtype)
-                "attr.*",       // Child pattern (any attribute subtype)
-                true            // Allowed
+                TYPE_OBJECT, "*",               // Parent: object.*
+                MetaAttribute.TYPE_ATTR, "*",   // Child: attr.*
+                null,                           // No name constraint
+                true                            // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain keys
             registry.addConstraint(new PlacementConstraint(
                 "object.keys.placement",
                 "Objects can contain keys (primary, foreign, secondary)",
-                "object.*",     // Parent pattern (any object subtype)
-                "key.*",        // Child pattern (any key subtype)
-                true            // Allowed
+                TYPE_OBJECT, "*",               // Parent: object.*
+                MetaKey.TYPE_KEY, "*",          // Child: key.*
+                null,                           // No name constraint
+                true                            // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain validators
             registry.addConstraint(new PlacementConstraint(
                 "object.validators.placement",
                 "Objects can contain validators",
-                "object.*",     // Parent pattern (any object subtype)
-                "validator.*",  // Child pattern (any validator subtype)
-                true            // Allowed
+                TYPE_OBJECT, "*",               // Parent: object.*
+                MetaValidator.TYPE_VALIDATOR, "*",  // Child: validator.*
+                null,                           // No name constraint
+                true                            // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain views
             registry.addConstraint(new PlacementConstraint(
                 "object.views.placement",
                 "Objects can contain views",
-                "object.*",     // Parent pattern (any object subtype)
-                "view.*",       // Child pattern (any view subtype)
-                true            // Allowed
+                TYPE_OBJECT, "*",               // Parent: object.*
+                MetaView.TYPE_VIEW, "*",        // Child: view.*
+                null,                           // No name constraint
+                true                            // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: Objects CAN contain nested objects
             registry.addConstraint(new PlacementConstraint(
                 "object.nested.placement",
                 "Objects can contain nested objects",
-                "object.*",     // Parent pattern (any object subtype)
-                "object.*",     // Child pattern (any object subtype)
-                true            // Allowed
+                TYPE_OBJECT, "*",               // Parent: object.*
+                TYPE_OBJECT, "*",               // Child: object.*
+                null,                           // No name constraint
+                true                            // Allowed
             ));
 
             // UNIQUENESS CONSTRAINT: Unique field names within object (using standard constraint pattern)

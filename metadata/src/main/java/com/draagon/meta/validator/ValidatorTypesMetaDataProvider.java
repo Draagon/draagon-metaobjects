@@ -52,8 +52,8 @@ public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public String[] getDependencies() {
-        // No dependencies - validator.base inherits from metadata.base which is auto-registered
-        return new String[0];
+        // Depends on core base types to ensure metadata.base is available for validator.base inheritance
+        return new String[]{"core-base-types"};
     }
 
     @Override

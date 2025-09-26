@@ -58,8 +58,8 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public String[] getDependencies() {
-        // No dependencies - attr.base inherits from metadata.base which is auto-registered
-        return new String[0];
+        // Depends on core base types to ensure metadata.base is available for attr.base inheritance
+        return new String[]{"core-base-types"};
     }
 
     @Override

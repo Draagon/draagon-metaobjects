@@ -11,7 +11,6 @@ import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.attr.StringAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +18,7 @@ import java.util.Date;
 
 import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
 
 /**
  * A Date Field with unified registry registration and child requirements.
@@ -68,36 +68,36 @@ public class DateField extends PrimitiveField<Date> {
         registry.addConstraint(new PlacementConstraint(
             "datefield.format.placement",
             "DateField can optionally have format attribute",
-            "field.date",                  // Parent pattern
-            "attr.string[format]",         // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_DATE,                         // Parent: field.date
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, ATTR_FORMAT, // Child: attr.string[format]
+            true                                              // Allowed
         ));
 
         // PLACEMENT CONSTRAINT: DateField CAN have dateFormat attribute
         registry.addConstraint(new PlacementConstraint(
             "datefield.dateformat.placement",
             "DateField can optionally have dateFormat attribute",
-            "field.date",                  // Parent pattern
-            "attr.string[dateFormat]",     // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_DATE,                             // Parent: field.date
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, ATTR_DATE_FORMAT, // Child: attr.string[dateFormat]
+            true                                                  // Allowed
         ));
 
         // PLACEMENT CONSTRAINT: DateField CAN have minDate attribute
         registry.addConstraint(new PlacementConstraint(
             "datefield.mindate.placement",
             "DateField can optionally have minDate attribute",
-            "field.date",                  // Parent pattern
-            "attr.string[minDate]",        // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_DATE,                         // Parent: field.date
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, ATTR_MIN_DATE, // Child: attr.string[minDate]
+            true                                              // Allowed
         ));
 
         // PLACEMENT CONSTRAINT: DateField CAN have maxDate attribute
         registry.addConstraint(new PlacementConstraint(
             "datefield.maxdate.placement",
             "DateField can optionally have maxDate attribute",
-            "field.date",                  // Parent pattern
-            "attr.string[maxDate]",        // Child pattern
-            true                           // Allowed
+            TYPE_FIELD, SUBTYPE_DATE,                         // Parent: field.date
+            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, ATTR_MAX_DATE, // Child: attr.string[maxDate]
+            true                                              // Allowed
         ));
     }
 

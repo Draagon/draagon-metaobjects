@@ -19,10 +19,10 @@ import com.draagon.meta.object.MetaObject;
  * Example usage:
  * - Allow maxLength on string fields:
  *   new PlacementConstraint("field.string.maxLength", "String fields can have maxLength",
- *                          "field.string", "attr.int[maxLength]", true)
+ *                          "field", "string", "attr", "int", "maxLength", true)
  * - Forbid script tags on string fields:
  *   new PlacementConstraint("field.string.script", "String fields cannot contain script",
- *                          "field.string", "attr.*[script]", false)
+ *                          "field", "string", "attr", "*", "script", false)
  */
 public class PlacementConstraint implements Constraint {
 
@@ -39,7 +39,9 @@ public class PlacementConstraint implements Constraint {
      * @param parentPattern Pattern for parent type (e.g., "field.string", "object.*")
      * @param childPattern Pattern for child type (e.g., "attr.int[maxLength]", "field.*")
      * @param allowed Whether this placement is allowed (true) or forbidden (false)
+     * @deprecated Use the constructor with separate type/subtype/name parameters and proper constants instead
      */
+    @Deprecated
     public PlacementConstraint(String constraintId, String description,
                               String parentPattern, String childPattern, boolean allowed) {
         this.constraintId = constraintId;

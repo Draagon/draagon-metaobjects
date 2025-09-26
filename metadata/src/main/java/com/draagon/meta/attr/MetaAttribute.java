@@ -216,8 +216,9 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             registry.addConstraint(new PlacementConstraint(
                 "attribute.universal.placement",
                 "Attributes can be placed on any MetaData",
-                "*.*",                      // Parent pattern (any metadata)
-                "attr.*",                   // Child pattern (any attribute)
+                "*", "*",                   // Parent: *.* (any metadata)
+                TYPE_ATTR, "*",             // Child: attr.*
+                null,                       // No name constraint
                 true                        // Allowed
             ));
 

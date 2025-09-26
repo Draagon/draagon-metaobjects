@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
 
 /**
  * An Integer Field with unified registry registration and child requirements.
@@ -78,18 +79,18 @@ public class IntegerField extends PrimitiveField<Integer> {
             registry.addConstraint(new PlacementConstraint(
                 "integerfield.minvalue.placement",
                 "IntegerField can optionally have minValue attribute",
-                "field.int",              // Parent pattern
-                "attr.*[minValue]",       // Child pattern (allows int or string)
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_INT,           // Parent: field.int
+                TYPE_ATTR, "*", ATTR_MIN_VALUE,    // Child: attr.*[minValue] (allows any attr subtype)
+                true                               // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: IntegerField CAN have maxValue attribute
             registry.addConstraint(new PlacementConstraint(
                 "integerfield.maxvalue.placement",
                 "IntegerField can optionally have maxValue attribute",
-                "field.int",              // Parent pattern
-                "attr.*[maxValue]",       // Child pattern (allows int or string)
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_INT,           // Parent: field.int
+                TYPE_ATTR, "*", ATTR_MAX_VALUE,    // Child: attr.*[maxValue] (allows any attr subtype)
+                true                               // Allowed
             ));
 
             log.debug("Registered IntegerField-specific constraints using consolidated registry");

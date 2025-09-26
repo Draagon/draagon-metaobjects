@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.draagon.meta.field.MetaField.TYPE_FIELD;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
 
 
 /**
@@ -78,18 +79,18 @@ public class LongField extends PrimitiveField<Long> {
             registry.addConstraint(new PlacementConstraint(
                 "longfield.minvalue.placement",
                 "LongField can optionally have minValue attribute",
-                "field.long",             // Parent pattern
-                "attr.*[minValue]",       // Child pattern (allows long or string)
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_LONG,          // Parent: field.long
+                TYPE_ATTR, "*", "minValue",        // Child: attr.*[minValue] (allows any attr subtype)
+                true                               // Allowed
             ));
 
             // PLACEMENT CONSTRAINT: LongField CAN have maxValue attribute
             registry.addConstraint(new PlacementConstraint(
                 "longfield.maxvalue.placement",
                 "LongField can optionally have maxValue attribute",
-                "field.long",             // Parent pattern
-                "attr.*[maxValue]",       // Child pattern (allows long or string)
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_LONG,          // Parent: field.long
+                TYPE_ATTR, "*", "maxValue",        // Child: attr.*[maxValue] (allows any attr subtype)
+                true                               // Allowed
             ));
 
             log.debug("Registered LongField-specific constraints using consolidated registry");
