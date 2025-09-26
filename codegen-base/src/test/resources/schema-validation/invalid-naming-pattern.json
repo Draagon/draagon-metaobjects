@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "package": "test.invalid.naming",
+    "children": [
+      {
+        "object": {
+          "name": "User::Invalid",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "field-with-dash",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "field with spaces",
+                "subType": "int"
+              }
+            },
+            {
+              "field": {
+                "name": "field@special",
+                "subType": "long"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

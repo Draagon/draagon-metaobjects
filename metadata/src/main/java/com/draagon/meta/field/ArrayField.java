@@ -2,7 +2,6 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.InvalidValueException;
-import com.draagon.meta.util.DataConverter;
 
 import java.util.ArrayList;
 import java.util.List;

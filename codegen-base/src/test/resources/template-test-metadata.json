@@ -6,7 +6,8 @@
       {
         "object": {
           "name": "User",
-          "package": "com.example.model",
+          "subType": "pojo",
+          "package": "com_example_model",
           "@dbTable": "users",
           "@description": "User entity for template testing",
           "children": [
@@ -43,7 +44,8 @@
       {
         "object": {
           "name": "Product",
-          "package": "com.example.model",
+          "subType": "pojo",
+          "package": "com_example_model",
           "@description": "Product value object for template testing",
           "children": [
             {

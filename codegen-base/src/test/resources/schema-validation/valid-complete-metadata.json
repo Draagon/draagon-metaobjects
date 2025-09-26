@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "package": "test_schema_validation",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "field": {
+                "name": "username",
+                "subType": "string",
+                "@maxLength": 50,
+                "@pattern": "^[a-zA-Z0-9_]+$",
+                "children": [
+                  {
+                    "attr": {
+                      "name": "required",
+                      "subType": "boolean",
+                      "value": "true"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "children": [
+                        {
+                          "attr": {
+                            "name": "maxLength",
+                            "subType": "int",
+                            "value": "50"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "pattern",
+                      "subType": "regex",
+                      "children": [
+                        {
+                          "attr": {
+                            "name": "pattern",
+                            "subType": "string",
+                            "value": "^[a-zA-Z0-9_]+$"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 255,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "emailPattern",
+                      "subType": "regex",
+                      "children": [
+                        {
+                          "attr": {
+                            "name": "pattern",
+                            "subType": "string",
+                            "value": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "field": {
+                "name": "createdDate",
+                "subType": "date",
+                "children": [
+                  {
+                    "attr": {
+                      "name": "format",
+                      "subType": "string",
+                      "value": "yyyy-MM-dd"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "field": {
+                "name": "score",
+                "subType": "double",
+                "@defaultValue": "0.0"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "children": [
+                  {
+                    "attr": {
+                      "name": "fields",
+                      "subType": "string",
+                      "value": "id"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

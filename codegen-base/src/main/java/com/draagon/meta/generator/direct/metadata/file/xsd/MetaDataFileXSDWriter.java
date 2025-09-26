@@ -340,9 +340,10 @@ public class MetaDataFileXSDWriter extends XMLDirectWriter<MetaDataFileXSDWriter
         restriction.setAttribute("base", "xs:string");
         simpleType.appendChild(restriction);
 
-        // Use pattern from MetaDataConstants
+        // Use pattern from MetaDataConstants, converted for XML Schema (remove anchors)
         Element patternFacet = doc.createElement("xs:pattern");
-        patternFacet.setAttribute("value", VALID_NAME_PATTERN);
+        String xmlSchemaPattern = VALID_NAME_PATTERN.replaceAll("^\\^|\\$$", ""); // Remove ^ and $
+        patternFacet.setAttribute("value", xmlSchemaPattern);
         restriction.appendChild(patternFacet);
 
         // Add length facets

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata package="test_invalid_subtypes">
+  <children>
+    <child>
+      <object name="TestObject" subType="invalidObjectSubtype">
+        <children>
+          <child>
+            <field name="testField" subType="invalidFieldSubtype"/>
+          </child>
+          <child>
+            <validator name="testValidator" subType="invalidValidatorSubtype"/>
+          </child>
+          <child>
+            <attr name="testAttr" subType="invalidAttrSubtype" value="test"/>
+          </child>
+          <child>
+            <key name="testKey" subType="invalidKeySubtype"/>
+          </child>
+        </children>
+      </object>
+    </child>
+  </children>
+</metadata>

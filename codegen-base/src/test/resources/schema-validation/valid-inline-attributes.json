@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "package": "test_inline_attributes",
+    "children": [
+      {
+        "object": {
+          "name": "Product",
+          "subType": "pojo",
+          "@dbTable": "products",
+          "@hasAuditing": true,
+          "children": [
+            {
+              "field": {
+                "name": "productId",
+                "subType": "long",
+                "@required": true,
+                "@dbColumn": "product_id",
+                "@isId": true,
+                "@dbNullable": false
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 100,
+                "@minLength": 1,
+                "@dbColumn": "product_name",
+                "@isSearchable": true
+              }
+            },
+            {
+              "field": {
+                "name": "price",
+                "subType": "double",
+                "@required": true,
+                "@dbColumn": "price",
+                "@dbScale": 2,
+                "@minValue": 0.01
+              }
+            },
+            {
+              "field": {
+                "name": "inStock",
+                "subType": "boolean",
+                "@defaultValue": true,
+                "@dbColumn": "in_stock"
+              }
+            },
+            {
+              "field": {
+                "name": "categoryId",
+                "subType": "int",
+                "@dbColumn": "category_id",
+                "@dbForeignKey": "categories.id",
+                "@isOptional": true
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": "productId"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

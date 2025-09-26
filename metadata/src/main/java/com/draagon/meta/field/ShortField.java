@@ -22,7 +22,6 @@ import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
  * @version 6.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class ShortField extends PrimitiveField<Short>
 {
     private static final Logger log = LoggerFactory.getLogger(ShortField.class);
@@ -38,12 +37,15 @@ public class ShortField extends PrimitiveField<Short>
                 .type(TYPE_FIELD).subType(SUBTYPE_SHORT)
                 .description("Short field with numeric validation")
                 
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
                 // SHORT-SPECIFIC ATTRIBUTES
                 .optionalAttribute(ATTR_MIN_VALUE, "short")
                 .optionalAttribute(ATTR_MAX_VALUE, "short")
                 
                 // COMMON FIELD ATTRIBUTES
-                .optionalAttribute("isAbstract", "boolean")
+                /* .optionalAttribute("isAbstract", "boolean")
                 .optionalAttribute("validation", "string")
                 .optionalAttribute("required", "string")
                 .optionalAttribute("defaultValue", "string")
@@ -64,7 +66,7 @@ public class ShortField extends PrimitiveField<Short>
                 // ACCEPTS COMMON ATTRIBUTES
                 .optionalChild("attr", "string")
                 .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+                .optionalChild("attr", "boolean")*/
             );
             
             log.debug("Registered ShortField type with unified registry");

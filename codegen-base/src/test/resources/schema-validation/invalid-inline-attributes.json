@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "package": "test_invalid_inline",
+    "children": [
+      {
+        "object": {
+          "name": "TestObject",
+          "subType": "pojo",
+          "@invalidAttribute": "shouldNotExist",
+          "children": [
+            {
+              "field": {
+                "name": "testField",
+                "subType": "string",
+                "@maxLength": "notANumber",
+                "@required": "notABoolean",
+                "@minValue": true,
+                "@pattern": 123
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

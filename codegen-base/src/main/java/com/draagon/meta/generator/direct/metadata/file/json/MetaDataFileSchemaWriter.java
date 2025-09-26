@@ -232,9 +232,20 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
 
         for (String primaryType : primaryTypes) {
             JsonObject wrapper = new JsonObject();
-            JsonObject property = new JsonObject();
-            property.add("$ref", new JsonPrimitive("#/$defs/" + capitalizeFirstLetter(primaryType)));
-            wrapper.add(primaryType, property);
+            wrapper.addProperty("type", "object");
+
+            // Create properties object
+            JsonObject properties = new JsonObject();
+            JsonObject typeRef = new JsonObject();
+            typeRef.add("$ref", new JsonPrimitive("#/$defs/" + capitalizeFirstLetter(primaryType)));
+            properties.add(primaryType, typeRef);
+            wrapper.add("properties", properties);
+
+            // Add required array
+            JsonArray required = new JsonArray();
+            required.add(primaryType);
+            wrapper.add("required", required);
+
             oneOf.add(wrapper);
         }
 
@@ -328,8 +339,9 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         nameSchema.addProperty("type", "string");
         nameSchema.addProperty("description", "Name following MetaData naming constraints");
 
-        // Use pattern from MetaDataConstants
-        nameSchema.addProperty("pattern", VALID_NAME_PATTERN);
+        // Use pattern from MetaDataConstants, converted for JSON Schema (remove anchors)
+        String jsonSchemaPattern = VALID_NAME_PATTERN.replaceAll("^\\^|\\$$", ""); // Remove ^ and $
+        nameSchema.addProperty("pattern", jsonSchemaPattern);
         nameSchema.addProperty("minLength", 1);
         nameSchema.addProperty("maxLength", 64);
 

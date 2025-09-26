@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata package="test_missing_required">
+  <children>
+    <child>
+      <object subType="pojo">
+        <children>
+          <child>
+            <field subType="string"/>
+          </child>
+          <child>
+            <field name="validField"/>
+          </child>
+          <child>
+            <validator name="validValidator"/>
+          </child>
+        </children>
+      </object>
+    </child>
+  </children>
+</metadata>

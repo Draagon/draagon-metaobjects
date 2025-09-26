@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "package": "test_invalid_subtypes",
+    "children": [
+      {
+        "object": {
+          "name": "TestObject",
+          "subType": "invalidObjectSubtype",
+          "children": [
+            {
+              "field": {
+                "name": "testField",
+                "subType": "invalidFieldSubtype"
+              }
+            },
+            {
+              "validator": {
+                "name": "testValidator",
+                "subType": "invalidValidatorSubtype"
+              }
+            },
+            {
+              "attr": {
+                "name": "testAttr",
+                "subType": "invalidAttrSubtype",
+                "value": "test"
+              }
+            },
+            {
+              "key": {
+                "name": "testKey",
+                "subType": "invalidKeySubtype"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

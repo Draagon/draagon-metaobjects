@@ -304,11 +304,9 @@ public static MetaObject getMetaObject(String name) {
 #### **❌ DON'T: Add Rigid Validation to Core Types**
 ```java
 // WRONG - Hardcoded restrictions prevent extensibility
-@MetaDataType(
-    name = "field",
-    allowedSubTypes = {"string", "int", "long"} // ❌ Rigid, not extensible
-)
 public class MetaField extends MetaData {
+    private static final Set<String> ALLOWED_SUBTYPES = Set.of("string", "int", "long"); // ❌ Rigid, not extensible
+
     public MetaField(String subType) {
         if (!ALLOWED_SUBTYPES.contains(subType)) { // ❌ Prevents plugins
             throw new IllegalArgumentException("Invalid subtype");
@@ -317,10 +315,9 @@ public class MetaField extends MetaData {
 }
 
 // RIGHT - Use constraint system for validation
-@MetaDataType(name = "field") // ✅ No rigid restrictions
 public class MetaField extends MetaData {
-    // Validation handled by constraint system
-    // Downstream implementations can extend subtypes
+    // No hardcoded restrictions - validation handled by constraint system
+    // Downstream implementations can extend subtypes through provider system
 }
 ```
 
@@ -341,12 +338,12 @@ public void validateSubType(String subType) {
 #### **✅ DO: Check Constraint System Before Adding Validation**
 ```java
 // ALWAYS search these first before adding validation:
-// 1. Self-registration static blocks in MetaData classes
+// 1. Provider-based registration in MetaDataTypeProvider classes
 // 2. MetaDataRegistry integrated constraint system
 // 3. Existing PlacementConstraint/ValidationConstraint patterns
 
-// If validation needed, extend self-registration pattern:
-// 1. Add constraint to appropriate MetaData class static{} block
+// If validation needed, extend provider-based pattern:
+// 1. Add constraint to appropriate MetaDataTypeProvider.registerTypes() method
 // 2. Use PlacementConstraint for "X CAN be placed under Y" rules
 // 3. Use ValidationConstraint for value validation rules
 // 4. Test with build verification
@@ -380,68 +377,93 @@ public class MetaObject {
 - **Thread Safe**: Immutable after loading, no synchronization needed for reads
 - **Memory Efficient**: Smart caching balances performance with memory cleanup
 
-## 🔧 **Self-Registration Pattern (v5.2.0+)**
+## 🔧 **Provider-Based Registration System (v6.2.5+)**
 
-### 🚀 **MAJOR ENHANCEMENT: Programmatic Constraint Self-Registration**
+### 🚀 **MAJOR ARCHITECTURAL ACHIEVEMENT: Complete Provider-Based Registration**
 
-**STATUS: ✅ COMPLETED** - External constraint JSON files eliminated, all constraints now self-registered programmatically.
+**STATUS: ✅ COMPLETED** - Eliminated all @MetaDataType annotations and static initializers, replacing them with a comprehensive provider-based registration system.
 
 #### **What Changed**
-- **Before**: Constraints defined in external JSON files loaded at startup
-- **After**: Constraints registered programmatically via static initializers in MetaData classes
-- **Result**: Better type safety + self-contained registration + extensible plugin architecture
+- **Before**: @MetaDataType annotations + static initializers in every metadata class
+- **After**: Clean classes with provider-based registration through discoverable service pattern
+- **Result**: Enhanced maintainability + controlled registration order + improved extensibility
 
-#### **Self-Registration Implementation Pattern**
+#### **Provider-Based Registration Implementation Pattern**
 
 ```java
+// BEFORE (Annotation + Static Initializer Pattern - DEPRECATED):
 @MetaDataType(type = "field", subType = "string", description = "String field type")
 public class StringField extends PrimitiveField<String> {
-
-    // Self-registration with constraint setup
     static {
-        try {
-            MetaDataTypeRegistry registry = new MetaDataTypeRegistry();
-            
-            // Register this type handler
-            registry.registerHandler(
-                new MetaDataTypeId(TYPE_FIELD, SUBTYPE_STRING), 
-                StringField.class
-            );
-            
-            // Set up constraints for this type
-            setupStringFieldConstraints();
-            
-        } catch (Exception e) {
-            log.error("Failed to register StringField type handler", e);
-        }
-    }
-
-    private static void setupStringFieldConstraints() {
-        MetaDataRegistry metaDataRegistry = MetaDataRegistry.getInstance();
-
-        // PLACEMENT CONSTRAINT: StringField CAN have maxLength attribute
-        PlacementConstraint maxLengthPlacement = new PlacementConstraint(
-            "stringfield.maxlength.placement",
-            "StringField can optionally have maxLength attribute",
-            (metadata) -> metadata instanceof StringField,
-            (child) -> child instanceof IntAttribute &&
-                      child.getName().equals(MAX_LENGTH_ATTR_NAME)
-        );
-        metaDataRegistry.addValidationConstraint(maxLengthPlacement);
-        
-        // VALIDATION CONSTRAINT: Field naming patterns
-        ValidationConstraint namingPattern = new ValidationConstraint(
-            "stringfield.naming.pattern",
-            "Field names must follow identifier pattern",
-            (metadata) -> metadata instanceof StringField,
-            (metadata, value) -> {
-                String name = metadata.getName();
-                return name != null && name.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
-            }
-        );
-        metaDataRegistry.addValidationConstraint(namingPattern);
+        // Registration logic here - UNPREDICTABLE TIMING
     }
 }
+
+// AFTER (Provider-Based Registration Pattern - CURRENT):
+// Clean class - no annotations, no static blocks
+public class StringField extends PrimitiveField<String> {
+    // Registration method remains, but called by provider
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(StringField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_STRING)
+            .description("String field with length and pattern validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_PATTERN, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MAX_LENGTH, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(ATTR_MIN_LENGTH, IntAttribute.SUBTYPE_INT)
+        );
+    }
+}
+```
+
+#### **Provider-Based Service Discovery System**
+
+**NEW: MetaDataProvider Classes with Priority-Based Loading**
+
+```java
+/**
+ * Field Types MetaData provider with priority 10.
+ * Registers all concrete field types after base types are available.
+ */
+public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
+
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        // Controlled registration order - no more class loading chaos
+        StringField.registerTypes(registry);
+        IntegerField.registerTypes(registry);
+        LongField.registerTypes(registry);
+        DoubleField.registerTypes(registry);
+        // ... all concrete field types
+    }
+
+    @Override
+    public int getPriority() {
+        // Priority 10: After base types (0), before extensions (50+)
+        return 10;
+    }
+}
+```
+
+#### **Service Discovery Integration**
+
+**META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:**
+```
+com.draagon.meta.core.CoreTypeMetaDataProvider
+com.draagon.meta.field.FieldTypesMetaDataProvider
+com.draagon.meta.attr.AttributeTypesMetaDataProvider
+com.draagon.meta.validator.ValidatorTypesMetaDataProvider
+com.draagon.meta.key.KeyTypesMetaDataProvider
+com.draagon.meta.database.CoreDBMetaDataProvider
+```
+
+**Priority-Based Loading Order:**
+1. **Priority 0**: `CoreTypeMetaDataProvider` - Registers base types (metadata.base, field.base, etc.)
+2. **Priority 10**: `FieldTypesMetaDataProvider` - Registers all concrete field types
+3. **Priority 15**: `AttributeTypesMetaDataProvider` - Registers all attribute types
+4. **Priority 20**: `ValidatorTypesMetaDataProvider` - Registers all validator types
+5. **Priority 25**: `KeyTypesMetaDataProvider` - Registers all key types
+6. **Priority 50+**: Extension providers for database, web, etc.
 ```
 
 #### **Key Components Implemented**
@@ -472,7 +494,7 @@ ValidationConstraint constraint = new ValidationConstraint(
 - **getPlacementValidationConstraints()**: Query placement constraints specifically
 - **Unified Architecture**: Constraint system integrated into MetaDataRegistry (no separate ConstraintRegistry)
 
-#### **Classes with Self-Registration Implemented**
+#### **Classes with Provider-Based Registration Implemented**
 - ✅ **StringField**: maxLength, pattern, minLength constraints via IntAttribute/StringAttribute
 - ✅ **IntegerField**: minValue, maxValue constraints via IntAttribute
 - ✅ **StringAttribute**: Placement under any MetaData
@@ -509,54 +531,60 @@ ValidationConstraint namingPattern = new ValidationConstraint(
 );
 ```
 
-#### **✅ Success Criteria Met**
-- ✅ All external constraint JSON files deleted
-- ✅ All MetaData classes have self-registration via @MetaDataType + static{}
-- ✅ All constraints programmatic (PlacementConstraint/ValidationConstraint)
-- ✅ No hardcoded extensibility violations remain
-- ✅ Full build succeeds: `mvn clean compile package`
-- ✅ Plugin extensibility maintained (new types can be added)
-- ✅ Uses existing attribute classes (StringAttribute, IntAttribute, etc.)
+#### **✅ Success Criteria Achieved**
+- ✅ All @MetaDataType annotations eliminated from framework
+- ✅ All static initializers removed and replaced with provider calls
+- ✅ String literals replaced with type-safe constants
+- ✅ All tests passing with enhanced type registration
+- ✅ Enhanced service discovery with priority-based loading
+- ✅ Zero regression policy maintained throughout transformation
+- ✅ Plugin extensibility enhanced through provider pattern
 
 #### **For Plugin Developers**
 ```java
-// Example: Adding a new CurrencyField type
-@MetaDataType(type = "field", subType = "currency", description = "Currency field with precision")
+// MODERN APPROACH: Provider-based registration for plugins
+
+// 1. Create clean plugin class (no annotations, no static blocks)
 public class CurrencyField extends PrimitiveField<BigDecimal> {
-    
-    static {
-        // Self-register the new type
-        MetaDataTypeRegistry registry = new MetaDataTypeRegistry();
-        registry.registerHandler(
-            new MetaDataTypeId(TYPE_FIELD, "currency"),
-            CurrencyField.class
+    // Currency-specific constants live here
+    public static final String ATTR_PRECISION = "precision";
+    public static final String ATTR_CURRENCY_CODE = "currencyCode";
+
+    // Registration method called by plugin provider
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(CurrencyField.class, def -> def
+            .type(TYPE_FIELD).subType("currency")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)  // Gets all field.base attributes
+            .optionalAttribute(ATTR_PRECISION, "int")     // Plus currency-specific
+            .optionalAttribute(ATTR_CURRENCY_CODE, "string")
+            .description("Currency field with precision and formatting")
         );
-        
-        // Add currency-specific constraints
-        setupCurrencyFieldConstraints();
-    }
-    
-    private static void setupCurrencyFieldConstraints() {
-        // CurrencyField CAN have precision attribute
-        PlacementConstraint precisionPlacement = new PlacementConstraint(
-            "currencyfield.precision.placement",
-            "CurrencyField can have precision attribute",
-            (metadata) -> metadata instanceof CurrencyField,
-            (child) -> child instanceof IntAttribute && 
-                      child.getName().equals("precision")
-        );
-        MetaDataRegistry.getInstance().addValidationConstraint(precisionPlacement);
     }
 }
+
+// 2. Create plugin provider class
+public class CustomBusinessTypesProvider implements MetaDataTypeProvider {
+
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        // Register custom types without core modifications
+        CurrencyField.registerTypes(registry);
+        WorkflowValidator.registerTypes(registry);
+        AuditKey.registerTypes(registry);
+    }
+
+    @Override
+    public int getPriority() {
+        return 100; // After core types, before application-specific
+    }
+}
+
+// 3. Add service discovery file
+// META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:
+// com.mycompany.metadata.CustomBusinessTypesProvider
 ```
 
-**Result**: Plugin can extend the type system without modifying core code or external configuration files.
-
-## 🚀 **Provider-Based Registration System (v6.2.5+)**
-
-### 🎯 **MAJOR ARCHITECTURAL REFACTORING: Complete @MetaDataType Annotation Elimination**
-
-**STATUS: ✅ COMPLETED** - Eliminated all @MetaDataType annotations and static initializers, replacing them with a comprehensive provider-based registration system that maintains 199/199 test success rate and full project compatibility.
+**Result**: Plugin can extend the type system through clean provider pattern without modifying core code or configuration files.
 
 #### **What Changed**
 - **Before**: @MetaDataType annotations + static initializers in every metadata class
@@ -1150,10 +1178,10 @@ metadata → codegen-base → codegen-mustache → codegen-plantuml → maven-pl
 - ✅ **@IsolatedTest Annotation**: Added isolation mechanism for tests that must manipulate registry directly
 - ✅ **Centralized Registry Access**: All tests now inherit from shared foundation preventing registry conflicts
 
-#### **Step 2: Root Cause Analysis & Static Registration**
-- ✅ **MetaField (field.base)**: **THE KEY FIX** - Added missing static registration block enabling field inheritance
+#### **Step 2: Root Cause Analysis & Provider-Based Registration**
+- ✅ **MetaField (field.base)**: **THE KEY FIX** - Implemented base type registration enabling field inheritance
 - ✅ **Field Type Registration**: Fixed StringField, LongField, IntegerField, DoubleField, BooleanField, DateField
-- ✅ **Automatic Registration**: Added `static { registerTypes(); }` blocks to trigger class loading registration
+- ✅ **Provider-Based Registration**: Migrated to controlled registration through MetaDataTypeProvider system
 - ✅ **Type Registry Health**: Increased from 28 to 35 total registered types
 
 #### **Step 3: Constraint System Integration**
@@ -1815,10 +1843,11 @@ The following critical systems have been successfully implemented and tested:
 
 ```java
 // ❌ WRONG - Service pollution in core types
-@MetaDataType(type = "field", subType = "string")
 public class StringField extends MetaField {
-    static {
-        MetaDataRegistry.registerType(StringField.class, def -> def
+    // Registration with service pollution (old problematic approach)
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(StringField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_STRING)
             // CORE FIELD ATTRIBUTES (appropriate)
             .optionalAttribute("required", "boolean")
             .optionalAttribute("defaultValue", "string")
@@ -2043,10 +2072,11 @@ public class MetaView {
 
 ```java
 // ✅ CLEAN - StringField no longer polluted with service concerns
-@MetaDataType(type = "field", subType = "string")
 public class StringField extends PrimitiveField<String> {
-    static {
-        MetaDataRegistry.registerType(StringField.class, def -> def
+
+    // Registration handled by FieldTypesMetaDataProvider
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(StringField.class, def -> def
             .type(TYPE_FIELD).subType(SUBTYPE_STRING)
             .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
             .description("String field with length and pattern validation")
@@ -2069,11 +2099,11 @@ public class StringField extends PrimitiveField<String> {
 #### **Integrated Constraint Registration**
 
 ```java
-// Database constraints registered directly in MetaDataRegistry during service initialization
-public class DatabaseServiceInitializer {
-    static {
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+// Database constraints registered through MetaDataTypeProvider system
+public class DatabaseConstraintsProvider implements MetaDataTypeProvider {
 
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
         // Database service defines its own placement constraints integrated into registry
         PlacementConstraint dbTableConstraint = new PlacementConstraint(
             "database.table.placement",
@@ -2084,6 +2114,11 @@ public class DatabaseServiceInitializer {
         );
         registry.addValidationConstraint(dbTableConstraint);
     }
+
+    @Override
+    public int getPriority() {
+        return 50; // After core types and fields
+    }
 }
 ```
 
@@ -2091,14 +2126,14 @@ public class DatabaseServiceInitializer {
 
 ```java
 // Custom CurrencyField extending the system cleanly
-@MetaDataType(type = "field", subType = "currency")
 public class CurrencyField extends PrimitiveField<BigDecimal> {
     // Currency-specific constants live here
     public static final String ATTR_PRECISION = "precision";
     public static final String ATTR_CURRENCY_CODE = "currencyCode";
 
-    static {
-        MetaDataRegistry.registerType(CurrencyField.class, def -> def
+    // Registration handled by plugin provider
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(CurrencyField.class, def -> def
             .type(TYPE_FIELD).subType("currency")
             .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)  // Gets all field.base attributes
             .optionalAttribute(ATTR_PRECISION, "int")     // Plus currency-specific
@@ -2108,6 +2143,19 @@ public class CurrencyField extends PrimitiveField<BigDecimal> {
 
         // Currency service adds its own constraints
         setupCurrencyConstraints();
+    }
+}
+
+// Plugin provider for service discovery
+public class CurrencyTypesProvider implements MetaDataTypeProvider {
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        CurrencyField.registerTypes(registry);
+    }
+
+    @Override
+    public int getPriority() {
+        return 100; // After core types
     }
 }
 ```
@@ -2835,7 +2883,7 @@ Current status: **7 of 15 items completed** (2025-09-19). Next priority: **LOW-2
 **Test Infrastructure Dependencies:**
 - **codegen module** requires `metaobjects-metadata` test-jar for `SimpleLoaderTestBase`
 - **Full clean install** required when modifying metadata type registrations
-- **XML type configuration** in `core/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml` must be updated alongside Java self-registration
+- **XML type configuration** in `core/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml` must be updated alongside provider-based registration
 
 ### ⚠️ **PACKAGE NAMING CONSTRAINTS - EXTREMELY STRICT**
 
@@ -2856,7 +2904,7 @@ Current status: **7 of 15 items completed** (2025-09-19). Next priority: **LOW-2
 
 ### 🏗️ **XML TYPE CONFIGURATION SYSTEM (STILL ACTIVE)**
 
-**CRITICAL**: Despite Java self-registration via static blocks, the XML type configuration system is REQUIRED and ACTIVE:
+**CRITICAL**: Despite Java provider-based registration, the XML type configuration system is REQUIRED and ACTIVE:
 
 ```xml
 <!-- core/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml -->
@@ -2876,7 +2924,7 @@ Current status: **7 of 15 items completed** (2025-09-19). Next priority: **LOW-2
 ```
 
 **Dual Registration Pattern:**
-1. **Java Self-Registration**: Programmatic via static blocks in MetaData classes
+1. **Java Provider-Based Registration**: Programmatic via MetaDataTypeProvider classes
 2. **XML Configuration**: Declarative child type relationships and validation rules
 
 ### 🧪 **INLINE ATTRIBUTE TYPE CASTING ISSUES**
@@ -2949,7 +2997,7 @@ cd core && mvn metaobjects:generate@gen-schemas
 
 **4. Missing Test-Specific Attributes**
 - **Cause**: XML type configuration lacks test attributes like "isId", "dbColumn"
-- **Fix**: Update both Java self-registration AND XML configuration
+- **Fix**: Update both Java provider-based registration AND XML configuration
 
 ### 💡 **TESTING INSIGHTS**
 
@@ -3445,10 +3493,11 @@ Based on Maven repository publishing requirements:
 **✅ Cross-Module Inheritance Support:**
 ```java
 // TextView in web module successfully inherits from base type in metadata module
-@MetaDataType(type = "view", subType = "text")
 public class TextView extends MetaView {
-    static {
-        MetaDataRegistry.registerType(TextView.class, def -> def
+
+    // Registration handled by ViewTypesMetaDataProvider
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(TextView.class, def -> def
             .type(TYPE_VIEW).subType("text")
             .inheritsFrom("view", "base")  // String literals for cross-module access
             .description("Text-based view component for HTML rendering")
@@ -3528,16 +3577,30 @@ All existing APIs continue to work while new inheritance relationships provide e
 **Plugin developers can now easily extend base types:**
 ```java
 // Example: Custom CurrencyField extending field.base
-@MetaDataType(type = "field", subType = "currency")
 public class CurrencyField extends PrimitiveField<BigDecimal> {
-    static {
-        MetaDataRegistry.registerType(CurrencyField.class, def -> def
+
+    // Registration handled by plugin provider
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(CurrencyField.class, def -> def
             .type(TYPE_FIELD).subType("currency")
             .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)  // Gets all field.base attributes
             .optionalAttribute("precision", "int")    // Plus currency-specific attributes
             .optionalAttribute("currencyCode", "string")
             .description("Currency field with precision and formatting")
         );
+    }
+}
+
+// Plugin provider implementation
+public class CurrencyTypesProvider implements MetaDataTypeProvider {
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        CurrencyField.registerTypes(registry);
+    }
+
+    @Override
+    public int getPriority() {
+        return 100; // After core types
     }
 }
 ```
@@ -3552,95 +3615,117 @@ public class CurrencyField extends PrimitiveField<BigDecimal> {
 
 **The inheritance system is now a fundamental part of the MetaObjects architecture, providing clean extensibility while maintaining all performance characteristics of the READ-OPTIMIZED design.**
 
-## 🎯 **ANNOTATION SYSTEM ENHANCEMENT (v6.2.0+)**
+## 🎯 **PROVIDER-BASED REGISTRATION COMPLETION (v6.2.0+)**
 
-### 🚀 **MAJOR IMPROVEMENT: @MetaDataTypeHandler → @MetaDataType Refactoring**
+### 🚀 **ARCHITECTURAL ACHIEVEMENT: Complete Annotation Elimination**
 
-**STATUS: ✅ COMPLETED** - Comprehensive annotation rename for improved clarity and AI-friendliness.
+**STATUS: ✅ COMPLETED** - All @MetaDataType annotations eliminated from the framework, replaced entirely with provider-based registration.
 
-#### **Architectural Motivation**
+#### **Final Architecture State**
 
-The original `@MetaDataTypeHandler` annotation was misleading because:
-- **Classes ARE metadata types**, they don't "handle" them
-- **"Handler" suggested processing**, but these are **type definitions**
-- **AI confusion**: Less intuitive for AI understanding of the type system
+The MetaObjects framework now uses **pure provider-based registration** with no annotation dependencies:
 
-#### **Enhanced @MetaDataType Annotation**
+- **Clean Classes**: No annotations cluttering metadata class definitions
+- **Provider Discovery**: Service-based registration through META-INF/services
+- **Controlled Registration Order**: Priority-based provider loading ensures dependencies are met
+- **Enhanced Extensibility**: Plugin developers use provider pattern for clean extensions
 
-**New Clear Semantics:**
+#### **Current Implementation Pattern**
+
+**Clean Class Definition:**
 ```java
-// BEFORE: Confusing - suggests handling
-@MetaDataTypeHandler(type = "field", subType = "string", description = "String field type")
-public class StringField extends MetaField {
+// CURRENT: Clean class - no annotations
+public class StringField extends PrimitiveField<String> {
 
-// AFTER: Clear - this IS a metadata type
-@MetaDataType(type = "field", subType = "string", description = "String field type")
-public class StringField extends MetaField {
-```
-
-#### **AI-Friendly Benefits**
-
-**For AI assistance, the annotation now:**
-1. **Immediately conveys purpose** - "This defines a metadata type"
-2. **Suggests hierarchical structure** - The `type.subType` pattern
-3. **Indicates discoverability** - Part of a registerable type system
-4. **Self-documents the framework** - Clear metadata framework context
-
-#### **Implementation Scope**
-
-**✅ Complete Framework-Wide Refactoring:**
-- **metadata module**: 20+ classes updated (fields, attributes, validators, keys)
-- **core module**: All MetaData classes updated
-- **om module**: ManagedMetaObject updated
-- **web module**: 5 view classes updated (TextView, DateView, etc.)
-- **Test framework**: Compliance tests and base classes updated
-
-**✅ Backward Compatibility Maintained:**
-```java
-// Deprecated alias provides smooth transition
-@Deprecated
-public @interface MetaDataTypeHandler {
-    // Delegates to @MetaDataType for compatibility
+    // Registration handled by provider system
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(StringField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_STRING)
+            .description("String field with length and pattern validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_PATTERN, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MAX_LENGTH, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(ATTR_MIN_LENGTH, IntAttribute.SUBTYPE_INT)
+        );
+    }
 }
 ```
 
-#### **Usage Examples**
-
-**Modern Plugin Development:**
+**Provider-Based Discovery:**
 ```java
-@MetaDataType(type = "field", subType = "currency", description = "Currency field with precision")
-public class CurrencyField extends MetaField {
-    static {
-        MetaDataRegistry.registerType(CurrencyField.class, def -> def
+/**
+ * Field Types MetaData provider with priority 10.
+ */
+public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
+
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        // Controlled registration order
+        StringField.registerTypes(registry);
+        IntegerField.registerTypes(registry);
+        // ... other field types
+    }
+
+    @Override
+    public int getPriority() {
+        return 10; // After base types (0), before extensions (50+)
+    }
+}
+```
+
+#### **Service Discovery Architecture**
+
+**META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:**
+```
+com.draagon.meta.core.CoreTypeMetaDataProvider
+com.draagon.meta.field.FieldTypesMetaDataProvider
+com.draagon.meta.attr.AttributeTypesMetaDataProvider
+com.draagon.meta.validator.ValidatorTypesMetaDataProvider
+com.draagon.meta.key.KeyTypesMetaDataProvider
+```
+
+#### **Benefits Achieved**
+
+✅ **Zero Annotation Dependency**: Framework operates entirely without runtime annotation processing
+✅ **Controlled Loading**: Priority-based providers ensure dependency order is correct
+✅ **Enhanced Performance**: No annotation scanning overhead during class loading
+✅ **Clean Architecture**: Separation of type definition from registration concerns
+✅ **Plugin Friendly**: Extension developers use same provider pattern as core framework
+
+#### **Plugin Development Pattern**
+
+**Modern Extension Approach:**
+```java
+// Plugin class - clean and annotation-free
+public class CurrencyField extends PrimitiveField<BigDecimal> {
+
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(CurrencyField.class, def -> def
             .type("field").subType("currency")
+            .inheritsFrom("field", "base")
             .optionalAttribute("precision", "int")
-            .description("Currency field with precision")
+            .optionalAttribute("currencyCode", "string")
+            .description("Currency field with precision and formatting")
         );
+    }
+}
+
+// Plugin provider
+public class CustomBusinessTypesProvider implements MetaDataTypeProvider {
+    @Override
+    public void registerTypes(MetaDataRegistry registry) {
+        CurrencyField.registerTypes(registry);
+        // Other custom types...
+    }
+
+    @Override
+    public int getPriority() {
+        return 100; // After core types, before application-specific
     }
 }
 ```
 
-**Cross-Module Inheritance:**
-```java
-@MetaDataType(type = "view", subType = "text", description = "HTML text input view")
-public class TextView extends MetaView {
-    static {
-        MetaDataRegistry.registerType(TextView.class, def -> def
-            .type("view").subType("text")
-            .inheritsFrom("view", "base")  // String-based cross-module inheritance
-            .description("HTML text input view")
-        );
-    }
-}
-```
-
-#### **Migration Path**
-
-- **✅ Immediate**: All new code uses `@MetaDataType`
-- **🔄 Transition**: Old `@MetaDataTypeHandler` still works (deprecated)
-- **🚀 Future**: Can remove deprecated alias in next major version
-
-**The @MetaDataType annotation makes the framework significantly more intuitive for both human developers and AI assistants working with the MetaObjects type system.**
+**The provider-based registration system represents the final architectural state of the MetaObjects framework, eliminating all annotation dependencies while providing superior extensibility and maintainability.**
 
 ## VERSION MANAGEMENT FOR CLAUDE AI
 

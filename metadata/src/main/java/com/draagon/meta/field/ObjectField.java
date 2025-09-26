@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
  * @version 6.0
  * @author Doug Mealing
  */
-@SuppressWarnings("serial")
 public class ObjectField extends MetaField<Object>
 {
     private static final Logger log = LoggerFactory.getLogger(ObjectField.class);
