@@ -7,6 +7,8 @@
 package com.draagon.meta;
 
 import com.draagon.meta.attr.MetaAttribute;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.loader.MetaDataLoader;
 // Using unified registry instead
 import com.draagon.meta.registry.MetaDataRegistry;
@@ -155,21 +157,19 @@ public class MetaData implements Cloneable, Serializable {
         MetaDataRegistry registry = MetaDataRegistry.getInstance();
 
         // OBJECTS can be abstract or concrete under metadata.base
-        registry.addConstraint(new PlacementConstraint(
+        registry.addConstraint(PlacementConstraint.allowChildType(
             "metadata.base.objects",
             "metadata.base can contain objects",
-            "metadata.base",        // Parent pattern
-            "object.*",             // Child pattern
-            true                    // Allowed
+            TYPE_METADATA, SUBTYPE_BASE,        // Parent: metadata.base
+            MetaObject.TYPE_OBJECT, "*"         // Child: object.*
         ));
 
         // FIELDS under metadata.base
-        registry.addConstraint(new PlacementConstraint(
+        registry.addConstraint(PlacementConstraint.allowChildType(
             "metadata.base.fields",
             "metadata.base can contain fields",
-            "metadata.base",        // Parent pattern
-            "field.*",              // Child pattern
-            true                    // Allowed
+            TYPE_METADATA, SUBTYPE_BASE,        // Parent: metadata.base
+            MetaField.TYPE_FIELD, "*"           // Child: field.*
         ));
 
         // ATTRIBUTES under metadata.base

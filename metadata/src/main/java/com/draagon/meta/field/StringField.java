@@ -86,30 +86,27 @@ public class StringField extends PrimitiveField<String> {
     private static void setupStringFieldConstraints(MetaDataRegistry registry) {
         try {
             // PLACEMENT CONSTRAINT: StringField CAN have maxLength attribute
-            registry.addConstraint(new PlacementConstraint(
+            registry.addConstraint(PlacementConstraint.allowAttribute(
                 "stringfield.maxlength.placement",
                 "StringField can optionally have maxLength attribute",
-                "field.string",           // Parent pattern
-                "attr.int[maxLength]",    // Child pattern
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_STRING,           // Parent: field.string
+                IntAttribute.SUBTYPE_INT, ATTR_MAX_LENGTH    // Child: attr.int[maxLength]
             ));
 
             // PLACEMENT CONSTRAINT: StringField CAN have minLength attribute
-            registry.addConstraint(new PlacementConstraint(
+            registry.addConstraint(PlacementConstraint.allowAttribute(
                 "stringfield.minlength.placement",
                 "StringField can optionally have minLength attribute",
-                "field.string",           // Parent pattern
-                "attr.int[minLength]",    // Child pattern
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_STRING,           // Parent: field.string
+                IntAttribute.SUBTYPE_INT, ATTR_MIN_LENGTH    // Child: attr.int[minLength]
             ));
 
             // PLACEMENT CONSTRAINT: StringField CAN have pattern attribute
-            registry.addConstraint(new PlacementConstraint(
+            registry.addConstraint(PlacementConstraint.allowAttribute(
                 "stringfield.pattern.placement",
                 "StringField can optionally have pattern attribute",
-                "field.string",           // Parent pattern
-                "attr.string[pattern]",   // Child pattern
-                true                      // Allowed
+                TYPE_FIELD, SUBTYPE_STRING,           // Parent: field.string
+                StringAttribute.SUBTYPE_STRING, ATTR_PATTERN    // Child: attr.string[pattern]
             ));
 
             // CUSTOM CONSTRAINT: Pattern validation for string fields (cannot be done declaratively)

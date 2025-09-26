@@ -1,6 +1,9 @@
 package com.draagon.meta.constraint;
 
 import com.draagon.meta.MetaData;
+import com.draagon.meta.attr.*;
+import com.draagon.meta.field.MetaField;
+import com.draagon.meta.object.MetaObject;
 
 /**
  * Placement constraint that's easy to serialize to schemas.
@@ -30,7 +33,7 @@ public class PlacementConstraint implements Constraint {
     private final boolean allowed;
 
     /**
-     * Create a placement constraint
+     * Create a placement constraint using string patterns (legacy constructor)
      * @param constraintId Unique identifier
      * @param description Human-readable description
      * @param parentPattern Pattern for parent type (e.g., "field.string", "object.*")
@@ -44,6 +47,125 @@ public class PlacementConstraint implements Constraint {
         this.parentPattern = parentPattern != null ? parentPattern : "*";
         this.childPattern = childPattern != null ? childPattern : "*";
         this.allowed = allowed;
+    }
+
+    /**
+     * Create a placement constraint using separated type/subtype/name parameters (recommended)
+     * @param constraintId Unique identifier
+     * @param description Human-readable description
+     * @param parentType Parent type (use constants like MetaField.TYPE_FIELD)
+     * @param parentSubType Parent subtype (use constants like StringField.SUBTYPE_STRING)
+     * @param childType Child type (use constants like MetaAttribute.TYPE_ATTR)
+     * @param childSubType Child subtype (use constants like StringAttribute.SUBTYPE_STRING)
+     * @param childName Child name (use constants like StringField.ATTR_MAX_LENGTH)
+     * @param allowed Whether this placement is allowed (true) or forbidden (false)
+     */
+    public PlacementConstraint(String constraintId, String description,
+                              String parentType, String parentSubType,
+                              String childType, String childSubType, String childName,
+                              boolean allowed) {
+        this.constraintId = constraintId;
+        this.description = description;
+        this.parentPattern = buildPattern(parentType, parentSubType, null);
+        this.childPattern = buildPattern(childType, childSubType, childName);
+        this.allowed = allowed;
+    }
+
+    /**
+     * Build a pattern string from separated components
+     * @param type Type component (or "*" for wildcard)
+     * @param subType SubType component (or "*" for wildcard)
+     * @param name Name component (or null for no name constraint)
+     * @return Pattern string like "type.subtype[name]"
+     */
+    private static String buildPattern(String type, String subType, String name) {
+        StringBuilder pattern = new StringBuilder();
+        pattern.append(type != null ? type : "*");
+        pattern.append(".");
+        pattern.append(subType != null ? subType : "*");
+        if (name != null && !"*".equals(name)) {
+            pattern.append("[").append(name).append("]");
+        }
+        return pattern.toString();
+    }
+
+    // === STATIC FACTORY METHODS FOR COMMON PATTERNS ===
+
+    /**
+     * Allow an attribute on a specific field type
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description
+     * @param parentType Parent field type (use MetaField.TYPE_FIELD)
+     * @param parentSubType Parent field subtype (use constants like StringField.SUBTYPE_STRING)
+     * @param attributeSubType Attribute subtype (use constants like StringAttribute.SUBTYPE_STRING)
+     * @param attributeName Attribute name (use constants like StringField.ATTR_MAX_LENGTH)
+     * @return New PlacementConstraint allowing the attribute
+     */
+    public static PlacementConstraint allowAttribute(String constraintId, String description,
+                                                   String parentType, String parentSubType,
+                                                   String attributeSubType, String attributeName) {
+        return new PlacementConstraint(constraintId, description,
+            parentType, parentSubType, MetaAttribute.TYPE_ATTR, attributeSubType, attributeName, true);
+    }
+
+    /**
+     * Allow an attribute on any field type
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description
+     * @param attributeSubType Attribute subtype (use constants like BooleanAttribute.SUBTYPE_BOOLEAN)
+     * @param attributeName Attribute name (use constants like MetaField.ATTR_REQUIRED)
+     * @return New PlacementConstraint allowing the attribute on any field
+     */
+    public static PlacementConstraint allowAttributeOnAnyField(String constraintId, String description,
+                                                             String attributeSubType, String attributeName) {
+        return allowAttribute(constraintId, description, MetaField.TYPE_FIELD, "*", attributeSubType, attributeName);
+    }
+
+    /**
+     * Allow an attribute on any object type
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description
+     * @param attributeSubType Attribute subtype (use constants like StringAttribute.SUBTYPE_STRING)
+     * @param attributeName Attribute name (use constants for object attributes)
+     * @return New PlacementConstraint allowing the attribute on any object
+     */
+    public static PlacementConstraint allowAttributeOnAnyObject(String constraintId, String description,
+                                                              String attributeSubType, String attributeName) {
+        return allowAttribute(constraintId, description, MetaObject.TYPE_OBJECT, "*", attributeSubType, attributeName);
+    }
+
+    /**
+     * Allow a child type under a parent type (no name constraint)
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description
+     * @param parentType Parent type (use constants like MetaObject.TYPE_OBJECT)
+     * @param parentSubType Parent subtype (use constants like "*" for any)
+     * @param childType Child type (use constants like MetaField.TYPE_FIELD)
+     * @param childSubType Child subtype (use constants like "*" for any)
+     * @return New PlacementConstraint allowing the child type
+     */
+    public static PlacementConstraint allowChildType(String constraintId, String description,
+                                                   String parentType, String parentSubType,
+                                                   String childType, String childSubType) {
+        return new PlacementConstraint(constraintId, description,
+            parentType, parentSubType, childType, childSubType, null, true);
+    }
+
+    /**
+     * Forbid an attribute on a specific field type
+     * @param constraintId Unique constraint identifier
+     * @param description Human-readable description
+     * @param parentType Parent field type (use MetaField.TYPE_FIELD)
+     * @param parentSubType Parent field subtype (use constants like StringField.SUBTYPE_STRING)
+     * @param attributeSubType Attribute subtype (use constants like StringAttribute.SUBTYPE_STRING)
+     * @param attributeName Attribute name (use constants like StringField.ATTR_MAX_LENGTH)
+     * @return New PlacementConstraint forbidding the attribute
+     */
+    public static PlacementConstraint forbidAttribute(String constraintId, String description,
+                                                    String parentType, String parentSubType,
+                                                    String attributeSubType, String attributeName) {
+        return new PlacementConstraint(constraintId, description,
+            parentType, parentSubType, MetaAttribute.TYPE_ATTR, attributeSubType, attributeName, false);
     }
 
     /**

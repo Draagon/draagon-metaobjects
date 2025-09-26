@@ -820,12 +820,10 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         try {
 
             // PLACEMENT CONSTRAINT: All fields CAN have required attribute
-            registry.addConstraint(new PlacementConstraint(
+            registry.addConstraint(PlacementConstraint.allowAttributeOnAnyField(
                 "field.required.placement",
                 "Fields can optionally have required attribute",
-                "field.*",                  // Parent pattern (any field subtype)
-                "attr.boolean[required]",   // Child pattern
-                true                        // Allowed
+                BooleanAttribute.SUBTYPE_BOOLEAN, ATTR_REQUIRED
             ));
 
             // VALIDATION CONSTRAINT: Field names must follow identifier pattern
