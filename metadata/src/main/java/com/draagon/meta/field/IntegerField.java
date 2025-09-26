@@ -58,45 +58,10 @@ public class IntegerField extends PrimitiveField<Integer> {
                 .optionalAttribute(ATTR_MAX_VALUE, IntAttribute.SUBTYPE_INT)
             );
 
-            log.debug("Registered IntegerField type with unified registry");
-
-            // Register IntegerField-specific constraints using concrete constraint classes
-            registerIntegerFieldConstraints(registry);
+            log.debug("Registered IntegerField type with unified registry (auto-generated constraints)");
 
         } catch (Exception e) {
             log.error("Failed to register IntegerField type with unified registry", e);
-        }
-    }
-    
-    /**
-     * Register IntegerField-specific constraints using consolidated registry
-     *
-     * @param registry The MetaDataRegistry to use for constraint registration
-     */
-    private static void registerIntegerFieldConstraints(MetaDataRegistry registry) {
-        try {
-            // PLACEMENT CONSTRAINT: IntegerField CAN have minValue attribute
-            registry.addConstraint(new PlacementConstraint(
-                "integerfield.minvalue.placement",
-                "IntegerField can optionally have minValue attribute",
-                TYPE_FIELD, SUBTYPE_INT,           // Parent: field.int
-                TYPE_ATTR, "*", ATTR_MIN_VALUE,    // Child: attr.*[minValue] (allows any attr subtype)
-                true                               // Allowed
-            ));
-
-            // PLACEMENT CONSTRAINT: IntegerField CAN have maxValue attribute
-            registry.addConstraint(new PlacementConstraint(
-                "integerfield.maxvalue.placement",
-                "IntegerField can optionally have maxValue attribute",
-                TYPE_FIELD, SUBTYPE_INT,           // Parent: field.int
-                TYPE_ATTR, "*", ATTR_MAX_VALUE,    // Child: attr.*[maxValue] (allows any attr subtype)
-                true                               // Allowed
-            ));
-
-            log.debug("Registered IntegerField-specific constraints using consolidated registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register IntegerField constraints", e);
         }
     }
 

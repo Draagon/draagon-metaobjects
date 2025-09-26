@@ -9,15 +9,9 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.LongAttribute;
 import com.draagon.meta.attr.StringAttribute;
-// Constraint registration now handled by consolidated MetaDataRegistry
-import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.draagon.meta.field.MetaField.TYPE_FIELD;
-import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
-import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
 
 
 /**
@@ -58,45 +52,10 @@ public class LongField extends PrimitiveField<Long> {
                 .optionalAttribute(ATTR_MAX_VALUE, LongAttribute.SUBTYPE_LONG)
             );
 
-            log.debug("Registered LongField type with unified registry");
-
-            // Register LongField-specific constraints using concrete constraint classes
-            registerLongFieldConstraints(registry);
+            log.debug("Registered LongField type with unified registry (auto-generated constraints)");
 
         } catch (Exception e) {
             log.error("Failed to register LongField type with unified registry", e);
-        }
-    }
-    
-    /**
-     * Register LongField-specific constraints using consolidated registry
-     *
-     * @param registry The MetaDataRegistry to use for constraint registration
-     */
-    private static void registerLongFieldConstraints(MetaDataRegistry registry) {
-        try {
-            // PLACEMENT CONSTRAINT: LongField CAN have minValue attribute
-            registry.addConstraint(new PlacementConstraint(
-                "longfield.minvalue.placement",
-                "LongField can optionally have minValue attribute",
-                TYPE_FIELD, SUBTYPE_LONG,          // Parent: field.long
-                TYPE_ATTR, "*", "minValue",        // Child: attr.*[minValue] (allows any attr subtype)
-                true                               // Allowed
-            ));
-
-            // PLACEMENT CONSTRAINT: LongField CAN have maxValue attribute
-            registry.addConstraint(new PlacementConstraint(
-                "longfield.maxvalue.placement",
-                "LongField can optionally have maxValue attribute",
-                TYPE_FIELD, SUBTYPE_LONG,          // Parent: field.long
-                TYPE_ATTR, "*", "maxValue",        // Child: attr.*[maxValue] (allows any attr subtype)
-                true                               // Allowed
-            ));
-
-            log.debug("Registered LongField-specific constraints using consolidated registry");
-
-        } catch (Exception e) {
-            log.error("Failed to register LongField constraints", e);
         }
     }
 

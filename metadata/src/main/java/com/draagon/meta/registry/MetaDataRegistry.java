@@ -114,6 +114,7 @@ public class MetaDataRegistry {
     public void registerType(Class<? extends MetaData> clazz,
                                    Consumer<TypeDefinitionBuilder> configurator) {
         TypeDefinitionBuilder builder = TypeDefinitionBuilder.forClass(clazz);
+        builder.withRegistry(this);  // Provide registry reference for auto-constraint generation
         configurator.accept(builder);
         this.register(builder.build());
     }

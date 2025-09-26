@@ -67,49 +67,9 @@ public class StringField extends PrimitiveField<String> {
                 .optionalAttribute(ATTR_MIN_LENGTH, IntAttribute.SUBTYPE_INT)
             );
 
-            log.debug("Registered StringField type with unified registry");
+            log.debug("Registered StringField type with unified registry (auto-generated placement constraints)");
 
-            // Register StringField-specific constraints using consolidated registry
-            setupStringFieldConstraints(registry);
-
-        } catch (Exception e) {
-            log.error("Failed to register StringField type with unified registry", e);
-        }
-    }
-
-    
-    /**
-     * Setup StringField-specific constraints using consolidated registry
-     *
-     * @param registry The MetaDataRegistry to use for constraint registration
-     */
-    private static void setupStringFieldConstraints(MetaDataRegistry registry) {
-        try {
-            // PLACEMENT CONSTRAINT: StringField CAN have maxLength attribute
-            registry.addConstraint(PlacementConstraint.allowAttribute(
-                "stringfield.maxlength.placement",
-                "StringField can optionally have maxLength attribute",
-                TYPE_FIELD, SUBTYPE_STRING,           // Parent: field.string
-                IntAttribute.SUBTYPE_INT, ATTR_MAX_LENGTH    // Child: attr.int[maxLength]
-            ));
-
-            // PLACEMENT CONSTRAINT: StringField CAN have minLength attribute
-            registry.addConstraint(PlacementConstraint.allowAttribute(
-                "stringfield.minlength.placement",
-                "StringField can optionally have minLength attribute",
-                TYPE_FIELD, SUBTYPE_STRING,           // Parent: field.string
-                IntAttribute.SUBTYPE_INT, ATTR_MIN_LENGTH    // Child: attr.int[minLength]
-            ));
-
-            // PLACEMENT CONSTRAINT: StringField CAN have pattern attribute
-            registry.addConstraint(PlacementConstraint.allowAttribute(
-                "stringfield.pattern.placement",
-                "StringField can optionally have pattern attribute",
-                TYPE_FIELD, SUBTYPE_STRING,           // Parent: field.string
-                StringAttribute.SUBTYPE_STRING, ATTR_PATTERN    // Child: attr.string[pattern]
-            ));
-
-            // CUSTOM CONSTRAINT: Pattern validation for string fields (cannot be done declaratively)
+            // CUSTOM CONSTRAINT: Pattern validation for string fields (cannot be auto-generated)
             registry.addConstraint(new CustomConstraint(
                 "stringfield.pattern.validation",
                 "StringField pattern attribute must be valid regex",
@@ -129,10 +89,8 @@ public class StringField extends PrimitiveField<String> {
                 "Validates regex pattern syntax using Pattern.compile()"
             ));
 
-            log.debug("Registered StringField-specific constraints using consolidated registry");
-
         } catch (Exception e) {
-            log.error("Failed to register StringField constraints", e);
+            log.error("Failed to register StringField type with unified registry", e);
         }
     }
 
