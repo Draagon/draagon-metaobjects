@@ -111,7 +111,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.getInstance().registerType(MetaField.class, def -> def
+            registry.registerType(MetaField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_BASE)
                 .description("Base field metadata with common field attributes")
                 // INHERIT FROM ROOT METADATA TYPE
@@ -140,21 +140,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         }
     }
 
-    /**
-     * Alternative registerTypes() method with no parameters for backward compatibility.
-     */
-    public static void registerTypes() {
-        registerTypes(MetaDataRegistry.getInstance());
-    }
-
-    // Static registration block - automatically registers the base field type when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register base MetaField type during class loading", e);
-        }
-    }
 
     private T defaultValue = null;
     private boolean lookedForDefault = false;

@@ -44,7 +44,7 @@ public abstract class MetaKey extends MetaData {
             .description("Base key metadata with common key attributes")
             .inheritsFrom("metadata", "base")
             .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
-            .optionalAttribute(ATTR_KEYS, "stringArray")
+            .optionalAttribute(ATTR_KEYS, "stringarray")
             .optionalAttribute(ATTR_DESCRIPTION, "string")
 
                 // ACCEPTS ANY ATTRIBUTES (all key types inherit these)

@@ -8,7 +8,7 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
+import com.draagon.meta.attr.IntAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,25 +39,14 @@ public class FloatField extends PrimitiveField<Float>
      * Register FloatField type using the standardized registerTypes() pattern.
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        try {
-            MetaDataRegistry.getInstance().registerType(FloatField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
-                .description("Float field with numeric and precision validation")
-
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-
-                // FLOAT-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, "float")
-                .optionalAttribute(ATTR_MAX_VALUE, "float")
-                .optionalAttribute(ATTR_PRECISION, "int")
-
-            );
-
-            log.debug("Registered FloatField type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register FloatField type with unified registry", e);
-        }
+        registry.registerType(FloatField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
+            .description("Float field with numeric and precision validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_MIN_VALUE, SUBTYPE_FLOAT)
+            .optionalAttribute(ATTR_MAX_VALUE, SUBTYPE_FLOAT)
+            .optionalAttribute(ATTR_PRECISION, IntAttribute.SUBTYPE_INT)
+        );
     }
 
 

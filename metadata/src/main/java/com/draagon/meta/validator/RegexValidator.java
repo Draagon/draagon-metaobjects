@@ -7,6 +7,7 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
 import org.apache.commons.validator.GenericValidator;
 
@@ -31,7 +32,7 @@ public class RegexValidator extends MetaValidator {
             .type(TYPE_VALIDATOR).subType(SUBTYPE_REGEX)
             .description("Regular expression validator for pattern matching")
             .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-            .requiredAttribute(ATTR_MASK, "string")
+            .requiredAttribute(ATTR_MASK, StringAttribute.SUBTYPE_STRING)
         );
     }
 

@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
  * <li><strong>field.timestamp:</strong> Timestamp fields</li>
  * <li><strong>field.byte:</strong> Byte fields</li>
  * <li><strong>field.short:</strong> Short fields</li>
+ * <li><strong>field.object:</strong> Object fields with object reference support</li>
+ * <li><strong>field.objectArray:</strong> Object array fields for lists of object references</li>
+ * <li><strong>field.stringArray:</strong> String array fields for lists of string values</li>
+ * <li><strong>field.class:</strong> Class fields for class type references</li>
  * </ul>
  *
  * <h3>Priority:</h3>
@@ -51,6 +55,12 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
         TimestampField.registerTypes(registry);
         ByteField.registerTypes(registry);
         ShortField.registerTypes(registry);
+
+        // Additional field types that were previously missing
+        ObjectField.registerTypes(registry);
+        ObjectArrayField.registerTypes(registry);
+        StringArrayField.registerTypes(registry);
+        ClassField.registerTypes(registry);
 
         log.info("Field types registered via provider");
     }

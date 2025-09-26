@@ -10,6 +10,7 @@ import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.registry.MetaDataType;
+import com.draagon.meta.attr.BooleanAttribute;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public abstract class MetaView extends MetaData {
             .inheritsFrom("metadata", "base")
 
             // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-            .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
 
             // VIEWS CAN CONTAIN ATTRIBUTES
             .optionalChild("attr", "*", "*")

@@ -50,9 +50,11 @@ public class PropertiesAttribute extends MetaAttribute<Properties> {
             setValueAsString( (String) value );
         }
         else if ( value instanceof Properties ) {
-            super.setValue((Properties) value);
+            setValue((Properties) value);
         }
-        throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
+        else {
+            throw new InvalidAttributeValueException( "Can not set value with class [" + value.getClass() + "] for object: " + value );
+        }
     }
 
     @Override

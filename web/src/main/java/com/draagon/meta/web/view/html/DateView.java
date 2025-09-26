@@ -8,11 +8,12 @@ package com.draagon.meta.web.view.html;
 
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
-import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.InvalidValueException;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.web.view.*;
 import com.draagon.meta.web.util.Param;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.attr.IntAttribute;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
@@ -44,9 +45,9 @@ public class DateView extends MonthView {
         registry.registerType(DateView.class, def -> def
             .type(TYPE_VIEW).subType("date")
             .inheritsFrom("view", "base")
-            .optionalAttribute(ATTR_MINRANGE, "string")
-            .optionalAttribute(ATTR_MAXRANGE, "string")
-            .optionalAttribute(ATTR_EMPTYVALUE, "string")
+            .optionalAttribute(ATTR_MINRANGE, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MAXRANGE, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_EMPTYVALUE, StringAttribute.SUBTYPE_STRING)
             .description("HTML date input view")
         );
 
@@ -55,9 +56,6 @@ public class DateView extends MonthView {
 
     public DateView(String name) {
         super(name);
-        addMetaAttr(StringAttribute.create(ATTR_MINRANGE, null));
-        addMetaAttr(StringAttribute.create(ATTR_MAXRANGE, null));
-        addMetaAttr(StringAttribute.create(ATTR_EMPTYVALUE, null));
     }
 
     public void getValue(HttpServletRequest request, Object o, String label)
@@ -279,9 +277,9 @@ public class DateView extends MonthView {
     public static void registerDateViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
         // Date input specific attributes
         registry.findType("field", "date")
-            .optionalAttribute(DATE_MIN_YEAR, "int")
-            .optionalAttribute(DATE_MAX_YEAR, "int")
-            .optionalAttribute(DATE_FORMAT, "string")
-            .optionalAttribute(DATE_PICKER_TYPE, "string");
+            .optionalAttribute(DATE_MIN_YEAR, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(DATE_MAX_YEAR, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(DATE_FORMAT, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DATE_PICKER_TYPE, StringAttribute.SUBTYPE_STRING);
     }
 }

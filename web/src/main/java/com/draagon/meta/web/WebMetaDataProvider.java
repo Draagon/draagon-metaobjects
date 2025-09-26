@@ -25,9 +25,9 @@ import com.draagon.meta.registry.MetaDataTypeProvider;
  * <li><strong>WebView:</strong> Base web view attributes</li>
  * </ul>
  *
- * <h3>Priority:</h3>
- * <p>Priority 300 - Runs after database services (100-199) and code generation services (200-299).
- * This ensures web attributes can leverage database and schema information for better form generation.</p>
+ * <h3>Dependencies:</h3>
+ * <p>Self-contained - registers view.base and all web view types.
+ * No external dependencies needed since MetaView.registerTypes() creates the base view type.</p>
  *
  * @since 6.0.0
  */

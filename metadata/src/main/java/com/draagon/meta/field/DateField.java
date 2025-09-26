@@ -11,7 +11,7 @@ import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
+import com.draagon.meta.attr.StringAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,72 +37,68 @@ public class DateField extends PrimitiveField<Date> {
     public final static String ATTR_MIN_DATE = "minDate";
     public final static String ATTR_MAX_DATE = "maxDate";
 
-    // Static registration block - automatically registers when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register DateField type during class loading", e);
-        }
-    }
 
     public DateField( String name ) {
         super( SUBTYPE_DATE, name, DataTypes.DATE );
     }
 
     /**
-     * Register DateField type and constraints with the registry
-     *
-     * @param registry The MetaDataRegistry to register with
+     * Register DateField type and constraints with the registry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        try {
-            // Register the type definition
-            MetaDataRegistry.getInstance().registerType(DateField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_DATE)
-                .description("Date field with format and range validation")
+        registry.registerType(DateField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_DATE)
+            .description("Date field with format and range validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_DATE_FORMAT, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_FORMAT, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MIN_DATE, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MAX_DATE, StringAttribute.SUBTYPE_STRING)
+        );
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-
-                // DATE-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_DATE_FORMAT, "string")
-                .optionalAttribute(ATTR_FORMAT, "string")
-                .optionalAttribute(ATTR_MIN_DATE, "string")
-                .optionalAttribute(ATTR_MAX_DATE, "string")
-            );
-
-            log.debug("Registered DateField type with unified registry");
-
-            // Register DateField-specific constraints using concrete constraint classes
-            registerDateFieldConstraints(registry);
-
-        } catch (Exception e) {
-            log.error("Failed to register DateField type with unified registry", e);
-        }
+        // Register DateField-specific constraints
+        registerDateFieldConstraints(registry);
     }
     
     /**
      * Register DateField-specific constraints using consolidated registry
-     *
-     * @param registry The MetaDataRegistry to use for constraint registration
      */
     private static void registerDateFieldConstraints(MetaDataRegistry registry) {
-        try {
-            // PLACEMENT CONSTRAINT: DateField CAN have format attribute
-            registry.addConstraint(new PlacementConstraint(
-                "datefield.format.placement",
-                "DateField can optionally have format attribute",
-                "field.date",           // Parent pattern
-                "attr.string[format]",  // Child pattern
-                true                    // Allowed
-            ));
+        // PLACEMENT CONSTRAINT: DateField CAN have format attribute
+        registry.addConstraint(new PlacementConstraint(
+            "datefield.format.placement",
+            "DateField can optionally have format attribute",
+            "field.date",                  // Parent pattern
+            "attr.string[format]",         // Child pattern
+            true                           // Allowed
+        ));
 
-            log.debug("Registered DateField-specific constraints using consolidated registry");
+        // PLACEMENT CONSTRAINT: DateField CAN have dateFormat attribute
+        registry.addConstraint(new PlacementConstraint(
+            "datefield.dateformat.placement",
+            "DateField can optionally have dateFormat attribute",
+            "field.date",                  // Parent pattern
+            "attr.string[dateFormat]",     // Child pattern
+            true                           // Allowed
+        ));
 
-        } catch (Exception e) {
-            log.error("Failed to register DateField constraints", e);
-        }
+        // PLACEMENT CONSTRAINT: DateField CAN have minDate attribute
+        registry.addConstraint(new PlacementConstraint(
+            "datefield.mindate.placement",
+            "DateField can optionally have minDate attribute",
+            "field.date",                  // Parent pattern
+            "attr.string[minDate]",        // Child pattern
+            true                           // Allowed
+        ));
+
+        // PLACEMENT CONSTRAINT: DateField CAN have maxDate attribute
+        registry.addConstraint(new PlacementConstraint(
+            "datefield.maxdate.placement",
+            "DateField can optionally have maxDate attribute",
+            "field.date",                  // Parent pattern
+            "attr.string[maxDate]",        // Child pattern
+            true                           // Allowed
+        ));
     }
 
     /**

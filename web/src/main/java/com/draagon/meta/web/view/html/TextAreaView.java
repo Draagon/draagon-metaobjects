@@ -10,6 +10,8 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.web.view.*;
+import com.draagon.meta.attr.IntAttribute;
+import com.draagon.meta.attr.StringAttribute;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
@@ -41,11 +43,13 @@ public class TextAreaView extends TextView
     registry.registerType(TextAreaView.class, def -> def
       .type(TYPE_VIEW).subType("textarea")
       .description("HTML textarea input view")
-      .optionalAttribute("cols", "int")
-      .optionalAttribute("rows", "int")
-      .optionalChild("attr", "string")
-      .optionalChild("attr", "int")
-      .optionalChild("attr", "boolean")
+
+      // INHERIT FROM BASE VIEW
+      .inheritsFrom("view", "base")
+
+      // TEXTAREA-SPECIFIC ATTRIBUTES
+      .optionalAttribute("cols", IntAttribute.SUBTYPE_INT)
+      .optionalAttribute("rows", IntAttribute.SUBTYPE_INT)
     );
 
     // Registered TextAreaView with unified registry
@@ -107,9 +111,9 @@ public class TextAreaView extends TextView
   public static void registerTextAreaViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
       // Text area specific attributes
       registry.findType("field", "string")
-          .optionalAttribute(TEXTAREA_COLS, "int")
-          .optionalAttribute(TEXTAREA_ROWS, "int")
-          .optionalAttribute(TEXTAREA_WRAP, "string")
-          .optionalAttribute(TEXTAREA_MAX_LENGTH, "int");
+          .optionalAttribute(TEXTAREA_COLS, IntAttribute.SUBTYPE_INT)
+          .optionalAttribute(TEXTAREA_ROWS, IntAttribute.SUBTYPE_INT)
+          .optionalAttribute(TEXTAREA_WRAP, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(TEXTAREA_MAX_LENGTH, IntAttribute.SUBTYPE_INT);
   }
 }

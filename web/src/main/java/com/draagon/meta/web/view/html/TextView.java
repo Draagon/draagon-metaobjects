@@ -10,6 +10,8 @@ import com.draagon.meta.field.MetaField;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.web.view.*;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.attr.IntAttribute;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
@@ -125,9 +127,9 @@ public class TextView extends HtmlView
   public static void registerTextViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
       // Text input specific attributes
       registry.findType("field", "string")
-          .optionalAttribute(TEXT_MAX_LENGTH, "int")
-          .optionalAttribute(TEXT_SIZE, "int")
-          .optionalAttribute(TEXT_PATTERN, "string")
-          .optionalAttribute(TEXT_AUTOCOMPLETE, "string");
+          .optionalAttribute(TEXT_MAX_LENGTH, IntAttribute.SUBTYPE_INT)
+          .optionalAttribute(TEXT_SIZE, IntAttribute.SUBTYPE_INT)
+          .optionalAttribute(TEXT_PATTERN, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(TEXT_AUTOCOMPLETE, StringAttribute.SUBTYPE_STRING);
   }
 }

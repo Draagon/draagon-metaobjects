@@ -22,6 +22,9 @@ import org.w3c.dom.Element;
 
 import java.io.IOException;
 
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+
 /**
  * A Class Field with unified registry registration and child requirements.
  *
@@ -35,17 +38,22 @@ public class ClassField extends MetaField<Class> implements StringSerializationH
 
     public final static String SUBTYPE_CLASS = "class";
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register ClassField type using the standardized registerTypes() pattern.
+     * This method registers the class field type that inherits from field.base.
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.getInstance().registerType(ClassField.class, def -> def
+            registry.registerType(ClassField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_CLASS)
                 .description("Class field for class type references")
-                
-                // Inherits: required, defaultValue, validation, defaultView from MetaField
-                // No class-specific attributes needed
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
             );
-            
+
             log.debug("Registered ClassField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register ClassField type with unified registry", e);

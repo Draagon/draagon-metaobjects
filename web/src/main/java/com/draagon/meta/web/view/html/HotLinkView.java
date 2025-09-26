@@ -16,6 +16,7 @@ import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.web.view.ViewHelper;
 import com.draagon.meta.web.view.WebView;
 import com.draagon.meta.web.view.WebViewException;
+import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +49,10 @@ public class HotLinkView extends HtmlView {
      */
     public static void registerTypes(MetaDataRegistry registry) {
         registry.registerType(HotLinkView.class, def -> def
-            .type("view").subType("hotlink")
+            .type(TYPE_VIEW).subType("hotlink")
             .inheritsFrom("view", "base")
-            .optionalAttribute(ATTR_LINKCLASS, "string")
-            .optionalAttribute(ATTR_URL, "string")
+            .optionalAttribute(ATTR_LINKCLASS, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_URL, StringAttribute.SUBTYPE_STRING)
             .description("HTML hotlink view")
         );
         // Registered HotLinkView type with unified registry
@@ -59,8 +60,6 @@ public class HotLinkView extends HtmlView {
 
     public HotLinkView(String name) {
         super(name);
-        addMetaAttr(StringAttribute.create(ATTR_LINKCLASS, null));
-        addMetaAttr(StringAttribute.create(ATTR_URL, null));
     }
 
     public void doView(PageContext page, Object o, String label, int mode, Map<String, String> params)

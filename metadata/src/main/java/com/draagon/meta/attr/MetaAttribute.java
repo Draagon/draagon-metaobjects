@@ -31,7 +31,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             .type(TYPE_ATTR).subType(SUBTYPE_BASE)
             .description("Base attribute metadata with common attribute properties")
             .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
-            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.ATTR_SUBTYPE)
+            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
         );
 
         // Register cross-cutting attribute constraints

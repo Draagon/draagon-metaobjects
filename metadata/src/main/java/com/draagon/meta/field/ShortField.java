@@ -9,7 +9,6 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,49 +29,17 @@ public class ShortField extends PrimitiveField<Short>
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
 
-    // Unified registry self-registration
-    static {
-        try {
-            MetaDataRegistry.getInstance().registerType(ShortField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_SHORT)
-                .description("Short field with numeric validation")
-                
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-
-                // SHORT-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_MIN_VALUE, "short")
-                .optionalAttribute(ATTR_MAX_VALUE, "short")
-                
-                // COMMON FIELD ATTRIBUTES
-                /* .optionalAttribute("isAbstract", "boolean")
-                .optionalAttribute("validation", "string")
-                .optionalAttribute("required", "string")
-                .optionalAttribute("defaultValue", "string")
-                .optionalAttribute("defaultView", "string")
-                
-                // DATABASE ATTRIBUTES (for database mapping)
-                .optionalAttribute("isId", "boolean")
-                .optionalAttribute("dbColumn", "string")
-                .optionalAttribute("isSearchable", "boolean")
-                .optionalAttribute("isOptional", "boolean")
-                
-                // ACCEPTS VALIDATORS
-                .optionalChild("validator", "*")
-                
-                // ACCEPTS VIEWS
-                .optionalChild("view", "*")
-                
-                // ACCEPTS COMMON ATTRIBUTES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")*/
-            );
-            
-            log.debug("Registered ShortField type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register ShortField type with unified registry", e);
-        }
+    /**
+     * Register ShortField type with the registry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ShortField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_SHORT)
+            .description("Short field with numeric validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_MIN_VALUE, SUBTYPE_SHORT)
+            .optionalAttribute(ATTR_MAX_VALUE, SUBTYPE_SHORT)
+        );
     }
 
     public ShortField( String name ) {

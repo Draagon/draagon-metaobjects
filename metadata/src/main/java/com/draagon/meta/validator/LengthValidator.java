@@ -7,6 +7,7 @@
 package com.draagon.meta.validator;
 
 import com.draagon.meta.*;
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.registry.MetaDataRegistry;
 import org.apache.commons.validator.GenericValidator;
@@ -38,8 +39,8 @@ public class LengthValidator extends MetaValidator
             .type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
             .description("Length validator ensures field value is within min/max length")
             .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_MIN, "string")
-            .optionalAttribute(ATTR_MAX, "string")
+            .optionalAttribute(ATTR_MIN, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MAX, StringAttribute.SUBTYPE_STRING)
         );
     }
 

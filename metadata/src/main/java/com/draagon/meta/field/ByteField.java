@@ -9,7 +9,6 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,35 +30,17 @@ public class ByteField extends PrimitiveField<Byte>
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
 
-    // Unified registry self-registration
-    static {
-        try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.getInstance().registerType(ByteField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_BYTE)
-                .description("Byte field with numeric validation")
-
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-
-                // BYTE-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, "byte")
-                .optionalAttribute(ATTR_MAX_VALUE, "byte")
-
-            );
-
-            log.debug("Registered ByteField type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register ByteField type with unified registry", e);
-        }
+    /**
+     * Register ByteField type with the registry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(ByteField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_BYTE)
+            .description("Byte field with numeric validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_MIN_VALUE, SUBTYPE_BYTE)
+            .optionalAttribute(ATTR_MAX_VALUE, SUBTYPE_BYTE)
+        );
     }
 
     public ByteField(String name) {

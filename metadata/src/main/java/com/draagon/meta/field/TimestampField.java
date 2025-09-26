@@ -8,12 +8,15 @@ package com.draagon.meta.field;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.IntAttribute;
-// Constraint registration now handled by consolidated MetaDataRegistry
+import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A Timestamp Field with unified registry registration and child requirements.
@@ -32,64 +35,64 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
     public final static String ATTR_MIN_DATE = "minDate";
     public final static String ATTR_MAX_DATE = "maxDate";
 
-    // Unified registry self-registration
-    static {
-        try {
-            // Explicitly trigger MetaField static initialization first
-            try {
-                Class.forName(MetaField.class.getName());
-                // Add a small delay to ensure MetaField registration completes
-                Thread.sleep(1);
-            } catch (ClassNotFoundException | InterruptedException e) {
-                log.warn("Could not force MetaField class loading", e);
-            }
-
-            MetaDataRegistry.getInstance().registerType(TimestampField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_TIMESTAMP)
-                .description("Timestamp field with date/time and precision validation")
-
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-
-                // TIMESTAMP-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_PRECISION, "int")
-                .optionalAttribute(ATTR_DATE_FORMAT, "string")
-                .optionalAttribute(ATTR_MIN_DATE, "string")
-                .optionalAttribute(ATTR_MAX_DATE, "string")
-
-            );
-
-            log.debug("Registered TimestampField type with unified registry");
-
-            // Register TimestampField-specific constraints using consolidated registry
-            setupTimestampFieldConstraints(MetaDataRegistry.getInstance());
-
-        } catch (Exception e) {
-            log.error("Failed to register TimestampField type with unified registry", e);
-        }
-    }
     
     /**
+     * Register TimestampField type with the registry (called by provider)
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
+        registry.registerType(TimestampField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_TIMESTAMP)
+            .description("Timestamp field with date/time and precision validation")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+            .optionalAttribute(ATTR_PRECISION, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(ATTR_DATE_FORMAT, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MIN_DATE, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(ATTR_MAX_DATE, StringAttribute.SUBTYPE_STRING)
+        );
+
+        // Register TimestampField-specific constraints
+        setupTimestampFieldConstraints(registry);
+    }
+
+    /**
      * Setup TimestampField-specific constraints using consolidated registry
-     *
-     * @param registry The MetaDataRegistry to use for constraint registration
      */
     private static void setupTimestampFieldConstraints(MetaDataRegistry registry) {
-        try {
-            // PLACEMENT CONSTRAINT: TimestampField CAN have precision attribute
-            registry.addConstraint(new PlacementConstraint(
-                "timestampfield.precision.placement",
-                "TimestampField can optionally have precision attribute",
-                "field.timestamp",        // Parent pattern
-                "attr.int[precision]",    // Child pattern
-                true                      // Allowed
-            ));
+        // PLACEMENT CONSTRAINT: TimestampField CAN have precision attribute
+        registry.addConstraint(new PlacementConstraint(
+            "timestampfield.precision.placement",
+            "TimestampField can optionally have precision attribute",
+            "field.timestamp",             // Parent pattern
+            "attr.int[precision]",         // Child pattern
+            true                           // Allowed
+        ));
 
-            log.debug("Registered TimestampField-specific constraints using consolidated registry");
+        // PLACEMENT CONSTRAINT: TimestampField CAN have dateFormat attribute
+        registry.addConstraint(new PlacementConstraint(
+            "timestampfield.dateformat.placement",
+            "TimestampField can optionally have dateFormat attribute",
+            "field.timestamp",             // Parent pattern
+            "attr.string[dateFormat]",     // Child pattern
+            true                           // Allowed
+        ));
 
-        } catch (Exception e) {
-            log.error("Failed to register TimestampField constraints", e);
-        }
+        // PLACEMENT CONSTRAINT: TimestampField CAN have minDate attribute
+        registry.addConstraint(new PlacementConstraint(
+            "timestampfield.mindate.placement",
+            "TimestampField can optionally have minDate attribute",
+            "field.timestamp",             // Parent pattern
+            "attr.string[minDate]",        // Child pattern
+            true                           // Allowed
+        ));
+
+        // PLACEMENT CONSTRAINT: TimestampField CAN have maxDate attribute
+        registry.addConstraint(new PlacementConstraint(
+            "timestampfield.maxdate.placement",
+            "TimestampField can optionally have maxDate attribute",
+            "field.timestamp",             // Parent pattern
+            "attr.string[maxDate]",        // Child pattern
+            true                           // Allowed
+        ));
     }
 
     public TimestampField(String name) {

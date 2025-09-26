@@ -3,6 +3,7 @@ package com.draagon.meta.validator;
 import com.draagon.meta.DataTypes;
 import com.draagon.meta.InvalidMetaDataException;
 import com.draagon.meta.InvalidValueException;
+import com.draagon.meta.attr.IntAttribute;
 import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
 
@@ -29,8 +30,8 @@ public class ArrayValidator extends MetaValidator {
             .type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
             .description("Array validator for size constraints")
             .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_MINSIZE, "int")
-            .optionalAttribute(ATTR_MAXSIZE, "int")
+            .optionalAttribute(ATTR_MINSIZE, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(ATTR_MAXSIZE, IntAttribute.SUBTYPE_INT)
         );
     }
 

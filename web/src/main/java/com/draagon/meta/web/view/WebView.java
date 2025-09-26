@@ -9,6 +9,9 @@ package com.draagon.meta.web.view;
 import com.draagon.meta.view.MetaView;
 import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.attr.BooleanAttribute;
+import com.draagon.meta.attr.IntAttribute;
 import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,26 +112,26 @@ public abstract class WebView extends MetaView
   public static void registerWebViewAttributes(com.draagon.meta.registry.MetaDataRegistry registry) {
       // Object-level web attributes
       registry.findType("object", "base")
-          .optionalAttribute(WEB_CSS_CLASS, "string")
-          .optionalAttribute(WEB_VALIDATION_MESSAGE, "string");
+          .optionalAttribute(WEB_CSS_CLASS, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_VALIDATION_MESSAGE, StringAttribute.SUBTYPE_STRING);
 
       registry.findType("object", "pojo")
-          .optionalAttribute(WEB_CSS_CLASS, "string");
+          .optionalAttribute(WEB_CSS_CLASS, StringAttribute.SUBTYPE_STRING);
 
       // Field-level web attributes
       registry.findType("field", "base")
-          .optionalAttribute(WEB_LABEL, "string")
-          .optionalAttribute(WEB_PLACEHOLDER, "string")
-          .optionalAttribute(WEB_CSS_CLASS, "string")
-          .optionalAttribute(WEB_INPUT_TYPE, "string")
-          .optionalAttribute(WEB_VALIDATION_MESSAGE, "string")
-          .optionalAttribute(WEB_REQUIRED, "boolean")
-          .optionalAttribute(WEB_READONLY, "boolean")
-          .optionalAttribute(WEB_HIDDEN, "boolean");
+          .optionalAttribute(WEB_LABEL, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_PLACEHOLDER, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_CSS_CLASS, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_INPUT_TYPE, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_VALIDATION_MESSAGE, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_REQUIRED, BooleanAttribute.SUBTYPE_BOOLEAN)
+          .optionalAttribute(WEB_READONLY, BooleanAttribute.SUBTYPE_BOOLEAN)
+          .optionalAttribute(WEB_HIDDEN, BooleanAttribute.SUBTYPE_BOOLEAN);
 
       registry.findType("field", "string")
-          .optionalAttribute(WEB_PLACEHOLDER, "string")
-          .optionalAttribute(WEB_INPUT_TYPE, "string");
+          .optionalAttribute(WEB_PLACEHOLDER, StringAttribute.SUBTYPE_STRING)
+          .optionalAttribute(WEB_INPUT_TYPE, StringAttribute.SUBTYPE_STRING);
   }
 }
 

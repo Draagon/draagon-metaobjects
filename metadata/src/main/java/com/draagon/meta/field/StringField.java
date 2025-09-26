@@ -55,7 +55,7 @@ public class StringField extends PrimitiveField<String> {
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+            registry.registerType(StringField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING)
                 .description("String field with length and pattern validation")
 
@@ -78,12 +78,6 @@ public class StringField extends PrimitiveField<String> {
         }
     }
 
-    /**
-     * Alternative registerTypes() method with no parameters for backward compatibility.
-     */
-    public static void registerTypes() {
-        registerTypes(MetaDataRegistry.getInstance());
-    }
     
     /**
      * Setup StringField-specific constraints using consolidated registry

@@ -9,7 +9,6 @@ package com.draagon.meta.field;
 import com.draagon.meta.*;
 import com.draagon.meta.attr.StringAttribute;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,41 +28,20 @@ public class BooleanField extends PrimitiveField<Boolean> {
 
     public final static String SUBTYPE_BOOLEAN = "boolean";
 
-    // Static registration block - automatically registers when class is loaded
-    static {
-        try {
-            registerTypes(MetaDataRegistry.getInstance());
-        } catch (Exception e) {
-            log.error("Failed to register BooleanField type during class loading", e);
-        }
-    }
 
     public BooleanField(String name ) {
         super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN );
     }
 
     /**
-     * Register BooleanField type with the registry
-     *
-     * @param registry The MetaDataRegistry to register with
+     * Register BooleanField type with the registry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        try {
-            // Register the type definition
-            MetaDataRegistry.getInstance().registerType(BooleanField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_BOOLEAN)
-                .description("Boolean field for true/false values")
-
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-
-                // NO BOOLEAN-SPECIFIC ATTRIBUTES - inherits all from MetaField base
-            );
-
-            log.debug("Registered BooleanField type with unified registry");
-        } catch (Exception e) {
-            log.error("Failed to register BooleanField type with unified registry", e);
-        }
+        registry.registerType(BooleanField.class, def -> def
+            .type(TYPE_FIELD).subType(SUBTYPE_BOOLEAN)
+            .description("Boolean field for true/false values")
+            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+        );
     }
 
     /**

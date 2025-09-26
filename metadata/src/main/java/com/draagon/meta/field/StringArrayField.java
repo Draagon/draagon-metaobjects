@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
+
 /**
  * A String Array Field with unified registry registration and child requirements.
  *
@@ -29,17 +32,22 @@ public class StringArrayField extends ArrayField<String,List<String>> implements
 
     public final static String SUBTYPE_STRING_ARRAY = "stringArray";
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register StringArrayField type using the standardized registerTypes() pattern.
+     * This method registers the string array field type that inherits from field.base.
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.getInstance().registerType(StringArrayField.class, def -> def
+            registry.registerType(StringArrayField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING_ARRAY)
                 .description("String array field for lists of string values")
-                
-                // Inherits: required, defaultValue, validation, defaultView from MetaField
-                // Array fields inherit array-specific attributes from ArrayField
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
             );
-            
+
             log.debug("Registered StringArrayField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register StringArrayField type with unified registry", e);

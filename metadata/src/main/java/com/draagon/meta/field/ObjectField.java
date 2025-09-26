@@ -10,8 +10,12 @@ import com.draagon.meta.DataTypes;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.registry.MetaDataRegistry;
+import com.draagon.meta.attr.StringAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.draagon.meta.field.MetaField.TYPE_FIELD;
+import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;
 
 /**
  * An Object Field with unified registry registration and child requirements.
@@ -26,18 +30,25 @@ public class ObjectField extends MetaField<Object>
     public final static String SUBTYPE_OBJECT = "object";
     public final static String ATTR_OBJECTREF = MetaObject.ATTR_OBJECT_REF;
 
-    // Unified registry self-registration
-    static {
+    /**
+     * Register ObjectField type using the standardized registerTypes() pattern.
+     * This method registers the object field type that inherits from field.base.
+     *
+     * @param registry The MetaDataRegistry to register with
+     */
+    public static void registerTypes(MetaDataRegistry registry) {
         try {
-            MetaDataRegistry.getInstance().registerType(ObjectField.class, def -> def
+            registry.registerType(ObjectField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_OBJECT)
                 .description("Object field with object reference support")
-                
-                // OBJECT-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_OBJECTREF, "string")
-                // Inherits: required, defaultValue, validation, defaultView from MetaField
+
+                // INHERIT FROM BASE FIELD
+                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+                // OBJECT-SPECIFIC ATTRIBUTES ONLY
+                .optionalAttribute(ATTR_OBJECTREF, StringAttribute.SUBTYPE_STRING)
             );
-            
+
             log.debug("Registered ObjectField type with unified registry");
         } catch (Exception e) {
             log.error("Failed to register ObjectField type with unified registry", e);

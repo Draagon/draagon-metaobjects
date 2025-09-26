@@ -11,6 +11,7 @@ import com.draagon.meta.*;
 import com.draagon.meta.registry.MetaDataRegistry;
 import com.draagon.meta.web.util.Param;
 import com.draagon.meta.web.view.*;
+import static com.draagon.meta.view.MetaView.TYPE_VIEW;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class MonthView extends HtmlView
    */
   public static void registerTypes(MetaDataRegistry registry) {
     registry.registerType(MonthView.class, def -> def
-      .type("view").subType("month")
+      .type(TYPE_VIEW).subType("month")
       .inheritsFrom("view", "base")
       .description("HTML month selector view")
     );

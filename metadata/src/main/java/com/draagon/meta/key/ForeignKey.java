@@ -27,12 +27,13 @@ public class ForeignKey extends MetaKey {
             .type(TYPE_KEY).subType(SUBTYPE)
             .description("Foreign key for referencing other objects")
             .inheritsFrom(TYPE_KEY, SUBTYPE_BASE)
-            .optionalAttribute("foreignObjectRef", "string")
-            .optionalAttribute("foreignKey", "string")
-            .optionalAttribute("foreignKeyMap", "string")
+            .optionalAttribute(ATTR_FOREIGNOBJECTREF, "string")
+            .optionalAttribute(ATTR_FOREIGNKEY, "string")
+            .optionalAttribute(ATTR_FORIGNKEYMAP, "string")
         );
     }
 
+    // FOREIGN KEY ATTRIBUTE CONSTANTS
     public final static String ATTR_FOREIGNOBJECTREF = "foreignObjectRef";
     public final static String ATTR_FOREIGNKEY = "foreignKey";
     public final static String ATTR_FORIGNKEYMAP = "foreignKeyMap";
