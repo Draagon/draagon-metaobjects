@@ -7,7 +7,7 @@
 package com.draagon.meta.attr;
 
 import com.draagon.meta.DataTypes;
-import com.draagon.meta.constraint.CustomConstraint;
+import com.draagon.meta.constraint.RegexConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
 
 import static com.draagon.meta.attr.MetaAttribute.TYPE_ATTR;
@@ -50,25 +50,13 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
      * @param registry The MetaDataRegistry to use for constraint registration
      */
     private static void setupStringArrayAttributeConstraints(MetaDataRegistry registry) {
-        // CUSTOM CONSTRAINT: String array attribute format (requires parsing)
-        registry.addConstraint(new CustomConstraint(
+        // REGEX CONSTRAINT: String array attribute format (comma-delimited validation)
+        registry.addConstraint(new RegexConstraint(
             "stringarrayattribute.format.validation",
-            "StringArrayAttribute values must be properly formatted",
-            (metadata) -> metadata instanceof StringArrayAttribute,
-            (metadata, value) -> {
-                if (metadata instanceof StringArrayAttribute) {
-                    StringArrayAttribute arrayAttr = (StringArrayAttribute) metadata;
-                    try {
-                        // Test if the value can be parsed as a string array
-                        arrayAttr.getValue();
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                }
-                return true;
-            },
-            "Validates array parsing using getValue()"
+            "StringArrayAttribute values must be comma-delimited without leading/trailing/double commas",
+            TYPE_ATTR, SUBTYPE_STRING_ARRAY, "*",
+            "^(?:[^,]+(?:,[^,]+)*)?$", // Comma-delimited pattern: item1,item2,item3 (no leading/trailing/double commas)
+            true // Allow null values
         ));
     }
 
