@@ -2,9 +2,9 @@ package com.draagon.meta.object;
 
 import com.draagon.meta.*;
 import com.draagon.meta.attr.MetaAttribute;
-import com.draagon.meta.constraint.CustomConstraint;
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.constraint.RegexConstraint;
+import com.draagon.meta.constraint.UniquenessConstraint;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.key.ForeignKey;
 import com.draagon.meta.key.MetaKey;
@@ -606,23 +606,11 @@ public abstract class MetaObject extends MetaData {
                 true            // Allowed
             ));
 
-            // CUSTOM CONSTRAINT: Unique field names within object (complex business logic)
-            registry.addConstraint(new CustomConstraint(
+            // UNIQUENESS CONSTRAINT: Unique field names within object (using standard constraint pattern)
+            registry.addConstraint(UniquenessConstraint.forFieldNames(
                 "object.field.uniqueness",
                 "Field names must be unique within an object",
-                (metadata) -> metadata instanceof MetaObject,
-                (metadata, value) -> {
-                    if (metadata instanceof MetaObject) {
-                        MetaObject obj = (MetaObject) metadata;
-                        var fieldNames = obj.getChildren(MetaField.class).stream()
-                            .map(field -> field.getName())
-                            .collect(java.util.stream.Collectors.toSet());
-                        var fieldList = obj.getChildren(MetaField.class);
-                        return fieldNames.size() == fieldList.size(); // No duplicates
-                    }
-                    return true;
-                },
-                "Cross-field uniqueness validation requiring field collection comparison"
+                TYPE_OBJECT, "*"
             ));
 
             // VALIDATION CONSTRAINT: Object names must follow identifier pattern
