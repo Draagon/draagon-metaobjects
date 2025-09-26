@@ -9,7 +9,6 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.util.MetaDataUtil;
 import com.draagon.meta.object.MetaObject;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import com.draagon.meta.attr.BooleanAttribute;
 import static com.draagon.meta.MetaData.ATTR_IS_ABSTRACT;
 import org.slf4j.Logger;

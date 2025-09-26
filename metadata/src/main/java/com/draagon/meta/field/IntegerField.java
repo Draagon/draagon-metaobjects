@@ -12,7 +12,6 @@ import com.draagon.meta.attr.StringAttribute;
 // Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.constraint.PlacementConstraint;
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -13,7 +13,6 @@ import com.draagon.meta.constraint.CustomConstraint;
 import com.draagon.meta.constraint.PlacementConstraint;
 // Constraint registration now handled by consolidated MetaDataRegistry
 import com.draagon.meta.registry.MetaDataRegistry;
-import com.draagon.meta.registry.MetaDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static com.draagon.meta.field.MetaField.SUBTYPE_BASE;

@@ -6,18 +6,22 @@ import com.draagon.meta.object.value.ValueObject;
 import com.draagon.meta.field.MetaField;
 import com.draagon.meta.generator.mustache.MustacheTemplateGenerator;
 import com.draagon.meta.MetaData;
+import com.draagon.meta.util.MetaDataUtil;
 
 import java.net.URI;
 import java.util.Arrays;
 
 /**
- * Basic example demonstrating MetaObjects core functionality without any framework integration.
- * 
- * This example shows:
- * 1. Loading metadata from JSON files
- * 2. Generating Java POJO classes using Mustache templates
- * 3. Working with metadata directly
- * 4. Creating and validating objects using metadata
+ * Basic example demonstrating SIMPLE PATTERN MetaObjects usage without framework integration.
+ *
+ * This example demonstrates the simple pattern for single-loader scenarios:
+ * 1. Direct SimpleLoader usage (no registry complexity)
+ * 2. MetaDataUtil.findMetaObject*(loader, ...) methods
+ * 3. Single-loader metadata operations
+ * 4. Basic object creation and validation
+ * 5. Code generation capabilities
+ *
+ * Use this pattern when you have one MetaDataLoader and don't need multi-loader registry features.
  */
 public class BasicMetaObjectsExample {
     
@@ -73,21 +77,22 @@ public class BasicMetaObjectsExample {
                 System.out.println("     - " + obj.getName() + " (package: " + obj.getPackage() + ")");
             }
             
-            // Try to get User MetaObject
+            // SIMPLE PATTERN: Direct loader MetaObject lookup using utility methods
             MetaObject userMeta = null;
             try {
-                userMeta = loader.getMetaObjectByName("User");
-                System.out.println("   Found MetaObject: " + userMeta.getName());
+                // Use MetaDataUtil simple pattern method (recommended)
+                userMeta = MetaDataUtil.findMetaObjectByName(loader, "com_example_model::User");
+                System.out.println("   Found User MetaObject via MetaDataUtil: " + userMeta.getName());
                 System.out.println("   Fields: " + userMeta.getMetaFields().size());
             } catch (Exception e) {
-                System.out.println("   Error finding User: " + e.getMessage());
-                // Try with package qualification
+                System.out.println("   Error finding User via MetaDataUtil: " + e.getMessage());
+                // Fallback to direct loader access
                 try {
                     userMeta = loader.getMetaObjectByName("com_example_model::User");
-                    System.out.println("   Found User with package: " + userMeta.getName());
+                    System.out.println("   Found User via direct loader: " + userMeta.getName());
                     System.out.println("   Fields: " + userMeta.getMetaFields().size());
                 } catch (Exception e2) {
-                    System.out.println("   Error finding User with package: " + e2.getMessage());
+                    System.out.println("   Error with direct loader access: " + e2.getMessage());
                 }
             }
             
@@ -148,10 +153,28 @@ public class BasicMetaObjectsExample {
                 System.out.println("   Cannot create user object - User MetaObject not found");
             }
             
-            // 6. Demonstrate metadata registry functionality
-            System.out.println("\n6. Registry information...");
+            // 6. SIMPLE PATTERN: Demonstrate utility methods for single-loader scenarios
+            System.out.println("\n6. Simple pattern utility methods...");
             System.out.println("   Loader name: " + loader.getName());
-            System.out.println("   Total MetaObjects: " + loader.getChildren(MetaObject.class).size());
+
+            // Use MetaDataUtil simple pattern method to get all MetaObjects
+            java.util.List<MetaObject> allObjects = MetaDataUtil.getAllMetaObjects(loader);
+            System.out.println("   Total MetaObjects via utility: " + allObjects.size());
+
+            for (MetaObject obj : allObjects) {
+                System.out.println("     - " + obj.getName() + " (package: " + obj.getPackage() + ")");
+            }
+
+            // 7. Simple vs Complex pattern comparison
+            System.out.println("\n7. When to use simple vs complex patterns...");
+            System.out.println("   SIMPLE PATTERN (this example):");
+            System.out.println("     - Single MetaDataLoader");
+            System.out.println("     - Direct loader.getMetaObjectByName() or MetaDataUtil.findMetaObjectByName(loader, ...)");
+            System.out.println("     - No registry complexity needed");
+            System.out.println("   COMPLEX PATTERN (see spring-example, osgi-example):");
+            System.out.println("     - Multiple MetaDataLoaders in registry");
+            System.out.println("     - MetaDataLoaderRegistry or MetaDataService");
+            System.out.println("     - Multi-tenant, plugin, or framework scenarios");
             
             System.out.println("\n=== Example completed successfully ===");
             

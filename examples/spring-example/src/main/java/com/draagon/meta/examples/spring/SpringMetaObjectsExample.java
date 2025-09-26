@@ -5,6 +5,7 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.simple.SimpleLoader;
 import com.draagon.meta.registry.MetaDataLoaderRegistry;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.util.MetaDataUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -27,15 +28,15 @@ import java.util.Arrays;
 @SpringBootApplication
 public class SpringMetaObjectsExample implements CommandLineRunner {
     
-    // Option 1: Convenient service wrapper (recommended)
+    // COMPLEX PATTERN: Convenient service wrapper for multi-loader scenarios (recommended)
     @Autowired
     private MetaDataService metaDataService;
-    
-    // Option 2: Backward compatible loader injection
+
+    // SIMPLE PATTERN: Direct loader injection for single-loader scenarios
     @Autowired
     private MetaDataLoader primaryMetaDataLoader;
-    
-    // Option 3: Full registry access for advanced operations
+
+    // COMPLEX PATTERN: Full registry access for advanced multi-loader operations
     @Autowired
     private MetaDataLoaderRegistry metaDataLoaderRegistry;
     
@@ -54,61 +55,48 @@ public class SpringMetaObjectsExample implements CommandLineRunner {
      * Simple test of Spring integration without Spring Boot complexity
      */
     private static void testSpringIntegrationManually() throws Exception {
-        System.out.println("\n1. Manual Spring integration test...");
-        
-        // Test direct Spring class usage
-        com.draagon.meta.spring.MetaDataService service = null;
-        com.draagon.meta.spring.MetaDataAutoConfiguration config = null;
-        
+        System.out.println("\n1. Spring class loading verification...");
+
+        // Test Spring class availability
         try {
-            // Test that Spring classes can be loaded
-            config = new com.draagon.meta.spring.MetaDataAutoConfiguration();
-            System.out.println("   MetaDataAutoConfiguration class loaded: SUCCESS");
-            
-            // Test MetaDataService class loading
-            Class<?> serviceClass = Class.forName("com.draagon.meta.spring.MetaDataService");
-            System.out.println("   MetaDataService class loaded: SUCCESS");
-            
-            // Test MetaDataLoaderConfiguration class loading
-            Class<?> configClass = Class.forName("com.draagon.meta.spring.MetaDataLoaderConfiguration");
-            System.out.println("   MetaDataLoaderConfiguration class loaded: SUCCESS");
-            
+            Class.forName("com.draagon.meta.spring.MetaDataAutoConfiguration");
+            Class.forName("com.draagon.meta.spring.MetaDataService");
+            Class.forName("com.draagon.meta.spring.MetaDataLoaderConfiguration");
+            System.out.println("   Spring integration classes: SUCCESS");
         } catch (Exception e) {
             System.out.println("   Spring class loading failed: " + e.getMessage());
         }
-        
-        // Test basic metadata functionality (same as other examples)
+
+        // Test basic metadata functionality using simple pattern
         System.out.println("\n2. Basic MetaObjects functionality...");
-        
-        com.draagon.meta.loader.simple.SimpleLoader loader = new com.draagon.meta.loader.simple.SimpleLoader("spring-test");
-        
-        // Load from classpath (same approach as other examples)
+
+        // Simple pattern: Create one loader for single-loader scenario
+        SimpleLoader loader = new SimpleLoader("spring-test");
+
         java.net.URL resourceUrl = SpringMetaObjectsExample.class.getResource("/metadata/examples-metadata.json");
         if (resourceUrl == null) {
-            throw new RuntimeException("Could not find metadata resource: /metadata/examples-metadata.json");
+            throw new RuntimeException("Could not find metadata resource");
         }
-        
-        // Create temporary file and copy resource content
+
         java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("examples-metadata", ".json");
         try (java.io.InputStream is = resourceUrl.openStream()) {
             java.nio.file.Files.copy(is, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         }
-        
-        java.net.URI metadataUri = tempFile.toUri();
-        loader.setSourceURIs(java.util.Arrays.asList(metadataUri));
+
+        loader.setSourceURIs(java.util.Arrays.asList(tempFile.toUri()));
         loader.init();
-        
+
         System.out.println("   Loaded " + loader.getChildren().size() + " metadata items");
-        
-        // Test MetaObject access
+
+        // Simple pattern: Direct loader access instead of registry
         try {
-            com.draagon.meta.object.MetaObject userMeta = loader.getMetaObjectByName("com_example_model::User");
+            MetaObject userMeta = com.draagon.meta.util.MetaDataUtil.findMetaObjectByName(loader, "com_example_model::User");
             System.out.println("   Found User MetaObject: " + userMeta.getName());
             System.out.println("   User has " + userMeta.getMetaFields().size() + " fields");
         } catch (Exception e) {
             System.out.println("   MetaObject lookup failed: " + e.getMessage());
         }
-        
+
         System.out.println("\n=== Manual Spring integration test completed ===");
     }
     
@@ -155,38 +143,54 @@ public class SpringMetaObjectsExample implements CommandLineRunner {
         boolean hasProduct = metaDataService.metaObjectExists("com_example_model::Product");
         System.out.println("   User exists: " + hasUser + ", Product exists: " + hasProduct);
         
-        // 3. Backward compatible loader access
-        System.out.println("\n3. Backward compatible loader access...");
+        // 3. SIMPLE PATTERN: Direct loader access for single-loader scenarios
+        System.out.println("\n3. Simple pattern - direct loader access...");
         System.out.println("   Primary loader name: " + primaryMetaDataLoader.getName());
-        System.out.println("   Primary loader objects: " + 
+        System.out.println("   Primary loader objects: " +
             primaryMetaDataLoader.getChildren(MetaObject.class).size());
-        
-        // 4. Advanced registry operations
-        System.out.println("\n4. Advanced registry operations...");
-        System.out.println("   Total registered loaders: " + 
-            metaDataLoaderRegistry.getDataLoaders().size());
-        
-        for (MetaDataLoader loader : metaDataLoaderRegistry.getDataLoaders()) {
-            System.out.println("     - Loader: " + loader.getName() + 
-                " (" + loader.getChildren().size() + " children)");
+
+        // Demonstrate simple pattern utility methods
+        try {
+            MetaObject directUser = MetaDataUtil.findMetaObjectByName(primaryMetaDataLoader, "com_example_model::User");
+            System.out.println("   Direct loader lookup: " + directUser.getName());
+        } catch (Exception e) {
+            System.out.println("   Direct lookup failed: " + e.getMessage());
         }
         
-        // 5. Demonstrate service convenience methods
-        System.out.println("\n5. Service convenience methods...");
-        
+        // 4. COMPLEX PATTERN: Advanced registry operations for multi-loader scenarios
+        System.out.println("\n4. Complex pattern - registry operations...");
+        System.out.println("   Total registered loaders: " +
+            metaDataLoaderRegistry.getDataLoaders().size());
+
+        for (MetaDataLoader loader : metaDataLoaderRegistry.getDataLoaders()) {
+            System.out.println("     - Loader: " + loader.getName() +
+                " (" + loader.getChildren().size() + " children)");
+        }
+
+        // Demonstrate complex pattern utility methods
         try {
-            // Direct lookup
+            MetaObject registryUser = MetaDataUtil.findMetaObjectByName("com_example_model::User", this);
+            System.out.println("   Registry utility lookup: " + registryUser.getName());
+        } catch (Exception e) {
+            System.out.println("   Registry utility lookup failed: " + e.getMessage());
+        }
+        
+        // 5. COMPLEX PATTERN: Service convenience methods (best for most Spring applications)
+        System.out.println("\n5. Service convenience methods (recommended for most Spring apps)...");
+
+        try {
+            // Service wrapper with Optional support
             MetaObject user = metaDataService.findMetaObjectByName("com_example_model::User");
-            System.out.println("   Direct lookup successful: " + user.getName());
-            
+            System.out.println("   Service lookup successful: " + user.getName());
+
             // Field details
             user.getMetaFields().forEach(field -> {
-                System.out.println("     Field: " + field.getName() + 
+                System.out.println("     Field: " + field.getName() +
                     " (" + field.getSubType() + ")");
             });
-            
+
         } catch (Exception e) {
-            System.out.println("   MetaObject lookup failed: " + e.getMessage());
+            System.out.println("   Service lookup failed: " + e.getMessage());
         }
         
         System.out.println("\n=== Spring Example completed ===");

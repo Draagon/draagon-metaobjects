@@ -76,14 +76,16 @@ public class MetaClassDBValidatorService
       MappingHandler mh = getObjectManager().getMappingHandler();
       DatabaseDriver dd = (DatabaseDriver) getObjectManager().getDatabaseDriver();
       
-      // Get loaders from specific registry if set, otherwise use utility method
+      // Get loaders using simplified pattern
       java.util.Collection<MetaDataLoader> loaders;
       if (metaDataLoaderRegistry != null) {
+        // Complex pattern: Use specific registry for multi-loader scenarios
         loaders = metaDataLoaderRegistry.getDataLoaders();
         log.info("Using specific MetaDataLoaderRegistry with " + loaders.size() + " loaders");
       } else {
+        // Simple pattern: Use utility method for default registry discovery
         loaders = MetaDataUtil.getAllMetaDataLoaders(this);
-        log.info("Using MetaDataUtil registry discovery with " + loaders.size() + " loaders");
+        log.info("Using MetaDataUtil default registry with " + loaders.size() + " loaders");
       }
       
       // Validate all Writeable (TABLE) MetaClasses

@@ -13,6 +13,9 @@ import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.registry.MetaDataLoaderRegistry;
 import com.draagon.meta.registry.ServiceRegistryFactory;
 import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.MetaObjectAware;
+
+import java.util.Objects;
 
 /**
  * Utility class providing helper methods for MetaData operations.
@@ -221,10 +224,10 @@ public class MetaDataUtil {
 
   /**
    * Gets all registered MetaDataLoaders using OSGi-compatible registry.
-   * 
-   * <p>This is the preferred replacement for the legacy static 
+   *
+   * <p>This is the preferred replacement for the legacy static
    * {@code MetaDataRegistry.getDataLoaders()} method.</p>
-   * 
+   *
    * @param context The calling object context (for future extensibility)
    * @return Collection of all registered MetaDataLoaders
    * @since 6.0.0
@@ -232,5 +235,110 @@ public class MetaDataUtil {
   public static java.util.Collection<MetaDataLoader> getAllMetaDataLoaders(Object context) {
     MetaDataLoaderRegistry registry = getMetaDataLoaderRegistry(context);
     return registry.getDataLoaders();
+  }
+
+  // ============================================================================
+  // SIMPLE PATTERN METHODS - Direct MetaDataLoader Usage
+  // ============================================================================
+
+  /**
+   * Finds a MetaObject for the given object instance using direct loader access.
+   *
+   * <p>This is the <strong>simple pattern</strong> for single-loader scenarios.
+   * Use this when you have a specific loader and don't need multi-loader registry overhead.</p>
+   *
+   * @param loader The MetaDataLoader to search
+   * @param obj The object to find metadata for
+   * @return MetaObject that can handle the given object
+   * @throws MetaDataNotFoundException if no suitable MetaObject is found
+   * @since 6.0.0
+   */
+  public static MetaObject findMetaObject(MetaDataLoader loader, Object obj) throws MetaDataNotFoundException {
+    Objects.requireNonNull(loader, "MetaDataLoader cannot be null");
+    Objects.requireNonNull(obj, "Object to find metadata for cannot be null");
+
+    // Use the loader's getMetaObjectFor method (same pattern as MetaDataLoaderRegistry)
+    MetaObject metaObject = loader.getMetaObjectFor(obj);
+    if (metaObject != null) {
+      return metaObject;
+    }
+
+    throw new MetaDataNotFoundException("No MetaObject found for object of type: " + obj.getClass().getName(), obj.getClass().getSimpleName());
+  }
+
+  /**
+   * Finds a MetaObject by name using direct loader access.
+   *
+   * <p>This is the <strong>simple pattern</strong> for single-loader scenarios.
+   * Use this when you have a specific loader and know the exact metadata name.</p>
+   *
+   * @param loader The MetaDataLoader to search
+   * @param name Fully qualified metadata name (e.g., "com.example::User")
+   * @return MetaObject with the specified name
+   * @throws MetaDataNotFoundException if no MetaObject with the given name is found
+   * @since 6.0.0
+   */
+  public static MetaObject findMetaObjectByName(MetaDataLoader loader, String name) throws MetaDataNotFoundException {
+    Objects.requireNonNull(loader, "MetaDataLoader cannot be null");
+    Objects.requireNonNull(name, "MetaObject name cannot be null");
+
+    MetaObject metaObject = loader.getMetaObjectByName(name);
+    if (metaObject == null) {
+      throw new MetaDataNotFoundException("MetaObject not found: " + name, name);
+    }
+    return metaObject;
+  }
+
+  /**
+   * Gets all MetaObjects from a specific loader.
+   *
+   * <p>This is the <strong>simple pattern</strong> for single-loader scenarios.
+   * Use this when you need to enumerate all metadata in a specific loader.</p>
+   *
+   * @param loader The MetaDataLoader to get objects from
+   * @return List of all MetaObjects in the loader
+   * @since 6.0.0
+   */
+  public static java.util.List<MetaObject> getAllMetaObjects(MetaDataLoader loader) {
+    Objects.requireNonNull(loader, "MetaDataLoader cannot be null");
+    return loader.getChildren(MetaObject.class);
+  }
+
+  // ============================================================================
+  // COMPLEX PATTERN METHODS - MetaDataLoaderRegistry Usage
+  // ============================================================================
+
+  /**
+   * Finds a MetaObject for the given object instance using registry lookup.
+   *
+   * <p>This is the <strong>complex pattern</strong> for multi-loader scenarios.
+   * Use this for multi-tenant, plugin systems, or runtime loader switching.</p>
+   *
+   * @param registry The MetaDataLoaderRegistry to search
+   * @param obj The object to find metadata for
+   * @return MetaObject that can handle the given object
+   * @throws MetaDataNotFoundException if no suitable MetaObject is found
+   * @since 6.0.0
+   */
+  public static MetaObject findMetaObject(MetaDataLoaderRegistry registry, Object obj) throws MetaDataNotFoundException {
+    Objects.requireNonNull(registry, "MetaDataLoaderRegistry cannot be null");
+    return registry.findMetaObject(obj);
+  }
+
+  /**
+   * Finds a MetaObject by name using registry lookup.
+   *
+   * <p>This is the <strong>complex pattern</strong> for multi-loader scenarios.
+   * Use this when you need to search across multiple loaders or don't know which loader contains the metadata.</p>
+   *
+   * @param registry The MetaDataLoaderRegistry to search
+   * @param name Fully qualified metadata name (e.g., "com.example::User")
+   * @return MetaObject with the specified name
+   * @throws MetaDataNotFoundException if no MetaObject with the given name is found
+   * @since 6.0.0
+   */
+  public static MetaObject findMetaObjectByName(MetaDataLoaderRegistry registry, String name) throws MetaDataNotFoundException {
+    Objects.requireNonNull(registry, "MetaDataLoaderRegistry cannot be null");
+    return registry.findMetaObjectByName(name);
   }
 }

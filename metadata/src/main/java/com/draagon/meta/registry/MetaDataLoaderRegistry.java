@@ -13,18 +13,20 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Service-based registry for MetaDataLoaders that works in both OSGI and non-OSGI environments.
- * 
- * <p>This registry replaces the static {@code MetaDataRegistry} with a context-aware,
- * service-based approach that supports:</p>
- * 
+ * Registry for runtime MetaDataLoader management in OSGI and non-OSGI environments.
+ *
+ * <p>This registry provides dynamic create/destroy capabilities for MetaDataLoader instances,
+ * supporting legitimate runtime use cases such as:</p>
+ *
  * <ul>
- *   <li><strong>OSGI Compatibility:</strong> No global static state</li>
- *   <li><strong>Dynamic Discovery:</strong> Uses ServiceRegistry to find loader providers</li>
- *   <li><strong>Thread Safety:</strong> Concurrent collections and proper synchronization</li>
- *   <li><strong>Lifecycle Management:</strong> Proper cleanup and resource management</li>
+ *   <li><strong>Multi-tenant Applications:</strong> Different metadata sources per tenant</li>
+ *   <li><strong>Plugin Systems:</strong> Runtime loader registration/unregistration</li>
+ *   <li><strong>Configuration Switching:</strong> Dev/test/prod metadata sources</li>
+ *   <li><strong>Hot Reloading:</strong> Update metadata sources without restart</li>
  * </ul>
- * 
+ *
+ * <p>For simple single-loader scenarios, consider using MetaDataLoader directly instead.</p>
+ *
  * @since 6.0.0
  */
 public class MetaDataLoaderRegistry {
@@ -53,13 +55,15 @@ public class MetaDataLoaderRegistry {
     }
     
     /**
-     * Ensure the registry is initialized (lazy initialization)
+     * Ensure the registry is initialized (simplified - no auto-discovery)
      */
     private void ensureInitialized() {
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
-                    discoverAndRegisterLoaders();
+                    // Simplified: No auto-discovery of providers
+                    // Loaders must be registered explicitly via registerLoader()
+                    log.debug("MetaDataLoaderRegistry initialized - ready for explicit loader registration");
                     initialized = true;
                 }
             }
@@ -291,34 +295,6 @@ public class MetaDataLoaderRegistry {
         );
     }
     
-    /**
-     * Service discovery - find and register all loader providers
-     */
-    private void discoverAndRegisterLoaders() {
-        log.debug("Discovering loader providers via {}", serviceRegistry.getDescription());
-        
-        try {
-            Collection<MetaDataLoaderProvider> providers = serviceRegistry.getServices(MetaDataLoaderProvider.class);
-            
-            log.info("Found {} MetaDataLoaderProvider services", providers.size());
-            
-            for (MetaDataLoaderProvider provider : providers) {
-                try {
-                    log.debug("Registering loaders from provider: {}", provider.getClass().getName());
-                    provider.registerLoaders(this);
-                    
-                } catch (Exception e) {
-                    log.error("Error processing loader provider {}: {}", 
-                             provider.getClass().getName(), e.getMessage(), e);
-                }
-            }
-            
-            log.info("Loader discovery complete. Registered {} loaders", loaders.size());
-            
-        } catch (Exception e) {
-            log.error("Error during loader discovery: {}", e.getMessage(), e);
-        }
-    }
     
     /**
      * Registry statistics record
