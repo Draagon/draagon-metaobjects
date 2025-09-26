@@ -6,12 +6,15 @@ import com.draagon.meta.attr.MetaAttribute;
 import com.draagon.meta.loader.MetaDataLoader;
 import com.draagon.meta.loader.parser.BaseMetaDataParser;
 import com.draagon.meta.loader.parser.MetaDataFileParser;
-import com.draagon.meta.util.XMLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +44,7 @@ public class XMLMetaDataParser extends BaseMetaDataParser implements MetaDataFil
         Document doc = null;
 
         try {
-            doc = XMLUtil.loadFromStream(is);
+            doc = loadDocumentFromStream(is);
 
             //////////////////////////////////////////////////////
             // PARSE THE ITEMS XML BLOCK
@@ -289,5 +292,20 @@ public class XMLMetaDataParser extends BaseMetaDataParser implements MetaDataFil
      */
     protected List<Element> getElementsOfName(Node n, String name, boolean firstOnly) {
         return XMLParsingUtils.getElementsOfName(n, name, firstOnly);
+    }
+
+    /**
+     * Private method to load Document from InputStream (replaces XMLUtil.loadFromStream)
+     */
+    private static Document loadDocumentFromStream(InputStream is) throws IOException {
+        try {
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+            return documentBuilder.parse(is);
+        } catch (ParserConfigurationException e) {
+            throw new IOException("Unable to get a new XML Document Builder: " + e.toString(), e);
+        } catch (SAXException e) {
+            throw new IOException("Error attempting to read XML from inputStream: " + e.getMessage(), e);
+        }
     }
 }

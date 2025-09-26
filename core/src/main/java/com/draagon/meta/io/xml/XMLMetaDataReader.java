@@ -3,9 +3,12 @@ package com.draagon.meta.io.xml;
 import com.draagon.meta.io.MetaDataIOException;
 import com.draagon.meta.io.MetaDataReader;
 import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.util.XMLUtil;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,7 +24,7 @@ public abstract class XMLMetaDataReader extends MetaDataReader {
 
     protected Document loadXML() throws IOException {
         // TODO: Add flag for validating XML
-        doc = XMLUtil.loadFromStream(in, false);
+        doc = loadDocumentFromStream(in, false);
         return doc;
     }
 
@@ -34,5 +37,20 @@ public abstract class XMLMetaDataReader extends MetaDataReader {
                 throw new MetaDataIOException(this, e.toString(), e);
             }
         }*/
+    }
+
+    /**
+     * Private method to load Document from InputStream with validation option (replaces XMLUtil.loadFromStream)
+     */
+    private static Document loadDocumentFromStream(InputStream is, boolean validating) throws IOException {
+        try {
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+            return documentBuilder.parse(is);
+        } catch (ParserConfigurationException e) {
+            throw new IOException("Unable to get a new XML Document Builder: " + e.toString(), e);
+        } catch (SAXException e) {
+            throw new IOException("Error attempting to read XML from inputStream: " + e.getMessage(), e);
+        }
     }
 }

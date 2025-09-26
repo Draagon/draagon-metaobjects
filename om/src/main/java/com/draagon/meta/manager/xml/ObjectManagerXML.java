@@ -16,7 +16,6 @@ import com.draagon.meta.manager.exp.Expression;
 import com.draagon.meta.manager.exp.Range;
 import com.draagon.meta.manager.exp.SortOrder;
 import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.util.XMLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -25,6 +24,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -460,7 +462,7 @@ public class ObjectManagerXML extends ObjectManager
         InputStream is = null;
         try {
           is = getSourceStream( mc );
-          doc = XMLUtil.loadFromStream( is );
+          doc = loadDocumentFromStream(is);
         }
         catch( IOException e )
         {
@@ -567,6 +569,21 @@ public class ObjectManagerXML extends ObjectManager
     	throw new UnsupportedOperationException( "executeQuery is not support by the XML manager" );
     }
 
+
+    /**
+     * Private method to load Document from InputStream (replaces XMLUtil.loadFromStream)
+     */
+    private static Document loadDocumentFromStream(InputStream is) throws IOException {
+        try {
+            DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+            return documentBuilder.parse(is);
+        } catch (ParserConfigurationException e) {
+            throw new IOException("Unable to get a new XML Document Builder: " + e.toString(), e);
+        } catch (SAXException e) {
+            throw new IOException("Error attempting to read XML from inputStream: " + e.getMessage(), e);
+        }
+    }
 
     ///////////////////////////////////////////////////////
     // TO STRING METHOD
