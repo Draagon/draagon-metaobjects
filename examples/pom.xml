@@ -15,6 +15,11 @@
     <name>MetaObjects :: Examples</name>
     <description>Example projects demonstrating MetaObjects usage patterns</description>
 
+    <properties>
+        <!-- Examples are not published to Maven Central -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <modules>
         <module>shared-resources</module>
         <module>basic-example</module>

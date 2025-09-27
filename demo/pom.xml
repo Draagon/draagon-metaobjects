@@ -15,6 +15,11 @@
     <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects Fishstore Demo App showing Model-driven development.</description>
 
+    <properties>
+        <!-- Demo is not published to Maven Central -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <build>
         <plugins>
             <!-- TODO: Add MetaObjects Maven Plugin when it supports proper code generation -->
