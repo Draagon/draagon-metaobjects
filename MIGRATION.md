@@ -1,18 +1,21 @@
-# Migration Guide: v5.1.x → v5.2.0+
+# Migration Guide: v5.1.x → v6.2.5+
 
-This guide helps existing MetaObjects users migrate to the new **modular architecture** introduced in v5.2.0.
+This guide helps existing MetaObjects users migrate to the new **metaobjects.com architecture** and **modular structure** introduced in v6.2.5+.
 
 ## 🎯 **Migration Overview**
 
-The v5.2.0 release represents a **major architectural enhancement** with **full backward compatibility**. The primary change is breaking the monolithic structure into focused modules.
+The v6.2.5+ release represents a **major architectural enhancement** with comprehensive package refactoring and modular structure. The primary changes are package refactoring and breaking the monolithic structure into focused modules.
 
 ### **What Changed**
+- **Package Structure**: `com.draagon.meta.*` → `com.metaobjects.*`
+- **Group ID**: `com.draagon` → `com.metaobjects`
+- **Domain**: Moved to `metaobjects.com` and `metaobjects.dev`
 - **Monolithic JAR** → **Focused modules**
 - **Single dependency** → **Choose what you need**
 - **Framework coupling** → **Optional integrations**
 
 ### **What Stayed the Same**
-- ✅ **All APIs remain identical**
+- ✅ **All APIs remain functionally identical** (just new packages)
 - ✅ **Metadata formats unchanged**
 - ✅ **Functionality preserved**
 - ✅ **Configuration compatible**
@@ -28,23 +31,23 @@ The v5.2.0 release represents a **major architectural enhancement** with **full 
 </dependency>
 ```
 
-### **After (v5.2.0+) - Choose Your Modules**
+### **After (v6.2.5+) - Choose Your Modules**
 
 #### **Basic Usage (Core Only)**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 
 #### **Spring Projects**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core-spring</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 *Note: Automatically includes `metaobjects-core`*
@@ -52,27 +55,27 @@ The v5.2.0 release represents a **major architectural enhancement** with **full 
 #### **Code Generation**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-codegen-mustache</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 
 #### **Database Object Management**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-omdb</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 
 #### **Complete Feature Set (Web + Spring)**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-web-spring</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -82,18 +85,27 @@ The v5.2.0 release represents a **major architectural enhancement** with **full 
 
 **Before:**
 ```java
-// Code remains identical
-import com.metaobjects.loader.simple.SimpleLoader;
-import com.metaobjects.object.MetaObject;
-import com.metaobjects.object.value.ValueObject;
+// Using old packages
+import com.draagon.meta.loader.simple.SimpleLoader;
+import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.value.ValueObject;
 
 SimpleLoader loader = new SimpleLoader("myLoader");
 // ... rest of code unchanged
 ```
 
 **After:**
-- **Dependency**: Change to `metaobjects-core`
-- **Code**: **No changes required**
+```java
+// Updated to new packages
+import com.metaobjects.loader.simple.SimpleLoader;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.object.value.ValueObject;
+
+SimpleLoader loader = new SimpleLoader("myLoader");
+// ... rest of code remains the same
+```
+- **Dependency**: Change to `metaobjects-core` with new groupId
+- **Code**: Update import statements to new package structure
 
 ### **Scenario 2: Spring Integration**
 
@@ -123,9 +135,9 @@ private MetaDataLoader loader;
 **After:**
 ```xml
 <plugin>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </plugin>
 ```
 - **Plugin usage**: **Identical**
@@ -150,18 +162,18 @@ import { MetaViewRenderer } from './metaviews/MetaViewRenderer';
 #### **Update Parent POM (if using)**
 ```xml
 <parent>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </parent>
 ```
 
 #### **Update Plugin Versions**
 ```xml
 <plugin>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </plugin>
 ```
 
@@ -174,9 +186,9 @@ implementation 'com.draagon:metaobjects:5.1.0'
 
 #### **After**
 ```gradle
-implementation 'com.draagon:metaobjects-core:5.2.0-SNAPSHOT'
+implementation 'com.metaobjects:metaobjects-core:6.2.5-SNAPSHOT'
 // Add additional modules as needed
-implementation 'com.draagon:metaobjects-core-spring:5.2.0-SNAPSHOT'
+implementation 'com.metaobjects:metaobjects-core-spring:6.2.5-SNAPSHOT'
 ```
 
 ## 🎁 **Enhanced Features Available**
@@ -250,7 +262,7 @@ OSGi bundle symbolic names have changed to reflect the new module structure:
 **Solution**: Switch to `metaobjects-core-spring` for auto-configuration
 
 #### **Issue: Maven plugin not found**
-**Solution**: Update plugin version to 5.2.0-SNAPSHOT
+**Solution**: Update plugin version to 6.2.5-SNAPSHOT and groupId to com.metaobjects
 
 ## 📞 **Support**
 

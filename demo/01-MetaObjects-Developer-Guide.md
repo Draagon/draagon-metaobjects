@@ -70,7 +70,7 @@ your-project/
 <typesConfig xmlns="http://metaobjects.com/schema/metamodel/v3">
     
     <!-- Import base MetaObjects types -->
-    <import>com/draagon/meta/loader/json/metaobjects.types.json</import>
+    <import>com/metaobjects/loader/json/metaobjects.types.json</import>
     
     <!-- Project-specific type extensions (optional) -->
     <types>

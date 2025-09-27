@@ -47,7 +47,58 @@ limitations under the License.
 
 # Current Development
 
-## Version 5.2.0-SNAPSHOT (In Development)
+## Version 6.2.5-SNAPSHOT (In Development)
+
+# Past Releases
+
+## Version 6.2.5 (September 26, 2025)
+
+### 🚀 **MAJOR RELEASE: Complete Package Refactoring**
+
+**This release represents a comprehensive package refactoring from `com.draagon.meta` to `com.metaobjects` with new domain ownership.**
+
+#### **🔧 Package Structure Migration**
+- **Complete package refactoring**: All classes moved from `com.draagon.meta.*` → `com.metaobjects.*`
+- **Maven groupId updated**: `com.draagon` → `com.metaobjects`
+- **400+ Java files updated**: Package declarations, imports, and metadata references
+- **Directory structure migrated**: Proper `com/metaobjects` directory hierarchy
+
+#### **🏢 Branding & Legal Updates**
+- **Domain ownership**: Moved to `metaobjects.com` and `metaobjects.dev`
+- **License updates**: Updated to "Doug Mealing LLC dba Meta Objects"
+- **Consistent branding**: All documentation and code references updated
+- **Organization information**: Proper legal attribution throughout
+
+#### **📦 Maven & Build System**
+- **19 POM files updated**: New groupId across all modules
+- **ServiceLoader fixes**: All META-INF/services files updated
+- **Build verification**: All modules compile and test successfully
+- **UTF-8 encoding issues resolved**: Clean compilation across platform
+
+#### **🎯 Git History Preservation**
+- **Complete Git history maintained**: All file renames properly detected
+- **High similarity scores**: 83%-99% rename detection success
+- **Development timeline preserved**: Full commit history accessible via `git log --follow`
+- **No history loss**: Complete development timeline intact
+
+#### **⚠️ Migration Requirements**
+**For existing projects:**
+1. **Update Maven dependencies**: Change groupId from `com.draagon` to `com.metaobjects`
+2. **Update import statements**: Change `com.draagon.meta.*` to `com.metaobjects.*`
+3. **Version update**: Upgrade to `6.2.5` for new package structure
+4. **Clean build recommended**: Run `mvn clean compile` after updates
+
+#### **✅ Backward Compatibility**
+- **Functional APIs unchanged**: All method signatures and behavior preserved
+- **Metadata formats compatible**: Existing XML/JSON metadata files work unchanged
+- **Configuration preserved**: Build configurations and templates compatible
+- **Service behavior identical**: Runtime behavior remains exactly the same
+
+**See [Migration Guide](MIGRATION.md) for detailed upgrade instructions.**
+
+## Previous Development
+
+## Version 5.2.0-SNAPSHOT (Previous Development)
 Major architectural evolution release featuring comprehensive code generation simplification, enhanced error reporting system, and preparation for cross-language template-based generation. This development version includes significant architectural improvements while maintaining full backward compatibility.
 
 ### Code Generation Module Simplification (v6.0.0+ Architecture)

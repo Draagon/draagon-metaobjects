@@ -34,7 +34,7 @@ This guide shows how to configure Maven projects for MetaObjects code generation
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- MetaObjects Version -->
-        <metaobjects.version>5.1.0</metaobjects.version>
+        <metaobjects.version>6.2.5-SNAPSHOT</metaobjects.version>
         
         <!-- Plugin Versions -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
@@ -51,28 +51,28 @@ This guide shows how to configure Maven projects for MetaObjects code generation
         <dependencies>
             <!-- MetaObjects Core -->
             <dependency>
-                <groupId>com.draagon</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-core</artifactId>
                 <version>${metaobjects.version}</version>
             </dependency>
-            
+
             <!-- MetaObjects Metadata -->
             <dependency>
-                <groupId>com.draagon</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-metadata</artifactId>
                 <version>${metaobjects.version}</version>
             </dependency>
-            
+
             <!-- MetaObjects Object Manager -->
             <dependency>
-                <groupId>com.draagon</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-om</artifactId>
                 <version>${metaobjects.version}</version>
             </dependency>
-            
+
             <!-- MetaObjects Database Object Manager -->
             <dependency>
-                <groupId>com.draagon</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-omdb</artifactId>
                 <version>${metaobjects.version}</version>
             </dependency>
@@ -84,7 +84,7 @@ This guide shows how to configure Maven projects for MetaObjects code generation
             <plugins>
                 <!-- MetaObjects Maven Plugin -->
                 <plugin>
-                    <groupId>com.draagon</groupId>
+                    <groupId>com.metaobjects</groupId>
                     <artifactId>metaobjects-maven-plugin</artifactId>
                     <version>${metaobjects.version}</version>
                 </plugin>
@@ -136,17 +136,17 @@ This guide shows how to configure Maven projects for MetaObjects code generation
     <dependencies>
         <!-- MetaObjects Dependencies -->
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
         </dependency>
-        
+
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
         </dependency>
-        
+
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-omdb</artifactId>
         </dependency>
         
@@ -183,7 +183,7 @@ This guide shows how to configure Maven projects for MetaObjects code generation
         <plugins>
             <!-- MetaObjects Code Generation Plugin -->
             <plugin>
-                <groupId>com.draagon</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <executions>
                     <!-- Generate Domain Objects -->
@@ -596,7 +596,7 @@ Configure incremental code generation:
 
 ```xml
 <plugin>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
     <configuration>
         <globals>

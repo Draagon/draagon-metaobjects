@@ -37,27 +37,27 @@ MetaObjects has been completely refactored into focused, independent modules tha
 ### **Basic Usage (Framework-Independent)**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 
 ### **Spring Integration**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core-spring</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
 </dependency>
 ```
 
 ### **Code Generation**
 ```xml
 <plugin>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.5-SNAPSHOT</version>
     <executions>
         <execution>
             <goals><goal>generate</goal></goals>
