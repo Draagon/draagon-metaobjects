@@ -34,6 +34,9 @@ public class StaticBlockDebugTest extends SharedRegistryTestBase {
         // Use the shared registry but back up its state for isolation
         MetaDataRegistry registry = getSharedRegistry();
 
+        // Disable strict duplicate detection for isolated testing
+        registry.disableStrictDuplicateDetection();
+
         // Backup existing registrations before this test runs
         backupRegistry = new HashMap<>();
         for (String typeName : registry.getRegisteredTypeNames()) {
@@ -55,6 +58,8 @@ public class StaticBlockDebugTest extends SharedRegistryTestBase {
             registry.clear();
             // Restore original registrations
             restoreRegistryFromBackup();
+            // Re-enable strict duplicate detection
+            registry.enableStrictDuplicateDetection();
         }
         log.info("Tore down isolated registry test with registry restored");
     }
@@ -104,7 +109,7 @@ public class StaticBlockDebugTest extends SharedRegistryTestBase {
         try {
             // Manually execute what the StringField static block should do
             log.info("Manually registering StringField...");
-            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+            registry.registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field with pattern validation")
                 .optionalAttribute("pattern", "string")
@@ -202,21 +207,21 @@ public class StaticBlockDebugTest extends SharedRegistryTestBase {
             log.info("Manually registering multiple types...");
             
             // Register StringField
-            MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+            registry.registerType(StringField.class, def -> def
                 .type("field").subType("string")
                 .description("String field")
                 .optionalAttribute("pattern", "string")
             );
-            
+
             // Register IntegerField
-            MetaDataRegistry.getInstance().registerType(IntegerField.class, def -> def
-                .type("field").subType("int") 
+            registry.registerType(IntegerField.class, def -> def
+                .type("field").subType("int")
                 .description("Integer field")
                 .optionalAttribute("minValue", "int")
             );
-            
+
             // Register StringAttribute
-            MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
+            registry.registerType(StringAttribute.class, def -> def
                 .type("attr").subType("string")
                 .description("String attribute")
             );

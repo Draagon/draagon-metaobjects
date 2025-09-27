@@ -67,6 +67,7 @@ public class MetaDataRegistry {
     // Integrated constraint system (merged from ConstraintRegistry)
     private final List<Constraint> constraints = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean constraintsInitialized = false;
+    private volatile boolean strictDuplicateDetection = true; // Enable strict checking by default
 
     private volatile boolean initialized = false;
     
@@ -1099,6 +1100,10 @@ public class MetaDataRegistry {
             }
 
             try {
+                // Temporarily disable strict duplicate detection during initialization
+                boolean wasStrictDetection = strictDuplicateDetection;
+                disableStrictDuplicateDetection();
+
                 // Load essential constraints using concrete classes
                 loadPlacementConstraints();
 
@@ -1107,12 +1112,19 @@ public class MetaDataRegistry {
                 loadCoreIOConstraints();
                 loadWebConstraints();
 
+                // Re-enable strict detection after initialization
+                if (wasStrictDetection) {
+                    enableStrictDuplicateDetection();
+                }
+
                 log.info("Loaded {} core constraints using concrete constraint classes",
                          constraints.size());
                 constraintsInitialized = true;
 
             } catch (Exception e) {
                 log.error("Error loading core constraints: {}", e.getMessage(), e);
+                // Re-enable strict detection even on error
+                enableStrictDuplicateDetection();
             }
         }
     }
@@ -1515,8 +1527,9 @@ public class MetaDataRegistry {
 
 
     /**
-     * Add a constraint to the registry
+     * Add a constraint to the registry with context-aware duplicate detection
      * @param constraint The constraint to add
+     * @throws MetaDataException if a constraint with the same ID already exists and strict detection is enabled
      */
     public void addConstraint(Constraint constraint) {
         if (constraint == null) {
@@ -1524,8 +1537,60 @@ public class MetaDataRegistry {
             return;
         }
 
+        // Check for duplicate constraint IDs only when strict detection is enabled
+        String constraintId = constraint.getConstraintId();
+        if (constraintId != null && strictDuplicateDetection) {
+            Optional<Constraint> existing = constraints.stream()
+                .filter(c -> constraintId.equals(c.getConstraintId()))
+                .findFirst();
+
+            if (existing.isPresent()) {
+                String errorMessage = String.format(
+                    "DUPLICATE CONSTRAINT DETECTED: Constraint ID '%s' already registered!\n\n" +
+                    "This usually indicates a test registry isolation problem:\n" +
+                    "  • Existing: %s [%s]\n" +
+                    "  • Attempted: %s [%s]\n\n" +
+                    "SOLUTION: If this is a test class, extend SharedRegistryTestBase instead of:\n" +
+                    "  ❌ MetaDataRegistry registry = MetaDataRegistry.getInstance();\n" +
+                    "  ✅ public class YourTest extends SharedRegistryTestBase { ... }\n\n" +
+                    "This prevents registry conflicts between tests on different platforms (Windows/Linux).\n" +
+                    "See CLAUDE.md for detailed explanation of the shared registry pattern.",
+                    constraintId,
+                    existing.get().getClass().getSimpleName(), existing.get().getDescription(),
+                    constraint.getClass().getSimpleName(), constraint.getDescription()
+                );
+
+                log.error("Duplicate constraint registration detected: {}", constraintId);
+                throw new MetaDataException(errorMessage);
+            }
+        } else if (constraintId != null && !strictDuplicateDetection) {
+            // In non-strict mode, just warn about duplicates but allow them
+            boolean hasDuplicate = constraints.stream()
+                .anyMatch(c -> constraintId.equals(c.getConstraintId()));
+            if (hasDuplicate) {
+                log.debug("Allowing duplicate constraint during initialization: {}", constraintId);
+                return; // Skip adding duplicate in non-strict mode
+            }
+        }
+
         constraints.add(constraint);
         log.debug("Added constraint: {} [{}]", constraint.getType(), constraint.getDescription());
+    }
+
+    /**
+     * Temporarily disable strict duplicate detection (for initialization)
+     */
+    public void disableStrictDuplicateDetection() {
+        this.strictDuplicateDetection = false;
+        log.debug("Disabled strict duplicate constraint detection");
+    }
+
+    /**
+     * Re-enable strict duplicate detection (for normal operation)
+     */
+    public void enableStrictDuplicateDetection() {
+        this.strictDuplicateDetection = true;
+        log.debug("Enabled strict duplicate constraint detection");
     }
 
     /**

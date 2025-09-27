@@ -2,8 +2,8 @@ package com.metaobjects.attr;
 
 import com.metaobjects.constraint.ConstraintViolationException;
 import com.metaobjects.constraint.RegexConstraint;
-import com.metaobjects.registry.MetaDataRegistry;
-import org.junit.BeforeClass;
+import com.metaobjects.registry.SharedRegistryTestBase;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -12,15 +12,16 @@ import static org.junit.Assert.*;
  * Test the new regex-based validation for StringArrayAttribute
  * This test verifies that the CustomConstraint has been successfully
  * replaced with a RegexConstraint for comma-delimited array validation.
+ *
+ * Uses SharedRegistryTestBase to avoid registry conflicts on different platforms.
  */
-public class StringArrayAttributeRegexValidationTest {
+public class StringArrayAttributeRegexValidationTest extends SharedRegistryTestBase {
 
-    private static MetaDataRegistry registry;
-    private static StringArrayAttribute testAttribute;
+    private StringArrayAttribute testAttribute;
 
-    @BeforeClass
-    public static void setUp() {
-        registry = MetaDataRegistry.getInstance();
+    @Before
+    public void setUp() {
+        // Use the shared registry from base class
         testAttribute = new StringArrayAttribute("testArrayAttr");
     }
 
@@ -61,7 +62,7 @@ public class StringArrayAttributeRegexValidationTest {
         for (String invalidArray : invalidArrays) {
             try {
                 // Find the regex constraint for StringArrayAttribute
-                RegexConstraint regexConstraint = registry.getAllValidationConstraints().stream()
+                RegexConstraint regexConstraint = sharedRegistry.getAllValidationConstraints().stream()
                     .filter(c -> c instanceof RegexConstraint)
                     .map(c -> (RegexConstraint) c)
                     .filter(c -> c.getConstraintId().equals("stringarrayattribute.format.validation"))
@@ -89,7 +90,7 @@ public class StringArrayAttributeRegexValidationTest {
     @Test
     public void testRegexPatternDetails() {
         // Verify the exact regex pattern being used
-        RegexConstraint regexConstraint = registry.getAllValidationConstraints().stream()
+        RegexConstraint regexConstraint = sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c instanceof RegexConstraint)
             .map(c -> (RegexConstraint) c)
             .filter(c -> c.getConstraintId().equals("stringarrayattribute.format.validation"))
@@ -105,7 +106,7 @@ public class StringArrayAttributeRegexValidationTest {
     @Test
     public void testCustomConstraintElimination() {
         // Verify that we no longer have CustomConstraints for StringArrayAttribute
-        long customConstraintCount = registry.getAllValidationConstraints().stream()
+        long customConstraintCount = sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c.getClass().getSimpleName().equals("CustomConstraint"))
             .filter(c -> c.getConstraintId().equals("stringarrayattribute.format.validation"))
             .count();
@@ -114,7 +115,7 @@ public class StringArrayAttributeRegexValidationTest {
                     0, customConstraintCount);
 
         // Verify that we DO have the RegexConstraint
-        long regexConstraintCount = registry.getAllValidationConstraints().stream()
+        long regexConstraintCount = sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c instanceof RegexConstraint)
             .filter(c -> c.getConstraintId().equals("stringarrayattribute.format.validation"))
             .count();

@@ -34,6 +34,9 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         // Use the shared registry but back up its state for isolation
         MetaDataRegistry registry = getSharedRegistry();
 
+        // Disable strict duplicate detection for isolated testing
+        registry.disableStrictDuplicateDetection();
+
         // Backup existing registrations instead of clearing
         backupRegistry = new HashMap<>();
         for (String typeName : registry.getRegisteredTypeNames()) {
@@ -57,6 +60,8 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
             registry.clear();
             // Restore original registrations
             restoreRegistryFromBackup();
+            // Re-enable strict duplicate detection
+            registry.enableStrictDuplicateDetection();
         }
         log.info("Tore down isolated registry test with registry restored");
     }
@@ -69,7 +74,7 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register a simple type manually
-        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+        registry.registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("Test string field")
             .optionalAttribute("pattern", "string")
@@ -93,13 +98,13 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register types with child requirements
-        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+        registry.registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("String field with pattern attribute")
             .optionalAttribute("pattern", "string")
         );
 
-        MetaDataRegistry.getInstance().registerType(StringAttribute.class, def -> def
+        registry.registerType(StringAttribute.class, def -> def
             .type("attr").subType("string")
             .description("String attribute")
         );
@@ -122,7 +127,7 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register a type with specific requirements
-        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+        registry.registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("String field")
             .optionalAttribute("pattern", "string")
@@ -147,7 +152,7 @@ public class BasicRegistryTest extends SharedRegistryTestBase {
         MetaDataRegistry registry = getSharedRegistry();
 
         // Register StringField type
-        MetaDataRegistry.getInstance().registerType(StringField.class, def -> def
+        registry.registerType(StringField.class, def -> def
             .type("field").subType("string")
             .description("String field")
         );

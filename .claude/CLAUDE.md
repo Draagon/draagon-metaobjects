@@ -1339,6 +1339,195 @@ This achievement represents a **dramatic improvement from widespread registry fa
 
 **The 100% test success rate demonstrates that the shared registry pattern successfully eliminated registry conflicts while maintaining all architectural principles of the MetaObjects framework.**
 
+## 🧪 **UNIT TEST SETUP GUIDELINES (CRITICAL FOR FUTURE DEVELOPMENT)**
+
+### 🚨 **MANDATORY TESTING PATTERNS TO PREVENT SERVICELOADER CONFLICTS**
+
+**CONTEXT**: ServiceLoader discovery behaves differently on Windows vs Linux, causing duplicate constraint registrations that break tests on GitHub Actions. These patterns are REQUIRED for all new test classes.
+
+#### **✅ DEFAULT PATTERN: SharedRegistryTestBase (Use This for 95% of Tests)**
+
+```java
+// ✅ CORRECT - Use this pattern for all standard tests
+public class YourNewTest extends SharedRegistryTestBase {
+
+    @Test
+    public void testSomething() {
+        // Use sharedRegistry instead of MetaDataRegistry.getInstance()
+        MetaDataRegistry registry = getSharedRegistry();
+
+        // Your test logic here - registry is shared and stable
+        TypeDefinition def = registry.getTypeDefinition("field", "string");
+        assertNotNull("Type should be registered", def);
+    }
+}
+```
+
+**WHY**: Extends SharedRegistryTestBase which provides a single static MetaDataRegistry shared across ALL tests, preventing registry conflicts.
+
+#### **⚠️ ISOLATED PATTERN: For Tests That Manipulate Registry**
+
+```java
+// ⚠️ USE SPARINGLY - Only for tests that must clear/manipulate registry
+@IsolatedTest("Clears and restores shared MetaDataRegistry state")
+public class RegistryManipulationTest extends SharedRegistryTestBase {
+
+    private Map<String, TypeDefinition> backupRegistry;
+
+    @Before
+    public void setUp() {
+        MetaDataRegistry registry = getSharedRegistry();
+
+        // CRITICAL: Disable strict duplicate detection for isolation
+        registry.disableStrictDuplicateDetection();
+
+        // Backup existing registrations
+        backupRegistry = new HashMap<>();
+        for (String typeName : registry.getRegisteredTypeNames()) {
+            // Store backup...
+        }
+
+        // Clear for isolated testing
+        registry.clear();
+    }
+
+    @After
+    public void tearDown() {
+        MetaDataRegistry registry = getSharedRegistry();
+        if (registry != null) {
+            registry.clear();
+            restoreRegistryFromBackup();
+
+            // CRITICAL: Re-enable strict duplicate detection
+            registry.enableStrictDuplicateDetection();
+        }
+    }
+}
+```
+
+**USE CASES**: Tests that need to clear registry, test registration logic, or manipulate global registry state.
+
+### 🚫 **ANTI-PATTERNS TO NEVER USE**
+
+#### **❌ BROKEN PATTERN: Direct MetaDataRegistry.getInstance()**
+
+```java
+// ❌ WRONG - Causes ServiceLoader conflicts on GitHub Actions
+public class BrokenTest {
+
+    @Test
+    public void testSomething() {
+        // ❌ This causes platform-specific failures
+        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+
+        // ❌ This fails with "expected:<1> but was:<2>" on Linux
+        List<Constraint> constraints = registry.getAllValidationConstraints();
+        assertEquals(1, constraints.size()); // Fails due to duplicates
+    }
+}
+```
+
+**WHY BROKEN**: ServiceLoader discovers providers multiple times on Linux/GitHub Actions, causing duplicate constraint registrations.
+
+#### **❌ BROKEN PATTERN: Manual Registry Creation**
+
+```java
+// ❌ WRONG - Creates separate registry instances
+public class AnotherBrokenTest {
+
+    @BeforeClass
+    public static void setUpClass() {
+        // ❌ Creates conflicts with other tests
+        MetaDataRegistry separateRegistry = new MetaDataRegistry();
+        // This doesn't integrate with shared test infrastructure
+    }
+}
+```
+
+### 🔧 **INTELLIGENT ERROR DETECTION SYSTEM**
+
+The framework includes intelligent duplicate detection that provides helpful error messages when tests are set up incorrectly:
+
+```java
+// Error message developers see when using broken patterns:
+DUPLICATE CONSTRAINT DETECTED: Constraint ID 'metadata.base.objects' already registered!
+
+This usually indicates a test registry isolation problem:
+  ❌ Existing: PlacementConstraint [metadata.base can contain objects]
+  ❌ Attempted: PlacementConstraint [metadata.base can contain objects]
+
+SOLUTION: If this is a test class, extend SharedRegistryTestBase instead of:
+  ❌ MetaDataRegistry registry = MetaDataRegistry.getInstance();
+  ✅ public class YourTest extends SharedRegistryTestBase { ... }
+
+This prevents registry conflicts between tests on different platforms (Windows/Linux).
+See CLAUDE.md for detailed explanation of the shared registry pattern.
+```
+
+### 🌍 **PLATFORM DIFFERENCES EXPLAINED**
+
+#### **Windows Behavior**
+- ServiceLoader typically discovers each MetaDataTypeProvider once
+- Constraint counts remain consistent (expected behavior)
+- Tests pass locally during development
+
+#### **Linux/GitHub Actions Behavior**
+- ServiceLoader may discover providers multiple times due to classloader differences
+- Causes duplicate constraint registrations
+- Results in "expected:<1> but was:<2>" test failures
+- Breaks CI/CD builds
+
+#### **Solution Architecture**
+The SharedRegistryTestBase pattern eliminates platform differences by:
+1. **Single Static Registry**: One registry instance shared across all tests
+2. **Controlled Initialization**: Registry initialized once before any tests run
+3. **Predictable State**: Same registry state regardless of platform
+4. **Conflict Prevention**: No teardown/recreation between tests
+
+### 📝 **TESTING CHECKLIST FOR NEW TESTS**
+
+**Before creating any new test class:**
+
+✅ **Does your test need to manipulate the registry?**
+- **NO**: Use `extends SharedRegistryTestBase` (standard pattern)
+- **YES**: Use `@IsolatedTest` pattern with strict duplicate detection controls
+
+✅ **Are you accessing MetaDataRegistry?**
+- **Use**: `getSharedRegistry()` method from base class
+- **NEVER**: `MetaDataRegistry.getInstance()` directly
+
+✅ **Are you testing constraint-related functionality?**
+- **Expect**: Consistent constraint counts across platforms
+- **Use**: Shared registry to avoid duplicate registrations
+
+✅ **Are you creating test data or metadata?**
+- **Follow**: Naming patterns that comply with identifier constraints
+- **Use**: SharedRegistryTestBase for predictable type availability
+
+### 🎯 **EXAMPLES OF CONVERTED TESTS**
+
+**Successfully converted test classes that now follow these patterns:**
+- ✅ `StringArrayAttributeRegexValidationTest` - SharedRegistryTestBase pattern
+- ✅ `UniquenessConstraintTest` - SharedRegistryTestBase pattern
+- ✅ `AllMetaDataTypesRegistrationTest` - SharedRegistryTestBase pattern
+- ✅ `BasicRegistryTest` - @IsolatedTest pattern with strict controls
+- ✅ `StaticRegistrationTest` - @IsolatedTest pattern with strict controls
+
+**Test Results After Conversion:**
+- **Before**: 199 tests → 66 failures, 33 errors (~50% passing)
+- **After**: 227 tests → 0 failures, 0 errors (100% PASSING ✅)
+
+### 🚨 **CRITICAL SUCCESS FACTORS**
+
+1. **ALWAYS extend SharedRegistryTestBase** unless you absolutely need registry isolation
+2. **NEVER use MetaDataRegistry.getInstance()** directly in tests
+3. **ALWAYS use getSharedRegistry()** from the base class
+4. **DISABLE strict duplicate detection** only in @IsolatedTest setUp()
+5. **RE-ENABLE strict duplicate detection** in @IsolatedTest tearDown()
+6. **BACKUP and RESTORE** registry state in isolated tests
+
+**Following these patterns ensures tests pass consistently on both Windows development machines and Linux GitHub Actions runners.**
+
 ## 🎉 **ARCHITECTURAL REFACTORING COMPLETION STATUS**
 
 **✅ PHASE 1: Preparation** - Completed  

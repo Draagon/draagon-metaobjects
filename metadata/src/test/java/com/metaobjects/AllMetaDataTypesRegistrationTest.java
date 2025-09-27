@@ -1,6 +1,7 @@
 package com.metaobjects;
 
 import com.metaobjects.registry.MetaDataRegistry;
+import com.metaobjects.registry.SharedRegistryTestBase;
 import com.metaobjects.field.*;
 import com.metaobjects.object.pojo.PojoMetaObject;
 import com.metaobjects.object.mapped.MappedMetaObject;
@@ -16,14 +17,13 @@ import static org.junit.Assert.*;
 
 /**
  * Comprehensive test to verify all MetaData type registrations are working.
+ * Uses SharedRegistryTestBase to avoid registry conflicts on different platforms.
  */
-public class AllMetaDataTypesRegistrationTest {
-
-    private MetaDataRegistry registry;
+public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
 
     @Before
     public void setUp() {
-        registry = MetaDataRegistry.getInstance();
+        // Use the shared registry from base class
         
         // Trigger static registrations for ALL field types
         try {
@@ -72,10 +72,10 @@ public class AllMetaDataTypesRegistrationTest {
 
     @Test
     public void testRegistryHasAllTypes() {
-        MetaDataRegistry.RegistryStats stats = registry.getStats();
+        MetaDataRegistry.RegistryStats stats = sharedRegistry.getStats();
         assertNotNull("Registry stats should be available", stats);
         System.out.println("Registry has " + stats.totalTypes() + " types registered");
-        
+
         // Should have at least field types + object types + attribute types
         assertTrue("Should have at least 16 types registered", stats.totalTypes() >= 16);
     }
@@ -83,84 +83,84 @@ public class AllMetaDataTypesRegistrationTest {
     @Test
     public void testAllFieldTypesRegistered() {
         // Verify ALL field types are registered
-        assertTrue("StringField should be registered", 
-                  registry.isRegistered("field", "string"));
-        assertTrue("IntegerField should be registered", 
-                  registry.isRegistered("field", "int"));
-        assertTrue("LongField should be registered", 
-                  registry.isRegistered("field", "long"));
-        assertTrue("DoubleField should be registered", 
-                  registry.isRegistered("field", "double"));
-        assertTrue("BooleanField should be registered", 
-                  registry.isRegistered("field", "boolean"));
-        assertTrue("DateField should be registered", 
-                  registry.isRegistered("field", "date"));
-        assertTrue("FloatField should be registered", 
-                  registry.isRegistered("field", "float"));
-        assertTrue("ShortField should be registered", 
-                  registry.isRegistered("field", "short"));
-        assertTrue("ByteField should be registered", 
-                  registry.isRegistered("field", "byte"));
-        assertTrue("ObjectField should be registered", 
-                  registry.isRegistered("field", "object"));
-        assertTrue("StringArrayField should be registered", 
-                  registry.isRegistered("field", "stringArray"));
-        assertTrue("ObjectArrayField should be registered", 
-                  registry.isRegistered("field", "objectArray"));
-        assertTrue("ClassField should be registered", 
-                  registry.isRegistered("field", "class"));
+        assertTrue("StringField should be registered",
+                  sharedRegistry.isRegistered("field", "string"));
+        assertTrue("IntegerField should be registered",
+                  sharedRegistry.isRegistered("field", "int"));
+        assertTrue("LongField should be registered",
+                  sharedRegistry.isRegistered("field", "long"));
+        assertTrue("DoubleField should be registered",
+                  sharedRegistry.isRegistered("field", "double"));
+        assertTrue("BooleanField should be registered",
+                  sharedRegistry.isRegistered("field", "boolean"));
+        assertTrue("DateField should be registered",
+                  sharedRegistry.isRegistered("field", "date"));
+        assertTrue("FloatField should be registered",
+                  sharedRegistry.isRegistered("field", "float"));
+        assertTrue("ShortField should be registered",
+                  sharedRegistry.isRegistered("field", "short"));
+        assertTrue("ByteField should be registered",
+                  sharedRegistry.isRegistered("field", "byte"));
+        assertTrue("ObjectField should be registered",
+                  sharedRegistry.isRegistered("field", "object"));
+        assertTrue("StringArrayField should be registered",
+                  sharedRegistry.isRegistered("field", "stringArray"));
+        assertTrue("ObjectArrayField should be registered",
+                  sharedRegistry.isRegistered("field", "objectArray"));
+        assertTrue("ClassField should be registered",
+                  sharedRegistry.isRegistered("field", "class"));
     }
 
     @Test
     public void testObjectTypesRegistered() {
         // Verify object types are registered
-        assertTrue("PojoMetaObject should be registered", 
-                  registry.isRegistered("object", "pojo"));
-        assertTrue("MappedMetaObject should be registered", 
-                  registry.isRegistered("object", "map"));
+        assertTrue("PojoMetaObject should be registered",
+                  sharedRegistry.isRegistered("object", "pojo"));
+        assertTrue("MappedMetaObject should be registered",
+                  sharedRegistry.isRegistered("object", "map"));
     }
 
     @Test
     public void testAttributeTypesRegistered() {
         // Verify attribute types are registered
-        assertTrue("StringAttribute should be registered", 
-                  registry.isRegistered("attr", "string"));
-        assertTrue("IntAttribute should be registered", 
-                  registry.isRegistered("attr", "int"));
-        assertTrue("BooleanAttribute should be registered", 
-                  registry.isRegistered("attr", "boolean"));
+        assertTrue("StringAttribute should be registered",
+                  sharedRegistry.isRegistered("attr", "string"));
+        assertTrue("IntAttribute should be registered",
+                  sharedRegistry.isRegistered("attr", "int"));
+        assertTrue("BooleanAttribute should be registered",
+                  sharedRegistry.isRegistered("attr", "boolean"));
     }
 
     @Test
     public void testFieldConstraintsWorking() {
         // Test that field constraints are working
         assertTrue("StringField should accept pattern attribute",
-                  registry.acceptsChild("field", "string", "attr", "string", "pattern"));
+                  sharedRegistry.acceptsChild("field", "string", "attr", "string", "pattern"));
         assertTrue("DoubleField should accept precision attribute",
-                  registry.acceptsChild("field", "double", "attr", "int", "precision"));
+                  sharedRegistry.acceptsChild("field", "double", "attr", "int", "precision"));
         assertTrue("ObjectField should accept objectRef attribute",
-                  registry.acceptsChild("field", "object", "attr", "string", "objectRef"));
+                  sharedRegistry.acceptsChild("field", "object", "attr", "string", "objectRef"));
     }
 
     @Test
     public void testAllRegisteredTypesDisplay() {
         System.out.println("ALL registered types:");
-        registry.getRegisteredTypes().forEach(typeId -> {
+        sharedRegistry.getRegisteredTypes().forEach(typeId -> {
             System.out.println("  " + typeId.type() + "." + typeId.subType());
         });
-        
+
         // Count by type
-        long fieldCount = registry.getRegisteredTypes().stream()
+        long fieldCount = sharedRegistry.getRegisteredTypes().stream()
             .filter(t -> "field".equals(t.type())).count();
-        long objectCount = registry.getRegisteredTypes().stream()
+        long objectCount = sharedRegistry.getRegisteredTypes().stream()
             .filter(t -> "object".equals(t.type())).count();
-        long attrCount = registry.getRegisteredTypes().stream()
+        long attrCount = sharedRegistry.getRegisteredTypes().stream()
             .filter(t -> "attr".equals(t.type())).count();
-            
+
         System.out.println("Field types: " + fieldCount);
         System.out.println("Object types: " + objectCount);
         System.out.println("Attribute types: " + attrCount);
-        
+
         assertTrue("Should have at least 13 field types", fieldCount >= 13);
         assertTrue("Should have at least 2 object types", objectCount >= 2);
         assertTrue("Should have at least 3 attribute types", attrCount >= 3);

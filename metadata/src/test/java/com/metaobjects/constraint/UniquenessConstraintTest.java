@@ -4,8 +4,7 @@ import com.metaobjects.field.MetaField;
 import com.metaobjects.field.StringField;
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.object.pojo.PojoMetaObject;
-import com.metaobjects.registry.MetaDataRegistry;
-import org.junit.BeforeClass;
+import com.metaobjects.registry.SharedRegistryTestBase;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -17,15 +16,10 @@ import static org.junit.Assert.*;
  * Comprehensive test suite for UniquenessConstraint
  * Verifies that the UniquenessConstraint correctly replaces CustomConstraint
  * for field name uniqueness validation.
+ *
+ * Uses SharedRegistryTestBase to avoid registry conflicts on different platforms.
  */
-public class UniquenessConstraintTest {
-
-    private static MetaDataRegistry registry;
-
-    @BeforeClass
-    public static void setUp() {
-        registry = MetaDataRegistry.getInstance();
-    }
+public class UniquenessConstraintTest extends SharedRegistryTestBase {
 
     @Test
     public void testForFieldNamesFactoryMethod() {
@@ -215,7 +209,7 @@ public class UniquenessConstraintTest {
     @Test
     public void testConstraintRegisteredInMetaDataRegistry() {
         // Verify that the constraint is actually registered and replaces the CustomConstraint
-        long uniquenessConstraintCount = registry.getAllValidationConstraints().stream()
+        long uniquenessConstraintCount = sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c instanceof UniquenessConstraint)
             .filter(c -> c.getConstraintId().equals("object.field.uniqueness"))
             .count();
@@ -224,7 +218,7 @@ public class UniquenessConstraintTest {
                     1, uniquenessConstraintCount);
 
         // Verify that we no longer have the CustomConstraint for field uniqueness
-        long customConstraintCount = registry.getAllValidationConstraints().stream()
+        long customConstraintCount = sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c.getClass().getSimpleName().equals("CustomConstraint"))
             .filter(c -> c.getConstraintId().equals("object.field.uniqueness"))
             .count();
@@ -248,7 +242,7 @@ public class UniquenessConstraintTest {
         testObject.addChild(field3);
 
         // Verify our UniquenessConstraint is properly registered
-        long uniquenessConstraintCount = registry.getAllValidationConstraints().stream()
+        long uniquenessConstraintCount = sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c instanceof UniquenessConstraint)
             .filter(c -> c.getConstraintId().equals("object.field.uniqueness"))
             .count();
@@ -257,7 +251,7 @@ public class UniquenessConstraintTest {
                     1, uniquenessConstraintCount);
 
         // Test that the constraint works properly with the real field collection
-        UniquenessConstraint realConstraint = (UniquenessConstraint) registry.getAllValidationConstraints().stream()
+        UniquenessConstraint realConstraint = (UniquenessConstraint) sharedRegistry.getAllValidationConstraints().stream()
             .filter(c -> c instanceof UniquenessConstraint)
             .filter(c -> c.getConstraintId().equals("object.field.uniqueness"))
             .findFirst()
