@@ -4,7 +4,7 @@
 <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
@@ -17,16 +17,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.draagon</groupId>
-            <artifactId>metaobjects-database-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <!-- JSON Dependencies for Code Generation -->
         <dependency>
@@ -37,7 +32,7 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
@@ -81,12 +76,12 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.draagon.meta.generator,
-                            com.draagon.meta.generator.direct.*,
-                            com.draagon.meta.generator.util
+                            com.metaobjects.generator,
+                            com.metaobjects.generator.direct.*,
+                            com.metaobjects.generator.util
                         </Export-Package>
                         <Import-Package>
-                            com.draagon.meta.*,
+                            com.metaobjects.*,
                             org.slf4j.*,
                             *
                         </Import-Package>

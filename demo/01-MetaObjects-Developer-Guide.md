@@ -67,7 +67,7 @@ your-project/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<typesConfig xmlns="http://draagon.com/schema/metamodel/v3">
+<typesConfig xmlns="http://metaobjects.com/schema/metamodel/v3">
     
     <!-- Import base MetaObjects types -->
     <import>com/draagon/meta/loader/json/metaobjects.types.json</import>
@@ -99,7 +99,7 @@ your-project/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="yourproject::common">
 
     <!-- Standard ID field -->
@@ -149,7 +149,7 @@ your-project/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="yourproject::domain">
 
     <!-- User Entity -->
@@ -246,7 +246,7 @@ your-project/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="yourproject::database">
 
     <!-- Database-specific attributes for User -->
@@ -311,7 +311,7 @@ your-project/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="yourproject::ui">
 
     <!-- UI-specific attributes for User -->

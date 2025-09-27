@@ -17,7 +17,7 @@
     </field>
     
     <!-- Basket -->
-    <object name="Basket" subType="map" object="com.draagon.meta.loader.simple.fruitbasket.Basket">
+    <object name="Basket" subType="map" object="com.metaobjects.loader.simple.fruitbasket.Basket">
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -56,7 +56,7 @@
     <!-- Fruit -->
     <object name="Fruit" subType="map" _isAbstract="true">
 
-        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Fruit</attr>
+        <attr name="object">com.metaobjects.loader.simple.fruitbasket.Fruit</attr>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -76,9 +76,9 @@
     </object>
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit" object="com.draagon.meta.loader.simple.fruitbasket.Apple">
+    <object name="Apple" super="Fruit" object="com.metaobjects.loader.simple.fruitbasket.Apple">
 
-        <!-- attr name="object">com.draagon.meta.loader.simple.fruitbasket.Apple</attr -->
+        <!-- attr name="object">com.metaobjects.loader.simple.fruitbasket.Apple</attr -->
 
         <!-- Orachard -->
         <field name="orchard" subType="string"/>
@@ -91,14 +91,14 @@
     <!-- Macintosh -->
     <object name="Macintosh" super="Apple">
 
-        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Macintosh</attr>
+        <attr name="object">com.metaobjects.loader.simple.fruitbasket.Macintosh</attr>
 
     </object>
 
     <!-- Orange -->
     <object name="Orange" super="Fruit">
 
-        <attr name="object">com.draagon.meta.loader.simple.fruitbasket.Orange</attr>
+        <attr name="object">com.metaobjects.loader.simple.fruitbasket.Orange</attr>
 
         <field name="pickedDate" subType="date"/>
 

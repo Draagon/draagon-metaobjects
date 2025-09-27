@@ -20,7 +20,7 @@
                 <configuration>
                     <!-- Specify the Mojo parameter -->
                     <loader>
-                        <classname>com.draagon.meta.loader.simple.SimpleLoader</classname>
+                        <classname>com.metaobjects.loader.simple.SimpleLoader</classname>
                         <name>mojo-test-pom</name>
                         <sourceDir>./src/test/resources</sourceDir>
                         <sources>
@@ -34,7 +34,7 @@
                     </globals>
                     <generators>
                         <generator>
-                            <classname>com.draagon.meta.mojo.test.GeneratorTest</classname>
+                            <classname>com.metaobjects.mojo.test.GeneratorTest</classname>
                             <args>
                                 <basePkg>src/main/java</basePkg>
                             </args>

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
@@ -12,17 +12,17 @@
     <packaging>bundle</packaging>
 
     <name>MetaObjects :: ObjectManager</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects for Model-driven development - ObjectManager</description>
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
@@ -30,14 +30,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <!-- Test dependency for compliance test base classes -->
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>

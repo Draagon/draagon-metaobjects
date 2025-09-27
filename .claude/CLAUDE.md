@@ -447,14 +447,14 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
 
 #### **Service Discovery Integration**
 
-**META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:**
+**META-INF/services/com.metaobjects.registry.MetaDataTypeProvider:**
 ```
-com.draagon.meta.core.CoreTypeMetaDataProvider
-com.draagon.meta.field.FieldTypesMetaDataProvider
-com.draagon.meta.attr.AttributeTypesMetaDataProvider
-com.draagon.meta.validator.ValidatorTypesMetaDataProvider
-com.draagon.meta.key.KeyTypesMetaDataProvider
-com.draagon.meta.database.CoreDBMetaDataProvider
+com.metaobjects.core.CoreTypeMetaDataProvider
+com.metaobjects.field.FieldTypesMetaDataProvider
+com.metaobjects.attr.AttributeTypesMetaDataProvider
+com.metaobjects.validator.ValidatorTypesMetaDataProvider
+com.metaobjects.key.KeyTypesMetaDataProvider
+com.metaobjects.database.CoreDBMetaDataProvider
 ```
 
 **Priority-Based Loading Order:**
@@ -580,7 +580,7 @@ public class CustomBusinessTypesProvider implements MetaDataTypeProvider {
 }
 
 // 3. Add service discovery file
-// META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:
+// META-INF/services/com.metaobjects.registry.MetaDataTypeProvider:
 // com.mycompany.metadata.CustomBusinessTypesProvider
 ```
 
@@ -663,14 +663,14 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
 
 #### **Service Discovery Integration**
 
-**META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:**
+**META-INF/services/com.metaobjects.registry.MetaDataTypeProvider:**
 ```
-com.draagon.meta.core.CoreTypeMetaDataProvider
-com.draagon.meta.field.FieldTypesMetaDataProvider
-com.draagon.meta.attr.AttributeTypesMetaDataProvider
-com.draagon.meta.validator.ValidatorTypesMetaDataProvider
-com.draagon.meta.key.KeyTypesMetaDataProvider
-com.draagon.meta.database.CoreDBMetaDataProvider
+com.metaobjects.core.CoreTypeMetaDataProvider
+com.metaobjects.field.FieldTypesMetaDataProvider
+com.metaobjects.attr.AttributeTypesMetaDataProvider
+com.metaobjects.validator.ValidatorTypesMetaDataProvider
+com.metaobjects.key.KeyTypesMetaDataProvider
+com.metaobjects.database.CoreDBMetaDataProvider
 ```
 
 **Priority-Based Loading Order:**
@@ -1979,9 +1979,9 @@ public class ErrorFormatter {
 
 ```java
 // Codegen modules can access database constants via compile-time dependencies
-import static com.draagon.meta.database.common.DatabaseAttributeConstants.*;
-import static com.draagon.meta.field.MetaField.TYPE_FIELD;
-import static com.draagon.meta.object.MetaObject.TYPE_OBJECT;
+import static com.metaobjects.database.common.DatabaseAttributeConstants.*;
+import static com.metaobjects.field.MetaField.TYPE_FIELD;
+import static com.metaobjects.object.MetaObject.TYPE_OBJECT;
 
 public class MetaDataAIDocumentationWriter {
     private void generateFieldDocumentation() {
@@ -2248,7 +2248,7 @@ Unlike previous generators that created schemas for validating data instances (U
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://draagon.com/schemas/metaobjects/6.0.0/metaobjects-file-schema.json",
+  "$id": "https://metaobjects.com/schemas/metaobjects/6.0.0/metaobjects-file-schema.json",
   "title": "MetaObjects File Schema v6.0.0",
   "description": "JSON Schema for validating MetaData file structure and constraints"
 }
@@ -2268,19 +2268,19 @@ Unlike previous generators that created schemas for validating data instances (U
     <goals><goal>generate</goal></goals>
     <configuration>
         <loader>
-            <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+            <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
             <name>gen-schemas</name>
         </loader>
         <generators>
             <generator>
-                <classname>com.draagon.meta.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator</classname>
+                <classname>com.metaobjects.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator</classname>
                 <args>
                     <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
                     <outputFilename>metaobjects-file-schema.json</outputFilename>
                 </args>
             </generator>
             <generator>
-                <classname>com.draagon.meta.generator.direct.metadata.file.xsd.MetaDataFileXSDGenerator</classname>
+                <classname>com.metaobjects.generator.direct.metadata.file.xsd.MetaDataFileXSDGenerator</classname>
                 <args>
                     <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
                     <outputFilename>metaobjects-file-schema.xsd</outputFilename>
@@ -2577,7 +2577,7 @@ cd core && mvn compile
 **Legacy Static Registry Pattern (BROKEN):**
 ```java
 // ❌ WRONG - This breaks OSGi bundle lifecycle
-import com.draagon.meta.loader.MetaDataRegistry; // OLD STATIC REGISTRY
+import com.metaobjects.loader.MetaDataRegistry; // OLD STATIC REGISTRY
 
 // In test setup or initialization:
 MetaDataRegistry.registerLoader(loader); // ❌ Causes memory leaks in OSGi
@@ -2595,8 +2595,8 @@ MetaObject obj = MetaDataRegistry.findMetaObject(target); // ❌ Not OSGi compat
 **Service-Based Registry Pattern (CORRECT):**
 ```java
 // ✅ CORRECT - OSGi-compatible service discovery
-import com.draagon.meta.registry.MetaDataLoaderRegistry;
-import com.draagon.meta.registry.ServiceRegistryFactory;
+import com.metaobjects.registry.MetaDataLoaderRegistry;
+import com.metaobjects.registry.ServiceRegistryFactory;
 
 // Proper initialization:
 MetaDataLoaderRegistry registry = new MetaDataLoaderRegistry(ServiceRegistryFactory.getDefault());
@@ -2908,7 +2908,7 @@ Current status: **7 of 15 items completed** (2025-09-19). Next priority: **LOW-2
 
 ```xml
 <!-- core/src/main/resources/com/draagon/meta/loader/xml/metaobjects.types.xml -->
-<type name="field" class="com.draagon.meta.field.MetaField" defaultSubType="string">
+<type name="field" class="com.metaobjects.field.MetaField" defaultSubType="string">
     <children>
         <!-- Core attributes -->
         <child type="attr" subType="boolean" name="_isAbstract"/>
@@ -3254,7 +3254,7 @@ private Object isSecondaryKeyField(Object input) {
 #### **XML Configuration Support**
 The `metaobjects.types.xml` in core module properly supports key children:
 ```xml
-<subType name="pojo" class="com.draagon.meta.object.pojo.PojoMetaObject">
+<subType name="pojo" class="com.metaobjects.object.pojo.PojoMetaObject">
     <children>
         <!-- Database attributes -->
         <child type="attr" subType="string" name="dbTable"/>
@@ -3675,13 +3675,13 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
 
 #### **Service Discovery Architecture**
 
-**META-INF/services/com.draagon.meta.registry.MetaDataTypeProvider:**
+**META-INF/services/com.metaobjects.registry.MetaDataTypeProvider:**
 ```
-com.draagon.meta.core.CoreTypeMetaDataProvider
-com.draagon.meta.field.FieldTypesMetaDataProvider
-com.draagon.meta.attr.AttributeTypesMetaDataProvider
-com.draagon.meta.validator.ValidatorTypesMetaDataProvider
-com.draagon.meta.key.KeyTypesMetaDataProvider
+com.metaobjects.core.CoreTypeMetaDataProvider
+com.metaobjects.field.FieldTypesMetaDataProvider
+com.metaobjects.attr.AttributeTypesMetaDataProvider
+com.metaobjects.validator.ValidatorTypesMetaDataProvider
+com.metaobjects.key.KeyTypesMetaDataProvider
 ```
 
 #### **Benefits Achieved**

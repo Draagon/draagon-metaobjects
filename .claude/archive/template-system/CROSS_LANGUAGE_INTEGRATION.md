@@ -60,7 +60,7 @@ helpers: ["helper1", "helper2"]  # Language-specific implementations
     
     <!-- MetaObjects dependencies -->
     <dependency>
-        <groupId>com.draagon.meta</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metadata</artifactId>
         <version>${project.version}</version>
     </dependency>
@@ -72,10 +72,10 @@ helpers: ["helper1", "helper2"]  # Language-specific implementations
 **Java Template Engine (`MustacheTemplateEngine.java`):**
 
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.field.MetaField;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.field.MetaField;
 import com.github.mustachejava.*;
 import java.io.*;
 import java.util.*;
@@ -161,9 +161,9 @@ public class MustacheTemplateEngine implements ITemplateEngine {
 **Java Helper Registry (`JavaHelperRegistry.java`):**
 
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
-import com.draagon.meta.field.MetaField;
+import com.metaobjects.field.MetaField;
 import org.apache.commons.lang3.StringUtils;
 import java.util.function.Function;
 
@@ -234,7 +234,7 @@ public class JavaHelperRegistry extends BaseHelperRegistry {
 
 ```xml
 <plugin>
-    <groupId>com.draagon.meta</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
     <version>${project.version}</version>
     <executions>

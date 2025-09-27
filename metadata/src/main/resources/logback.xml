@@ -12,7 +12,7 @@
     </root>
 
     <!-- Set specific logger levels -->
-    <logger name="com.draagon.meta" level="INFO"/>
+    <logger name="com.metaobjects" level="INFO"/>
     
     <!-- Reduce noise from third-party libraries -->
     <logger name="org.springframework" level="WARN"/>

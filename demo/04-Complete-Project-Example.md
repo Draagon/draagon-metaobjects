@@ -196,7 +196,7 @@ customer-management/
                                 <strict>true</strict>
                             </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+                                <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
                                 <name>customer-domain</name>
                                 <sources>
                                     <!-- Load metadata files in order -->
@@ -270,7 +270,7 @@ customer-management/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<typesConfig xmlns="http://draagon.com/schema/metamodel/v3">
+<typesConfig xmlns="http://metaobjects.com/schema/metamodel/v3">
     
     <!-- Import base MetaObjects types -->
     <import>com/draagon/meta/loader/json/metaobjects.types.json</import>
@@ -311,7 +311,7 @@ customer-management/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="customer::common">
 
     <!-- Standard ID field -->
@@ -386,7 +386,7 @@ customer-management/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="customer::domain">
 
     <!-- Customer Entity -->
@@ -512,7 +512,7 @@ customer-management/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="customer::domain">
 
     <!-- Order Entity -->
@@ -621,7 +621,7 @@ customer-management/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="customer::database">
 
     <!-- Customer database mapping -->
@@ -787,7 +787,7 @@ customer-management/
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<metadata xmlns="http://draagon.com/schema/metamodel/v3" 
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" 
           package="customer::api">
 
     <!-- Customer API representation -->

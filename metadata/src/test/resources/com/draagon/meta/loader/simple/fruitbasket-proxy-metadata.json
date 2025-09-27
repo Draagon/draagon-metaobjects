@@ -1,4 +1,4 @@
-{"$schema": "simple-model.schema.json",
+﻿{"$schema": "simple-model.schema.json",
  "metadata": {"package": "simple::fruitbasket",
   "children": [
 
@@ -13,7 +13,7 @@
         {"validator": {"subType": "length", "@min": 1, "@max": 50}}
       ]}},
 
-    {"object": {"name": "Basket", "subType": "proxy", "@object": "com.draagon.meta.test.proxy.fruitbasket.Basket",
+    {"object": {"name": "Basket", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.Basket",
       "children": [
         {"key": {"name": "primary", "subType": "primary", "@keys": "id"}},
         {"field": {"name": "id", "super": "..::common::id"}},
@@ -31,7 +31,7 @@
         {"field": {"name": "oranges", "subType": "objectArray", "@objectRef": "::Orange"}}
       ]}},
 
-    {"object": {"name": "BasketToFruit", "subType": "proxy", "@object": "com.draagon.meta.test.proxy.fruitbasket.BasketToFruit",
+    {"object": {"name": "BasketToFruit", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.BasketToFruit",
       "children": [
         {"key": {"name": "primary", "subType": "primary", "@keys": "basketId,fruitId"}},
         {"key": {"subType": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
@@ -40,7 +40,7 @@
         {"field": {"name": "fruitId", "super": "..::common::id"}}
       ]}},
 
-    {"object": {"name": "Fruit", "subType": "proxy", "@isAbstract": true, "@object": "com.draagon.meta.test.proxy.fruitbasket.Fruit",
+    {"object": {"name": "Fruit", "subType": "proxy", "@isAbstract": true, "@object": "com.metaobjects.test.proxy.fruitbasket.Fruit",
       "children": [
         {"key": {"name": "primary", "subType": "primary", "@keys": "id"}},
         {"key": {"subType": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
@@ -52,15 +52,15 @@
         {"field": {"name": "inBasket", "subType": "boolean"}}
       ]}},
 
-    {"object": {"name": "Apple", "super": "Fruit", "@object": "com.draagon.meta.test.proxy.fruitbasket.Apple",
+    {"object": {"name": "Apple", "super": "Fruit", "@object": "com.metaobjects.test.proxy.fruitbasket.Apple",
       "children": [
         {"field": {"name": "orchard", "subType": "string"}},
         {"field": {"name": "worms", "subType": "short"}}
       ]}},
 
-    {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.draagon.meta.test.proxy.fruitbasket.Macintosh"}},
+    {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.metaobjects.test.proxy.fruitbasket.Macintosh"}},
 
-    {"object": {"name": "Orange", "super": "Fruit", "@object": "com.draagon.meta.test.proxy.fruitbasket.Orange",
+    {"object": {"name": "Orange", "super": "Fruit", "@object": "com.metaobjects.test.proxy.fruitbasket.Orange",
       "children": [
         {"field": {"name": "pickedDate", "subType": "date"}}
       ]}}

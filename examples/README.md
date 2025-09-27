@@ -51,7 +51,7 @@ cd examples/basic-example && mvn clean compile
 #### **Basic Example**
 ```bash
 cd examples/basic-example
-mvn compile exec:java -Dexec.mainClass="com.draagon.meta.examples.basic.BasicMetaObjectsExample"
+mvn compile exec:java -Dexec.mainClass="com.metaobjects.examples.basic.BasicMetaObjectsExample"
 ```
 
 **What it demonstrates:**
@@ -63,7 +63,7 @@ mvn compile exec:java -Dexec.mainClass="com.draagon.meta.examples.basic.BasicMet
 #### **Spring Example**
 ```bash
 cd examples/spring-example  
-mvn compile exec:java -Dexec.mainClass="com.draagon.meta.examples.spring.SpringMetaObjectsExample"
+mvn compile exec:java -Dexec.mainClass="com.metaobjects.examples.spring.SpringMetaObjectsExample"
 ```
 
 **What it demonstrates:**
@@ -75,7 +75,7 @@ mvn compile exec:java -Dexec.mainClass="com.draagon.meta.examples.spring.SpringM
 #### **OSGi Example**
 ```bash
 cd examples/osgi-example
-mvn compile exec:java -Dexec.mainClass="com.draagon.meta.examples.osgi.OSGiMetaObjectsExample"
+mvn compile exec:java -Dexec.mainClass="com.metaobjects.examples.osgi.OSGiMetaObjectsExample"
 ```
 
 **What it demonstrates:**
@@ -154,7 +154,7 @@ mvn compile exec:java -Dexec.mainClass="com.draagon.meta.examples.osgi.OSGiMetaO
 
 5. Environment detection...
    OSGI environment detected: false
-   Service registry implementation: com.draagon.meta.registry.StandardServiceRegistry
+   Service registry implementation: com.metaobjects.registry.StandardServiceRegistry
 
 === MetaObject Lookup Demo ===
 Found User MetaObject: com_example_model::User

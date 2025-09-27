@@ -2,9 +2,9 @@
 
 <!-- Sample Overlay Example -->
 <metadata
-        xmlns="https://draagon.com/schema/metamodel/produce/v1"
+        xmlns="https://metaobjects.com/schema/metamodel/produce/v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+        xsi:schemaLocation="https://metaobjects.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
         package="produce::v1">
 
     <!-- Custom Extension -->

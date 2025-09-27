@@ -13,8 +13,8 @@ You are implementing a major architectural unification for the MetaObjects frame
 ### **Problem 1: Dual MetaDataTypeRegistry Pattern**
 ```java
 // TWO DIFFERENT REGISTRIES EXIST:
-com.draagon.meta.type.MetaDataTypeRegistry          // Singleton, uses registerType()
-com.draagon.meta.registry.MetaDataTypeRegistry      // Service-based, uses registerHandler()
+com.metaobjects.type.MetaDataTypeRegistry          // Singleton, uses registerType()
+com.metaobjects.registry.MetaDataTypeRegistry      // Service-based, uses registerHandler()
 ```
 
 ### **Problem 2: Fragmented Constraint Management**
@@ -88,7 +88,7 @@ public class MetaDataRegistry {
 Replace the existing service-based registry with unified version:
 
 ```java
-package com.draagon.meta.registry;
+package com.metaobjects.registry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -353,8 +353,8 @@ public class StringAttribute extends MetaAttribute<String> {
 **ACTION: DELETE THIS FILE** - Constraints now integrated into type definitions
 
 **Files to Update:**
-- Remove all imports of `com.draagon.meta.type.MetaDataTypeRegistry`
-- Remove all imports of `com.draagon.meta.constraint.ConstraintRegistry`
+- Remove all imports of `com.metaobjects.type.MetaDataTypeRegistry`
+- Remove all imports of `com.metaobjects.constraint.ConstraintRegistry`
 - Remove all `ConstraintRegistry.getInstance().addConstraint()` calls
 
 ### **STEP 4: Create Service-Based Extensions (Week 3)**
@@ -531,7 +531,7 @@ cd metadata && mvn test -Dtest=UnifiedRegistryTest
 - [ ] Better error messages with supported children lists
 
 ### **Code Quality Validation**
-- [ ] No `com.draagon.meta.type.MetaDataTypeRegistry` imports remain
+- [ ] No `com.metaobjects.type.MetaDataTypeRegistry` imports remain
 - [ ] No `ConstraintRegistry` imports or usage remain
 - [ ] Each class owns its own constants (TYPE_*, SUBTYPE_*, ATTR_*)
 - [ ] Parent types define what children they accept

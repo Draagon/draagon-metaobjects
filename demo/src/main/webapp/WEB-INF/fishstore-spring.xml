@@ -24,12 +24,12 @@ http://www.eclipse.org/legal/epl-v10.html
     </jdbc:embedded-database>
     
     <!-- Setup the MetaDataLoader -->
-    <bean id="loader" class="com.draagon.meta.loader.file.FileMetaDataLoader">
+    <bean id="loader" class="com.metaobjects.loader.file.FileMetaDataLoader">
         <constructor-arg>
-            <bean class="com.draagon.meta.loader.file.FileLoaderOptions">
+            <bean class="com.metaobjects.loader.file.FileLoaderOptions">
                 <property name="sources">
                     <list>
-                        <bean class="com.draagon.meta.loader.file.LocalFileMetaDataSources">
+                        <bean class="com.metaobjects.loader.file.LocalFileMetaDataSources">
                             <constructor-arg>
                                 <list>
                                     <value>metadata/fishstore-metadata.json</value>
@@ -47,13 +47,13 @@ http://www.eclipse.org/legal/epl-v10.html
     </bean>    
     
     <!-- Setup the ObjectManagerDB -->
-    <bean id="objectManager" class="com.draagon.meta.manager.db.ObjectManagerDB">
-        <property name="driverClass" value="com.draagon.meta.manager.db.driver.DerbyDriver"/>
+    <bean id="objectManager" class="com.metaobjects.manager.db.ObjectManagerDB">
+        <property name="driverClass" value="com.metaobjects.manager.db.driver.DerbyDriver"/>
         <property name="dataSource" ref="dataSource"/>
     </bean>
     
     <!-- Add Validation which will auto create the tables -->
-    <bean id="validator" class="com.draagon.meta.manager.db.validator.MetaClassDBValidatorService">
+    <bean id="validator" class="com.metaobjects.manager.db.validator.MetaClassDBValidatorService">
         <property name="objectManager" ref="objectManager"/>
         <property name="autoCreate" value="true"/>
     </bean>    
@@ -62,16 +62,16 @@ http://www.eclipse.org/legal/epl-v10.html
     <context:annotation-config />
 
     <!-- Component scan for the services and DAOs -->    
-    <context:component-scan base-package="com.draagon.meta.demo.fishstore.service" />
-    <context:component-scan base-package="com.draagon.meta.demo.fishstore.dao" />
+    <context:component-scan base-package="com.metaobjects.demo.fishstore.service" />
+    <context:component-scan base-package="com.metaobjects.demo.fishstore.dao" />
 
     <!-- Configures the @Controller programming model -->
     <mvc:annotation-driven />
 
     <!-- Component scan for the Controllers -->    
-    <context:component-scan base-package="com.draagon.meta.demo.fishstore.web" />
-    <context:component-scan base-package="com.draagon.meta.demo.fishstore.api" />
-    <context:component-scan base-package="com.draagon.meta.web.react.api" />
+    <context:component-scan base-package="com.metaobjects.demo.fishstore.web" />
+    <context:component-scan base-package="com.metaobjects.demo.fishstore.api" />
+    <context:component-scan base-package="com.metaobjects.web.react.api" />
     
     <!-- Forwards requests to the "/" resource to the "welcome" view -->
     <mvc:view-controller path="/" view-name="redirect:/home"/>

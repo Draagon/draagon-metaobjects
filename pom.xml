@@ -1,30 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.draagon</groupId>
-        <artifactId>draagon-parent</artifactId>
-        <version>4.0.0</version>
-    </parent>
-  
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects</artifactId>
     <version>5.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>MetaObjects</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects for Model-driven development</description>
 
     <scm>
-        <connection>scm:git:git://github.com/Draagon/draagon-metaobjects.git</connection>
-        <developerConnection>scm:git:git@github.com:Draagon/draagon-metaobjects.git</developerConnection>
-        <url>https://github.com/Draagon/draagonmetaobjects</url>
+        <connection>scm:git:git://github.com/metaobjectsdev/metaobjects.git</connection>
+        <developerConnection>scm:git:git@github.com:metaobjectsdev/metaobjects.git</developerConnection>
+        <url>https://github.com/metaobjectsdev/metaobjects</url>
         <tag>HEAD</tag>
     </scm>
 
     <organization>
-        <name>Doug Mealing LLC</name>
-        <url>http://www.draagon.com/</url>
+        <name>Doug Mealing LLC dba Meta Objects</name>
+        <url>https://www.metaobjects.com/</url>
     </organization>
 
     <modules>
@@ -346,12 +341,12 @@
                 <snapshotRepository>
                     <id>draagon-snapshots</id>
                     <name>draagon-snapshots</name>
-                    <url>http://build.draagon.com:8081/artifactory/libs-snapshot-local</url>
+                    <url>http://build.metaobjects.com:8081/artifactory/libs-snapshot-local</url>
                 </snapshotRepository>
                 <repository>
                     <id>draagon-central</id>
                     <name>draagon-releases</name>
-                    <url>http://build.draagon.com:8081/artifactory/libs-release-local</url>
+                    <url>http://build.metaobjects.com:8081/artifactory/libs-release-local</url>
                 </repository>
             </distributionManagement>
         </profile>

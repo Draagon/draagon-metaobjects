@@ -1,0 +1,7 @@
+com.metaobjects.core.CoreTypeMetaDataProvider
+com.metaobjects.object.ObjectTypesMetaDataProvider
+com.metaobjects.field.FieldTypesMetaDataProvider
+com.metaobjects.attr.AttributeTypesMetaDataProvider
+com.metaobjects.validator.ValidatorTypesMetaDataProvider
+com.metaobjects.key.KeyTypesMetaDataProvider
+com.metaobjects.database.CoreDBMetaDataProvider

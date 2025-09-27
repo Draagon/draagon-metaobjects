@@ -1,4 +1,4 @@
-{"metadata": {"package": "produce::v1::vegetable",
+﻿{"metadata": {"package": "produce::v1::vegetable",
   "children": [
 
     {"object": {"name": "Vegetable", "subType": "pojo",
@@ -12,7 +12,7 @@
             {"attr": {"name": "keys", "value": "basketId"}},
             {"attr": {"name": "foreignObjectRef", "value": "..::container::Basket"}}
           ]}},
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Vegetable"}},
+        {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Vegetable"}},
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "basketId", "super": "..::common::id"}},
@@ -22,7 +22,7 @@
 
     {"object": {"name": "Tomato", "super": "Vegetable",
       "children": [
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Tomato"}}
+        {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Tomato"}}
       ]}}
   ]}
 }

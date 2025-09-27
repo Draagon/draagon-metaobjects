@@ -328,12 +328,12 @@ public class MetaDataApiController {
 #### MetaObjects Integration
 ```xml
 <!-- Spring configuration -->
-<bean id="loader" class="com.draagon.meta.loader.file.FileMetaDataLoader">
+<bean id="loader" class="com.metaobjects.loader.file.FileMetaDataLoader">
     <constructor-arg>
-        <bean class="com.draagon.meta.loader.file.FileLoaderOptions">
+        <bean class="com.metaobjects.loader.file.FileLoaderOptions">
             <property name="sources">
                 <list>
-                    <bean class="com.draagon.meta.loader.file.LocalFileMetaDataSources">
+                    <bean class="com.metaobjects.loader.file.LocalFileMetaDataSources">
                         <constructor-arg>
                             <list>
                                 <value>metadata/fishstore-metadata.json</value>
@@ -462,8 +462,8 @@ private MetaData createNewMetaData(String packageName, String name, String type,
 
 ### Service Registration
 ```xml
-<!-- META-INF/services/com.draagon.meta.registry.MetaDataContextProvider -->
-com.draagon.meta.registry.CoreMetaDataContextProvider
+<!-- META-INF/services/com.metaobjects.registry.MetaDataContextProvider -->
+com.metaobjects.registry.CoreMetaDataContextProvider
 ```
 
 ### Usage Patterns

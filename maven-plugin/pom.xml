@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>metaobjects</artifactId>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
 
@@ -11,7 +11,7 @@
     <packaging>maven-plugin</packaging>
 
     <name>MetaObjects :: Maven Plugin</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects for Metadata-driven development - Maven Plugin</description>
 
     <build>
@@ -49,29 +49,29 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         
         <!-- Code Generation Dependencies -->
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-base</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-mustache</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-plantuml</artifactId>
             <version>${project.version}</version>
         </dependency>

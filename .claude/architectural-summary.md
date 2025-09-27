@@ -282,12 +282,12 @@ if (field.hasValidator("required")) { /* ... */ }
 ### ✅ CORRECT: Use Existing Infrastructure
 ```java
 // ✅ DO: Use FileMetaDataLoader for JSON metadata
-<bean id="loader" class="com.draagon.meta.loader.file.FileMetaDataLoader">
+<bean id="loader" class="com.metaobjects.loader.file.FileMetaDataLoader">
     <constructor-arg>
-        <bean class="com.draagon.meta.loader.file.FileLoaderOptions">
+        <bean class="com.metaobjects.loader.file.FileLoaderOptions">
             <property name="sources">
                 <list>
-                    <bean class="com.draagon.meta.loader.file.LocalFileMetaDataSources">
+                    <bean class="com.metaobjects.loader.file.LocalFileMetaDataSources">
                         <constructor-arg>
                             <list>
                                 <value>metadata/fishstore-metadata.json</value>
@@ -327,7 +327,7 @@ demo/          - Demo-specific controllers, JSON metadata, sample data services
 web/src/.../FishstoreDataController.java  // References demo classes!
 
 // ❌ DON'T: Reference demo classes from web module  
-import com.draagon.meta.demo.fishstore.Store; // in web module
+import com.metaobjects.demo.fishstore.Store; // in web module
 ```
 
 ### ✅ CORRECT: JSON Metadata Location
@@ -449,9 +449,9 @@ Critical metadata overlay functionality restoration that was broken during the v
 - **Solution**: Added missing type registrations in CoreMetaDataTypeProvider:
   ```java
   registry.registerHandler(new MetaDataTypeId("attr", "properties"), 
-      com.draagon.meta.attr.PropertiesAttribute.class);
+      com.metaobjects.attr.PropertiesAttribute.class);
   registry.registerHandler(new MetaDataTypeId("attr", "class"), 
-      com.draagon.meta.attr.ClassAttribute.class);
+      com.metaobjects.attr.ClassAttribute.class);
   ```
 
 #### ✅ ENHANCED FILEMETADATAPARSER

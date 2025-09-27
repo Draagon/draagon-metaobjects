@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "fishstore",
   "version": "1.0.0",
   "description": "Fishstore demo metadata for React MetaViews",
@@ -7,7 +7,7 @@
       "name": "Base",
       "subType": "managed",
       "displayName": "Base Entity",
-      "className": "com.draagon.meta.demo.fishstore.Base",
+      "className": "com.metaobjects.demo.fishstore.Base",
       "attributes": {},
       "fields": {
         "id": {
@@ -36,7 +36,7 @@
       "subType": "managed",
       "super": "Base",
       "displayName": "Fish Store",
-      "className": "com.draagon.meta.demo.fishstore.Store",
+      "className": "com.metaobjects.demo.fishstore.Store",
       "dbTable": "STORE",
       "attributes": {},
       "fields": {
@@ -110,7 +110,7 @@
       "subType": "managed",
       "super": "Base",
       "displayName": "Fish Tank",
-      "className": "com.draagon.meta.demo.fishstore.Tank",
+      "className": "com.metaobjects.demo.fishstore.Tank",
       "dbTable": "TANK",
       "attributes": {},
       "fields": {
@@ -173,7 +173,7 @@
       "subType": "managed",
       "super": "Base",
       "displayName": "Fish Breed",
-      "className": "com.draagon.meta.demo.fishstore.Breed",
+      "className": "com.metaobjects.demo.fishstore.Breed",
       "dbTable": "BREED",
       "attributes": {},
       "fields": {
@@ -250,7 +250,7 @@
       "subType": "managed",
       "super": "Base",
       "displayName": "Fish",
-      "className": "com.draagon.meta.demo.fishstore.Fish",
+      "className": "com.metaobjects.demo.fishstore.Fish",
       "dbTable": "FISH",
       "attributes": {},
       "fields": {

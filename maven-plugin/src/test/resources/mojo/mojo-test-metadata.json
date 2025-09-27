@@ -1,4 +1,4 @@
-{"$schema": "simple-model.schema.json",
+﻿{"$schema": "simple-model.schema.json",
  "metadata": {"package": "simple::fruitbasket",
   "children": [
 
@@ -13,7 +13,7 @@
         {"validator": {"subType": "length", "@min": 1, "@max": 50}}
       ]}},
 
-    {"object": {"name": "Basket", "subType": "map", "@object": "com.draagon.meta.loader.simple.fruitbasket.Basket",
+    {"object": {"name": "Basket", "subType": "map", "@object": "com.metaobjects.loader.simple.fruitbasket.Basket",
       "children": [
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
@@ -29,7 +29,7 @@
         {"field": {"name": "oranges", "subType": "objectArray", "@objectRef": "::Orange"}}
       ]}},
 
-    {"object": {"name": "Fruit", "subType": "map", "@isAbstract": true, "@object": "com.draagon.meta.loader.simple.fruitbasket.Fruit",
+    {"object": {"name": "Fruit", "subType": "map", "@isAbstract": true, "@object": "com.metaobjects.loader.simple.fruitbasket.Fruit",
       "children": [
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
@@ -38,15 +38,15 @@
         {"field": {"name": "inBasket", "subType": "boolean"}}
       ]}},
 
-    {"object": {"name": "Apple", "super": "Fruit", "@object": "com.draagon.meta.loader.simple.fruitbasket.Apple",
+    {"object": {"name": "Apple", "super": "Fruit", "@object": "com.metaobjects.loader.simple.fruitbasket.Apple",
       "children": [
         {"field": {"name": "orchard", "subType": "string"}},
         {"field": {"name": "worms", "subType": "short"}}
       ]}},
 
-    {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.draagon.meta.loader.simple.fruitbasket.Macintosh"}},
+    {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.metaobjects.loader.simple.fruitbasket.Macintosh"}},
 
-    {"object": {"name": "Orange", "super": "Fruit", "@object": "com.draagon.meta.loader.simple.fruitbasket.Orange",
+    {"object": {"name": "Orange", "super": "Fruit", "@object": "com.metaobjects.loader.simple.fruitbasket.Orange",
       "children": [
         {"field": {"name": "pickedDate", "subType": "date"}}
       ]}}

@@ -394,8 +394,8 @@ public MetaDataLoader primaryLoader() {
 ### **Debug Information**
 Enable debug logging:
 ```properties
-logging.level.com.draagon.meta.spring=DEBUG
-logging.level.com.draagon.meta.registry=DEBUG
+logging.level.com.metaobjects.spring=DEBUG
+logging.level.com.metaobjects.registry=DEBUG
 ```
 
 ## 📊 **Performance Considerations**

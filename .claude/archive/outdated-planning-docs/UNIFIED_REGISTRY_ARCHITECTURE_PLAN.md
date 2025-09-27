@@ -30,8 +30,8 @@
 ### **Problem: Dual MetaDataTypeRegistry Confusion**
 ```java
 // CURRENT ISSUE - Two different registries with different APIs
-import com.draagon.meta.type.MetaDataTypeRegistry;              // Singleton pattern
-import com.draagon.meta.registry.MetaDataTypeRegistry;          // Service pattern
+import com.metaobjects.type.MetaDataTypeRegistry;              // Singleton pattern
+import com.metaobjects.registry.MetaDataTypeRegistry;          // Service pattern
 
 // Different access patterns creating confusion
 MetaDataTypeRegistry typeRegistry = MetaDataTypeRegistry.getInstance();    // Singleton
@@ -243,7 +243,7 @@ public class DatabasePlugin implements MetaDataPlugin {
 }
 
 // Plugin discovery via ServiceLoader (existing pattern)
-// META-INF/services/com.draagon.meta.MetaDataPlugin
+// META-INF/services/com.metaobjects.MetaDataPlugin
 // com.company.database.DatabasePlugin
 ```
 

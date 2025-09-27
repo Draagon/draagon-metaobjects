@@ -4,7 +4,7 @@
 <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects-examples</artifactId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
@@ -17,12 +17,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-examples-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -54,15 +54,15 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.draagon.meta.examples.osgi
+                            com.metaobjects.examples.osgi
                         </Export-Package>
                         <Import-Package>
-                            com.draagon.meta.*,
+                            com.metaobjects.*,
                             org.osgi.*,
                             org.slf4j.*,
                             *
                         </Import-Package>
-                        <Bundle-Activator>com.draagon.meta.examples.osgi.OSGiExampleActivator</Bundle-Activator>
+                        <Bundle-Activator>com.metaobjects.examples.osgi.OSGiExampleActivator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

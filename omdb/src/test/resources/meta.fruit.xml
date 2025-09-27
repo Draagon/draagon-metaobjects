@@ -8,7 +8,7 @@
     <!-- Fruit -->
     <object name="Fruit" subType="value" dbTable="FRUIT">
     
-      <attr name="object" subType="string">com.draagon.meta.manager.db.test.fruit.Fruit</attr>
+      <attr name="object" subType="string">com.metaobjects.manager.db.test.fruit.Fruit</attr>
       
       <!-- Id -->
       <field name="id" super="id"/>
@@ -33,7 +33,7 @@
     <object name="Apple" super="Fruit" subType="value" dbTable="APPLE" dbView="APPLE_VIEW"
         dbViewSQL="SELECT F.*, A.* FROM FRUIT F, APPLE A WHERE F.id=A.fruit_id AND F.kind=1">
     
-      <attr name="object" subType="string">com.draagon.meta.manager.db.test.fruit.Apple</attr>
+      <attr name="object" subType="string">com.metaobjects.manager.db.test.fruit.Apple</attr>
           
       <attr name="dbInheritance" subType="properties">
         superClass=produce::Fruit
@@ -60,7 +60,7 @@
     <object name="Orange" super="Fruit" dbTable="ORANGE" dbView="ORANGE_VIEW"
         dbViewSQL="SELECT F.*, O.* FROM FRUIT F, ORANGE O WHERE F.id=O.fruit_id AND F.kind=2">
     
-      <attr name="object" subType="string">com.draagon.meta.manager.db.test.fruit.Orange</attr>    
+      <attr name="object" subType="string">com.metaobjects.manager.db.test.fruit.Orange</attr>    
             
       <attr name="dbInheritance" subType="properties">
         superClass=produce::Fruit

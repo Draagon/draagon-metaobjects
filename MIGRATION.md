@@ -83,9 +83,9 @@ The v5.2.0 release represents a **major architectural enhancement** with **full 
 **Before:**
 ```java
 // Code remains identical
-import com.draagon.meta.loader.simple.SimpleLoader;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
+import com.metaobjects.loader.simple.SimpleLoader;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.object.value.ValueObject;
 
 SimpleLoader loader = new SimpleLoader("myLoader");
 // ... rest of code unchanged
@@ -222,16 +222,16 @@ If you were using internal APIs (rare), some package restructuring may require i
 
 ```java
 // If you were using these internal APIs (uncommon)
-// Before: com.draagon.meta.generator.direct.*
-// After:   com.draagon.meta.generator.mustache.*
+// Before: com.metaobjects.generator.direct.*
+// After:   com.metaobjects.generator.mustache.*
 
 // Most users won't be affected
 ```
 
 ### **OSGi Bundle Names**
 OSGi bundle symbolic names have changed to reflect the new module structure:
-- `com.draagon.metaobjects` → `com.draagon.metaobjects.core`
-- Add new bundles: `com.draagon.metaobjects.core.spring`, etc.
+- `com.metaobjectsobjects` → `com.metaobjectsobjects.core`
+- Add new bundles: `com.metaobjectsobjects.core.spring`, etc.
 
 ## 🧪 **Testing Your Migration**
 

@@ -1,7 +1,0 @@
-com.draagon.meta.core.CoreTypeMetaDataProvider
-com.draagon.meta.object.ObjectTypesMetaDataProvider
-com.draagon.meta.field.FieldTypesMetaDataProvider
-com.draagon.meta.attr.AttributeTypesMetaDataProvider
-com.draagon.meta.validator.ValidatorTypesMetaDataProvider
-com.draagon.meta.key.KeyTypesMetaDataProvider
-com.draagon.meta.database.CoreDBMetaDataProvider

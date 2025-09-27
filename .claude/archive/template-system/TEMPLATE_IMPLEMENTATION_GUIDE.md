@@ -47,7 +47,7 @@ This guide provides step-by-step instructions for implementing the Mustache-base
 
 **Create `codegen/src/main/java/com/draagon/meta/generator/mustache/TemplateDefinition.java`:**
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -132,10 +132,10 @@ public class TemplateDefinition {
 
 **Create `codegen/src/main/java/com/draagon/meta/generator/mustache/HelperRegistry.java`:**
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.field.MetaField;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.field.MetaField;
 import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 import java.util.HashMap;
@@ -302,10 +302,10 @@ public class HelperRegistry {
 
 **Create `codegen/src/main/java/com/draagon/meta/generator/mustache/MustacheTemplateEngine.java`:**
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.field.MetaField;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.field.MetaField;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
@@ -431,7 +431,7 @@ public class MustacheTemplateEngine {
 
 **Create `codegen/src/main/java/com/draagon/meta/generator/mustache/TemplateParser.java`:**
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -497,13 +497,13 @@ public class TemplateParser {
 
 **Create `codegen/src/main/java/com/draagon/meta/generator/mustache/MustacheTemplateGenerator.java`:**
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
-import com.draagon.meta.generator.direct.MultiFileDirectGeneratorBase;
-import com.draagon.meta.generator.io.GeneratorIOException;
-import com.draagon.meta.generator.io.GeneratorIOManager;
-import com.draagon.meta.generator.param.GeneratorParam;
-import com.draagon.meta.object.MetaObject;
+import com.metaobjects.generator.direct.MultiFileDirectGeneratorBase;
+import com.metaobjects.generator.io.GeneratorIOException;
+import com.metaobjects.generator.io.GeneratorIOManager;
+import com.metaobjects.generator.param.GeneratorParam;
+import com.metaobjects.object.MetaObject;
 import java.io.IOException;
 import java.util.List;
 
@@ -586,11 +586,11 @@ public class MustacheTemplateGenerator extends MultiFileDirectGeneratorBase {
 
 **Create `codegen/src/test/java/com/draagon/meta/generator/mustache/MustacheTemplateEngineTest.java`:**
 ```java
-package com.draagon.meta.generator.mustache;
+package com.metaobjects.generator.mustache;
 
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.loader.simple.SimpleLoader;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.field.MetaField;
+import com.metaobjects.loader.simple.SimpleLoader;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;

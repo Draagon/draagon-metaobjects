@@ -200,7 +200,7 @@ This guide shows how to configure Maven projects for MetaObjects code generation
                                 <outputDir>${project.build.directory}/generated-sources</outputDir>
                             </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+                                <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
                                 <name>domain-loader</name>
                                 <sources>
                                     <!-- Load types configuration -->
@@ -291,10 +291,10 @@ This guide shows how to configure Maven projects for MetaObjects code generation
 ```java
 package com.yourcompany.generator;
 
-import com.draagon.meta.generator.GeneratorBase;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.field.MetaField;
+import com.metaobjects.generator.GeneratorBase;
+import com.metaobjects.loader.MetaDataLoader;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.field.MetaField;
 
 import java.io.File;
 import java.io.FileWriter;

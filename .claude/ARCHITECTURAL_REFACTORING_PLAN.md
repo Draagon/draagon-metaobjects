@@ -143,9 +143,9 @@ metaobjects/
 ```
 
 **Content to move from current codegen:**
-- `com.draagon.meta.generator.mustache.MustacheTemplateEngine`
-- `com.draagon.meta.generator.mustache.MustacheTemplateGenerator`
-- `com.draagon.meta.generator.mustache.HelperRegistry`
+- `com.metaobjects.generator.mustache.MustacheTemplateEngine`
+- `com.metaobjects.generator.mustache.MustacheTemplateGenerator`
+- `com.metaobjects.generator.mustache.HelperRegistry`
 - All Mustache helper classes and utilities
 - Mustache-specific test files
 - Mustache template resources
@@ -297,9 +297,9 @@ metaobjects/
 ```
 
 **Content to move from current spring module:**
-- `com.draagon.meta.spring.MetaDataAutoConfiguration`
-- `com.draagon.meta.spring.MetaDataService` 
-- `com.draagon.meta.spring.MetaDataLoaderConfiguration`
+- `com.metaobjects.spring.MetaDataAutoConfiguration`
+- `com.metaobjects.spring.MetaDataService` 
+- `com.metaobjects.spring.MetaDataLoaderConfiguration`
 - All Spring integration test files
 - Spring auto-configuration resources
 
@@ -605,14 +605,14 @@ public class {{className}} {
 
 **File:** `examples/basic-example/src/main/java/com/draagon/meta/examples/basic/BasicMetaObjectsExample.java`
 ```java
-package com.draagon.meta.examples.basic;
+package com.metaobjects.examples.basic;
 
-import com.draagon.meta.loader.simple.SimpleLoader;
-import com.draagon.meta.object.MetaObject;
-import com.draagon.meta.object.value.ValueObject;
-import com.draagon.meta.field.MetaField;
-import com.draagon.meta.generator.mustache.MustacheTemplateGenerator;
-import com.draagon.meta.ValidationResult;
+import com.metaobjects.loader.simple.SimpleLoader;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.object.value.ValueObject;
+import com.metaobjects.field.MetaField;
+import com.metaobjects.generator.mustache.MustacheTemplateGenerator;
+import com.metaobjects.ValidationResult;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -771,12 +771,12 @@ public class BasicMetaObjectsExample {
 
 **File:** `examples/osgi-example/src/main/java/com/draagon/meta/examples/osgi/OSGiMetaObjectsExample.java`
 ```java
-package com.draagon.meta.examples.osgi;
+package com.metaobjects.examples.osgi;
 
-import com.draagon.meta.registry.MetaDataLoaderRegistry;
-import com.draagon.meta.registry.ServiceRegistryFactory;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.object.MetaObject;
+import com.metaobjects.registry.MetaDataLoaderRegistry;
+import com.metaobjects.registry.ServiceRegistryFactory;
+import com.metaobjects.loader.MetaDataLoader;
+import com.metaobjects.object.MetaObject;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -902,12 +902,12 @@ public class OSGiMetaObjectsExample {
 
 **File:** `examples/spring-example/src/main/java/com/draagon/meta/examples/spring/SpringMetaObjectsExample.java`
 ```java
-package com.draagon.meta.examples.spring;
+package com.metaobjects.examples.spring;
 
-import com.draagon.meta.spring.MetaDataService;
-import com.draagon.meta.loader.MetaDataLoader;
-import com.draagon.meta.registry.MetaDataLoaderRegistry;
-import com.draagon.meta.object.MetaObject;
+import com.metaobjects.spring.MetaDataService;
+import com.metaobjects.loader.MetaDataLoader;
+import com.metaobjects.registry.MetaDataLoaderRegistry;
+import com.metaobjects.object.MetaObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -1118,9 +1118,9 @@ public class SpringMetaObjectsExample implements CommandLineRunner {
 #### **Mandatory Patterns for All New Modules:**
 ```java
 // ✅ CORRECT - Always use service-based registry patterns
-import com.draagon.meta.registry.MetaDataLoaderRegistry;
-import com.draagon.meta.registry.ServiceRegistryFactory;
-import com.draagon.meta.util.MetaDataUtil;
+import com.metaobjects.registry.MetaDataLoaderRegistry;
+import com.metaobjects.registry.ServiceRegistryFactory;
+import com.metaobjects.util.MetaDataUtil;
 
 // In any class needing MetaDataLoader access:
 MetaObject obj = MetaDataUtil.findMetaObjectByName("ObjectName", this);
@@ -1129,7 +1129,7 @@ MetaObject obj = MetaDataUtil.findMetaObjectByName("ObjectName", this);
 #### **Forbidden Patterns (Will Break OSGi):**
 ```java
 // ❌ NEVER USE - These break OSGi bundle lifecycle
-import com.draagon.meta.loader.MetaDataRegistry; // Legacy static registry
+import com.metaobjects.loader.MetaDataRegistry; // Legacy static registry
 MetaDataRegistry.registerLoader(loader); // Memory leaks in OSGi
 MetaDataRegistry.findMetaObject(obj); // ClassLoader issues
 ```

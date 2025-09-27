@@ -99,8 +99,8 @@ template: |
       
       // Static factory method using MetaObjects
       public static {{className}} newInstance() {
-          com.draagon.meta.object.MetaObject metaObject = 
-              com.draagon.meta.loader.MetaDataRegistry.findMetaObject("{{fullName}}");
+          com.metaobjects.object.MetaObject metaObject = 
+              com.metaobjects.loader.MetaDataRegistry.findMetaObject("{{fullName}}");
           if (metaObject == null) {
               throw new IllegalStateException("MetaObject not found: {{fullName}}");
           }
@@ -156,9 +156,9 @@ requirements:
 template: |
   package {{packageName}};
   
-  import com.draagon.meta.object.value.ValueObject;
-  import com.draagon.meta.object.MetaObject;
-  import com.draagon.meta.loader.MetaDataRegistry;
+  import com.metaobjects.object.value.ValueObject;
+  import com.metaobjects.object.MetaObject;
+  import com.metaobjects.loader.MetaDataRegistry;
   {{#imports}}
   import {{.}};
   {{/imports}}

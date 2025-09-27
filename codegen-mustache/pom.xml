@@ -4,7 +4,7 @@
 <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-base</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -55,14 +55,14 @@
         
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-base</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
@@ -84,10 +84,10 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
-                            com.draagon.meta.generator.mustache.*
+                            com.metaobjects.generator.mustache.*
                         </Export-Package>
                         <Import-Package>
-                            com.draagon.meta.*,
+                            com.metaobjects.*,
                             com.github.mustachejava.*,
                             org.slf4j.*,
                             *

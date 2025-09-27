@@ -238,7 +238,7 @@ public class ValidatorExample {
 ### Using MetaDataCasting
 
 ```java
-import com.draagon.meta.util.MetaDataCasting;
+import com.metaobjects.util.MetaDataCasting;
 
 public class CastingExample {
     
@@ -269,7 +269,7 @@ public class CastingExample {
 ### Using TypedMetaDataAccess
 
 ```java
-import com.draagon.meta.util.TypedMetaDataAccess;
+import com.metaobjects.util.TypedMetaDataAccess;
 
 public class TypedAccessExample {
     

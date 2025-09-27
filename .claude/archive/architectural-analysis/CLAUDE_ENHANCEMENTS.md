@@ -120,9 +120,9 @@ private MetaData createNewMetaData(String packageName, String name, String type,
 ```java
 // Added missing attribute type registrations to CoreMetaDataTypeProvider
 registry.registerHandler(new MetaDataTypeId("attr", "properties"), 
-    com.draagon.meta.attr.PropertiesAttribute.class);
+    com.metaobjects.attr.PropertiesAttribute.class);
 registry.registerHandler(new MetaDataTypeId("attr", "class"), 
-    com.draagon.meta.attr.ClassAttribute.class);
+    com.metaobjects.attr.ClassAttribute.class);
 ```
 
 ### 🏆 ARCHITECTURAL BENEFITS ACHIEVED
@@ -277,7 +277,7 @@ The current TypesConfig system has **fundamental architectural flaws** that prev
 
 #### Current Issues Identified:
 
-1. **Language Lock-in:** TypesConfig hard-codes Java class names (e.g., `"class": "com.draagon.meta.field.MetaField"`), making C# and TypeScript implementations impossible
+1. **Language Lock-in:** TypesConfig hard-codes Java class names (e.g., `"class": "com.metaobjects.field.MetaField"`), making C# and TypeScript implementations impossible
 2. **Type/Subtype Confusion:** MetaData classes don't cleanly separate type ("field") from subtype ("int"), causing `getMetaDataClass()` to lose subtype information
 3. **Extensibility Limitation:** Parent types must pre-declare allowed subtypes, preventing future extensions (e.g., enterprise packages can't add new field types)
 4. **OSGI Incompatibility:** Current MetaDataRegistry uses global static state that breaks in OSGI environments

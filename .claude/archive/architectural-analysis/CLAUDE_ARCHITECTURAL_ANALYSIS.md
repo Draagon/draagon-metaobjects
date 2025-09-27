@@ -17,9 +17,9 @@ While the MetaData core follows excellent architectural principles, the **TypesC
 // TypesConfig embeds Java-specific class names
 {
   "name": "field",
-  "class": "com.draagon.meta.field.MetaField",  // ❌ Java-only
+  "class": "com.metaobjects.field.MetaField",  // ❌ Java-only
   "subTypes": [
-    {"name": "int", "class": "com.draagon.meta.field.IntegerField"}
+    {"name": "int", "class": "com.metaobjects.field.IntegerField"}
   ]
 }
 ```
@@ -523,9 +523,9 @@ private MetaData createNewMetaData(String packageName, String name, String type,
 ```java
 // Added missing attribute type registrations to CoreMetaDataTypeProvider
 registry.registerHandler(new MetaDataTypeId("attr", "properties"), 
-    com.draagon.meta.attr.PropertiesAttribute.class);
+    com.metaobjects.attr.PropertiesAttribute.class);
 registry.registerHandler(new MetaDataTypeId("attr", "class"), 
-    com.draagon.meta.attr.ClassAttribute.class);
+    com.metaobjects.attr.ClassAttribute.class);
 ```
 
 ### 🏆 Architectural Benefits Achieved

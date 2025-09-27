@@ -2,17 +2,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
         <version>5.2.0-SNAPSHOT</version>
     </parent>
   
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-demo</artifactId>
     <packaging>war</packaging>
 
     <name>MetaObjects :: Demo</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects Fishstore Demo App showing Model-driven development.</description>
 
     <build>
@@ -24,12 +24,12 @@
     <dependencies>
         <!-- MetaObjects Dependencies -->
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-omdb</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-web-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
