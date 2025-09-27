@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * startup and then provide ultra-fast, thread-safe access to object properties throughout 
  * the application lifetime.</p>
  * 
- * <h3>Field as Metadata Pattern</h3>
+ * <strong>Field as Metadata Pattern</strong>:
  * <p>Similar to {@code java.lang.reflect.Field}, MetaField serves dual purposes:</p>
  * <ul>
  * <li><strong>Metadata Descriptor</strong>: Defines field name, type, validation rules, display preferences</li>
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
  * <li><strong>Serialization Guide</strong>: Controls JSON/XML serialization behavior</li>
  * </ul>
  * 
- * <h3>Usage Examples</h3>
+ * <strong>Usage Examples</strong>:
  * <pre>{@code
  * // Loading Phase - Field definition
  * MetaObject userMeta = loader.getMetaObjectByName("User");
@@ -59,11 +59,11 @@ import java.util.stream.Stream;
  * boolean isValid = emailField.validate(userObject);        // Constraint validation
  * }</pre>
  * 
- * <h3>Type Safety</h3>
+ * <strong>Type Safety</strong>:
  * <p>MetaField is parameterized with the expected Java type {@code <T>} for compile-time 
  * type safety. This prevents ClassCastException and provides IDE support for auto-completion.</p>
  * 
- * <h3>Performance Characteristics</h3>
+ * <strong>Performance Characteristics</strong>:
  * <ul>
  * <li><strong>Field Lookup</strong>: O(1) cached access from parent MetaObject</li>
  * <li><strong>Value Access</strong>: Direct reflection or optimized accessors</li>
@@ -230,6 +230,11 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         return defaultValue;
     }
 
+    /**
+     * Converts the provided object to the field's value type
+     * @param o the object to convert
+     * @return the converted value of type T
+     */
     protected T convertDefaultValue(Object o) {
         if (!getValueClass().isInstance(o)) {
             // Convert as needed

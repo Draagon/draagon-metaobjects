@@ -13,12 +13,12 @@ import org.slf4j.LoggerFactory;
  * all other metadata types inherit from. It must be loaded before any other providers
  * that define types inheriting from metadata.base.</p>
  *
- * <h3>Base Types Registered:</h3>
+ * <strong>Base Types Registered:</strong>:
  * <ul>
  * <li><strong>metadata.base:</strong> Root metadata type that all others inherit from</li>
  * </ul>
  *
- * <h3>Dependencies:</h3>
+ * <strong>Dependencies:</strong>:
  * <p>No dependencies - This provider registers the foundational base type that
  * all other types depend on.</p>
  *

@@ -7,12 +7,12 @@ package com.metaobjects.registry;
  * from META-INF/services files. This enables dynamic type registration and extension
  * without configuration files or static dependencies.</p>
  *
- * <h3>Dependency-Based Loading:</h3>
+ * <strong>Dependency-Based Loading:</strong>:
  * <p>Providers specify explicit dependencies instead of fragile priority numbers.
  * The system automatically resolves the dependency graph using topological sorting
  * to ensure proper load order.</p>
  *
- * <h3>Example Implementation:</h3>
+ * <strong>Example Implementation:</strong>:
  * <pre>{@code
  * public class DatabaseMetaDataProvider implements MetaDataTypeProvider {
  *
@@ -35,7 +35,7 @@ package com.metaobjects.registry;
  * }
  * }</pre>
  *
- * <h3>Dependency Benefits:</h3>
+ * <strong>Dependency Benefits:</strong>:
  * <ul>
  * <li><strong>Explicit Dependencies:</strong> Clear what each provider needs</li>
  * <li><strong>Automatic Resolution:</strong> System calculates correct load order</li>
@@ -44,7 +44,7 @@ package com.metaobjects.registry;
  * <li><strong>Maintainable:</strong> Easy to add new providers without priority conflicts</li>
  * </ul>
  *
- * <h3>Common Provider IDs:</h3>
+ * <strong>Common Provider IDs:</strong>:
  * <ul>
  * <li><strong>core-types:</strong> Basic metadata.base type</li>
  * <li><strong>field-types:</strong> All concrete field types</li>

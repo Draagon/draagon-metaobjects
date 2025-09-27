@@ -19,11 +19,14 @@ public class ArrayValidator extends MetaValidator {
 
     public final static String SUBTYPE_ARRAY = "array";
 
+    /** Attribute name for minimum array size validation */
     public final static String ATTR_MINSIZE = "minSize";
+    /** Attribute name for maximum array size validation */
     public final static String ATTR_MAXSIZE = "maxSize";
 
     /**
      * Register this type with the MetaDataRegistry (called by provider)
+     * @param registry the MetaDataRegistry to register with
      */
     public static void registerTypes(MetaDataRegistry registry) {
         registry.registerType(ArrayValidator.class, def -> def

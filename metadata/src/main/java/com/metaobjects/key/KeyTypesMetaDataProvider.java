@@ -11,14 +11,14 @@ import org.slf4j.LoggerFactory;
  * <p>This provider registers all the concrete key types that extend key.base.
  * It calls the registerTypes() methods on each concrete key class to ensure proper registration.</p>
  *
- * <h3>Key Types Registered:</h3>
+ * <strong>Key Types Registered:</strong>:
  * <ul>
  * <li><strong>key.primary:</strong> Primary key definitions</li>
  * <li><strong>key.foreign:</strong> Foreign key relationships</li>
  * <li><strong>key.secondary:</strong> Secondary keys and indexes</li>
  * </ul>
  *
- * <h3>Priority:</h3>
+ * <strong>Priority:</strong>:
  * <p>Priority 25 - Runs after validator types (20) but before object types (30).
  * This ensures key.base is available before concrete key types are registered.</p>
  *

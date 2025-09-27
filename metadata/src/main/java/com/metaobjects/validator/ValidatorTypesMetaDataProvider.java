@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * <p>This provider registers all the concrete validator types that extend validator.base.
  * It calls the registerTypes() methods on each concrete validator class to ensure proper registration.</p>
  *
- * <h3>Validator Types Registered:</h3>
+ * <strong>Validator Types Registered:</strong>:
  * <ul>
  * <li><strong>validator.required:</strong> Required field validators</li>
  * <li><strong>validator.length:</strong> Length validation for strings/arrays</li>
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * <li><strong>validator.array:</strong> Array validation</li>
  * </ul>
  *
- * <h3>Priority:</h3>
+ * <strong>Priority:</strong>:
  * <p>Priority 20 - Runs after attribute types (15) but before key types (25).
  * This ensures validator.base is available before concrete validator types are registered.</p>
  *

@@ -9,7 +9,7 @@ import com.metaobjects.MetaDataTypeId;
  * to existing types without modifying the original type definitions. It's used by the
  * service provider pattern to extend types with service-specific attributes.</p>
  *
- * <h3>Usage Pattern:</h3>
+ * <strong>Usage Pattern:</strong>:
  * <pre>{@code
  * // Service provider extending string fields with database attributes
  * registry.findType("field", "string")

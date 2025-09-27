@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * <p>This provider registers all the concrete attribute types that extend attr.base.
  * It calls the registerTypes() methods on each concrete attribute class to ensure proper registration.</p>
  *
- * <h3>Attribute Types Registered:</h3>
+ * <strong>Attribute Types Registered:</strong>
  * <ul>
  * <li><strong>attr.string:</strong> String attributes</li>
  * <li><strong>attr.int:</strong> Integer attributes</li>
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * <li><strong>attr.properties:</strong> Properties attributes</li>
  * </ul>
  *
- * <h3>Priority:</h3>
+ * <strong>Priority:</strong>
  * <p>Priority 15 - Runs after field types (10) but before validators (20).
  * This ensures attr.base is available before concrete attribute types are registered.</p>
  *

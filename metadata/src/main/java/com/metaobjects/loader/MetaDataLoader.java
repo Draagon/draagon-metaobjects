@@ -36,8 +36,9 @@ import java.util.concurrent.TimeoutException;
  * <strong>NOT</strong> a typical data access pattern but rather a metadata definition system 
  * analogous to the Java reflection system.</p>
  * 
- * <h3>ClassLoader Pattern Analogy</h3>
+ * <strong>ClassLoader Pattern Analogy</strong>:
  * <table border="1">
+ * <caption>ClassLoader Pattern Comparison</caption>
  * <tr><th>Java Reflection</th><th>MetaObjects Framework</th><th>Purpose</th></tr>
  * <tr><td>Class.forName()</td><td>MetaDataLoader.load()</td><td>Load definitions</td></tr>
  * <tr><td>Class.getFields()</td><td>MetaObject.getMetaFields()</td><td>Access structure</td></tr>
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeoutException;
  * <tr><td>Thread-safe reads</td><td>Thread-safe metadata access</td><td>Concurrent operations</td></tr>
  * </table>
  * 
- * <h3>Loading vs Runtime Phases</h3>
+ * <strong>Loading vs Runtime Phases</strong>:
  * <pre>{@code
  * // LOADING PHASE - Happens once at startup
  * MetaDataLoader loader = new SimpleLoader("myLoader");
@@ -59,7 +60,7 @@ import java.util.concurrent.TimeoutException;
  * Object value = field.getValue(userObject);                // Thread-safe read
  * }</pre>
  * 
- * <h3>Performance Characteristics</h3>
+ * <strong>Performance Characteristics</strong>:
  * <ul>
  * <li><strong>Startup Cost, Runtime Speed</strong>: Heavy initialization, ultra-fast runtime access</li>
  * <li><strong>Permanent References</strong>: Like Class objects, MetaData stays in memory until app shutdown</li>
@@ -71,7 +72,6 @@ import java.util.concurrent.TimeoutException;
  * @version 6.0.0
  * @since 1.0
  * @see com.metaobjects.loader.simple.SimpleLoader
- * @see com.metaobjects.loader.file.FileMetaDataLoader
  * @see MetaData
  */
 public class MetaDataLoader extends MetaData implements LoaderConfigurable {

@@ -32,7 +32,7 @@ import java.util.Comparator;
  *   <li><strong>Thread-Safe:</strong> Optimized for read-heavy workloads with concurrent access</li>
  * </ul>
  * 
- * <h3>Registration Examples:</h3>
+ * <strong>Registration Examples:</strong>:
  * 
  * <pre>{@code
  * // Register a field type with attributes

@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * are loaded once during application startup and optimized for heavy read access throughout 
  * the application lifetime.</p>
  * 
- * <h3>Architecture Pattern</h3>
+ * <strong>Architecture Pattern:</strong>
  * <ul>
  * <li><strong>Load Once</strong>: Like ClassLoader, expensive startup for permanent benefit</li>
  * <li><strong>Read Many</strong>: Optimized for thousands of concurrent read operations</li>
@@ -47,7 +47,7 @@ import java.util.stream.Stream;
  * <li><strong>Memory Efficient</strong>: Smart caching balances performance with memory cleanup</li>
  * </ul>
  * 
- * <h3>Usage Examples</h3>
+ * <strong>Usage Examples:</strong>
  * <pre>{@code
  * // Loading Phase - Happens once at startup
  * MetaDataLoader loader = new SimpleLoader("myLoader");
@@ -59,7 +59,7 @@ import java.util.stream.Stream;
  * MetaField field = userMeta.getMetaField("email");          // Cached access
  * }</pre>
  * 
- * <h3>Performance Characteristics</h3>
+ * <strong>Performance Characteristics:</strong>
  * <ul>
  * <li><strong>Loading Phase</strong>: 100ms-1s (acceptable one-time cost)</li>
  * <li><strong>Runtime Reads</strong>: 1-10μs (cached, immutable access)</li>

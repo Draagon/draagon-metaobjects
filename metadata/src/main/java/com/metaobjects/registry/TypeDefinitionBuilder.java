@@ -16,7 +16,7 @@ import java.util.Objects;
  * <p>This builder provides a clean API for defining MetaData types along with their
  * child requirements, replacing the dual registry pattern with a unified approach.</p>
  * 
- * <h3>Usage Examples:</h3>
+ * <strong>Usage Examples:</strong>:
  * 
  * <pre>{@code
  * // Simple field type with attributes

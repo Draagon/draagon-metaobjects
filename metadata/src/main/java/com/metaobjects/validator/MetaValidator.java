@@ -33,6 +33,7 @@ public abstract class MetaValidator extends MetaData {
 
     /**
      * Register this type with the MetaDataRegistry (called by provider)
+     * @param registry the MetaDataRegistry to register with
      */
     public static void registerTypes(MetaDataRegistry registry) {
         registry.registerType(MetaValidator.class, def -> def
@@ -72,6 +73,7 @@ public abstract class MetaValidator extends MetaData {
      * Gets the declaring meta field.<br>
      * NOTE: This may not be the MetaField from which the view
      * was retrieved, so be careful!
+     * @return the MetaField that declares this validator, or null if attached to MetaDataLoader
      */
     public MetaField getDeclaringMetaField() {
         if ( getParent() instanceof MetaDataLoader) return null;
@@ -83,6 +85,8 @@ public abstract class MetaValidator extends MetaData {
     /**
      * Retrieves the MetaField for this view associated
      * with the specified object.
+     * @param obj the object to get the MetaField for
+     * @return the MetaField associated with the object
      */
     public MetaField getMetaField(Object obj) {
         MetaObject mo = MetaDataUtil.findMetaObject(obj, this);
@@ -98,6 +102,7 @@ public abstract class MetaValidator extends MetaData {
 
     /**
      * Sets the Super Validator
+     * @param superValidator the super validator to set
      */
     public void setSuperValidator(MetaValidator superValidator) {
         setSuperData(superValidator);
@@ -105,6 +110,7 @@ public abstract class MetaValidator extends MetaData {
 
     /**
      * Gets the Super Validator
+     * @return the super validator
      */
     protected MetaValidator getSuperValidator() {
         return getSuperData();
@@ -115,6 +121,8 @@ public abstract class MetaValidator extends MetaData {
 
     /**
      * Validates the value of the field in the specified object
+     * @param object the object containing the field to validate
+     * @param value the value to validate
      */
     public abstract void validate(Object object, Object value);
 
@@ -123,6 +131,8 @@ public abstract class MetaValidator extends MetaData {
 
     /**
      * Retrieves the message to use for displaying errors
+     * @param defMsg the default message to use if no custom message is set
+     * @return the error message to display
      */
     public String getMessage(String defMsg) {
         String msg = defMsg;

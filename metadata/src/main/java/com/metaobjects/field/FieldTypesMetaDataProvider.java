@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * <p>This provider registers all the concrete field types that extend field.base.
  * It calls the registerTypes() methods on each concrete field class to ensure proper registration.</p>
  *
- * <h3>Field Types Registered:</h3>
+ * <strong>Field Types Registered:</strong>:
  * <ul>
  * <li><strong>field.string:</strong> String fields with pattern and length validation</li>
  * <li><strong>field.int:</strong> Integer fields with range validation</li>
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * <li><strong>field.class:</strong> Class fields for class type references</li>
  * </ul>
  *
- * <h3>Priority:</h3>
+ * <strong>Priority:</strong>:
  * <p>Priority 10 - Runs after core base types (0) but before extensions (50+).
  * This ensures field.base is available before concrete field types are registered.</p>
  *

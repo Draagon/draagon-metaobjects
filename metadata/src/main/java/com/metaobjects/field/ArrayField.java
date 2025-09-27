@@ -12,8 +12,16 @@ import java.util.List;
 @SuppressWarnings("serial")
 public abstract class ArrayField<A,T extends List> extends MetaField<T> {
 
+    /** Attribute name for array item name configuration */
     public final static String ATTR_ITEM_NAME   = "itemName";
 
+    /**
+     * Creates an ArrayField with the specified subtype, name and data type
+     * @param subType the field subtype
+     * @param name the field name
+     * @param dataType the data type, must be an array type
+     * @throws IllegalStateException if dataType is not an array type
+     */
     public ArrayField(String subType, String name, DataTypes dataType ) {
         super( subType, name, dataType );
         if ( !dataType.isArray() )
@@ -59,7 +67,10 @@ public abstract class ArrayField<A,T extends List> extends MetaField<T> {
     }
 
 
-    /** Return the array item type */
+    /**
+     * Return the array item type
+     * @return the class type of array items
+     */
     @SuppressWarnings("unchecked")
     public Class<A> getArrayItemClass() {
         return (Class<A>) getDataType().getArrayItemClass();
