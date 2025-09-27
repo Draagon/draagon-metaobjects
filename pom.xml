@@ -28,9 +28,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/Draagon/draagon-metaobjects.git</connection>
-        <developerConnection>scm:git:git@github.com:Draagon/draagon-metaobjects.git</developerConnection>
-        <url>https://github.com/Draagon/draagon-metaobjects</url>
+        <connection>scm:git:git://github.com/metaobjects/metaobjects-core.git</connection>
+        <developerConnection>scm:git:git@github.com:metaobjects/metaobjects-core.git</developerConnection>
+        <url>https://github.com/metaobjects/metaobjects-core</url>
         <tag>HEAD</tag>
     </scm>
 
