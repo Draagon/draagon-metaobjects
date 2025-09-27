@@ -621,6 +621,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns whether this MetaData matches specified Type, SubType, and Name
+     * @param md the metadata to compare against
+     * @return true if this metadata has the same type, subtype, and name as the specified metadata
      */
     public boolean isSameTypeSubTypeName( MetaData md ) {
         return isTypeSubTypeName( md.type, md.subType, md.name);
@@ -629,6 +631,12 @@ public class MetaData implements Cloneable, Serializable {
     /////////////////////////////////////////////////////
     // Object Instantiation Helpers
 
+    /**
+     * Sets the ClassLoader to use for metadata class loading
+     * @param <T> the type of metadata to return
+     * @param classLoader the ClassLoader to set for metadata operations
+     * @return this metadata instance cast to the specified type
+     */
     @SuppressWarnings("unchecked")
     public <T extends MetaData> T setMetaDataClassLoader( ClassLoader classLoader ) {
         metaDataClassLoader = classLoader;
@@ -695,6 +703,7 @@ public class MetaData implements Cloneable, Serializable {
     
     /**
      * Type-safe utility methods for common type checks
+     * @return true if this metadata is a field type, false otherwise
      */
     public boolean isFieldMetaData() {
         return this instanceof com.metaobjects.field.MetaField;
@@ -722,6 +731,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Iterates up the Super Data until it finds the MetaDataLoader
+     * @return the MetaDataLoader that contains this metadata, or null if none found
      */
     public MetaDataLoader getLoader() {
 
@@ -743,13 +753,15 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Retrieve the MetaObject package
+     * @return the package name of this metadata, or null if not set
      */
     public String getPackage() {
         return pkg;
     }
 
     /**
-     * Retrieve the MetaObject package
+     * Retrieve the MetaObject short name
+     * @return the short name of this metadata without package prefix
      */
     public String getShortName() {
         return shortName;
@@ -757,6 +769,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Sets the parent of the attribute
+     * @param parent the parent metadata to attach to this metadata
      */
     protected void attachParent(MetaData parent) {
         parentRef = new WeakReference<>(parent);
@@ -764,8 +777,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Gets the parent MetaData.  Be careful as this might not be the
-     * same as the metadata you retrieved this from as a child due to 
+     * same as the metadata you retrieved this from as a child due to
      * inheritance.   Use with care!
+     * @return the parent metadata, or null if no parent is set
      */
     public MetaData getParent() {
         if (parentRef == null) {
@@ -776,6 +790,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Sets the Super Data
+     * @param superData the super metadata to set
      */
     public void setSuperData(MetaData superData) {
         this.superData = superData;
@@ -783,6 +798,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Gets the Super Data
+     * @param <T> the type of metadata to return
+     * @return the super metadata cast to the specified type
      */
     @SuppressWarnings("unchecked")
     public <T extends MetaData> T getSuperData() {
@@ -791,6 +808,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Gets the Super Data with type safety - returns Optional to avoid ClassCastException
+     * @param <T> the type of metadata to return
      * @param type The expected type of the super data
      * @return Optional containing the super data if it matches the expected type
      */
@@ -811,6 +829,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Sets an attribute of the MetaClass
+     * @param attr the attribute to add to this metadata
      */
     public void addMetaAttr(MetaAttribute attr) {
         addChild(attr);
@@ -826,6 +845,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Retrieves an attribute value of the MetaData
+     * @param name the name of the attribute to retrieve
+     * @return the MetaAttribute with the specified name
+     * @throws MetaDataNotFoundException if the attribute is not found
      */
     public MetaAttribute getMetaAttr(String name) throws MetaDataNotFoundException {
         return getMetaAttr(name,true);
@@ -833,6 +855,10 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Retrieves an attribute value of the MetaData
+     * @param name the name of the attribute to retrieve
+     * @param includeParentData whether to search parent metadata for the attribute
+     * @return the MetaAttribute with the specified name
+     * @throws MetaDataNotFoundException if the attribute is not found
      */
     public MetaAttribute getMetaAttr(String name, boolean includeParentData) throws MetaDataNotFoundException {
         try {
@@ -845,14 +871,19 @@ public class MetaData implements Cloneable, Serializable {
 
 
     /**
-     * Retrieves all attribute names
+     * Checks if this metadata has an attribute with the specified name
+     * @param name the name of the attribute to check
+     * @return true if the attribute exists, false otherwise
      */
     public boolean hasMetaAttr(String name) {
         return hasMetaAttr(name,true);
     }
 
     /**
-     * Retrieves all attribute names
+     * Checks if this metadata has an attribute with the specified name
+     * @param name the name of the attribute to check
+     * @param includeParentData true to include parent data in the search, false to search only this metadata
+     * @return true if the attribute exists, false otherwise
      */
     public boolean hasMetaAttr(String name, boolean includeParentData) {
         try {
@@ -865,14 +896,17 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     /**
-     * Retrieves all attribute names
+     * Retrieves all attributes for this metadata
+     * @return list of all MetaAttribute objects, including parent data
      */
     public List<MetaAttribute> getMetaAttrs() {
         return getMetaAttrs(true);
     }
 
     /**
-     * Retrieves all attribute names
+     * Retrieves all attributes for this metadata
+     * @param includeParentData true to include attributes from parent data, false for only this metadata
+     * @return list of MetaAttribute objects based on the includeParentData flag
      */
     public List<MetaAttribute> getMetaAttrs( boolean includeParentData ) {
 
@@ -882,7 +916,11 @@ public class MetaData implements Cloneable, Serializable {
     /////////////////////////////////////////////////////////////////////////////
     // CHILDREN METHODS
 
-    /** Filters for parent data */
+    /**
+     * Filters for parent data
+     * @param d the metadata to filter
+     * @return true if this metadata should be filtered when accessing parent data
+     */
     protected boolean filterWhenParentData( MetaData d ) {
         return ( d instanceof MetaAttribute && d.getName().startsWith("_") );
     }
@@ -904,6 +942,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Whether the child data exists
+     * @param type the type of child to check for
+     * @param name the name of the child to check for
+     * @return true if a child of the specified type and name exists, false otherwise
      */
     protected boolean hasChildOfType(String type, String name) {
         try {
@@ -916,6 +957,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Whether the child data exists
+     * @param name the name of the child to check for
+     * @param c the class type of the child to check for
+     * @return true if a child with the specified name and type exists, false otherwise
      */
     public boolean hasChild(String name, Class<? extends MetaData> c) {
         try {
@@ -929,6 +973,7 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
+     * @param data the child metadata to add
      */
     public void addChild(MetaData data) throws InvalidMetaDataException {
         addChild(data, true);
@@ -961,6 +1006,8 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Adds a child MetaData object of the specified class type. If no class
      * type is set, then a child of the same type is not checked against.
+     * @param data the child metadata to add
+     * @param checkExists true to check if child already exists before adding, false to skip check
      */
     public void addChild(MetaData data, boolean checkExists)  throws InvalidMetaDataException {
 
@@ -1007,6 +1054,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Deletes a child MetaData object of the given class
+     * @param type the type of child to delete
+     * @param name the name of the child to delete
      */
     public void deleteChildOfType(String type, String name ) {
         MetaData d = getChildOfType(type, name);
@@ -1022,6 +1071,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Deletes a child MetaData object of the given class
+     * @param name the name of the child to delete
+     * @param c the class type of the child to delete
      */
     public void deleteChild(String name, Class<? extends MetaData> c) {
         MetaData d = getChild(name, c);
@@ -1037,6 +1088,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Deletes a child MetaData object
+     * @param data the child metadata to delete
      */
     public void deleteChild(MetaData data) {
         if (data.getParent() != this) {
@@ -1051,6 +1103,7 @@ public class MetaData implements Cloneable, Serializable {
     
     /**
      * Returns all MetaData children
+     * @return list of all child metadata objects
      */
     public List<MetaData> getChildren() {
         return children.getAll();
@@ -1058,6 +1111,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns all MetaData children which implement the specified class
+     * @param type the type of children to retrieve
+     * @param includeParentData true to include parent data in search, false for only this metadata
+     * @return list of MetaData children of the specified type
      */
     public List<MetaData> getChildrenOfType( String type, boolean includeParentData ) {
         return addChildren( type, MetaData.class, includeParentData );
@@ -1065,6 +1121,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns all MetaData children which implement the specified class
+     * @param <T> the type of metadata to return
+     * @param c the class type of children to retrieve
+     * @return list of children of the specified class type
      */
     public <T extends MetaData> List<T> getChildren(Class<T> c) {
         return addChildren(null, c, true );
@@ -1072,6 +1131,10 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns all MetaData children which implement the specified class
+     * @param <T> the type of metadata to return
+     * @param c the class type of children to retrieve
+     * @param includeParentData true to include parent data in search, false for only this metadata
+     * @return list of children of the specified class type
      */
     public <T extends MetaData> List<T> getChildren(Class<T> c, boolean includeParentData ) {
         return addChildren(null, c, includeParentData );
@@ -1179,6 +1242,9 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns the first child record
+     * @param <T> the type of metadata to return
+     * @param c the class type of child to retrieve
+     * @return the first child of the specified type, or null if none found
      */
     public <T extends MetaData> T getFirstChild(Class<T> c) {
         Iterator<T> i = getChildren(c, true).iterator();
@@ -1188,6 +1254,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns the first child record of the specified type
+     * @param type the type of child to retrieve
+     * @return the first child of the specified type, or null if none found
      */
     public MetaData getFirstChildOfType( String type ) {
         Iterator<MetaData> i = getChildrenOfType( type, true).iterator();
@@ -1200,6 +1268,7 @@ public class MetaData implements Cloneable, Serializable {
      *
      * @param type The type of MetaData to retrieve
      * @param name The name of the child to retrieve. A null will return the first matching child.
+     * @return the child metadata of the specified type and name
      */
     public final MetaData getChildOfType(String type, String name) throws MetaDataNotFoundException {
         return getChildOfType(type, name, true, true);
@@ -1207,6 +1276,10 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns a child by the specified name of the specified class
+     * @param type the type of MetaData to retrieve
+     * @param name the name of the child to retrieve
+     * @param includeParentData true to include parent data in search, false for only this metadata
+     * @return the child metadata of the specified type and name
      */
     public final MetaData getChildOfType(String type, String name, boolean includeParentData) throws MetaDataNotFoundException {
         return getChildOfType( type, name, includeParentData, true);
@@ -1220,8 +1293,10 @@ public class MetaData implements Cloneable, Serializable {
     /**
      * Returns a child by the specified name of the specified class
      *
+     * @param <T> the type of metadata to return
      * @param name The name of the child to retrieve. A null will return the first matching child.
      * @param c The Expected MetaData class to cast to
+     * @return the child metadata of the specified name and type
      */
     public <T extends MetaData> T getChild(String name, Class<T> c) throws MetaDataNotFoundException {
         return getChild(name, c, true, true);
@@ -1229,6 +1304,11 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Returns a child by the specified name of the specified class
+     * @param <T> the type of metadata to return
+     * @param name the name of the child to retrieve
+     * @param c the class type of the child to retrieve
+     * @param includeParentData true to include parent data in search, false for only this metadata
+     * @return the child metadata of the specified name and type
      */
     public <T extends MetaData> T getChild(String name, Class<T> c, boolean includeParentData) throws MetaDataNotFoundException {
         return getChild(name, c, includeParentData, true);
@@ -1287,6 +1367,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Clears all children of the specified type
+     * @param type the type of children to clear, null to clear all children
      */
     public void clearChildrenOfType( String type ) {
         boolean removed = false;
@@ -1305,6 +1386,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Clears all children of the specified MetaData class
+     * @param c the class type of children to clear, null to clear all children
      */
     public void clearChildren(Class<? extends MetaData> c) {
         boolean removed = false;
@@ -1327,6 +1409,7 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Overload the MetaData.  Used with overlays
+     * @param <T> the type of metadata to return
      * @return The wrapped MetaData
      */
     public <T extends MetaData> T overload()  {
@@ -1360,6 +1443,11 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Create a newInstance of the specified MetaData class given the specified type, subType, and name
+     * @param <T> the type of metadata to return
+     * @param c the class of metadata to instantiate
+     * @param typeName the type name for the new instance
+     * @param subTypeName the subtype name for the new instance
+     * @param fullname the full name for the new instance
      * @return The newly created MetaData instance
      */
     public <T extends MetaData> T newInstanceFromClass( Class<T> c, String typeName, String subTypeName, String fullname) {
@@ -1433,6 +1521,12 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * The arg.toString() is appended to the CacheKeyPrefix
+     * @param <T> the type of value to cache and return
+     * @param <A> the type of argument passed to the getter
+     * @param cacheKeyPrefix the prefix for the cache key
+     * @param arg the argument to pass to the getter and append to cache key
+     * @param getter the function to call if cache miss occurs
+     * @return the cached value or result from getter function
      */
     public <T,A> T useCache( String cacheKeyPrefix, A arg, GetValueForCacheWithArg<T,A> getter ) {
         final String CACHE_KEY = cacheKeyPrefix+"{"+arg+"}";
@@ -1449,6 +1543,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Sets a cache value for this piece of MetaData (legacy method)
+     * @param key the cache key
+     * @param value the value to cache
      */
     public void setCacheValue(Object key, Object value) {
         cache.put(key, value);
@@ -1456,6 +1552,8 @@ public class MetaData implements Cloneable, Serializable {
 
     /**
      * Retrieves a cache value for this piece of MetaData (legacy method)
+     * @param key the cache key to retrieve
+     * @return the cached value, or null if not found
      */
     public Object getCacheValue(Object key) {
         return cache.get(key);
@@ -1494,7 +1592,10 @@ public class MetaData implements Cloneable, Serializable {
         return Objects.hash(children, type, subType, name);
     }
 
-    /** Get the toString Prefix */
+    /**
+     * Get the toString Prefix
+     * @return the prefix string for toString representation
+     */
     protected String getToStringPrefix() {
         String className = getClass().getSimpleName();
         String typeName = getType() != null ? getType() : "null";

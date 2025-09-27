@@ -80,7 +80,7 @@ public interface MetaDataTypeProvider {
      * <p>Used for dependency resolution. Should be a short, descriptive name
      * that other providers can reference in their getDependencies() method.</p>
      *
-     * <h3>Naming Convention:</h3>
+     * <strong>Naming Convention:</strong>
      * <ul>
      * <li>Use kebab-case: "field-types", "database-extensions"</li>
      * <li>Be descriptive: "web-view-types" not "web"</li>
@@ -103,7 +103,7 @@ public interface MetaDataTypeProvider {
      * <p>The dependency resolution system will ensure these providers
      * are loaded before this provider. Returns empty array if no dependencies.</p>
      *
-     * <h3>Dependency Examples:</h3>
+     * <strong>Dependency Examples:</strong>
      * <ul>
      * <li><strong>Field types</strong> depend on: ["core-types"] (for field.base)</li>
      * <li><strong>Object types</strong> depend on: ["core-types"] (for object.base)</li>

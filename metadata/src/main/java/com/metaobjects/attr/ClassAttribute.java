@@ -39,7 +39,10 @@ public class ClassAttribute extends MetaAttribute<Class<?>> {
     }
 
     /**
-     * Manually create a Class MetaAttribute with a Class<?> value
+     * Manually create a Class MetaAttribute with a Class&lt;?&gt; value
+     * @param name the name of the attribute
+     * @param value the class value to set
+     * @return ClassAttribute with the specified name and class value
      */
     public static ClassAttribute create(String name, Class<?> value ) {
         ClassAttribute a = new ClassAttribute( name );

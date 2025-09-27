@@ -128,7 +128,7 @@ public final class DataConverter
 	}
 
 	/**
-	 * Type-safe string array conversion - eliminates unsafe List<?> to List<String> cast
+	 * Type-safe string array conversion - eliminates unsafe List&lt;?&gt; to List&lt;String&gt; cast
 	 * @param val The value to convert to string array
 	 * @return List of strings, with each element safely converted to String
 	 */
@@ -189,7 +189,7 @@ public final class DataConverter
 	}
 
 	/**
-	 * Type-safe object array conversion - eliminates unsafe List<?> to List<Object> cast
+	 * Type-safe object array conversion - eliminates unsafe List&lt;?&gt; to List&lt;Object&gt; cast
 	 * @param val The value to convert to object array
 	 * @return List of objects, safely created from input without unsafe casting
 	 */

@@ -182,6 +182,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Sets the Super Field
+     * @param superField the super field to set for this field
      */
     public void setSuperField(MetaField superField) {
         setSuperData(superField);
@@ -189,6 +190,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Gets the Super Field
+     * @return the super field for this field, or null if none set
      */
     public MetaField getSuperField() {
         return (MetaField) getSuperData();
@@ -211,6 +213,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Gets the default field value
+     * @return the default value for this field, or null if none set
      */
     public T getDefaultValue() {
 
@@ -253,6 +256,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Gets the type of value object class returned
+     * @return the Java class type for values of this field
      */
     public Class<?> getValueClass() {
         return getDataType().getValueClass();
@@ -330,6 +334,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     /**
      * Safe default value getter with Optional wrapper
+     * @return Optional containing the default value, or empty if none set
      */
     public Optional<T> getDefaultValueSafe() {
         return Optional.ofNullable(getDefaultValue());
@@ -337,6 +342,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     /**
      * Check if this field has a default value
+     * @return true if this field has a default value, false otherwise
      */
     public boolean hasDefaultValue() {
         return getDefaultValue() != null;
@@ -344,6 +350,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     /**
      * Enhanced setDefaultValue with validation and tracking
+     * @param defVal the default value to set for this field
      */
     public void setDefaultValueEnhanced(T defVal) {
         Instant start = Instant.now();
@@ -383,6 +390,8 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Sets the object attribute represented by this MetaField
+     * @param obj the object to set the attribute on
+     * @param val the value to set for the attribute
      */
     protected void setObjectAttribute(Object obj, Object val) {
 
@@ -399,6 +408,8 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Gets the object attribute represented by this MetaField
+     * @param obj the object to get the attribute from
+     * @return the value of the attribute for the specified object
      */
     protected Object getObjectAttribute(Object obj) {
         return getObjectValue(obj);
@@ -428,7 +439,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     /**
      * Adds a MetaView to this MetaField
      *
+     * @param <T> the type of MetaField to return
      * @param view MetaView to add
+     * @return this MetaField instance for method chaining
      */
     public <T extends MetaField> T addMetaView(MetaView view) {
         addChild(view);
@@ -526,6 +539,10 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     ////////////////////////////////////////////////////
     // VALIDATOR METHODS
 
+    /**
+     * Performs validation on the specified object
+     * @param obj the object to validate
+     */
     public void performValidation(Object obj) {
         if ( obj != null ) {
             performValidation(obj, getObjectAttribute(obj));
@@ -556,6 +573,8 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
 
     /**
      * Whether the named MetaValidator exists
+     * @param name the name of the validator to check for
+     * @return true if a validator with the specified name exists, false otherwise
      */
     public boolean hasValidator(String name) {
         return findValidator(name).isPresent();
@@ -573,6 +592,8 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     /**
      * This method returns the list of validators based on the
      * comma delimited string name provided
+     * @param listAttr comma-delimited string of validator names
+     * @return list of MetaValidator objects matching the specified names
      */
     public List<MetaValidator> getValidatorList(String listAttr)
     {
@@ -664,6 +685,11 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     ////////////////////////////////////////////////////
     // OBJECT SETTER METHODS
 
+    /**
+     * Sets a Boolean value on the specified object
+     * @param obj the object to set the value on
+     * @param value the Boolean value to set
+     */
     public void setBoolean(Object obj, Boolean value){
         setObject(obj, value );
     }
@@ -728,6 +754,11 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     ////////////////////////////////////////////////////
     // OBJECT GETTER METHODS
 
+    /**
+     * Gets a Boolean value from the specified object
+     * @param obj the object to get the value from
+     * @return the Boolean value from the object
+     */
     public Boolean getBoolean(Object obj) {
         return DataConverter.toBoolean(getObjectAttribute(obj));
     }
