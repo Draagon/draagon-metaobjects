@@ -56,5 +56,13 @@ jobs:
           git config user.email github-actions@github.com
           git add pom.xml */pom.xml
           git commit -m "Prepare next development iteration [skip ci]"
-          git push
+
+          # Push to both main and develop branches
+          git push origin main
+
+          # Also update develop branch with new snapshot version
+          git fetch origin develop
+          git checkout develop
+          git merge main --strategy-option=theirs
+          git push origin develop
   
