@@ -14,7 +14,26 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0  # Fetch all history for merging
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge develop to master
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          # Ensure we're on master branch
+          git checkout master
+          git pull origin master
+
+          # Fetch and merge develop
+          git fetch origin develop
+          git merge origin/develop --no-ff -m "Release: Merge develop for version ${{ github.event.release.tag_name }}"
+
+          # Push the merge to master
+          git push origin master
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -57,12 +76,12 @@ jobs:
           git add pom.xml */pom.xml
           git commit -m "Prepare next development iteration [skip ci]"
 
-          # Push to both main and develop branches
-          git push origin main
+          # Push to both master and develop branches
+          git push origin master
 
           # Also update develop branch with new snapshot version
           git fetch origin develop
           git checkout develop
-          git merge main --strategy-option=theirs
+          git merge master --strategy-option=theirs
           git push origin develop
   
