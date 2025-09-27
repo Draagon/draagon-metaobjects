@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata package="test.invalid.naming">
+  <children>
+    <child>
+      <object name="User::Invalid" subType="pojo">
+        <children>
+          <child>
+            <field name="field-with-dash" subType="string"/>
+          </child>
+          <child>
+            <field name="field with spaces" subType="int"/>
+          </child>
+          <child>
+            <field name="field@special" subType="long"/>
+          </child>
+        </children>
+      </object>
+    </child>
+  </children>
+</metadata>

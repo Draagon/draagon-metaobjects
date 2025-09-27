@@ -1,0 +1,93 @@
+{"metadata": {"package": "acme",
+  "children": [
+    {"object": {"package": "::garage", "name": "Garage", "subType": "map", "@object": "com.acme.garage.Garage",
+        "children": [
+          {"field": {"name": "id", "super": "..::common::id"}},
+          {"field": {"name": "name", "super": "..::common::name"}},
+          {"field": {"name": "address", "subType": "string", "@required": true, "@maxLength": "200"}},
+          {"field": {"name": "capacity", "subType": "int", "@required": true,
+              "children": [
+                {"validator": {"name": "positive", "subType": "required"}}
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle", "name": "Vehicle", "subType": "map", "@isAbstract": true, "@object": "com.acme.vehicle.Vehicle",
+        "children": [
+          {"field": {"name": "id", "super": "..::common::id"}},
+          {"field": {"name": "name", "super": "..::common::name"}},
+          {"field": {"name": "vehicleDescription", "super": "..::common::description"}},
+          {"field": {"name": "year", "subType": "int", "@required": true,
+              "children": [
+                {"validator": {"name": "yearRange", "subType": "length", "@min": "1900", "@max": "2030"}}
+              ]
+            }
+          },
+          {"field": {"name": "price", "subType": "double", "@required": true,
+              "children": [
+                {"validator": {"name": "priceValidator", "subType": "required"}}
+              ]
+            }
+          },
+          {"field": {"name": "garageId", "subType": "long", "@required": true}}
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle::car", "name": "Car", "super": "..::Vehicle", "@object": "com.acme.vehicle.car.Car",
+        "children": [
+          {"field": {"name": "doors", "subType": "int", "@required": true,
+              "children": [{"validator": {"name": "doorRange", "subType": "length", "@min": "2", "@max": "6"}}]
+            }
+          },
+          {"field": {"name": "transmission", "subType": "string", "@required": true, "@maxLength": "20"}},
+          {"field": {"name": "fuelType", "subType": "string", "@required": true,
+              "children": [{"validator": {"name": "fuelOptions", "subType": "required", "@values": "gas,diesel,electric,hybrid"}}]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle::truck", "name": "Truck", "super": "..::Vehicle", "@object": "com.acme.vehicle.truck.Truck",
+        "children": [
+          {"field": {"name": "payloadCapacity", "subType": "double", "@required": true,
+              "children": [{"validator": {"name": "positive", "subType": "required"}}]
+            }
+          },
+          {"field": {"name": "bedLength", "subType": "double", "@required": true,
+              "children": [{"validator": {"name": "bedRange", "subType": "length", "@min": "3.0", "@max": "12.0"}}]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle::motorcycle", "name": "Motorcycle", "super": "..::Vehicle", "@object": "com.acme.vehicle.motorcycle.Motorcycle",
+        "children": [
+          {"field": {"name": "engineSize", "subType": "int", "@required": true,
+              "children": [{"validator": {"name": "engineRange", "subType": "length", "@min": "50", "@max": "2000"}}]
+            }
+          },
+          {"field": {"name": "bikeType", "subType": "string",
+              "children": [{"validator": {"name": "typeOptions", "subType": "required", "@values": "cruiser,sport,touring,standard,dirt"}}]
+            }
+          }
+        ]
+      }
+    },
+    {"object": {"package": "::vehicle::car::luxury", "name": "Porsche", "super": "..::Car", "@object": "com.acme.vehicle.car.luxury.Porsche",
+        "children": [
+          {"field": {"name": "model", "subType": "string", "@required": true, "@maxLength": "30"}},
+          {"field": {"name": "topSpeed", "subType": "int", "@required": true,
+              "children": [{"validator": {"name": "speedRange", "subType": "length", "@min": "100", "@max": "400"}}]
+            }
+          },
+          {"field": {"name": "series", "subType": "string",
+              "children": [{"validator": {"name": "seriesOptions", "subType": "required", "@values": "911,Cayenne,Panamera,Macan,Taycan"}}]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}}

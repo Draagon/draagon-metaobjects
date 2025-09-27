@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects</artifactId>
+        <version>6.2.5-SNAPSHOT</version>
+    </parent>
+  
+    <artifactId>metaobjects-examples</artifactId>
+    <packaging>pom</packaging>
+
+    <name>MetaObjects :: Examples</name>
+    <description>Example projects demonstrating MetaObjects usage patterns</description>
+
+    <properties>
+        <!-- Examples are not published to Maven Central -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
+    <modules>
+        <module>shared-resources</module>
+        <module>basic-example</module>
+        <module>osgi-example</module>
+        <module>spring-example</module>
+    </modules>
+</project>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects</artifactId>
+        <version>6.2.5-SNAPSHOT</version>
+    </parent>
+  
+    <artifactId>metaobjects-codegen-base</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>MetaObjects :: Code Generation :: Base</name>
+    <description>Base code generation framework for MetaObjects</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <!-- JSON Dependencies for Code Generation -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.13.1</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Schema Validation Dependencies for Testing -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Inherited from parent POM: SLF4J, JUnit, Logback -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Maven Jar Plugin for test-jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${jar.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Maven Bundle Plugin for OSGi -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Export-Package>
+                            com.metaobjects.generator,
+                            com.metaobjects.generator.direct.*,
+                            com.metaobjects.generator.util
+                        </Export-Package>
+                        <Import-Package>
+                            com.metaobjects.*,
+                            org.slf4j.*,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

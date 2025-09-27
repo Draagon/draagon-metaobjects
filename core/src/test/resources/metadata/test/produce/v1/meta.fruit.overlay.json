@@ -6,18 +6,18 @@
         {"object": {"package": "::container::ext", "name": "ProduceExt", "isEmbedded": true,
             "children": [
                 {"field": {"name": "name", "super": "..::..::common::name"}},
-                {"field": {"name": "foo", "type": "double"}}
+                {"field": {"name": "foo", "subType": "double"}}
             ]
         }},
         {"object": {"package": "::fruit", "name": "Apple",
             "children": [
-                {"field": {"name": "specialOverlay", "type": "string"}}
+                {"field": {"name": "specialOverlay", "subType": "string"}}
             ]
         }},
         {"object": {"package": "::container", "name": "Basket",
             "children": [
-                {"field": {"name": "specialOverlay", "type": "string"}},
-                {"field": {"name": "specialExt", "type": "object", "objectRef": "::ext::ProduceExt"}}
+                {"field": {"name": "specialOverlay", "subType": "string"}},
+                {"field": {"name": "specialExt", "subType": "object", "objectRef": "::ext::ProduceExt"}}
                 ]}
         }]
 }}

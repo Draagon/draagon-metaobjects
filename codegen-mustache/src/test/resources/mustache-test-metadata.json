@@ -1,0 +1,103 @@
+{
+  "name": "mustache-test-metadata",
+  "metadata": {
+    "version": "1.0.0",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "subType": "pojo",
+          "package": "com_example_model",
+          "@dbTable": "users",
+          "@hasAuditing": true,
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "user_id"
+              }
+            },
+            {
+              "field": {
+                "name": "username",
+                "subType": "string",
+                "@required": true,
+                "@dbColumn": "username",
+                "@maxLength": 50,
+                "@isSearchable": true
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string",
+                "@required": true,
+                "@dbColumn": "email_address",
+                "@maxLength": 255,
+                "@isSearchable": true
+              }
+            },
+            {
+              "field": {
+                "name": "age",
+                "subType": "int",
+                "@dbColumn": "user_age",
+                "@isOptional": true
+              }
+            },
+            {
+              "field": {
+                "name": "createdAt",
+                "subType": "date",
+                "@dbColumn": "created_at"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Product",
+          "subType": "pojo",
+          "package": "com_example_model",
+          "@dbTable": "products",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "product_id"
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@required": true,
+                "@dbColumn": "product_name",
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "price",
+                "subType": "double",
+                "@required": true,
+                "@dbColumn": "price"
+              }
+            },
+            {
+              "field": {
+                "name": "notes",
+                "subType": "string",
+                "@dbColumn": "description",
+                "@maxLength": 1000
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

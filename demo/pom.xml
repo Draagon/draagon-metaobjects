@@ -2,101 +2,65 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.2.2-SNAPSHOT</version>
+        <version>6.2.5-SNAPSHOT</version>
     </parent>
   
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-demo</artifactId>
     <packaging>war</packaging>
 
     <name>MetaObjects :: Demo</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects Fishstore Demo App showing Model-driven development.</description>
+
+    <properties>
+        <!-- Demo is not published to Maven Central -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <template>${project.basedir}/src/main/resources/codegen/objectCodegen.gtm</template>
-                                <sourceDir>${project.basedir}/src/main/resources/</sourceDir>
-                                <input>metadata/fishstore-metadata.xml</input>
-                                <output>${project.build.sourceDirectory}/com/draagon/meta/demo/fishstore/model/</output>
-                                <!-- prefix></prefix -->
-                                <suffix>.java</suffix>
-                                <package>com.draagon.meta.demo.fishstore</package>
-                            </properties>
-                            <source>${project.basedir}/src/main/resources/codegen/objectCodegen.groovy</source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- TODO: Add MetaObjects Maven Plugin when it supports proper code generation -->
         </plugins>
     </build>
 
     <dependencies>
+        <!-- MetaObjects Dependencies -->
         <dependency>
-            <groupId>org.codehaus.gmaven.runtime</groupId>
-            <artifactId>gmaven-runtime-1.7</artifactId>
-            <version>1.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-all</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>1.7.6</version>
-        </dependency>
-        <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-omdb</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <type>jar</type>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-web-spring</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        
+        <!-- Spring dependencies now come transitively from web-spring -->
+        <!-- Additional Spring dependencies for demo-specific functionality -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <type>jar</type>
+            <version>5.3.31</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>3.1.2.RELEASE</version>
-            <type>jar</type>
+            <version>5.3.31</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>5.2.20.RELEASE</version>
-            <type>jar</type>
-        </dependency>
+        
+        <!-- Java EE API -->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>${javaee.api.version}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <!-- Database -->
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>

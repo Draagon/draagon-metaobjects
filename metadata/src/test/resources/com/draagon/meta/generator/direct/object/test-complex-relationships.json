@@ -1,0 +1,653 @@
+{
+  "metadata": {
+    "package": "complex::relationships",
+    "objects": [
+      {
+        "name": "Customer",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "customerNumber",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              },
+              {
+                "subType": "pattern",
+                "attributes": [
+                  {
+                    "subType": "string",
+                    "name": "regex",
+                    "value": "CUST-\\d{6}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "firstName",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "lastName",
+            "subType": "string", 
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "email",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "email"
+              }
+            ]
+          },
+          {
+            "name": "dateOfBirth",
+            "subType": "date"
+          },
+          {
+            "name": "registrationDate",
+            "subType": "date",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "status",
+            "subType": "string",
+            "defaultValue": "ACTIVE"
+          },
+          {
+            "name": "orders",
+            "subType": "objectArray",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Order"
+              }
+            ]
+          },
+          {
+            "name": "addresses",
+            "subType": "objectArray",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "..::common::Address"
+              }
+            ]
+          },
+          {
+            "name": "preferredPaymentMethod",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "PaymentMethod"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Order",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "orderNumber",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              },
+              {
+                "subType": "pattern",
+                "attributes": [
+                  {
+                    "subType": "string",
+                    "name": "regex",
+                    "value": "ORD-\\d{8}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "orderDate",
+            "subType": "date",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "totalAmount",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "status",
+            "subType": "string",
+            "defaultValue": "PENDING"
+          },
+          {
+            "name": "customerId",
+            "subType": "long",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "customer",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Customer"
+              }
+            ]
+          },
+          {
+            "name": "orderItems",
+            "subType": "objectArray",
+            "attributes": [
+              {
+                "subType": "string", 
+                "name": "objectRef",
+                "value": "OrderItem"
+              }
+            ]
+          },
+          {
+            "name": "shippingAddress",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "..::common::Address"
+              }
+            ]
+          },
+          {
+            "name": "billingAddress",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "..::common::Address"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "OrderItem",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "orderId",
+            "subType": "long",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "productId",
+            "subType": "long",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "product",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Product"
+              }
+            ]
+          },
+          {
+            "name": "quantity",
+            "subType": "int",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "int",
+                    "name": "min",
+                    "value": "1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "unitPrice",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "totalPrice",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Product",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "sku",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "name",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "description",
+            "subType": "string"
+          },
+          {
+            "name": "price",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "weight",
+            "subType": "double"
+          },
+          {
+            "name": "dimensions",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Dimensions"
+              }
+            ]
+          },
+          {
+            "name": "category",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Category"
+              }
+            ]
+          },
+          {
+            "name": "tags",
+            "subType": "stringArray"
+          }
+        ]
+      },
+      {
+        "name": "Category",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "name",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "description",
+            "subType": "string"
+          },
+          {
+            "name": "parentCategory",
+            "subType": "object",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Category"
+              }
+            ]
+          },
+          {
+            "name": "childCategories",
+            "subType": "objectArray",
+            "attributes": [
+              {
+                "subType": "string",
+                "name": "objectRef",
+                "value": "Category"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Dimensions",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "length",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "width",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "height",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "unit",
+            "subType": "string",
+            "defaultValue": "inches"
+          }
+        ]
+      },
+      {
+        "name": "PaymentMethod",
+        "package": "::model",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "type",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "isDefault",
+            "subType": "boolean",
+            "defaultValue": false
+          }
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "name": "Address",
+        "package": "::common",
+        "subType": "map",
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "type",
+            "subType": "string",
+            "defaultValue": "BILLING"
+          },
+          {
+            "name": "street",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "city",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "state",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "length",
+                "attributes": [
+                  {
+                    "subType": "int",
+                    "name": "min",
+                    "value": "2"
+                  },
+                  {
+                    "subType": "int",
+                    "name": "max",
+                    "value": "2"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "zipCode",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "pattern",
+                "attributes": [
+                  {
+                    "subType": "string",
+                    "name": "regex",
+                    "value": "\\d{5}(-\\d{4})?"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "country",
+            "subType": "string",
+            "defaultValue": "USA"
+          }
+        ]
+      }
+    ]
+  }
+}

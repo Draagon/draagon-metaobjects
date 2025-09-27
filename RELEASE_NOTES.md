@@ -1,5 +1,5 @@
 # MetaObjects Release Notes
-Latest update: May 22nd 2020
+Latest update: September 10th 2025
 
 ## Introduction
 This contains the list of past releases as well as an update on the planned features for a coming release.  Nothing
@@ -24,7 +24,7 @@ limitations under the License.
 
 # Upcoming Releases
 
-## Version 4.4.0 
+## Version 5.x.0 
 
 ### Planned Features
 * <b>Native support for Abstract and Interface MetaData</b>
@@ -45,7 +45,229 @@ limitations under the License.
   - Support for viewing included metadata, editing project metadata, and supporting overlays
   - Support for running generators after edit and viewing the output within the editor
 
-# Current Releases
+# Current Development
+
+## Version 6.2.5-SNAPSHOT (In Development)
+
+# Past Releases
+
+## Version 6.2.5 (September 26, 2025)
+
+### 🚀 **MAJOR RELEASE: Complete Package Refactoring**
+
+**This release represents a comprehensive package refactoring from `com.draagon.meta` to `com.metaobjects` with new domain ownership.**
+
+#### **🔧 Package Structure Migration**
+- **Complete package refactoring**: All classes moved from `com.draagon.meta.*` → `com.metaobjects.*`
+- **Maven groupId updated**: `com.draagon` → `com.metaobjects`
+- **400+ Java files updated**: Package declarations, imports, and metadata references
+- **Directory structure migrated**: Proper `com/metaobjects` directory hierarchy
+
+#### **🏢 Branding & Legal Updates**
+- **Domain ownership**: Moved to `metaobjects.com` and `metaobjects.dev`
+- **License updates**: Updated to "Doug Mealing LLC dba Meta Objects"
+- **Consistent branding**: All documentation and code references updated
+- **Organization information**: Proper legal attribution throughout
+
+#### **📦 Maven & Build System**
+- **19 POM files updated**: New groupId across all modules
+- **ServiceLoader fixes**: All META-INF/services files updated
+- **Build verification**: All modules compile and test successfully
+- **UTF-8 encoding issues resolved**: Clean compilation across platform
+
+#### **🎯 Git History Preservation**
+- **Complete Git history maintained**: All file renames properly detected
+- **High similarity scores**: 83%-99% rename detection success
+- **Development timeline preserved**: Full commit history accessible via `git log --follow`
+- **No history loss**: Complete development timeline intact
+
+#### **⚠️ Migration Requirements**
+**For existing projects:**
+1. **Update Maven dependencies**: Change groupId from `com.draagon` to `com.metaobjects`
+2. **Update import statements**: Change `com.draagon.meta.*` to `com.metaobjects.*`
+3. **Version update**: Upgrade to `6.2.5` for new package structure
+4. **Clean build recommended**: Run `mvn clean compile` after updates
+
+#### **✅ Backward Compatibility**
+- **Functional APIs unchanged**: All method signatures and behavior preserved
+- **Metadata formats compatible**: Existing XML/JSON metadata files work unchanged
+- **Configuration preserved**: Build configurations and templates compatible
+- **Service behavior identical**: Runtime behavior remains exactly the same
+
+**See [Migration Guide](MIGRATION.md) for detailed upgrade instructions.**
+
+## Previous Development
+
+## Version 5.2.0-SNAPSHOT (Previous Development)
+Major architectural evolution release featuring comprehensive code generation simplification, enhanced error reporting system, and preparation for cross-language template-based generation. This development version includes significant architectural improvements while maintaining full backward compatibility.
+
+### Code Generation Module Simplification (v6.0.0+ Architecture)
+* **Module Separation Complete** - All code generation functionality moved to dedicated `codegen` module
+* **Complexity Elimination** - Removed ~730 lines of unnecessary code including CodeFragment system and complex plugin lifecycle
+* **Template System Preparation** - Simplified architecture prepared for upcoming Mustache-based template system
+* **FileIndentor Relocation** - Properly scoped utility from `generator.util` to `generator.direct.util` package
+* **Backward Compatibility** - Maven plugin integration remains unchanged, zero breaking changes
+
+### Enhanced Error Reporting System Implementation
+* **MetaDataPath Utility** - Hierarchical path building for human-readable error navigation
+* **Rich MetaDataException Context** - Automatic collection of metadata source, operation, thread, and timestamp information
+* **ErrorFormatter Utility** - Consistent error formatting with context-aware messaging
+* **15+ Enhanced Exception Classes** - Comprehensive coverage across all major modules (metadata, om, omdb, web, codegen)
+* **Factory Method Patterns** - 25+ factory methods for convenient creation of context-rich exceptions
+
+### Service-Based Architecture Enhancements
+* **TypesConfig Replacement Complete** - Full migration to MetaDataTypeRegistry and MetaDataEnhancementService
+* **Cross-Language Compatibility** - String-based type system works across Java, C#, and TypeScript
+* **ServiceLoader Discovery** - Automatic provider discovery with priority-based loading
+* **Attribute Enhancement System** - Template-driven metadata enhancement with declarative requirements
+
+### React MetaView System Integration
+* **Production-Ready React Components** - Complete TypeScript component library with Redux state management
+* **Spring REST API Integration** - JSON metadata serialization with CORS support for modern web development
+* **Fishstore Demo Enhancement** - Full React storefront application demonstrating metadata-driven UI generation
+* **Cross-Language Validation** - Proves metadata system effectiveness across Java/TypeScript boundary
+
+# Stable Releases
+
+## Version 5.1.0 (Latest Stable)
+Comprehensive ObjectManager enhancements release focused on modern Java patterns, improved database abstraction, and NoSQL persistence layer support. This release fixes critical interface design issues while introducing extensive functionality improvements and architectural enhancements.
+
+### Critical Interface Fixes
+* **DBOperations Interface Correction** - Fixed interface design by removing internal/protected methods from public API
+* **Method Access Level Restoration** - Reverted ObjectManagerDB method access levels to proper encapsulation
+* **Enhanced API Consistency** - Improved separation between public API and internal implementation details
+
+### ObjectManager Framework Enhancements  
+* **Modern Java 21 Patterns** - Switch expressions, pattern matching, streams, records integration throughout ObjectManager
+* **Event-Driven Architecture** - Complete PersistenceEventListener system for monitoring and extensibility
+* **Asynchronous Programming Support** - CompletableFuture integration for non-blocking persistence operations
+* **Thread-Safe Caching** - ConcurrentHashMap-based caching with intelligent cache invalidation
+* **Bulk Operations Optimization** - Database-specific bulk operation support with type grouping and batching
+
+### NoSQL Persistence Layer Architecture
+* **omnosql Module** - Complete new module supporting 7 persistence layer types
+* **Document Operations** - MongoDB integration with comprehensive document store support
+* **Key-Value Operations** - Redis integration with advanced caching and expiration strategies  
+* **Graph Operations** - Neo4j integration with traversal and relationship management
+* **Column Family Operations** - Cassandra integration with consistency level management
+* **Time Series Operations** - InfluxDB integration with aggregation and forecasting support
+* **Search Engine Operations** - Elasticsearch integration with full-text search capabilities
+* **Reference Implementations** - Complete working examples for all persistence types
+
+### Query and Validation Enhancements
+* **Fluent Query Builder API** - Modern builder pattern for complex query construction
+* **Enhanced Validation Framework** - Comprehensive validation chains with metrics integration
+* **Resource Management** - AutoCloseable integration with try-with-resources patterns
+* **Metadata-Driven Validation** - Field-level and object-level validators with extensible architecture
+
+### Testing and Quality Improvements
+* **Fixed Database Connection Issues** - Resolved null pointer exceptions in test cleanup
+* **Metadata Configuration Fixes** - Corrected type definitions from "managed" to standard "value" types
+* **Comprehensive Test Coverage** - 50+ test files covering all persistence layer types
+* **Build Compatibility** - Ensured all modules compile successfully with Java 21
+
+## Version 5.0.0
+Major architectural modernization release focused on enhancing the core MetaData framework with improved type safety, extensibility, and contemporary Java development practices. This release introduces foundational changes to support advanced metadata-driven development patterns while maintaining backward compatibility.
+
+### Core Architecture Enhancements
+* **Enhanced Type System Architecture** - Preparation for migration from string-based type system to type-safe registry pattern
+* **Improved Extensibility Framework** - Foundation laid for downstream projects to register custom MetaData types
+* **Modernized Exception Handling** - Enhanced error handling patterns with proper validation and meaningful error messages
+* **Performance Optimizations** - Continued improvements to caching strategies and memory management
+
+### Development Infrastructure
+* **Version Management System** - Complete synchronization of version references across all modules and documentation
+* **Build System Improvements** - Enhanced Maven configuration for Java 21 compatibility
+* **Documentation Updates** - Comprehensive updates to project documentation and development guidelines
+
+### Technical Foundations
+* **Metadata Framework Preparation** - Architectural groundwork for future type registry implementation
+* **Enhanced Validation Patterns** - Improved validation logic across core components
+* **Future-Ready Codebase** - Preparation for modern Java language features and patterns
+
+## Version 4.5.0 
+Major code quality and modernization release with comprehensive improvements across all modules. This release focuses on technical debt reduction, performance enhancements, error handling improvements, and expanded test coverage while maintaining 100% backward compatibility.
+
+### Java Modernization
+* **Upgraded from Java 1.8 to Java 21** with full compatibility
+* **Updated Maven compiler plugin** to 3.13.0 with --release flag configuration  
+* **Resolved OSGi bundle plugin compatibility** for Java 21
+* **Migrated from Commons Logging to SLF4J** across 46 files with standardized logger declarations
+
+### Critical Logic Improvements
+* **Fixed critical date parsing bug** in ExpressionParser (changed format() to parse() - major bug fix)
+* **Enhanced ValueObject validation logic** to properly handle objects without MetaData
+* **Implemented MetaObject name consistency validation** in DataObjectBase to prevent mismatched configurations
+* **Added proper inheritance checking** in JSON readers with isInheritanceCompatible() method traversing inheritance hierarchy
+* **Improved ArrayValidator logic** for better non-array value handling with clear documentation
+* **Enhanced error handling** in FileMetaDataParser and XMLMetaDataParser with proper fallback strategies
+
+### Performance & Memory Optimizations  
+* **Implemented intelligent caching system** in ArrayValidator for frequently accessed min/max size values
+* **Added cache fields**: cachedMinSize, cachedMaxSize with boolean flags to eliminate repeated MetaAttribute lookups
+* **Optimized getAttrValueAsInt()** method with direct access for INT data types, fallback for string parsing
+* **Enhanced GeneratorUtil** with comprehensive null/empty validation and exception handling for malformed filter strings
+
+### Enhanced Error Handling & Logging
+* **Added comprehensive SLF4J logging** to JsonModelWriter and JsonMetaDatalWriter with detailed warning messages for unsupported serialization types
+* **Improved error handling patterns** with graceful fallbacks and meaningful error messages  
+* **Clarified exception handling** in FileMetaDataParser super class resolution with proper documentation
+* **Enhanced validation logic** across multiple components with better error reporting
+
+### Expanded Test Coverage
+* **Added comprehensive ArrayList tests** to DataConverterTests covering 7 test scenarios:
+  - Null input handling, existing List<String> processing, comma-separated string parsing
+  - Single string conversion, empty string handling, non-string object conversion, object array testing
+* **Implemented collection tests** in FileMetaDataLoaderTestXml with Apple/Orange object instantiation verification  
+* **Added generator test implementations** in PlantUMLTest with output file validation and path verification
+* **All new tests verified**: 15/15 DataConverterTests pass including comprehensive new test methods
+
+### Code Quality & Documentation
+* **Replaced StringBuffer with StringBuilder** across 8 files for better performance (non-thread-safe contexts)
+* **Added comprehensive JavaDoc documentation** with consistent formatting and parameter descriptions
+* **Removed obsolete commented code** and debug statements throughout codebase
+* **Extracted configuration constants** for file extensions, error messages, and magic numbers
+* **Enhanced null safety** with validation checks and defensive programming patterns
+* **Resolved architectural decisions** regarding MetaObject.ATTR_OBJECT_REF usage and relationships
+
+### Technical Debt Resolution
+* **Resolved 25+ critical TODO items** across all modules with proper implementations
+* **Addressed performance-related TODOs** with caching and optimization implementations
+* **Clarified error handling questions** with documented design decisions
+* **Completed missing test implementations** for better code coverage
+* **Enhanced inheritance support** in JSON serialization with proper compatibility checking
+
+### Dependency Updates  
+* **Updated Gson** from 2.8.5 → 2.13.1 for improved JSON handling
+* **Updated Commons Validator** from 1.3.1 → 1.9.0 for better validation support
+* **Added missing version properties** to parent POM for consistent dependency management
+* **Enhanced Maven plugin compatibility** with modern Java versions
+
+### Backward Compatibility
+* **100% backward compatibility maintained** - no breaking changes introduced
+* **All existing APIs preserved** with enhanced internal implementations
+* **Maintained existing behavior** while improving performance and reliability
+* **Seamless upgrade path** from previous versions
+
+### Files Modified
+**17+ files enhanced across all modules:**
+- **Core Module**: 6 files (ValueObject, DataObjectBase, FileMetaDataParser, XMLMetaDataParser, JsonModelWriter, JsonMetaDatalWriter)  
+- **Metadata Module**: 5 files (ArrayValidator, GeneratorUtil, JsonObjectReader, RawJsonObjectReader, MetaObject)
+- **OM Module**: 1 file (ExpressionParser - critical bug fix)
+- **Test Files**: 3 files (DataConverterTests, FileMetaDataLoaderTestXml, PlantUMLTest)
+
+### Build & Quality Assurance
+* **All 5 modules compile successfully** with Java 21
+* **Comprehensive compilation verification** across MetaObjects, MetaData, Maven Plugin, Core, and ObjectManager modules
+* **Enhanced error handling** maintains robustness while improving user experience  
+* **Performance optimizations** provide measurable improvements in caching and lookup operations
+
+### Upgrade Steps
+* **No upgrade steps required** - fully backward compatible
+* **Recommended**: Review any custom error handling code that may benefit from the new patterns
+* **Optional**: Consider leveraging new caching mechanisms if extending ArrayValidator
+
+---
 
 ## Version 4.3.4 
 Improvements to Code Generation, Default field Values, MetaValidator validations on objects, and IO Json Serialization.  

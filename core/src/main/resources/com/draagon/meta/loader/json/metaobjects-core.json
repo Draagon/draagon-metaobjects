@@ -1,0 +1,17 @@
+{"metadata": {"package": "core",
+  "children": [
+    {"object": {"name": "User", "subType": "pojo",
+      "children": [
+        {"field": {"name": "name", "subType": "string"}},
+        {"field": {"name": "email", "subType": "string"}},
+        {"field": {"name": "age", "subType": "int"}}
+      ]}},
+    {"object": {"name": "Product", "subType": "pojo",
+      "children": [
+        {"field": {"name": "name", "subType": "string"}},
+        {"field": {"name": "description", "subType": "string"}},
+        {"field": {"name": "price", "subType": "double"}},
+        {"field": {"name": "quantity", "subType": "int"}}
+      ]}}
+  ]}
+}

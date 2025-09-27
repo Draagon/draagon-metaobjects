@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 
 <metadata
-        xmlns="https://draagon.com/schema/metamodel/produce/v1"
+        xmlns="https://metaobjects.com/schema/metamodel/produce/v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+        xsi:schemaLocation="https://metaobjects.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
         package="produce::v1::fruit">
 
     <!-- Fruit -->
-    <object name="Fruit" type="pojo" _isAbstract="true">
+    <object name="Fruit" subType="pojo" _isAbstract="true">
 
         <key name="primary" keys="id"/>
-        <key type="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
+        <key subType="foreign" name="basketKey" keys="basketId" foreignObjectRef="..::container::Basket"/>
 
-        <attr name="object">com.draagon.meta.test.produce.v1.Fruit</attr>
+        <attr name="object">com.metaobjects.test.produce.v1.Fruit</attr>
 
         <!-- Id -->
         <field name="id" super="..::common::id"/>
@@ -24,39 +24,39 @@
         <field name="basketId" super="..::common::id"/>
 
         <!-- Length -->
-        <field name="length" type="int"/>
+        <field name="length" subType="int"/>
 
         <!-- Weight -->
-        <field name="weight" type="int"/>
+        <field name="weight" subType="int"/>
      
     </object>
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit" object="com.draagon.meta.test.produce.v1.Apple">
+    <object name="Apple" super="Fruit" object="com.metaobjects.test.produce.v1.Apple">
 
-        <!-- attr name="object">com.draagon.meta.test.produce.v1.Apple</attr -->
+        <!-- attr name="object">com.metaobjects.test.produce.v1.Apple</attr -->
 
         <!-- Orachard -->
-        <field name="orchard" type="string"/>
+        <field name="orchard" subType="string"/>
 
         <!-- Worms -->
-        <field name="worms" type="short"/>
+        <field name="worms" subType="short"/>
       
     </object>  
 
     <!-- Macintosh -->
     <object name="Macintosh" super="Apple">
 
-        <attr name="object">com.draagon.meta.test.produce.v1.Macintosh</attr>
+        <attr name="object">com.metaobjects.test.produce.v1.Macintosh</attr>
 
     </object>
 
     <!-- Orange -->
     <object name="Orange" super="Fruit">
 
-        <attr name="object">com.draagon.meta.test.produce.v1.Orange</attr>
+        <attr name="object">com.metaobjects.test.produce.v1.Orange</attr>
 
-        <field name="pickedDate" type="date"/>
+        <field name="pickedDate" subType="date"/>
            
     </object>
 

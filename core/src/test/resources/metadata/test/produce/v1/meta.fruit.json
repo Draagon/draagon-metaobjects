@@ -1,44 +1,44 @@
-
+﻿
 {"metadata": {"package": "produce::v1::fruit",
   "children": [
 
-    {"object": {"name": "Fruit", "type": "pojo",
+    {"object": {"name": "Fruit", "subType": "pojo",
       "children": [
-        {"key": {"name": "primary", "type":"primary",
+        {"key": {"name": "primary", "subType":"primary",
           "children": [
             {"attr": {"name": "keys", "value": "id"}}
           ]}},
-        {"key": {"name": "basketKey", "type":"foreign",
+        {"key": {"name": "basketKey", "subType":"foreign",
           "children": [
             {"attr": {"name": "keys", "value": "basketId"}},
             {"attr": {"name": "foreignObjectRef", "value": "..::container::Basket"}}
           ]}},
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Fruit"}},
+        {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Fruit"}},
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "basketId", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
-        {"field": {"name": "length", "type": "int"}},
-        {"field": {"name": "weight", "type": "int"}}
+        {"field": {"name": "length", "subType": "int"}},
+        {"field": {"name": "weight", "subType": "int"}}
       ]}},
 
     {"object": {"name": "Apple", "super": "Fruit",
       "children": [
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Apple"}},
-        {"field": {"name": "orchard", "type": "string"}},
-        {"field": {"name": "worms", "type": "short"}},
-        {"field": {"name": "length", "type": "int"}},
-        {"field": {"name": "weight", "type": "int"}}
+        {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Apple"}},
+        {"field": {"name": "orchard", "subType": "string"}},
+        {"field": {"name": "worms", "subType": "short"}},
+        {"field": {"name": "length", "subType": "int"}},
+        {"field": {"name": "weight", "subType": "int"}}
       ]}},
 
     {"object": {"name": "Macintosh", "super": "Apple",
       "children": [
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Macintosh"}}
+        {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Macintosh"}}
       ]}},
 
     {"object": {"name": "Orange", "super": "Fruit",
       "children": [
-        {"attr": {"name": "object", "value": "com.draagon.meta.test.produce.v1.Orange"}},
-        {"field": {"name": "pickedDate", "type": "date"}}
+        {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Orange"}},
+        {"field": {"name": "pickedDate", "subType": "date"}}
       ]}}
   ]}
 }

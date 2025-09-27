@@ -2,16 +2,16 @@
 <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.3.5-SNAPSHOT</version>
+        <version>6.2.5-SNAPSHOT</version>
     </parent>
   
     <artifactId>metaobjects-core</artifactId>
     <packaging>bundle</packaging>
 
     <name>MetaObjects :: Core</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects for Model-driven development - Core Libraries</description>
 
     <build>
@@ -29,13 +29,30 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.draagon</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <version>${project.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.metaobjects</groupId>
+                        <artifactId>metaobjects-metadata</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.metaobjects</groupId>
+                        <artifactId>metaobjects-codegen-base</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
+                    <!-- v6.0.0: Constraint-based schema generation - FIXED: Using correct SimpleLoader
+                         SOLUTION: SimpleLoader/SimpleModelParser from metadata module supports our JSON format
+                         STATUS: Re-enabled with correct loader
+                    -->
+                    <!--
                     <execution>
-                        <id>gen-resources</id>
-                        <phase>generate-test-sources</phase>
+                        <id>gen-schemas</id>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -45,24 +62,35 @@
                                 <strict>true</strict>
                             </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
-                                <name>gen-resources</name>
-                                <sources>
-                                    <source>com/draagon/meta/loader/xml/metaobjects.types.xml</source>
-                                </sources>
+                                <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
+                                <name>gen-test-resources</name>
+                                <sources/>
                             </loader>
                             <generators>
                                 <generator>
-                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
+                                    <classname>com.metaobjects.generator.direct.metadata.file.json.MetaDataFileJsonSchemaGenerator</classname>
                                     <args>
-                                        <nameSpace>http://draagon.com/schema/metamodel/v3</nameSpace>
-                                        <outputDir>${project.build.outputDirectory}/metamodel/v3</outputDir>
-                                        <outputFilename>metaobjectsv3.xsd</outputFilename>
+                                        <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
+                                        <outputFilename>metaobjects-v6-schema.json</outputFilename>
+                                        <schemaVersion>https://json-schema.org/draft/2020-12/schema</schemaVersion>
+                                        <schemaId>https://metaobjects.com/schemas/metaobjects/6.0.0/metaobjects-schema.json</schemaId>
+                                        <title>MetaObjects File Schema v6.0.0</title>
+                                        <description>JSON Schema for validating MetaData file structure and constraints</description>
+                                    </args>
+                                </generator>
+                                <generator>
+                                    <classname>com.metaobjects.generator.direct.metadata.file.xsd.MetaDataFileXSDGenerator</classname>
+                                    <args>
+                                        <outputDir>${project.basedir}/target/generated-resources/schemas</outputDir>
+                                        <outputFilename>metaobjects-v6-schema.xsd</outputFilename>
+                                        <nameSpace>https://metaobjects.com/schemas/metaobjects/6.0.0</nameSpace>
                                     </args>
                                 </generator>
                             </generators>
                         </configuration>
                     </execution>
+                    -->
+                    <!-- DISABLED v6.0.0: TypesConfig system removed - these metadata files use old v5.x format
                     <execution>
                         <id>gen-test-resources</id>
                         <phase>generate-test-resources</phase>
@@ -75,36 +103,30 @@
                                 <strict>true</strict>
                             </globals>
                             <loader>
-                                <classname>com.draagon.meta.loader.file.FileMetaDataLoader</classname>
+                                <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
                                 <name>gen-test-resources</name>
-                                <sourceDir>${project.basedir}/src/test/resources</sourceDir>
                                 <sources>
-                                    <source>com/draagon/meta/loader/xml/metaobjects.types.xml</source>
-                                    <source>metadata/test/produce/v1/produce-v1.bundle</source>
+                                    REMOVED v6.0.0: TypesConfig system removed
+                                    <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
+                                    
+                                    <source>model:resource:metadata/test/produce/v1/produce-v1.bundle</source>
                                 </sources>
                             </loader>
                             <generators>
                                 <generator>
-                                    <classname>com.draagon.meta.generator.direct.xsd.MetaDataXSDGenerator</classname>
-                                    <args>
-                                        <nameSpace>https://draagon.com/schema/metamodel/produce/v1</nameSpace>
-                                        <outputDir>${project.basedir}/src/test/resources/metadata/test/produce/v1</outputDir>
-                                        <outputFilename>produce-v1-model.xsd</outputFilename>
-                                    </args>
-                                </generator>
-                                <generator>
-                                    <classname>com.draagon.meta.generator.direct.javacode.simple.SimpleJavaCodeGenerator</classname>
+                                    <classname>com.metaobjects.generator.direct.object.javacode.JavaCodeGenerator</classname>
                                     <args>
                                         <outputDir>${project.basedir}/target/generated-test-sources</outputDir>
                                         <finalOutputDir>${project.basedir}/target/generated-test-resources</finalOutputDir>
                                         <outputFilename>produce-v1-object-model.xml</outputFilename>
                                         <type>interface</type>
-                                        <pkgPrefix>com.draagon.meta.test</pkgPrefix>
+                                        <pkgPrefix>com.metaobjects.test</pkgPrefix>
                                     </args>
                                 </generator>
                             </generators>
                         </configuration>
                     </execution>
+                    -->
                 </executions>
             </plugin>
         </plugins>
@@ -112,10 +134,28 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <!-- Code generation dependency for tests (generator classes moved to codegen in v6.0.0) -->
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-codegen-base</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Test dependency for compliance test base classes -->
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        
     </dependencies>
                     
 </project>

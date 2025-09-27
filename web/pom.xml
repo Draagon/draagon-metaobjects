@@ -3,30 +3,56 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.draagon</groupId>
+        <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects</artifactId>
-        <version>4.2.2-SNAPSHOT</version>
+        <version>6.2.5-SNAPSHOT</version>
     </parent>
   
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-web</artifactId>
     <packaging>jar</packaging>
 
     <name>MetaObjects :: Web</name>
-    <url>https://github.com/Draagon/draagon-metaobjects</url>
+    <url>https://github.com/metaobjectsdev/metaobjects</url>
     <description>MetaObjects for Model-driven development - Web</description>
     
     <dependencies>
         <dependency>
-            <groupId>com.draagon</groupId>
+            <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>6.0</version>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Modern servlet API compatible with Java 17+ -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp</groupId>
+            <artifactId>jakarta.servlet.jsp-api</artifactId>
+            <version>3.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <!-- Test dependency for compliance test base classes -->
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-metadata</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>    
             

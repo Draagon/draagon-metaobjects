@@ -1,21 +1,21 @@
 <metadata
-        xmlns="https://draagon.com/schema/metamodel/produce/v1"
+        xmlns="https://metaobjects.com/schema/metamodel/produce/v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+        xsi:schemaLocation="https://metaobjects.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
         package="produce::v1::common">
 
     <attr name="farmName">Big Bob's Farm</attr>
 
     <!-- Id -->
-    <field name="id" type="long" validation="required">
-        <validator name="required" type="required"/>
+    <field name="id" subType="long" validation="required">
+        <validator name="required" subType="required"/>
     </field>
 
     <!-- Name -->
-    <field name="name" type="string" validation="required,length">
-        <validator name="required" type="required"/>
-        <validator name="length" type="length">
-            <attr type="int" name="min">1</attr>
+    <field name="name" subType="string" validation="required,length">
+        <validator name="required" subType="required"/>
+        <validator name="length" subType="length">
+            <attr subType="int" name="min">1</attr>
             <attr name="max">50</attr>
         </validator>
     </field>

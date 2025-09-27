@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-examples</artifactId>
+        <version>6.2.5-SNAPSHOT</version>
+    </parent>
+  
+    <artifactId>metaobjects-example-basic</artifactId>
+    <packaging>jar</packaging>
+
+    <name>MetaObjects :: Examples :: Basic Usage</name>
+    <description>Basic MetaObjects usage without frameworks</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-codegen-mustache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-examples-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

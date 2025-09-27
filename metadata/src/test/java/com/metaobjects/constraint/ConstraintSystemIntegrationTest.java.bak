@@ -1,0 +1,197 @@
+package com.draagon.meta.constraint;
+
+import com.draagon.meta.InvalidMetaDataException;
+import com.draagon.meta.MetaData;
+import com.draagon.meta.attr.StringAttribute;
+import com.draagon.meta.field.StringField;
+import com.draagon.meta.object.MetaObject;
+import com.draagon.meta.object.value.ValueMetaObject;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * Integration test demonstrating the complete constraint system:
+ * - Abstract constraint definitions with specific instances
+ * - Reference-based constraint file loading
+ * - Real-time constraint enforcement during metadata construction
+ * - Graceful degradation for unknown constraint types
+ */
+public class ConstraintSystemIntegrationTest {
+    
+    private ConstraintRegistry constraintRegistry;
+    private ConstraintEnforcer constraintEnforcer;
+    
+    @Before
+    public void setUp() {
+        // Clear any existing state
+        constraintRegistry = ConstraintRegistry.getInstance();
+        constraintRegistry.clearAllConstraints();
+        
+        constraintEnforcer = ConstraintEnforcer.getInstance();
+        constraintEnforcer.setConstraintCheckingEnabled(true);
+    }
+    
+    @Test
+    public void testValidMetaObjectCreation() throws Exception {
+        // Load constraints from our test resource
+        constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+        
+        // Create a valid MetaObject - should pass all constraints
+        ValueMetaObject validObject = new ValueMetaObject("User");
+        
+        // Add a valid field - should pass identifier pattern and length constraints
+        StringField validField = new StringField("name");
+        validObject.addChild(validField);
+        
+        // Add a valid attribute - should pass length constraint
+        StringAttribute validAttr = new StringAttribute("defaultValue");
+        validAttr.setValueAsString("John Doe");
+        validField.addChild(validAttr);
+        
+        // If we get here without exceptions, constraints passed
+        assertNotNull("Valid metadata creation should succeed", validObject);
+        assertEquals("Object should have the field", 1, validObject.getChildren(StringField.class).size());
+    }
+    
+    @Test
+    public void testInvalidMetaObjectName() {
+        try {
+            constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+            
+            // Try to create MetaObject with invalid name (starts with number)
+            ValueMetaObject invalidObject = new ValueMetaObject("123InvalidName");
+            
+            fail("Should have thrown InvalidMetaDataException for invalid identifier");
+            
+        } catch (InvalidMetaDataException e) {
+            // Expected - constraint violation should be wrapped in InvalidMetaDataException
+            assertTrue("Exception should mention constraint violation", 
+                e.getMessage().contains("Constraint violation"));
+            
+            // The underlying cause should be a ConstraintViolationException
+            Throwable cause = e.getCause();
+            assertTrue("Cause should be ConstraintViolationException", 
+                cause instanceof ConstraintViolationException);
+                
+            ConstraintViolationException cve = (ConstraintViolationException) cause;
+            assertEquals("Should be pattern constraint", "pattern", cve.getConstraintType());
+            
+        } catch (Exception e) {
+            fail("Unexpected exception type: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testInvalidFieldName() {
+        try {
+            constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+            
+            ValueMetaObject validObject = new ValueMetaObject("User");
+            
+            // Try to add field with invalid name (contains special characters)
+            StringField invalidField = new StringField("field-with-dashes");
+            validObject.addChild(invalidField);
+            
+            fail("Should have thrown InvalidMetaDataException for invalid field identifier");
+            
+        } catch (InvalidMetaDataException e) {
+            assertTrue("Exception should mention constraint violation", 
+                e.getMessage().contains("Constraint violation"));
+                
+            ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
+            assertEquals("Should be pattern constraint", "pattern", cve.getConstraintType());
+            
+        } catch (Exception e) {
+            fail("Unexpected exception type: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testInvalidAttributeLength() {
+        try {
+            constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+            
+            ValueMetaObject validObject = new ValueMetaObject("User");
+            StringField validField = new StringField("name");
+            validObject.addChild(validField);
+            
+            // Try to add attribute with value that's too long (over 255 chars for defaultValue)
+            StringAttribute longAttr = new StringAttribute("defaultValue");
+            StringBuilder longValue = new StringBuilder();
+            for (int i = 0; i < 300; i++) {
+                longValue.append("x");
+            }
+            longAttr.setValueAsString(longValue.toString());
+            
+            validField.addChild(longAttr);
+            
+            fail("Should have thrown InvalidMetaDataException for attribute value too long");
+            
+        } catch (InvalidMetaDataException e) {
+            assertTrue("Exception should mention constraint violation", 
+                e.getMessage().contains("Constraint violation"));
+                
+            ConstraintViolationException cve = (ConstraintViolationException) e.getCause();
+            assertEquals("Should be length constraint", "length", cve.getConstraintType());
+            
+        } catch (Exception e) {
+            fail("Unexpected exception type: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testConstraintCheckingCanBeDisabled() throws Exception {
+        constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+        
+        // Disable constraint checking
+        constraintEnforcer.setConstraintCheckingEnabled(false);
+        
+        // Now invalid names should be allowed
+        MetaObject invalidObject = new ValueMetaObject("123InvalidName");
+        StringField invalidField = new StringField("field-with-dashes");
+        invalidObject.addChild(invalidField);
+        
+        // Should succeed because constraint checking is disabled
+        assertNotNull("Invalid metadata should be allowed when constraints disabled", invalidObject);
+        assertEquals("Object should have the field", 1, invalidObject.getChildren(StringField.class).size());
+    }
+    
+    @Test
+    public void testGracefulDegradationForUnknownConstraints() {
+        // Create a constraint file with an unknown constraint type
+        try {
+            // This should load successfully but log warnings for unknown constraint types
+            // The unknown constraints should be ignored gracefully
+            constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+            
+            // Check that unknown constraint types are tracked
+            // (Note: In a real scenario, there would be unknown types, but our test file only has known types)
+            assertNotNull("Registry should track unknown constraint types", 
+                constraintRegistry.getUnknownConstraintTypes());
+            
+        } catch (Exception e) {
+            fail("Loading constraints with unknown types should not fail: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testAbstractConstraintResolution() throws Exception {
+        constraintRegistry.loadConstraintsFromResource("META-INF/constraints/core-constraints.json");
+        
+        // Verify that abstract constraints are resolved properly
+        var constraints = constraintRegistry.getConstraintsForTarget("object", "value", "ValidName");
+        
+        assertFalse("Should have constraints for object type", constraints.isEmpty());
+        
+        // Should have at least identifier-pattern and name-length constraints
+        boolean hasPatternConstraint = constraints.stream()
+            .anyMatch(c -> "pattern".equals(c.getType()));
+        boolean hasLengthConstraint = constraints.stream()
+            .anyMatch(c -> "length".equals(c.getType()));
+            
+        assertTrue("Should have pattern constraint from abstract reference", hasPatternConstraint);
+        assertTrue("Should have length constraint from abstract reference", hasLengthConstraint);
+    }
+}

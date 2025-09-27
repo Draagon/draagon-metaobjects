@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata package="test_schema_validation">
+  <children>
+    <child>
+      <object name="User" subType="pojo" dbTable="users" hasAuditing="true">
+        <children>
+          <child>
+            <field name="id" subType="short" required="true" dbColumn="user_id" isId="true" dbNullable="false">
+              <children>
+                <child>
+                  <validator name="required" subType="required"/>
+                </child>
+              </children>
+            </field>
+          </child>
+          <child>
+            <field name="username" subType="base" maxLength="50" pattern="^[a-zA-Z0-9_]+$" required="true" dbColumn="username" isSearchable="true">
+              <children>
+                <child>
+                  <attr name="required" subType="boolean" value="true"/>
+                </child>
+                <child>
+                  <validator name="length" subType="length">
+                    <children>
+                      <child>
+                        <attr name="maxLength" subType="int" value="50"/>
+                      </child>
+                    </children>
+                  </validator>
+                </child>
+                <child>
+                  <validator name="pattern" subType="regex">
+                    <children>
+                      <child>
+                        <attr name="pattern" subType="string" value="^[a-zA-Z0-9_]+$"/>
+                      </child>
+                    </children>
+                  </validator>
+                </child>
+              </children>
+            </field>
+          </child>
+          <child>
+            <field name="email" subType="base" required="true" maxLength="255" dbColumn="email">
+              <children>
+                <child>
+                  <validator name="emailPattern" subType="regex">
+                    <children>
+                      <child>
+                        <attr name="pattern" subType="string" value="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"/>
+                      </child>
+                    </children>
+                  </validator>
+                </child>
+              </children>
+            </field>
+          </child>
+          <child>
+            <field name="createdDate" subType="date" dbColumn="created_date">
+              <children>
+                <child>
+                  <attr name="format" subType="string" value="yyyy-MM-dd"/>
+                </child>
+              </children>
+            </field>
+          </child>
+          <child>
+            <field name="score" subType="short" defaultValue="0.0" dbColumn="score"/>
+          </child>
+          <child>
+            <key name="primary" subType="primary" fields="id"/>
+          </child>
+        </children>
+      </object>
+    </child>
+  </children>
+</metadata>

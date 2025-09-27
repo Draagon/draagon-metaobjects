@@ -1,0 +1,23 @@
+{"metadata": {"package": "acme::common",
+  "children": [
+    {"field": {"name": "id", "subType": "long", "@isAbstract": true, "@validation": "required",
+        "children": [
+          {"validator": {"subType": "required"}}
+        ]
+      }
+    },
+    {"field": {"name": "name", "subType": "string", "@isAbstract": true, "@validation": "required,length",
+        "children": [
+          {"validator": {"subType": "required"}},
+          {"validator": {"subType": "length", "@min": "1", "@max": "100"}}
+        ]
+      }
+    },
+    {"field": {"name": "description", "subType": "string", "@isAbstract": true,
+        "children": [
+          {"validator": {"subType": "length", "@max": "500"}}
+        ]
+      }
+    }
+  ]
+}}

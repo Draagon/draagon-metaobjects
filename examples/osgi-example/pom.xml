@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-examples</artifactId>
+        <version>6.2.5-SNAPSHOT</version>
+    </parent>
+  
+    <artifactId>metaobjects-example-osgi</artifactId>
+    <packaging>bundle</packaging>
+
+    <name>MetaObjects :: Examples :: OSGI Usage</name>
+    <description>MetaObjects usage in OSGI environments</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-examples-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- OSGI dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Maven Bundle Plugin for OSGi -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Export-Package>
+                            com.metaobjects.examples.osgi
+                        </Export-Package>
+                        <Import-Package>
+                            com.metaobjects.*,
+                            org.osgi.*,
+                            org.slf4j.*,
+                            *
+                        </Import-Package>
+                        <Bundle-Activator>com.metaobjects.examples.osgi.OSGiExampleActivator</Bundle-Activator>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

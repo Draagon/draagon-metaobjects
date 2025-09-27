@@ -1,0 +1,75 @@
+{
+  "name": "test-interface-metadata",
+  "metadata": {
+    "version": "1.0.0",
+    "children": [
+      {
+        "object": {
+          "name": "TestInterface",
+          "subType": "pojo",
+          "package": "com_example_test",
+          "@description": "Test object for Java code generation",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@description": "Unique identifier"
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@description": "Name property"
+              }
+            },
+            {
+              "field": {
+                "name": "active",
+                "subType": "boolean",
+                "@description": "Active status"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "TestImplementation",
+          "subType": "pojo",
+          "package": "com_example_test",
+          "@implements": "TestInterface",
+          "@description": "Test implementation for interface",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long"
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "active",
+                "subType": "boolean"
+              }
+            },
+            {
+              "field": {
+                "name": "extra",
+                "subType": "string",
+                "@description": "Additional field in implementation"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

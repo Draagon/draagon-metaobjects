@@ -1,0 +1,4 @@
+# Spring Boot Auto-Configuration
+# Note: MetaDataAutoConfiguration moved to metadata module for framework-wide availability
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.draagon.meta.spring.MetaDataAutoConfiguration

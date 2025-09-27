@@ -6,47 +6,47 @@ are made available under the terms of the Eclipse Public License v1.0
 which accompanies this distribution, and is available at
 http://www.eclipse.org/legal/epl-v10.html
 -->
-<metadata package="fishstore">
+<metadata xmlns="http://metaobjects.com/schema/metamodel/v3" package="fishstore">
     
     <types>
-        <object><type name="managed" class="com.draagon.meta.object.managed.ManagedMetaObject"/></object>
+        <object><type name="managed" class="com.metaobjects.object.managed.ManagedMetaObject"/></object>
     </types>
     
     <!-- Base -->
-    <object name="Base" type="managed">   
-        <attr name="object">com.draagon.meta.demo.fishstore.Base</attr>      
-        <field name="id" type="long" isKey="true" auto="last" dbColumn="ID" />
+    <object name="Base" subType="managed">   
+        <attr name="object">com.metaobjects.demo.fishstore.Base</attr>      
+        <field name="id" subType="long" isKey="true" auto="last" dbColumn="ID" />
     </object>  
         
     <!-- Store -->
     <object name="Store" super="Base" dbTable="STORE">    
-        <attr name="object">com.draagon.meta.demo.fishstore.Store</attr>      
-        <field name="name" type="string" len="50" dbColumn="NAME" />
-        <field name="maxTanks" type="int" dbColumn="MAX_TANKS" />
+        <attr name="object">com.metaobjects.demo.fishstore.Store</attr>      
+        <field name="name" subType="string" len="50" dbColumn="NAME" />
+        <field name="maxTanks" subType="int" dbColumn="MAX_TANKS" />
     </object>  
         
     <!-- Tank -->
     <object name="Tank" super="Base" dbTable="TANK">    
-        <attr name="object">com.draagon.meta.demo.fishstore.Tank</attr>      
-        <field name="num" type="int" dbColumn="NUM" />
-        <field name="maxFish" type="int" dbColumn="MAX_FISH" />
-        <field name="fishes" type="objectArray" objectRef="fishstore::Fish" />
+        <attr name="object">com.metaobjects.demo.fishstore.Tank</attr>      
+        <field name="num" subType="int" dbColumn="NUM" />
+        <field name="maxFish" subType="int" dbColumn="MAX_FISH" />
+        <field name="fishes" subType="objectArray" objectRef="fishstore::Fish" />
     </object>
 
     <!-- Breed -->
     <object name="Breed" super="Base" dbTable="TANK">
-        <attr name="object">com.draagon.meta.demo.fishstore.Breed</attr>
-        <field name="name" type="string" len="100" dbColumn="NAME" />
-        <field name="agressionLevel" type="int" dbColumn="AGRESSION_LEVEL" />
+        <attr name="object">com.metaobjects.demo.fishstore.Breed</attr>
+        <field name="name" subType="string" len="100" dbColumn="NAME" />
+        <field name="agressionLevel" subType="int" dbColumn="AGRESSION_LEVEL" />
     </object>
 
     <!-- Fish -->
     <object name="Fish" super="Base" dbTable="TANK">    
-        <attr name="object">com.draagon.meta.demo.fishstore.Fish</attr>      
-        <field name="breedName" type="string" len="100" dbColumn="BREED_NAME" />
-        <field name="breed" type="object" objectRef="fishstore::Breed" dbColumn="BREED_ID" />
-        <field name="length" type="int" dbColumn="LENGTH" />
-        <field name="weight" type="int" dbColumn="WEIGHT" />
+        <attr name="object">com.metaobjects.demo.fishstore.Fish</attr>      
+        <field name="breedName" subType="string" len="100" dbColumn="BREED_NAME" />
+        <field name="breed" subType="object" objectRef="fishstore::Breed" dbColumn="BREED_ID" />
+        <field name="length" subType="int" dbColumn="LENGTH" />
+        <field name="weight" subType="int" dbColumn="WEIGHT" />
     </object>
                 
 </metadata>

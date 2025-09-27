@@ -1,0 +1,155 @@
+{
+  "$schema": "../generated-resources/schemas/metaobjects-schema.json",
+  "objects": [
+    {
+      "subType": "object",
+      "subType": "value", 
+      "name": "TestUser",
+      "description": "Test user object with constraint validation",
+      "fields": [
+        {
+          "subType": "field",
+          "subType": "string",
+          "name": "username",
+          "description": "User login name - must be valid identifier",
+          "attributes": [
+            {
+              "subType": "attr",
+              "subType": "string",
+              "name": "defaultValue",
+              "value": "guest"
+            }
+          ]
+        },
+        {
+          "subType": "field",
+          "subType": "string", 
+          "name": "email",
+          "description": "User email address",
+          "attributes": [
+            {
+              "subType": "attr",
+              "subType": "string",
+              "name": "htmlInputType",
+              "value": "email"
+            },
+            {
+              "subType": "attr", 
+              "subType": "string",
+              "name": "placeholder",
+              "value": "Enter your email address"
+            }
+          ]
+        },
+        {
+          "subType": "field",
+          "subType": "int",
+          "name": "age",
+          "description": "User age in years",
+          "attributes": [
+            {
+              "subType": "attr",
+              "subType": "string", 
+              "name": "htmlInputType",
+              "value": "number"
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "subType": "attr",
+          "subType": "string",
+          "name": "dbTable",
+          "value": "users"
+        },
+        {
+          "subType": "attr",
+          "subType": "string",
+          "name": "dbSchema", 
+          "value": "public"
+        }
+      ]
+    },
+    {
+      "subType": "object",
+      "subType": "value",
+      "name": "TestProduct",
+      "description": "Test product with database and web constraints",
+      "fields": [
+        {
+          "subType": "field",
+          "subType": "string",
+          "name": "productName",
+          "description": "Product display name",
+          "attributes": [
+            {
+              "subType": "attr",
+              "subType": "string",
+              "name": "dbCol",
+              "value": "product_name"
+            },
+            {
+              "subType": "attr",
+              "subType": "string",
+              "name": "dbType", 
+              "value": "VARCHAR"
+            },
+            {
+              "subType": "attr",
+              "subType": "int",
+              "name": "dbLength",
+              "value": 255
+            },
+            {
+              "subType": "attr",
+              "subType": "string",
+              "name": "formLabel",
+              "value": "Product Name"
+            }
+          ]
+        },
+        {
+          "subType": "field",
+          "subType": "double",
+          "name": "price",
+          "description": "Product price in USD",
+          "attributes": [
+            {
+              "subType": "attr",
+              "subType": "string",
+              "name": "dbCol",
+              "value": "price"
+            },
+            {
+              "subType": "attr",
+              "subType": "string", 
+              "name": "dbType",
+              "value": "DECIMAL"
+            },
+            {
+              "subType": "attr",
+              "subType": "int",
+              "name": "dbPrecision",
+              "value": 10
+            },
+            {
+              "subType": "attr",
+              "subType": "int",
+              "name": "dbScale",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "attributes": [
+        {
+          "subType": "attr",
+          "subType": "string",
+          "name": "dbTable",
+          "value": "products"
+        }
+      ]
+    }
+  ]
+}

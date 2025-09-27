@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "package": "inheritance::test",
+    "objects": [
+      {
+        "name": "BaseEntity",
+        "package": "::common",
+        "subType": "map",
+        "_isAbstract": true,
+        "fields": [
+          {
+            "name": "id",
+            "subType": "long",
+            "attributes": [
+              {
+                "subType": "boolean",
+                "name": "isKey",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "createdAt",
+            "subType": "date"
+          },
+          {
+            "name": "updatedAt", 
+            "subType": "date"
+          },
+          {
+            "name": "version",
+            "subType": "int",
+            "defaultValue": "1"
+          }
+        ]
+      },
+      {
+        "name": "NamedEntity",
+        "package": "::common",
+        "subType": "map",
+        "super": "BaseEntity",
+        "_isAbstract": true,
+        "fields": [
+          {
+            "name": "name",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              },
+              {
+                "subType": "length",
+                "attributes": [
+                  {
+                    "subType": "int",
+                    "name": "min",
+                    "value": "1"
+                  },
+                  {
+                    "subType": "int",
+                    "name": "max", 
+                    "value": "100"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "description",
+            "subType": "string"
+          }
+        ]
+      },
+      {
+        "name": "Vehicle",
+        "package": "::model",
+        "subType": "map",
+        "super": "..::common::NamedEntity",
+        "_isAbstract": true,
+        "fields": [
+          {
+            "name": "make",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "model",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              }
+            ]
+          },
+          {
+            "name": "year",
+            "subType": "int",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "int",
+                    "name": "min",
+                    "value": "1900"
+                  },
+                  {
+                    "subType": "int",
+                    "name": "max",
+                    "value": "2030"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "vin",
+            "subType": "string",
+            "validators": [
+              {
+                "subType": "required"
+              },
+              {
+                "subType": "length",
+                "attributes": [
+                  {
+                    "subType": "int", 
+                    "name": "min",
+                    "value": "17"
+                  },
+                  {
+                    "subType": "int",
+                    "name": "max",
+                    "value": "17"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Car",
+        "package": "::model",
+        "subType": "map",
+        "super": "Vehicle",
+        "fields": [
+          {
+            "name": "numberOfDoors",
+            "subType": "int",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "int",
+                    "name": "min", 
+                    "value": "2"
+                  },
+                  {
+                    "subType": "int",
+                    "name": "max",
+                    "value": "5"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "fuelType",
+            "subType": "string",
+            "defaultValue": "GASOLINE"
+          },
+          {
+            "name": "isElectric", 
+            "subType": "boolean",
+            "defaultValue": false
+          }
+        ]
+      },
+      {
+        "name": "Motorcycle",
+        "package": "::model",
+        "subType": "map",
+        "super": "Vehicle",
+        "fields": [
+          {
+            "name": "engineSize",
+            "subType": "int",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "int",
+                    "name": "min",
+                    "value": "50"
+                  },
+                  {
+                    "subType": "int",
+                    "name": "max",
+                    "value": "2000"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "hasSidecar",
+            "subType": "boolean",
+            "defaultValue": false
+          }
+        ]
+      },
+      {
+        "name": "Truck",
+        "package": "::model",
+        "subType": "map",
+        "super": "Vehicle",
+        "fields": [
+          {
+            "name": "payloadCapacity",
+            "subType": "double",
+            "validators": [
+              {
+                "subType": "range",
+                "attributes": [
+                  {
+                    "subType": "double",
+                    "name": "min",
+                    "value": "0.0"
+                  },
+                  {
+                    "subType": "double",
+                    "name": "max", 
+                    "value": "50000.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "towingCapacity",
+            "subType": "double"
+          },
+          {
+            "name": "isFourWheelDrive",
+            "subType": "boolean",
+            "defaultValue": false
+          }
+        ]
+      }
+    ]
+  }
+}

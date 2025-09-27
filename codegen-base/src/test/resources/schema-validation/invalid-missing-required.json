@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "package": "test_missing_required",
+    "children": [
+      {
+        "object": {
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "validField"
+              }
+            },
+            {
+              "validator": {
+                "name": "validValidator"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -2,9 +2,9 @@
 
 <!-- Sample Overlay Example -->
 <metadata
-        xmlns="https://draagon.com/schema/metamodel/produce/v1"
+        xmlns="https://metaobjects.com/schema/metamodel/produce/v1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="https://draagon.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
+        xsi:schemaLocation="https://metaobjects.com/schema/metamodel/produce/v1 produce-v1-model.xsd"
         package="produce::v1">
 
     <!-- Custom Extension -->
@@ -14,7 +14,7 @@
         <field name="name" super="..::..::common::name"/>
 
         <!-- Foo Double -->
-        <field name="foo" type="double"/>
+        <field name="foo" subType="double"/>
 
     </object>
 
@@ -22,7 +22,7 @@
     <object package="::fruit" name="Apple">
 
         <!-- Special Overlay -->
-        <field name="specialOverlay" type="string"/>
+        <field name="specialOverlay" subType="string"/>
 
     </object>
 
@@ -30,10 +30,10 @@
     <object package="::container" name="Basket">
 
         <!-- Special Overlay -->
-        <field name="specialOverlay" type="string"/>
+        <field name="specialOverlay" subType="string"/>
 
         <!-- Special Extension -->
-        <field name="specialExt" type="object" objectRef="::ext::ProduceExt"/>
+        <field name="specialExt" subType="object" objectRef="::ext::ProduceExt"/>
 
     </object>
 

@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "package": "com_example_model",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "subType": "pojo",
+          "@dbTable": "users",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true,
+                "@dbColumn": "user_id"
+              }
+            },
+            {
+              "field": {
+                "name": "username", 
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 50,
+                "@dbColumn": "username"
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string", 
+                "@required": true,
+                "@maxLength": 255,
+                "@dbColumn": "email"
+              }
+            },
+            {
+              "field": {
+                "name": "createdDate",
+                "subType": "date",
+                "@dbColumn": "created_date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Product",
+          "subType": "pojo",
+          "@dbTable": "products",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true,
+                "@dbColumn": "product_id"
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 100,
+                "@dbColumn": "product_name"
+              }
+            },
+            {
+              "field": {
+                "name": "price",
+                "subType": "double",
+                "@required": true,
+                "@dbColumn": "price"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
