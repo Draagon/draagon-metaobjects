@@ -3,8 +3,18 @@ name: Development Branch CI
 on:
   push:
     branches: [ develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'LICENSE'
   pull_request:
     branches: [ develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+      - 'LICENSE'
 
 permissions:
   contents: read

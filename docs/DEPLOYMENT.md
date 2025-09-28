@@ -24,7 +24,8 @@ This guide explains how to deploy the MetaObjects documentation as a live websit
 
 3. **Save Settings**
    - Click **Save**
-   - Note the provided URL: `https://metaobjectsdev.github.io/metaobjects-core/`
+   - **Custom Domain**: Set to `metaobjects.dev`
+   - Note the live URL: `https://metaobjects.dev/metaobjects-core/`
 
 ### Step 2: Verify Workflow Files
 
@@ -66,7 +67,7 @@ git push origin main
    - Review logs if there are any issues
 
 2. **Visit Live Site**
-   - Open: `https://metaobjectsdev.github.io/metaobjects-core/`
+   - Open: `https://metaobjects.dev/metaobjects-core/`
    - Verify site loads correctly
    - Test navigation and search functionality
 
@@ -74,22 +75,19 @@ git push origin main
 
 ### Custom Domain Setup
 
-1. **Add Custom Domain**
+1. **Add Custom Domain** (Already configured)
    ```bash
-   # Create CNAME file
-   echo "docs.metaobjects.com" > docs/src/site/documentation/docs/CNAME
-   git add docs/src/site/documentation/docs/CNAME
-   git commit -m "Add custom domain"
-   git push
+   # CNAME file already created
+   # Contains: metaobjects.dev
    ```
 
-2. **Update mkdocs.yml**
+2. **Update mkdocs.yml** (Already configured)
    ```yaml
-   site_url: 'https://docs.metaobjects.com/'
+   site_url: 'https://metaobjects.dev/metaobjects-core/'
    ```
 
-3. **Configure DNS**
-   - Add CNAME record: `docs.metaobjects.com` → `metaobjectsdev.github.io`
+3. **Configure DNS** (Should be already configured)
+   - Add CNAME record: `metaobjects.dev` → `metaobjectsdev.github.io`
    - Wait for DNS propagation (up to 24 hours)
 
 ### Environment-Specific Deployments
@@ -341,8 +339,8 @@ Before going live:
 
 With everything configured, your MetaObjects documentation website will be live at:
 
-**Primary URL**: `https://metaobjectsdev.github.io/metaobjects-core/`
-**Custom Domain** (if configured): `https://docs.metaobjects.com/`
+**Custom Domain**: `https://metaobjects.dev/metaobjects-core/`
+**GitHub Pages URL**: `https://metaobjectsdev.github.io/metaobjects-core/` (mirrors custom domain)
 
 The site will automatically update whenever documentation changes are pushed to the main branch, providing a professional, always-current documentation experience for MetaObjects framework users.
 

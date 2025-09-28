@@ -52,8 +52,33 @@ jobs:
 
       - name: Build documentation
         run: |
+          echo "🚀 Building MkDocs documentation (NOT Maven project)"
+          echo "Working directory: $(pwd)"
+          echo "Repository contents:"
+          ls -la
+
+          echo "📁 Navigating to documentation directory..."
           cd docs/src/site/documentation
+          echo "MkDocs directory: $(pwd)"
+          echo "Documentation files:"
+          ls -la
+
+          echo "📄 Checking MkDocs configuration..."
+          if [ ! -f "mkdocs.yml" ]; then
+            echo "❌ ERROR: mkdocs.yml not found!"
+            exit 1
+          fi
+
+          echo "🔧 Validating MkDocs configuration..."
+          mkdocs --version
+          mkdocs config
+
+          echo "🏗️ Building documentation with MkDocs..."
           mkdocs build --strict --verbose
+
+          echo "✅ MkDocs build completed successfully!"
+          echo "📊 Build output:"
+          ls -la site/
 
       - name: Upload documentation artifacts
         uses: actions/upload-pages-artifact@v3

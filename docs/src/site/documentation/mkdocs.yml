@@ -1,7 +1,7 @@
 site_name: MetaObjects Documentation
 site_description: 'Comprehensive documentation for the MetaObjects metadata-driven development framework'
 site_author: 'MetaObjects Development Team'
-site_url: 'https://metaobjectsdev.github.io/metaobjects-core/'
+site_url: 'https://metaobjects.dev/metaobjects-core/'
 
 # Repository
 repo_name: 'metaobjectsdev/metaobjects-core'
