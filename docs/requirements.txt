@@ -19,6 +19,9 @@ mkdocs-redirects>=1.2.0
 # Python Markdown extensions (included with mkdocs-material but listed for clarity)
 pymdown-extensions>=10.0.0
 
+# Icon libraries for comprehensive icon support
+materialdesignicons>=1.0.0
+
 # Optional: Add these for enhanced features
 # mkdocs-git-committers-plugin-2>=1.2.0  # Show contributors
 # mkdocs-awesome-pages-plugin>=2.9.0     # Better navigation

@@ -37,6 +37,8 @@ theme:
     - search.share
     - content.code.copy
     - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
 
 # Extensions
 markdown_extensions:
@@ -56,6 +58,11 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - octicons
+          - fontawesome/brands
+          - fontawesome/solid
   - admonition
   - pymdownx.details
   - attr_list
