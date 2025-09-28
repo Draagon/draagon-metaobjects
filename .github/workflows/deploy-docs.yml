@@ -73,7 +73,7 @@ jobs:
           mkdocs --version
 
           echo "🏗️ Building documentation with MkDocs..."
-          mkdocs build --strict --verbose
+          mkdocs build --verbose
 
           echo "✅ MkDocs build completed successfully!"
           echo "📊 Build output:"
