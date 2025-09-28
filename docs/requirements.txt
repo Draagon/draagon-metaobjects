@@ -1,0 +1,25 @@
+# MkDocs Documentation Requirements
+#
+# This file contains all dependencies needed to build the MetaObjects documentation
+# Used by GitHub Actions workflow and local development
+
+# Core MkDocs
+mkdocs>=1.5.0
+
+# Material Design theme
+mkdocs-material>=9.4.0
+
+# Plugins
+mkdocs-git-revision-date-localized-plugin>=1.2.0
+
+# Additional useful plugins for future enhancement
+mkdocs-minify-plugin>=0.7.0
+mkdocs-redirects>=1.2.0
+
+# Python Markdown extensions (included with mkdocs-material but listed for clarity)
+pymdown-extensions>=10.0.0
+
+# Optional: Add these for enhanced features
+# mkdocs-git-committers-plugin-2>=1.2.0  # Show contributors
+# mkdocs-awesome-pages-plugin>=2.9.0     # Better navigation
+# mkdocs-include-markdown-plugin>=6.0.0  # Include external markdown

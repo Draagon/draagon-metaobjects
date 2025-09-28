@@ -1,0 +1,164 @@
+name: 📚 Documentation Issue
+description: Report issues with documentation content, website, or deployment
+title: "[DOCS]: "
+labels: ["documentation", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the MetaObjects documentation!
+
+        Please provide details about the documentation issue you've encountered.
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What type of documentation issue is this?
+      options:
+        - Content Error (incorrect information)
+        - Missing Documentation (feature not documented)
+        - Broken Link (internal or external link not working)
+        - Code Example Error (example doesn't work)
+        - Website Issue (styling, navigation, search problems)
+        - Deployment Issue (documentation site not building/deploying)
+        - Accessibility Issue (screen reader, keyboard navigation problems)
+        - Performance Issue (slow loading, large files)
+        - Mobile/Responsive Issue (doesn't work on mobile devices)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: page-url
+    attributes:
+      label: Page URL
+      description: URL of the documentation page with the issue
+      placeholder: "https://metaobjectsdev.github.io/metaobjects-core/user-guide/..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Detailed description of the issue
+      placeholder: |
+        Please describe:
+        - What you expected to see or happen
+        - What actually happened or what's wrong
+        - Steps to reproduce (if applicable)
+        - Browser/device information (for website issues)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content (if applicable)
+      description: Copy/paste the current incorrect content
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: suggested-content
+    attributes:
+      label: Suggested Fix/Content
+      description: How should this be corrected or what content should be added?
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: code-example
+    attributes:
+      label: Code Example (if applicable)
+      description: If reporting a code example issue, paste the code that doesn't work
+      render: java
+    validations:
+      required: false
+
+  - type: input
+    id: framework-version
+    attributes:
+      label: MetaObjects Version
+      description: Which version of the MetaObjects framework does this relate to?
+      placeholder: "6.2.0"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: environment
+    attributes:
+      label: Environment (for website issues)
+      description: Where did you encounter this issue?
+      options:
+        - label: Desktop browser (Chrome)
+        - label: Desktop browser (Firefox)
+        - label: Desktop browser (Safari)
+        - label: Desktop browser (Edge)
+        - label: Mobile browser (iOS Safari)
+        - label: Mobile browser (Android Chrome)
+        - label: Screen reader
+        - label: Local development (mkdocs serve)
+        - label: Documentation build process
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How would you rate the severity of this issue?
+      options:
+        - Low (cosmetic, enhancement)
+        - Medium (affects usability)
+        - High (incorrect information, broken functionality)
+        - Critical (documentation completely inaccessible)
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information that might be helpful
+      placeholder: |
+        - Related issues or pages
+        - Screenshots (if helpful)
+        - Error messages
+        - Browser console errors
+        - Build logs (for deployment issues)
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help fix this issue?
+      options:
+        - label: I can provide a pull request to fix this issue
+        - label: I can help test a fix for this issue
+        - label: I can provide additional information if needed
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 📚 Documentation Resources
+
+        - **Documentation Plan**: [docs/DOCUMENTATION_PLAN.md](https://github.com/metaobjectsdev/metaobjects-core/blob/main/docs/DOCUMENTATION_PLAN.md)
+        - **Deployment Guide**: [docs/DEPLOYMENT.md](https://github.com/metaobjectsdev/metaobjects-core/blob/main/docs/DEPLOYMENT.md)
+        - **Local Development**: [docs/README.md](https://github.com/metaobjectsdev/metaobjects-core/blob/main/docs/README.md)
+        - **Writing Guidelines**: Available in DOCUMENTATION_PLAN.md
+
+        ## 🚀 Quick Fixes
+
+        **For content errors**: Most documentation content is in `docs/src/site/documentation/docs/`
+        **For website issues**: Check `docs/src/site/documentation/mkdocs.yml` configuration
+        **For deployment issues**: Review `.github/workflows/deploy-docs.yml` workflow
+
+        Thank you for helping improve the MetaObjects documentation! 🎉

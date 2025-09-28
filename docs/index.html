@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaObjects Documentation</title>
+    <meta name="description" content="Redirecting to MetaObjects Framework Documentation">
+
+    <!-- Instant redirect for modern browsers -->
+    <meta http-equiv="refresh" content="0; url=https://metaobjectsdev.github.io/metaobjects-core/">
+
+    <!-- Canonical URL for SEO -->
+    <link rel="canonical" href="https://metaobjectsdev.github.io/metaobjects-core/">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        h1 {
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .redirect-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .redirect-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .links {
+            margin-top: 2rem;
+            opacity: 0.8;
+        }
+
+        .links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            transition: border-color 0.3s ease;
+        }
+
+        .links a:hover {
+            border-bottom-color: white;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .links a {
+                display: block;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📚</div>
+        <h1>MetaObjects Documentation</h1>
+        <p>Redirecting you to the comprehensive MetaObjects framework documentation...</p>
+
+        <div class="spinner"></div>
+
+        <p>
+            <a href="https://metaobjectsdev.github.io/metaobjects-core/" class="redirect-button">
+                Go to Documentation
+            </a>
+        </p>
+
+        <div class="links">
+            <a href="https://github.com/metaobjectsdev/metaobjects-core">GitHub Repository</a>
+            <a href="https://github.com/metaobjectsdev/metaobjects-core/releases">Releases</a>
+            <a href="https://github.com/metaobjectsdev/metaobjects-core/issues">Issues</a>
+        </div>
+    </div>
+
+    <script>
+        // Immediate redirect for JavaScript-enabled browsers
+        window.location.href = 'https://metaobjectsdev.github.io/metaobjects-core/';
+
+        // Backup redirect after 3 seconds
+        setTimeout(function() {
+            if (window.location.href.indexOf('metaobjectsdev.github.io') === -1) {
+                window.location.href = 'https://metaobjectsdev.github.io/metaobjects-core/';
+            }
+        }, 3000);
+
+        // Update button text after delay
+        setTimeout(function() {
+            const button = document.querySelector('.redirect-button');
+            if (button) {
+                button.textContent = 'Click here if not redirected';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -1,1 +1,137 @@
 site_name: MetaObjects Documentation
+site_description: 'Comprehensive documentation for the MetaObjects metadata-driven development framework'
+site_author: 'MetaObjects Development Team'
+site_url: 'https://metaobjectsdev.github.io/metaobjects-core/'
+
+# Repository
+repo_name: 'metaobjectsdev/metaobjects-core'
+repo_url: 'https://github.com/metaobjectsdev/metaobjects-core'
+
+# Copyright
+copyright: 'Copyright &copy; 2024 MetaObjects Development Team'
+
+# Configuration
+theme:
+  name: 'material'
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+# Plugins
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: getting-started/quick-start.md
+    - Core Concepts: getting-started/core-concepts.md
+    - Installation: getting-started/installation.md
+    - First Example: getting-started/first-example.md
+  - User Guide:
+    - Metadata:
+      - Foundation: user-guide/metadata/metadata-foundation.md
+      - Type System: user-guide/metadata/type-system.md
+      - Inheritance: user-guide/metadata/inheritance.md
+      - Constraints:
+        - Architecture: user-guide/metadata/constraints/constraint-architecture.md
+        - Custom Constraints: user-guide/metadata/constraints/custom-constraints.md
+      - Attributes:
+        - Framework: user-guide/metadata/attributes/attribute-framework.md
+        - Inline Attributes: user-guide/metadata/attributes/inline-attributes.md
+      - I/O:
+        - JSON Processing: user-guide/metadata/io/json-processing.md
+        - XML Processing: user-guide/metadata/io/xml-processing.md
+    - Code Generation:
+      - Architecture: user-guide/codegen/generator-architecture.md
+      - Built-in Generators: user-guide/codegen/built-in-generators.md
+      - Templates:
+        - Mustache Integration: user-guide/codegen/templates/mustache-integration.md
+        - Custom Templates: user-guide/codegen/templates/custom-templates.md
+    - Core:
+      - Loaders:
+        - Architecture: user-guide/core/loaders/loader-architecture.md
+        - Parser System: user-guide/core/loaders/parser-system.md
+      - Objects:
+        - Object Types: user-guide/core/objects/object-types.md
+        - Value Objects: user-guide/core/objects/value-objects.md
+  - Developer Guide:
+    - Performance:
+      - Characteristics: developer-guide/performance/performance-characteristics.md
+      - Optimization: developer-guide/performance/optimization.md
+    - Integration:
+      - Spring Integration: developer-guide/integration/spring-integration.md
+      - OSGi Integration: developer-guide/integration/osgi-integration.md
+    - Plugins:
+      - Creating Extensions: developer-guide/plugins/creating-extensions.md
+      - Provider Pattern: developer-guide/plugins/provider-pattern.md
+  - Architecture:
+    - Design Principles: architecture/design-principles.md
+    - Read-Optimized Pattern: architecture/read-optimized-pattern.md
+    - Memory Model: architecture/memory-model.md
+    - Decision Records: architecture/decisions/
+  - Examples:
+    - Basic Usage: examples/basic-usage.md
+    - Spring Integration: examples/spring-integration.md
+    - Code Generation: examples/code-generation.md
+    - Plugin Development: examples/plugin-development.md
+  - API Reference:
+    - Metadata: api-reference/metadata.md
+    - Core: api-reference/core.md
+    - Code Generation: api-reference/codegen.md
+  - Migration:
+    - From v5.x: migration/from-v5.md
+    - Breaking Changes: migration/breaking-changes.md
+
+# Extra CSS and JavaScript
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
