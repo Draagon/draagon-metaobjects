@@ -84,9 +84,9 @@ jobs:
         with:
           path: docs/src/site/documentation/site
 
-  # Deploy job - only on main/master branch pushes
+  # Deploy job - on main/master pushes OR manual workflow dispatch
   deploy:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) || github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
