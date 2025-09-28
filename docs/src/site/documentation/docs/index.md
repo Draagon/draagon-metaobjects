@@ -226,6 +226,38 @@ Ready to experience metadata-driven development? Choose your path:
 
 </div>
 
+## MetaObjects Ecosystem
+
+This documentation covers the **core platform**. For the complete MetaObjects experience:
+
+<div class="grid cards" markdown>
+
+-   :material-web:{ .lg .middle } **MetaObjects Platform**
+
+    ---
+
+    Enterprise solutions, case studies, and business context
+
+    [:octicons-arrow-right-24: metaobjects.com](https://metaobjects.com)
+
+-   :material-account-supervisor:{ .lg .middle } **Developer Portal**
+
+    ---
+
+    Community hub, tutorials, and developer resources
+
+    [:octicons-arrow-right-24: metaobjects.dev](https://metaobjects.dev)
+
+-   :material-account:{ .lg .middle } **About the Creator**
+
+    ---
+
+    Meet Doug Mealing, architect of the MetaObjects framework
+
+    [:octicons-arrow-right-24: dougmealing.com](https://dougmealing.com)
+
+</div>
+
 ## Community & Support
 
 - **GitHub Repository**: [metaobjectsdev/metaobjects-core](https://github.com/metaobjectsdev/metaobjects-core)
