@@ -69,9 +69,8 @@ jobs:
             exit 1
           fi
 
-          echo "🔧 Validating MkDocs configuration..."
+          echo "🔧 Validating MkDocs installation..."
           mkdocs --version
-          mkdocs config
 
           echo "🏗️ Building documentation with MkDocs..."
           mkdocs build --strict --verbose
