@@ -56,15 +56,13 @@ public class StringField extends PrimitiveField<String> {
         try {
             registry.registerType(StringField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_STRING)
-                .description("String field with length and pattern validation")
+                .description("String field with pattern validation that supports validator children")
 
                 // INHERIT FROM BASE FIELD
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
 
                 // STRING-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_PATTERN, StringAttribute.SUBTYPE_STRING)
-                .optionalAttribute(ATTR_MAX_LENGTH, IntAttribute.SUBTYPE_INT)
-                .optionalAttribute(ATTR_MIN_LENGTH, IntAttribute.SUBTYPE_INT)
             );
 
             log.debug("Registered StringField type with unified registry (auto-generated placement constraints)");

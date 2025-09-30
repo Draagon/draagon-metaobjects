@@ -25,6 +25,7 @@ public class CoreDBMetaDataProvider implements MetaDataTypeProvider {
     public static final String DB_LENGTH = "dbLength";
     public static final String DB_PRECISION = "dbPrecision";
     public static final String DB_SCALE = "dbScale";
+    public static final String DB_AUTO_INCREMENT = "dbAutoIncrement";
 
     @Override
     public String getProviderId() {
@@ -89,5 +90,9 @@ public class CoreDBMetaDataProvider implements MetaDataTypeProvider {
             .optionalAttribute(DB_COLUMN, "string")
             .optionalAttribute(DB_PRECISION, "int")
             .optionalAttribute(DB_SCALE, "int");
+
+        // Key-level database attributes
+        registry.findType("key", "primary")
+            .optionalAttribute(DB_AUTO_INCREMENT, "string");
     }
 }

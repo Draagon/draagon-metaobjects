@@ -22,7 +22,79 @@
 
     <build>
         <plugins>
-            <!-- TODO: Add MetaObjects Maven Plugin when it supports proper code generation -->
+            <!-- MetaObjects Maven Plugin for generating ManagedObject classes -->
+            <plugin>
+                <groupId>com.metaobjects</groupId>
+                <artifactId>metaobjects-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-managed-objects</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <loader>
+                                <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
+                                <name>fishstore-loader</name>
+                                <sourceDir>${project.basedir}/src/main/resources</sourceDir>
+                                <sources>
+                                    <source>metadata/fishstore-base-metadata.json</source>
+                                    <source>metadata/fishstore-db-overlay.json</source>
+                                </sources>
+                            </loader>
+                            <generators>
+                                <generator>
+                                    <classname>com.metaobjects.generator.mustache.MustacheTemplateGenerator</classname>
+                                    <args>
+                                        <templatePath>${project.basedir}/src/main/resources/templates/</templatePath>
+                                        <outputDir>target/generated-sources/metaobjects</outputDir>
+                                        <packagePrefix>com.metaobjects.demo</packagePrefix>
+                                        <packagePostfix>domain</packagePostfix>
+                                        <targetLanguage>java</targetLanguage>
+                                        <templateName>managed-object</templateName>
+                                    </args>
+                                </generator>
+                            </generators>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.metaobjects</groupId>
+                        <artifactId>metaobjects-codegen-mustache</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.metaobjects</groupId>
+                        <artifactId>metaobjects-om</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- Build Helper Plugin to add generated sources to classpath -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <execution>
+                        <id>add-generated-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/target/generated-sources/metaobjects</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -65,7 +137,6 @@
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>${derby.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

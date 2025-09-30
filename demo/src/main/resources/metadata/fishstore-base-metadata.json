@@ -1,18 +1,19 @@
 {
+  "name": "fishstore-base",
   "metadata": {
-    "package": "com_example_model",
+    "version": "1.0.0",
+    "package": "fishstore",
     "children": [
       {
         "object": {
-          "name": "User",
-          "subType": "pojo",
-          "@dbTable": "users",
+          "name": "Base",
+          "subType": "managed",
+          "@isAbstract": true,
           "children": [
             {
               "field": {
                 "name": "id",
                 "subType": "long",
-                "@dbColumn": "user_id",
                 "children": [
                   {
                     "validator": {
@@ -24,10 +25,25 @@
               }
             },
             {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Store",
+          "subType": "managed",
+          "super": "::Base",
+          "children": [
+            {
               "field": {
-                "name": "username",
+                "name": "name",
                 "subType": "string",
-                "@dbColumn": "username",
                 "children": [
                   {
                     "validator": {
@@ -47,39 +63,16 @@
             },
             {
               "field": {
-                "name": "email",
-                "subType": "string",
-                "@dbColumn": "email",
+                "name": "maxTanks",
+                "subType": "int",
                 "children": [
                   {
                     "validator": {
                       "name": "required",
                       "subType": "required"
                     }
-                  },
-                  {
-                    "validator": {
-                      "name": "length",
-                      "subType": "length",
-                      "@max": "255"
-                    }
                   }
                 ]
-              }
-            },
-            {
-              "field": {
-                "name": "createdDate",
-                "subType": "date",
-                "@dbColumn": "created_date"
-              }
-            },
-            {
-              "key": {
-                "name": "primary",
-                "subType": "primary",
-                "@keys": ["id"],
-                "@autoIncrementStrategy": "sequential"
               }
             }
           ]
@@ -87,15 +80,14 @@
       },
       {
         "object": {
-          "name": "Product",
-          "subType": "pojo",
-          "@dbTable": "products",
+          "name": "Tank",
+          "subType": "managed",
+          "super": "::Base",
           "children": [
             {
               "field": {
-                "name": "id",
-                "subType": "long",
-                "@dbColumn": "product_id",
+                "name": "num",
+                "subType": "int",
                 "children": [
                   {
                     "validator": {
@@ -108,9 +100,31 @@
             },
             {
               "field": {
+                "name": "maxFish",
+                "subType": "int",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Breed",
+          "subType": "managed",
+          "super": "::Base",
+          "children": [
+            {
+              "field": {
                 "name": "name",
                 "subType": "string",
-                "@dbColumn": "product_name",
                 "children": [
                   {
                     "validator": {
@@ -130,9 +144,52 @@
             },
             {
               "field": {
-                "name": "price",
-                "subType": "double",
-                "@dbColumn": "price",
+                "name": "agressionLevel",
+                "subType": "int",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Fish",
+          "subType": "managed",
+          "super": "::Base",
+          "children": [
+            {
+              "field": {
+                "name": "breedName",
+                "subType": "string",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "field": {
+                "name": "length",
+                "subType": "int",
                 "children": [
                   {
                     "validator": {
@@ -144,11 +201,17 @@
               }
             },
             {
-              "key": {
-                "name": "primary",
-                "subType": "primary",
-                "@keys": ["id"],
-                "@autoIncrementStrategy": "sequential"
+              "field": {
+                "name": "weight",
+                "subType": "int",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             }
           ]

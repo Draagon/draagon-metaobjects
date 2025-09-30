@@ -13,6 +13,8 @@ import com.metaobjects.registry.MetaDataRegistry;
 import static com.metaobjects.attr.MetaAttribute.TYPE_ATTR;
 import static com.metaobjects.attr.MetaAttribute.SUBTYPE_BASE;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,6 +30,40 @@ public class StringArrayAttribute extends MetaAttribute<List<String>>
      */
     public StringArrayAttribute(String name ) {
         super( SUBTYPE_STRING_ARRAY, name, DataTypes.STRING_ARRAY);
+    }
+
+    /**
+     * Override setValueAsString to parse comma-delimited format
+     */
+    @Override
+    public void setValueAsString(String value) {
+        if (value == null) {
+            setValueAsObject(null);
+            return;
+        }
+
+        // Empty string should result in empty list, not null
+        if (value.trim().isEmpty()) {
+            setValueAsObject(new ArrayList<>());
+            return;
+        }
+
+        // Parse comma-delimited format: "id,name,email" or single value "id"
+        if (value.contains(",")) {
+            // Comma-delimited: id,name,email
+            String[] items = value.split(",");
+            List<String> list = new ArrayList<>();
+            for (String item : items) {
+                String trimmed = item.trim();
+                if (!trimmed.isEmpty()) {
+                    list.add(trimmed);
+                }
+            }
+            setValueAsObject(list);
+        } else {
+            // Single value
+            setValueAsObject(Arrays.asList(value.trim()));
+        }
     }
 
     /**

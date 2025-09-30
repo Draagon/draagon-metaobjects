@@ -73,13 +73,13 @@ Create a JSON metadata file that defines a simple User object:
       {
         "object": {
           "name": "User",
-          "type": "pojo",
+          "subType": "pojo",
           "@dbTable": "users",
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@required": true,
                 "@dbColumn": "user_id"
               }
@@ -87,7 +87,7 @@ Create a JSON metadata file that defines a simple User object:
             {
               "field": {
                 "name": "email",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 255,
                 "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$",
@@ -97,7 +97,7 @@ Create a JSON metadata file that defines a simple User object:
             {
               "field": {
                 "name": "firstName",
-                "type": "string",
+                "subType": "string",
                 "@maxLength": 100,
                 "@dbColumn": "first_name"
               }
@@ -105,7 +105,7 @@ Create a JSON metadata file that defines a simple User object:
             {
               "field": {
                 "name": "lastName",
-                "type": "string",
+                "subType": "string",
                 "@maxLength": 100,
                 "@dbColumn": "last_name"
               }
@@ -113,8 +113,16 @@ Create a JSON metadata file that defines a simple User object:
             {
               "field": {
                 "name": "createdAt",
-                "type": "date",
+                "subType": "date",
                 "@dbColumn": "created_at"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]

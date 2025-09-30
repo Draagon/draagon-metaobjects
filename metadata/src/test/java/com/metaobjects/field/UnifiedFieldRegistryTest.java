@@ -98,15 +98,15 @@ public class UnifiedFieldRegistryTest {
         // Test StringField registration and child requirements
         assertTrue("StringField should accept pattern attribute",
                   registry.acceptsChild("field", "string", "attr", "string", "pattern"));
-        assertTrue("StringField should accept maxLength attribute", 
-                  registry.acceptsChild("field", "string", "attr", "int", "maxLength"));
-        assertTrue("StringField should accept minLength attribute",
-                  registry.acceptsChild("field", "string", "attr", "int", "minLength"));
+        assertTrue("StringField should accept validator children",
+                  registry.acceptsChild("field", "string", "validator", "required", "*"));
+        assertTrue("StringField should accept LengthValidator children",
+                  registry.acceptsChild("field", "string", "validator", "length", "*"));
         
         String description = registry.getSupportedChildrenDescription("field", "string");
         assertNotNull("Should have supported children description", description);
         assertTrue("Description should mention pattern", description.toLowerCase().contains("pattern"));
-        assertTrue("Description should mention maxLength", description.toLowerCase().contains("maxlength"));
+        assertTrue("Description should mention validator support", description.toLowerCase().contains("validator"));
     }
 
     @Test

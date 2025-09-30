@@ -159,6 +159,12 @@ public class MetaData implements Cloneable, Serializable {
     private static void setupRootAbstractConstraints() {
         MetaDataRegistry registry = MetaDataRegistry.getInstance();
 
+        // Check if constraints are already registered to prevent duplicates during Maven plugin execution
+        if (registry.hasConstraint("metadata.base.objects")) {
+            log.debug("Root abstract constraints already registered, skipping");
+            return;
+        }
+
         // OBJECTS can be abstract or concrete under metadata.base
         registry.addConstraint(PlacementConstraint.allowChildType(
             "metadata.base.objects",

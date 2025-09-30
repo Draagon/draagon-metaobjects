@@ -39,7 +39,7 @@ public class MustacheTemplateEngine {
      * @throws RuntimeException if code generation fails
      */
     public String generateCode(TemplateDefinition template, MetaObject metaObject) {
-        return generateCode(template, metaObject, null);
+        return generateCode(template, metaObject, null, null);
     }
     
     /**
@@ -48,13 +48,14 @@ public class MustacheTemplateEngine {
      * @param template the template definition containing the Mustache template
      * @param metaObject the MetaObject to generate code for
      * @param packagePrefix optional package prefix to prepend to the package name
+     * @param packagePostfix optional package postfix to append to the package name
      * @return the generated code as a string
      * @throws RuntimeException if code generation fails
      */
-    public String generateCode(TemplateDefinition template, MetaObject metaObject, String packagePrefix) {
+    public String generateCode(TemplateDefinition template, MetaObject metaObject, String packagePrefix, String packagePostfix) {
         try {
             // Create template context
-            Map<String, Object> context = createTemplateContext(template, metaObject, packagePrefix);
+            Map<String, Object> context = createTemplateContext(template, metaObject, packagePrefix, packagePostfix);
             
             // Compile mustache template (with caching)
             Mustache mustache = getCompiledTemplate(template);
@@ -93,15 +94,29 @@ public class MustacheTemplateEngine {
      * Create the template context with all necessary data and helper functions, with package prefix support.
      */
     private Map<String, Object> createTemplateContext(TemplateDefinition template, MetaObject metaObject, String packagePrefix) {
+        return createTemplateContext(template, metaObject, packagePrefix, null);
+    }
+
+    /**
+     * Create template context with package prefix and postfix support.
+     */
+    private Map<String, Object> createTemplateContext(TemplateDefinition template, MetaObject metaObject, String packagePrefix, String packagePostfix) {
         Map<String, Object> context = new HashMap<>();
         
         // Basic object information
         String fullName = metaObject.getName();
-        String className = fullName.contains("::") ? 
+        String className = fullName.contains("::") ?
             fullName.substring(fullName.lastIndexOf("::") + 2) : fullName;
+        String qualifiedName = (metaObject.getPackage() != null && !metaObject.getPackage().isEmpty()) ?
+            metaObject.getPackage() + "::" + metaObject.getName() : metaObject.getName();
+
+        String packageName = getPackageName(metaObject, packagePrefix, packagePostfix);
+
         context.put("className", className);
-        context.put("packageName", getPackageName(metaObject, packagePrefix));
-        context.put("fullName", metaObject.getPackage() + "::" + metaObject.getName());
+        context.put("packageName", packageName);
+        context.put("package", packageName); // Template uses {{package}}
+        context.put("fullName", qualifiedName);
+        context.put("metaObjectName", qualifiedName); // For managed-object template constants
         context.put("imports", getRequiredImports(template, metaObject));
         
         // Database-specific context
@@ -113,7 +128,9 @@ public class MustacheTemplateEngine {
         for (int i = 0; i < metaFields.size(); i++) {
             MetaField field = metaFields.get(i);
             Map<String, Object> fieldContext = createFieldContext(field);
-            fieldContext.put("isLast", i == metaFields.size() - 1);
+            boolean isLast = i == metaFields.size() - 1;
+            fieldContext.put("isLast", isLast);
+            fieldContext.put("hasNext", !isLast);
             fields.add(fieldContext);
         }
         context.put("fields", fields);
@@ -141,7 +158,8 @@ public class MustacheTemplateEngine {
         
         String fieldName = field.getName();
         fieldContext.put("name", fieldName);
-        
+        fieldContext.put("fieldName", fieldName); // Alias for template consistency
+
         // Pre-compute method names
         String capitalizedName = helperRegistry.get("capitalize").apply(fieldName).toString();
         fieldContext.put("getterName", "get" + capitalizedName);
@@ -154,7 +172,12 @@ public class MustacheTemplateEngine {
         fieldContext.put("isPrimitive", helperRegistry.get("isPrimitive").apply(field));
         fieldContext.put("isSearchable", helperRegistry.get("isSearchable").apply(field));
         fieldContext.put("capitalizedName", helperRegistry.get("capitalize").apply(field.getName()));
+        fieldContext.put("capitalizedFieldName", capitalizedName); // Alias for template consistency
         fieldContext.put("description", field.hasMetaAttr("description") ? field.getMetaAttr("description").getValueAsString() : "Property " + field.getName());
+
+        // Add template-specific variables for managed-object template
+        fieldContext.put("constantFieldName", helperRegistry.get("constantFieldName").apply(field));
+        fieldContext.put("isBoolean", helperRegistry.get("isBoolean").apply(field));
         
         // Additional field properties
         fieldContext.put("hasDefaultValue", field.hasMetaAttr("defaultValue"));
@@ -195,22 +218,42 @@ public class MustacheTemplateEngine {
     }
     
     private String getPackageName(MetaObject metaObject, String packagePrefix) {
-        // First try to get from package property
-        String packageName = metaObject.getPackage();
-        if (packageName == null || packageName.isEmpty()) {
+        return getPackageName(metaObject, packagePrefix, null);
+    }
+
+    /**
+     * Get the package name for a MetaObject with prefix and postfix support.
+     */
+    private String getPackageName(MetaObject metaObject, String packagePrefix, String packagePostfix) {
+        // Get package from metadata first
+        String metadataPackage = metaObject.getPackage();
+        if (metadataPackage == null || metadataPackage.isEmpty()) {
             // Fallback to package attribute
             if (metaObject.hasMetaAttr("package")) {
-                packageName = metaObject.getMetaAttr("package").getValueAsString();
+                metadataPackage = metaObject.getMetaAttr("package").getValueAsString();
             } else {
-                packageName = "com.example.generated";
+                metadataPackage = "generated";
             }
         }
-        
-        // Apply package prefix if provided
+
+        // Keep metadata package name as specified (no underscore-to-dot conversion)
+        String packageName;
+
+        // If packagePrefix is provided, combine it with metadata package
         if (packagePrefix != null && !packagePrefix.trim().isEmpty()) {
-            packageName = packagePrefix + "." + packageName;
+            packageName = packagePrefix.trim() + "." + metadataPackage;
+        } else {
+            packageName = metadataPackage;
         }
-        
+
+        // Append package postfix if provided
+        if (packagePostfix != null && !packagePostfix.trim().isEmpty()) {
+            if (!packageName.endsWith(".")) {
+                packageName += ".";
+            }
+            packageName += packagePostfix.trim();
+        }
+
         return packageName;
     }
     

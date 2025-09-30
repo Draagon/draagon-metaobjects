@@ -1,8 +1,8 @@
 package com.metaobjects.demo.fishstore.api;
 
 import com.metaobjects.demo.fishstore.service.FishstoreService;
-import com.metaobjects.demo.fishstore.Store;
-import com.metaobjects.demo.fishstore.Breed;
+import com.metaobjects.demo.fishstore.domain.Store;
+import com.metaobjects.demo.fishstore.domain.Breed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

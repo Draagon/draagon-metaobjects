@@ -522,11 +522,18 @@ public abstract class BaseMetaDataParser {
                 parentMetaData.addChild(attr);
 
                 // Handle array format for StringArrayAttribute types
-                if ("stringarray".equals(subType) && !finalValue.startsWith("[")) {
-                    // Convert single value to array format for StringArrayAttribute
-                    attr.setValueAsString("[" + finalValue + "]");
-                    log.debug("Auto-created type-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]",
-                             attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                if ("stringarray".equals(subType)) {
+                    if (finalValue.startsWith("[") && finalValue.endsWith("]")) {
+                        // Already in JSON array format - use as is
+                        attr.setValueAsString(finalValue);
+                        log.debug("Auto-created type-aware stringarray attribute [{}] with JSON array format on parent [{}:{}:{}] in file [{}]",
+                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    } else {
+                        // Convert single value to array format for StringArrayAttribute
+                        attr.setValueAsString("[\"" + finalValue + "\"]");
+                        log.debug("Auto-created type-aware stringarray attribute [{}] converted to JSON array on parent [{}:{}:{}] in file [{}]",
+                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    }
                 } else {
                     attr.setValueAsString(finalValue);
                     log.debug("Auto-created type-aware attribute [{}] with subtype [{}] and expectedType [{}] on parent [{}:{}:{}] in file [{}]",
@@ -690,7 +697,7 @@ public abstract class BaseMetaDataParser {
         if (stringValue == null) {
             return null;
         }
-        
+
         try {
             if (expectedType == Boolean.class || expectedType == boolean.class) {
                 return Boolean.parseBoolean(stringValue);
@@ -700,11 +707,14 @@ public abstract class BaseMetaDataParser {
                 return Long.parseLong(stringValue);
             } else if (expectedType == Double.class || expectedType == double.class) {
                 return Double.parseDouble(stringValue);
+            } else if (expectedType == String[].class) {
+                // String array type - value is already in comma-delimited format from parser
+                return stringValue;
             } else {
                 return stringValue; // String or unknown type
             }
         } catch (NumberFormatException e) {
-            log.warn("Failed to convert value [{}] to type [{}], using as string: {}", 
+            log.warn("Failed to convert value [{}] to type [{}], using as string: {}",
                 stringValue, expectedType.getSimpleName(), e.getMessage());
             return stringValue;
         }

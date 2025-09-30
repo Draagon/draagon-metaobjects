@@ -13,14 +13,31 @@ Metadata defines the **structure, rules, and behavior** of your objects. Think o
 {
   "object": {
     "name": "User",
-    "type": "pojo",
+    "subType": "pojo",
+    "@dbTable": "users",
     "children": [
       {
         "field": {
+          "name": "id",
+          "subType": "long",
+          "@dbColumn": "user_id"
+        }
+      },
+      {
+        "field": {
           "name": "email",
-          "type": "string",
+          "subType": "string",
           "@required": true,
-          "@maxLength": 255
+          "@maxLength": 255,
+          "@dbColumn": "email"
+        }
+      },
+      {
+        "key": {
+          "name": "primary",
+          "subType": "primary",
+          "@keys": ["id"],
+          "@autoIncrementStrategy": "sequential"
         }
       }
     ]

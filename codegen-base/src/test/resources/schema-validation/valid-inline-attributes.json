@@ -15,7 +15,6 @@
                 "subType": "long",
                 "@required": true,
                 "@dbColumn": "product_id",
-                "@isId": true,
                 "@dbNullable": false
               }
             },
@@ -61,7 +60,8 @@
               "key": {
                 "name": "primary",
                 "subType": "primary",
-                "@fields": "productId"
+                "@keys": ["productId"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]

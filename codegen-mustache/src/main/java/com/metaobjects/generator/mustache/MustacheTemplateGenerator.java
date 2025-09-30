@@ -36,6 +36,7 @@ public class MustacheTemplateGenerator implements Generator {
     public static final String PARAM_TEMPLATE_PATH = "templatePath";
     public static final String PARAM_OUTPUT_DIR = "outputDir";
     public static final String PARAM_PACKAGE_PREFIX = "packagePrefix";
+    public static final String PARAM_PACKAGE_POSTFIX = "packagePostfix";
     public static final String PARAM_TARGET_LANGUAGE = "targetLanguage";
     public static final String PARAM_TEMPLATE_NAME = "templateName";
     
@@ -49,6 +50,7 @@ public class MustacheTemplateGenerator implements Generator {
     private String templatePath = "templates/";
     private String outputDir = "target/generated-sources/metaobjects";
     private String packagePrefix = "";
+    private String packagePostfix = "";
     private String targetLanguage = "java";
     private String templateName = null; // If null, auto-discover templates
     
@@ -60,6 +62,7 @@ public class MustacheTemplateGenerator implements Generator {
         this.templatePath = this.args.getOrDefault(PARAM_TEMPLATE_PATH, this.templatePath);
         this.outputDir = this.args.getOrDefault(PARAM_OUTPUT_DIR, this.outputDir);
         this.packagePrefix = this.args.getOrDefault(PARAM_PACKAGE_PREFIX, this.packagePrefix);
+        this.packagePostfix = this.args.getOrDefault(PARAM_PACKAGE_POSTFIX, this.packagePostfix);
         this.targetLanguage = this.args.getOrDefault(PARAM_TARGET_LANGUAGE, this.targetLanguage);
         this.templateName = this.args.get(PARAM_TEMPLATE_NAME);
         
@@ -72,6 +75,9 @@ public class MustacheTemplateGenerator implements Generator {
         log.info("  Output Directory: {}", outputDir);
         log.info("  Target Language: {}", targetLanguage);
         log.info("  Package Prefix: {}", packagePrefix);
+        if (!packagePostfix.isEmpty()) {
+            log.info("  Package Postfix: {}", packagePostfix);
+        }
         if (templateName != null) {
             log.info("  Template Name: {}", templateName);
         }
@@ -251,7 +257,7 @@ public class MustacheTemplateGenerator implements Generator {
             templateParser.validateTemplate(template);
             
             // Generate code using Mustache engine
-            String generatedCode = templateEngine.generateCode(template, metaObject, packagePrefix);
+            String generatedCode = templateEngine.generateCode(template, metaObject, packagePrefix, packagePostfix);
             
             // Determine output file path and name
             String fullName = metaObject.getName();
@@ -282,22 +288,35 @@ public class MustacheTemplateGenerator implements Generator {
      * Get the package path for a MetaObject.
      */
     private String getPackagePath(MetaObject metaObject) {
-        // First try to get from package property
-        String packageName = metaObject.getPackage();
-        if (packageName == null || packageName.isEmpty()) {
+        // Get package from metadata first
+        String metadataPackage = metaObject.getPackage();
+        if (metadataPackage == null || metadataPackage.isEmpty()) {
             // Fallback to package attribute
             if (metaObject.hasMetaAttr("package")) {
-                packageName = metaObject.getMetaAttr("package").getValueAsString();
+                metadataPackage = metaObject.getMetaAttr("package").getValueAsString();
             } else {
-                packageName = "com.example.generated";
+                metadataPackage = "generated";
             }
         }
-            
-        // Apply package prefix if configured
+
+        // Keep metadata package name as specified (no underscore-to-dot conversion for directory path)
+        String packageName;
+
+        // If packagePrefix is provided, combine it with metadata package
         if (!packagePrefix.isEmpty()) {
-            packageName = packagePrefix + "." + packageName;
+            packageName = packagePrefix.trim() + "." + metadataPackage;
+        } else {
+            packageName = metadataPackage;
         }
-        
+
+        // Append package postfix if provided
+        if (!packagePostfix.isEmpty()) {
+            if (!packageName.endsWith(".")) {
+                packageName += ".";
+            }
+            packageName += packagePostfix.trim();
+        }
+
         return packageName.replace(".", File.separator);
     }
     

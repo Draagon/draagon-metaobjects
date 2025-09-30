@@ -6,7 +6,8 @@
       "children": [
         {"key": {"name": "primary", "subType":"primary",
           "children": [
-            {"attr": {"name": "keys", "value": "id"}}
+            {"attr": {"name": "keys", "value": "id"}},
+            {"attr": {"name": "autoIncrementStrategy", "value": "sequential"}}
           ]}},
         {"key": {"name": "basketKey", "subType":"foreign",
           "children": [

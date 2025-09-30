@@ -78,6 +78,16 @@ public class HelperRegistry {
         
         // Validation helpers
         register("hasValidation", this::hasValidation);
+
+        // Template-specific helpers for code generation
+        register("constantFieldName", this::getConstantFieldName);
+        register("isBoolean", this::isBoolean);
+
+        // Database helper aliases and additional helpers
+        register("dbColumn", this::getDbColumnName); // Alias for dbColumnName
+        register("hasDbColumn", this::hasDbColumn);
+        register("capitalizedFieldName", this::capitalize); // Alias for capitalize
+        register("hasNext", this::hasNext);
     }
     
     /**
@@ -727,5 +737,66 @@ public class HelperRegistry {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Convert a field name to constant format (UPPER_SNAKE_CASE).
+     * Examples: "maxTanks" → "MAX_TANKS", "firstName" → "FIRST_NAME", "id" → "ID"
+     */
+    private Object getConstantFieldName(Object input) {
+        if (input instanceof MetaField) {
+            MetaField field = (MetaField) input;
+            return fieldNameToConstant(field.getName());
+        }
+        if (input instanceof String) {
+            return fieldNameToConstant((String) input);
+        }
+        return null;
+    }
+
+    /**
+     * Check if a field has a boolean data type.
+     */
+    private Object isBoolean(Object input) {
+        if (input instanceof MetaField) {
+            MetaField field = (MetaField) input;
+            String dataType = field.getDataType().toString().toLowerCase();
+            return "boolean".equals(dataType);
+        }
+        return false;
+    }
+
+    /**
+     * Convert a field name from camelCase to CONSTANT_CASE.
+     */
+    private String fieldNameToConstant(String fieldName) {
+        if (fieldName == null || fieldName.isEmpty()) {
+            return "";
+        }
+
+        // Convert to snake_case first, then to uppercase
+        return camelCaseToSnakeCase(fieldName).toUpperCase();
+    }
+
+    /**
+     * Check if a field has a database column mapping.
+     */
+    private Object hasDbColumn(Object input) {
+        if (input instanceof MetaField) {
+            MetaField field = (MetaField) input;
+            return field.hasMetaAttr("dbColumn");
+        }
+        return false;
+    }
+
+    /**
+     * Helper for template iteration - determines if current item has a next item.
+     * Note: This is typically handled by the template engine context, but provided
+     * as a fallback helper for compatibility.
+     */
+    private Object hasNext(Object input) {
+        // This helper is typically provided by the template context during field iteration
+        // Return false as default - the actual hasNext logic is handled in MustacheTemplateEngine
+        return false;
     }
 }

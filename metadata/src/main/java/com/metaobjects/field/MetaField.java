@@ -120,7 +120,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
 
                 // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
-                .optionalAttribute(ATTR_REQUIRED, BooleanAttribute.SUBTYPE_BOOLEAN)
                 .optionalAttribute(ATTR_DEFAULT_VALUE,StringAttribute.SUBTYPE_STRING)
                 .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
 

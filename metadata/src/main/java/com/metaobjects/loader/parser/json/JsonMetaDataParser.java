@@ -237,7 +237,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
     }
     
     /**
-     * Convert JSON value to string representation, preserving the original value
+     * Convert JSON value to string representation, with JSON arrays converted to comma-delimited format
      */
     private String jsonValueToString(JsonElement jsonValue) {
         if (jsonValue.isJsonPrimitive()) {
@@ -248,10 +248,41 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             } else {
                 return jsonValue.getAsString();
             }
+        } else if (jsonValue.isJsonArray()) {
+            // JSON Array -> convert to comma-delimited format for StringArrayAttribute
+            return convertJsonArrayToCommaDelimited(jsonValue.getAsJsonArray());
         } else {
-            // Complex JSON value -> JSON representation
+            // Other complex JSON value -> JSON representation
             return jsonValue.toString();
         }
+    }
+
+    /**
+     * Convert JSON array to comma-delimited string format
+     */
+    private String convertJsonArrayToCommaDelimited(JsonArray jsonArray) {
+        if (jsonArray.size() == 0) {
+            return "";
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            if (i > 0) {
+                result.append(",");
+            }
+
+            JsonElement element = jsonArray.get(i);
+            if (element.isJsonPrimitive()) {
+                String value = element.getAsString();
+                // Add the raw value without quotes - StringArrayAttribute will handle parsing
+                result.append(value);
+            } else {
+                // For non-primitive elements, convert to string representation
+                result.append(element.toString());
+            }
+        }
+
+        return result.toString();
     }
 
 

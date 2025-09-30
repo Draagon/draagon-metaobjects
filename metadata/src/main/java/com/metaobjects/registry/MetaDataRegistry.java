@@ -1594,6 +1594,19 @@ public class MetaDataRegistry {
     }
 
     /**
+     * Check if a constraint with the given ID already exists
+     * @param constraintId The constraint ID to check for
+     * @return true if a constraint with this ID exists, false otherwise
+     */
+    public boolean hasConstraint(String constraintId) {
+        if (constraintId == null) {
+            return false;
+        }
+        return constraints.stream()
+            .anyMatch(c -> constraintId.equals(c.getConstraintId()));
+    }
+
+    /**
      * Get all validation constraints (unified constraint system)
      * @return List of all registered validation constraints
      */

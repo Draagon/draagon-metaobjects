@@ -13,26 +13,26 @@ Traditional metadata systems require verbose nested structures for attributes. M
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "children": [
       {
         "attr": {
           "name": "required",
-          "type": "boolean",
+          "subType": "boolean",
           "value": true
         }
       },
       {
         "attr": {
           "name": "maxLength",
-          "type": "int",
+          "subType": "int",
           "value": 255
         }
       },
       {
         "attr": {
           "name": "pattern",
-          "type": "string",
+          "subType": "string",
           "value": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$"
         }
       }
@@ -46,7 +46,7 @@ Traditional metadata systems require verbose nested structures for attributes. M
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "@required": true,
     "@maxLength": 255,
     "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$"
@@ -72,23 +72,22 @@ JSON inline attributes use the `@` prefix to distinguish them from standard meta
       {
         "object": {
           "name": "User",
-          "type": "pojo",
+          "subType": "pojo",
           "@dbTable": "users",
           "@auditable": true,
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@required": true,
-                "@dbColumn": "user_id",
-                "@isPrimaryKey": true
+                "@dbColumn": "user_id"
               }
             },
             {
               "field": {
                 "name": "email",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 255,
                 "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$",
@@ -99,10 +98,18 @@ JSON inline attributes use the `@` prefix to distinguish them from standard meta
             {
               "field": {
                 "name": "status",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@defaultValue": "active",
                 "@allowedValues": ["active", "inactive", "pending"]
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]
@@ -128,24 +135,27 @@ XML inline attributes use standard XML attribute syntax without prefixes:
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata package="com_example_model">
   <children>
-    <object name="User" type="pojo" dbTable="users" auditable="true">
+    <object name="User" subType="pojo" dbTable="users" auditable="true">
       <children>
-        <field name="id" type="long"
+        <field name="id" subType="long"
                required="true"
-               dbColumn="user_id"
-               isPrimaryKey="true" />
+               dbColumn="user_id" />
 
-        <field name="email" type="string"
+        <field name="email" subType="string"
                required="true"
                maxLength="255"
                pattern="^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$"
                dbColumn="email_address"
                unique="true" />
 
-        <field name="status" type="string"
+        <field name="status" subType="string"
                required="true"
                defaultValue="active"
                allowedValues="active,inactive,pending" />
+
+        <key name="primary" subType="primary"
+             keys="id"
+             autoIncrementStrategy="sequential" />
       </children>
     </object>
   </children>
@@ -494,7 +504,7 @@ try {
 {
   "object": {
     "name": "User",
-    "type": "pojo",
+    "subType": "pojo",
     "@dbTable": "users",
     "@dbSchema": "public",
     "@auditable": true
@@ -504,7 +514,7 @@ try {
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "@dbColumn": "email_address",
     "@dbType": "VARCHAR(255)",
     "@nullable": false,
@@ -520,7 +530,7 @@ try {
 {
   "field": {
     "name": "age",
-    "type": "int",
+    "subType": "int",
     "@required": true,
     "@minValue": 0,
     "@maxValue": 150,
@@ -531,7 +541,7 @@ try {
 {
   "field": {
     "name": "password",
-    "type": "string",
+    "subType": "string",
     "@required": true,
     "@minLength": 8,
     "@maxLength": 128,
@@ -546,7 +556,7 @@ try {
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "@displayName": "Email Address",
     "@helpText": "Enter your primary email address",
     "@placeholder": "user@example.com",
@@ -565,7 +575,7 @@ try {
 {
   "field": {
     "name": "ssn",
-    "type": "string",
+    "subType": "string",
     "@required": true,
     "@pattern": "^\\d{3}-\\d{2}-\\d{4}$",
     "@encrypted": true,

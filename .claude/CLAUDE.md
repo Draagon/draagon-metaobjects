@@ -1339,6 +1339,248 @@ This achievement represents a **dramatic improvement from widespread registry fa
 
 **The 100% test success rate demonstrates that the shared registry pattern successfully eliminated registry conflicts while maintaining all architectural principles of the MetaObjects framework.**
 
+## 🗄️ **OBJECTMANAGER PERSISTENCE PATTERNS (CRITICAL FOR DATABASE INTEGRATION)**
+
+### 🚨 **MANDATORY PRIMARYKEY METADATA FOR PERSISTENCE**
+
+**CONTEXT**: ObjectManagerDB requires proper PrimaryKey metadata with auto-increment strategy for database persistence. Based on Derby auto-increment fixes (commit 76fb68b).
+
+#### **✅ CORRECT PRIMARYKEY PATTERN: Inline Attributes**
+
+```json
+{
+  "object": {
+    "name": "User",
+    "subType": "managed",
+    "@dbTable": "users",
+    "children": [
+      {
+        "field": {
+          "name": "id",
+          "subType": "long",
+          "@dbColumn": "user_id"
+        }
+      },
+      {
+        "key": {
+          "name": "primary",
+          "subType": "primary",
+          "@keys": ["id"],
+          "@autoIncrementStrategy": "sequential"
+        }
+      }
+    ]
+  }
+}
+```
+
+#### **✅ CORRECT PRIMARYKEY PATTERN: Explicit Attributes**
+
+```json
+{
+  "key": {
+    "name": "primary",
+    "subType": "primary",
+    "children": [
+      {
+        "attr": {
+          "name": "keys",
+          "value": "id"
+        }
+      },
+      {
+        "attr": {
+          "name": "autoIncrementStrategy",
+          "value": "sequential"
+        }
+      }
+    ]
+  }
+}
+```
+
+#### **❌ INCORRECT PATTERNS TO AVOID**
+
+```json
+// ❌ WRONG - Missing PrimaryKey metadata entirely
+{
+  "field": {
+    "name": "id",
+    "subType": "long"
+  }
+}
+
+// ❌ WRONG - Using @primaryKey attribute instead of PrimaryKey metadata
+{
+  "field": {
+    "name": "id",
+    "subType": "long",
+    "@primaryKey": true  // ❌ Not proper metadata structure
+  }
+}
+
+// ❌ WRONG - Using @isId attribute instead of PrimaryKey metadata
+{
+  "field": {
+    "name": "id",
+    "subType": "long",
+    "@isId": true  // ❌ Not proper metadata structure
+  }
+}
+
+// ❌ WRONG - Using @fields instead of @keys
+{
+  "key": {
+    "name": "primary",
+    "subType": "primary",
+    "@fields": "id"  // ❌ Should be @keys: ["id"]
+  }
+}
+
+// ❌ WRONG - Missing auto-increment strategy
+{
+  "key": {
+    "name": "primary",
+    "subType": "primary",
+    "@keys": ["id"]
+    // ❌ Missing @autoIncrementStrategy: "sequential"
+  }
+}
+```
+
+### 🔧 **AUTO-INCREMENT STRATEGIES**
+
+**Available strategies for `@autoIncrementStrategy`:**
+- **`"sequential"`**: Database auto-increment (Derby IDENTITY, MySQL AUTO_INCREMENT, PostgreSQL SERIAL)
+- **`"uuid"`**: UUID generation (for string primary keys)
+- **`"none"`**: No auto-increment (manually assigned IDs)
+
+### 🏗️ **OBJECTMANAGERDB SETUP PATTERN**
+
+```java
+// ✅ CORRECT - Standalone ObjectManagerDB setup
+public class DatabaseTestExample {
+
+    public static void main(String[] args) throws Exception {
+        // 1. Initialize MetaData Loader
+        FileMetaDataLoader loader = new FileMetaDataLoader(options, "myLoader");
+        loader.init();
+        loader.register(); // Register for MetaDataUtil discovery
+
+        // 2. Initialize Derby Database
+        EmbeddedDataSource dataSource = new EmbeddedDataSource();
+        dataSource.setDatabaseName("memory:testdb");
+        dataSource.setCreateDatabase("create");
+
+        // 3. Initialize ObjectManagerDB
+        ObjectManagerDB objectManager = new ObjectManagerDB();
+        objectManager.setDriverClass("com.metaobjects.manager.db.driver.DerbyDriver");
+        objectManager.setDataSource(dataSource);
+
+        // 4. Initialize Database Validator (Auto-create tables)
+        MetaClassDBValidatorService validator = new MetaClassDBValidatorService();
+        validator.setObjectManager(objectManager);
+        validator.setAutoCreate(true);
+
+        MetaDataLoaderRegistry registry = new MetaDataLoaderRegistry(ServiceRegistryFactory.getDefault());
+        registry.registerLoader(loader);
+        validator.setMetaDataLoaderRegistry(registry);
+        validator.init();
+
+        // 5. Use ObjectManagerDB for persistence
+        ObjectConnection connection = objectManager.getConnection();
+        try {
+            Store store = new Store();
+            store.setMetaData(loader.getMetaObjectByName("fishstore::Store"));
+            store.setName("Test Store");
+            store.setMaxTanks(10);
+
+            objectManager.createObject(connection, store);
+            // Auto-increment ID will be assigned by database
+            System.out.println("Created store with ID: " + store.getId());
+        } finally {
+            connection.close();
+        }
+    }
+}
+```
+
+### 🎯 **DATABASE OVERLAY PATTERN**
+
+Use separate overlay files for database-specific attributes:
+
+**base-metadata.json:**
+```json
+{
+  "metadata": {
+    "package": "fishstore",
+    "children": [
+      {
+        "object": {
+          "name": "Store",
+          "subType": "managed",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+**db-overlay.json:**
+```json
+{
+  "metadata": {
+    "package": "fishstore",
+    "children": [
+      {
+        "object": {
+          "name": "Store",
+          "@dbTable": "STORE",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "@dbColumn": "ID"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "@autoIncrementStrategy": "sequential"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+### ⚠️ **CRITICAL DATABASE PERSISTENCE REQUIREMENTS**
+
+1. **PrimaryKey Metadata Required**: All persistent objects MUST have proper PrimaryKey metadata
+2. **Auto-increment Strategy**: PrimaryKey MUST specify `@autoIncrementStrategy` for database ID generation
+3. **MetaData Assignment**: Domain objects MUST have `setMetaData()` called before persistence operations
+4. **Registry Connection**: Tests MUST use proper MetaDataLoaderRegistry setup to connect services
+
+**Without proper PrimaryKey metadata, ObjectManagerDB will fail with "Attempt to modify an identity column" errors.**
+
 ## 🧪 **UNIT TEST SETUP GUIDELINES (CRITICAL FOR FUTURE DEVELOPMENT)**
 
 ### 🚨 **MANDATORY TESTING PATTERNS TO PREVENT SERVICELOADER CONFLICTS**

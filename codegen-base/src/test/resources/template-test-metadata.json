@@ -15,7 +15,6 @@
               "field": {
                 "name": "id",
                 "subType": "long",
-                "@primaryKey": true,
                 "@dbColumn": "id"
               }
             },
@@ -36,6 +35,14 @@
                 "@required": true,
                 "@maxLength": 100,
                 "@dbColumn": "email"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]
