@@ -797,9 +797,9 @@ public class GenericSQLDriver implements DatabaseDriver {
             //	}
             //}
             
-            // Do not use the field if it's an auto id that is set after after
-            // creation/update -- only relevant on some drivers (MSSQL)
-            if ( !selectOnly && colDef.getAutoType() == ColumnDef.AUTO_LAST_ID ) continue;
+            // Do not use the field if it's an auto-incrementor (both AUTO_ID and AUTO_LAST_ID)
+            // This prevents attempts to insert values into identity/auto-increment columns
+            if ( !selectOnly && colDef.isAutoIncrementor() ) continue;
 
             if (j > 0) {
                 buf.append(",");
@@ -828,9 +828,9 @@ public class GenericSQLDriver implements DatabaseDriver {
 			
             ColumnDef colDef = (ColumnDef) omdb.getArgDef(mf);
 
-            // Do not use the field if it's an auto id that is set after after
-            // creation/update
-            if ( colDef.getAutoType() != ColumnDef.AUTO_LAST_ID ) j++;
+            // Only count fields that are not auto-incrementors (both AUTO_ID and AUTO_LAST_ID)
+            // This ensures the parameter count matches the field count in INSERT statements
+            if ( !colDef.isAutoIncrementor() ) j++;
          }
 
          return getQuestionCommaString(j);
@@ -1670,7 +1670,7 @@ public class GenericSQLDriver implements DatabaseDriver {
                 if (colDef.getAutoType() == ColumnDef.AUTO_ID) {
                     f.setString(o, getNextAutoId(c, colDef));
                 }
-                else if (colDef.getAutoType() == ColumnDef.AUTO_LAST_ID) {
+                else if (colDef.isAutoIncrementor()) {
                     continue;
                 }
                 // Set the create date (if auto)
