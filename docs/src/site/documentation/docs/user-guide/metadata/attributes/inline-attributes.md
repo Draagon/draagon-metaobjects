@@ -6,6 +6,21 @@ Inline attributes are a key feature of MetaObjects that dramatically reduce meta
 
 Traditional metadata systems require verbose nested structures for attributes. MetaObjects' inline attribute syntax provides a clean, readable alternative that maintains full type safety and validation.
 
+!!! important "When to Use Inline Attributes"
+    **Inline attributes are for configuration and system properties, NOT for validation rules.**
+
+    **✅ Use inline attributes for:**
+    - Database mapping: `@dbTable`, `@dbColumn`, `@dbNullable`
+    - System configuration: `@defaultValue`, `@displayName`, `@isSearchable`
+    - UI properties: `@placeholder`, `@helpText`, `@cssClasses`
+
+    **❌ Use discrete MetaValidator children for:**
+    - Validation rules: `required`, `length`, `pattern`, `range`
+    - Business logic validation
+    - Complex constraint relationships
+
+    This architectural separation ensures validation is first-class metadata while keeping configuration attributes concise.
+
 ### Traditional vs Inline Syntax
 
 **Traditional Verbose Format:**
@@ -526,15 +541,31 @@ try {
 
 ### Validation Rules
 
+!!! important "Architectural Guidance"
+    **Validation rules should be discrete MetaValidator children, not inline attributes.** This ensures validation is first-class metadata with proper type safety and extensibility.
+
 ```json
 {
   "field": {
     "name": "age",
     "subType": "int",
-    "@required": true,
-    "@minValue": 0,
-    "@maxValue": 150,
-    "@defaultValue": 18
+    "@defaultValue": 18,
+    "children": [
+      {
+        "validator": {
+          "name": "required",
+          "subType": "required"
+        }
+      },
+      {
+        "validator": {
+          "name": "range",
+          "subType": "range",
+          "@min": "0",
+          "@max": "150"
+        }
+      }
+    ]
   }
 }
 
@@ -542,10 +573,29 @@ try {
   "field": {
     "name": "password",
     "subType": "string",
-    "@required": true,
-    "@minLength": 8,
-    "@maxLength": 128,
-    "@pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+    "children": [
+      {
+        "validator": {
+          "name": "required",
+          "subType": "required"
+        }
+      },
+      {
+        "validator": {
+          "name": "length",
+          "subType": "length",
+          "@min": "8",
+          "@max": "128"
+        }
+      },
+      {
+        "validator": {
+          "name": "pattern",
+          "subType": "pattern",
+          "@pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+        }
+      }
+    ]
   }
 }
 ```

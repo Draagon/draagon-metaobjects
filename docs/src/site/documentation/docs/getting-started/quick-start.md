@@ -68,7 +68,7 @@ Create a JSON metadata file that defines a simple User object:
 ```json title="src/main/resources/metadata/user-metadata.json"
 {
   "metadata": {
-    "package": "com_example_model",
+    "package": "example",
     "children": [
       {
         "object": {
@@ -80,34 +80,76 @@ Create a JSON metadata file that defines a simple User object:
               "field": {
                 "name": "id",
                 "subType": "long",
-                "@required": true,
-                "@dbColumn": "user_id"
+                "@dbColumn": "user_id",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "email",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 255,
-                "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$",
-                "@dbColumn": "email_address"
+                "@dbColumn": "email_address",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "255"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "pattern",
+                      "subType": "pattern",
+                      "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "firstName",
                 "subType": "string",
-                "@maxLength": 100,
-                "@dbColumn": "first_name"
+                "@dbColumn": "first_name",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "lastName",
                 "subType": "string",
-                "@maxLength": 100,
-                "@dbColumn": "last_name"
+                "@dbColumn": "last_name",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -133,8 +175,8 @@ Create a JSON metadata file that defines a simple User object:
 }
 ```
 
-!!! tip "Inline Attributes"
-    Notice the `@` prefix on attributes like `@required`, `@maxLength`, etc. This is MetaObjects' inline attribute syntax that makes metadata more readable and concise.
+!!! tip "Architecture Patterns"
+    Notice the discrete validator children for validation rules like required and length constraints. Database attributes like `@dbTable` and `@dbColumn` use inline attribute syntax with the `@` prefix. This separation ensures validation is first-class metadata while keeping configuration attributes concise.
 
 ## Step 3: Load and Use Metadata
 
