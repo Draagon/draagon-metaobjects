@@ -52,7 +52,9 @@ public class DateField extends PrimitiveField<Date> {
             .optionalAttribute(ATTR_MAX_DATE, StringAttribute.SUBTYPE_STRING)
         );
 
-        log.debug("Registered DateField type with unified registry (auto-generated constraints)");
+        if (log != null) {
+            log.debug("Registered DateField type with unified registry (auto-generated constraints)");
+        }
     }
 
     /**

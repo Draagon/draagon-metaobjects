@@ -61,6 +61,12 @@
             <version>${xml.apis.version}</version>
             <type>jar</type>
         </dependency>
+        <!-- SLF4J logging dependency - required for MetaField logger -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>

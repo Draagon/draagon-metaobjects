@@ -433,12 +433,9 @@ public class ObjectManagerDB extends ObjectManager implements DBOperations {
         if (f instanceof com.metaobjects.field.BooleanField) {
             boolean bv = rs.getBoolean(j);
             f.setBoolean(o, rs.wasNull() ? null : bv);
-        } else if (f instanceof com.metaobjects.field.ByteField) {
-            byte bv = rs.getByte(j);
-            f.setByte(o, rs.wasNull() ? null : bv);
-        } else if (f instanceof com.metaobjects.field.ShortField) {
-            short sv = rs.getShort(j);
-            f.setShort(o, rs.wasNull() ? null : sv);
+        } else if (f instanceof com.metaobjects.field.DecimalField) {
+            java.math.BigDecimal dv = rs.getBigDecimal(j);
+            f.setObject(o, rs.wasNull() ? null : dv);
         } else if (f instanceof com.metaobjects.field.IntegerField) {
             int iv = rs.getInt(j);
             f.setInt(o, rs.wasNull() ? null : iv);

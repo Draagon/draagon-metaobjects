@@ -65,7 +65,9 @@ public class StringField extends PrimitiveField<String> {
                 .optionalAttribute(ATTR_PATTERN, StringAttribute.SUBTYPE_STRING)
             );
 
-            log.debug("Registered StringField type with unified registry (auto-generated placement constraints)");
+            if (log != null) {
+                log.debug("Registered StringField type with unified registry (auto-generated placement constraints)");
+            }
 
             // CUSTOM CONSTRAINT: Pattern validation for string fields (cannot be auto-generated)
             registry.addConstraint(new CustomConstraint(
@@ -88,7 +90,9 @@ public class StringField extends PrimitiveField<String> {
             ));
 
         } catch (Exception e) {
-            log.error("Failed to register StringField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register StringField type with unified registry", e);
+            }
         }
     }
 

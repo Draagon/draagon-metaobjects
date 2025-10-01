@@ -58,10 +58,14 @@ public class IntegerField extends PrimitiveField<Integer> {
                 .optionalAttribute(ATTR_MAX_VALUE, IntAttribute.SUBTYPE_INT)
             );
 
-            log.debug("Registered IntegerField type with unified registry (auto-generated constraints)");
+            if (log != null) {
+                log.debug("Registered IntegerField type with unified registry (auto-generated constraints)");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register IntegerField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register IntegerField type with unified registry", e);
+            }
         }
     }
 

@@ -55,7 +55,7 @@
     {"object": {"name": "Apple", "super": "Fruit", "@object": "com.metaobjects.test.proxy.fruitbasket.Apple",
       "children": [
         {"field": {"name": "orchard", "subType": "string"}},
-        {"field": {"name": "worms", "subType": "short"}}
+        {"field": {"name": "worms", "subType": "int"}}
       ]}},
 
     {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.metaobjects.test.proxy.fruitbasket.Macintosh"}},

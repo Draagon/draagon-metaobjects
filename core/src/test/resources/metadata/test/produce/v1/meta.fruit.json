@@ -26,7 +26,7 @@
       "children": [
         {"attr": {"name": "object", "value": "com.metaobjects.test.produce.v1.Apple"}},
         {"field": {"name": "orchard", "subType": "string"}},
-        {"field": {"name": "worms", "subType": "short"}},
+        {"field": {"name": "worms", "subType": "int"}},
         {"field": {"name": "length", "subType": "int"}},
         {"field": {"name": "weight", "subType": "int"}}
       ]}},

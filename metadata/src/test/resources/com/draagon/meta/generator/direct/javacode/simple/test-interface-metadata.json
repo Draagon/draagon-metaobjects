@@ -71,7 +71,7 @@
     {"subType": "object", "package": "::fruit", "name": "Apple", "super": "Fruit",
       "children": [
         {"subType": "field", "name": "orchard", "subType": "string"},
-        {"subType": "field", "name": "worms", "subType": "short"}
+        {"subType": "field", "name": "worms", "subType": "int"}
       ]},
 
     {"subType": "object", "package": "::fruit", "name": "Macintosh", "super": "Apple"},

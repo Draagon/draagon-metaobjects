@@ -1547,21 +1547,13 @@ public class GenericSQLDriver implements DatabaseDriver {
             } else {
                 s.setBoolean(j, Boolean.valueOf(value.toString()).booleanValue());
             }
-        } else if (f instanceof com.metaobjects.field.ByteField) {
+        } else if (f instanceof com.metaobjects.field.DecimalField) {
             if (value == null) {
-                s.setNull(j, Types.TINYINT);
-            } else if (value instanceof Byte) {
-                s.setByte(j, ((Byte) value).byteValue());
+                s.setNull(j, Types.DECIMAL);
+            } else if (value instanceof java.math.BigDecimal) {
+                s.setBigDecimal(j, (java.math.BigDecimal) value);
             } else {
-                s.setByte(j, Byte.valueOf(value.toString()).byteValue());
-            }
-        } else if (f instanceof com.metaobjects.field.ShortField) {
-            if (value == null) {
-                s.setNull(j, Types.SMALLINT);
-            } else if (value instanceof Short) {
-                s.setShort(j, ((Short) value).shortValue());
-            } else {
-                s.setShort(j, Short.valueOf(value.toString()).shortValue());
+                s.setBigDecimal(j, new java.math.BigDecimal(value.toString()));
             }
         } else if (f instanceof com.metaobjects.field.IntegerField) {
             if (value == null) {
@@ -1578,6 +1570,20 @@ public class GenericSQLDriver implements DatabaseDriver {
                 s.setTimestamp(j, new Timestamp(((java.util.Date) value).getTime()));
             } else {
                 s.setTimestamp(j, new Timestamp(Long.valueOf(value.toString()).longValue()));
+            }
+        } else if (f instanceof com.metaobjects.field.TimeField) {
+            if (value == null) {
+                s.setNull(j, Types.TIME);
+            } else if (value instanceof java.time.LocalTime) {
+                s.setTime(j, java.sql.Time.valueOf((java.time.LocalTime) value));
+            } else {
+                // Parse string value as LocalTime and convert to SQL Time
+                try {
+                    java.time.LocalTime localTime = java.time.LocalTime.parse(value.toString());
+                    s.setTime(j, java.sql.Time.valueOf(localTime));
+                } catch (java.time.format.DateTimeParseException e) {
+                    throw new SQLException("Invalid time format: " + value.toString(), e);
+                }
             }
         } else if (f instanceof com.metaobjects.field.LongField) {
             if (value == null) {
@@ -1880,18 +1886,18 @@ public class GenericSQLDriver implements DatabaseDriver {
         if (f instanceof com.metaobjects.field.BooleanField) {
             boolean bv = rs.getBoolean(j);
             f.setBoolean(o, rs.wasNull() ? null : bv);
-        } else if (f instanceof com.metaobjects.field.ByteField) {
-            byte bv = rs.getByte(j);
-            f.setByte(o, rs.wasNull() ? null : bv);
-        } else if (f instanceof com.metaobjects.field.ShortField) {
-            short sv = rs.getShort(j);
-            f.setShort(o, rs.wasNull() ? null : sv);
+        } else if (f instanceof com.metaobjects.field.DecimalField) {
+            java.math.BigDecimal dv = rs.getBigDecimal(j);
+            f.setObject(o, rs.wasNull() ? null : dv);
         } else if (f instanceof com.metaobjects.field.IntegerField) {
             int iv = rs.getInt(j);
             f.setInt(o, rs.wasNull() ? null : iv);
         } else if (f instanceof com.metaobjects.field.DateField) {
             Timestamp tv = rs.getTimestamp(j);
             f.setDate(o, rs.wasNull() ? null : new Date(tv.getTime()));
+        } else if (f instanceof com.metaobjects.field.TimeField) {
+            java.sql.Time tv = rs.getTime(j);
+            f.setObject(o, rs.wasNull() ? null : tv.toLocalTime());
         } else if (f instanceof com.metaobjects.field.LongField) {
             long lv = rs.getLong(j);
             f.setLong(o, rs.wasNull() ? null : lv);

@@ -25,10 +25,8 @@ public class SimpleFieldRegistrationTest {
             new DoubleField("testDouble");
             new BooleanField("testBoolean");
             new DateField("testDate");
-            // New field types added
             new FloatField("testFloat");
-            new ShortField("testShort");
-            new ByteField("testByte");
+            new DecimalField("testDecimal");  // New high-precision decimal field
             new ObjectField("testObject");
             new StringArrayField("testStringArray");
             new ObjectArrayField("testObjectArray");
@@ -76,10 +74,10 @@ public class SimpleFieldRegistrationTest {
     public void testDoubleFieldRegistration() {
         assertTrue("DoubleField should be registered",
                   registry.isRegistered("field", "double"));
-        
-        assertTrue("DoubleField should accept precision attribute",
-                  registry.acceptsChild("field", "double", "attr", "int", "precision"));
-        
+
+        assertTrue("DoubleField should accept range validation attributes",
+                  registry.acceptsChild("field", "double", "attr", "double", "minValue"));
+
         String description = registry.getSupportedChildrenDescription("field", "double");
         System.out.println("DoubleField description: " + description);
         assertNotNull("Should have description", description);
@@ -99,13 +97,154 @@ public class SimpleFieldRegistrationTest {
     public void testDateFieldRegistration() {
         assertTrue("DateField should be registered",
                   registry.isRegistered("field", "date"));
-        
+
         assertTrue("DateField should accept format attribute",
                   registry.acceptsChild("field", "date", "attr", "string", "dateFormat"));
-        
+
         String description = registry.getSupportedChildrenDescription("field", "date");
         System.out.println("DateField description: " + description);
         assertNotNull("Should have description", description);
+    }
+
+    @Test
+    public void testTimeFieldRegistration() {
+        assertTrue("TimeField should be registered",
+                  registry.isRegistered("field", "time"));
+
+        assertTrue("TimeField should accept format attribute",
+                  registry.acceptsChild("field", "time", "attr", "string", "format"));
+
+        assertTrue("TimeField should accept minTime attribute",
+                  registry.acceptsChild("field", "time", "attr", "string", "minTime"));
+
+        assertTrue("TimeField should accept maxTime attribute",
+                  registry.acceptsChild("field", "time", "attr", "string", "maxTime"));
+
+        String description = registry.getSupportedChildrenDescription("field", "time");
+        System.out.println("TimeField description: " + description);
+        assertNotNull("Should have description", description);
+    }
+
+    @Test
+    public void testDecimalFieldRegistration() {
+        assertTrue("DecimalField should be registered",
+                  registry.isRegistered("field", "decimal"));
+
+        assertTrue("DecimalField should accept precision attribute",
+                  registry.acceptsChild("field", "decimal", "attr", "int", "precision"));
+
+        assertTrue("DecimalField should accept scale attribute",
+                  registry.acceptsChild("field", "decimal", "attr", "int", "scale"));
+
+        assertTrue("DecimalField should accept minValue attribute",
+                  registry.acceptsChild("field", "decimal", "attr", "string", "minValue"));
+
+        String description = registry.getSupportedChildrenDescription("field", "decimal");
+        System.out.println("DecimalField description: " + description);
+        assertNotNull("Should have description", description);
+    }
+
+    @Test
+    public void testFloatFieldRegistration() {
+        assertTrue("FloatField should be registered",
+                  registry.isRegistered("field", "float"));
+
+        assertTrue("FloatField should accept range validation attributes",
+                  registry.acceptsChild("field", "float", "attr", "float", "minValue"));
+
+        String description = registry.getSupportedChildrenDescription("field", "float");
+        System.out.println("FloatField description: " + description);
+        assertNotNull("Should have description", description);
+    }
+
+    @Test
+    public void testUniversalArraySupport() {
+        // Test that all field types support @isArray attribute
+        assertTrue("StringField should accept isArray attribute",
+                  registry.acceptsChild("field", "string", "attr", "boolean", "isArray"));
+
+        assertTrue("IntegerField should accept isArray attribute",
+                  registry.acceptsChild("field", "int", "attr", "boolean", "isArray"));
+
+        assertTrue("LongField should accept isArray attribute",
+                  registry.acceptsChild("field", "long", "attr", "boolean", "isArray"));
+
+        assertTrue("DoubleField should accept isArray attribute",
+                  registry.acceptsChild("field", "double", "attr", "boolean", "isArray"));
+
+        assertTrue("DecimalField should accept isArray attribute",
+                  registry.acceptsChild("field", "decimal", "attr", "boolean", "isArray"));
+
+        assertTrue("BooleanField should accept isArray attribute",
+                  registry.acceptsChild("field", "boolean", "attr", "boolean", "isArray"));
+
+        assertTrue("DateField should accept isArray attribute",
+                  registry.acceptsChild("field", "date", "attr", "boolean", "isArray"));
+
+        assertTrue("TimeField should accept isArray attribute",
+                  registry.acceptsChild("field", "time", "attr", "boolean", "isArray"));
+
+        System.out.println("✅ Universal @isArray support verified for all field types");
+    }
+
+    // @Test - DISABLED: isArrayType() method not implemented yet (array architecture on hold)
+    // public void testIsArrayTypeMethod() {
+    //     // Test the new isArrayType() method
+    //     StringField regularField = new StringField("testRegular");
+    //     assertFalse("Regular field should not be array type", regularField.isArrayType());
+    //
+    //     // Create a field with @isArray=true
+    //     StringField arrayField = new StringField("testArray");
+    //     arrayField.addMetaAttr(com.metaobjects.attr.BooleanAttribute.create("isArray", true));
+    //     assertTrue("Array field should be detected as array type", arrayField.isArrayType());
+    //
+    //     System.out.println("✅ isArrayType() method working correctly");
+    // }
+
+    @Test
+    public void testTimeFieldCreationAndValidation() {
+        // Test basic TimeField creation
+        TimeField timeField = new TimeField("businessHours");
+        assertNotNull("TimeField should be created", timeField);
+        assertEquals("Field subtype should be 'time'", "time", timeField.getSubType());
+
+        // Test format attribute
+        timeField.addMetaAttr(com.metaobjects.attr.StringAttribute.create("format", "HH:mm"));
+        assertEquals("Format should be HH:mm", "HH:mm", timeField.getFormat());
+
+        // Test time constraints
+        timeField.addMetaAttr(com.metaobjects.attr.StringAttribute.create("minTime", "08:00"));
+        timeField.addMetaAttr(com.metaobjects.attr.StringAttribute.create("maxTime", "18:00"));
+        assertEquals("MinTime should be 08:00", "08:00", timeField.getMinTime());
+        assertEquals("MaxTime should be 18:00", "18:00", timeField.getMaxTime());
+
+        // Test time validation
+        assertTrue("Valid time should pass", timeField.isValidTime("09:30"));
+        assertTrue("Valid time should pass", timeField.isValidTime("12:15"));
+        assertTrue("Valid time should pass", timeField.isValidTime("17:45"));
+
+        assertFalse("Early time should fail", timeField.isValidTime("07:30"));
+        assertFalse("Late time should fail", timeField.isValidTime("19:30"));
+        assertFalse("Invalid format should fail", timeField.isValidTime("9:30"));
+
+        // Test factory method with constraints
+        TimeField storeHours = TimeField.create("storeHours", "HH:mm", "09:00", "21:00");
+        assertTrue("Store hours should accept 10:00", storeHours.isValidTime("10:00"));
+        assertFalse("Store hours should reject 08:00", storeHours.isValidTime("08:00"));
+
+        System.out.println("✅ TimeField creation and validation working correctly");
+    }
+
+    @Test
+    public void testRemovedFieldTypes() {
+        // Verify that ByteField and ShortField are no longer registered
+        assertFalse("ByteField should not be registered",
+                   registry.isRegistered("field", "byte"));
+
+        assertFalse("ShortField should not be registered",
+                   registry.isRegistered("field", "short"));
+
+        System.out.println("✅ ByteField and ShortField successfully removed");
     }
 
     @Test
@@ -114,5 +253,8 @@ public class SimpleFieldRegistrationTest {
         registry.getRegisteredTypes().forEach(typeId -> {
             System.out.println("  " + typeId.type() + "." + typeId.subType());
         });
+
+        MetaDataRegistry.RegistryStats stats = registry.getStats();
+        System.out.println("Registry contains " + stats.totalTypes() + " total types");
     }
 }

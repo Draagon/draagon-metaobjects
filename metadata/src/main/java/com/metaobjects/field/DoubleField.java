@@ -35,8 +35,6 @@ public class DoubleField extends PrimitiveField<Double>
     public final static String SUBTYPE_DOUBLE   = "double";
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
-    public final static String ATTR_PRECISION = "precision";
-    public final static String ATTR_SCALE = "scale";
 
     public DoubleField( String name ) {
         super( SUBTYPE_DOUBLE, name, DataTypes.DOUBLE );
@@ -52,7 +50,7 @@ public class DoubleField extends PrimitiveField<Double>
             // Register the type definition
             registry.registerType(DoubleField.class, def -> def
                 .type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
-                .description("Double field with numeric and precision validation")
+                .description("Double field with range validation")
 
                 // INHERIT FROM BASE FIELD
                 .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
@@ -60,14 +58,16 @@ public class DoubleField extends PrimitiveField<Double>
                 // DOUBLE-SPECIFIC ATTRIBUTES ONLY
                 .optionalAttribute(ATTR_MIN_VALUE, "double")
                 .optionalAttribute(ATTR_MAX_VALUE, "double")
-                .optionalAttribute(ATTR_PRECISION, "int")
-                .optionalAttribute(ATTR_SCALE, "int")
             );
 
-            log.debug("Registered DoubleField type with unified registry (auto-generated constraints)");
+            if (log != null) {
+                log.debug("Registered DoubleField type with unified registry (auto-generated constraints)");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register DoubleField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register DoubleField type with unified registry", e);
+            }
         }
     }
 

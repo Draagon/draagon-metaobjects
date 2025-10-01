@@ -16,13 +16,13 @@ import org.slf4j.LoggerFactory;
  * <li><strong>field.string:</strong> String fields with pattern and length validation</li>
  * <li><strong>field.int:</strong> Integer fields with range validation</li>
  * <li><strong>field.long:</strong> Long fields with range validation</li>
- * <li><strong>field.double:</strong> Double fields with precision validation</li>
- * <li><strong>field.float:</strong> Float fields with precision validation</li>
+ * <li><strong>field.double:</strong> Double fields with range validation</li>
+ * <li><strong>field.float:</strong> Float fields with range validation</li>
+ * <li><strong>field.decimal:</strong> High-precision decimal fields for financial calculations</li>
  * <li><strong>field.boolean:</strong> Boolean fields</li>
  * <li><strong>field.date:</strong> Date fields with format validation</li>
+ * <li><strong>field.time:</strong> Time fields for hours, minutes, seconds (no date)</li>
  * <li><strong>field.timestamp:</strong> Timestamp fields</li>
- * <li><strong>field.byte:</strong> Byte fields</li>
- * <li><strong>field.short:</strong> Short fields</li>
  * <li><strong>field.object:</strong> Object fields with object reference support</li>
  * <li><strong>field.objectArray:</strong> Object array fields for lists of object references</li>
  * <li><strong>field.stringArray:</strong> String array fields for lists of string values</li>
@@ -50,11 +50,11 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
         LongField.registerTypes(registry);
         DoubleField.registerTypes(registry);
         FloatField.registerTypes(registry);
+        DecimalField.registerTypes(registry);
         BooleanField.registerTypes(registry);
         DateField.registerTypes(registry);
+        TimeField.registerTypes(registry);
         TimestampField.registerTypes(registry);
-        ByteField.registerTypes(registry);
-        ShortField.registerTypes(registry);
 
         // Additional field types that were previously missing
         ObjectField.registerTypes(registry);

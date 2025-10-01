@@ -52,10 +52,14 @@ public class LongField extends PrimitiveField<Long> {
                 .optionalAttribute(ATTR_MAX_VALUE, LongAttribute.SUBTYPE_LONG)
             );
 
-            log.debug("Registered LongField type with unified registry (auto-generated constraints)");
+            if (log != null) {
+                log.debug("Registered LongField type with unified registry (auto-generated constraints)");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register LongField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register LongField type with unified registry", e);
+            }
         }
     }
 

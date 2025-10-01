@@ -29,7 +29,6 @@ public class FloatField extends PrimitiveField<Float>
     public final static String SUBTYPE_FLOAT = "float";
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
-    public final static String ATTR_PRECISION = "precision";
 
     public FloatField( String name ) {
         super( SUBTYPE_FLOAT, name, DataTypes.FLOAT );
@@ -41,11 +40,10 @@ public class FloatField extends PrimitiveField<Float>
     public static void registerTypes(MetaDataRegistry registry) {
         registry.registerType(FloatField.class, def -> def
             .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
-            .description("Float field with numeric and precision validation")
+            .description("Float field with range validation")
             .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
             .optionalAttribute(ATTR_MIN_VALUE, SUBTYPE_FLOAT)
             .optionalAttribute(ATTR_MAX_VALUE, SUBTYPE_FLOAT)
-            .optionalAttribute(ATTR_PRECISION, IntAttribute.SUBTYPE_INT)
         );
     }
 
