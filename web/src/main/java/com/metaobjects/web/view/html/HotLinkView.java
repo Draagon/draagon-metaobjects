@@ -62,6 +62,11 @@ public class HotLinkView extends HtmlView {
         super(name);
     }
 
+    @Override
+    public String getSubType() {
+        return "hotlink";
+    }
+
     public void doView(PageContext page, Object o, String label, int mode, Map<String, String> params)
             throws MetaDataException {
         MetaField mf = getMetaField(o);

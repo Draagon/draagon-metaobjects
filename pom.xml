@@ -88,6 +88,8 @@
     <resources.plugin.version>3.1.0</resources.plugin.version>
     <site.plugin.version>3.8.2</site.plugin.version>
     <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
+    <!-- Code Coverage Plugins -->
+    <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
     <!-- Maven Packaging Plugins -->
     <jar.plugin.version>3.2.0</jar.plugin.version>
     <war.plugin.version>3.2.3</war.plugin.version>
@@ -205,6 +207,107 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${failsafe.plugin.version}</version>
+      </plugin>
+      <!-- JaCoCo Code Coverage Plugin -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.plugin.version}</version>
+        <configuration>
+          <!-- Exclude packages from coverage analysis -->
+          <excludes>
+            <exclude>**/*Test*</exclude>
+            <exclude>**/test/**</exclude>
+            <exclude>**/*Exception*</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>prepare-agent-integration</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-integration</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>report-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>coverage-check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <!-- Set very low thresholds to prevent build failures while still generating reports -->
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.05</minimum> <!-- 5% minimum instruction coverage -->
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.02</minimum> <!-- 2% minimum branch coverage -->
+                    </limit>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.10</minimum> <!-- 10% minimum class coverage -->
+                    </limit>
+                  </limits>
+                </rule>
+                <!-- More lenient rules for specific packages with known low coverage -->
+                <rule>
+                  <element>PACKAGE</element>
+                  <includes>
+                    <include>com.metaobjects.manager.columnar</include>
+                    <include>com.metaobjects.manager.document.mongodb</include>
+                    <include>com.metaobjects.manager.keyvalue</include>
+                    <include>com.metaobjects.manager.search</include>
+                    <include>com.metaobjects.manager.timeseries</include>
+                  </includes>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.00</minimum> <!-- Allow 0% for NoSQL packages -->
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <!-- Don't fail build on coverage violations - just report -->
+              <haltOnFailure>false</haltOnFailure>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

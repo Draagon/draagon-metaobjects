@@ -58,6 +58,11 @@ public class DateView extends MonthView {
         super(name);
     }
 
+    @Override
+    public String getSubType() {
+        return "date";
+    }
+
     public void getValue(HttpServletRequest request, Object o, String label)
             throws MetaDataException {
         int year = HtmlViewHelper.getIntValue(request, label + "-year");

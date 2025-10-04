@@ -51,6 +51,11 @@ public class TextView extends HtmlView
         super(name);
     }
 
+    @Override
+    public String getSubType() {
+        return "text";
+    }
+
   /**
    * Draws a Textbox view of the field
    */

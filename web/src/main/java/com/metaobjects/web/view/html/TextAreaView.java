@@ -59,6 +59,11 @@ public class TextAreaView extends TextView
         super(name);
     }
 
+    @Override
+    public String getSubType() {
+        return "textarea";
+    }
+
   public void doView( PageContext page, Object o, String label, int mode, Map params )
       throws MetaDataException
   {

@@ -70,6 +70,11 @@ public class MonthView extends HtmlView
   public MonthView(String name) {
         super(name);
     }
+
+    @Override
+    public String getSubType() {
+        return "month";
+    }
   
   public void setEmptyString( String empty ) {
 	  this.emptyString = empty;
