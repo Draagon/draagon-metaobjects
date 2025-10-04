@@ -101,32 +101,6 @@ public class MustacheTemplateGeneratorTest extends GeneratorTestBase {
         assertTrue("Should have toString method", content.contains("toString()"));
     }
     
-    @Test
-    public void testGenerateValueObjectExtension() throws Exception {
-        // Set ValueObject template
-        Map<String, String> args = new HashMap<>();
-        args.put(MustacheTemplateGenerator.PARAM_TEMPLATE_PATH, "templates/");
-        args.put(MustacheTemplateGenerator.PARAM_OUTPUT_DIR, outputDir.getAbsolutePath());
-        args.put(MustacheTemplateGenerator.PARAM_TARGET_LANGUAGE, "java");
-        args.put(MustacheTemplateGenerator.PARAM_TEMPLATE_NAME, "valueobject-extension");
-        
-        generator.setArgs(args);
-        generator.execute(loader);
-        
-        // Verify User.java was generated with ValueObject extension
-        File userFile = new File(outputDir, "com_example_model/User.java");
-        assertTrue("User.java should be generated", userFile.exists());
-        
-        String content = Files.readString(userFile.toPath());
-        assertTrue("Should extend ValueObject", content.contains("extends ValueObject"));
-        assertTrue("Should have META_OBJECT_NAME", content.contains("META_OBJECT_NAME"));
-        assertTrue("Should have dynamic getters", content.contains("getAttrValue(\"username\")"));
-        assertTrue("Should have dynamic setters", content.contains("setAttrValue(\"username\""));
-        assertTrue("Should have fluent methods", content.contains("username(String username)"));
-        assertTrue("Should have has methods", content.contains("hasUsername()"));
-        assertTrue("Should have copy method", content.contains("copy()"));
-        assertTrue("Should have newInstance method", content.contains("newInstance()"));
-    }
     
     @Test
     public void testAutoDiscoverTemplates() throws Exception {

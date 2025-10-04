@@ -52,7 +52,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
         this.placementConstraints = new ArrayList<>();
         this.validationConstraints = new ArrayList<>();
 
-        log.info("Initialized registry-driven schema writer with {} registered types",
+        log.debug("Initialized registry-driven schema writer with {} registered types",
                 typeRegistry.getRegisteredTypes().size());
     }
 
@@ -122,7 +122,7 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
      * Load constraint definitions and type registry data
      */
     private void loadConstraintDefinitions() {
-        log.info("Loading registry data for schema generation: {} types, {} constraints",
+        log.debug("Loading registry data for schema generation: {} types, {} constraints",
                 typeRegistry.getRegisteredTypes().size(),
                 typeRegistry.getAllValidationConstraints().size());
 

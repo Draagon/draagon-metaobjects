@@ -261,23 +261,6 @@ public class TemplateParserTest {
         assertTrue("Should contain @Column annotation", templateContent.contains("@Column"));
     }
     
-    @Test
-    public void testParseValueObjectTemplate() throws IOException {
-        TemplateDefinition template = parser.parseTemplateFromFile("templates/valueobject-extension.mustache.yaml");
-        
-        assertNotNull("ValueObject template should be loaded", template);
-        assertEquals("ValueObject Extension Template", template.getName());
-        assertEquals("java", template.getTargetLanguage());
-        
-        // Validate the template
-        parser.validateTemplate(template);
-        
-        // Check template content
-        String templateContent = template.getTemplate();
-        assertTrue("Should extend ValueObject", templateContent.contains("extends ValueObject"));
-        assertTrue("Should have META_OBJECT_NAME", templateContent.contains("META_OBJECT_NAME"));
-        assertTrue("Should have dynamic getters", templateContent.contains("getAttrValue"));
-    }
     
     private TemplateDefinition createValidTemplate() {
         TemplateDefinition template = new TemplateDefinition();

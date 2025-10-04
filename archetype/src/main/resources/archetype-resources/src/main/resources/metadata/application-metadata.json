@@ -1,0 +1,199 @@
+{
+  "metadata": {
+    "package": "domain",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long"
+              }
+            },
+            {
+              "field": {
+                "name": "username",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "firstName",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "lastName",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "createdAt",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "updatedAt",
+                "subType": "string"
+              }
+            },
+            {
+              "identity": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": ["id"],
+                "@generation": "increment"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Order",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long"
+              }
+            },
+            {
+              "field": {
+                "name": "userRef",
+                "subType": "long"
+              }
+            },
+            {
+              "field": {
+                "name": "status",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "totalAmount",
+                "subType": "decimal"
+              }
+            },
+            {
+              "field": {
+                "name": "orderDate",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "orderNumber",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "subtotalAmount",
+                "subType": "decimal"
+              }
+            },
+            {
+              "field": {
+                "name": "taxAmount",
+                "subType": "decimal"
+              }
+            },
+            {
+              "field": {
+                "name": "shippingAddress",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "notes",
+                "subType": "string"
+              }
+            },
+            {
+              "identity": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": ["id"],
+                "@generation": "increment"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "OrderItem",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long"
+              }
+            },
+            {
+              "field": {
+                "name": "orderRef",
+                "subType": "long"
+              }
+            },
+            {
+              "field": {
+                "name": "productName",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "productDescription",
+                "subType": "string"
+              }
+            },
+            {
+              "field": {
+                "name": "quantity",
+                "subType": "int"
+              }
+            },
+            {
+              "field": {
+                "name": "unitPrice",
+                "subType": "decimal"
+              }
+            },
+            {
+              "field": {
+                "name": "totalPrice",
+                "subType": "decimal"
+              }
+            },
+            {
+              "identity": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": ["id"],
+                "@generation": "increment"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

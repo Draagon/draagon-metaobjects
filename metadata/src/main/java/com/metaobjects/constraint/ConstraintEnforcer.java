@@ -201,7 +201,7 @@ public class ConstraintEnforcer {
      */
     public void setConstraintCheckingEnabled(boolean enabled) {
         this.globalConstraintCheckingEnabled = enabled;
-        log.info("Global constraint checking {}", enabled ? "enabled" : "disabled");
+        log.debug("Global constraint checking {}", enabled ? "enabled" : "disabled");
     }
     
     /**
@@ -211,7 +211,7 @@ public class ConstraintEnforcer {
      */
     public void setConstraintCheckingEnabled(String metaDataType, boolean enabled) {
         constraintCheckingEnabled.put(metaDataType, enabled);
-        log.info("Constraint checking {} for metadata type [{}]", enabled ? "enabled" : "disabled", metaDataType);
+        log.debug("Constraint checking {} for metadata type [{}]", enabled ? "enabled" : "disabled", metaDataType);
     }
     
     /**

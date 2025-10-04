@@ -1,426 +1,558 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.metaobjects</groupId>
-    <artifactId>metaobjects</artifactId>
-    <version>6.2.7-SNAPSHOT</version>
-    <packaging>pom</packaging>
-
-    <name>MetaObjects Core</name>
-    <description>Universal metadata-driven development platform</description>
-    <url>https://metaobjects.com</url>
-
-    <licenses>
-       <license>
-           <name>Apache License, Version 2.0</name>
-           <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-           <distribution>repo</distribution>
-           <comments>A business-friendly OSS license</comments>
-       </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <id>dmealing</id>
-            <name>Doug Mealing</name>
-            <email>doug@metaobjects.com</email>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:git://github.com/metaobjectsdev/metaobjects-core.git</connection>
-        <developerConnection>scm:git:git@github.com:metaobjectsdev/metaobjects-core.git</developerConnection>
-        <url>https://github.com/metaobjectsdev/metaobjects-core</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <organization>
-        <name>Doug Mealing LLC dba Meta Objects</name>
-        <url>https://www.metaobjects.com/</url>
-    </organization>
-
-    <modules>
-        <module>metadata</module>
-        <module>codegen-base</module>
-        <module>codegen-mustache</module>
-        <module>codegen-plantuml</module>
-        <module>maven-plugin</module>
-        <module>core</module>
-        <module>core-spring</module>
-        <module>om</module>
-        <module>omdb</module>
-        <module>omnosql</module>
-        <module>web</module>
-        <module>web-spring</module>
-        <module>demo</module>
-        <module>examples</module>
-        <!-- module>docs</module -->
-    </modules>
-
-    <properties>
-
-        <!-- Maven Properties -->
-
-        <java.version>17</java.version>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss.SSSZ</maven.build.timestamp.format>
-
-        <!-- Apache Commons Properties -->
-
-        <commons.validator.version>1.9.0</commons.validator.version>
-
-        <!-- Testing Properties -->
-
-        <junit.version>4.13.2</junit.version>
-
-        <!-- Logging Properties -->
-
-        <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.12</logback.version>
-        <log4j.version>2.24.0</log4j.version>
-        <commons.logging.version>1.3.5</commons.logging.version>
-
-        <!-- Draagon Properties -->
-
-        <!-- draagon.cache.version>3.9.0</draagon.cache.version -->
-
-        <!-- XML Properties -->
-
-        <xerces.version>2.12.0</xerces.version>
-        <xml.apis.version>1.4.01</xml.apis.version>
-
-        <!-- DB Properties -->
-
-        <derby.version>10.9.1.0</derby.version>
-
-        <!-- J2EE Properties -->
-
-        <javaee.api.version>6.0</javaee.api.version>
-
-        <!--
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.metaobjects</groupId>
+  <artifactId>metaobjects</artifactId>
+  <version>6.3.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>MetaObjects Core</name>
+  <description>Universal metadata-driven development platform</description>
+  <url>https://metaobjects.com</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>dmealing</id>
+      <name>Doug Mealing</name>
+      <email>doug@metaobjects.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/metaobjectsdev/metaobjects-core.git</connection>
+    <developerConnection>scm:git:git@github.com:metaobjectsdev/metaobjects-core.git</developerConnection>
+    <url>https://github.com/metaobjectsdev/metaobjects-core</url>
+    <tag>HEAD</tag>
+  </scm>
+  <organization>
+    <name>Doug Mealing LLC dba Meta Objects</name>
+    <url>https://www.metaobjects.com/</url>
+  </organization>
+  <modules>
+    <module>metadata</module>
+    <module>codegen-base</module>
+    <module>codegen-mustache</module>
+    <module>codegen-plantuml</module>
+    <module>maven-plugin</module>
+    <module>core</module>
+    <module>core-spring</module>
+    <module>archetype</module>
+    <module>examples</module>
+  </modules>
+  <properties>
+    <!-- Maven Properties -->
+    <java.version>17</java.version>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss.SSSZ</maven.build.timestamp.format>
+    <!-- Apache Commons Properties -->
+    <commons.validator.version>1.9.0</commons.validator.version>
+    <!-- Testing Properties -->
+    <junit.version>4.13.2</junit.version>
+    <!-- Logging Properties -->
+    <slf4j.version>2.0.16</slf4j.version>
+    <logback.version>1.5.12</logback.version>
+    <log4j.version>2.24.0</log4j.version>
+    <commons.logging.version>1.3.5</commons.logging.version>
+    <!-- Draagon Properties -->
+    <!-- draagon.cache.version>3.9.0</draagon.cache.version -->
+    <!-- XML Properties -->
+    <xerces.version>2.12.0</xerces.version>
+    <xml.apis.version>1.4.01</xml.apis.version>
+    <!-- DB Properties -->
+    <derby.version>10.9.1.0</derby.version>
+    <!-- J2EE Properties -->
+    <javaee.api.version>6.0</javaee.api.version>
+    <!--
             Maven Plugins (https://maven.apache.org/plugins/)
         -->
-
-        <!-- Maven Core Plugins -->
-        <clean.plugin.version>3.1.0</clean.plugin.version>
-        <compiler.plugin.version>3.13.0</compiler.plugin.version>
-        <deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
-        <failsafe.plugin.version>3.0.0-M4</failsafe.plugin.version>
-        <install.plugin.version>3.0.0-M1</install.plugin.version>
-        <resources.plugin.version>3.1.0</resources.plugin.version>
-        <site.plugin.version>3.8.2</site.plugin.version>
-        <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
-
-        <!-- Maven Packaging Plugins -->
-        <jar.plugin.version>3.2.0</jar.plugin.version>
-        <war.plugin.version>3.2.3</war.plugin.version>
-        <source.plugin.version>3.2.1</source.plugin.version>
-
-        <!-- Maven Reporting Plugins -->
-        <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
-        <project.info.reports.plugin.version>3.0.0</project.info.reports.plugin.version>
-
-        <!-- Maven Tools Plugins -->
-        <archetype.plugin.version>3.1.2</archetype.plugin.version>
-        <assembly.plugin.version>3.2.0</assembly.plugin.version>
-        <enforcer.plugin.version>3.0.0-M3</enforcer.plugin.version>
-        <release.plugin.version>3.0.0-M1</release.plugin.version>
-
-        <!-- Nexus and GPG Plugin Versions -->
-        <nexus.staging.plugin.version>1.7.0</nexus.staging.plugin.version>
-        <gpg.plugin.version>3.2.7</gpg.plugin.version>
-
-        <!-- Maven Enforcer Settings: https://maven.apache.org/enforcer/maven-enforcer-plugin -->
-        <enforcer.skip>false</enforcer.skip>
-        <enforcer.maven-version>[3.5.0,)</enforcer.maven-version>
-        <enforcer.java-version>[17,)</enforcer.java-version>
-        <enforcer.failBuild>true</enforcer.failBuild>
-
-        <!-- Felix Bundle Plugin: https://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html -->
-        <bundle.plugin.version>5.1.9</bundle.plugin.version>
-        <osgi.export>{local-packages};-split-package:=error</osgi.export>
-        <osgi.import>*</osgi.import>
-        <osgi.private>{local-packages}</osgi.private>
-        <osgi.embed />
-        <osgi.embed.dir>lib</osgi.embed.dir>
-        <osgi.activator />
-        <osgi.dynamic />
-
-    </properties>
-
+    <!-- Maven Core Plugins -->
+    <clean.plugin.version>3.1.0</clean.plugin.version>
+    <compiler.plugin.version>3.13.0</compiler.plugin.version>
+    <deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
+    <failsafe.plugin.version>3.0.0-M4</failsafe.plugin.version>
+    <install.plugin.version>3.0.0-M1</install.plugin.version>
+    <resources.plugin.version>3.1.0</resources.plugin.version>
+    <site.plugin.version>3.8.2</site.plugin.version>
+    <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
+    <!-- Code Coverage Plugins -->
+    <jacoco.plugin.version>0.8.13</jacoco.plugin.version>
+    <!-- Maven Packaging Plugins -->
+    <jar.plugin.version>3.2.0</jar.plugin.version>
+    <war.plugin.version>3.2.3</war.plugin.version>
+    <source.plugin.version>3.2.1</source.plugin.version>
+    <!-- Maven Reporting Plugins -->
+    <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
+    <project.info.reports.plugin.version>3.0.0</project.info.reports.plugin.version>
+    <!-- Maven Tools Plugins -->
+    <archetype.plugin.version>3.1.2</archetype.plugin.version>
+    <assembly.plugin.version>3.2.0</assembly.plugin.version>
+    <enforcer.plugin.version>3.0.0-M3</enforcer.plugin.version>
+    <release.plugin.version>3.0.0-M1</release.plugin.version>
+    <!-- Nexus and GPG Plugin Versions -->
+    <nexus.staging.plugin.version>1.7.0</nexus.staging.plugin.version>
+    <gpg.plugin.version>3.2.7</gpg.plugin.version>
+    <!-- Maven Enforcer Settings: https://maven.apache.org/enforcer/maven-enforcer-plugin -->
+    <enforcer.skip>false</enforcer.skip>
+    <enforcer.maven-version>[3.5.0,)</enforcer.maven-version>
+    <enforcer.java-version>[17,)</enforcer.java-version>
+    <enforcer.failBuild>true</enforcer.failBuild>
+    <!-- Felix Bundle Plugin: https://felix.apache.org/documentation/subprojects/apache-felix-maven-bundle-plugin-bnd.html -->
+    <bundle.plugin.version>5.1.9</bundle.plugin.version>
+    <osgi.export>{local-packages};-split-package:=error</osgi.export>
+    <osgi.import>*</osgi.import>
+    <osgi.private>{local-packages}</osgi.private>
+    <osgi.embed/>
+    <osgi.embed.dir>lib</osgi.embed.dir>
+    <osgi.activator/>
+    <osgi.dynamic/>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- SLF4J API -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <!-- Logback implementation -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+    </dependency>
+    <!-- Bridge from Commons Logging to SLF4J -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <!-- Exclude Commons Logging in favor of SLF4J bridge -->
+    <!-- Keep for now to maintain compatibility -->
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <version>${commons.logging.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <!-- Dependency Management for both core and dynamic modules -->
+  <dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- SLF4J API -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!-- Logback implementation -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-        </dependency>
-        <!-- Bridge from Commons Logging to SLF4J -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!-- Exclude Commons Logging in favor of SLF4J bridge -->
-        <!-- Keep for now to maintain compatibility -->
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
-            <scope>provided</scope>
-        </dependency>
+      <!-- MetaObjects Core Dependencies -->
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-metadata</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-metadata</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-codegen-base</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-codegen-mustache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-core-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-maven-plugin</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- MetaObjects Dynamic Dependencies -->
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-dynamic-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-dynamic-core</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-om</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-omdb</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-omnosql</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-web</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-web-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-demo</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- External Dependencies -->
+      <dependency>
+        <groupId>javax</groupId>
+        <artifactId>javaee-api</artifactId>
+        <version>${javaee.api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!-- Security: Override SnakeYAML 1.30 (moderate vulnerabilities) with secure version -->
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>2.2</version>
+      </dependency>
+      <!-- Security: Keep Jackson compatible with Spring Boot 2.7.18 but use secure patch versions -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.13.5</version>
+      </dependency>
     </dependencies>
-
-    <!-- Override vulnerable transitive dependencies -->
-    <dependencyManagement>
+  </dependencyManagement>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.archetype</groupId>
+        <artifactId>archetype-packaging</artifactId>
+        <version>${archetype.plugin.version}</version>
+      </extension>
+    </extensions>
+    <plugins>
+      <!-- Maven Core Plugins -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${clean.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${compiler.plugin.version}</version>
+        <configuration>
+          <release>${java.version}</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy.plugin.version}</version>
+        <configuration>
+          <deployAtEnd>true</deployAtEnd>
+          <retryFailedDeploymentCount>3</retryFailedDeploymentCount>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${failsafe.plugin.version}</version>
+      </plugin>
+      <!-- JaCoCo Code Coverage Plugin -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.plugin.version}</version>
+        <configuration>
+          <!-- Exclude packages from coverage analysis -->
+          <excludes>
+            <exclude>**/*Test*</exclude>
+            <exclude>**/test/**</exclude>
+            <exclude>**/*Exception*</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>prepare-agent-integration</id>
+            <goals>
+              <goal>prepare-agent-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-integration</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>report-integration</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>coverage-check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <!-- Set very low thresholds to prevent build failures while still generating reports -->
+              <rules>
+                <rule>
+                  <element>BUNDLE</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.05</minimum> <!-- 5% minimum instruction coverage -->
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.02</minimum> <!-- 2% minimum branch coverage -->
+                    </limit>
+                    <limit>
+                      <counter>CLASS</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.10</minimum> <!-- 10% minimum class coverage -->
+                    </limit>
+                  </limits>
+                </rule>
+                <!-- More lenient rules for specific packages with known low coverage -->
+                <rule>
+                  <element>PACKAGE</element>
+                  <includes>
+                    <include>com.metaobjects.manager.columnar</include>
+                    <include>com.metaobjects.manager.document.mongodb</include>
+                    <include>com.metaobjects.manager.keyvalue</include>
+                    <include>com.metaobjects.manager.search</include>
+                    <include>com.metaobjects.manager.timeseries</include>
+                  </includes>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.00</minimum> <!-- Allow 0% for NoSQL packages -->
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+              <!-- Don't fail build on coverage violations - just report -->
+              <haltOnFailure>false</haltOnFailure>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>${install.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${resources.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${site.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${release.plugin.version}</version>
+        <configuration>
+          <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+        </configuration>
         <dependencies>
-            <!-- Security: Override SnakeYAML 1.30 (moderate vulnerabilities) with secure version -->
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>2.2</version>
-            </dependency>
-
-            <!-- Security: Keep Jackson compatible with Spring Boot 2.7.18 but use secure patch versions -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>2.13.5</version>
-            </dependency>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>1.11.2</version>
+          </dependency>
         </dependencies>
-    </dependencyManagement>
-
-    <build>
-
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.archetype</groupId>
-                <artifactId>archetype-packaging</artifactId>
-                <version>${archetype.plugin.version}</version>
-            </extension>
-        </extensions>
-
+      </plugin>
+      <!-- OSGi Bundle Support -->
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${bundle.plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <niceManifest>true</niceManifest>
+          <instructions>
+            <Import-Package>${osgi.import}</Import-Package>
+            <Export-Package>${osgi.export}</Export-Package>
+            <Private-Package>${osgi.private}</Private-Package>
+            <Embed-Dependency>${osgi.embed}</Embed-Dependency>
+            <Embed-Directory>${osgi.embed.dir}</Embed-Directory>
+            <DynamicImport-Package>${osgi.dynamic}</DynamicImport-Package>
+            <Bundle-Activator>${osgi.activator}</Bundle-Activator>
+            <Build-Time>${maven.build.timestamp}</Build-Time>
+            <Specification-Title>${project.name}</Specification-Title>
+            <Specification-Version>${project.version}</Specification-Version>
+            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+            <Implementation-Title>${project.name}</Implementation-Title>
+            <Implementation-Version>${project.version}</Implementation-Version>
+            <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+            <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+          </instructions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>bundle-manifest</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <!-- Default profile for SNAPSHOT builds - local install only -->
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <!-- No distribution management - SNAPSHOT builds stay local -->
+    </profile>
+    <!-- Release profile for Maven Central publishing - only for release builds -->
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
         <plugins>
-            <!-- Maven Core Plugins -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${clean.plugin.version}</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compiler.plugin.version}</version>
+          <!-- Central Publishing Plugin -->
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.6.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+              <waitUntil>published</waitUntil>
+            </configuration>
+          </plugin>
+          <!-- GPG Signing (required for Maven Central) -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Source JAR (required for Maven Central) -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Javadoc JAR (required for Maven Central) -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.3</version>
+            <configuration>
+              <encoding>UTF-8</encoding>
+              <failOnError>false</failOnError>
+              <failOnWarnings>false</failOnWarnings>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
                 <configuration>
-                    <release>${java.version}</release>
+                  <doclint>none</doclint>
+                  <failOnError>false</failOnError>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${deploy.plugin.version}</version>
-                <configuration>
-                    <deployAtEnd>true</deployAtEnd>
-                    <retryFailedDeploymentCount>3</retryFailedDeploymentCount>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${failsafe.plugin.version}</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>${install.plugin.version}</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>${resources.plugin.version}</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>${site.plugin.version}</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>${release.plugin.version}</version>
-                <configuration>
-                    <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe</artifactId>
-                        <version>1.11.2</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
-            <!-- OSGi Bundle Support -->
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>${bundle.plugin.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <niceManifest>true</niceManifest>
-                    <instructions>
-                        <Import-Package>${osgi.import}</Import-Package>
-                        <Export-Package>${osgi.export}</Export-Package>
-                        <Private-Package>${osgi.private}</Private-Package>
-                        <Embed-Dependency>${osgi.embed}</Embed-Dependency>
-                        <Embed-Directory>${osgi.embed.dir}</Embed-Directory>
-                        <DynamicImport-Package>${osgi.dynamic}</DynamicImport-Package>
-                        <Bundle-Activator>${osgi.activator}</Bundle-Activator>
-                        <Build-Time>${maven.build.timestamp}</Build-Time>
-                        <Specification-Title>${project.name}</Specification-Title>
-                        <Specification-Version>${project.version}</Specification-Version>
-                        <Specification-Vendor>${project.organization.name}</Specification-Vendor>
-                        <Implementation-Title>${project.name}</Implementation-Title>
-                        <Implementation-Version>${project.version}</Implementation-Version>
-                        <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-                        <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                    </instructions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>bundle-manifest</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
-    </build>
-
-    <profiles>
-        <!-- Default profile for SNAPSHOT builds - local install only -->
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <!-- No distribution management - SNAPSHOT builds stay local -->
-        </profile>
-
-        <!-- Release profile for Maven Central publishing - only for release builds -->
-        <profile>
-            <id>release</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- Central Publishing Plugin -->
-                    <plugin>
-                        <groupId>org.sonatype.central</groupId>
-                        <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.6.0</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <publishingServerId>central</publishingServerId>
-                            <autoPublish>true</autoPublish>
-                            <waitUntil>published</waitUntil>
-                        </configuration>
-                    </plugin>
-
-                    <!-- GPG Signing (required for Maven Central) -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- Source JAR (required for Maven Central) -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.3.0</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <!-- Javadoc JAR (required for Maven Central) -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.6.3</version>
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                            <failOnError>false</failOnError>
-                            <failOnWarnings>false</failOnWarnings>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                 <configuration>
-                                    <doclint>none</doclint>
-                                    <failOnError>false</failOnError>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <distributionManagement>
-                <repository>
-                    <id>central</id>
-                    <url>https://central.sonatype.com/</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
-
+      </build>
+      <distributionManagement>
+        <repository>
+          <id>central</id>
+          <url>https://central.sonatype.com/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 </project>

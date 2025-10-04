@@ -106,10 +106,6 @@ public class TypeDefinitionInheritanceTest {
         assertTrue("Should have some inherited requirements from MetaField base",
                   inheritedRequirements > 0);
 
-        System.out.println("StringField inheritance test results:");
-        System.out.println("  - Total requirements: " + totalRequirements);
-        System.out.println("  - Direct requirements: " + directRequirements);
-        System.out.println("  - Inherited requirements: " + inheritedRequirements);
-        System.out.println("  - Parent: " + stringFieldDef.getParentQualifiedName());
+        // StringField inheritance results available for assertions - no verbose output needed
     }
 }

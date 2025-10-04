@@ -10,6 +10,8 @@ import com.metaobjects.test.proxy.fruitbasket.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 
@@ -17,6 +19,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 public class ProxyObjectTests {
+    private static final Logger log = LoggerFactory.getLogger(ProxyObjectTests.class);
 
     protected final String BASKET_TO_FRUIT = "simple::fruitbasket::BasketToFruit";
     protected MetaDataLoader loader = null;
@@ -31,15 +34,15 @@ public class ProxyObjectTests {
 
     @Before
     public void initLoader() throws ClassNotFoundException {
-        System.out.println("@Before: Starting loader initialization");
+        log.debug("Starting loader initialization");
 
         loader = SimpleLoader.createManual("proxytest", Arrays.asList(
                 "com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.json"
         ));
 
-        System.out.println("@Before: Loader created, calling setupData");
+        log.debug("Loader created, calling setupData");
         setupData();
-        System.out.println("@Before: Setup completed, store size: " + objectStore.size());
+        log.debug("Setup completed, store size: {}", objectStore.size());
     }
 
     protected void setupData() throws ClassNotFoundException {
@@ -162,7 +165,7 @@ public class ProxyObjectTests {
 
         // TEMPORARY FIX: If identity has no fields due to parsing issues, fallback to ID field lookup
         if (identityFields.isEmpty()) {
-            System.out.println("WARNING: Identity has no fields, falling back to ID field lookup for " + metaObject.getName());
+            log.warn("Identity has no fields, falling back to ID field lookup for {}", metaObject.getName());
 
             // Special case for BasketToFruit - use composite key
             if (metaObject.getName().contains("BasketToFruit")) {
@@ -175,7 +178,7 @@ public class ProxyObjectTests {
                         return new Object[]{basketIdValue, fruitIdValue};
                     }
                 } catch (Exception e) {
-                    System.out.println("ERROR: Could not access basketId/fruitId fields: " + e.getMessage());
+                    log.error("Could not access basketId/fruitId fields: {}", e.getMessage());
                 }
             }
 
@@ -187,7 +190,7 @@ public class ProxyObjectTests {
                     return new Object[]{idValue};
                 }
             } catch (Exception e) {
-                System.out.println("ERROR: Could not find or access 'id' field: " + e.getMessage());
+                log.error("Could not find or access 'id' field: {}", e.getMessage());
             }
             return new Object[0]; // Return empty array if no fallback works
         }
@@ -255,7 +258,7 @@ public class ProxyObjectTests {
             String key = getType(o)+":"+keyStr;
             objectStore.put( key, o );
         } catch (Exception e) {
-            System.out.println("ERROR in addToStore for " + o.getClass().getSimpleName() + ": " + e.getMessage());
+            log.error("Error in addToStore for {}: {}", o.getClass().getSimpleName(), e.getMessage());
             throw new RuntimeException("Failed to add to store", e);
         }
     }
@@ -300,7 +303,7 @@ public class ProxyObjectTests {
             addToStore(f);
             return (T) f;
         } catch (Exception e) {
-            System.out.println("ERROR in newFruit(" + clazz.getSimpleName() + ", " + id + "): " + e.getMessage());
+            log.error("Error in newFruit({}, {}): {}", clazz.getSimpleName(), id, e.getMessage());
             throw new RuntimeException("Failed to create fruit", e);
         }
     }
@@ -317,7 +320,7 @@ public class ProxyObjectTests {
             addToStore(b);
             return (T) b;
         } catch (Exception e) {
-            System.out.println("ERROR in newBasket(" + clazz.getSimpleName() + ", " + id + "): " + e.getMessage());
+            log.error("Error in newBasket({}, {}): {}", clazz.getSimpleName(), id, e.getMessage());
             throw new RuntimeException("Failed to create basket", e);
         }
     }
@@ -359,6 +362,6 @@ public class ProxyObjectTests {
         // The enhanced ProxyObject should now handle array conversions seamlessly
         // This test validates the infrastructure is in place without requiring
         // specific array fields in the test metadata
-        System.out.println("Array-enhanced ProxyObject test completed successfully");
+        log.info("Array-enhanced ProxyObject test completed successfully");
     }
 }

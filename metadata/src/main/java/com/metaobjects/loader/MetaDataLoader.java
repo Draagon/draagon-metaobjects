@@ -258,7 +258,7 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
             CompletableFuture<MetaDataLoader> future = activeLoaders.get(loaderKey);
             if (future != null && (future.isDone() || future.isCompletedExceptionally())) {
                 activeLoaders.remove(loaderKey);
-                log.info("Cleaned up failed initialization for loader: {}", loaderKey);
+                log.debug("Cleaned up failed initialization for loader: {}", loaderKey);
             }
         } else {
             // Cleanup all completed/failed futures
@@ -286,7 +286,7 @@ public class MetaDataLoader extends MetaData implements LoaderConfigurable {
         for (int attempt = 0; attempt <= maxRetries; attempt++) {
             try {
                 if (attempt > 0) {
-                    log.info("Retrying initialization for loader [{}], attempt {} of {}", 
+                    log.debug("Retrying initialization for loader [{}], attempt {} of {}",
                            getName(), attempt + 1, maxRetries + 1);
                     
                     // Reset state for retry

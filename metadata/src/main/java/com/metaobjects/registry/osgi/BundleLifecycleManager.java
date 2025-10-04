@@ -102,7 +102,7 @@ public class BundleLifecycleManager {
                 var addBundleListenerMethod = bundleContext.getClass().getMethod("addBundleListener", bundleListenerClass);
                 addBundleListenerMethod.invoke(bundleContext, bundleListener);
                 
-                log.info("BundleLifecycleManager initialized with real OSGI BundleListener");
+                log.debug("BundleLifecycleManager initialized with real OSGI BundleListener");
                 
             } catch (ClassNotFoundException e) {
                 log.debug("OSGI BundleListener not available - running in test mode");
@@ -111,13 +111,13 @@ public class BundleLifecycleManager {
             }
             
             active = true;
-            log.info("BundleLifecycleManager activated (OSGI available: {})", bundleListener != null && !bundleListener.getClass().equals(Object.class));
+            log.debug("BundleLifecycleManager activated (OSGI available: {})", bundleListener != null && !bundleListener.getClass().equals(Object.class));
             
         } catch (Exception e) {
             log.error("Failed to initialize BundleLifecycleManager: {}", e.getMessage(), e);
             // Still set active to true for testing environments
             active = true;
-            log.info("BundleLifecycleManager activated in fallback mode");
+            log.debug("BundleLifecycleManager activated in fallback mode");
         }
     }
     
@@ -192,7 +192,7 @@ public class BundleLifecycleManager {
      * Handle bundle stopping event - prepare for cleanup
      */
     private void handleBundleStopping(Object bundle, BundleInfo bundleInfo) {
-        log.info("Bundle stopping: {} - preparing for cleanup", bundleInfo);
+        log.debug("Bundle stopping: {} - preparing for cleanup", bundleInfo);
         
         // Notify service registry to prepare for bundle cleanup
         Object serviceRegistry = serviceRegistryRef.get();
@@ -213,7 +213,7 @@ public class BundleLifecycleManager {
      * Handle bundle stopped event - perform cleanup
      */
     private void handleBundleStopped(Object bundle, BundleInfo bundleInfo) {
-        log.info("Bundle stopped: {} - performing cleanup", bundleInfo);
+        log.debug("Bundle stopped: {} - performing cleanup", bundleInfo);
         performBundleCleanup(bundle, bundleInfo);
     }
     
@@ -221,7 +221,7 @@ public class BundleLifecycleManager {
      * Handle bundle uninstalled event - final cleanup
      */
     private void handleBundleUninstalled(Object bundle, BundleInfo bundleInfo) {
-        log.info("Bundle uninstalled: {} - performing final cleanup", bundleInfo);
+        log.debug("Bundle uninstalled: {} - performing final cleanup", bundleInfo);
         performBundleCleanup(bundle, bundleInfo);
         trackedBundles.remove(bundle);
     }
@@ -268,12 +268,12 @@ public class BundleLifecycleManager {
                         Class<?> bundleListenerClass = Class.forName("org.osgi.framework.BundleListener");
                         var removeBundleListenerMethod = bundleContext.getClass().getMethod("removeBundleListener", bundleListenerClass);
                         removeBundleListenerMethod.invoke(bundleContext, bundleListener);
-                        log.info("BundleLifecycleManager shutdown completed with OSGI cleanup");
+                        log.debug("BundleLifecycleManager shutdown completed with OSGI cleanup");
                     } catch (ClassNotFoundException e) {
                         log.debug("OSGI classes not available during shutdown - test mode");
                     }
                 } else {
-                    log.info("BundleLifecycleManager shutdown completed (test mode)");
+                    log.debug("BundleLifecycleManager shutdown completed (test mode)");
                 }
             } catch (Exception e) {
                 log.debug("Error during BundleLifecycleManager shutdown: {}", e.getMessage());

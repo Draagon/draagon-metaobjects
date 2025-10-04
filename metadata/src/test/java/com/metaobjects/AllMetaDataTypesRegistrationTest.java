@@ -71,7 +71,7 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
     public void testRegistryHasAllTypes() {
         MetaDataRegistry.RegistryStats stats = sharedRegistry.getStats();
         assertNotNull("Registry stats should be available", stats);
-        System.out.println("Registry has " + stats.totalTypes() + " types registered");
+        // Registry stats available for assertions - no verbose output needed
 
         // Should have at least field types + object types + attribute types
         assertTrue("Should have at least 16 types registered", stats.totalTypes() >= 16);
@@ -137,22 +137,13 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
 
     @Test
     public void testAllRegisteredTypesDisplay() {
-        System.out.println("ALL registered types:");
-        sharedRegistry.getRegisteredTypes().forEach(typeId -> {
-            System.out.println("  " + typeId.type() + "." + typeId.subType());
-        });
-
-        // Count by type
+        // Count by type - no verbose output during tests
         long fieldCount = sharedRegistry.getRegisteredTypes().stream()
             .filter(t -> "field".equals(t.type())).count();
         long objectCount = sharedRegistry.getRegisteredTypes().stream()
             .filter(t -> "object".equals(t.type())).count();
         long attrCount = sharedRegistry.getRegisteredTypes().stream()
             .filter(t -> "attr".equals(t.type())).count();
-
-        System.out.println("Field types: " + fieldCount);
-        System.out.println("Object types: " + objectCount);
-        System.out.println("Attribute types: " + attrCount);
 
         assertTrue("Should have at least 10 field types", fieldCount >= 10);
         assertTrue("Should have at least 2 object types", objectCount >= 2);

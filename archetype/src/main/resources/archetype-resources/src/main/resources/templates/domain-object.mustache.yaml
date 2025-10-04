@@ -1,0 +1,111 @@
+name: "domain-object"
+version: "1.0.0"
+description: "JPA Entity template for Spring Boot applications"
+targetLanguage: "java"
+outputFileExtension: "java"
+packagePath: true
+requirements:
+  helpers: ["constantFieldName", "isBoolean", "capitalize", "javaType", "dbColumnName", "dbTableName", "capitalizedFieldName", "hasNext", "isIdField", "isNullable"]
+template: |
+  package {{package}};
+
+  import jakarta.persistence.*;
+  import jakarta.validation.constraints.*;
+  import java.time.LocalDateTime;
+  import java.time.LocalDate;
+  import java.math.BigDecimal;
+  {{#imports}}
+  import {{.}};
+  {{/imports}}
+
+  /**
+   * {{description}}
+   *
+   * Generated from MetaObjects metadata: {{metaObjectName}}
+   * This class is generated from metadata and provides JPA entity mapping.
+   *
+   * Modify this class as needed - it will not be overwritten on regeneration.
+   */
+  @Entity
+  {{#dbTableName}}
+  @Table(name = "{{dbTableName}}")
+  {{/dbTableName}}
+  public class {{className}} {
+
+      {{#fields}}
+      {{#isIdField}}
+      @Id
+      @GeneratedValue(strategy = GenerationType.IDENTITY)
+      {{/isIdField}}
+      {{#dbColumnName}}
+      @Column(name = "{{dbColumnName}}"{{^isNullable}}, nullable = false{{/isNullable}})
+      {{/dbColumnName}}
+      {{^dbColumnName}}
+      @Column{{^isNullable}}(nullable = false){{/isNullable}}
+      {{/dbColumnName}}
+      {{^isNullable}}
+      @NotNull
+      {{/isNullable}}
+      private {{javaType}} {{fieldName}};
+
+      {{/fields}}
+
+      // Constructors
+
+      /**
+       * Default constructor for JPA
+       */
+      public {{className}}() {
+          // JPA requires default constructor
+      }
+
+      // Getters and Setters
+
+      {{#fields}}
+      /**
+       * Get {{fieldName}}
+       */
+      {{#isBoolean}}
+      public {{javaType}} is{{capitalizedFieldName}}() {
+          return {{fieldName}};
+      }
+      {{/isBoolean}}
+      {{^isBoolean}}
+      public {{javaType}} get{{capitalizedFieldName}}() {
+          return {{fieldName}};
+      }
+      {{/isBoolean}}
+
+      /**
+       * Set {{fieldName}}
+       */
+      public void set{{capitalizedFieldName}}({{javaType}} {{fieldName}}) {
+          this.{{fieldName}} = {{fieldName}};
+      }
+
+      {{/fields}}
+
+      @Override
+      public boolean equals(Object obj) {
+          if (this == obj) return true;
+          if (obj == null || getClass() != obj.getClass()) return false;
+          {{className}} that = ({{className}}) obj;
+          // TODO: Implement proper equals logic based on ID fields
+          return false;
+      }
+
+      @Override
+      public int hashCode() {
+          // TODO: Implement proper hashCode logic based on ID fields
+          return 0;
+      }
+
+      @Override
+      public String toString() {
+          return "{{className}}{" +
+              {{#fields}}
+              "{{fieldName}}=" + {{fieldName}}{{#hasNext}} + ", " +{{/hasNext}}{{^hasNext}} +{{/hasNext}}
+              {{/fields}}
+              '}';
+      }
+  }

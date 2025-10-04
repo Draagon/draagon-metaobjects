@@ -2,11 +2,14 @@ package com.metaobjects.mojo.test;
 
 import com.metaobjects.generator.Generator;
 import com.metaobjects.loader.MetaDataLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class GeneratorTest implements Generator {
+    private static final Logger log = LoggerFactory.getLogger(GeneratorTest.class);
 
     private MetaDataLoader loader = null;
     private Map<String,String> args = null;
@@ -37,9 +40,10 @@ public class GeneratorTest implements Generator {
     public void execute(MetaDataLoader loader) {
         this.loader = loader;
 
-        System.out.println( "LOADER:  "  + loader );
-        System.out.println( "ARGS:    "  + args );
-        System.out.println( "FILTERS:  " + filters );
-        System.out.println( "SCRIPTS: "  + scripts );
+        // Debug output for Maven plugin testing - only at DEBUG level
+        log.debug("Generator test execution - Loader: {}", loader);
+        log.debug("Generator test execution - Args: {}", args);
+        log.debug("Generator test execution - Filters: {}", filters);
+        log.debug("Generator test execution - Scripts: {}", scripts);
     }
 }

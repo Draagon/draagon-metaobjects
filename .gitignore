@@ -7,3 +7,4 @@ derby.log
 target
 out
 .DS_Store
+*.code-workspace

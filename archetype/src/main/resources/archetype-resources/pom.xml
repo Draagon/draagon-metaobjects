@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
+    <packaging>jar</packaging>
+
+    <name>${artifactId}</name>
+    <description>MetaObjects Application: ${artifactId}</description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- MetaObjects Framework Version -->
+        <metaobjects.version>6.2.6</metaobjects.version>
+
+        <!-- Spring Boot Version -->
+        <spring.boot.version>3.2.0</spring.boot.version>
+
+        <!-- Testing -->
+        <junit.version>5.10.0</junit.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- MetaObjects Core Framework (for code generation only) -->
+        <dependency>
+            <groupId>com.metaobjects</groupId>
+            <artifactId>metaobjects-core</artifactId>
+            <version>${metaobjects.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring Boot Starters -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Database (H2 for getting started - replace with your choice) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Testing Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- MetaObjects Code Generation Plugin -->
+            <plugin>
+                <groupId>com.metaobjects</groupId>
+                <artifactId>metaobjects-maven-plugin</artifactId>
+                <version>${metaobjects.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-domain-objects</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <loader>
+                                <classname>com.metaobjects.loader.file.FileMetaDataLoader</classname>
+                                <name>app-metadata</name>
+                                <sourceDir>${project.basedir}/src/main/resources</sourceDir>
+                                <sources>
+                                    <source>metadata/application-metadata.json</source>
+                                </sources>
+                            </loader>
+                            <generators>
+                                <!-- Generate JPA Domain Objects -->
+                                <generator>
+                                    <classname>com.metaobjects.generator.mustache.MustacheTemplateGenerator</classname>
+                                    <args>
+                                        <templatePath>${project.basedir}/src/main/resources/templates/</templatePath>
+                                        <outputDir>${project.basedir}/target/generated-sources/metaobjects</outputDir>
+                                        <packagePrefix>${package}</packagePrefix>
+                                        <targetLanguage>java</targetLanguage>
+                                        <templateName>domain-object</templateName>
+                                    </args>
+                                </generator>
+                            </generators>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.metaobjects</groupId>
+                        <artifactId>metaobjects-codegen-mustache</artifactId>
+                        <version>${metaobjects.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- Build Helper Maven Plugin - Add generated sources to compilation -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/target/generated-sources/metaobjects</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+
+            <!-- Spring Boot Maven Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Surefire Plugin for Testing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

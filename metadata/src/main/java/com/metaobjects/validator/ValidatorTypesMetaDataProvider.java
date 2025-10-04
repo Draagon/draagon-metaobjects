@@ -42,7 +42,7 @@ public class ValidatorTypesMetaDataProvider implements MetaDataTypeProvider {
         NumericValidator.registerTypes(registry);
         ArrayValidator.registerTypes(registry);
 
-        log.info("Validator types registered via provider");
+        log.debug("Validator types registered via provider");
     }
 
     @Override

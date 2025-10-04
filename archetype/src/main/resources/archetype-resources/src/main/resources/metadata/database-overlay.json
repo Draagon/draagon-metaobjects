@@ -1,0 +1,32 @@
+{
+  "name": "database-overlay",
+  "metadata": {
+    "version": "1.0.0",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "override": true,
+          "@dbTable": "users",
+          "@description": "User database table mapping"
+        }
+      },
+      {
+        "object": {
+          "name": "Order",
+          "override": true,
+          "@dbTable": "orders",
+          "@description": "Order database table mapping"
+        }
+      },
+      {
+        "object": {
+          "name": "OrderItem",
+          "override": true,
+          "@dbTable": "order_items",
+          "@description": "Order item database table mapping"
+        }
+      }
+    ]
+  }
+}
