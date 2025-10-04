@@ -650,7 +650,7 @@ public class MetaDataRegistry {
             // Resolve dependencies using topological sort
             List<MetaDataTypeProvider> resolvedProviders = resolveDependencies(providers);
 
-            log.info("Loading {} MetaDataTypeProvider services in dependency order", resolvedProviders.size());
+            log.debug("Loading {} MetaDataTypeProvider services in dependency order", resolvedProviders.size());
 
             // Register type extensions from each provider in dependency order
             for (MetaDataTypeProvider provider : resolvedProviders) {
@@ -682,7 +682,7 @@ public class MetaDataRegistry {
                 }
             }
 
-            log.info("Successfully loaded {} MetaDataTypeProvider services", resolvedProviders.size());
+            log.debug("Successfully loaded {} MetaDataTypeProvider services", resolvedProviders.size());
 
         } catch (Exception e) {
             log.error("Error during service provider loading: {}", e.getMessage(), e);
@@ -833,7 +833,7 @@ public class MetaDataRegistry {
 
         int resolvedCount = resolved.size();
         if (resolvedCount > 0) {
-            log.info("Resolved deferred inheritance for {} types, {} still deferred",
+            log.debug("Resolved deferred inheritance for {} types, {} still deferred",
                     resolvedCount, stillDeferred.size());
         }
 
@@ -1117,7 +1117,7 @@ public class MetaDataRegistry {
                     enableStrictDuplicateDetection();
                 }
 
-                log.info("Loaded {} core constraints using concrete constraint classes",
+                log.debug("Loaded {} core constraints using concrete constraint classes",
                          constraints.size());
                 constraintsInitialized = true;
 

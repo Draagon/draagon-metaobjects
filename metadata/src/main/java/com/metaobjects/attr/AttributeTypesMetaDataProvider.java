@@ -55,7 +55,7 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
         ClassAttribute.registerTypes(registry);
         PropertiesAttribute.registerTypes(registry);
 
-        log.info("Attribute types registered via provider");
+        log.debug("Attribute types registered via provider");
     }
 
     @Override

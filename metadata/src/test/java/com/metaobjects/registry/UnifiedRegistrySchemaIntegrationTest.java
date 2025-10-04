@@ -201,54 +201,21 @@ public class UnifiedRegistrySchemaIntegrationTest {
     public void testRegistrySchemaComplianceMapping() {
         // Test that registry types map correctly to schema expectations
 
-        // Debug registry state
-        System.out.println("=== REGISTRY DEBUG ===");
-        System.out.println("Total types: " + registry.getStats().totalTypes());
-        System.out.println("Registered types: " + registry.getRegisteredTypeNames());
+        // Registry compliance mapping data available for assertions - no verbose output needed
 
-        // Check if field.string is registered
-        boolean stringFieldExists = registry.getRegisteredTypeNames().contains("field.string");
-        System.out.println("field.string registered: " + stringFieldExists);
-
-        // Check if attr.string is registered
-        boolean stringAttrExists = registry.getRegisteredTypeNames().contains("attr.string");
-        System.out.println("attr.string registered: " + stringAttrExists);
-
-        // Check field.base acceptance of attr.string
-        boolean baseAccepts = registry.acceptsChild("field", "base", "attr", "string", "testAttr");
-        System.out.println("field.base accepts attr.string: " + baseAccepts);
-
-        // Get description of what field.base supports
-        String baseDescription = registry.getSupportedChildrenDescription("field", "base");
-        System.out.println("field.base supported children: " + baseDescription);
-
-        // Get description of what field.string supports
-        String description = registry.getSupportedChildrenDescription("field", "string");
-        System.out.println("field.string supported children: " + description);
-
-        // Check if field.string properly inherits from field.base
-        try {
-            java.lang.reflect.Method getTypeDefMethod = registry.getClass().getDeclaredMethod("getTypeDefinition", String.class, String.class);
-            getTypeDefMethod.setAccessible(true);
-            Object baseTypeDef = getTypeDefMethod.invoke(registry, "field", "base");
-            Object stringTypeDef = getTypeDefMethod.invoke(registry, "field", "string");
-
-            if (baseTypeDef != null && stringTypeDef != null) {
-                System.out.println("field.base definition exists: true");
-                System.out.println("field.string definition exists: true");
-                System.out.println("field.string parent: " + stringTypeDef.getClass().getMethod("getParentType").invoke(stringTypeDef) + "." +
-                                 stringTypeDef.getClass().getMethod("getParentSubType").invoke(stringTypeDef));
-            }
-        } catch (Exception e) {
-            System.out.println("Reflection debug failed: " + e.getMessage());
-        }
+        // Registry type registration verification
+        assertTrue("field.string should be registered",
+                  registry.getRegisteredTypeNames().contains("field.string"));
+        assertTrue("attr.string should be registered",
+                  registry.getRegisteredTypeNames().contains("attr.string"));
+        assertTrue("field.base should accept attr.string",
+                  registry.acceptsChild("field", "base", "attr", "string", "testAttr"));
 
         // Field types that should be supported
         String[] expectedFieldTypes = {"string", "int", "long", "double", "float", "boolean", "date", "timestamp"};
         for (String fieldType : expectedFieldTypes) {
-            boolean accepts = registry.acceptsChild("field", fieldType, "attr", "string", "testAttr");
-            System.out.println("field." + fieldType + " accepts attr.string: " + accepts);
-            assertTrue("Registry should support field type: " + fieldType, accepts);
+            assertTrue("Registry should support field type: " + fieldType,
+                      registry.acceptsChild("field", fieldType, "attr", "string", "testAttr"));
         }
         
         // Object types that should be supported  

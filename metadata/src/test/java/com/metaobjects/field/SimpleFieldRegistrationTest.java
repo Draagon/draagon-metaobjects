@@ -39,7 +39,7 @@ public class SimpleFieldRegistrationTest {
         assertNotNull("Registry should be available", registry);
         MetaDataRegistry.RegistryStats stats = registry.getStats();
         assertNotNull("Stats should be available", stats);
-        System.out.println("Registry has " + stats.totalTypes() + " types registered");
+        // Registry stats available for assertions - no verbose output needed
     }
 
     @Test
@@ -51,7 +51,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "string", "attr", "string", "pattern"));
         
         String description = registry.getSupportedChildrenDescription("field", "string");
-        System.out.println("StringField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -64,7 +64,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "long", "attr", "long", "minValue"));
         
         String description = registry.getSupportedChildrenDescription("field", "long");
-        System.out.println("LongField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -77,7 +77,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "double", "attr", "double", "minValue"));
 
         String description = registry.getSupportedChildrenDescription("field", "double");
-        System.out.println("DoubleField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -87,7 +87,7 @@ public class SimpleFieldRegistrationTest {
                   registry.isRegistered("field", "boolean"));
         
         String description = registry.getSupportedChildrenDescription("field", "boolean");
-        System.out.println("BooleanField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -100,7 +100,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "date", "attr", "string", "dateFormat"));
 
         String description = registry.getSupportedChildrenDescription("field", "date");
-        System.out.println("DateField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -119,7 +119,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "time", "attr", "string", "maxTime"));
 
         String description = registry.getSupportedChildrenDescription("field", "time");
-        System.out.println("TimeField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -138,7 +138,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "decimal", "attr", "string", "minValue"));
 
         String description = registry.getSupportedChildrenDescription("field", "decimal");
-        System.out.println("DecimalField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -151,7 +151,7 @@ public class SimpleFieldRegistrationTest {
                   registry.acceptsChild("field", "float", "attr", "double", "minValue"));
 
         String description = registry.getSupportedChildrenDescription("field", "float");
-        System.out.println("FloatField description: " + description);
+        // Field description available for assertions - no verbose output needed;
         assertNotNull("Should have description", description);
     }
 
@@ -182,7 +182,7 @@ public class SimpleFieldRegistrationTest {
         assertTrue("TimeField should accept isArray attribute",
                   registry.acceptsChild("field", "time", "attr", "boolean", "isArray"));
 
-        System.out.println("✅ Universal @isArray support verified for all field types");
+        // Test validation successful - no verbose output needed;
     }
 
     // @Test - DISABLED: isArrayType() method not implemented yet (array architecture on hold)
@@ -196,7 +196,7 @@ public class SimpleFieldRegistrationTest {
     //     arrayField.addMetaAttr(com.metaobjects.attr.BooleanAttribute.create("isArray", true));
     //     assertTrue("Array field should be detected as array type", arrayField.isArrayType());
     //
-    //     System.out.println("✅ isArrayType() method working correctly");
+    //     // Test validation successful - no verbose output needed;
     // }
 
     @Test
@@ -230,7 +230,7 @@ public class SimpleFieldRegistrationTest {
         assertTrue("Store hours should accept 10:00", storeHours.isValidTime("10:00"));
         assertFalse("Store hours should reject 08:00", storeHours.isValidTime("08:00"));
 
-        System.out.println("✅ TimeField creation and validation working correctly");
+        // Test validation successful - no verbose output needed;
     }
 
     @Test
@@ -242,17 +242,12 @@ public class SimpleFieldRegistrationTest {
         assertFalse("ShortField should not be registered",
                    registry.isRegistered("field", "short"));
 
-        System.out.println("✅ ByteField and ShortField successfully removed");
+        // Test validation successful - no verbose output needed;
     }
 
     @Test
     public void testAllRegisteredTypes() {
-        System.out.println("All registered types:");
-        registry.getRegisteredTypes().forEach(typeId -> {
-            System.out.println("  " + typeId.type() + "." + typeId.subType());
-        });
-
+        // Registry types available for assertions - no verbose output needed
         MetaDataRegistry.RegistryStats stats = registry.getStats();
-        System.out.println("Registry contains " + stats.totalTypes() + " total types");
     }
 }

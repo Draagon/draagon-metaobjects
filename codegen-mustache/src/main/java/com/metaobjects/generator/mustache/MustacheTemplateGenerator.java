@@ -70,16 +70,16 @@ public class MustacheTemplateGenerator implements Generator {
             templatePath += "/";
         }
         
-        log.info("Mustache Template Generator configured:");
-        log.info("  Template Path: {}", templatePath);
-        log.info("  Output Directory: {}", outputDir);
-        log.info("  Target Language: {}", targetLanguage);
-        log.info("  Package Prefix: {}", packagePrefix);
+        log.debug("Mustache Template Generator configured:");
+        log.debug("  Template Path: {}", templatePath);
+        log.debug("  Output Directory: {}", outputDir);
+        log.debug("  Target Language: {}", targetLanguage);
+        log.debug("  Package Prefix: {}", packagePrefix);
         if (!packagePostfix.isEmpty()) {
-            log.info("  Package Postfix: {}", packagePostfix);
+            log.debug("  Package Postfix: {}", packagePostfix);
         }
         if (templateName != null) {
-            log.info("  Template Name: {}", templateName);
+            log.debug("  Template Name: {}", templateName);
         }
         
         // Initialize engines
@@ -107,13 +107,13 @@ public class MustacheTemplateGenerator implements Generator {
     public void execute(MetaDataLoader loader) throws GeneratorException {
         try {
             
-            log.info("Starting Mustache template generation...");
+            log.debug("Starting Mustache template generation...");
             
             // Get filtered MetaObjects
             Collection<MetaObject> metaObjects = GeneratorUtil.getFilteredMetaData(
                 loader, MetaObject.class, null); // TODO: Use filters properly
             
-            log.info("Found {} MetaObjects to process", metaObjects.size());
+            log.debug("Found {} MetaObjects to process", metaObjects.size());
             
             // Load templates
             List<TemplateDefinition> templates = loadTemplates();
@@ -123,7 +123,7 @@ public class MustacheTemplateGenerator implements Generator {
                 return;
             }
             
-            log.info("Loaded {} templates for language: {}", templates.size(), targetLanguage);
+            log.debug("Loaded {} templates for language: {}", templates.size(), targetLanguage);
             
             // Generate code for each MetaObject using each applicable template
             int filesGenerated = 0;

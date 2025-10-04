@@ -53,14 +53,14 @@ public class ServiceRegistryFactory {
         if (isOSGIAvailable()) {
             Object bundleContext = getBundleContext();
             if (bundleContext != null) {
-                log.info("Creating OSGIServiceRegistry with BundleContext");
+                log.debug("Creating OSGIServiceRegistry with BundleContext");
                 return new OSGIServiceRegistry(bundleContext);
             } else {
-                log.info("OSGI detected but no BundleContext found, falling back to StandardServiceRegistry");
+                log.debug("OSGI detected but no BundleContext found, falling back to StandardServiceRegistry");
                 return new StandardServiceRegistry();
             }
         } else {
-            log.info("Creating StandardServiceRegistry (OSGI not available)");
+            log.debug("Creating StandardServiceRegistry (OSGI not available)");
             return new StandardServiceRegistry();
         }
     }
@@ -72,7 +72,7 @@ public class ServiceRegistryFactory {
      * @return StandardServiceRegistry instance
      */
     public static ServiceRegistry create(ClassLoader classLoader) {
-        log.info("Creating StandardServiceRegistry with specific ClassLoader: {}", classLoader);
+        log.debug("Creating StandardServiceRegistry with specific ClassLoader: {}", classLoader);
         return new StandardServiceRegistry(classLoader);
     }
     
@@ -83,7 +83,7 @@ public class ServiceRegistryFactory {
      * @return OSGIServiceRegistry instance
      */
     public static ServiceRegistry createOSGI(Object bundleContext) {
-        log.info("Creating OSGIServiceRegistry with provided BundleContext");
+        log.debug("Creating OSGIServiceRegistry with provided BundleContext");
         return new OSGIServiceRegistry(bundleContext);
     }
     

@@ -330,7 +330,7 @@ public class OSGIServiceRegistry implements ServiceRegistry {
             manualServices.clear();
             closed = true;
             
-            log.info("OSGIServiceRegistry closed with proper resource cleanup");
+            log.debug("OSGIServiceRegistry closed with proper resource cleanup");
         }
     }
     
@@ -368,7 +368,7 @@ public class OSGIServiceRegistry implements ServiceRegistry {
             var getSymbolicNameMethod = bundle.getClass().getMethod("getSymbolicName");
             String bundleSymbolicName = (String) getSymbolicNameMethod.invoke(bundle);
             
-            log.info("Bundle event received for: {}", bundleSymbolicName);
+            log.debug("Bundle event received for: {}", bundleSymbolicName);
             
             // Future: Could implement bundle-specific service cleanup here
             // For now, we rely on the automatic cleanup in close() and ServiceTracker
@@ -389,7 +389,7 @@ public class OSGIServiceRegistry implements ServiceRegistry {
             var getSymbolicNameMethod = bundle.getClass().getMethod("getSymbolicName");
             String bundleSymbolicName = (String) getSymbolicNameMethod.invoke(bundle);
             
-            log.info("Performing cleanup for bundle: {}", bundleSymbolicName);
+            log.debug("Performing cleanup for bundle: {}", bundleSymbolicName);
             
             // Close ServiceTrackers and release ServiceReferences
             // The ServiceTrackers should automatically handle cleanup when bundles stop

@@ -62,7 +62,7 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
         ObjectField.registerTypes(registry);
         ClassField.registerTypes(registry);
 
-        log.info("Field types registered via provider");
+        log.debug("Field types registered via provider");
     }
 
     @Override

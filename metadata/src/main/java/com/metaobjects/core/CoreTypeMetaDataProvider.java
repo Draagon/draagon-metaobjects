@@ -33,7 +33,7 @@ public class CoreTypeMetaDataProvider implements MetaDataTypeProvider {
         // Register the fundamental metadata.base type that all others inherit from
         MetaData.registerTypes(registry);
 
-        log.info("Core base types registered via provider");
+        log.debug("Core base types registered via provider");
     }
 
     @Override
