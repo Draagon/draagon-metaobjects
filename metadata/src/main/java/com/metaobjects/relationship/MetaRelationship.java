@@ -53,20 +53,34 @@ public abstract class MetaRelationship extends MetaData {
      * Register this type with the MetaDataRegistry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(MetaRelationship.class, def -> def
-            .type(TYPE_RELATIONSHIP).subType(SUBTYPE_BASE)
-            .description("Abstract base relationship metadata with model-driven patterns")
-            .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
-            // Abstract type - Java class itself is marked abstract
-            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
-            .optionalAttribute(ATTR_TARGET_OBJECT,  StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_CARDINALITY,  StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_REFERENCED_BY,  StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_DESCRIPTION, StringAttribute.SUBTYPE_STRING)
+        registry.registerType(MetaRelationship.class, def -> {
+            def.type(TYPE_RELATIONSHIP).subType(SUBTYPE_BASE)
+               .description("Abstract base relationship metadata with model-driven patterns")
+               .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
+               // ACCEPTS ANY ATTRIBUTES (all relationship types inherit these)
+               .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*");
 
-            // ACCEPTS ANY ATTRIBUTES (all relationship types inherit these)
-            .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")
-        );
+            // RELATIONSHIP-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT)
+               .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_TARGET_OBJECT)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_CARDINALITY)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_REFERENCED_BY)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_DESCRIPTION)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+        });
     }
 
     protected MetaRelationship(String subType, String name) {

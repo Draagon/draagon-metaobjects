@@ -216,11 +216,63 @@ public Class<?> getExpectedAttributeType(String attributeName) {
         case "precision":
             return Double.class;
 
+        case "isArray":
+            return Boolean.class;
+
         default:
             return String.class;
     }
 }
 ```
+
+### Universal @isArray Support (v6.2.6+)
+
+**Revolutionary array type system** eliminates the need for dedicated array subtypes:
+
+**Before v6.2.6 (Array Type Explosion):**
+```
+StringField, StringArrayField, IntField, IntArrayField,
+LongField, LongArrayField, DoubleField, DoubleArrayField
+// Result: 12+ field types, exponential growth
+```
+
+**After v6.2.6 (Universal @isArray Modifier):**
+```json
+{
+  "field": {
+    "name": "tags",
+    "subType": "string",
+    "@isArray": true
+  }
+}
+```
+
+**Cross-Platform Array Generation:**
+- **Java**: `List<String>`, `String[]`
+- **C#**: `List<string>`, `string[]`
+- **TypeScript**: `string[]`, `Array<string>`
+
+**Enhanced JSON Array Parsing:**
+```json
+{
+  "identity": {
+    "name": "primary",
+    "subType": "primary",
+    "@fields": ["id"]           // Natural JSON array syntax
+  }
+}
+
+// Also supports composite keys:
+{
+  "identity": {
+    "name": "composite_pk",
+    "subType": "primary",
+    "@fields": ["basketId", "fruitId"]  // Multi-field array
+  }
+}
+```
+
+**Backward Compatibility:** Escaped JSON strings like `"@fields": "[\"id\"]"` are automatically converted for compatibility.
 
 ### Conversion Examples
 

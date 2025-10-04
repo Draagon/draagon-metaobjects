@@ -92,7 +92,7 @@ Native support for popular frameworks without forcing dependencies:
     <dependency>
         <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects-core-spring</artifactId>
-        <version>6.2.5-SNAPSHOT</version>
+        <version>6.2.6-SNAPSHOT</version>
     </dependency>
     ```
 
@@ -102,7 +102,7 @@ Native support for popular frameworks without forcing dependencies:
     <dependency>
         <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects-core</artifactId>
-        <version>6.2.5-SNAPSHOT</version>
+        <version>6.2.6-SNAPSHOT</version>
     </dependency>
     ```
 
@@ -112,7 +112,7 @@ Native support for popular frameworks without forcing dependencies:
     <dependency>
         <groupId>com.metaobjects</groupId>
         <artifactId>metaobjects-metadata</artifactId>
-        <version>6.2.5-SNAPSHOT</version>
+        <version>6.2.6-SNAPSHOT</version>
     </dependency>
     ```
 

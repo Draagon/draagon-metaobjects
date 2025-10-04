@@ -29,13 +29,20 @@ public class ArrayValidator extends MetaValidator {
      * @param registry the MetaDataRegistry to register with
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(ArrayValidator.class, def -> def
-            .type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
-            .description("Array validator for size constraints")
-            .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_MINSIZE, IntAttribute.SUBTYPE_INT)
-            .optionalAttribute(ATTR_MAXSIZE, IntAttribute.SUBTYPE_INT)
-        );
+        registry.registerType(ArrayValidator.class, def -> {
+            def.type(TYPE_VALIDATOR).subType(SUBTYPE_ARRAY)
+               .description("Array validator for size constraints")
+               .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE);
+
+            // ARRAY-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_MINSIZE)
+               .ofType(IntAttribute.SUBTYPE_INT)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_MAXSIZE)
+               .ofType(IntAttribute.SUBTYPE_INT)
+               .asSingle();
+        });
     }
 
     // Cache for frequently accessed size values

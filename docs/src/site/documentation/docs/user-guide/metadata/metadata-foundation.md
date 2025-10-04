@@ -315,6 +315,39 @@ public class StringField extends PrimitiveField<String> {
 - **Enhanced extensibility** - plugins use same pattern as core
 - **Cross-module support** - types can be registered from any module
 
+### Fluent Constraint System (v6.2.6+)
+
+The revolutionary **AttributeConstraintBuilder** provides elegant, type-safe constraint definition:
+
+**Enhanced Registration with Fluent Constraints:**
+```java
+public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(PrimaryIdentity.class, def -> def
+        .type(TYPE_IDENTITY).subType(SUBTYPE_PRIMARY)
+        .description("Primary identity for object identification")
+        .inheritsFrom("identity", "base")
+
+        // Fluent constraint definition with AttributeConstraintBuilder
+        .optionalAttributeWithConstraints(ATTR_GENERATION)
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asSingle()
+           .withEnum(GENERATION_INCREMENT, GENERATION_UUID, GENERATION_ASSIGNED)
+
+        // Array-based attributes with fluent syntax
+        .optionalAttributeWithConstraints(ATTR_FIELDS)
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asArray()
+    );
+}
+```
+
+**Fluent Constraint Benefits:**
+- **115+ Comprehensive Constraints** - 57 placement + 28 validation + 30 array-specific
+- **Type Safety** - Compile-time checking of constraint definitions
+- **Enhanced ConstraintEnforcer** - Attribute-specific validation with precise error reporting
+- **Chainable Methods** - Readable constraint configuration with clear intent
+- **Universal @isArray Support** - Single modifier eliminates array subtype explosion
+
 ## Cache Strategy
 
 MetaObjects uses a sophisticated dual cache strategy for optimal performance:

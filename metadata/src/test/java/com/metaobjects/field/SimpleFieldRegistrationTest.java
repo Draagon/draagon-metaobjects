@@ -148,7 +148,7 @@ public class SimpleFieldRegistrationTest {
                   registry.isRegistered("field", "float"));
 
         assertTrue("FloatField should accept range validation attributes",
-                  registry.acceptsChild("field", "float", "attr", "float", "minValue"));
+                  registry.acceptsChild("field", "float", "attr", "double", "minValue"));
 
         String description = registry.getSupportedChildrenDescription("field", "float");
         System.out.println("FloatField description: " + description);

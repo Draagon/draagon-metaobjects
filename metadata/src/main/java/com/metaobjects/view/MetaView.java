@@ -30,17 +30,18 @@ public abstract class MetaView extends MetaData {
      * Called by WebMetaDataProvider during service discovery.
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(MetaView.class, def -> def
-            .type(TYPE_VIEW).subType(SUBTYPE_BASE)
-            .description("Base view metadata with common view attributes")
-            .inheritsFrom("metadata", "base")
+        registry.registerType(MetaView.class, def -> {
+            def.type(TYPE_VIEW).subType(SUBTYPE_BASE)
+               .description("Base view metadata with common view attributes")
+               .inheritsFrom("metadata", "base")
+               // VIEWS CAN CONTAIN ATTRIBUTES
+               .optionalChild("attr", "*", "*");
 
-            // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
-
-            // VIEWS CAN CONTAIN ATTRIBUTES
-            .optionalChild("attr", "*", "*")
-        );
+            // VIEW-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT)
+               .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+               .asSingle();
+        });
 
         // Registered base MetaView type with unified registry
     }

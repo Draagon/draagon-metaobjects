@@ -9,7 +9,7 @@ This module provides comprehensive Spring Framework integration for MetaObjects,
 <dependency>
     <groupId>com.draagon</groupId>
     <artifactId>metaobjects-core-spring</artifactId>
-    <version>5.2.0-SNAPSHOT</version>
+    <version>6.2.6-SNAPSHOT</version>
 </dependency>
 ```
 *Note: Automatically includes `metaobjects-core`*

@@ -73,18 +73,26 @@ public class TimeField extends PrimitiveField<LocalTime> {
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            registry.registerType(TimeField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_TIME)
-                .description("Time field for time-only values (hours, minutes, seconds)")
+            registry.registerType(TimeField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_TIME)
+                   .description("Time field for time-only values (hours, minutes, seconds)")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // TIME-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_FORMAT, StringAttribute.SUBTYPE_STRING)     // Time format pattern
-                .optionalAttribute(ATTR_MIN_TIME, StringAttribute.SUBTYPE_STRING)   // Minimum time constraint
-                .optionalAttribute(ATTR_MAX_TIME, StringAttribute.SUBTYPE_STRING)   // Maximum time constraint
-            );
+                // TIME-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_FORMAT)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();     // Time format pattern
+
+                def.optionalAttributeWithConstraints(ATTR_MIN_TIME)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();     // Minimum time constraint
+
+                def.optionalAttributeWithConstraints(ATTR_MAX_TIME)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();     // Maximum time constraint
+            });
 
             if (log != null) {
                 log.debug("Registered TimeField type with unified registry (auto-generated constraints)");

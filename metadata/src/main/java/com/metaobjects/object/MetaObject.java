@@ -1,7 +1,9 @@
 package com.metaobjects.object;
 
 import com.metaobjects.*;
+import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.attr.MetaAttribute;
+import com.metaobjects.attr.StringAttribute;
 import com.metaobjects.constraint.PlacementConstraint;
 import com.metaobjects.constraint.RegexConstraint;
 import com.metaobjects.constraint.UniquenessConstraint;
@@ -66,48 +68,47 @@ public abstract class MetaObject extends MetaData {
      * Called by ObjectTypesMetaDataProvider during service discovery.
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(MetaObject.class, def -> def
-            .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
-            .description("Base object metadata with common object attributes")
-            .inheritsFrom("metadata", "base")
+        registry.registerType(MetaObject.class, def -> {
+            // ✅ FLUENT CONSTRAINTS WITH CONSTANTS
+            def.type(TYPE_OBJECT).subType(SUBTYPE_BASE)
+               .description("Base object metadata with common object attributes")
+               .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE);
 
+            // Configure each attribute separately to avoid method chaining conflicts
             // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-            .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+            def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT).ofType(BooleanAttribute.SUBTYPE_BOOLEAN).asSingle();
 
             // OBJECT-LEVEL ATTRIBUTES (all object types inherit these)
-            .optionalAttribute(ATTR_EXTENDS, "string")
-            .optionalAttribute(ATTR_IMPLEMENTS, "string")
-            .optionalAttribute(ATTR_IS_INTERFACE, "boolean")
+            def.optionalAttributeWithConstraints(ATTR_EXTENDS).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
+            def.optionalAttributeWithConstraints(ATTR_IMPLEMENTS).ofType(StringAttribute.SUBTYPE_STRING).asArray();  // ✅ MULTIPLE INTERFACES SUPPORT
+            def.optionalAttributeWithConstraints(ATTR_IS_INTERFACE).ofType(BooleanAttribute.SUBTYPE_BOOLEAN).asSingle();
 
             // OBJECT-SPECIFIC ATTRIBUTES
-            .optionalAttribute(ATTR_DESCRIPTION, "string")
-            .optionalAttribute(ATTR_OBJECT, "string")
-            .optionalAttribute(ATTR_OBJECT_REF, "string")
+            def.optionalAttributeWithConstraints(ATTR_DESCRIPTION).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
+            def.optionalAttributeWithConstraints(ATTR_OBJECT).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
+            def.optionalAttributeWithConstraints(ATTR_OBJECT_REF).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
 
             // OBJECTS CONTAIN FIELDS (any field type, any name)
-            .optionalChild("field", "*", "*")
+            def.optionalChild(MetaField.TYPE_FIELD, "*", "*");
 
             // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
-            .optionalChild("object", "*", "*")
+            def.optionalChild(MetaObject.TYPE_OBJECT, "*", "*");
 
             // OBJECTS CAN CONTAIN IDENTITIES (primary and secondary)
-            .optionalChild("identity", "*", "*")
-
-            // OBJECTS CAN CONTAIN KEYS (deprecated - use identity instead)
-            .optionalChild("key", "*", "*")
+            def.optionalChild(MetaIdentity.TYPE_IDENTITY, "*", "*");
 
             // OBJECTS CAN CONTAIN ATTRIBUTES
-            .optionalChild("attr", "*", "*")
+            def.optionalChild(MetaAttribute.TYPE_ATTR, "*", "*");
 
             // OBJECTS CAN CONTAIN VALIDATORS
-            .optionalChild("validator", "*", "*")
+            def.optionalChild(MetaValidator.TYPE_VALIDATOR, "*", "*");
 
             // OBJECTS CAN CONTAIN VIEWS
-            .optionalChild("view", "*", "*")
+            def.optionalChild(MetaView.TYPE_VIEW, "*", "*");
 
             // OBJECTS CAN CONTAIN RELATIONSHIPS
-            .optionalChild("relationship", "*", "*")
-        );
+            def.optionalChild(MetaRelationship.TYPE_RELATIONSHIP, "*", "*");
+        });
 
         if (log != null) {
             log.debug("Registered base MetaObject type with unified registry");

@@ -42,15 +42,28 @@ public class DateField extends PrimitiveField<Date> {
      * Register DateField type and constraints with the registry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(DateField.class, def -> def
-            .type(TYPE_FIELD).subType(SUBTYPE_DATE)
-            .description("Date field with format and range validation")
-            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_DATE_FORMAT, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_FORMAT, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_MIN_DATE, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_MAX_DATE, StringAttribute.SUBTYPE_STRING)
-        );
+        registry.registerType(DateField.class, def -> {
+            def.type(TYPE_FIELD).subType(SUBTYPE_DATE)
+               .description("Date field with format and range validation")
+               .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
+
+            // DATE-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_DATE_FORMAT)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_FORMAT)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_MIN_DATE)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_MAX_DATE)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+        });
 
         if (log != null) {
             log.debug("Registered DateField type with unified registry (auto-generated constraints)");

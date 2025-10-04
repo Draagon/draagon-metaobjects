@@ -38,16 +38,18 @@ public class ObjectField extends MetaField<Object>
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            registry.registerType(ObjectField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_OBJECT)
-                .description("Object field with object reference support")
+            registry.registerType(ObjectField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_OBJECT)
+                   .description("Object field with object reference support")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // OBJECT-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_OBJECTREF, StringAttribute.SUBTYPE_STRING)
-            );
+                // OBJECT-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_OBJECTREF)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();
+            });
 
             log.debug("Registered ObjectField type with unified registry");
         } catch (Exception e) {

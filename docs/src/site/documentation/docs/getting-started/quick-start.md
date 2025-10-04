@@ -19,7 +19,7 @@ Choose the appropriate dependency based on your project type:
         <dependency>
             <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
-            <version>6.2.5-SNAPSHOT</version>
+            <version>6.2.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
     ```
@@ -30,8 +30,8 @@ Choose the appropriate dependency based on your project type:
     <dependencies>
         <dependency>
             <groupId>com.metaobjects</groupId>
-            <artifactId>metaobjects-core-spring</artifactId>
-            <version>6.2.5-SNAPSHOT</version>
+            <artifactId>metaobjects-spring</artifactId>
+            <version>6.2.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
     ```
@@ -43,7 +43,7 @@ Choose the appropriate dependency based on your project type:
         <dependency>
             <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-mustache</artifactId>
-            <version>6.2.5-SNAPSHOT</version>
+            <version>6.2.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

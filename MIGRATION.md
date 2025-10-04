@@ -1,10 +1,10 @@
-# Migration Guide: v5.1.x → v6.2.5+
+# Migration Guide: v5.1.x → v6.2.6+
 
-This guide helps existing MetaObjects users migrate to the new **metaobjects.com architecture** and **modular structure** introduced in v6.2.5+.
+This guide helps existing MetaObjects users migrate to the new **metaobjects.com architecture** and **modular structure** introduced in v6.2.6+.
 
 ## 🎯 **Migration Overview**
 
-The v6.2.5+ release represents a **major architectural enhancement** with comprehensive package refactoring and modular structure. The primary changes are package refactoring and breaking the monolithic structure into focused modules.
+The v6.2.6+ release represents a **major architectural enhancement** with comprehensive package refactoring, modular structure, and revolutionary fluent constraint system. The primary changes are package refactoring, modular structure, and enhanced constraint capabilities.
 
 ### **What Changed**
 - **Package Structure**: `com.draagon.meta.*` → `com.metaobjects.*`
@@ -31,14 +31,14 @@ The v6.2.5+ release represents a **major architectural enhancement** with compre
 </dependency>
 ```
 
-### **After (v6.2.5+) - Choose Your Modules**
+### **After (v6.2.6+) - Choose Your Modules**
 
 #### **Basic Usage (Core Only)**
 ```xml
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.2.6-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -47,7 +47,7 @@ The v6.2.5+ release represents a **major architectural enhancement** with compre
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core-spring</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.2.6-SNAPSHOT</version>
 </dependency>
 ```
 *Note: Automatically includes `metaobjects-core`*

@@ -48,17 +48,22 @@ public class DoubleField extends PrimitiveField<Double>
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(DoubleField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
-                .description("Double field with range validation")
+            registry.registerType(DoubleField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
+                   .description("Double field with range validation")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // DOUBLE-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, "double")
-                .optionalAttribute(ATTR_MAX_VALUE, "double")
-            );
+                // DOUBLE-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_MIN_VALUE)
+                   .ofType(DoubleAttribute.SUBTYPE_DOUBLE)
+                   .asSingle();
+
+                def.optionalAttributeWithConstraints(ATTR_MAX_VALUE)
+                   .ofType(DoubleAttribute.SUBTYPE_DOUBLE)
+                   .asSingle();
+            });
 
             if (log != null) {
                 log.debug("Registered DoubleField type with unified registry (auto-generated constraints)");

@@ -33,17 +33,20 @@ public class SecondaryIdentity extends MetaIdentity {
      * Called by IdentityTypesMetaDataProvider during service discovery.
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(SecondaryIdentity.class, def -> def
-            .type(TYPE_IDENTITY).subType(SUBTYPE_SECONDARY)
-            .description("Secondary identity for business keys and alternate identifiers")
-            .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
-            .optionalAttribute(ATTR_FIELDS, SUBTYPE_STRING) // Use StringAttribute with @isArray for field arrays
-            .optionalAttribute(ATTR_GENERATION, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_DESCRIPTION, StringAttribute.SUBTYPE_STRING)
+        registry.registerType(SecondaryIdentity.class, def -> {
+            // ✅ FLUENT ARRAY CONSTRAINTS WITH CONSTANTS
+            def.type(TYPE_IDENTITY).subType(SUBTYPE_SECONDARY)
+               .description("Secondary identity for business keys and alternate identifiers")
+               .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE);
+
+            // Configure each attribute separately to avoid method chaining conflicts
+            def.optionalAttributeWithConstraints(ATTR_FIELDS).ofType(StringAttribute.SUBTYPE_STRING).asArray();
+            def.optionalAttributeWithConstraints(ATTR_GENERATION).ofType(StringAttribute.SUBTYPE_STRING).withEnum(GENERATION_INCREMENT, GENERATION_UUID, GENERATION_ASSIGNED);
+            def.optionalAttributeWithConstraints(ATTR_DESCRIPTION).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
 
             // ACCEPTS ANY ATTRIBUTES (for extensibility from service providers)
-            .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")
-        );
+            def.optionalChild(MetaAttribute.TYPE_ATTR, "*", "*");
+        });
     }
 
     /**

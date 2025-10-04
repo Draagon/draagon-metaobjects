@@ -30,13 +30,20 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
      */
     public static void registerTypes(MetaDataRegistry registry) {
         // Register base attribute type
-        registry.registerType(MetaAttribute.class, def -> def
-            .type(TYPE_ATTR).subType(SUBTYPE_BASE)
-            .description("Base attribute metadata with common attribute properties")
-            .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
-            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
-            .optionalAttribute(ATTR_IS_ARRAY, BooleanAttribute.SUBTYPE_BOOLEAN)
-        );
+        registry.registerType(MetaAttribute.class, def -> {
+            def.type(TYPE_ATTR).subType(SUBTYPE_BASE)
+               .description("Base attribute metadata with common attribute properties")
+               .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE);
+
+            // ATTRIBUTE-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT)
+               .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_IS_ARRAY)
+               .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+               .asSingle();
+        });
 
         // Register cross-cutting attribute constraints
         registerCrossCuttingAttributeConstraints(registry);

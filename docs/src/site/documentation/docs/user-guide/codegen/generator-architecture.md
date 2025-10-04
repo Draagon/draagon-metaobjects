@@ -287,8 +287,8 @@ public class MetaDataFileJsonSchemaGenerator extends SingleJsonDirectGeneratorBa
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://metaobjects.com/schemas/metaobjects/6.2.5/metaobjects-file-schema.json",
-  "title": "MetaObjects File Schema v6.2.5",
+  "$id": "https://metaobjects.com/schemas/metaobjects/6.2.6/metaobjects-file-schema.json",
+  "title": "MetaObjects File Schema v6.2.6",
   "description": "JSON Schema for validating MetaData file structure",
   "type": "object",
   "properties": {
@@ -569,7 +569,7 @@ Generators integrate with the Maven build process:
 <plugin>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.2.6-SNAPSHOT</version>
     <executions>
         <execution>
             <id>generate-schemas</id>

@@ -118,26 +118,31 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            registry.registerType(MetaField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_BASE)
-                .description("Base field metadata with common field attributes")
-                // INHERIT FROM ROOT METADATA TYPE
+            registry.registerType(MetaField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_BASE)
+                   .description("Base field metadata with common field attributes")
+                   // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
+                   .optionalChild(MetaAttribute.TYPE_ATTR, "*")
+                   .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
+                   .optionalChild(MetaView.TYPE_VIEW, "*");
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
+                // FIELD-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT)
+                   .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+                   .asSingle();
 
-                // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
-                .optionalAttribute(ATTR_DEFAULT_VALUE,StringAttribute.SUBTYPE_STRING)
-                .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
-                .optionalAttribute(ATTR_IS_ARRAY, BooleanAttribute.SUBTYPE_BOOLEAN)
+                def.optionalAttributeWithConstraints(ATTR_DEFAULT_VALUE)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();
 
-                // KEY-RELATED ATTRIBUTES DEPRECATED - Use MetaIdentity instead
+                def.optionalAttributeWithConstraints(ATTR_DEFAULT_VIEW)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();
 
-                // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
-                .optionalChild(MetaAttribute.TYPE_ATTR, "*")
-                .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
-                .optionalChild(MetaView.TYPE_VIEW, "*")
-            );
+                def.optionalAttributeWithConstraints(ATTR_IS_ARRAY)
+                   .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+                   .asSingle();
+            });
 
             if (log != null) {
                 log.debug("Registered base MetaField type with unified registry");

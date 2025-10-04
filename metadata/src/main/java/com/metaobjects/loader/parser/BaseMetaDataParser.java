@@ -9,6 +9,7 @@ import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.field.MetaField;
 import com.metaobjects.identity.MetaIdentity;
 import com.metaobjects.loader.MetaDataLoader;
+import com.metaobjects.object.MetaObject;
 import com.metaobjects.registry.MetaDataRegistry;
 import com.metaobjects.relationship.MetaRelationship;
 import com.metaobjects.util.MetaDataUtil;
@@ -684,7 +685,12 @@ public abstract class BaseMetaDataParser {
             return getIdentityAttributeType(attrName);
         }
 
-        // For other MetaData types (MetaObject, etc.), use basic type mapping
+        // Handle MetaObject types
+        if (md instanceof MetaObject) {
+            return getObjectAttributeType(attrName);
+        }
+
+        // For other MetaData types, use basic type mapping
         return String.class;        
     }
     
@@ -697,6 +703,29 @@ public abstract class BaseMetaDataParser {
                 // The 'fields' attribute on identity elements should always be StringArray
                 return String[].class; // This will map to stringarray subtype
             case "generation":
+            default:
+                return String.class;
+        }
+    }
+
+    /**
+     * Attribute type mapping for MetaObject types (PojoMetaObject, ProxyMetaObject, MappedMetaObject)
+     */
+    protected Class<?> getObjectAttributeType(String attrName) {
+        switch (attrName) {
+            case "isAbstract":
+            case "isInterface":
+                // Boolean attributes on objects
+                return Boolean.class;
+            case "implements":
+                // Array of interface names
+                return String[].class;
+            case "extends":
+            case "description":
+            case "object":
+            case "objectRef":
+                // String attributes on objects
+                return String.class;
             default:
                 return String.class;
         }

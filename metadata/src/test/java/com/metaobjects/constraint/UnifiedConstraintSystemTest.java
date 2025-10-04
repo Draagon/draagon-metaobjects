@@ -90,11 +90,11 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
         // Test that StringField constraints are properly loaded in consolidated registry
         var allConstraints = getSharedRegistry().getAllValidationConstraints();
 
-        // Look for StringField-specific constraints
+        // Look for StringField-specific constraints with actual generated IDs
         boolean foundMaxLengthPlacement = allConstraints.stream()
             .anyMatch(c -> c.getConstraintId().contains("stringfield.maxlength"));
         boolean foundPatternPlacement = allConstraints.stream()
-            .anyMatch(c -> c.getConstraintId().contains("stringfield.pattern"));
+            .anyMatch(c -> c.getConstraintId().contains("field.string.pattern.custom"));
 
         assertTrue("Should find StringField maxLength placement constraint", foundMaxLengthPlacement);
         assertTrue("Should find StringField pattern placement constraint", foundPatternPlacement);

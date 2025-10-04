@@ -212,6 +212,40 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
 }
 ```
 
+### Fluent Constraint System (v6.2.6+)
+
+The revolutionary **AttributeConstraintBuilder** provides sophisticated, type-safe attribute constraint definition:
+
+**Enhanced Constraint Registration:**
+```java
+public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(StringField.class, def -> def
+        .type(TYPE_FIELD).subType("string")
+        .description("String field with advanced validation")
+        .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+        // AttributeConstraintBuilder with fluent constraint definition
+        .optionalAttributeWithConstraints("pattern")
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asSingle()
+           .withValidation(pattern -> pattern.matches("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))
+
+        // Array-based attributes with fluent syntax
+        .optionalAttributeWithConstraints("allowedValues")
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asArray()
+           .withConstraint(values -> values.size() <= 10)
+    );
+}
+```
+
+**Fluent Constraint Features:**
+- **Type-Safe APIs** - Compile-time validation of constraint definitions
+- **Chainable Methods** - Clear, readable constraint configuration
+- **Enhanced ConstraintEnforcer** - Precise attribute-specific validation
+- **Universal @isArray Support** - Single modifier for array attributes
+- **115+ Comprehensive Constraints** - Covers placement, validation, and array-specific rules
+
 ### Service Discovery
 
 ```

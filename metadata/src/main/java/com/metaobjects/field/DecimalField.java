@@ -45,19 +45,30 @@ public class DecimalField extends PrimitiveField<BigDecimal> {
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(DecimalField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_DECIMAL)
-                .description("High-precision decimal field for financial calculations")
+            registry.registerType(DecimalField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_DECIMAL)
+                   .description("High-precision decimal field for financial calculations")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // DECIMAL-SPECIFIC ATTRIBUTES
-                .optionalAttribute(ATTR_PRECISION, IntAttribute.SUBTYPE_INT)   // Total digits (e.g., 10)
-                .optionalAttribute(ATTR_SCALE, IntAttribute.SUBTYPE_INT)       // Decimal places (e.g., 2)
-                .optionalAttribute(ATTR_MIN_VALUE, StringAttribute.SUBTYPE_STRING) // String to preserve precision
-                .optionalAttribute(ATTR_MAX_VALUE, StringAttribute.SUBTYPE_STRING) // String to preserve precision
-            );
+                // DECIMAL-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_PRECISION)
+                   .ofType(IntAttribute.SUBTYPE_INT)
+                   .asSingle();   // Total digits (e.g., 10)
+
+                def.optionalAttributeWithConstraints(ATTR_SCALE)
+                   .ofType(IntAttribute.SUBTYPE_INT)
+                   .asSingle();   // Decimal places (e.g., 2)
+
+                def.optionalAttributeWithConstraints(ATTR_MIN_VALUE)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();   // String to preserve precision
+
+                def.optionalAttributeWithConstraints(ATTR_MAX_VALUE)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();   // String to preserve precision
+            });
 
             if (log != null) {
                 log.debug("Registered DecimalField type with unified registry");

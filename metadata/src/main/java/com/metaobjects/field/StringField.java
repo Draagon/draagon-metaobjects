@@ -54,40 +54,39 @@ public class StringField extends PrimitiveField<String> {
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            registry.registerType(StringField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_STRING)
-                .description("String field with pattern validation that supports validator children")
+            registry.registerType(StringField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_STRING)
+                   .description("String field with pattern validation that supports validator children")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // STRING-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_PATTERN, StringAttribute.SUBTYPE_STRING)
-            );
+                // STRING-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_PATTERN)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .withCustom(value -> {
+                       if (value == null) return true;
+                       try {
+                           // Validate that the pattern is a valid regex
+                           java.util.regex.Pattern.compile(value.toString());
+                           return true;
+                       } catch (java.util.regex.PatternSyntaxException e) {
+                           return false;
+                       }
+                   });
+
+                def.optionalAttributeWithConstraints(ATTR_MAX_LENGTH)
+                   .ofType(IntAttribute.SUBTYPE_INT)
+                   .asSingle();
+
+                def.optionalAttributeWithConstraints(ATTR_MIN_LENGTH)
+                   .ofType(IntAttribute.SUBTYPE_INT)
+                   .asSingle();
+            });
 
             if (log != null) {
-                log.debug("Registered StringField type with unified registry (auto-generated placement constraints)");
+                log.debug("Registered StringField type with fluent constraint builder (auto-generated constraints)");
             }
-
-            // CUSTOM CONSTRAINT: Pattern validation for string fields (cannot be auto-generated)
-            registry.addConstraint(new CustomConstraint(
-                "stringfield.pattern.validation",
-                "StringField pattern attribute must be valid regex",
-                (metadata) -> metadata instanceof StringField && metadata.hasMetaAttr(ATTR_PATTERN),
-                (metadata, value) -> {
-                    try {
-                        String pattern = metadata.getMetaAttr(ATTR_PATTERN).getValueAsString();
-                        if (pattern != null && !pattern.isEmpty()) {
-                            // Test if pattern is valid regex
-                            java.util.regex.Pattern.compile(pattern);
-                        }
-                        return true;
-                    } catch (java.util.regex.PatternSyntaxException e) {
-                        return false;
-                    }
-                },
-                "Validates regex pattern syntax using Pattern.compile()"
-            ));
 
         } catch (Exception e) {
             if (log != null) {
