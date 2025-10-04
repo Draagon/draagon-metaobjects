@@ -2,6 +2,7 @@ package com.metaobjects.constraint;
 
 import com.metaobjects.MetaData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -151,13 +152,24 @@ public class UniquenessConstraint extends BaseConstraint {
             (metaData) -> {
                 if (metaData instanceof com.metaobjects.object.MetaObject) {
                     com.metaobjects.object.MetaObject obj = (com.metaobjects.object.MetaObject) metaData;
-                    return obj.getChildren(com.metaobjects.key.MetaKey.class).stream()
-                        .map(key -> key.getName())
-                        .collect(Collectors.toList());
+                    // ✅ MIGRATED: Get identity names from the new MetaIdentity approach
+                    List<String> identityNames = new ArrayList<>();
+
+                    // Add identity names from MetaIdentity children
+                    obj.getIdentities().stream()
+                        .map(identity -> identity.getName())
+                        .forEach(identityNames::add);
+
+                    // Add relationship names (for foreign key relationships)
+                    obj.getRelationships().stream()
+                        .map(rel -> rel.getName())
+                        .forEach(identityNames::add);
+
+                    return identityNames;
                 }
                 return List.of();
             },
-            "key names"
+            "identity and relationship names"
         );
     }
 

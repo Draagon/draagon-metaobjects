@@ -35,8 +35,6 @@ public class DoubleField extends PrimitiveField<Double>
     public final static String SUBTYPE_DOUBLE   = "double";
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
-    public final static String ATTR_PRECISION = "precision";
-    public final static String ATTR_SCALE = "scale";
 
     public DoubleField( String name ) {
         super( SUBTYPE_DOUBLE, name, DataTypes.DOUBLE );
@@ -50,24 +48,31 @@ public class DoubleField extends PrimitiveField<Double>
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(DoubleField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
-                .description("Double field with numeric and precision validation")
+            registry.registerType(DoubleField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_DOUBLE)
+                   .description("Double field with range validation")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // DOUBLE-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, "double")
-                .optionalAttribute(ATTR_MAX_VALUE, "double")
-                .optionalAttribute(ATTR_PRECISION, "int")
-                .optionalAttribute(ATTR_SCALE, "int")
-            );
+                // DOUBLE-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_MIN_VALUE)
+                   .ofType(DoubleAttribute.SUBTYPE_DOUBLE)
+                   .asSingle();
 
-            log.debug("Registered DoubleField type with unified registry (auto-generated constraints)");
+                def.optionalAttributeWithConstraints(ATTR_MAX_VALUE)
+                   .ofType(DoubleAttribute.SUBTYPE_DOUBLE)
+                   .asSingle();
+            });
+
+            if (log != null) {
+                log.debug("Registered DoubleField type with unified registry (auto-generated constraints)");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register DoubleField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register DoubleField type with unified registry", e);
+            }
         }
     }
 

@@ -224,6 +224,53 @@ registry.registerLoader(loader);
 MetaObject found = registry.findMetaObjectByName("com_example_model::User");
 ```
 
+### **Fluent Constraint System (v6.2.6+)**
+```java
+// Enhanced type registration with AttributeConstraintBuilder
+public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(StringField.class, def -> def
+        .type(TYPE_FIELD).subType("string")
+        .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+
+        // Fluent constraint definition
+        .optionalAttributeWithConstraints("pattern")
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asSingle()
+           .withValidation(pattern -> pattern.matches("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))
+
+        // Array-based attributes
+        .optionalAttributeWithConstraints("allowedValues")
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asArray()
+    );
+}
+```
+
+### **Universal @isArray Support (v6.2.6+)**
+```java
+// Checking for array type fields with universal @isArray modifier
+public boolean isArrayType() {
+    return hasMetaAttr("isArray") &&
+           Boolean.parseBoolean(getMetaAttr("isArray").getValueAsString());
+}
+
+// Enhanced JSON array parsing for identity fields
+{
+  "identity": {
+    "name": "primary",
+    "subType": "primary",
+    "@fields": ["id"]           // Natural JSON array syntax
+  }
+}
+```
+
+**v6.2.6 Features Demonstrated:**
+- **115+ Comprehensive Constraints** - Placement, validation, and array-specific rules
+- **AttributeConstraintBuilder** - Type-safe fluent constraint definition
+- **Enhanced ConstraintEnforcer** - Precise attribute-specific validation
+- **Universal @isArray Modifier** - Eliminates array subtype explosion
+- **Enhanced JSON Array Parsing** - Natural array syntax with backward compatibility
+
 ## 🛠️ **Customizing Examples**
 
 ### **Modifying Metadata**

@@ -13,6 +13,10 @@ import com.metaobjects.registry.MetaDataRegistry;
 import static com.metaobjects.attr.MetaAttribute.TYPE_ATTR;
 import static com.metaobjects.attr.MetaAttribute.SUBTYPE_BASE;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * An Integer Attribute with provider-based registration.
  */
@@ -25,6 +29,63 @@ public class IntAttribute extends MetaAttribute<Integer> {
      */
     public IntAttribute(String name ) {
         super( SUBTYPE_INT, name, DataTypes.INT);
+    }
+
+    /**
+     * Universal @isArray support - handles both single integers and integer arrays
+     */
+    @Override
+    public void setValueAsString(String value) {
+        if (isArrayType()) {
+            // Array mode: Parse comma-delimited format for integers
+            if (value == null) {
+                setValueAsObject(null);
+                return;
+            }
+
+            // Empty string should result in empty list, not null
+            if (value.trim().isEmpty()) {
+                setValueAsObject(new ArrayList<>());
+                return;
+            }
+
+            // Parse comma-delimited format: "1,2,3" or single value "42"
+            if (value.contains(",")) {
+                // Comma-delimited: 1,2,3
+                String[] items = value.split(",");
+                List<Integer> list = new ArrayList<>();
+                for (String item : items) {
+                    String trimmed = item.trim();
+                    if (!trimmed.isEmpty()) {
+                        try {
+                            list.add(Integer.parseInt(trimmed));
+                        } catch (NumberFormatException e) {
+                            throw new IllegalArgumentException("Invalid integer value in array: " + trimmed, e);
+                        }
+                    }
+                }
+                setValueAsObject(list);
+            } else {
+                // Single value
+                try {
+                    Integer intValue = Integer.parseInt(value.trim());
+                    setValueAsObject(Arrays.asList(intValue));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid integer value: " + value, e);
+                }
+            }
+        } else {
+            // Single value mode: Standard integer handling
+            if (value == null) {
+                setValueAsObject(null);
+            } else {
+                try {
+                    setValueAsObject(Integer.parseInt(value.trim()));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid integer value: " + value, e);
+                }
+            }
+        }
     }
 
     /**

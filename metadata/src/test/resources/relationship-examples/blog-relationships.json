@@ -1,0 +1,383 @@
+{
+  "metadata": {
+    "package": "blog",
+    "children": [
+      {
+        "object": {
+          "name": "Author",
+          "subType": "pojo",
+          "@dbTable": "authors",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "author_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "username",
+                "subType": "string",
+                "@dbColumn": "username",
+                "@required": true,
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string",
+                "@dbColumn": "email",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "displayName",
+                "subType": "string",
+                "@dbColumn": "display_name",
+                "@maxLength": 100
+              }
+            },
+            {
+              "relationship": {
+                "name": "posts",
+                "subType": "composition",
+                "@targetObject": "BlogPost",
+                "@cardinality": "many",
+                "@referencedBy": "postIds"
+              }
+            },
+            {
+              "relationship": {
+                "name": "profile",
+                "subType": "composition",
+                "@targetObject": "AuthorProfile",
+                "@cardinality": "one",
+                "@referencedBy": "profileId"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "AuthorProfile",
+          "subType": "pojo",
+          "@dbTable": "author_profiles",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "profile_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "bio",
+                "subType": "string",
+                "@dbColumn": "bio",
+                "@maxLength": 1000
+              }
+            },
+            {
+              "field": {
+                "name": "avatarUrl",
+                "subType": "string",
+                "@dbColumn": "avatar_url",
+                "@maxLength": 500
+              }
+            },
+            {
+              "field": {
+                "name": "website",
+                "subType": "string",
+                "@dbColumn": "website",
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "socialLinks",
+                "subType": "string",
+                "@dbColumn": "social_links",
+                "@maxLength": 1000
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "BlogPost",
+          "subType": "pojo",
+          "@dbTable": "blog_posts",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "post_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "title",
+                "subType": "string",
+                "@dbColumn": "title",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "slug",
+                "subType": "string",
+                "@dbColumn": "slug",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "content",
+                "subType": "string",
+                "@dbColumn": "content",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "excerpt",
+                "subType": "string",
+                "@dbColumn": "excerpt",
+                "@maxLength": 500
+              }
+            },
+            {
+              "field": {
+                "name": "publishedDate",
+                "subType": "date",
+                "@dbColumn": "published_date"
+              }
+            },
+            {
+              "field": {
+                "name": "status",
+                "subType": "string",
+                "@dbColumn": "status",
+                "@required": true,
+                "@maxLength": 20
+              }
+            },
+            {
+              "relationship": {
+                "name": "comments",
+                "subType": "composition",
+                "@targetObject": "Comment",
+                "@cardinality": "many",
+                "@referencedBy": "commentIds"
+              }
+            },
+            {
+              "relationship": {
+                "name": "tags",
+                "subType": "association",
+                "@targetObject": "Tag",
+                "@cardinality": "many",
+                "@referencedBy": "tagIds"
+              }
+            },
+            {
+              "relationship": {
+                "name": "category",
+                "subType": "association",
+                "@targetObject": "Category",
+                "@cardinality": "one",
+                "@referencedBy": "categoryId"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Comment",
+          "subType": "pojo",
+          "@dbTable": "comments",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "comment_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "content",
+                "subType": "string",
+                "@dbColumn": "content",
+                "@required": true,
+                "@maxLength": 2000
+              }
+            },
+            {
+              "field": {
+                "name": "authorName",
+                "subType": "string",
+                "@dbColumn": "author_name",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "authorEmail",
+                "subType": "string",
+                "@dbColumn": "author_email",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "createdDate",
+                "subType": "date",
+                "@dbColumn": "created_date",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "approved",
+                "subType": "boolean",
+                "@dbColumn": "approved"
+              }
+            },
+            {
+              "relationship": {
+                "name": "parentComment",
+                "subType": "association",
+                "@targetObject": "Comment",
+                "@cardinality": "one",
+                "@referencedBy": "parentCommentId"
+              }
+            },
+            {
+              "relationship": {
+                "name": "replies",
+                "subType": "association",
+                "@targetObject": "Comment",
+                "@cardinality": "many",
+                "@referencedBy": "replyIds"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Tag",
+          "subType": "pojo",
+          "@dbTable": "tags",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "tag_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@dbColumn": "tag_name",
+                "@required": true,
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "slug",
+                "subType": "string",
+                "@dbColumn": "slug",
+                "@required": true,
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "description",
+                "subType": "string",
+                "@dbColumn": "description",
+                "@maxLength": 255
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Category",
+          "subType": "pojo",
+          "@dbTable": "categories",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "category_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@dbColumn": "category_name",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "slug",
+                "subType": "string",
+                "@dbColumn": "slug",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "description",
+                "subType": "string",
+                "@dbColumn": "description",
+                "@maxLength": 500
+              }
+            },
+            {
+              "relationship": {
+                "name": "parentCategory",
+                "subType": "association",
+                "@targetObject": "Category",
+                "@cardinality": "one",
+                "@referencedBy": "parentCategoryId"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

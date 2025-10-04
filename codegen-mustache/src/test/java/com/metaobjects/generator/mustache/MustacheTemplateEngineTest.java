@@ -2,7 +2,7 @@ package com.metaobjects.generator.mustache;
 
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.generator.GeneratorTestBase;
+import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.loader.simple.SimpleLoader;
 import com.metaobjects.loader.uri.URIHelper;
 import org.junit.Before;
@@ -15,24 +15,26 @@ import java.util.Arrays;
  * Test class for MustacheTemplateEngine.
  * Validates the core functionality of the Mustache-based code generation system.
  */
-public class MustacheTemplateEngineTest extends GeneratorTestBase {
-    
+public class MustacheTemplateEngineTest {
+
     private MustacheTemplateEngine engine;
     private MetaObject testMetaObject;
     private SimpleLoader loader;
-    
+
     @Before
     public void setUp() throws Exception {
         engine = new MustacheTemplateEngine();
-        
-        // Load test metadata using the proper pattern
-        loader = initLoader(Arrays.asList(
+
+        // Load test metadata using SimpleLoader directly
+        loader = new SimpleLoader("mustache-test");
+        loader.setSourceURIs(Arrays.asList(
             URIHelper.toURI("model:resource:mustache-test-metadata.json")
         ));
-        
+        loader.init();
+
         // Get the User MetaObject
         testMetaObject = loader.getChild("com_example_model::User", MetaObject.class);
-        
+
         assertNotNull("Test MetaObject should be loaded", testMetaObject);
     }
     
@@ -176,7 +178,44 @@ public class MustacheTemplateEngineTest extends GeneratorTestBase {
         
         assertEquals("Results after cache clear should be identical", result1, result3);
     }
-    
+
+    @Test
+    public void testArrayFieldGeneration() {
+        // Get the tags field that should be an array
+        MetaField tagsField = (MetaField) testMetaObject.getChild("tags", MetaField.class);
+        assertNotNull("Tags field should exist", tagsField);
+
+        // Verify the field is correctly identified as an array type
+        assertTrue("Tags field should be identified as array type", tagsField.isArrayType());
+
+        // Test the helper registry functions
+        HelperRegistry helperRegistry = engine.getHelperRegistry();
+
+        // Test isArrayField helper
+        Boolean isArray = (Boolean) helperRegistry.get("isArrayField").apply(tagsField);
+        assertTrue("isArrayField helper should return true for array field", isArray);
+
+        // Test javaArrayType helper
+        String arrayType = (String) helperRegistry.get("javaArrayType").apply(tagsField);
+        assertEquals("Array type should be List<String>", "List<String>", arrayType);
+
+        // Test that array fields are correctly handled in code generation
+        TemplateDefinition template = createArrayAwareTemplate();
+        String result = engine.generateCode(template, testMetaObject);
+
+        assertNotNull("Generated code should not be null", result);
+        assertTrue("Should contain class declaration", result.contains("public class User"));
+
+
+        // Verify array field generation (account for HTML encoding of angle brackets)
+        assertTrue("Should contain List<String> field declaration",
+                   result.contains("private List&lt;String&gt; tags;"));
+        assertTrue("Should contain List<String> return type in getter",
+                   result.contains("List&lt;String&gt; getTags()"));
+        assertTrue("Should contain List<String> parameter in setter",
+                   result.contains("setTags(List&lt;String&gt; tags)"));
+    }
+
     // Helper methods to create test templates
     
     private TemplateDefinition createBasicEntityTemplate() {
@@ -289,6 +328,59 @@ public class MustacheTemplateEngineTest extends GeneratorTestBase {
             "{{/fields}}" +
             "        return copy;\n" +
             "    }\n" +
+            "}"
+        );
+        return template;
+    }
+
+    private TemplateDefinition createArrayAwareTemplate() {
+        TemplateDefinition template = new TemplateDefinition();
+        template.setName("Array Aware Entity");
+        template.setTargetLanguage("java");
+        template.setOutputFileExtension("java");
+        template.setTemplate(
+            "package {{packageName}};\n\n" +
+            "import java.util.List;\n" +
+            "{{#imports}}\n" +
+            "import {{.}};\n" +
+            "{{/imports}}\n\n" +
+            "/**\n" +
+            " * Generated entity class for {{className}} with array support\n" +
+            " */\n" +
+            "public class {{className}} {\n" +
+            "{{#fields}}" +
+            "{{#isArrayField}}" +
+            "    private {{javaArrayType}} {{name}};\n" +
+            "{{/isArrayField}}" +
+            "{{^isArrayField}}" +
+            "    private {{javaType}} {{name}};\n" +
+            "{{/isArrayField}}" +
+            "{{/fields}}" +
+            "\n" +
+            "    // Default constructor\n" +
+            "    public {{className}}() {}\n" +
+            "\n" +
+            "{{#fields}}" +
+            "{{#isArrayField}}" +
+            "    public {{javaArrayType}} {{getterName}}() {\n" +
+            "        return this.{{name}};\n" +
+            "    }\n" +
+            "\n" +
+            "    public void {{setterName}}({{javaArrayType}} {{name}}) {\n" +
+            "        this.{{name}} = {{name}};\n" +
+            "    }\n" +
+            "{{/isArrayField}}" +
+            "{{^isArrayField}}" +
+            "    public {{javaType}} {{getterName}}() {\n" +
+            "        return this.{{name}};\n" +
+            "    }\n" +
+            "\n" +
+            "    public void {{setterName}}({{javaType}} {{name}}) {\n" +
+            "        this.{{name}} = {{name}};\n" +
+            "    }\n" +
+            "{{/isArrayField}}" +
+            "\n" +
+            "{{/fields}}" +
             "}"
         );
         return template;

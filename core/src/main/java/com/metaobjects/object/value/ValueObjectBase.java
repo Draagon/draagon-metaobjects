@@ -1,6 +1,7 @@
 
 package com.metaobjects.object.value;
 
+import com.metaobjects.field.MetaField;
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.object.data.DataObjectBase;
 import org.slf4j.Logger;
@@ -249,5 +250,24 @@ public abstract class ValueObjectBase extends DataObjectBase implements Map<Stri
             s.add(getObjectAttribute(name));
         }
         return s;
+    }
+
+    //////////////////////////////////////////////////////////////
+    // ARRAY SUPPORT HELPER METHODS
+
+    /**
+     * Check if a field is defined as an array type.
+     * Uses metadata when available, falls back to best-effort detection.
+     */
+    protected boolean isArrayField(String fieldName) {
+        if (hasMetaDataAttached()) {
+            // Option A: Use metadata when available
+            MetaField field = getMetaData().getMetaField(fieldName);
+            return field != null && field.isArrayType();
+        } else {
+            // Option B: Best-effort detection when no metadata
+            Object value = getObjectAttribute(fieldName);
+            return value instanceof List;
+        }
     }
 }

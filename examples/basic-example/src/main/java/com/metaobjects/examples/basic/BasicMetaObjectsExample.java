@@ -7,6 +7,8 @@ import com.metaobjects.field.MetaField;
 import com.metaobjects.generator.mustache.MustacheTemplateGenerator;
 import com.metaobjects.MetaData;
 import com.metaobjects.util.MetaDataUtil;
+import com.metaobjects.validator.RequiredValidator;
+import com.metaobjects.validator.LengthValidator;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -118,14 +120,12 @@ public class BasicMetaObjectsExample {
                 // Validate using metadata (basic validation)
                 boolean isValid = true;
                 for (MetaField field : userMeta.getMetaFields()) {
-                    if (field.hasMetaAttr("required")) {
-                        boolean required = Boolean.parseBoolean(
-                            field.getMetaAttr("required").getValueAsString());
-                        if (required && !user.containsKey(field.getName())) {
-                            System.out.println("   Validation error: Required field '" + 
-                                field.getName() + "' is missing");
-                            isValid = false;
-                        }
+                    // Check if field has RequiredValidator child instead of @required attribute
+                    boolean hasRequiredValidator = !field.getChildren(RequiredValidator.class).isEmpty();
+                    if (hasRequiredValidator && !user.containsKey(field.getName())) {
+                        System.out.println("   Validation error: Required field '" +
+                            field.getName() + "' is missing");
+                        isValid = false;
                     }
                 }
                 System.out.println("   Validation result: " + (isValid ? "VALID" : "INVALID"));
@@ -138,15 +138,15 @@ public class BasicMetaObjectsExample {
                 System.out.println("   Email field value: " + emailValue);
                 
                 // Check field attributes
-                if (emailField.hasMetaAttr("required")) {
-                    boolean required = Boolean.parseBoolean(
-                        emailField.getMetaAttr("required").getValueAsString());
-                    System.out.println("   Email field is required: " + required);
-                }
+                boolean emailIsRequired = !emailField.getChildren(RequiredValidator.class).isEmpty();
+                System.out.println("   Email field is required: " + emailIsRequired);
                 
-                if (emailField.hasMetaAttr("maxLength")) {
+                // Check for LengthValidator instead of @maxLength attribute
+                LengthValidator lengthValidator = emailField.getChildren(LengthValidator.class)
+                    .stream().findFirst().orElse(null);
+                if (lengthValidator != null && lengthValidator.hasMetaAttr("max")) {
                     int maxLength = Integer.parseInt(
-                        emailField.getMetaAttr("maxLength").getValueAsString());
+                        lengthValidator.getMetaAttr("max").getValueAsString());
                     System.out.println("   Email field max length: " + maxLength);
                 }
             } else {

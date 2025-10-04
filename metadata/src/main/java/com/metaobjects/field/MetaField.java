@@ -102,6 +102,13 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     /** Default view specification attribute - MetaField owns this concept */
     public static final String ATTR_DEFAULT_VIEW = "defaultView";
 
+    /** Universal array modifier - any field can be an array */
+    public static final String ATTR_IS_ARRAY = "isArray";
+
+    // === KEY-RELATED ATTRIBUTES DEPRECATED ===
+    // These attributes have been moved to MetaIdentity (v6.2.7+)
+    // Use MetaIdentity instead of field-level key attributes
+
     // Unified registry self-registration
     /**
      * Register MetaField types using the standardized registerTypes() pattern.
@@ -111,32 +118,46 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            registry.registerType(MetaField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_BASE)
-                .description("Base field metadata with common field attributes")
-                // INHERIT FROM ROOT METADATA TYPE
+            registry.registerType(MetaField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_BASE)
+                   .description("Base field metadata with common field attributes")
+                   // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
+                   .optionalChild(MetaAttribute.TYPE_ATTR, "*")
+                   .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
+                   .optionalChild(MetaView.TYPE_VIEW, "*");
 
-                // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-                .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
+                // FIELD-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT)
+                   .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+                   .asSingle();
 
-                // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
-                .optionalAttribute(ATTR_REQUIRED, BooleanAttribute.SUBTYPE_BOOLEAN)
-                .optionalAttribute(ATTR_DEFAULT_VALUE,StringAttribute.SUBTYPE_STRING)
-                .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
+                def.optionalAttributeWithConstraints(ATTR_DEFAULT_VALUE)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();
 
-                // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
-                .optionalChild(MetaAttribute.TYPE_ATTR, "*")
-                .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
-                .optionalChild(MetaView.TYPE_VIEW, "*")
-            );
+                def.optionalAttributeWithConstraints(ATTR_DEFAULT_VIEW)
+                   .ofType(StringAttribute.SUBTYPE_STRING)
+                   .asSingle();
 
-            log.debug("Registered base MetaField type with unified registry");
+                def.optionalAttributeWithConstraints(ATTR_IS_ARRAY)
+                   .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+                   .asSingle();
+            });
+
+            if (log != null) {
+                log.debug("Registered base MetaField type with unified registry");
+            }
 
             // Register cross-cutting field constraints using consolidated registry
             registerCrossCuttingFieldConstraints(registry);
 
         } catch (Exception e) {
-            log.error("Failed to register MetaField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register MetaField type with unified registry", e);
+            } else {
+                System.err.println("Failed to register MetaField type with unified registry: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
@@ -244,6 +265,56 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         }
     }
 
+    // === KEY-RELATED ACCESSOR METHODS ===
+
+    // === DEPRECATED KEY METHODS ===
+    // These methods have been deprecated in favor of MetaIdentity (v6.2.7+)
+    // Use MetaObject.getIdentities() or MetaObject.getPrimaryIdentity() instead
+
+    /**
+     * @deprecated Use MetaObject.getSecondaryIdentities() instead
+     */
+    @Deprecated
+    public boolean isSecondaryKey() {
+        // For backward compatibility, check if this field is part of any secondary identity
+        return isPartOfSecondaryIdentity();
+    }
+
+    // === NEW IDENTITY-AWARE METHODS ===
+
+    /**
+     * Returns true if this field is part of the primary identity.
+     */
+    public boolean isPartOfPrimaryIdentity() {
+        if (getParent() instanceof com.metaobjects.object.MetaObject) {
+            com.metaobjects.object.MetaObject metaObject = (com.metaobjects.object.MetaObject) getParent();
+            return metaObject.getIdentities().stream()
+                .filter(identity -> identity.isPrimary())
+                .anyMatch(identity -> identity.getFields().contains(getName()));
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this field is part of any secondary identity.
+     */
+    public boolean isPartOfSecondaryIdentity() {
+        if (getParent() instanceof com.metaobjects.object.MetaObject) {
+            com.metaobjects.object.MetaObject metaObject = (com.metaobjects.object.MetaObject) getParent();
+            return metaObject.getIdentities().stream()
+                .filter(identity -> identity.isSecondary())
+                .anyMatch(identity -> identity.getFields().contains(getName()));
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this field is part of any identity (primary or secondary).
+     */
+    public boolean isPartOfAnyIdentity() {
+        return isPartOfPrimaryIdentity() || isPartOfSecondaryIdentity();
+    }
+
     /** Flush the caches and set local flags to false */
     @Override
     protected void flushCaches() {
@@ -278,6 +349,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * @return the expected Java class for the attribute, or String.class if not found
      */
     public Class<?> getExpectedAttributeType(String attributeName) {
+
         try {
             MetaDataRegistry registry = getLoader().getTypeRegistry();
 
@@ -286,7 +358,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             if (typeDef != null) {
                 // Look up the child requirement for this attribute
                 ChildRequirement attrReq = typeDef.getChildRequirement(attributeName);
-                if (attrReq != null && "attr".equals(attrReq.getExpectedType())) {
+                if (attrReq != null && MetaAttribute.TYPE_ATTR.equals(attrReq.getExpectedType())) {
                     // Map the attribute subType to Java class
                     return mapAttributeSubTypeToJavaClass(attrReq.getExpectedSubType());
                 }
@@ -334,9 +406,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     
     
     
-    
-    
-    
     /**
      * Safe default value getter with Optional wrapper
      * @return Optional containing the default value, or empty if none set
@@ -379,7 +448,54 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             throw e; // Re-throw to maintain existing behavior
         }
     }
-    
+
+    // === UNIVERSAL ARRAY SUPPORT METHODS ===
+
+    /**
+     * Check if this field is configured as an array type.
+     * @return true if @isArray=true is set on this field, false otherwise
+     */
+    public boolean isArrayType() {
+        if (hasMetaAttr(ATTR_IS_ARRAY)) {
+            MetaAttribute attr = getMetaAttr(ATTR_IS_ARRAY);
+            String value = attr.getValueAsString();
+
+            // Handle both BooleanAttribute and StringAttribute cases
+            // This is needed because the inline parsing may create StringAttribute instead of BooleanAttribute
+            if ("true".equalsIgnoreCase(value)) {
+                return true;
+            } else if ("false".equalsIgnoreCase(value)) {
+                return false;
+            }
+
+            // For proper BooleanAttribute, use standard boolean parsing
+            return Boolean.parseBoolean(value);
+        }
+        return false;
+    }
+
+    /**
+     * Get the effective data type for this field, considering array modifier.
+     * @return array equivalent if @isArray=true, otherwise the base data type
+     */
+    public DataTypes getEffectiveDataType() {
+        if (isArrayType()) {
+            return getDataType().getArrayEquivalent();
+        }
+        return getDataType();
+    }
+
+    /**
+     * Get the effective value class for this field, considering array modifier.
+     * @return List.class if @isArray=true, otherwise the base value class
+     */
+    public Class<?> getEffectiveValueClass() {
+        if (isArrayType()) {
+            return java.util.List.class;
+        }
+        return getValueClass();
+    }
+
 
     /** Add Child to the Field */
     //@Override
@@ -740,8 +856,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     public void setObjectArray(Object obj, List<?> value) {
-        if ( getDataType() != DataTypes.OBJECT_ARRAY ) throw new InvalidValueException(
-                "Cannot set List to non ObjectArray type ["+getDataType()+"]" );
+        // Support both old OBJECT_ARRAY type and new universal @isArray pattern
+        if ( getDataType() != DataTypes.OBJECT_ARRAY && !isArrayType() ) throw new InvalidValueException(
+                "Cannot set List to non ObjectArray type ["+getDataType()+"] and field is not marked as array type" );
         setObjectAttribute(obj, value);
     }
 
@@ -872,10 +989,17 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 "^[a-zA-Z][a-zA-Z0-9_]*$",  // Identifier pattern
                 false                       // Don't allow null (required)
             ));
-            log.debug("Registered cross-cutting field constraints using consolidated registry");
+            if (log != null) {
+                log.debug("Registered cross-cutting field constraints using consolidated registry");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register cross-cutting field constraints", e);
+            if (log != null) {
+                log.error("Failed to register cross-cutting field constraints", e);
+            } else {
+                System.err.println("Failed to register cross-cutting field constraints: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

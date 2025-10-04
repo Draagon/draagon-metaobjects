@@ -13,14 +13,31 @@ Metadata defines the **structure, rules, and behavior** of your objects. Think o
 {
   "object": {
     "name": "User",
-    "type": "pojo",
+    "subType": "pojo",
+    "@dbTable": "users",
     "children": [
       {
         "field": {
+          "name": "id",
+          "subType": "long",
+          "@dbColumn": "user_id"
+        }
+      },
+      {
+        "field": {
           "name": "email",
-          "type": "string",
+          "subType": "string",
           "@required": true,
-          "@maxLength": 255
+          "@maxLength": 255,
+          "@dbColumn": "email"
+        }
+      },
+      {
+        "identity": {
+          "name": "user_pk",
+          "subType": "primary",
+          "@fields": ["id"],
+          "@generation": "increment"
         }
       }
     ]
@@ -109,14 +126,16 @@ graph TD
     A --> D[MetaAttribute]
     A --> E[MetaValidator]
     A --> F[MetaView]
-    A --> G[MetaKey]
+    A --> G[MetaIdentity]
+    A --> H[MetaRelationship]
 
-    B --> H[Children: Fields, Keys, Validators]
-    C --> I[Type: string, int, long, etc.]
-    D --> J[Cross-cutting Properties]
-    E --> K[Validation Logic]
-    F --> L[UI Rendering Info]
-    G --> M[Primary, Foreign, Secondary]
+    B --> I[Children: Fields, Identities, Relationships, Validators]
+    C --> J[Type: string, int, long, etc.]
+    D --> K[Cross-cutting Properties]
+    E --> L[Validation Logic]
+    F --> M[UI Rendering Info]
+    G --> N[Primary, Secondary Identities]
+    H --> O[Association, Composition, Aggregation]
 ```
 
 ### :material-package: **MetaData** (Base Class)
@@ -153,6 +172,24 @@ MetaAttribute dbColumn = emailField.getMetaAttr("dbColumn");
 String columnName = dbColumn.getValueAsString();  // "email_address"
 ```
 
+### :material-key: **MetaIdentity** (Object Identity)
+Defines how objects are uniquely identified, replacing the deprecated field-level approach:
+
+```java
+PrimaryIdentity userPk = userMeta.getPrimaryIdentity();
+List<String> identityFields = userPk.getFieldNames();  // ["id"]
+String generation = userPk.getGeneration();  // "increment"
+```
+
+### :material-link: **MetaRelationship** (Object Relationships)
+Represents relationships between objects with clear semantic meaning:
+
+```java
+AssociationRelationship customerRel = orderMeta.getRelationship("customer");
+String targetObject = customerRel.getTargetObject();  // "Customer"
+String cardinality = customerRel.getCardinality();  // "one"
+```
+
 ## Type System Architecture
 
 MetaObjects uses a sophisticated type system:
@@ -160,16 +197,71 @@ MetaObjects uses a sophisticated type system:
 ### :material-sitemap: **Type Hierarchy**
 ```
 Type: "field"
-├── SubType: "string" → StringField
-├── SubType: "int" → IntegerField
-├── SubType: "long" → LongField
-├── SubType: "date" → DateField
-└── SubType: "custom" → Your Custom Field
+├── SubType: "string" → StringField + @isArray support
+├── SubType: "int" → IntegerField + @isArray support
+├── SubType: "long" → LongField + @isArray support
+├── SubType: "double" → DoubleField + @isArray support
+├── SubType: "decimal" → DecimalField + @isArray support
+├── SubType: "date" → DateField + @isArray support
+└── SubType: "custom" → Your Custom Field + @isArray support
 
 Type: "object"
 ├── SubType: "pojo" → PojoMetaObject
 ├── SubType: "proxy" → ProxyMetaObject
 └── SubType: "mapped" → MappedMetaObject
+
+Type: "identity"
+├── SubType: "primary" → PrimaryIdentity
+└── SubType: "secondary" → SecondaryIdentity
+
+Type: "relationship"
+├── SubType: "association" → AssociationRelationship
+├── SubType: "composition" → CompositionRelationship
+└── SubType: "aggregation" → AggregationRelationship
+```
+
+### :material-format-list-bulleted: **Universal @isArray System (v6.2.6+)**
+
+Revolutionary **universal @isArray support** eliminates array subtype explosion:
+
+#### Before: Type Explosion Problem
+```java
+// ❌ OLD APPROACH - Dedicated array subtypes required
+StringField, StringArrayField, IntField, IntArrayField,
+LongField, LongArrayField, DoubleField, DoubleArrayField
+// Result: 12+ field types, exponential growth
+```
+
+#### After: Universal @isArray Solution
+```java
+// ✅ NEW APPROACH - Universal @isArray modifier
+StringField, IntField, LongField + @isArray modifier
+// Result: 6 core types, unlimited array combinations
+
+// Check if field is array type
+public boolean isArrayType() {
+    return hasMetaAttr("isArray") &&
+           Boolean.parseBoolean(getMetaAttr("isArray").getValueAsString());
+}
+```
+
+#### Cross-Platform Array Generation
+```java
+// AI systems generate appropriate array types for target languages:
+// Java: List<String>, String[]
+// C#: List<string>, string[]
+// TypeScript: string[], Array<string>
+```
+
+#### Usage in Metadata
+```json
+{
+  "field": {
+    "name": "tags",
+    "subType": "string",
+    "@isArray": true  // Universal array modifier
+  }
+}
 ```
 
 ### :material-cogs: **Provider-Based Registration**
@@ -197,7 +289,7 @@ Types can inherit from base types to reduce duplication:
 
 ## Constraint System
 
-MetaObjects enforces rules through a comprehensive constraint system:
+MetaObjects enforces rules through a comprehensive constraint system with **115+ constraints** providing complete metadata validation:
 
 ### :material-shield-check: **Constraint Types**
 
@@ -231,6 +323,32 @@ ValidationConstraint namingPattern = new ValidationConstraint(
 );
 ```
 
+### :material-auto-fix: **Fluent Constraint System (v6.2.6+)**
+
+The revolutionary **fluent constraint system** with **AttributeConstraintBuilder** provides elegant APIs for constraint definition:
+
+```java
+// AttributeConstraintBuilder with fluent constraint definition
+def.optionalAttributeWithConstraints(ATTR_GENERATION)
+   .ofType(StringAttribute.SUBTYPE_STRING)
+   .asSingle()
+   .withEnum(GENERATION_INCREMENT, GENERATION_UUID, GENERATION_ASSIGNED);
+
+// Array-based attributes with fluent syntax
+def.optionalAttributeWithConstraints(ATTR_FIELDS)
+   .ofType(StringAttribute.SUBTYPE_STRING)
+   .asArray();
+
+// Enhanced ConstraintEnforcer with attribute-specific validation
+ConstraintEnforcer.validateAttribute(metadata, attributeName, value);
+```
+
+**Benefits of Fluent Constraints:**
+- :material-check: **Type Safety**: Compile-time checking of constraint definitions
+- :material-check: **Readability**: Chainable method calls for clear intent
+- :material-check: **Maintainability**: Self-documenting constraint configurations
+- :material-check: **Extensibility**: Easy to add custom constraint types
+
 ### :material-lightning-bolt: **Real-Time Enforcement**
 Constraints are enforced automatically during metadata construction:
 
@@ -240,6 +358,12 @@ MetaField invalidField = new MetaField("invalid::name");  // ❌ Contains ::
 MetaObject user = new MetaObject("User");
 user.addMetaField(invalidField);  // ❌ Constraint violation detected here
 ```
+
+### :material-chart-line: **Comprehensive Coverage**
+- **57 Placement Constraints**: Define structural relationships
+- **28 Validation Constraints**: Define value validation rules
+- **30 Array-Specific Constraints**: Universal @isArray support
+- **Cross-Module Integration**: Full enforcement across all 19 modules
 
 ## Memory Management & OSGi
 

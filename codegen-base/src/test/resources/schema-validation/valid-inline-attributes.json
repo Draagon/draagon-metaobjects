@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "package": "test_inline_attributes",
+    "package": "test",
     "children": [
       {
         "object": {
@@ -13,31 +13,63 @@
               "field": {
                 "name": "productId",
                 "subType": "long",
-                "@required": true,
                 "@dbColumn": "product_id",
-                "@isId": true,
-                "@dbNullable": false
+                "@dbNullable": false,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "name",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 100,
-                "@minLength": 1,
                 "@dbColumn": "product_name",
-                "@isSearchable": true
+                "@isSearchable": true,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@min": "1",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "price",
                 "subType": "double",
-                "@required": true,
                 "@dbColumn": "price",
                 "@dbScale": 2,
-                "@minValue": 0.01
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "minValue",
+                      "subType": "numeric",
+                      "@min": "0.01"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -58,10 +90,11 @@
               }
             },
             {
-              "key": {
+              "identity": {
                 "name": "primary",
                 "subType": "primary",
-                "@fields": "productId"
+                "@fields": ["productId"],
+                "@generation": "increment"
               }
             }
           ]

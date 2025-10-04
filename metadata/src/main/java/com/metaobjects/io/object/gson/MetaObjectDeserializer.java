@@ -86,23 +86,47 @@ public class MetaObjectDeserializer implements JsonDeserializer<Object> {
         else {
             switch (mf.getDataType()) {
                 case BOOLEAN:
-                    mf.setBoolean(vo, el.getAsBoolean());
+                    // Check if this is an array field using universal @isArray support
+                    if (mf.isArrayType()) {
+                        if (el.isJsonArray()) mf.setObject(vo, context.deserialize(el, List.class));
+                        else mf.setBoolean(vo, el.getAsBoolean());
+                    } else {
+                        mf.setBoolean(vo, el.getAsBoolean());
+                    }
                     break;
 
                 case BYTE:
                 case SHORT:
                 case INT:
-                    mf.setInt(vo, el.getAsInt());
+                    // Check if this is an array field using universal @isArray support
+                    if (mf.isArrayType()) {
+                        if (el.isJsonArray()) mf.setObject(vo, context.deserialize(el, List.class));
+                        else mf.setInt(vo, el.getAsInt());
+                    } else {
+                        mf.setInt(vo, el.getAsInt());
+                    }
                     break;
 
                 case DATE:
                 case LONG:
-                    mf.setLong(vo, el.getAsLong());
+                    // Check if this is an array field using universal @isArray support
+                    if (mf.isArrayType()) {
+                        if (el.isJsonArray()) mf.setObject(vo, context.deserialize(el, List.class));
+                        else mf.setLong(vo, el.getAsLong());
+                    } else {
+                        mf.setLong(vo, el.getAsLong());
+                    }
                     break;
 
                 case FLOAT:
                 case DOUBLE:
-                    mf.setDouble(vo, el.getAsDouble());
+                    // Check if this is an array field using universal @isArray support
+                    if (mf.isArrayType()) {
+                        if (el.isJsonArray()) mf.setObject(vo, context.deserialize(el, List.class));
+                        else mf.setDouble(vo, el.getAsDouble());
+                    } else {
+                        mf.setDouble(vo, el.getAsDouble());
+                    }
                     break;
 
                 case STRING_ARRAY:
@@ -111,11 +135,22 @@ public class MetaObjectDeserializer implements JsonDeserializer<Object> {
                     break;
 
                 case STRING:
-                    mf.setString(vo, el.getAsString());
+                    // Check if this is an array field using universal @isArray support
+                    if (mf.isArrayType()) {
+                        if (el.isJsonArray()) mf.setStringArray(vo, context.deserialize(el, List.class));
+                        else mf.setString(vo, el.getAsString());
+                    } else {
+                        mf.setString(vo, el.getAsString());
+                    }
                     break;
 
                 case OBJECT:
-                    readFieldObject(mo, mf, vo, el, context);
+                    // Check if this is an array field using universal @isArray support
+                    if (mf.isArrayType()) {
+                        readFieldObjectArray(mo, mf, vo, el, context);
+                    } else {
+                        readFieldObject(mo, mf, vo, el, context);
+                    }
                     break;
 
                 case OBJECT_ARRAY:
@@ -157,7 +192,6 @@ public class MetaObjectDeserializer implements JsonDeserializer<Object> {
                                         JsonElement el, JsonDeserializationContext context) {
 
         List<Object> objects = new ArrayList<>();
-        mf.setObject( vo, objects );
 
         if (!el.isJsonArray()) throw new MetaDataException("Expected JsonArray when reading MetaField "+
                 "["+mf+"], but found JsonElement: "+el);
@@ -170,6 +204,8 @@ public class MetaObjectDeserializer implements JsonDeserializer<Object> {
 
             objects.add( context.deserialize( elo, getObjectRefClass(mf)));
         }
+
+        mf.setObjectArray( vo, objects );
     }
 
     protected void readFieldObject(MetaObject mo, MetaField mf, Object vo,

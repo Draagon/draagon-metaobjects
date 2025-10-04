@@ -4,10 +4,19 @@ import com.metaobjects.MetaData;
 import com.metaobjects.MetaDataException;
 import com.metaobjects.MetaDataNotFoundException;
 import com.metaobjects.attr.MetaAttribute;
-import com.metaobjects.attr.StringArrayAttribute;
+import com.metaobjects.attr.BooleanAttribute;
+// StringArrayAttribute removed - using StringAttribute with @isArray instead
+import com.metaobjects.field.MetaField;
+import com.metaobjects.identity.MetaIdentity;
 import com.metaobjects.loader.MetaDataLoader;
+import com.metaobjects.object.MetaObject;
 import com.metaobjects.registry.MetaDataRegistry;
+import com.metaobjects.relationship.MetaRelationship;
 import com.metaobjects.util.MetaDataUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -521,12 +530,24 @@ public abstract class BaseMetaDataParser {
             if (attr != null) {
                 parentMetaData.addChild(attr);
 
-                // Handle array format for StringArrayAttribute types
-                if ("stringarray".equals(subType) && !finalValue.startsWith("[")) {
-                    // Convert single value to array format for StringArrayAttribute
-                    attr.setValueAsString("[" + finalValue + "]");
-                    log.debug("Auto-created type-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]",
-                             attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                // Handle array format for String[].class - use StringAttribute with @isArray=true
+                if (expectedType == String[].class) {
+                    // Set @isArray=true for StringAttribute when expected type is String[]
+                    BooleanAttribute isArrayAttr = BooleanAttribute.create("isArray", true);
+                    attr.addChild(isArrayAttr);
+
+                    if (finalValue.startsWith("[") && finalValue.endsWith("]")) {
+                        // Already in JSON array format - convert to comma-delimited for StringAttribute
+                        String commaDelimited = parseJsonStringArray(finalValue);
+                        attr.setValueAsString(commaDelimited);
+                        log.debug("Auto-created type-aware string array attribute [{}] with @isArray=true from JSON array on parent [{}:{}:{}] in file [{}]",
+                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    } else {
+                        // Single value - set directly on StringAttribute with @isArray=true
+                        attr.setValueAsString(finalValue);
+                        log.debug("Auto-created type-aware string array attribute [{}] with @isArray=true from single value on parent [{}:{}:{}] in file [{}]",
+                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    }
                 } else {
                     attr.setValueAsString(finalValue);
                     log.debug("Auto-created type-aware attribute [{}] with subtype [{}] and expectedType [{}] on parent [{}:{}:{}] in file [{}]",
@@ -594,20 +615,30 @@ public abstract class BaseMetaDataParser {
             log.warn("Inline attributes not supported - no attr type default subType registered");
             return;
         }
-        
+
+        // Detect if this is a JSON array BEFORE type conversion
+        boolean isJsonArray = isJsonArray(stringValue);
+
         // Use MetaField's expected type information instead of guessing
         String attributeSubType = getAttributeSubTypeFromMetaData(md, attrName);
-        Class<?> expectedType = getExpectedJavaTypeFromMetaData(md, attrName);
-        
-        // Convert string value to expected type, then back to string for storage
-        Object castedValue = convertStringToExpectedType(stringValue, expectedType);
-        String finalValue = castedValue != null ? castedValue.toString() : null;
-        
-        // Create the attribute with type-aware method
-        createInlineAttributeWithDetectedType(md, attrName, finalValue, attributeSubType);
-        
-        log.debug("Created inline attribute [{}] with value [{}] and expected type [{}] on [{}:{}:{}] in file [{}]", 
-            attrName, finalValue, attributeSubType, md.getType(), md.getSubType(), md.getName(), getFilename());
+
+        // For JSON arrays, don't convert yet - let the array-aware method handle it
+        String valueForCreation;
+        if (isJsonArray) {
+            // Pass original JSON array string to array-aware creation method
+            valueForCreation = stringValue;
+        } else {
+            // For single values, perform type conversion
+            Class<?> expectedType = getExpectedJavaTypeFromMetaData(md, attrName);
+            Object castedValue = convertStringToExpectedType(stringValue, expectedType);
+            valueForCreation = castedValue != null ? castedValue.toString() : null;
+        }
+
+        // Create the attribute with array-aware method
+        createInlineAttributeWithArrayDetection(md, attrName, valueForCreation, attributeSubType);
+
+        log.debug("Created inline attribute [{}] with value [{}] and expected type [{}] (isArray: {}) on [{}:{}:{}] in file [{}]",
+            attrName, valueForCreation, attributeSubType, isJsonArray, md.getType(), md.getSubType(), md.getName(), getFilename());
     }
     
     /**
@@ -625,7 +656,7 @@ public abstract class BaseMetaDataParser {
         } else if (expectedType == Double.class || expectedType == double.class) {
             return "double";
         } else if (expectedType == String[].class) {
-            return "stringarray";
+            return "string"; // Use string with @isArray instead of stringarray
         } else {
             return "string";
         }
@@ -635,21 +666,71 @@ public abstract class BaseMetaDataParser {
      * Get the expected Java type for an attribute by consulting the MetaData
      */
     protected Class<?> getExpectedJavaTypeFromMetaData(MetaData md, String attrName) {
+
         // If the MetaData is a MetaField, use its type information
-        if (md instanceof com.metaobjects.field.MetaField) {
-            com.metaobjects.field.MetaField<?> field = (com.metaobjects.field.MetaField<?>) md;
+        if (md instanceof MetaField) {
+            MetaField<?> field = (MetaField<?>) md;
             return field.getExpectedAttributeType(attrName);
         }
 
-        // Handle MetaKey types (PrimaryKey, ForeignKey, SecondaryKey)
-        if ("key".equals(md.getType())) {
-            return getKeyAttributeType(attrName);
+        // Handle MetaAttribute types
+        if (md instanceof MetaAttribute) {
+            MetaAttribute<?> attr = (MetaAttribute<?>) md;
+            return attr.getDataType().getValueClass();
+            //return attr.getExpectedAttributeType(attrName); //getRelationshipAttributeType(attrName);
         }
 
-        // For other MetaData types (MetaObject, etc.), use basic type mapping
-        return getBasicAttributeType(attrName);
+        // Handle MetaIdentity types
+        if (md instanceof MetaIdentity) {
+            return getIdentityAttributeType(attrName);
+        }
+
+        // Handle MetaObject types
+        if (md instanceof MetaObject) {
+            return getObjectAttributeType(attrName);
+        }
+
+        // For other MetaData types, use basic type mapping
+        return String.class;        
     }
     
+    /**
+     * Attribute type mapping for MetaIdentity types (PrimaryIdentity, SecondaryIdentity)
+     */
+    protected Class<?> getIdentityAttributeType(String attrName) {
+        switch (attrName) {
+            case "fields":
+                // The 'fields' attribute on identity elements should always be StringArray
+                return String[].class; // This will map to stringarray subtype
+            case "generation":
+            default:
+                return String.class;
+        }
+    }
+
+    /**
+     * Attribute type mapping for MetaObject types (PojoMetaObject, ProxyMetaObject, MappedMetaObject)
+     */
+    protected Class<?> getObjectAttributeType(String attrName) {
+        switch (attrName) {
+            case "isAbstract":
+            case "isInterface":
+                // Boolean attributes on objects
+                return Boolean.class;
+            case "implements":
+                // Array of interface names
+                return String[].class;
+            case "extends":
+            case "description":
+            case "object":
+            case "objectRef":
+                // String attributes on objects
+                return String.class;
+            default:
+                return String.class;
+        }
+    }
+
     /**
      * Attribute type mapping for MetaKey types (PrimaryKey, ForeignKey, SecondaryKey)
      */
@@ -665,23 +746,7 @@ public abstract class BaseMetaDataParser {
         }
     }
 
-    /**
-     * Basic attribute type mapping for non-field MetaData
-     */
-    protected Class<?> getBasicAttributeType(String attrName) {
-        switch (attrName) {
-            case "hasJpa":
-            case "hasAuditing":
-            case "hasValidation":
-            case "skipJpa":
-            case "isAbstract":
-                return Boolean.class;
-            case "dbTable":
-            case "description":
-            default:
-                return String.class;
-        }
-    }
+
     
     /**
      * Convert a string value to the expected Java type
@@ -690,7 +755,7 @@ public abstract class BaseMetaDataParser {
         if (stringValue == null) {
             return null;
         }
-        
+
         try {
             if (expectedType == Boolean.class || expectedType == boolean.class) {
                 return Boolean.parseBoolean(stringValue);
@@ -700,16 +765,65 @@ public abstract class BaseMetaDataParser {
                 return Long.parseLong(stringValue);
             } else if (expectedType == Double.class || expectedType == double.class) {
                 return Double.parseDouble(stringValue);
+            } else if (expectedType == String[].class) {
+                // String array type - parse JSON array format like ["id"] or ["basketId", "fruitId"]
+                return parseJsonStringArray(stringValue);
             } else {
                 return stringValue; // String or unknown type
             }
         } catch (NumberFormatException e) {
-            log.warn("Failed to convert value [{}] to type [{}], using as string: {}", 
+            log.warn("Failed to convert value [{}] to type [{}], using as string: {}",
                 stringValue, expectedType.getSimpleName(), e.getMessage());
             return stringValue;
         }
     }
-    
+
+    /**
+     * Parse JSON string array format into a comma-delimited string for StringArrayAttribute storage.
+     * Handles both JSON array format ["id"] and escaped JSON format "[\"id\"]"
+     */
+    protected String parseJsonStringArray(String stringValue) {
+        if (stringValue == null || stringValue.trim().isEmpty()) {
+            return stringValue;
+        }
+
+        try {
+            // Try to parse as JSON array first
+            JsonElement element = JsonParser.parseString(stringValue);
+            if (element.isJsonArray()) {
+                JsonArray jsonArray = element.getAsJsonArray();
+                List<String> values = new ArrayList<>();
+
+                for (JsonElement arrayElement : jsonArray) {
+                    if (arrayElement.isJsonPrimitive()) {
+                        values.add(arrayElement.getAsString());
+                    } else {
+                        log.warn("Non-primitive element in JSON array [{}], converting to string", arrayElement);
+                        values.add(arrayElement.toString());
+                    }
+                }
+
+                // Return as comma-delimited string for StringArrayAttribute storage
+                String result = String.join(",", values);
+                log.debug("Parsed JSON array [{}] to comma-delimited string [{}]", stringValue, result);
+                return result;
+            }
+        } catch (JsonSyntaxException e) {
+            log.debug("Failed to parse as JSON array [{}], checking for comma-delimited format: {}",
+                stringValue, e.getMessage());
+        }
+
+        // If not a JSON array, check if it's already a comma-delimited string
+        if (stringValue.contains(",")) {
+            log.debug("Using comma-delimited string as-is: [{}]", stringValue);
+            return stringValue;
+        }
+
+        // If it's a single value, return as-is
+        log.debug("Using single value as-is: [{}]", stringValue);
+        return stringValue;
+    }
+
     /**
      * Determine appropriate attribute subtype from detected value type (legacy method)
      */
@@ -735,22 +849,90 @@ public abstract class BaseMetaDataParser {
             // Try to create attribute with the detected subtype directly
             MetaAttribute attr = (MetaAttribute) getTypeRegistry().createInstance(
                 MetaAttribute.TYPE_ATTR, attributeSubType, attrName);
-            
+
             if (attr != null) {
                 parentMetaData.addChild(attr);
                 attr.setValueAsString(value);
-                
-                log.debug("Successfully created type-detected attribute [{}] with subtype [{}] and value [{}] on [{}:{}:{}] in file [{}]", 
+
+                log.debug("Successfully created type-detected attribute [{}] with subtype [{}] and value [{}] on [{}:{}:{}] in file [{}]",
                     attrName, attributeSubType, value, parentMetaData.getType(), parentMetaData.getSubType(), parentMetaData.getName(), getFilename());
                 return;
             }
-            
+
         } catch (Exception e) {
-            log.debug("Failed to create type-detected attribute [{}] with subtype [{}], falling back to context-based creation: {}", 
+            log.debug("Failed to create type-detected attribute [{}] with subtype [{}], falling back to context-based creation: {}",
                 attrName, attributeSubType, e.getMessage());
         }
-        
+
         // Fallback to original context-based approach
         createAttributeOnParent(parentMetaData, attrName, value);
+    }
+
+    /**
+     * Enhanced inline attribute creation with universal @isArray support.
+     * Detects JSON arrays and automatically sets @isArray=true.
+     */
+    protected void createInlineAttributeWithArrayDetection(MetaData parentMetaData, String attrName, String originalValue, String attributeSubType) {
+        boolean isJsonArray = isJsonArray(originalValue);
+
+        try {
+            // Create attribute with the detected subtype
+            MetaAttribute attr = (MetaAttribute) getTypeRegistry().createInstance(
+                MetaAttribute.TYPE_ATTR, attributeSubType, attrName);
+
+            if (attr != null) {
+                parentMetaData.addChild(attr);
+
+                // If this is a JSON array, set @isArray=true and convert to comma-delimited
+                if (isJsonArray) {
+                    // Set the @isArray attribute
+                    BooleanAttribute isArrayAttr = new BooleanAttribute(MetaAttribute.ATTR_IS_ARRAY);
+                    isArrayAttr.setValueAsObject(true);
+                    attr.addChild(isArrayAttr);
+
+                    // Convert JSON array to comma-delimited format for storage
+                    String commadelimitedValue = parseJsonStringArray(originalValue);
+                    attr.setValueAsString(commadelimitedValue);
+
+                    log.debug("Created ARRAY attribute [{}] with @isArray=true, subtype [{}] and comma-delimited value [{}] on [{}:{}:{}] in file [{}]",
+                        attrName, attributeSubType, commadelimitedValue, parentMetaData.getType(), parentMetaData.getSubType(), parentMetaData.getName(), getFilename());
+                } else {
+                    // Regular single value
+                    attr.setValueAsString(originalValue);
+
+                    log.debug("Created SINGLE attribute [{}] with subtype [{}] and value [{}] on [{}:{}:{}] in file [{}]",
+                        attrName, attributeSubType, originalValue, parentMetaData.getType(), parentMetaData.getSubType(), parentMetaData.getName(), getFilename());
+                }
+                return;
+            }
+
+        } catch (Exception e) {
+            log.debug("Failed to create array-aware attribute [{}] with subtype [{}], falling back to context-based creation: {}",
+                attrName, attributeSubType, e.getMessage());
+        }
+
+        // Fallback to original context-based approach
+        createAttributeOnParent(parentMetaData, attrName, originalValue);
+    }
+
+    /**
+     * Check if a string value represents a JSON array
+     */
+    protected boolean isJsonArray(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+
+        String trimmed = value.trim();
+        if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) {
+            return false;
+        }
+
+        try {
+            JsonElement element = JsonParser.parseString(trimmed);
+            return element.isJsonArray();
+        } catch (JsonSyntaxException e) {
+            return false;
+        }
     }
 }

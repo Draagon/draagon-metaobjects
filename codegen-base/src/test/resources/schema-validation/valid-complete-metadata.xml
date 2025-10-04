@@ -5,7 +5,7 @@
       <object name="User" subType="pojo" dbTable="users" hasAuditing="true">
         <children>
           <child>
-            <field name="id" subType="short" required="true" dbColumn="user_id" isId="true" dbNullable="false">
+            <field name="id" subType="int" required="true" dbColumn="user_id" isPrimaryKey="true" dbNullable="false">
               <children>
                 <child>
                   <validator name="required" subType="required"/>
@@ -65,10 +65,7 @@
             </field>
           </child>
           <child>
-            <field name="score" subType="short" defaultValue="0.0" dbColumn="score"/>
-          </child>
-          <child>
-            <key name="primary" subType="primary" fields="id"/>
+            <field name="score" subType="int" defaultValue="0" dbColumn="score"/>
           </child>
         </children>
       </object>

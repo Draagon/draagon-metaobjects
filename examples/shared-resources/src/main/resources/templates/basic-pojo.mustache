@@ -1,5 +1,6 @@
 package {{package}};
 
+import java.util.List;
 {{#imports}}
 import {{.}};
 {{/imports}}
@@ -12,22 +13,39 @@ import {{.}};
 public class {{className}} {
     
     {{#fields}}
+    {{#isArrayField}}
+    private {{javaArrayType}} {{fieldName}};
+    {{/isArrayField}}
+    {{^isArrayField}}
     private {{javaType}} {{fieldName}};
+    {{/isArrayField}}
     {{/fields}}
     
     // Constructors
     public {{className}}() {}
     
     {{#fields}}
+    {{#isArrayField}}
+    // {{fieldName}} array accessor methods
+    public {{javaArrayType}} get{{capitalizedFieldName}}() {
+        return {{fieldName}};
+    }
+
+    public void set{{capitalizedFieldName}}({{javaArrayType}} {{fieldName}}) {
+        this.{{fieldName}} = {{fieldName}};
+    }
+    {{/isArrayField}}
+    {{^isArrayField}}
     // {{fieldName}} accessor methods
     public {{javaType}} get{{capitalizedFieldName}}() {
         return {{fieldName}};
     }
-    
+
     public void set{{capitalizedFieldName}}({{javaType}} {{fieldName}}) {
         this.{{fieldName}} = {{fieldName}};
     }
-    
+    {{/isArrayField}}
+
     {{/fields}}
     
     @Override

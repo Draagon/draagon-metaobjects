@@ -47,7 +47,7 @@ public class UniquenessConstraintTest extends SharedRegistryTestBase {
         );
 
         assertNotNull("Constraint should be created", constraint);
-        assertEquals("Should have correct value description", "key names", constraint.getValueDescription());
+        assertEquals("Should have correct value description", "identity and relationship names", constraint.getValueDescription());
     }
 
     @Test

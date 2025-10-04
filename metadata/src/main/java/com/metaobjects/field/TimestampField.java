@@ -41,59 +41,28 @@ public class TimestampField extends PrimitiveField<java.util.Date> {
      * Register TimestampField type with the registry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(TimestampField.class, def -> def
-            .type(TYPE_FIELD).subType(SUBTYPE_TIMESTAMP)
-            .description("Timestamp field with date/time and precision validation")
-            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_PRECISION, IntAttribute.SUBTYPE_INT)
-            .optionalAttribute(ATTR_DATE_FORMAT, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_MIN_DATE, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_MAX_DATE, StringAttribute.SUBTYPE_STRING)
-        );
+        registry.registerType(TimestampField.class, def -> {
+            def.type(TYPE_FIELD).subType(SUBTYPE_TIMESTAMP)
+               .description("Timestamp field with date/time and precision validation")
+               .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-        // Register TimestampField-specific constraints
-        setupTimestampFieldConstraints(registry);
-    }
+            // TIMESTAMP-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_PRECISION)
+               .ofType(IntAttribute.SUBTYPE_INT)
+               .asSingle();
 
-    /**
-     * Setup TimestampField-specific constraints using consolidated registry
-     */
-    private static void setupTimestampFieldConstraints(MetaDataRegistry registry) {
-        // PLACEMENT CONSTRAINT: TimestampField CAN have precision attribute
-        registry.addConstraint(new PlacementConstraint(
-            "timestampfield.precision.placement",
-            "TimestampField can optionally have precision attribute",
-            TYPE_FIELD, SUBTYPE_TIMESTAMP,                    // Parent: field.timestamp
-            TYPE_ATTR, IntAttribute.SUBTYPE_INT, "precision", // Child: attr.int[precision]
-            true                                              // Allowed
-        ));
+            def.optionalAttributeWithConstraints(ATTR_DATE_FORMAT)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
 
-        // PLACEMENT CONSTRAINT: TimestampField CAN have dateFormat attribute
-        registry.addConstraint(new PlacementConstraint(
-            "timestampfield.dateformat.placement",
-            "TimestampField can optionally have dateFormat attribute",
-            TYPE_FIELD, SUBTYPE_TIMESTAMP,                       // Parent: field.timestamp
-            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, "dateFormat", // Child: attr.string[dateFormat]
-            true                                                 // Allowed
-        ));
+            def.optionalAttributeWithConstraints(ATTR_MIN_DATE)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
 
-        // PLACEMENT CONSTRAINT: TimestampField CAN have minDate attribute
-        registry.addConstraint(new PlacementConstraint(
-            "timestampfield.mindate.placement",
-            "TimestampField can optionally have minDate attribute",
-            TYPE_FIELD, SUBTYPE_TIMESTAMP,                   // Parent: field.timestamp
-            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, "minDate", // Child: attr.string[minDate]
-            true                                             // Allowed
-        ));
-
-        // PLACEMENT CONSTRAINT: TimestampField CAN have maxDate attribute
-        registry.addConstraint(new PlacementConstraint(
-            "timestampfield.maxdate.placement",
-            "TimestampField can optionally have maxDate attribute",
-            TYPE_FIELD, SUBTYPE_TIMESTAMP,                   // Parent: field.timestamp
-            TYPE_ATTR, StringAttribute.SUBTYPE_STRING, "maxDate", // Child: attr.string[maxDate]
-            true                                             // Allowed
-        ));
+            def.optionalAttributeWithConstraints(ATTR_MAX_DATE)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+        });
     }
 
     public TimestampField(String name) {

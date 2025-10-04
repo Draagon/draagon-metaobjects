@@ -36,14 +36,21 @@ public abstract class MetaValidator extends MetaData {
      * @param registry the MetaDataRegistry to register with
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(MetaValidator.class, def -> def
-            .type(TYPE_VALIDATOR).subType(SUBTYPE_BASE)
-            .description("Base validator metadata with common validator attributes")
-            .inheritsFrom("metadata", "base")
-            .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
-            .optionalAttribute(ATTR_MSG, StringAttribute.SUBTYPE_STRING)
-            .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")
-        );
+        registry.registerType(MetaValidator.class, def -> {
+            def.type(TYPE_VALIDATOR).subType(SUBTYPE_BASE)
+               .description("Base validator metadata with common validator attributes")
+               .inheritsFrom("metadata", "base")
+               .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*");
+
+            // VALIDATOR-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT)
+               .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_MSG)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+        });
     }
 
     public MetaValidator(String subtype, String name) {

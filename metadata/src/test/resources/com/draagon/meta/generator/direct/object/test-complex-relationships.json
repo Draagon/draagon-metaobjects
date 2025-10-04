@@ -84,7 +84,8 @@
           },
           {
             "name": "orders",
-            "subType": "objectArray",
+            "subType": "object",
+            "@isArray": true,
             "attributes": [
               {
                 "subType": "string",
@@ -95,7 +96,8 @@
           },
           {
             "name": "addresses",
-            "subType": "objectArray",
+            "subType": "object",
+            "@isArray": true,
             "attributes": [
               {
                 "subType": "string",
@@ -204,7 +206,8 @@
           },
           {
             "name": "orderItems",
-            "subType": "objectArray",
+            "subType": "object",
+            "@isArray": true,
             "attributes": [
               {
                 "subType": "string", 
@@ -414,7 +417,8 @@
           },
           {
             "name": "tags",
-            "subType": "stringArray"
+            "subType": "string",
+            "@isArray": true
           }
         ]
       },
@@ -460,7 +464,8 @@
           },
           {
             "name": "childCategories",
-            "subType": "objectArray",
+            "subType": "object",
+            "@isArray": true,
             "attributes": [
               {
                 "subType": "string",

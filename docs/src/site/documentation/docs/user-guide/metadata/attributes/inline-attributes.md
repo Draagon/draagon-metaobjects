@@ -6,6 +6,21 @@ Inline attributes are a key feature of MetaObjects that dramatically reduce meta
 
 Traditional metadata systems require verbose nested structures for attributes. MetaObjects' inline attribute syntax provides a clean, readable alternative that maintains full type safety and validation.
 
+!!! important "When to Use Inline Attributes"
+    **Inline attributes are for configuration and system properties, NOT for validation rules.**
+
+    **✅ Use inline attributes for:**
+    - Database mapping: `@dbTable`, `@dbColumn`, `@dbNullable`
+    - System configuration: `@defaultValue`, `@displayName`, `@isSearchable`
+    - UI properties: `@placeholder`, `@helpText`, `@cssClasses`
+
+    **❌ Use discrete MetaValidator children for:**
+    - Validation rules: `required`, `length`, `pattern`, `range`
+    - Business logic validation
+    - Complex constraint relationships
+
+    This architectural separation ensures validation is first-class metadata while keeping configuration attributes concise.
+
 ### Traditional vs Inline Syntax
 
 **Traditional Verbose Format:**
@@ -13,26 +28,26 @@ Traditional metadata systems require verbose nested structures for attributes. M
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "children": [
       {
         "attr": {
           "name": "required",
-          "type": "boolean",
+          "subType": "boolean",
           "value": true
         }
       },
       {
         "attr": {
           "name": "maxLength",
-          "type": "int",
+          "subType": "int",
           "value": 255
         }
       },
       {
         "attr": {
           "name": "pattern",
-          "type": "string",
+          "subType": "string",
           "value": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$"
         }
       }
@@ -46,7 +61,7 @@ Traditional metadata systems require verbose nested structures for attributes. M
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "@required": true,
     "@maxLength": 255,
     "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$"
@@ -72,23 +87,22 @@ JSON inline attributes use the `@` prefix to distinguish them from standard meta
       {
         "object": {
           "name": "User",
-          "type": "pojo",
+          "subType": "pojo",
           "@dbTable": "users",
           "@auditable": true,
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
+                "subType": "long",
                 "@required": true,
-                "@dbColumn": "user_id",
-                "@isPrimaryKey": true
+                "@dbColumn": "user_id"
               }
             },
             {
               "field": {
                 "name": "email",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@maxLength": 255,
                 "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$",
@@ -99,10 +113,18 @@ JSON inline attributes use the `@` prefix to distinguish them from standard meta
             {
               "field": {
                 "name": "status",
-                "type": "string",
+                "subType": "string",
                 "@required": true,
                 "@defaultValue": "active",
                 "@allowedValues": ["active", "inactive", "pending"]
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]
@@ -128,24 +150,27 @@ XML inline attributes use standard XML attribute syntax without prefixes:
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata package="com_example_model">
   <children>
-    <object name="User" type="pojo" dbTable="users" auditable="true">
+    <object name="User" subType="pojo" dbTable="users" auditable="true">
       <children>
-        <field name="id" type="long"
+        <field name="id" subType="long"
                required="true"
-               dbColumn="user_id"
-               isPrimaryKey="true" />
+               dbColumn="user_id" />
 
-        <field name="email" type="string"
+        <field name="email" subType="string"
                required="true"
                maxLength="255"
                pattern="^[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}$"
                dbColumn="email_address"
                unique="true" />
 
-        <field name="status" type="string"
+        <field name="status" subType="string"
                required="true"
                defaultValue="active"
                allowedValues="active,inactive,pending" />
+
+        <key name="primary" subType="primary"
+             keys="id"
+             autoIncrementStrategy="sequential" />
       </children>
     </object>
   </children>
@@ -191,11 +216,63 @@ public Class<?> getExpectedAttributeType(String attributeName) {
         case "precision":
             return Double.class;
 
+        case "isArray":
+            return Boolean.class;
+
         default:
             return String.class;
     }
 }
 ```
+
+### Universal @isArray Support (v6.2.6+)
+
+**Revolutionary array type system** eliminates the need for dedicated array subtypes:
+
+**Before v6.2.6 (Array Type Explosion):**
+```
+StringField, StringArrayField, IntField, IntArrayField,
+LongField, LongArrayField, DoubleField, DoubleArrayField
+// Result: 12+ field types, exponential growth
+```
+
+**After v6.2.6 (Universal @isArray Modifier):**
+```json
+{
+  "field": {
+    "name": "tags",
+    "subType": "string",
+    "@isArray": true
+  }
+}
+```
+
+**Cross-Platform Array Generation:**
+- **Java**: `List<String>`, `String[]`
+- **C#**: `List<string>`, `string[]`
+- **TypeScript**: `string[]`, `Array<string>`
+
+**Enhanced JSON Array Parsing:**
+```json
+{
+  "identity": {
+    "name": "primary",
+    "subType": "primary",
+    "@fields": ["id"]           // Natural JSON array syntax
+  }
+}
+
+// Also supports composite keys:
+{
+  "identity": {
+    "name": "composite_pk",
+    "subType": "primary",
+    "@fields": ["basketId", "fruitId"]  // Multi-field array
+  }
+}
+```
+
+**Backward Compatibility:** Escaped JSON strings like `"@fields": "[\"id\"]"` are automatically converted for compatibility.
 
 ### Conversion Examples
 
@@ -494,7 +571,7 @@ try {
 {
   "object": {
     "name": "User",
-    "type": "pojo",
+    "subType": "pojo",
     "@dbTable": "users",
     "@dbSchema": "public",
     "@auditable": true
@@ -504,7 +581,7 @@ try {
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "@dbColumn": "email_address",
     "@dbType": "VARCHAR(255)",
     "@nullable": false,
@@ -516,26 +593,61 @@ try {
 
 ### Validation Rules
 
+!!! important "Architectural Guidance"
+    **Validation rules should be discrete MetaValidator children, not inline attributes.** This ensures validation is first-class metadata with proper type safety and extensibility.
+
 ```json
 {
   "field": {
     "name": "age",
-    "type": "int",
-    "@required": true,
-    "@minValue": 0,
-    "@maxValue": 150,
-    "@defaultValue": 18
+    "subType": "int",
+    "@defaultValue": 18,
+    "children": [
+      {
+        "validator": {
+          "name": "required",
+          "subType": "required"
+        }
+      },
+      {
+        "validator": {
+          "name": "range",
+          "subType": "range",
+          "@min": "0",
+          "@max": "150"
+        }
+      }
+    ]
   }
 }
 
 {
   "field": {
     "name": "password",
-    "type": "string",
-    "@required": true,
-    "@minLength": 8,
-    "@maxLength": 128,
-    "@pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+    "subType": "string",
+    "children": [
+      {
+        "validator": {
+          "name": "required",
+          "subType": "required"
+        }
+      },
+      {
+        "validator": {
+          "name": "length",
+          "subType": "length",
+          "@min": "8",
+          "@max": "128"
+        }
+      },
+      {
+        "validator": {
+          "name": "pattern",
+          "subType": "pattern",
+          "@pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+        }
+      }
+    ]
   }
 }
 ```
@@ -546,7 +658,7 @@ try {
 {
   "field": {
     "name": "email",
-    "type": "string",
+    "subType": "string",
     "@displayName": "Email Address",
     "@helpText": "Enter your primary email address",
     "@placeholder": "user@example.com",
@@ -565,7 +677,7 @@ try {
 {
   "field": {
     "name": "ssn",
-    "type": "string",
+    "subType": "string",
     "@required": true,
     "@pattern": "^\\d{3}-\\d{2}-\\d{4}$",
     "@encrypted": true,

@@ -34,7 +34,7 @@ This guide shows how to configure Maven projects for MetaObjects code generation
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- MetaObjects Version -->
-        <metaobjects.version>6.2.5-SNAPSHOT</metaobjects.version>
+        <metaobjects.version>6.2.6-SNAPSHOT</metaobjects.version>
         
         <!-- Plugin Versions -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>

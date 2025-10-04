@@ -5,11 +5,11 @@ import com.metaobjects.field.MetaField;
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.object.MetaObjectAware;
 import com.metaobjects.object.Validatable;
+import com.metaobjects.util.DataConverter;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.List;
 
 public class ProxyObject implements ProxyAccessor, MetaObjectAware, Validatable {
 
@@ -31,14 +31,53 @@ public class ProxyObject implements ProxyAccessor, MetaObjectAware, Validatable 
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    // Package Protected getter/setter Methods
+    // Package Protected getter/setter Methods with Array Support
 
     public Object _getValueByName(String name) {
-        return valueMap.get(name);
+        Object value = valueMap.get(name);
+
+        // Smart fallback: if field is an array but getter might expect different format
+        if (isArrayField(name) && value instanceof List) {
+            // For proxy objects, return the List directly - this works best with generated interfaces
+            return value;
+        }
+
+        return value;
     }
 
     public void _setValueByName(String name, Object val) {
-        valueMap.put(name, val);
+        if (isArrayField(name)) {
+            // Field is defined as array - ensure proper conversion
+            if (val instanceof List) {
+                // Already a list, store directly
+                valueMap.put(name, val);
+            } else if (val instanceof String) {
+                // Convert string to list using DataConverter
+                List<String> list = DataConverter.toStringArray((String) val);
+                valueMap.put(name, list);
+            } else if (val != null) {
+                // Single value - convert to single-element list
+                valueMap.put(name, Arrays.asList(val));
+            } else {
+                // Null value
+                valueMap.put(name, null);
+            }
+        } else {
+            // Regular field - store as-is
+            valueMap.put(name, val);
+        }
+    }
+
+    /**
+     * Check if a field is defined as an array type.
+     * Uses metadata when available.
+     */
+    protected boolean isArrayField(String fieldName) {
+        if (metaObject != null) {
+            MetaField field = metaObject.getMetaField(fieldName);
+            return field != null && field.isArrayType();
+        }
+        return false;
     }
 
     protected String getField( Method method, String name ) {

@@ -14,7 +14,7 @@ import com.metaobjects.manager.ObjectConnection;
 import com.metaobjects.manager.ObjectManager;
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.spring.MetaDataService;
-import com.metaobjects.demo.fishstore.*;
+import com.metaobjects.demo.fishstore.domain.*;
 import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,10 +35,16 @@ public class FishstoreService {
     
     @Autowired
     private MetaDataService metaDataService;
+
+    @Autowired
+    private ObjectManagerDBTestService objectManagerDBTestService;
     
-    /** Initialize the database if needed */     
+    /** Initialize the database if needed */
     public void init() {
-        
+
+        // Test ObjectManagerDB functionality first
+        objectManagerDBTestService.testObjectManagerDB();
+
         ObjectConnection oc = om.getConnection();
         try {
             MetaObject storeMO = metaDataService.findMetaObjectByName("Store");

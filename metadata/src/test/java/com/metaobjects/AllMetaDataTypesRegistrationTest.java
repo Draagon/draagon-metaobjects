@@ -40,11 +40,8 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
             
             // Newly added field types
             new FloatField("testFloat");
-            new ShortField("testShort");
-            new ByteField("testByte");
+            new DecimalField("testDecimal");  // High-precision decimal field
             new ObjectField("testObject");
-            new StringArrayField("testStringArray");
-            new ObjectArrayField("testObjectArray");
             new ClassField("testClass");
             
             // Object types
@@ -97,16 +94,10 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
                   sharedRegistry.isRegistered("field", "date"));
         assertTrue("FloatField should be registered",
                   sharedRegistry.isRegistered("field", "float"));
-        assertTrue("ShortField should be registered",
-                  sharedRegistry.isRegistered("field", "short"));
-        assertTrue("ByteField should be registered",
-                  sharedRegistry.isRegistered("field", "byte"));
+        assertTrue("DecimalField should be registered",
+                  sharedRegistry.isRegistered("field", "decimal"));
         assertTrue("ObjectField should be registered",
                   sharedRegistry.isRegistered("field", "object"));
-        assertTrue("StringArrayField should be registered",
-                  sharedRegistry.isRegistered("field", "stringArray"));
-        assertTrue("ObjectArrayField should be registered",
-                  sharedRegistry.isRegistered("field", "objectArray"));
         assertTrue("ClassField should be registered",
                   sharedRegistry.isRegistered("field", "class"));
     }
@@ -136,8 +127,10 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
         // Test that field constraints are working
         assertTrue("StringField should accept pattern attribute",
                   sharedRegistry.acceptsChild("field", "string", "attr", "string", "pattern"));
-        assertTrue("DoubleField should accept precision attribute",
-                  sharedRegistry.acceptsChild("field", "double", "attr", "int", "precision"));
+        assertTrue("DoubleField should accept range validation attributes",
+                  sharedRegistry.acceptsChild("field", "double", "attr", "double", "minValue"));
+        assertTrue("DecimalField should accept precision attribute",
+                  sharedRegistry.acceptsChild("field", "decimal", "attr", "int", "precision"));
         assertTrue("ObjectField should accept objectRef attribute",
                   sharedRegistry.acceptsChild("field", "object", "attr", "string", "objectRef"));
     }
@@ -161,7 +154,7 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
         System.out.println("Object types: " + objectCount);
         System.out.println("Attribute types: " + attrCount);
 
-        assertTrue("Should have at least 13 field types", fieldCount >= 13);
+        assertTrue("Should have at least 10 field types", fieldCount >= 10);
         assertTrue("Should have at least 2 object types", objectCount >= 2);
         assertTrue("Should have at least 3 attribute types", attrCount >= 3);
     }

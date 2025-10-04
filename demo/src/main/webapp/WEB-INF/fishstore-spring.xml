@@ -32,7 +32,8 @@ http://www.eclipse.org/legal/epl-v10.html
                         <bean class="com.metaobjects.loader.file.LocalFileMetaDataSources">
                             <constructor-arg>
                                 <list>
-                                    <value>metadata/fishstore-metadata.json</value>
+                                    <value>metadata/fishstore-base-metadata.json</value>
+                                    <value>metadata/fishstore-db-overlay.json</value>
                                 </list>
                             </constructor-arg>
                         </bean>

@@ -130,8 +130,7 @@ public class UnifiedRegistryTest {
         Class<?> stringAttrClass = StringAttribute.class;
         @SuppressWarnings("unused")
         Class<?> intAttrClass = IntAttribute.class;
-        @SuppressWarnings("unused")
-        Class<?> stringArrayAttrClass = StringArrayAttribute.class;
+        // Note: StringArrayAttribute.class removed - using universal @isArray pattern now
         
         // Verify StringAttribute registration
         TypeDefinition stringAttrDef = registry.getTypeDefinition("attr", "string");
@@ -144,10 +143,8 @@ public class UnifiedRegistryTest {
             assertEquals("IntAttribute implementation class", IntAttribute.class, intAttrDef.getImplementationClass());
         }
         
-        // Verify StringArrayAttribute registration
-        TypeDefinition stringArrayAttrDef = registry.getTypeDefinition("attr", "stringarray");
-        assertNotNull("StringArrayAttribute should be registered", stringArrayAttrDef);
-        assertEquals("StringArrayAttribute implementation class", StringArrayAttribute.class, stringArrayAttrDef.getImplementationClass());
+        // Note: StringArrayAttribute is no longer registered - StringAttribute with @isArray=true is used instead
+        // StringAttribute verification is already done above and now supports universal @isArray pattern
     }
     
     /**

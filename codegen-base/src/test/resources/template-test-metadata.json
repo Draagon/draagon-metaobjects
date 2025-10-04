@@ -7,7 +7,7 @@
         "object": {
           "name": "User",
           "subType": "pojo",
-          "package": "com_example_model",
+          "package": "example",
           "@dbTable": "users",
           "@description": "User entity for template testing",
           "children": [
@@ -15,7 +15,6 @@
               "field": {
                 "name": "id",
                 "subType": "long",
-                "@primaryKey": true,
                 "@dbColumn": "id"
               }
             },
@@ -23,19 +22,53 @@
               "field": {
                 "name": "username",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 50,
                 "@dbColumn": "username",
-                "@dbNullable": false
+                "@dbNullable": false,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "50"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "email",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 100,
-                "@dbColumn": "email"
+                "@dbColumn": "email",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "identity": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]
@@ -45,29 +78,57 @@
         "object": {
           "name": "Product",
           "subType": "pojo",
-          "package": "com_example_model",
+          "package": "example",
           "@description": "Product value object for template testing",
           "children": [
             {
               "field": {
                 "name": "name",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 100
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "price",
                 "subType": "double",
-                "@required": true
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "category",
                 "subType": "string",
-                "@maxLength": 50
+                "children": [
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "50"
+                    }
+                  }
+                ]
               }
             }
           ]

@@ -5,10 +5,11 @@ targetLanguage: "java"
 outputFileExtension: "java"
 packagePath: true
 requirements:
-  helpers: ["capitalize", "javaType"]
+  helpers: ["capitalize", "javaType", "javaArrayType", "isArrayField"]
 template: |
   package {{packageName}};
-  
+
+  import java.util.List;
   {{#imports}}
   import {{.}};
   {{/imports}}
@@ -20,23 +21,41 @@ template: |
   public class {{className}} {
       
       {{#fields}}
+      {{#isArrayField}}
+      private {{javaArrayType}} {{name}};
+      {{/isArrayField}}
+      {{^isArrayField}}
       private {{javaType}} {{name}};
+      {{/isArrayField}}
       {{/fields}}
       
       // Default constructor
       public {{className}}() {}
       
       {{#fields}}
+      {{#isArrayField}}
+      // Array getter for {{name}}
+      public {{javaArrayType}} {{getterName}}() {
+          return this.{{name}};
+      }
+
+      // Array setter for {{name}}
+      public void {{setterName}}({{javaArrayType}} {{name}}) {
+          this.{{name}} = {{name}};
+      }
+      {{/isArrayField}}
+      {{^isArrayField}}
       // Getter for {{name}}
       public {{javaType}} {{getterName}}() {
           return this.{{name}};
       }
-      
+
       // Setter for {{name}}
       public void {{setterName}}({{javaType}} {{name}}) {
           this.{{name}} = {{name}};
       }
-      
+      {{/isArrayField}}
+
       {{/fields}}
       
       // Static factory method using MetaObjects

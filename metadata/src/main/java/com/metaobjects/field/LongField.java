@@ -40,22 +40,31 @@ public class LongField extends PrimitiveField<Long> {
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             // Register the type definition
-            registry.registerType(LongField.class, def -> def
-                .type(TYPE_FIELD).subType(SUBTYPE_LONG)
-                .description("Long field with numeric validation")
+            registry.registerType(LongField.class, def -> {
+                def.type(TYPE_FIELD).subType(SUBTYPE_LONG)
+                   .description("Long field with numeric validation")
 
-                // INHERIT FROM BASE FIELD
-                .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
+                   // INHERIT FROM BASE FIELD
+                   .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
 
-                // LONG-SPECIFIC ATTRIBUTES ONLY
-                .optionalAttribute(ATTR_MIN_VALUE, LongAttribute.SUBTYPE_LONG)
-                .optionalAttribute(ATTR_MAX_VALUE, LongAttribute.SUBTYPE_LONG)
-            );
+                // LONG-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+                def.optionalAttributeWithConstraints(ATTR_MIN_VALUE)
+                   .ofType(LongAttribute.SUBTYPE_LONG)
+                   .asSingle();
 
-            log.debug("Registered LongField type with unified registry (auto-generated constraints)");
+                def.optionalAttributeWithConstraints(ATTR_MAX_VALUE)
+                   .ofType(LongAttribute.SUBTYPE_LONG)
+                   .asSingle();
+            });
+
+            if (log != null) {
+                log.debug("Registered LongField type with unified registry (auto-generated constraints)");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register LongField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register LongField type with unified registry", e);
+            }
         }
     }
 

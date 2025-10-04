@@ -27,9 +27,9 @@
               }
             },
             {
-              "key": {
-                "name": "testKey",
-                "subType": "invalidKeySubtype"
+              "relationship": {
+                "name": "testRelationship",
+                "subType": "invalidRelationshipSubtype"
               }
             }
           ]

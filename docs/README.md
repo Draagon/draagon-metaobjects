@@ -56,7 +56,7 @@ mkdocs build
 
 The documentation is configured to be automatically deployed to:
 
-**Primary URL**: `https://metaobjectsdev.github.io/metaobjects-core/`
+**Live Documentation**: `https://metaobjects.dev/metaobjects-core/`
 
 ### Automatic Deployment
 

@@ -35,13 +35,20 @@ public class LengthValidator extends MetaValidator
      * Register this type with the MetaDataRegistry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(LengthValidator.class, def -> def
-            .type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
-            .description("Length validator ensures field value is within min/max length")
-            .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_MIN, StringAttribute.SUBTYPE_STRING)
-            .optionalAttribute(ATTR_MAX, StringAttribute.SUBTYPE_STRING)
-        );
+        registry.registerType(LengthValidator.class, def -> {
+            def.type(TYPE_VALIDATOR).subType(SUBTYPE_LENGTH)
+               .description("Length validator ensures field value is within min/max length")
+               .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE);
+
+            // LENGTH-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_MIN)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_MAX)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+        });
     }
 
     public LengthValidator(String name) {

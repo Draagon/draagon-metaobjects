@@ -1025,7 +1025,7 @@ public class MetaDataRegistry {
      */
     private void validateCoreTypesPresent(RegistryHealthReport report) {
         String[] expectedCoreTypes = {
-            "field.base", "object.base", "attr.base", "validator.base", "key.base"
+            "field.base", "object.base", "attr.base", "validator.base", "relationship.base"
         };
 
         List<String> missingCoreTypes = new ArrayList<>();
@@ -1591,6 +1591,19 @@ public class MetaDataRegistry {
     public void enableStrictDuplicateDetection() {
         this.strictDuplicateDetection = true;
         log.debug("Enabled strict duplicate constraint detection");
+    }
+
+    /**
+     * Check if a constraint with the given ID already exists
+     * @param constraintId The constraint ID to check for
+     * @return true if a constraint with this ID exists, false otherwise
+     */
+    public boolean hasConstraint(String constraintId) {
+        if (constraintId == null) {
+            return false;
+        }
+        return constraints.stream()
+            .anyMatch(c -> constraintId.equals(c.getConstraintId()));
     }
 
     /**

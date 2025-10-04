@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "package": "com_example_model",
+    "package": "example",
     "children": [
       {
         "object": {
@@ -12,26 +12,59 @@
               "field": {
                 "name": "id",
                 "subType": "long",
-                "@required": true,
-                "@dbColumn": "user_id"
+                "@dbColumn": "user_id",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
-                "name": "username", 
+                "name": "username",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 50,
-                "@dbColumn": "username"
+                "@dbColumn": "username",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "50"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "email",
-                "subType": "string", 
-                "@required": true,
-                "@maxLength": 255,
-                "@dbColumn": "email"
+                "subType": "string",
+                "@dbColumn": "email",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "255"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -39,6 +72,14 @@
                 "name": "createdDate",
                 "subType": "date",
                 "@dbColumn": "created_date"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]
@@ -54,25 +95,60 @@
               "field": {
                 "name": "id",
                 "subType": "long",
-                "@required": true,
-                "@dbColumn": "product_id"
+                "@dbColumn": "product_id",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "name",
                 "subType": "string",
-                "@required": true,
-                "@maxLength": 100,
-                "@dbColumn": "product_name"
+                "@dbColumn": "product_name",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "price",
                 "subType": "double",
-                "@required": true,
-                "@dbColumn": "price"
+                "@dbColumn": "price",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]

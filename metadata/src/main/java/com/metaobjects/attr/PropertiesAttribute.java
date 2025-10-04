@@ -3,9 +3,6 @@ package com.metaobjects.attr;
 import com.metaobjects.DataTypes;
 import com.metaobjects.registry.MetaDataRegistry;
 
-import static com.metaobjects.attr.MetaAttribute.TYPE_ATTR;
-import static com.metaobjects.attr.MetaAttribute.SUBTYPE_BASE;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
@@ -13,7 +10,6 @@ import java.util.Properties;
 /**
  * A Properties Attribute with provider-based registration.
  */
-@SuppressWarnings("serial")
 public class PropertiesAttribute extends MetaAttribute<Properties> {
 
     public final static String SUBTYPE_PROPERTIES = "properties";

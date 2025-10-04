@@ -28,12 +28,16 @@ public class RegexValidator extends MetaValidator {
      * Register this type with the MetaDataRegistry (called by provider)
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(RegexValidator.class, def -> def
-            .type(TYPE_VALIDATOR).subType(SUBTYPE_REGEX)
-            .description("Regular expression validator for pattern matching")
-            .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE)
-            .requiredAttribute(ATTR_MASK, StringAttribute.SUBTYPE_STRING)
-        );
+        registry.registerType(RegexValidator.class, def -> {
+            def.type(TYPE_VALIDATOR).subType(SUBTYPE_REGEX)
+               .description("Regular expression validator for pattern matching")
+               .inheritsFrom(TYPE_VALIDATOR, SUBTYPE_BASE);
+
+            // REGEX-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.requiredAttributeWithConstraints(ATTR_MASK)
+               .ofType(StringAttribute.SUBTYPE_STRING)
+               .asSingle();
+        });
     }
 
     public RegexValidator(String name) {

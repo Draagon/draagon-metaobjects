@@ -86,10 +86,8 @@ public class ManagedMetaObject extends PojoMetaObject implements StateAwareMetaO
                 mf = new IntegerField(field);
             } else if (type.equals("long")) {
                 mf = new LongField(field);
-            } else if (type.equals("short")) {
-                mf = new ShortField(field);
-            } else if (type.equals("byte")) {
-                mf = new ByteField(field);
+            } else if (type.equals("decimal")) {
+                mf = new DecimalField(field);
             } else if (type.equals("boolean")) {
                 mf = new BooleanField(field);
             } else if (type.equals("float")) {

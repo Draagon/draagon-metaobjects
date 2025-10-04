@@ -1,0 +1,109 @@
+{
+  "name": "fishstore-db-overlay",
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Database persistence overlay for fishstore entities",
+    "package": "fishstore",
+    "children": [
+      {
+        "object": {
+          "name": "Base",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "@dbColumn": "ID"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Store",
+          "@dbTable": "STORE",
+          "children": [
+            {
+              "field": {
+                "name": "name",
+                "@dbColumn": "NAME"
+              }
+            },
+            {
+              "field": {
+                "name": "maxTanks",
+                "@dbColumn": "MAX_TANKS"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Tank",
+          "@dbTable": "TANK",
+          "children": [
+            {
+              "field": {
+                "name": "num",
+                "@dbColumn": "NUM"
+              }
+            },
+            {
+              "field": {
+                "name": "maxFish",
+                "@dbColumn": "MAX_FISH"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Breed",
+          "@dbTable": "BREED",
+          "children": [
+            {
+              "field": {
+                "name": "name",
+                "@dbColumn": "NAME"
+              }
+            },
+            {
+              "field": {
+                "name": "agressionLevel",
+                "@dbColumn": "AGRESSION_LEVEL"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Fish",
+          "@dbTable": "FISH",
+          "children": [
+            {
+              "field": {
+                "name": "breedName",
+                "@dbColumn": "BREED_NAME"
+              }
+            },
+            {
+              "field": {
+                "name": "length",
+                "@dbColumn": "LENGTH"
+              }
+            },
+            {
+              "field": {
+                "name": "weight",
+                "@dbColumn": "WEIGHT"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -52,17 +52,41 @@ jobs:
 
       - name: Build documentation
         run: |
+          echo "🚀 Building MkDocs documentation (NOT Maven project)"
+          echo "Working directory: $(pwd)"
+          echo "Repository contents:"
+          ls -la
+
+          echo "📁 Navigating to documentation directory..."
           cd docs/src/site/documentation
-          mkdocs build --strict --verbose
+          echo "MkDocs directory: $(pwd)"
+          echo "Documentation files:"
+          ls -la
+
+          echo "📄 Checking MkDocs configuration..."
+          if [ ! -f "mkdocs.yml" ]; then
+            echo "❌ ERROR: mkdocs.yml not found!"
+            exit 1
+          fi
+
+          echo "🔧 Validating MkDocs installation..."
+          mkdocs --version
+
+          echo "🏗️ Building documentation with MkDocs..."
+          mkdocs build --verbose
+
+          echo "✅ MkDocs build completed successfully!"
+          echo "📊 Build output:"
+          ls -la site/
 
       - name: Upload documentation artifacts
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/src/site/documentation/site
 
-  # Deploy job - only on main/master branch pushes
+  # Deploy job - on main/master pushes OR manual workflow dispatch
   deploy:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) || github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

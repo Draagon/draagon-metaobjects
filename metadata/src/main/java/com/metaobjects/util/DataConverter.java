@@ -631,4 +631,142 @@ public final class DataConverter
 		return val;
 	}
 
+	//////////////////////////////////////////////////////////////
+	// PRIMITIVE ARRAY CONVERSION METHODS
+
+	/**
+	 * Convert value to Integer array (List&lt;Integer&gt;)
+	 */
+	public static List<Integer> toIntArray(Object val) {
+		if (val == null) return null;
+
+		if (val instanceof List<?>) {
+			List<?> list = (List<?>) val;
+			return list.stream()
+				.map(DataConverter::toInt)
+				.collect(java.util.stream.Collectors.toList());
+		} else if (val instanceof String) {
+			String s = (String) val;
+			if (s.trim().isEmpty()) return new java.util.ArrayList<>();
+
+			if (s.contains(",")) {
+				return java.util.Arrays.stream(s.split(","))
+					.map(item -> toInt(item.trim()))
+					.collect(java.util.stream.Collectors.toList());
+			} else {
+				return java.util.Arrays.asList(toInt(s.trim()));
+			}
+		} else {
+			return java.util.Arrays.asList(toInt(val));
+		}
+	}
+
+	/**
+	 * Convert value to Long array (List&lt;Long&gt;)
+	 */
+	public static List<Long> toLongArray(Object val) {
+		if (val == null) return null;
+
+		if (val instanceof List<?>) {
+			List<?> list = (List<?>) val;
+			return list.stream()
+				.map(DataConverter::toLong)
+				.collect(java.util.stream.Collectors.toList());
+		} else if (val instanceof String) {
+			String s = (String) val;
+			if (s.trim().isEmpty()) return new java.util.ArrayList<>();
+
+			if (s.contains(",")) {
+				return java.util.Arrays.stream(s.split(","))
+					.map(item -> toLong(item.trim()))
+					.collect(java.util.stream.Collectors.toList());
+			} else {
+				return java.util.Arrays.asList(toLong(s.trim()));
+			}
+		} else {
+			return java.util.Arrays.asList(toLong(val));
+		}
+	}
+
+	/**
+	 * Convert value to Boolean array (List&lt;Boolean&gt;)
+	 */
+	public static List<Boolean> toBooleanArray(Object val) {
+		if (val == null) return null;
+
+		if (val instanceof List<?>) {
+			List<?> list = (List<?>) val;
+			return list.stream()
+				.map(DataConverter::toBoolean)
+				.collect(java.util.stream.Collectors.toList());
+		} else if (val instanceof String) {
+			String s = (String) val;
+			if (s.trim().isEmpty()) return new java.util.ArrayList<>();
+
+			if (s.contains(",")) {
+				return java.util.Arrays.stream(s.split(","))
+					.map(item -> toBoolean(item.trim()))
+					.collect(java.util.stream.Collectors.toList());
+			} else {
+				return java.util.Arrays.asList(toBoolean(s.trim()));
+			}
+		} else {
+			return java.util.Arrays.asList(toBoolean(val));
+		}
+	}
+
+	/**
+	 * Convert value to Double array (List&lt;Double&gt;)
+	 */
+	public static List<Double> toDoubleArray(Object val) {
+		if (val == null) return null;
+
+		if (val instanceof List<?>) {
+			List<?> list = (List<?>) val;
+			return list.stream()
+				.map(DataConverter::toDouble)
+				.collect(java.util.stream.Collectors.toList());
+		} else if (val instanceof String) {
+			String s = (String) val;
+			if (s.trim().isEmpty()) return new java.util.ArrayList<>();
+
+			if (s.contains(",")) {
+				return java.util.Arrays.stream(s.split(","))
+					.map(item -> toDouble(item.trim()))
+					.collect(java.util.stream.Collectors.toList());
+			} else {
+				return java.util.Arrays.asList(toDouble(s.trim()));
+			}
+		} else {
+			return java.util.Arrays.asList(toDouble(val));
+		}
+	}
+
+	/**
+	 * Convert value to Float array (List&lt;Float&gt;)
+	 */
+	public static List<Float> toFloatArray(Object val) {
+		if (val == null) return null;
+
+		if (val instanceof List<?>) {
+			List<?> list = (List<?>) val;
+			return list.stream()
+				.map(DataConverter::toFloat)
+				.collect(java.util.stream.Collectors.toList());
+		} else if (val instanceof String) {
+			String s = (String) val;
+			if (s.trim().isEmpty()) return new java.util.ArrayList<>();
+
+			if (s.contains(",")) {
+				return java.util.Arrays.stream(s.split(","))
+					.map(item -> toFloat(item.trim()))
+					.collect(java.util.stream.Collectors.toList());
+			} else {
+				return java.util.Arrays.asList(toFloat(s.trim()));
+			}
+		} else {
+			return java.util.Arrays.asList(toFloat(val));
+		}
+	}
+
 } // Converter

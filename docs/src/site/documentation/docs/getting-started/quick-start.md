@@ -19,7 +19,7 @@ Choose the appropriate dependency based on your project type:
         <dependency>
             <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-core</artifactId>
-            <version>6.2.5-SNAPSHOT</version>
+            <version>6.2.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
     ```
@@ -30,8 +30,8 @@ Choose the appropriate dependency based on your project type:
     <dependencies>
         <dependency>
             <groupId>com.metaobjects</groupId>
-            <artifactId>metaobjects-core-spring</artifactId>
-            <version>6.2.5-SNAPSHOT</version>
+            <artifactId>metaobjects-spring</artifactId>
+            <version>6.2.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
     ```
@@ -43,7 +43,7 @@ Choose the appropriate dependency based on your project type:
         <dependency>
             <groupId>com.metaobjects</groupId>
             <artifactId>metaobjects-codegen-mustache</artifactId>
-            <version>6.2.5-SNAPSHOT</version>
+            <version>6.2.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -68,53 +68,103 @@ Create a JSON metadata file that defines a simple User object:
 ```json title="src/main/resources/metadata/user-metadata.json"
 {
   "metadata": {
-    "package": "com_example_model",
+    "package": "example",
     "children": [
       {
         "object": {
           "name": "User",
-          "type": "pojo",
+          "subType": "pojo",
           "@dbTable": "users",
           "children": [
             {
               "field": {
                 "name": "id",
-                "type": "long",
-                "@required": true,
-                "@dbColumn": "user_id"
+                "subType": "long",
+                "@dbColumn": "user_id",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "email",
-                "type": "string",
-                "@required": true,
-                "@maxLength": 255,
-                "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$",
-                "@dbColumn": "email_address"
+                "subType": "string",
+                "@dbColumn": "email_address",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "255"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "pattern",
+                      "subType": "pattern",
+                      "@pattern": "^[\\w._%+-]+@[\\w.-]+\\.[A-Za-z]{2,}$"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "firstName",
-                "type": "string",
-                "@maxLength": 100,
-                "@dbColumn": "first_name"
+                "subType": "string",
+                "@dbColumn": "first_name",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "lastName",
-                "type": "string",
-                "@maxLength": 100,
-                "@dbColumn": "last_name"
+                "subType": "string",
+                "@dbColumn": "last_name",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "createdAt",
-                "type": "date",
+                "subType": "date",
                 "@dbColumn": "created_at"
+              }
+            },
+            {
+              "key": {
+                "name": "primary",
+                "subType": "primary",
+                "@keys": ["id"],
+                "@autoIncrementStrategy": "sequential"
               }
             }
           ]
@@ -125,8 +175,8 @@ Create a JSON metadata file that defines a simple User object:
 }
 ```
 
-!!! tip "Inline Attributes"
-    Notice the `@` prefix on attributes like `@required`, `@maxLength`, etc. This is MetaObjects' inline attribute syntax that makes metadata more readable and concise.
+!!! tip "Architecture Patterns"
+    Notice the discrete validator children for validation rules like required and length constraints. Database attributes like `@dbTable` and `@dbColumn` use inline attribute syntax with the `@` prefix. This separation ensures validation is first-class metadata while keeping configuration attributes concise.
 
 ## Step 3: Load and Use Metadata
 

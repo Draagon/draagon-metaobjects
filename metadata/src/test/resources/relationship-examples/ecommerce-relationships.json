@@ -1,0 +1,417 @@
+{
+  "metadata": {
+    "package": "ecommerce",
+    "children": [
+      {
+        "object": {
+          "name": "User",
+          "subType": "pojo",
+          "@dbTable": "users",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "user_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "username",
+                "subType": "string",
+                "@dbColumn": "username",
+                "@required": true,
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string",
+                "@dbColumn": "email",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "relationship": {
+                "name": "profile",
+                "subType": "composition",
+                "@targetObject": "UserProfile",
+                "@cardinality": "one",
+                "@referencedBy": "profileId"
+              }
+            },
+            {
+              "relationship": {
+                "name": "addresses",
+                "subType": "composition",
+                "@targetObject": "Address",
+                "@cardinality": "many",
+                "@referencedBy": "addressIds"
+              }
+            },
+            {
+              "relationship": {
+                "name": "orders",
+                "subType": "association",
+                "@targetObject": "Order",
+                "@cardinality": "many",
+                "@referencedBy": "orderIds"
+              }
+            },
+            {
+              "relationship": {
+                "name": "manager",
+                "subType": "association",
+                "@targetObject": "User",
+                "@cardinality": "one",
+                "@referencedBy": "managerId"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "UserProfile",
+          "subType": "pojo",
+          "@dbTable": "user_profiles",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "profile_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "firstName",
+                "subType": "string",
+                "@dbColumn": "first_name",
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "lastName",
+                "subType": "string",
+                "@dbColumn": "last_name",
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "birthDate",
+                "subType": "date",
+                "@dbColumn": "birth_date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Address",
+          "subType": "pojo",
+          "@dbTable": "addresses",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "address_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "street",
+                "subType": "string",
+                "@dbColumn": "street",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "city",
+                "subType": "string",
+                "@dbColumn": "city",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "state",
+                "subType": "string",
+                "@dbColumn": "state",
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "zipCode",
+                "subType": "string",
+                "@dbColumn": "zip_code",
+                "@maxLength": 20
+              }
+            },
+            {
+              "field": {
+                "name": "type",
+                "subType": "string",
+                "@dbColumn": "address_type",
+                "@maxLength": 20
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Order",
+          "subType": "pojo",
+          "@dbTable": "orders",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "order_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "orderNumber",
+                "subType": "string",
+                "@dbColumn": "order_number",
+                "@required": true,
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "orderDate",
+                "subType": "date",
+                "@dbColumn": "order_date",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "totalAmount",
+                "subType": "decimal",
+                "@dbColumn": "total_amount",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "status",
+                "subType": "string",
+                "@dbColumn": "status",
+                "@required": true,
+                "@maxLength": 20
+              }
+            },
+            {
+              "relationship": {
+                "name": "orderItems",
+                "subType": "composition",
+                "@targetObject": "OrderItem",
+                "@cardinality": "many",
+                "@referencedBy": "orderItemIds"
+              }
+            },
+            {
+              "relationship": {
+                "name": "shippingAddress",
+                "subType": "association",
+                "@targetObject": "Address",
+                "@cardinality": "one",
+                "@referencedBy": "shippingAddressId"
+              }
+            },
+            {
+              "relationship": {
+                "name": "billingAddress",
+                "subType": "association",
+                "@targetObject": "Address",
+                "@cardinality": "one",
+                "@referencedBy": "billingAddressId"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "OrderItem",
+          "subType": "pojo",
+          "@dbTable": "order_items",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "item_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "quantity",
+                "subType": "int",
+                "@dbColumn": "quantity",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "unitPrice",
+                "subType": "decimal",
+                "@dbColumn": "unit_price",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "totalPrice",
+                "subType": "decimal",
+                "@dbColumn": "total_price",
+                "@required": true
+              }
+            },
+            {
+              "relationship": {
+                "name": "product",
+                "subType": "association",
+                "@targetObject": "Product",
+                "@cardinality": "one",
+                "@referencedBy": "productId"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Product",
+          "subType": "pojo",
+          "@dbTable": "products",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "product_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@dbColumn": "product_name",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "description",
+                "subType": "string",
+                "@dbColumn": "description",
+                "@maxLength": 1000
+              }
+            },
+            {
+              "field": {
+                "name": "price",
+                "subType": "decimal",
+                "@dbColumn": "price",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "sku",
+                "subType": "string",
+                "@dbColumn": "sku",
+                "@required": true,
+                "@maxLength": 50
+              }
+            },
+            {
+              "relationship": {
+                "name": "category",
+                "subType": "association",
+                "@targetObject": "Category",
+                "@cardinality": "one",
+                "@referencedBy": "categoryId"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Category",
+          "subType": "pojo",
+          "@dbTable": "categories",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@dbColumn": "category_id",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@dbColumn": "category_name",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "description",
+                "subType": "string",
+                "@dbColumn": "description",
+                "@maxLength": 500
+              }
+            },
+            {
+              "relationship": {
+                "name": "parentCategory",
+                "subType": "association",
+                "@targetObject": "Category",
+                "@cardinality": "one",
+                "@referencedBy": "parentCategoryId"
+              }
+            },
+            {
+              "relationship": {
+                "name": "subCategories",
+                "subType": "association",
+                "@targetObject": "Category",
+                "@cardinality": "many",
+                "@referencedBy": "subCategoryIds"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

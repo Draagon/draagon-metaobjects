@@ -8,7 +8,7 @@ package com.metaobjects.field;
 
 import com.metaobjects.*;
 import com.metaobjects.registry.MetaDataRegistry;
-import com.metaobjects.attr.IntAttribute;
+import com.metaobjects.attr.DoubleAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,6 @@ public class FloatField extends PrimitiveField<Float>
     public final static String SUBTYPE_FLOAT = "float";
     public final static String ATTR_MIN_VALUE = "minValue";
     public final static String ATTR_MAX_VALUE = "maxValue";
-    public final static String ATTR_PRECISION = "precision";
 
     public FloatField( String name ) {
         super( SUBTYPE_FLOAT, name, DataTypes.FLOAT );
@@ -39,14 +38,20 @@ public class FloatField extends PrimitiveField<Float>
      * Register FloatField type using the standardized registerTypes() pattern.
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(FloatField.class, def -> def
-            .type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
-            .description("Float field with numeric and precision validation")
-            .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE)
-            .optionalAttribute(ATTR_MIN_VALUE, SUBTYPE_FLOAT)
-            .optionalAttribute(ATTR_MAX_VALUE, SUBTYPE_FLOAT)
-            .optionalAttribute(ATTR_PRECISION, IntAttribute.SUBTYPE_INT)
-        );
+        registry.registerType(FloatField.class, def -> {
+            def.type(TYPE_FIELD).subType(SUBTYPE_FLOAT)
+               .description("Float field with range validation")
+               .inheritsFrom(TYPE_FIELD, SUBTYPE_BASE);
+
+            // FLOAT-SPECIFIC ATTRIBUTES WITH FLUENT CONSTRAINTS
+            def.optionalAttributeWithConstraints(ATTR_MIN_VALUE)
+               .ofType(DoubleAttribute.SUBTYPE_DOUBLE)
+               .asSingle();
+
+            def.optionalAttributeWithConstraints(ATTR_MAX_VALUE)
+               .ofType(DoubleAttribute.SUBTYPE_DOUBLE)
+               .asSingle();
+        });
     }
 
 

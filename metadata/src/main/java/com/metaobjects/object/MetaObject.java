@@ -1,15 +1,17 @@
 package com.metaobjects.object;
 
 import com.metaobjects.*;
+import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.attr.MetaAttribute;
+import com.metaobjects.attr.StringAttribute;
 import com.metaobjects.constraint.PlacementConstraint;
 import com.metaobjects.constraint.RegexConstraint;
 import com.metaobjects.constraint.UniquenessConstraint;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.key.ForeignKey;
-import com.metaobjects.key.MetaKey;
-import com.metaobjects.key.PrimaryKey;
-import com.metaobjects.key.SecondaryKey;
+import com.metaobjects.identity.MetaIdentity;
+import com.metaobjects.identity.PrimaryIdentity;
+import com.metaobjects.identity.SecondaryIdentity;
+import com.metaobjects.relationship.MetaRelationship;
 import com.metaobjects.registry.MetaDataRegistry;
 import com.metaobjects.validator.MetaValidator;
 import com.metaobjects.view.MetaView;
@@ -66,42 +68,47 @@ public abstract class MetaObject extends MetaData {
      * Called by ObjectTypesMetaDataProvider during service discovery.
      */
     public static void registerTypes(MetaDataRegistry registry) {
-        registry.registerType(MetaObject.class, def -> def
-            .type(TYPE_OBJECT).subType(SUBTYPE_BASE)
-            .description("Base object metadata with common object attributes")
-            .inheritsFrom("metadata", "base")
+        registry.registerType(MetaObject.class, def -> {
+            // ✅ FLUENT CONSTRAINTS WITH CONSTANTS
+            def.type(TYPE_OBJECT).subType(SUBTYPE_BASE)
+               .description("Base object metadata with common object attributes")
+               .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE);
 
+            // Configure each attribute separately to avoid method chaining conflicts
             // UNIVERSAL ATTRIBUTES (all MetaData inherit these)
-            .optionalAttribute(ATTR_IS_ABSTRACT, "boolean")
+            def.optionalAttributeWithConstraints(ATTR_IS_ABSTRACT).ofType(BooleanAttribute.SUBTYPE_BOOLEAN).asSingle();
 
             // OBJECT-LEVEL ATTRIBUTES (all object types inherit these)
-            .optionalAttribute(ATTR_EXTENDS, "string")
-            .optionalAttribute(ATTR_IMPLEMENTS, "string")
-            .optionalAttribute(ATTR_IS_INTERFACE, "boolean")
+            def.optionalAttributeWithConstraints(ATTR_EXTENDS).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
+            def.optionalAttributeWithConstraints(ATTR_IMPLEMENTS).ofType(StringAttribute.SUBTYPE_STRING).asArray();  // ✅ MULTIPLE INTERFACES SUPPORT
+            def.optionalAttributeWithConstraints(ATTR_IS_INTERFACE).ofType(BooleanAttribute.SUBTYPE_BOOLEAN).asSingle();
 
             // OBJECT-SPECIFIC ATTRIBUTES
-            .optionalAttribute(ATTR_DESCRIPTION, "string")
-            .optionalAttribute(ATTR_OBJECT, "string")
-            .optionalAttribute(ATTR_OBJECT_REF, "string")
+            def.optionalAttributeWithConstraints(ATTR_DESCRIPTION).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
+            def.optionalAttributeWithConstraints(ATTR_OBJECT).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
+            def.optionalAttributeWithConstraints(ATTR_OBJECT_REF).ofType(StringAttribute.SUBTYPE_STRING).asSingle();
 
             // OBJECTS CONTAIN FIELDS (any field type, any name)
-            .optionalChild("field", "*", "*")
+            def.optionalChild(MetaField.TYPE_FIELD, "*", "*");
 
             // OBJECTS CAN CONTAIN OTHER OBJECTS (composition)
-            .optionalChild("object", "*", "*")
+            def.optionalChild(MetaObject.TYPE_OBJECT, "*", "*");
 
-            // OBJECTS CAN CONTAIN KEYS
-            .optionalChild("key", "*", "*")
+            // OBJECTS CAN CONTAIN IDENTITIES (primary and secondary)
+            def.optionalChild(MetaIdentity.TYPE_IDENTITY, "*", "*");
 
             // OBJECTS CAN CONTAIN ATTRIBUTES
-            .optionalChild("attr", "*", "*")
+            def.optionalChild(MetaAttribute.TYPE_ATTR, "*", "*");
 
             // OBJECTS CAN CONTAIN VALIDATORS
-            .optionalChild("validator", "*", "*")
+            def.optionalChild(MetaValidator.TYPE_VALIDATOR, "*", "*");
 
             // OBJECTS CAN CONTAIN VIEWS
-            .optionalChild("view", "*", "*")
-        );
+            def.optionalChild(MetaView.TYPE_VIEW, "*", "*");
+
+            // OBJECTS CAN CONTAIN RELATIONSHIPS
+            def.optionalChild(MetaRelationship.TYPE_RELATIONSHIP, "*", "*");
+        });
 
         if (log != null) {
             log.debug("Registered base MetaObject type with unified registry");
@@ -460,50 +467,292 @@ public abstract class MetaObject extends MetaData {
     ////////////////////////////////////////////////////
     // KEY METHODS
 
-    public PrimaryKey getPrimaryKey() {
-        return getKeyByName(PrimaryKey.NAME, PrimaryKey.class );
+    // ✅ MIGRATED: getPrimaryKey() removed - use field.isPrimaryKey() on individual fields instead
+
+    // ✅ MIGRATED: MetaKey methods removed - use MetaRelationship and field attributes instead
+    // - For primary keys: Use field.isPrimaryKey()
+    // - For secondary keys: Use field.isSecondaryKey()
+    // - For foreign keys: Use AssociationRelationship children
+
+
+    ////////////////////////////////////////////////////
+    // RELATIONSHIP METHODS
+
+    /**
+     * Get all relationships defined in this MetaObject
+     */
+    public Collection<MetaRelationship> getRelationships() {
+        return getRelationships(true);
     }
 
-    protected <T extends MetaKey> T getKeyByName(String keyName, Class<T> clazz ) {
-        return getChild( keyName, clazz );
+    /**
+     * Get all relationships, optionally including inherited relationships
+     */
+    public Collection<MetaRelationship> getRelationships(boolean includeParentData) {
+        return getChildren(MetaRelationship.class, includeParentData);
     }
 
-    public SecondaryKey getSecondaryKeyByName(String keyName) {
-        return getKeyByName( keyName, SecondaryKey.class );
+    /**
+     * Add a relationship to the MetaObject
+     */
+    public MetaObject addRelationship(MetaRelationship relationship) {
+        addChild(relationship);
+        return this;
     }
 
-    public Collection<SecondaryKey> getSecondaryKeys() {
-        return getKeysOfSubType(SecondaryKey.SUBTYPE, SecondaryKey.class);
-    }
-
-    public ForeignKey getForeignKeyByName(String keyName) {
-        return getKeyByName( keyName, ForeignKey.class );
-    }
-
-    public Collection<ForeignKey> getForeignKeys() {
-        return getKeysOfSubType(ForeignKey.SUBTYPE, ForeignKey.class);
-    }
-
-    //public <T extends MetaKey> Collection<T> getKeysOfSubType( String subType ) {
-    //    return (Collection<T>) getKeysOfSubType( subType, MetaKey.class );
-    //}
-
-    /** Null for clazz means just look by subtype */
-    protected <T extends MetaKey> Collection<T> getKeysOfSubType( String subType, Class<T> clazz ) {
-        final String CACHE_KEY = "getKeysOfSubType("+subType+","+clazz+")";
-        Collection<T> keys = (Collection<T>) getCacheValue(CACHE_KEY);
-        if ( keys == null ) {
-            keys = new ArrayList<>();
-            for (T key : getChildren( clazz )) {
-                if ( key.getSubType().equals( subType )) keys.add(key);
-            }
-            setCacheValue(CACHE_KEY, keys);
+    /**
+     * Check if a named relationship exists
+     */
+    public boolean hasRelationship(String name) {
+        try {
+            getRelationship(name);
+            return true;
+        } catch (MetaDataNotFoundException e) {
+            return false;
         }
-        return keys;
     }
 
-    public Collection<MetaKey> getAllKeys() {
-        return getChildren( MetaKey.class );
+    /**
+     * Get a specific relationship by name
+     */
+    public MetaRelationship getRelationship(String relationshipName) {
+        return useCache("getRelationship()", relationshipName, name -> {
+            MetaRelationship relationship = null;
+            try {
+                relationship = (MetaRelationship) getChild(name, MetaRelationship.class);
+            } catch (MetaDataNotFoundException e) {
+                if (getSuperObject() != null) {
+                    try {
+                        relationship = getSuperObject().getRelationship(name);
+                    } catch (MetaDataNotFoundException ex) {
+                        // Expected - relationship not found in parent either
+                    }
+                }
+                if (relationship == null) {
+                    throw MetaDataNotFoundException.forRelationship(name, this);
+                }
+            }
+            return relationship;
+        });
+    }
+
+    /**
+     * Find a relationship by name using Optional-based API
+     */
+    public Optional<MetaRelationship> findRelationship(String name) {
+        try {
+            return Optional.of(getRelationship(name));
+        } catch (MetaDataNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get relationships by cardinality ("one" or "many")
+     */
+    public Collection<MetaRelationship> getRelationshipsByCardinality(String cardinality) {
+        return useCache("getRelationshipsByCardinality()", cardinality, card -> {
+            Collection<MetaRelationship> filtered = new ArrayList<>();
+            for (MetaRelationship rel : getRelationships()) {
+                if (card.equals(rel.getCardinality())) {
+                    filtered.add(rel);
+                }
+            }
+            return filtered;
+        });
+    }
+
+    /**
+     * Get relationships by semantic type ("composition", "aggregation", "association")
+     */
+    public Collection<MetaRelationship> getRelationshipsBySemanticType(String semanticType) {
+        return useCache("getRelationshipsBySemanticType()", semanticType, type -> {
+            Collection<MetaRelationship> filtered = new ArrayList<>();
+            for (MetaRelationship rel : getRelationships()) {
+                if (type.equals(rel.getSubType())) {
+                    filtered.add(rel);
+                }
+            }
+            return filtered;
+        });
+    }
+
+    /**
+     * Get relationships that target a specific object
+     */
+    public Collection<MetaRelationship> getRelationshipsByTarget(String targetObject) {
+        return useCache("getRelationshipsByTarget()", targetObject, target -> {
+            Collection<MetaRelationship> filtered = new ArrayList<>();
+            for (MetaRelationship rel : getRelationships()) {
+                if (target.equals(rel.getTargetObject())) {
+                    filtered.add(rel);
+                }
+            }
+            return filtered;
+        });
+    }
+
+    /**
+     * Get composition relationships (semantic type = "composition")
+     */
+    public Collection<MetaRelationship> getCompositionRelationships() {
+        return getRelationshipsBySemanticType("composition");
+    }
+
+    /**
+     * Get aggregation relationships (semantic type = "aggregation")
+     */
+    public Collection<MetaRelationship> getAggregationRelationships() {
+        return getRelationshipsBySemanticType("aggregation");
+    }
+
+    /**
+     * Get association relationships (semantic type = "association")
+     */
+    public Collection<MetaRelationship> getAssociationRelationships() {
+        return getRelationshipsBySemanticType("association");
+    }
+
+    // === IDENTITY METHODS ===
+
+    /**
+     * Get all identities (primary and secondary)
+     */
+    public Collection<MetaIdentity> getIdentities() {
+        return getChildren(MetaIdentity.class);
+    }
+
+    /**
+     * Get all identities, optionally including inherited identities
+     */
+    public Collection<MetaIdentity> getIdentities(boolean includeParentData) {
+        return getChildren(MetaIdentity.class, includeParentData);
+    }
+
+    /**
+     * Add an identity to the MetaObject
+     */
+    public MetaObject addIdentity(MetaIdentity identity) {
+        addChild(identity);
+        return this;
+    }
+
+    /**
+     * Get the primary identity for this object
+     * @return the primary identity, or null if none defined
+     */
+    public PrimaryIdentity getPrimaryIdentity() {
+        return useCache("getPrimaryIdentity()", () -> {
+            Collection<PrimaryIdentity> primaries = getChildren(PrimaryIdentity.class);
+            return primaries.isEmpty() ? null : primaries.iterator().next();
+        });
+    }
+
+    /**
+     * Get all secondary identities for this object
+     */
+    public Collection<SecondaryIdentity> getSecondaryIdentities() {
+        return useCache("getSecondaryIdentities()", () -> {
+            return getChildren(SecondaryIdentity.class);
+        });
+    }
+
+    /**
+     * Check if a named identity exists
+     */
+    public boolean hasIdentity(String name) {
+        try {
+            getIdentity(name);
+            return true;
+        } catch (MetaDataNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get a specific identity by name
+     */
+    public MetaIdentity getIdentity(String identityName) {
+        return useCache("getIdentity()", identityName, name -> {
+            MetaIdentity identity = null;
+            try {
+                identity = (MetaIdentity) getChild(name, MetaIdentity.class);
+            } catch (MetaDataNotFoundException e) {
+                if (getSuperObject() != null) {
+                    try {
+                        identity = getSuperObject().getIdentity(name);
+                    } catch (MetaDataNotFoundException ex) {
+                        // Expected - identity not found in parent either
+                    }
+                }
+                if (identity == null) {
+                    throw MetaDataNotFoundException.forIdentity(name, this);
+                }
+            }
+            return identity;
+        });
+    }
+
+    /**
+     * Find an identity by name using Optional-based API
+     */
+    public Optional<MetaIdentity> findIdentity(String name) {
+        try {
+            return Optional.of(getIdentity(name));
+        } catch (MetaDataNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Find a primary identity by name using Optional-based API
+     */
+    public Optional<PrimaryIdentity> findPrimaryIdentity(String name) {
+        try {
+            MetaIdentity identity = getIdentity(name);
+            if (identity instanceof PrimaryIdentity) {
+                return Optional.of((PrimaryIdentity) identity);
+            }
+            return Optional.empty();
+        } catch (MetaDataNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Find a secondary identity by name using Optional-based API
+     */
+    public Optional<SecondaryIdentity> findSecondaryIdentity(String name) {
+        try {
+            MetaIdentity identity = getIdentity(name);
+            if (identity instanceof SecondaryIdentity) {
+                return Optional.of((SecondaryIdentity) identity);
+            }
+            return Optional.empty();
+        } catch (MetaDataNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get one-to-one relationships (cardinality = "one")
+     */
+    public Collection<MetaRelationship> getOneToOneRelationships() {
+        return getRelationshipsByCardinality(MetaRelationship.CARDINALITY_ONE);
+    }
+
+    /**
+     * Get one-to-many relationships (cardinality = "many")
+     */
+    public Collection<MetaRelationship> getOneToManyRelationships() {
+        return getRelationshipsByCardinality(MetaRelationship.CARDINALITY_MANY);
+    }
+
+    /**
+     * Get relationships as a Stream for functional operations
+     */
+    public Stream<MetaRelationship> getRelationshipsStream() {
+        return getRelationships().stream();
     }
 
 
@@ -574,15 +823,9 @@ public abstract class MetaObject extends MetaData {
                 true                            // Allowed
             ));
 
-            // PLACEMENT CONSTRAINT: Objects CAN contain keys
-            registry.addConstraint(new PlacementConstraint(
-                "object.keys.placement",
-                "Objects can contain keys (primary, foreign, secondary)",
-                TYPE_OBJECT, "*",               // Parent: object.*
-                MetaKey.TYPE_KEY, "*",          // Child: key.*
-                null,                           // No name constraint
-                true                            // Allowed
-            ));
+            // ✅ MIGRATED: MetaKey constraint removed - keys are now handled via:
+            // - Field attributes (isPrimaryKey, isSecondaryKey)
+            // - MetaRelationship children (for foreign keys)
 
             // PLACEMENT CONSTRAINT: Objects CAN contain validators
             registry.addConstraint(new PlacementConstraint(
@@ -612,6 +855,16 @@ public abstract class MetaObject extends MetaData {
                 TYPE_OBJECT, "*",               // Child: object.*
                 null,                           // No name constraint
                 true                            // Allowed
+            ));
+
+            // PLACEMENT CONSTRAINT: Objects CAN contain relationships
+            registry.addConstraint(new PlacementConstraint(
+                "object.relationships.placement",
+                "Objects can contain relationships",
+                TYPE_OBJECT, "*",                       // Parent: object.*
+                MetaRelationship.TYPE_RELATIONSHIP, "*", // Child: relationship.*
+                null,                                   // No name constraint
+                true                                    // Allowed
             ));
 
             // UNIQUENESS CONSTRAINT: Unique field names within object (using standard constraint pattern)

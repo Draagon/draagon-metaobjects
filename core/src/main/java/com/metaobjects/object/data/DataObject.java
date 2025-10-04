@@ -6,6 +6,7 @@ import com.metaobjects.object.MetaObject;
 import com.metaobjects.util.DataConverter;
 
 import java.util.*;
+import java.util.Arrays;
 
 /**
  * Generic Map of fields and values that can be associated with a MetaObject. The values are retrieved
@@ -30,43 +31,119 @@ public class DataObject extends DataObjectBase {
     }
 
     protected void _setBoolean(String name, Boolean value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Boolean> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular boolean field
+            _set(name, value);
+        }
     }
 
     protected void _setByte(String name, Byte value)  {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Byte> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular byte field
+            _set(name, value);
+        }
     }
 
     protected void _setShort(String name, Short value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Short> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular short field
+            _set(name, value);
+        }
     }
 
     protected void _setInt(String name, Integer value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Integer> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular integer field
+            _set(name, value);
+        }
     }
 
     protected void _setInteger(String name, Integer value) {
-        _set(name, value);
+        _setInt(name, value);
     }
 
     protected void _setLong(String name, Long value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Long> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular long field
+            _set(name, value);
+        }
     }
 
     protected void _setFloat(String name, Float value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Float> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular float field
+            _set(name, value);
+        }
     }
 
     protected void _setDouble(String name, Double value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Double> list = value != null ? Arrays.asList(value) : null;
+            _set(name, list);
+        } else {
+            // Regular double field
+            _set(name, value);
+        }
     }
 
     protected void _setString(String name, String value) {
-        _set(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - parse string into list
+            List<String> list = DataConverter.toStringArray(value);
+            _set(name, list);
+        } else {
+            // Regular string field
+            _set(name, value);
+        }
     }
 
     protected void _setStringArray(String name, List<String> value ) {
         _set( name, value );
+    }
+
+    protected void _setIntArray(String name, List<Integer> value) {
+        _set(name, value);
+    }
+
+    protected void _setLongArray(String name, List<Long> value) {
+        _set(name, value);
+    }
+
+    protected void _setBooleanArray(String name, List<Boolean> value) {
+        _set(name, value);
+    }
+
+    protected void _setDoubleArray(String name, List<Double> value) {
+        _set(name, value);
+    }
+
+    protected void _setFloatArray(String name, List<Float> value) {
+        _set(name, value);
     }
 
     protected void _setDate(String name, java.util.Date value) {
@@ -99,19 +176,55 @@ public class DataObject extends DataObjectBase {
     }
 
     protected Boolean _getBoolean(String name) {
-        return DataConverter.toBoolean(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toBoolean(list.get(0));
+        }
+
+        return DataConverter.toBoolean(value); // Standard behavior
     }
 
     protected Byte _getByte(String name) {
-        return DataConverter.toByte(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toByte(list.get(0));
+        }
+
+        return DataConverter.toByte(value); // Standard behavior
     }
 
     protected Short _getShort(String name) {
-        return DataConverter.toShort(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toShort(list.get(0));
+        }
+
+        return DataConverter.toShort(value); // Standard behavior
     }
 
     protected Integer _getInt(String name) {
-        return DataConverter.toInt(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toInt(list.get(0));
+        }
+
+        return DataConverter.toInt(value); // Standard behavior
     }
 
     protected Integer _getInteger(String name) {
@@ -119,23 +232,77 @@ public class DataObject extends DataObjectBase {
     }
 
     protected Long _getLong(String name) {
-        return DataConverter.toLong(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toLong(list.get(0));
+        }
+
+        return DataConverter.toLong(value); // Standard behavior
     }
 
     protected Float _getFloat(String name) {
-        return DataConverter.toFloat(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toFloat(list.get(0));
+        }
+
+        return DataConverter.toFloat(value); // Standard behavior
     }
 
     protected Double _getDouble(String name)  {
-        return DataConverter.toDouble(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toDouble(list.get(0));
+        }
+
+        return DataConverter.toDouble(value); // Standard behavior
     }
 
     protected String _getString(String name) {
-        return DataConverter.toString(_get(name));
+        Object value = _get(name);
+
+        // Smart fallback: if field is an array, return comma-delimited string
+        if (isArrayField(name) && value instanceof List) {
+            return DataConverter.toString(value); // Already handles List → "item1,item2,item3"
+        }
+
+        return DataConverter.toString(value); // Standard behavior
     }
 
     protected List<String> _getStringArray( String fieldName ) {
         return DataConverter.toStringArray( _get( fieldName ));
+    }
+
+    protected List<Integer> _getIntArray(String name) {
+        return DataConverter.toIntArray(_get(name));
+    }
+
+    protected List<Long> _getLongArray(String name) {
+        return DataConverter.toLongArray(_get(name));
+    }
+
+    protected List<Boolean> _getBooleanArray(String name) {
+        return DataConverter.toBooleanArray(_get(name));
+    }
+
+    protected List<Double> _getDoubleArray(String name) {
+        return DataConverter.toDoubleArray(_get(name));
+    }
+
+    protected List<Float> _getFloatArray(String name) {
+        return DataConverter.toFloatArray(_get(name));
     }
 
     protected java.util.Date _getDate(String name) {

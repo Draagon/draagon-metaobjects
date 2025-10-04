@@ -22,20 +22,46 @@
               "field": {
                 "name": "username",
                 "subType": "string",
-                "@required": true,
                 "@dbColumn": "username",
-                "@maxLength": 50,
-                "@isSearchable": true
+                "@isSearchable": true,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "50"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "email",
                 "subType": "string",
-                "@required": true,
                 "@dbColumn": "email_address",
-                "@maxLength": 255,
-                "@isSearchable": true
+                "@isSearchable": true,
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "255"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -51,6 +77,22 @@
                 "name": "createdAt",
                 "subType": "date",
                 "@dbColumn": "created_at"
+              }
+            },
+            {
+              "field": {
+                "name": "tags",
+                "subType": "string",
+                "@isArray": true,
+                "@dbColumn": "user_tags"
+              }
+            },
+            {
+              "identity": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]
@@ -74,17 +116,37 @@
               "field": {
                 "name": "name",
                 "subType": "string",
-                "@required": true,
                 "@dbColumn": "product_name",
-                "@maxLength": 100
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  },
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "100"
+                    }
+                  }
+                ]
               }
             },
             {
               "field": {
                 "name": "price",
                 "subType": "double",
-                "@required": true,
-                "@dbColumn": "price"
+                "@dbColumn": "price",
+                "children": [
+                  {
+                    "validator": {
+                      "name": "required",
+                      "subType": "required"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -92,7 +154,23 @@
                 "name": "notes",
                 "subType": "string",
                 "@dbColumn": "description",
-                "@maxLength": 1000
+                "children": [
+                  {
+                    "validator": {
+                      "name": "length",
+                      "subType": "length",
+                      "@max": "1000"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "identity": {
+                "name": "primary",
+                "subType": "primary",
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]

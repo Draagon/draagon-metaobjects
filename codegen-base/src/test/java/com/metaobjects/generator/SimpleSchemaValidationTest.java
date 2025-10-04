@@ -207,11 +207,12 @@ public class SimpleSchemaValidationTest {
 
         // Verify field type enumerations
         assertTrue("XSD should contain FieldTypeEnum", xsdString.contains("FieldTypeEnum"));
-        assertTrue("XSD should contain short field type", xsdString.contains("\"short\""));
+        assertTrue("XSD should contain decimal field type", xsdString.contains("\"decimal\""));
         assertTrue("XSD should contain boolean field type", xsdString.contains("\"boolean\""));
         assertTrue("XSD should contain date field type", xsdString.contains("\"date\""));
         assertTrue("XSD should contain base field type", xsdString.contains("\"base\""));
-        assertTrue("XSD should contain stringArray field type", xsdString.contains("\"stringArray\""));
+        // stringArray field type eliminated in favor of universal @isArray modifier
+        // assertTrue("XSD should contain stringArray field type", xsdString.contains("\"stringArray\""));
         assertTrue("XSD should contain timestamp field type", xsdString.contains("\"timestamp\""));
 
         // Verify object type enumerations

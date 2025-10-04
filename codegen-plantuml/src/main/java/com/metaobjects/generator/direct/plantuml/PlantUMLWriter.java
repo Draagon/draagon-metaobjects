@@ -4,15 +4,14 @@ import com.metaobjects.DataTypes;
 import com.metaobjects.MetaData;
 import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.field.ObjectArrayField;
 import com.metaobjects.field.ObjectField;
 import com.metaobjects.generator.GeneratorIOException;
 import com.metaobjects.generator.direct.FileDirectWriter;
 import static com.metaobjects.generator.util.GeneratorUtil.*;
 
 import com.metaobjects.generator.util.GeneratorUtil;
-import com.metaobjects.key.ForeignKey;
-import com.metaobjects.key.MetaKey;
+import com.metaobjects.relationship.MetaRelationship;
+import com.metaobjects.relationship.AssociationRelationship;
 import com.metaobjects.loader.MetaDataLoader;
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.util.MetaDataUtil;
@@ -362,40 +361,50 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         dec();
     }
 
-    protected List<ForeignKey> getForeignKeys(MetaObject mo, boolean includeParentData) {
-        return mo.getChildren(ForeignKey.class, includeParentData);
+    protected List<AssociationRelationship> getAssociationRelationships(MetaObject mo, boolean includeParentData) {
+        return mo.getChildren(AssociationRelationship.class, includeParentData);
+    }
+
+    protected MetaObject getTargetObject(AssociationRelationship relationship) {
+        // Get the target object name from the relationship
+        if (relationship.hasMetaAttr(MetaRelationship.ATTR_TARGET_OBJECT)) {
+            String targetObjectName = relationship.getMetaAttr(MetaRelationship.ATTR_TARGET_OBJECT).getValueAsString();
+            if (targetObjectName != null) {
+                try {
+                    return MetaDataUtil.findMetaObjectByName(targetObjectName, this);
+                } catch (Exception e) {
+                    if (debug) log.warn("Could not find target object: " + targetObjectName, e);
+                }
+            }
+        }
+        return null;
     }
 
     protected void writeObjectKeyRelationships(MetaObject mo ) throws IOException {
 
-        // Write Fields
+        // Write Association Relationships (formerly Foreign Keys)
         boolean includeParentData = mo.getSuperObject() != null && isAbstract(mo.getSuperObject()) && !showAbstracts;
 
-        for (ForeignKey foreignKey : getForeignKeys(mo,includeParentData)) {
+        for (AssociationRelationship relationship : getAssociationRelationships(mo, includeParentData)) {
 
-            MetaObject foreignObject = foreignKey.getForeignObject();
-            if (foreignObject != null) {
+            MetaObject targetObject = getTargetObject(relationship);
+            if (targetObject != null) {
 
-                if ( debug ) log.info("writeObjectRef: "+mo.getName()+"  -->  "+foreignObject.getName());
+                if ( debug ) log.info("writeObjectRef: "+mo.getName()+"  -->  "+targetObject.getName());
 
                 String min = "0";
                 String max = "many";
 
                 // If it's just skipping abstract, then look for parents
-                //if (isEmbedded(foreignObject)) {
-                //    if ( debug ) log.info("writeObjectRef: find superObject !ignore Embedded! "+mo.getName()+"  -->  "+foreignObject.getName());
-                //}
-                //else
-                if ((isAbstract(foreignObject) && !showAbstracts)) {
-                    getDerivedObjects(foreignObject)
+                if ((isAbstract(targetObject) && !showAbstracts)) {
+                    getDerivedObjects(targetObject)
                             .stream()
-                            //.filter(o -> isEmbedded(o) || !isAbstract(o) || (isAbstract(o) && !showAbstracts))
                             .filter(o -> objects().contains(o))
-                            .forEach(o -> drawObjectReference(mo, foreignKey, o));
+                            .forEach(o -> drawObjectReference(mo, relationship, o));
                 }
                 // It's not abstract, so just draw it here
-                else if (objects().contains(foreignObject)) {
-                    drawObjectReference(mo, foreignKey, foreignObject);
+                else if (objects().contains(targetObject)) {
+                    drawObjectReference(mo, relationship, targetObject);
                 }
             }
         }
@@ -456,8 +465,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     protected String getRefMinOrMax( MetaField<?> f, boolean forMax ) {
 
-        // Object Arrays
-        if ( f instanceof ObjectArrayField ) {
+        // Object Arrays (using universal @isArray support)
+        if ( f.isArrayType() ) {
             ArrayValidator v = getValidatorOfType( f, ArrayValidator.class );
             if (v != null) {
                 if (!forMax)
@@ -713,7 +722,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     protected void drawObjectFieldWithRef(boolean primary, MetaObject mo, MetaField f, MetaData oref) {
         print(true,(primary?"+":"#")+" " + _pu(f) +" {");
-        if ( f.getDataType().isArray() ) print("[] ");
+        if ( f.isArrayType() ) print("[] ");
         print( _slimPkg( mo.getPackage(), oref.getPackage()));
         print(oref.getShortName());
         println("}");
@@ -735,8 +744,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
         println(" "+ _pu(objRef,true) +" : "+ _pu(f));
     }
 
-    protected void drawObjectReference(MetaObject mo, MetaKey key, MetaObject objRef) {
-        println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(key));
+    protected void drawObjectReference(MetaObject mo, MetaRelationship relationship, MetaObject objRef) {
+        println(true, _pu(mo, true) +" --> "+ _pu(objRef, true) +" : "+ _pu(relationship));
     }
 
     protected void drawNewLine() {

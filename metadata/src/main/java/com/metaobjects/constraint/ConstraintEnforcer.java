@@ -118,21 +118,83 @@ public class ConstraintEnforcer {
             log.trace("No placement constraints apply to this parent-child relationship - allowing placement");
         }
         
-        // Process validation constraints on the child
+        // Process validation constraints on the child and its attributes
         for (Constraint constraint : allConstraints) {
             if (constraint instanceof CustomConstraint) {
                 CustomConstraint vc = (CustomConstraint) constraint;
                 if (vc.appliesTo(child)) {
-                    vc.validate(child, child.getName());
+                    // For attribute-specific constraints, validate specific attributes
+                    if (vc.getConstraintId().contains(".array") ||
+                        vc.getConstraintId().contains(".set") ||
+                        vc.getConstraintId().contains(".map") ||
+                        vc.getConstraintId().contains(".enum") ||
+                        vc.getConstraintId().contains(".range") ||
+                        vc.getConstraintId().contains(".regex") ||
+                        vc.getConstraintId().contains(".custom")) {
+                        validateAttributeConstraint(vc, child);
+                    } else {
+                        // For other constraints, validate using metadata name
+                        vc.validate(child, child.getName());
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Validate an attribute-specific constraint by extracting the correct attribute value
+     * @param constraint The constraint to validate
+     * @param metaData The metadata object containing the attribute
+     * @throws ConstraintViolationException If the constraint is violated
+     */
+    private void validateAttributeConstraint(CustomConstraint constraint, MetaData metaData)
+            throws ConstraintViolationException {
+        // Extract attribute name from constraint ID (e.g., "identity.primary.fields.array" -> "fields")
+        String constraintId = constraint.getConstraintId();
+        String[] parts = constraintId.split("\\.");
+        if (parts.length >= 4) {
+            String attributeName = parts[parts.length - 2]; // Extract attribute name before ".array", ".set", etc.
 
-    
-    
-    
+            // Get the attribute value from the metadata
+            Object attributeValue = getAttributeValue(metaData, attributeName);
+
+            log.debug("Validating attribute constraint [{}] for attribute [{}] with value [{}] on [{}:{}:{}]",
+                constraintId, attributeName, attributeValue, metaData.getType(), metaData.getSubType(), metaData.getName());
+
+            // Validate the specific attribute value
+            constraint.validate(metaData, attributeValue);
+        } else {
+            log.warn("Could not extract attribute name from constraint ID [{}], validating with metadata name", constraintId);
+            constraint.validate(metaData, metaData.getName());
+        }
+    }
+
+    /**
+     * Extract attribute value from metadata
+     * @param metaData The metadata object
+     * @param attributeName The name of the attribute to extract
+     * @return The attribute value, or null if not found
+     */
+    private Object getAttributeValue(MetaData metaData, String attributeName) {
+        try {
+            // Look for the attribute in the metadata's children
+            List<MetaAttribute> attributes = metaData.getChildren(MetaAttribute.class);
+            for (MetaAttribute attr : attributes) {
+                if (attributeName.equals(attr.getName())) {
+                    return attr.getValueAsString(); // Return the actual attribute value
+                }
+            }
+
+            log.debug("Attribute [{}] not found in [{}:{}:{}], returning null",
+                attributeName, metaData.getType(), metaData.getSubType(), metaData.getName());
+            return null;
+        } catch (Exception e) {
+            log.warn("Error extracting attribute [{}] from [{}:{}:{}]: {}",
+                attributeName, metaData.getType(), metaData.getSubType(), metaData.getName(), e.getMessage());
+            return null;
+        }
+    }
+
     /**
      * Enable or disable constraint checking globally
      * @param enabled True to enable constraint checking, false to disable

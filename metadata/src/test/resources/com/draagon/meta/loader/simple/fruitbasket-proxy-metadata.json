@@ -15,7 +15,7 @@
 
     {"object": {"name": "Basket", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.Basket",
       "children": [
-        {"key": {"name": "primary", "subType": "primary", "@keys": "id"}},
+        {"identity": {"name": "primary", "subType": "primary", "@generation": "increment", "@fields": ["id"]}},
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "numApples", "subType": "int",
@@ -26,24 +26,24 @@
           "children": [
             {"validator": {"subType": "length", "@min": 0, "@max": 10}}
           ]}},
-        {"field": {"name": "fruitIds", "subType": "objectArray", "@objectRef": "::Apple"}},
-        {"field": {"name": "apples", "subType": "objectArray", "@objectRef": "::Apple"}},
-        {"field": {"name": "oranges", "subType": "objectArray", "@objectRef": "::Orange"}}
+        {"field": {"name": "fruitIds", "subType": "object", "@isArray": true, "@objectRef": "::Apple"}},
+        {"field": {"name": "apples", "subType": "object", "@isArray": true, "@objectRef": "::Apple"}},
+        {"field": {"name": "oranges", "subType": "object", "@isArray": true, "@objectRef": "::Orange"}}
       ]}},
 
     {"object": {"name": "BasketToFruit", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.BasketToFruit",
       "children": [
-        {"key": {"name": "primary", "subType": "primary", "@keys": "basketId,fruitId"}},
-        {"key": {"subType": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
-        {"key": {"subType": "foreign", "name": "fruitKey", "@keys": "fruitId", "@foreignObjectRef": "::Fruit"}},
+        {"identity": {"name": "primary", "subType": "primary", "@generation": "assigned", "@fields": ["basketId", "fruitId"]}},
+        {"relationship": {"name": "basketRef", "subType": "association", "@targetObject": "::Basket", "@cardinality": "many-to-one", "@sourceFields": ["basketId"]}},
+        {"relationship": {"name": "fruitRef", "subType": "association", "@targetObject": "::Fruit", "@cardinality": "many-to-one", "@sourceFields": ["fruitId"]}},
         {"field": {"name": "basketId", "super": "..::common::id"}},
         {"field": {"name": "fruitId", "super": "..::common::id"}}
       ]}},
 
     {"object": {"name": "Fruit", "subType": "proxy", "@isAbstract": true, "@object": "com.metaobjects.test.proxy.fruitbasket.Fruit",
       "children": [
-        {"key": {"name": "primary", "subType": "primary", "@keys": "id"}},
-        {"key": {"subType": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
+        {"identity": {"name": "primary", "subType": "primary", "@generation": "increment", "@fields": ["id"]}},
+        {"relationship": {"name": "basketRef", "subType": "association", "@targetObject": "::Basket", "@cardinality": "many-to-one", "@sourceFields": ["basketId"]}},
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "basketId", "super": "..::common::id"}},
@@ -55,7 +55,7 @@
     {"object": {"name": "Apple", "super": "Fruit", "@object": "com.metaobjects.test.proxy.fruitbasket.Apple",
       "children": [
         {"field": {"name": "orchard", "subType": "string"}},
-        {"field": {"name": "worms", "subType": "short"}}
+        {"field": {"name": "worms", "subType": "int"}}
       ]}},
 
     {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.metaobjects.test.proxy.fruitbasket.Macintosh"}},

@@ -654,6 +654,86 @@ MetaDataRegistry.getInstance().addValidationConstraint(maxLengthConstraint);
 MetaDataRegistry.getInstance().addValidationConstraint(requiredConstraint);
 ```
 
+### AttributeConstraintBuilder (v6.2.6+)
+
+**Package**: `com.metaobjects.registry`
+**Purpose**: Fluent API for building sophisticated attribute constraints
+
+#### Key Methods
+
+```java
+public class AttributeConstraintBuilder {
+
+    // Core constraint building
+    public AttributeConstraintBuilder ofType(String attributeSubType)
+    public AttributeConstraintBuilder asSingle()
+    public AttributeConstraintBuilder asArray()
+
+    // Validation constraints
+    public AttributeConstraintBuilder withEnum(String... allowedValues)
+    public AttributeConstraintBuilder withPattern(String regex)
+    public AttributeConstraintBuilder withRange(int min, int max)
+    public AttributeConstraintBuilder withValidation(Predicate<String> validator)
+
+    // Constraint completion
+    public void build()
+}
+```
+
+#### Usage Examples
+
+```java
+// Enhanced type registration with fluent constraints
+public static void registerTypes(MetaDataRegistry registry) {
+    registry.registerType(PrimaryIdentity.class, def -> def
+        .type(TYPE_IDENTITY).subType(SUBTYPE_PRIMARY)
+        .description("Primary identity for object identification")
+        .inheritsFrom("identity", "base")
+
+        // Fluent constraint definition with AttributeConstraintBuilder
+        .optionalAttributeWithConstraints(ATTR_GENERATION)
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asSingle()
+           .withEnum(GENERATION_INCREMENT, GENERATION_UUID, GENERATION_ASSIGNED)
+
+        // Array-based attributes with fluent syntax
+        .optionalAttributeWithConstraints(ATTR_FIELDS)
+           .ofType(StringAttribute.SUBTYPE_STRING)
+           .asArray()
+    );
+}
+
+// Universal @isArray support
+public boolean isArrayType() {
+    return hasMetaAttr("isArray") &&
+           Boolean.parseBoolean(getMetaAttr("isArray").getValueAsString());
+}
+```
+
+### Enhanced ConstraintEnforcer (v6.2.6+)
+
+**Package**: `com.metaobjects.constraint`
+**Purpose**: Attribute-specific constraint validation with enhanced error reporting
+
+#### Key Methods
+
+```java
+public class ConstraintEnforcer {
+
+    // Enhanced validation methods
+    public static void validateAttribute(MetaData metadata, String attributeName, Object value)
+    public static void enforceConstraintsOnAddChild(MetaData parent, MetaData child)
+
+    // Constraint checking
+    public static List<Constraint> getApplicableConstraints(MetaData metadata)
+    public static boolean hasViolations(MetaData metadata)
+
+    // Error reporting
+    public static List<ConstraintViolation> getAllViolations(MetaData metadata)
+    public static String formatViolationMessage(ConstraintViolation violation)
+}
+```
+
 ## Code Generation APIs
 
 ### GeneratorBase
