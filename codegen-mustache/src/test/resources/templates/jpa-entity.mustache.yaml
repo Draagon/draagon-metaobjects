@@ -6,12 +6,13 @@ outputFileExtension: "java"
 packagePath: true
 requirements:
   attributes: ["dbTable"]
-  helpers: ["capitalize", "javaType", "dbColumnName", "isIdField", "isNullable"]
+  helpers: ["capitalize", "javaType", "javaArrayType", "dbColumnName", "isIdField", "isNullable", "isArrayField"]
 template: |
   package {{packageName}};
   
   import javax.persistence.*;
   import java.io.Serializable;
+  import java.util.List;
   {{#imports}}
   import {{.}};
   {{/imports}}
@@ -31,9 +32,17 @@ template: |
       @Id
       @GeneratedValue(strategy = GenerationType.IDENTITY)
       {{/isIdField}}
+      {{#isArrayField}}
+      @ElementCollection
+      @CollectionTable(name = "{{dbTableName}}_{{dbColumnName}}", joinColumns = @JoinColumn(name = "{{#isIdField}}id{{/isIdField}}{{^isIdField}}parent_id{{/isIdField}}"))
+      @Column(name = "{{dbColumnName}}")
+      private {{javaArrayType}} {{name}};
+      {{/isArrayField}}
+      {{^isArrayField}}
       @Column(name = "{{dbColumnName}}"{{^isNullable}}, nullable = false{{/isNullable}})
       private {{javaType}} {{name}};
-      
+      {{/isArrayField}}
+
       {{/fields}}
       
       // Default constructor
@@ -47,16 +56,29 @@ template: |
       }
       
       {{#fields}}
+      {{#isArrayField}}
+      // Array getter for {{name}}
+      public {{javaArrayType}} {{#capitalize}}get{{name}}{{/capitalize}}() {
+          return this.{{name}};
+      }
+
+      // Array setter for {{name}}
+      public void {{#capitalize}}set{{name}}{{/capitalize}}({{javaArrayType}} {{name}}) {
+          this.{{name}} = {{name}};
+      }
+      {{/isArrayField}}
+      {{^isArrayField}}
       // Getter for {{name}}
       public {{javaType}} {{#capitalize}}get{{name}}{{/capitalize}}() {
           return this.{{name}};
       }
-      
+
       // Setter for {{name}}
       public void {{#capitalize}}set{{name}}{{/capitalize}}({{javaType}} {{name}}) {
           this.{{name}} = {{name}};
       }
-      
+      {{/isArrayField}}
+
       {{/fields}}
       
       // Static factory method using MetaObjects

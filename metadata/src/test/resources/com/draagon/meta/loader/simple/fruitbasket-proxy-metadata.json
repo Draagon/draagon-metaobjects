@@ -26,9 +26,9 @@
           "children": [
             {"validator": {"subType": "length", "@min": 0, "@max": 10}}
           ]}},
-        {"field": {"name": "fruitIds", "subType": "objectArray", "@objectRef": "::Apple"}},
-        {"field": {"name": "apples", "subType": "objectArray", "@objectRef": "::Apple"}},
-        {"field": {"name": "oranges", "subType": "objectArray", "@objectRef": "::Orange"}}
+        {"field": {"name": "fruitIds", "subType": "object", "@isArray": true, "@objectRef": "::Apple"}},
+        {"field": {"name": "apples", "subType": "object", "@isArray": true, "@objectRef": "::Apple"}},
+        {"field": {"name": "oranges", "subType": "object", "@isArray": true, "@objectRef": "::Orange"}}
       ]}},
 
     {"object": {"name": "BasketToFruit", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.BasketToFruit",

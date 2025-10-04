@@ -4,10 +4,13 @@ import com.metaobjects.MetaData;
 import com.metaobjects.field.MetaField;
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.registry.MetaDataRegistry;
+import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.attr.StringArrayAttribute;
+import com.metaobjects.attr.StringAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -64,19 +67,49 @@ public abstract class MetaIdentity extends MetaData {
 
     /**
      * Returns the field names that comprise this identity.
-     * Uses StringArrayAttribute to properly handle both single fields and arrays.
+     * Handles both StringArrayAttribute (legacy) and StringAttribute with @isArray (current).
      */
     public List<String> getFields() {
         if (!hasMetaAttr(ATTR_FIELDS)) {
             return new ArrayList<>();
         }
 
-        // Get the StringArrayAttribute and return its List<String> value directly
-        StringArrayAttribute fieldsAttr = (StringArrayAttribute) getMetaAttr(ATTR_FIELDS);
-        List<String> fieldsList = fieldsAttr.getValue();
+        MetaAttribute fieldsAttr = getMetaAttr(ATTR_FIELDS);
 
-        // Return empty list if null, otherwise return the actual list
-        return fieldsList != null ? fieldsList : new ArrayList<>();
+        // Handle legacy StringArrayAttribute format
+        if (fieldsAttr instanceof StringArrayAttribute) {
+            StringArrayAttribute legacyFieldsAttr = (StringArrayAttribute) fieldsAttr;
+            List<String> fieldsList = legacyFieldsAttr.getValue();
+            return fieldsList != null ? fieldsList : new ArrayList<>();
+        }
+
+        // Handle new StringAttribute with @isArray format
+        if (fieldsAttr instanceof StringAttribute) {
+            StringAttribute stringAttr = (StringAttribute) fieldsAttr;
+            String value = stringAttr.getValueAsString();
+
+            if (value == null || value.trim().isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Parse comma-delimited format: "field1,field2,field3" or single "field1"
+            if (value.contains(",")) {
+                List<String> fieldsList = new ArrayList<>();
+                for (String field : value.split(",")) {
+                    String trimmed = field.trim();
+                    if (!trimmed.isEmpty()) {
+                        fieldsList.add(trimmed);
+                    }
+                }
+                return fieldsList;
+            } else {
+                // Single field
+                return Arrays.asList(value.trim());
+            }
+        }
+
+        // Fallback for unknown attribute types
+        return new ArrayList<>();
     }
 
     /**

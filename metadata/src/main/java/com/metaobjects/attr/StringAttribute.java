@@ -12,6 +12,10 @@ import com.metaobjects.registry.MetaDataRegistry;
 import static com.metaobjects.attr.MetaAttribute.TYPE_ATTR;
 import static com.metaobjects.attr.MetaAttribute.SUBTYPE_BASE;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A String Attribute with provider-based registration.
  */
@@ -24,6 +28,65 @@ public class StringAttribute extends MetaAttribute<String> {
      */
     public StringAttribute(String name ) {
         super( SUBTYPE_STRING, name, DataTypes.STRING);
+    }
+
+    /**
+     * Universal @isArray support - handles both single strings and string arrays
+     */
+    @Override
+    public void setValueAsString(String value) {
+        if (isArrayType()) {
+            // Array mode: Parse comma-delimited format like StringArrayAttribute
+            if (value == null) {
+                setValueAsObjectDirect(null);
+                return;
+            }
+
+            // Empty string should result in empty list, not null
+            if (value.trim().isEmpty()) {
+                setValueAsObjectDirect(new ArrayList<>());
+                return;
+            }
+
+            // Parse comma-delimited format: "id,name,email" or single value "id"
+            if (value.contains(",")) {
+                // Comma-delimited: id,name,email
+                String[] items = value.split(",");
+                List<String> list = new ArrayList<>();
+                for (String item : items) {
+                    String trimmed = item.trim();
+                    if (!trimmed.isEmpty()) {
+                        list.add(trimmed);
+                    }
+                }
+                setValueAsObjectDirect(list);
+            } else {
+                // Single value
+                setValueAsObjectDirect(Arrays.asList(value.trim()));
+            }
+        } else {
+            // Single value mode: Standard string handling
+            setValueAsObject(value);
+        }
+    }
+
+    /**
+     * Direct value setting that bypasses DataConverter when in array mode
+     */
+    private void setValueAsObjectDirect(Object value) {
+        if (isArrayType()) {
+            // In array mode, store the List directly without type conversion
+            try {
+                java.lang.reflect.Field valueField = MetaAttribute.class.getDeclaredField("value");
+                valueField.setAccessible(true);
+                valueField.set(this, value);
+            } catch (Exception e) {
+                // Fallback to regular setValueAsObject if reflection fails
+                setValueAsObject(value);
+            }
+        } else {
+            setValueAsObject(value);
+        }
     }
 
     /**

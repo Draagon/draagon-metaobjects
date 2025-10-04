@@ -350,32 +350,40 @@ public class MetaDataFileSchemaWriter extends JsonDirectWriter<MetaDataFileSchem
 
     /**
      * Create schema for inline attribute values (@ prefixed attributes)
-     * Supports boolean, number, and string values
+     * Supports boolean, number, string, and array values
      */
     private JsonObject createInlineAttributeValueSchema() {
         JsonObject valueSchema = new JsonObject();
-        valueSchema.addProperty("description", "Inline attribute value (@ prefixed) - supports boolean, number, or string");
-        
-        // Allow boolean, number, or string values
+        valueSchema.addProperty("description", "Inline attribute value (@ prefixed) - supports boolean, number, string, or array");
+
+        // Allow boolean, number, string, or array values
         JsonArray anyOf = new JsonArray();
-        
+
         // Boolean value
         JsonObject boolSchema = new JsonObject();
         boolSchema.addProperty("type", "boolean");
         anyOf.add(boolSchema);
-        
+
         // Number value
         JsonObject numberSchema = new JsonObject();
         numberSchema.addProperty("type", "number");
         anyOf.add(numberSchema);
-        
+
         // String value
         JsonObject stringSchema = new JsonObject();
         stringSchema.addProperty("type", "string");
         anyOf.add(stringSchema);
-        
+
+        // Array value (for attributes like @fields)
+        JsonObject arraySchema = new JsonObject();
+        arraySchema.addProperty("type", "array");
+        JsonObject arrayItems = new JsonObject();
+        arrayItems.addProperty("type", "string");
+        arraySchema.add("items", arrayItems);
+        anyOf.add(arraySchema);
+
         valueSchema.add("anyOf", anyOf);
-        
+
         return valueSchema;
     }
 

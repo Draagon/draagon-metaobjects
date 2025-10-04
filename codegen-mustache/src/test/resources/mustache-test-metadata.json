@@ -80,6 +80,14 @@
               }
             },
             {
+              "field": {
+                "name": "tags",
+                "subType": "string",
+                "@isArray": true,
+                "@dbColumn": "user_tags"
+              }
+            },
+            {
               "identity": {
                 "name": "primary",
                 "subType": "primary",

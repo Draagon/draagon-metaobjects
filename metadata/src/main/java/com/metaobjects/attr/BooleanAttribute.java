@@ -14,6 +14,10 @@ import java.util.Set;
 import static com.metaobjects.attr.MetaAttribute.TYPE_ATTR;
 import static com.metaobjects.attr.MetaAttribute.SUBTYPE_BASE;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A Boolean Attribute with provider-based registration.
  */
@@ -50,6 +54,51 @@ public class BooleanAttribute extends MetaAttribute<Boolean>
      */
     public BooleanAttribute(String name ) {
         super( SUBTYPE_BOOLEAN, name, DataTypes.BOOLEAN);
+    }
+
+    /**
+     * Universal @isArray support - handles both single booleans and boolean arrays
+     */
+    @Override
+    public void setValueAsString(String value) {
+        if (isArrayType()) {
+            // Array mode: Parse comma-delimited format for booleans
+            if (value == null) {
+                setValueAsObject(null);
+                return;
+            }
+
+            // Empty string should result in empty list, not null
+            if (value.trim().isEmpty()) {
+                setValueAsObject(new ArrayList<>());
+                return;
+            }
+
+            // Parse comma-delimited format: "true,false,true" or single value "true"
+            if (value.contains(",")) {
+                // Comma-delimited: true,false,true
+                String[] items = value.split(",");
+                List<Boolean> list = new ArrayList<>();
+                for (String item : items) {
+                    String trimmed = item.trim();
+                    if (!trimmed.isEmpty()) {
+                        list.add(Boolean.parseBoolean(trimmed));
+                    }
+                }
+                setValueAsObject(list);
+            } else {
+                // Single value
+                Boolean boolValue = Boolean.parseBoolean(value.trim());
+                setValueAsObject(Arrays.asList(boolValue));
+            }
+        } else {
+            // Single value mode: Standard boolean handling
+            if (value == null) {
+                setValueAsObject(null);
+            } else {
+                setValueAsObject(Boolean.parseBoolean(value.trim()));
+            }
+        }
     }
 
     /**

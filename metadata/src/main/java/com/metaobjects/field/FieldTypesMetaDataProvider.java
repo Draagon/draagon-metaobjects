@@ -24,10 +24,12 @@ import org.slf4j.LoggerFactory;
  * <li><strong>field.time:</strong> Time fields for hours, minutes, seconds (no date)</li>
  * <li><strong>field.timestamp:</strong> Timestamp fields</li>
  * <li><strong>field.object:</strong> Object fields with object reference support</li>
- * <li><strong>field.objectArray:</strong> Object array fields for lists of object references</li>
- * <li><strong>field.stringArray:</strong> String array fields for lists of string values</li>
  * <li><strong>field.class:</strong> Class fields for class type references</li>
  * </ul>
+ *
+ * <strong>Universal Array Support:</strong>:
+ * <p>All field types support the @isArray modifier for creating arrays.
+ * Use @isArray=true to convert any field into an array type (e.g., string → List&lt;String&gt;).</p>
  *
  * <strong>Priority:</strong>:
  * <p>Priority 10 - Runs after core base types (0) but before extensions (50+).
@@ -56,10 +58,8 @@ public class FieldTypesMetaDataProvider implements MetaDataTypeProvider {
         TimeField.registerTypes(registry);
         TimestampField.registerTypes(registry);
 
-        // Additional field types that were previously missing
+        // Additional field types
         ObjectField.registerTypes(registry);
-        ObjectArrayField.registerTypes(registry);
-        StringArrayField.registerTypes(registry);
         ClassField.registerTypes(registry);
 
         log.info("Field types registered via provider");

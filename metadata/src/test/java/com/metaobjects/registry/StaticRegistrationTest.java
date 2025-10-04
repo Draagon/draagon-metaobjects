@@ -171,25 +171,13 @@ public class StaticRegistrationTest extends SharedRegistryTestBase {
             stringAttrDef = registry.getTypeDefinition("attr", "string");
         }
 
-        TypeDefinition stringArrayAttrDef = registry.getTypeDefinition("attr", "stringarray");
-        if (stringArrayAttrDef == null) {
-            registry.registerType(StringArrayAttribute.class, def -> def
-                .type("attr").subType("stringarray")
-                .description("String array attribute value")
-            );
-            stringArrayAttrDef = registry.getTypeDefinition("attr", "stringarray");
-        }
+        // StringArrayAttribute removed - use StringAttribute with @isArray instead
         
         assertNotNull("StringAttribute should be registered", stringAttrDef);
         assertEquals("StringAttribute implementation should match", 
                    StringAttribute.class, stringAttrDef.getImplementationClass());
         
-        assertNotNull("StringArrayAttribute should be registered", stringArrayAttrDef);
-        assertEquals("StringArrayAttribute implementation should match", 
-                   StringArrayAttribute.class, stringArrayAttrDef.getImplementationClass());
-        
-        log.info("Attribute types registered: {} and {}", 
-                stringAttrDef.getQualifiedName(), stringArrayAttrDef.getQualifiedName());
+        log.info("Attribute type registered: {}", stringAttrDef.getQualifiedName());
     }
     
     /**

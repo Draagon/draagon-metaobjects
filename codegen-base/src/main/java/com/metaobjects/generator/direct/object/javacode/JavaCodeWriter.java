@@ -33,25 +33,37 @@ public class JavaCodeWriter extends BaseObjectCodeWriter {
             String typeName = getClassName(mo);
             String pre = pkgPrefixMap.get(mo);
             if (pre != null) typeName = pre + typeName;
-            if (field.getDataType().isArray()) typeName = "java.util.List<" + typeName + ">";
+            if (field.isArrayType()) typeName = "java.util.List<" + typeName + ">";
             return typeName;
         }
 
+        // Get base type name
+        String baseType;
         switch(field.getDataType()) {
-            case BOOLEAN: return "Boolean";
-            case BYTE: return "Byte";
-            case SHORT: return "Short";
-            case INT: return "Integer";
-            case LONG: return "Long";
-            case FLOAT: return "Float";
-            case DOUBLE: return "Double";
-            case DATE: return "java.util.Date";
-            case STRING: return "String";
-            case STRING_ARRAY: return "java.util.List<String>";
-            case OBJECT: return "Object";
-            case OBJECT_ARRAY: return "java.util.List<Object>";
-            default: return "Object";
+            case BOOLEAN: baseType = "Boolean"; break;
+            case BYTE: baseType = "Byte"; break;
+            case SHORT: baseType = "Short"; break;
+            case INT: baseType = "Integer"; break;
+            case LONG: baseType = "Long"; break;
+            case FLOAT: baseType = "Float"; break;
+            case DOUBLE: baseType = "Double"; break;
+            case DATE: baseType = "java.util.Date"; break;
+            case STRING: baseType = "String"; break;
+            case OBJECT: baseType = "Object"; break;
+
+            // Legacy array types - should not be used with new @isArray approach
+            case STRING_ARRAY: baseType = "String"; break;  // Fallback for legacy
+            case OBJECT_ARRAY: baseType = "Object"; break;  // Fallback for legacy
+
+            default: baseType = "Object"; break;
         }
+
+        // Wrap in List if this field is marked as array
+        if (field.isArrayType()) {
+            return "java.util.List<" + baseType + ">";
+        }
+
+        return baseType;
     }
 
     @Override

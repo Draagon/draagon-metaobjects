@@ -1,6 +1,7 @@
 package com.metaobjects.constraint;
 
-import com.metaobjects.attr.StringArrayAttribute;
+import com.metaobjects.attr.StringAttribute;
+import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.field.StringField;
 import com.metaobjects.registry.SharedRegistryTestBase;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import static org.junit.Assert.*;
  * This test verifies that:
  * 1. Constraints are properly registered via consolidated MetaDataRegistry
  * 2. MetaData classes use the unified constraint registration approach
- * 3. StringArrayAttribute and other classes register their constraints properly
+ * 3. StringAttribute with @isArray and other classes register their constraints properly
  * 4. The consolidated registry provides both type and constraint functionality
  */
 public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
@@ -105,23 +106,23 @@ public class UnifiedConstraintSystemTest extends SharedRegistryTestBase {
     }
     
     @Test
-    public void testStringArrayAttributeLoadable() {
-        // Test that StringArrayAttribute works with consolidated registry
+    public void testStringAttributeReplacement() {
+        // Test that StringAttribute works as replacement for StringArrayAttribute
 
         try {
-            // Test that StringArrayAttribute can be created
-            StringArrayAttribute attr = StringArrayAttribute.create("testArray", "value1,value2");
-            assertNotNull("StringArrayAttribute should be creatable", attr);
+            // Test that StringAttribute can be created (used instead of StringArrayAttribute)
+            StringAttribute attr = StringAttribute.create("testArray", "value1,value2");
+            assertNotNull("StringAttribute should be creatable", attr);
             assertEquals("Should have correct name", "testArray", attr.getName());
 
             // Test that it has proper subtype registered
-            assertEquals("Should have stringarray subtype", "stringarray", attr.getSubType());
+            assertEquals("Should have string subtype", "string", attr.getSubType());
 
-            log.info("StringArrayAttribute created successfully: {} with values: {}",
+            log.info("StringAttribute created successfully: {} with values: {}",
                      attr.getName(), attr.getValue());
 
         } catch (Exception e) {
-            fail("StringArrayAttribute should work with consolidated registry: " + e.getMessage());
+            fail("StringAttribute should work with consolidated registry: " + e.getMessage());
         }
     }
 

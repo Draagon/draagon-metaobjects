@@ -42,8 +42,6 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
             new FloatField("testFloat");
             new DecimalField("testDecimal");  // High-precision decimal field
             new ObjectField("testObject");
-            new StringArrayField("testStringArray");
-            new ObjectArrayField("testObjectArray");
             new ClassField("testClass");
             
             // Object types
@@ -100,10 +98,6 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
                   sharedRegistry.isRegistered("field", "decimal"));
         assertTrue("ObjectField should be registered",
                   sharedRegistry.isRegistered("field", "object"));
-        assertTrue("StringArrayField should be registered",
-                  sharedRegistry.isRegistered("field", "stringArray"));
-        assertTrue("ObjectArrayField should be registered",
-                  sharedRegistry.isRegistered("field", "objectArray"));
         assertTrue("ClassField should be registered",
                   sharedRegistry.isRegistered("field", "class"));
     }
@@ -160,7 +154,7 @@ public class AllMetaDataTypesRegistrationTest extends SharedRegistryTestBase {
         System.out.println("Object types: " + objectCount);
         System.out.println("Attribute types: " + attrCount);
 
-        assertTrue("Should have at least 12 field types", fieldCount >= 12);
+        assertTrue("Should have at least 10 field types", fieldCount >= 10);
         assertTrue("Should have at least 2 object types", objectCount >= 2);
         assertTrue("Should have at least 3 attribute types", attrCount >= 3);
     }

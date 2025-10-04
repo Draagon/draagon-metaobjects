@@ -82,6 +82,10 @@ public class HelperRegistry {
         // Validation helpers
         register("hasValidation", this::hasValidation);
 
+        // Array support helpers
+        register("isArrayField", this::isArrayField);
+        register("javaArrayType", this::getJavaArrayType);
+
         // Template-specific helpers for code generation
         register("constantFieldName", this::getConstantFieldName);
         register("isBoolean", this::isBoolean);
@@ -795,6 +799,31 @@ public class HelperRegistry {
             return "boolean".equals(dataType);
         }
         return false;
+    }
+
+    /**
+     * Check if a field is defined as an array type using the @isArray attribute.
+     * This helper supports the universal array approach where any field can be an array.
+     */
+    private Object isArrayField(Object input) {
+        if (input instanceof MetaField) {
+            MetaField field = (MetaField) input;
+            return field.isArrayType();
+        }
+        return false;
+    }
+
+    /**
+     * Get the Java List type for array fields (e.g., "List<String>", "List<Integer>").
+     * This helper returns the appropriate List wrapper type for array fields.
+     */
+    private Object getJavaArrayType(Object input) {
+        if (input instanceof MetaField) {
+            MetaField field = (MetaField) input;
+            String elementType = getJavaType(field).toString();
+            return "List<" + elementType + ">";
+        }
+        return "List<Object>";
     }
 
     /**

@@ -64,42 +64,118 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
     // SETTER VALUES
 
     public void setBoolean(String name, Boolean value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Boolean> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular boolean field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setByte(String name, Byte value)  {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Byte> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular byte field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setShort(String name, Short value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Short> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular short field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setInt(String name, Integer value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Integer> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular integer field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setInteger(String name, Integer value) {
-        _setObjectAttribute(name, value);
+        setInt(name, value);
     }
 
     public void setLong(String name, Long value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Long> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular long field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setFloat(String name, Float value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Float> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular float field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setDouble(String name, Double value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - convert to single-element list
+            List<Double> list = value != null ? Arrays.asList(value) : null;
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular double field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setString(String name, String value) {
-        _setObjectAttribute(name, value);
+        if (isArrayField(name)) {
+            // Field is defined as array - parse string into list
+            List<String> list = DataConverter.toStringArray(value);
+            _setObjectAttribute(name, list);
+        } else {
+            // Regular string field
+            _setObjectAttribute(name, value);
+        }
     }
 
     public void setStringArray(String name, List<String> value) {
+        _setObjectAttribute(name, value);
+    }
+
+    public void setIntArray(String name, List<Integer> value) {
+        _setObjectAttribute(name, value);
+    }
+
+    public void setLongArray(String name, List<Long> value) {
+        _setObjectAttribute(name, value);
+    }
+
+    public void setBooleanArray(String name, List<Boolean> value) {
+        _setObjectAttribute(name, value);
+    }
+
+    public void setDoubleArray(String name, List<Double> value) {
+        _setObjectAttribute(name, value);
+    }
+
+    public void setFloatArray(String name, List<Float> value) {
         _setObjectAttribute(name, value);
     }
 
@@ -120,19 +196,55 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
     // GETTER VALUES
 
     public Boolean getBoolean(String name) {
-        return DataConverter.toBoolean(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toBoolean(list.get(0));
+        }
+
+        return DataConverter.toBoolean(value); // Standard behavior
     }
 
     public Byte getByte(String name) {
-        return DataConverter.toByte(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toByte(list.get(0));
+        }
+
+        return DataConverter.toByte(value); // Standard behavior
     }
 
     public Short getShort(String name) {
-        return DataConverter.toShort(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toShort(list.get(0));
+        }
+
+        return DataConverter.toShort(value); // Standard behavior
     }
 
     public Integer getInt(String name) {
-        return DataConverter.toInt(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toInt(list.get(0));
+        }
+
+        return DataConverter.toInt(value); // Standard behavior
     }
 
     public Integer getInteger(String name) {
@@ -140,23 +252,77 @@ public class ValueObject extends ValueObjectBase implements Map<String, Object> 
     }
 
     public Long getLong(String name) {
-        return DataConverter.toLong(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toLong(list.get(0));
+        }
+
+        return DataConverter.toLong(value); // Standard behavior
     }
 
     public Float getFloat(String name) {
-        return DataConverter.toFloat(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toFloat(list.get(0));
+        }
+
+        return DataConverter.toFloat(value); // Standard behavior
     }
 
     public Double getDouble(String name)  {
-        return DataConverter.toDouble(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return first element
+        if (isArrayField(name) && value instanceof List) {
+            List<?> list = (List<?>) value;
+            if (list.isEmpty()) return null;
+            return DataConverter.toDouble(list.get(0));
+        }
+
+        return DataConverter.toDouble(value); // Standard behavior
     }
 
     public String getString(String name) {
-        return DataConverter.toString(getObjectAttribute(name));
+        Object value = getObjectAttribute(name);
+
+        // Smart fallback: if field is an array, return comma-delimited string
+        if (isArrayField(name) && value instanceof List) {
+            return DataConverter.toString(value); // Already handles List → "item1,item2,item3"
+        }
+
+        return DataConverter.toString(value); // Standard behavior
     }
 
     public List<String> getStringArray(String name) {
         return DataConverter.toStringArray(getObjectAttribute(name));
+    }
+
+    public List<Integer> getIntArray(String name) {
+        return DataConverter.toIntArray(getObjectAttribute(name));
+    }
+
+    public List<Long> getLongArray(String name) {
+        return DataConverter.toLongArray(getObjectAttribute(name));
+    }
+
+    public List<Boolean> getBooleanArray(String name) {
+        return DataConverter.toBooleanArray(getObjectAttribute(name));
+    }
+
+    public List<Double> getDoubleArray(String name) {
+        return DataConverter.toDoubleArray(getObjectAttribute(name));
+    }
+
+    public List<Float> getFloatArray(String name) {
+        return DataConverter.toFloatArray(getObjectAttribute(name));
     }
 
     public java.util.Date getDate(String name) {

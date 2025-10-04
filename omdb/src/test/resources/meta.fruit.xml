@@ -29,7 +29,7 @@
 
       <!-- Primary Identity -->
       <identity name="primary" subType="primary">
-        <attr name="fields" subType="stringarray">id</attr>
+        <attr name="fields" subType="string" isArray="true">id</attr>
         <attr name="generation" subType="string">increment</attr>
       </identity>
 
@@ -91,7 +91,7 @@
 
       <!-- Primary Identity (new MetaIdentity system) -->
       <identity name="primary" subType="primary">
-        <attr name="fields" subType="stringarray">id</attr>
+        <attr name="fields" subType="string" isArray="true">id</attr>
         <attr name="generation" subType="string">increment</attr>
       </identity>
 

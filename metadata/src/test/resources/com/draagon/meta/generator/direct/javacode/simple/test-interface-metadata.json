@@ -25,7 +25,7 @@
 
     {"subType": "object", "package": "::container", "name": "Entity", "super": "..::common::Entity", "_isAbstract": true,
       "children": [
-        {"subType": "field", "name": "relatedEntities", "subType": "objectArray",
+        {"subType": "field", "name": "relatedEntities", "subType": "object", "isArray": true,
           "children": [
             {"subType": "attr", "subType": "string", "name": "objectRef", "value": "..::common::Entity"}
           ]}
@@ -46,11 +46,11 @@
           "children": [
             {"subType": "validator", "subType": "length", "min": "0", "max": "10"}
           ]},
-        {"subType": "field", "name": "apples", "subType": "objectArray",
+        {"subType": "field", "name": "apples", "subType": "object", "isArray": true,
           "children": [
             {"subType": "attr", "subType": "string", "name": "objectRef", "value": "..::fruit::Apple"}
           ]},
-        {"subType": "field", "name": "oranges", "subType": "objectArray",
+        {"subType": "field", "name": "oranges", "subType": "object", "isArray": true,
           "children": [
             {"subType": "attr", "subType": "string", "name": "objectRef", "value": "..::fruit::Orange"}
           ]}

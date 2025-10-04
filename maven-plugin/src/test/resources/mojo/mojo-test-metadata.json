@@ -25,8 +25,8 @@
           "children": [
             {"validator": {"subType": "length", "@min": 0, "@max": 10}}
           ]}},
-        {"field": {"name": "apples", "subType": "objectArray", "@objectRef": "::Apple"}},
-        {"field": {"name": "oranges", "subType": "objectArray", "@objectRef": "::Orange"}}
+        {"field": {"name": "apples", "subType": "object", "@isArray": true, "@objectRef": "::Apple"}},
+        {"field": {"name": "oranges", "subType": "object", "@isArray": true, "@objectRef": "::Orange"}}
       ]}},
 
     {"object": {"name": "Fruit", "subType": "map", "@isAbstract": true, "@object": "com.metaobjects.loader.simple.fruitbasket.Fruit",

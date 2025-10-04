@@ -74,8 +74,9 @@ public abstract class ObjectIOTestBase {
         basket.addChild(IntegerField.create( MD.ID, 1 ));
         basket.addChild(StringField.create( MD.NAME, null ));
         
-        ObjectArrayField basketFruitsField = ObjectArrayField.create( MD.BASKET_FRUITS );
+        ObjectField basketFruitsField = ObjectField.create( MD.BASKET_FRUITS );
         basketFruitsField.addChild(StringAttribute.create(MetaObject.ATTR_OBJECT_REF, MD.OBJ_FRUIT));
+        basketFruitsField.addChild(BooleanAttribute.create("isArray", true));
         basket.addChild(basketFruitsField);
         
         tempLoader.addChild(basket);

@@ -171,6 +171,10 @@ public class MustacheTemplateEngine {
         fieldContext.put("isNullable", helperRegistry.get("isNullable").apply(field));
         fieldContext.put("isPrimitive", helperRegistry.get("isPrimitive").apply(field));
         fieldContext.put("isSearchable", helperRegistry.get("isSearchable").apply(field));
+
+        // Add array field support
+        fieldContext.put("isArrayField", helperRegistry.get("isArrayField").apply(field));
+        fieldContext.put("javaArrayType", helperRegistry.get("javaArrayType").apply(field));
         fieldContext.put("capitalizedName", helperRegistry.get("capitalize").apply(field.getName()));
         fieldContext.put("capitalizedFieldName", capitalizedName); // Alias for template consistency
         fieldContext.put("description", field.hasMetaAttr("description") ? field.getMetaAttr("description").getValueAsString() : "Property " + field.getName());

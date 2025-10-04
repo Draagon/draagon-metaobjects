@@ -102,6 +102,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     /** Default view specification attribute - MetaField owns this concept */
     public static final String ATTR_DEFAULT_VIEW = "defaultView";
 
+    /** Universal array modifier - any field can be an array */
+    public static final String ATTR_IS_ARRAY = "isArray";
+
     // === KEY-RELATED ATTRIBUTES DEPRECATED ===
     // These attributes have been moved to MetaIdentity (v6.2.7+)
     // Use MetaIdentity instead of field-level key attributes
@@ -126,6 +129,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 // FIELD-LEVEL ATTRIBUTES (all field types inherit these)
                 .optionalAttribute(ATTR_DEFAULT_VALUE,StringAttribute.SUBTYPE_STRING)
                 .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
+                .optionalAttribute(ATTR_IS_ARRAY, BooleanAttribute.SUBTYPE_BOOLEAN)
 
                 // KEY-RELATED ATTRIBUTES DEPRECATED - Use MetaIdentity instead
 
@@ -340,7 +344,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * @return the expected Java class for the attribute, or String.class if not found
      */
     public Class<?> getExpectedAttributeType(String attributeName) {
-        
+
         try {
             MetaDataRegistry registry = getLoader().getTypeRegistry();
 
@@ -439,7 +443,54 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             throw e; // Re-throw to maintain existing behavior
         }
     }
-    
+
+    // === UNIVERSAL ARRAY SUPPORT METHODS ===
+
+    /**
+     * Check if this field is configured as an array type.
+     * @return true if @isArray=true is set on this field, false otherwise
+     */
+    public boolean isArrayType() {
+        if (hasMetaAttr(ATTR_IS_ARRAY)) {
+            MetaAttribute attr = getMetaAttr(ATTR_IS_ARRAY);
+            String value = attr.getValueAsString();
+
+            // Handle both BooleanAttribute and StringAttribute cases
+            // This is needed because the inline parsing may create StringAttribute instead of BooleanAttribute
+            if ("true".equalsIgnoreCase(value)) {
+                return true;
+            } else if ("false".equalsIgnoreCase(value)) {
+                return false;
+            }
+
+            // For proper BooleanAttribute, use standard boolean parsing
+            return Boolean.parseBoolean(value);
+        }
+        return false;
+    }
+
+    /**
+     * Get the effective data type for this field, considering array modifier.
+     * @return array equivalent if @isArray=true, otherwise the base data type
+     */
+    public DataTypes getEffectiveDataType() {
+        if (isArrayType()) {
+            return getDataType().getArrayEquivalent();
+        }
+        return getDataType();
+    }
+
+    /**
+     * Get the effective value class for this field, considering array modifier.
+     * @return List.class if @isArray=true, otherwise the base value class
+     */
+    public Class<?> getEffectiveValueClass() {
+        if (isArrayType()) {
+            return java.util.List.class;
+        }
+        return getValueClass();
+    }
+
 
     /** Add Child to the Field */
     //@Override
@@ -800,8 +851,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     }
 
     public void setObjectArray(Object obj, List<?> value) {
-        if ( getDataType() != DataTypes.OBJECT_ARRAY ) throw new InvalidValueException(
-                "Cannot set List to non ObjectArray type ["+getDataType()+"]" );
+        // Support both old OBJECT_ARRAY type and new universal @isArray pattern
+        if ( getDataType() != DataTypes.OBJECT_ARRAY && !isArrayType() ) throw new InvalidValueException(
+                "Cannot set List to non ObjectArray type ["+getDataType()+"] and field is not marked as array type" );
         setObjectAttribute(obj, value);
     }
 

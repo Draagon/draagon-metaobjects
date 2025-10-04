@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.metaobjects.object.MetaObject.ATTR_DESCRIPTION;
-import static com.metaobjects.attr.StringArrayAttribute.SUBTYPE_STRING_ARRAY;
+import static com.metaobjects.attr.StringAttribute.SUBTYPE_STRING;
 
 /**
  * Secondary identity for business keys and alternate identifiers. Objects can have multiple
@@ -37,7 +37,7 @@ public class SecondaryIdentity extends MetaIdentity {
             .type(TYPE_IDENTITY).subType(SUBTYPE_SECONDARY)
             .description("Secondary identity for business keys and alternate identifiers")
             .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
-            .optionalAttribute(ATTR_FIELDS, SUBTYPE_STRING_ARRAY)
+            .optionalAttribute(ATTR_FIELDS, SUBTYPE_STRING) // Use StringAttribute with @isArray for field arrays
             .optionalAttribute(ATTR_GENERATION, StringAttribute.SUBTYPE_STRING)
             .optionalAttribute(ATTR_DESCRIPTION, StringAttribute.SUBTYPE_STRING)
 

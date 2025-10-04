@@ -4,7 +4,6 @@ import com.metaobjects.DataTypes;
 import com.metaobjects.MetaData;
 import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.field.ObjectArrayField;
 import com.metaobjects.field.ObjectField;
 import com.metaobjects.generator.GeneratorIOException;
 import com.metaobjects.generator.direct.FileDirectWriter;
@@ -466,8 +465,8 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     protected String getRefMinOrMax( MetaField<?> f, boolean forMax ) {
 
-        // Object Arrays
-        if ( f instanceof ObjectArrayField ) {
+        // Object Arrays (using universal @isArray support)
+        if ( f.isArrayType() ) {
             ArrayValidator v = getValidatorOfType( f, ArrayValidator.class );
             if (v != null) {
                 if (!forMax)
@@ -723,7 +722,7 @@ public class PlantUMLWriter extends FileDirectWriter<PlantUMLWriter> {
 
     protected void drawObjectFieldWithRef(boolean primary, MetaObject mo, MetaField f, MetaData oref) {
         print(true,(primary?"+":"#")+" " + _pu(f) +" {");
-        if ( f.getDataType().isArray() ) print("[] ");
+        if ( f.isArrayType() ) print("[] ");
         print( _slimPkg( mo.getPackage(), oref.getPackage()));
         print(oref.getShortName());
         println("}");

@@ -5,6 +5,7 @@ import com.metaobjects.MetaDataException;
 import com.metaobjects.MetaDataNotFoundException;
 import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.attr.StringAttribute;
+import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.loader.MetaDataLoader;
 import com.metaobjects.loader.parser.BaseMetaDataParser;
 import com.metaobjects.loader.parser.MetaDataFileParser;
@@ -365,12 +366,24 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             if (attr != null) {
                 parentMetaData.addChild(attr);
 
-                // Handle array format for StringArrayAttribute types
-                if ("stringarray".equals(subType) && !finalValue.startsWith("[")) {
-                    // Convert single value to array format for StringArrayAttribute
-                    attr.setValueAsString("[" + finalValue + "]");
-                    log.debug("Auto-created type-aware stringarray attribute [{}] on parent [{}:{}:{}] in file [{}]",
-                             attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                // Handle array format for String[].class - use StringAttribute with @isArray=true
+                if (expectedType == String[].class) {
+                    // Set @isArray=true for StringAttribute when expected type is String[]
+                    BooleanAttribute isArrayAttr = BooleanAttribute.create("isArray", true);
+                    attr.addChild(isArrayAttr);
+
+                    if (finalValue.startsWith("[") && finalValue.endsWith("]")) {
+                        // Already in JSON array format - convert to comma-delimited for StringAttribute
+                        String commaDelimited = parseJsonStringArray(finalValue);
+                        attr.setValueAsString(commaDelimited);
+                        log.debug("Auto-created type-aware string array attribute [{}] with @isArray=true from JSON array on parent [{}:{}:{}] in file [{}]",
+                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    } else {
+                        // Single value - set directly on StringAttribute with @isArray=true
+                        attr.setValueAsString(finalValue);
+                        log.debug("Auto-created type-aware string array attribute [{}] with @isArray=true from single value on parent [{}:{}:{}] in file [{}]",
+                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
+                    }
                 } else {
                     attr.setValueAsString(finalValue);
                     log.debug("Auto-created type-aware attribute [{}] with subtype [{}] and expectedType [{}] on parent [{}:{}:{}] in file [{}]",

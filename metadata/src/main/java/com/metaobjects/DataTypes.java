@@ -158,6 +158,42 @@ public enum DataTypes {
         else return OBJECT;
     }
 
+    /**
+     * Get the array equivalent of this data type for @isArray support.
+     * @return the array equivalent DataType, or this if already an array
+     */
+    public DataTypes getArrayEquivalent() {
+        switch (this) {
+            case BOOLEAN: return BOOLEAN_ARRAY;
+            case BYTE: return BYTE_ARRAY;
+            case SHORT: return SHORT_ARRAY;
+            case INT: return INT_ARRAY;
+            case LONG: return LONG_ARRAY;
+            case FLOAT: return FLOAT_ARRAY;
+            case DOUBLE: return DOUBLE_ARRAY;
+            case STRING: return STRING_ARRAY;
+            case DATE: return DATE_ARRAY;
+            case OBJECT: return OBJECT_ARRAY;
+            case CUSTOM: return OBJECT_ARRAY; // Custom objects become object arrays
+
+            // Already arrays - return as-is
+            case BOOLEAN_ARRAY:
+            case BYTE_ARRAY:
+            case SHORT_ARRAY:
+            case INT_ARRAY:
+            case LONG_ARRAY:
+            case FLOAT_ARRAY:
+            case DOUBLE_ARRAY:
+            case STRING_ARRAY:
+            case DATE_ARRAY:
+            case OBJECT_ARRAY:
+                return this;
+
+            default:
+                throw new IllegalStateException("Unknown DataType: " + this);
+        }
+    }
+
     // Note: Type equivalency checking was considered but not implemented.
     // Current type system handles type checking through individual type methods.
 }

@@ -11,15 +11,15 @@
                 {"field": {"name": "numApples", "subType": "int"}},
                 {"field": {"name": "numOranges", "subType": "int"}},
                 {"field": {"name": "numVeggies", "subType": "int"}},
-                {"field": {"name": "apples", "subType": "objectArray", "objectRef":"..::fruit::Apple",
+                {"field": {"name": "apples", "subType": "object", "@isArray": true, "objectRef":"..::fruit::Apple",
                     "children": [
                         {"validator": {"subType": "array", "minSize": "0", "minSize": "5"}}
                         ]}},
-                {"field": {"name": "oranges",  "subType": "objectArray", "objectRef":"..::fruit::Orange",
+                {"field": {"name": "oranges",  "subType": "object", "@isArray": true, "objectRef":"..::fruit::Orange",
                     "children": [
                         {"validator": {"subType": "array", "minSize": "0", "minSize": "3"}}
                     ]}},
-                {"field": {"name": "veggies",  "subType": "objectArray", "objectRef":"..::fruit::Vegetable",
+                {"field": {"name": "veggies",  "subType": "object", "@isArray": true, "objectRef":"..::fruit::Vegetable",
                     "children": [
                         {"validator": {"subType": "array", "minSize": "1", "minSize": "2"}}
                     ]}}

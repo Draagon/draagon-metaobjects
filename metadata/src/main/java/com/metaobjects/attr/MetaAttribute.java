@@ -22,6 +22,9 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     public final static String TYPE_ATTR = "attr";
     public final static String SUBTYPE_BASE = "base";
 
+    // Universal @isArray support - same pattern as MetaField
+    public static final String ATTR_IS_ARRAY = "isArray";
+
     /**
      * Register this type with the MetaDataRegistry (called by provider)
      */
@@ -32,6 +35,7 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
             .description("Base attribute metadata with common attribute properties")
             .inheritsFrom(MetaData.TYPE_METADATA, MetaData.SUBTYPE_BASE)
             .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)
+            .optionalAttribute(ATTR_IS_ARRAY, BooleanAttribute.SUBTYPE_BOOLEAN)
         );
 
         // Register cross-cutting attribute constraints
@@ -83,7 +87,18 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
     public DataTypes getDataType() {
         return dataType;
     }
-    
+
+    /**
+     * Determines if this attribute holds an array of values.
+     * Universal @isArray support pattern - same as MetaField.
+     *
+     * @return true if this attribute is marked as an array type
+     */
+    public boolean isArrayType() {
+        return hasMetaAttr(ATTR_IS_ARRAY) &&
+               Boolean.parseBoolean(getMetaAttr(ATTR_IS_ARRAY).getValueAsString());
+    }
+
     // ========== ENHANCED ATTRIBUTE-SPECIFIC METHODS ==========
     
     

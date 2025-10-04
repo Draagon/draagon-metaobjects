@@ -13,14 +13,21 @@ import org.slf4j.LoggerFactory;
  *
  * <strong>Attribute Types Registered:</strong>
  * <ul>
- * <li><strong>attr.string:</strong> String attributes</li>
- * <li><strong>attr.int:</strong> Integer attributes</li>
+ * <li><strong>attr.string:</strong> String attributes (supports @isArray for string arrays)</li>
+ * <li><strong>attr.int:</strong> Integer attributes (supports @isArray for integer arrays)</li>
  * <li><strong>attr.long:</strong> Long attributes</li>
  * <li><strong>attr.double:</strong> Double attributes</li>
- * <li><strong>attr.boolean:</strong> Boolean attributes</li>
- * <li><strong>attr.stringarray:</strong> String array attributes</li>
+ * <li><strong>attr.boolean:</strong> Boolean attributes (supports @isArray for boolean arrays)</li>
+ * <li><strong>REMOVED attr.stringarray:</strong> Use StringAttribute with @isArray=true instead</li>
  * <li><strong>attr.class:</strong> Class attributes</li>
  * <li><strong>attr.properties:</strong> Properties attributes</li>
+ * </ul>
+ *
+ * <strong>Array Support:</strong>
+ * <p>All attribute types support the universal @isArray modifier:</p>
+ * <ul>
+ * <li><strong>JSON Format:</strong> Use any attribute type with @isArray=true</li>
+ * <li><strong>XML Format:</strong> Use any attribute type with isArray="true"</li>
  * </ul>
  *
  * <strong>Priority:</strong>
@@ -44,7 +51,7 @@ public class AttributeTypesMetaDataProvider implements MetaDataTypeProvider {
         LongAttribute.registerTypes(registry);
         DoubleAttribute.registerTypes(registry);
         BooleanAttribute.registerTypes(registry);
-        StringArrayAttribute.registerTypes(registry);
+        // StringArrayAttribute removed - use StringAttribute with @isArray instead
         ClassAttribute.registerTypes(registry);
         PropertiesAttribute.registerTypes(registry);
 

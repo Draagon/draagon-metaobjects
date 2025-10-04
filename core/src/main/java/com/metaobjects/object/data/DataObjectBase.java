@@ -617,4 +617,23 @@ public abstract class DataObjectBase implements Serializable, MetaObjectAware, V
 
         return b.toString();
     }
+
+    //////////////////////////////////////////////////////////////
+    // ARRAY SUPPORT HELPER METHODS
+
+    /**
+     * Check if a field is defined as an array type.
+     * Uses metadata when available, falls back to best-effort detection.
+     */
+    protected boolean isArrayField(String fieldName) {
+        if (hasMetaDataAttached()) {
+            // Option A: Use metadata when available
+            MetaField field = getMetaData().getMetaField(fieldName);
+            return field != null && field.isArrayType();
+        } else {
+            // Option B: Best-effort detection when no metadata
+            Object value = _getObjectAttribute(fieldName);
+            return value instanceof List;
+        }
+    }
 }
