@@ -2,13 +2,16 @@ package com.metaobjects.generator.mustache;
 
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.key.PrimaryKey;
-import com.metaobjects.key.ForeignKey;
-import com.metaobjects.key.SecondaryKey;
+import com.metaobjects.relationship.AssociationRelationship;
 import com.metaobjects.validator.MetaValidator;
 import com.metaobjects.validator.RequiredValidator;
 import com.metaobjects.validator.LengthValidator;
+import com.metaobjects.identity.MetaIdentity;
+import com.metaobjects.database.CoreDBMetaDataProvider;
 import org.apache.commons.lang3.StringUtils;
+
+import static com.metaobjects.database.CoreDBMetaDataProvider.DB_TABLE;
+import static com.metaobjects.database.CoreDBMetaDataProvider.DB_COLUMN;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,21 +245,21 @@ public class HelperRegistry {
     private Object isIdField(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            
-            // FIRST: Check if this field is part of a PrimaryKey metadata (preferred approach)
+
+            // FIRST: Check if this field is part of a MetaIdentity (primary identity metadata approach)
             MetaObject metaObject = (MetaObject) field.getParent();
             if (metaObject != null) {
-                // Look for PrimaryKey children in the MetaObject
-                List<PrimaryKey> primaryKeys = metaObject.getChildren(PrimaryKey.class);
-                
-                for (PrimaryKey primaryKey : primaryKeys) {
-                    List<MetaField> keyFields = primaryKey.getKeyFields();
-                    if (keyFields.contains(field)) {
-                        return true;
+                List<MetaIdentity> identities = metaObject.getChildren(MetaIdentity.class);
+                for (MetaIdentity identity : identities) {
+                    if (identity.isPrimary()) {
+                        List<MetaField> identityFields = identity.getMetaFields();
+                        if (identityFields.contains(field)) {
+                            return true;
+                        }
                     }
                 }
             }
-            
+
             // INFERENCE: Use intelligent naming and pattern inference for clean implementation
             return inferIdFieldFromPatterns(field);
         }
@@ -265,7 +268,7 @@ public class HelperRegistry {
     
     private boolean inferIdFieldFromPatterns(MetaField field) {
         String fieldName = field.getName();
-        String dbColumn = field.hasMetaAttr("dbColumn") ? field.getMetaAttr("dbColumn").getValueAsString() : "";
+        String dbColumn = field.hasMetaAttr(DB_COLUMN) ? field.getMetaAttr(DB_COLUMN).getValueAsString() : "";
         
         // Common ID field naming patterns
         if ("id".equals(fieldName)) return true;
@@ -285,24 +288,45 @@ public class HelperRegistry {
         
         return false;
     }
-    
+
+    private boolean inferForeignKeyFieldFromPatterns(MetaField field) {
+        String fieldName = field.getName();
+        String dbColumn = field.hasMetaAttr(DB_COLUMN) ? field.getMetaAttr(DB_COLUMN).getValueAsString() : "";
+
+        // Common foreign key field naming patterns
+        if (fieldName != null && fieldName.endsWith("Id") && !fieldName.equals("id")) return true;
+        if (fieldName != null && fieldName.endsWith("ID") && !fieldName.equals("ID")) return true;
+
+        // Database column naming patterns for foreign keys
+        if (dbColumn.endsWith("_id") && !dbColumn.equals("id")) return true;
+        if (dbColumn.endsWith("_ID") && !dbColumn.equals("ID")) return true;
+
+        return false;
+    }
+
     private Object isForeignKeyField(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            
-            // Check if this field is part of a ForeignKey metadata
+
+            // Check if this field is referenced by an AssociationRelationship (new approach)
             MetaObject metaObject = (MetaObject) field.getParent();
             if (metaObject != null) {
-                // Look for ForeignKey children in the MetaObject
-                List<ForeignKey> foreignKeys = metaObject.getChildren(ForeignKey.class);
-                
-                for (ForeignKey foreignKey : foreignKeys) {
-                    List<MetaField> keyFields = foreignKey.getKeyFields();
-                    if (keyFields.contains(field)) {
-                        return true;
+                // Look for AssociationRelationship children in the MetaObject
+                List<AssociationRelationship> relationships = metaObject.getChildren(AssociationRelationship.class);
+
+                for (AssociationRelationship relationship : relationships) {
+                    // Check if this field is referenced by the relationship
+                    if (relationship.hasMetaAttr("referencedBy")) {
+                        String referencedByField = relationship.getMetaAttr("referencedBy").getValueAsString();
+                        if (field.getName().equals(referencedByField)) {
+                            return true;
+                        }
                     }
                 }
             }
+
+            // INFERENCE: Use naming patterns to detect foreign key fields
+            return inferForeignKeyFieldFromPatterns(field);
         }
         return false;
     }
@@ -310,20 +334,22 @@ public class HelperRegistry {
     private Object isSecondaryKeyField(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            
-            // Check if this field is part of a SecondaryKey metadata
+
+            // Check if this field is part of a MetaIdentity (secondary identity metadata approach)
             MetaObject metaObject = (MetaObject) field.getParent();
             if (metaObject != null) {
-                // Look for SecondaryKey children in the MetaObject
-                List<SecondaryKey> secondaryKeys = metaObject.getChildren(SecondaryKey.class);
-                
-                for (SecondaryKey secondaryKey : secondaryKeys) {
-                    List<MetaField> keyFields = secondaryKey.getKeyFields();
-                    if (keyFields.contains(field)) {
-                        return true;
+                List<MetaIdentity> identities = metaObject.getChildren(MetaIdentity.class);
+                for (MetaIdentity identity : identities) {
+                    if (identity.isSecondary()) {
+                        List<MetaField> identityFields = identity.getMetaFields();
+                        if (identityFields.contains(field)) {
+                            return true;
+                        }
                     }
                 }
             }
+
+            return false;
         }
         return false;
     }
@@ -403,7 +429,7 @@ public class HelperRegistry {
             }
             
             // Inference: Generate JPA if object has database-related attributes or keys
-            return metaObject.hasMetaAttr("dbTable") || 
+            return metaObject.hasMetaAttr(DB_TABLE) || 
                    hasAnyFieldWithDbColumn(metaObject) ||
                    hasAnyDatabaseKeys(metaObject);
         }
@@ -418,7 +444,7 @@ public class HelperRegistry {
             }
             
             // Inference: Generate JPA if field has database-related attributes or is part of keys
-            return field.hasMetaAttr("dbColumn") || 
+            return field.hasMetaAttr(DB_COLUMN) || 
                    isPartOfAnyKey(field);
         }
         
@@ -427,14 +453,19 @@ public class HelperRegistry {
     
     private boolean hasAnyFieldWithDbColumn(MetaObject metaObject) {
         List<MetaField> fields = metaObject.getChildren(MetaField.class);
-        return fields.stream().anyMatch(field -> field.hasMetaAttr("dbColumn"));
+        return fields.stream().anyMatch(field -> field.hasMetaAttr(DB_COLUMN));
     }
     
     private boolean hasAnyDatabaseKeys(MetaObject metaObject) {
-        // Check for any database-related keys (Primary, Foreign, Secondary)
-        return !metaObject.getChildren(PrimaryKey.class).isEmpty() ||
-               !metaObject.getChildren(ForeignKey.class).isEmpty() ||
-               !metaObject.getChildren(SecondaryKey.class).isEmpty();
+        // Check for any database-related relationships
+        List<AssociationRelationship> relationships = metaObject.getChildren(AssociationRelationship.class);
+        if (!relationships.isEmpty()) {
+            return true;
+        }
+
+        // Check for MetaIdentity instances (new identity approach)
+        List<MetaIdentity> identities = metaObject.getChildren(MetaIdentity.class);
+        return !identities.isEmpty();
     }
     
     private boolean isPartOfAnyKey(MetaField field) {
@@ -517,8 +548,8 @@ public class HelperRegistry {
      */
     private String getColumnName(MetaField metaField) {
         // Check for explicit dbColumn attribute first
-        if (metaField.hasMetaAttr("dbColumn")) {
-            String explicitColumn = metaField.getMetaAttr("dbColumn").getValueAsString();
+        if (metaField.hasMetaAttr(DB_COLUMN)) {
+            String explicitColumn = metaField.getMetaAttr(DB_COLUMN).getValueAsString();
             if (explicitColumn != null && !explicitColumn.trim().isEmpty()) {
                 log.debug("Using explicit dbColumn: {} for field: {}", explicitColumn, metaField.getName());
                 return explicitColumn.trim();
@@ -539,8 +570,8 @@ public class HelperRegistry {
      */
     private String getTableName(MetaObject metaObject) {
         // Check for explicit dbTable attribute first
-        if (metaObject.hasMetaAttr("dbTable")) {
-            String explicitTable = metaObject.getMetaAttr("dbTable").getValueAsString();
+        if (metaObject.hasMetaAttr(DB_TABLE)) {
+            String explicitTable = metaObject.getMetaAttr(DB_TABLE).getValueAsString();
             if (explicitTable != null && !explicitTable.trim().isEmpty()) {
                 log.debug("Using explicit dbTable: {} for object: {}", explicitTable, metaObject.getName());
                 return explicitTable.trim();
@@ -784,7 +815,7 @@ public class HelperRegistry {
     private Object hasDbColumn(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            return field.hasMetaAttr("dbColumn");
+            return field.hasMetaAttr(DB_COLUMN);
         }
         return false;
     }

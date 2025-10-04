@@ -102,6 +102,10 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     /** Default view specification attribute - MetaField owns this concept */
     public static final String ATTR_DEFAULT_VIEW = "defaultView";
 
+    // === KEY-RELATED ATTRIBUTES DEPRECATED ===
+    // These attributes have been moved to MetaIdentity (v6.2.7+)
+    // Use MetaIdentity instead of field-level key attributes
+
     // Unified registry self-registration
     /**
      * Register MetaField types using the standardized registerTypes() pattern.
@@ -123,19 +127,28 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 .optionalAttribute(ATTR_DEFAULT_VALUE,StringAttribute.SUBTYPE_STRING)
                 .optionalAttribute(ATTR_DEFAULT_VIEW, StringAttribute.SUBTYPE_STRING)
 
+                // KEY-RELATED ATTRIBUTES DEPRECATED - Use MetaIdentity instead
+
                 // ACCEPTS ANY ATTRIBUTES, VALIDATORS AND VIEWS (all field types inherit these)
                 .optionalChild(MetaAttribute.TYPE_ATTR, "*")
                 .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
                 .optionalChild(MetaView.TYPE_VIEW, "*")
             );
 
-            log.debug("Registered base MetaField type with unified registry");
+            if (log != null) {
+                log.debug("Registered base MetaField type with unified registry");
+            }
 
             // Register cross-cutting field constraints using consolidated registry
             registerCrossCuttingFieldConstraints(registry);
 
         } catch (Exception e) {
-            log.error("Failed to register MetaField type with unified registry", e);
+            if (log != null) {
+                log.error("Failed to register MetaField type with unified registry", e);
+            } else {
+                System.err.println("Failed to register MetaField type with unified registry: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
@@ -243,6 +256,56 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
         }
     }
 
+    // === KEY-RELATED ACCESSOR METHODS ===
+
+    // === DEPRECATED KEY METHODS ===
+    // These methods have been deprecated in favor of MetaIdentity (v6.2.7+)
+    // Use MetaObject.getIdentities() or MetaObject.getPrimaryIdentity() instead
+
+    /**
+     * @deprecated Use MetaObject.getSecondaryIdentities() instead
+     */
+    @Deprecated
+    public boolean isSecondaryKey() {
+        // For backward compatibility, check if this field is part of any secondary identity
+        return isPartOfSecondaryIdentity();
+    }
+
+    // === NEW IDENTITY-AWARE METHODS ===
+
+    /**
+     * Returns true if this field is part of the primary identity.
+     */
+    public boolean isPartOfPrimaryIdentity() {
+        if (getParent() instanceof com.metaobjects.object.MetaObject) {
+            com.metaobjects.object.MetaObject metaObject = (com.metaobjects.object.MetaObject) getParent();
+            return metaObject.getIdentities().stream()
+                .filter(identity -> identity.isPrimary())
+                .anyMatch(identity -> identity.getFields().contains(getName()));
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this field is part of any secondary identity.
+     */
+    public boolean isPartOfSecondaryIdentity() {
+        if (getParent() instanceof com.metaobjects.object.MetaObject) {
+            com.metaobjects.object.MetaObject metaObject = (com.metaobjects.object.MetaObject) getParent();
+            return metaObject.getIdentities().stream()
+                .filter(identity -> identity.isSecondary())
+                .anyMatch(identity -> identity.getFields().contains(getName()));
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this field is part of any identity (primary or secondary).
+     */
+    public boolean isPartOfAnyIdentity() {
+        return isPartOfPrimaryIdentity() || isPartOfSecondaryIdentity();
+    }
+
     /** Flush the caches and set local flags to false */
     @Override
     protected void flushCaches() {
@@ -277,6 +340,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
      * @return the expected Java class for the attribute, or String.class if not found
      */
     public Class<?> getExpectedAttributeType(String attributeName) {
+        
         try {
             MetaDataRegistry registry = getLoader().getTypeRegistry();
 
@@ -285,7 +349,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             if (typeDef != null) {
                 // Look up the child requirement for this attribute
                 ChildRequirement attrReq = typeDef.getChildRequirement(attributeName);
-                if (attrReq != null && "attr".equals(attrReq.getExpectedType())) {
+                if (attrReq != null && MetaAttribute.TYPE_ATTR.equals(attrReq.getExpectedType())) {
                     // Map the attribute subType to Java class
                     return mapAttributeSubTypeToJavaClass(attrReq.getExpectedSubType());
                 }
@@ -330,9 +394,6 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 return String.class;
         }
     }
-    
-    
-    
     
     
     
@@ -871,10 +932,17 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 "^[a-zA-Z][a-zA-Z0-9_]*$",  // Identifier pattern
                 false                       // Don't allow null (required)
             ));
-            log.debug("Registered cross-cutting field constraints using consolidated registry");
+            if (log != null) {
+                log.debug("Registered cross-cutting field constraints using consolidated registry");
+            }
 
         } catch (Exception e) {
-            log.error("Failed to register cross-cutting field constraints", e);
+            if (log != null) {
+                log.error("Failed to register cross-cutting field constraints", e);
+            } else {
+                System.err.println("Failed to register cross-cutting field constraints: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

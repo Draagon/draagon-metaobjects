@@ -3,10 +3,10 @@
 <metadata package="produce">
 
     <!-- Id -->
-    <field name="id" subType="long" isKey="true" dbColumn="id" auto="last" />
+    <field name="id" subType="long" dbColumn="id" auto="last" />
     
     <!-- Fruit -->
-    <object name="Fruit" subType="value" dbTable="FRUIT">
+    <object name="Fruit" subType="pojo" dbTable="FRUIT">
     
       <attr name="object" subType="string">com.metaobjects.manager.db.test.fruit.Fruit</attr>
       
@@ -26,11 +26,17 @@
 
       <!-- Weight -->
       <field name="weight" subType="int" dbColumn="weight"/>
-     
+
+      <!-- Primary Identity -->
+      <identity name="primary" subType="primary">
+        <attr name="fields" subType="stringarray">id</attr>
+        <attr name="generation" subType="string">increment</attr>
+      </identity>
+
     </object>  
 
     <!-- Apple -->
-    <object name="Apple" super="Fruit" subType="value" dbTable="APPLE" dbView="APPLE_VIEW"
+    <object name="Apple" super="Fruit" subType="pojo" dbTable="APPLE" dbView="APPLE_VIEW"
         dbViewSQL="SELECT F.*, A.* FROM FRUIT F, APPLE A WHERE F.id=A.fruit_id AND F.kind=1">
     
       <attr name="object" subType="string">com.metaobjects.manager.db.test.fruit.Apple</attr>
@@ -44,7 +50,7 @@
       </attr>
     
       <!-- Fruit Id -->
-      <field name="fruitId" subType="long" dbColumn="FRUIT_ID" isKey="true" />
+      <field name="fruitId" subType="long" dbColumn="FRUIT_ID" />
 
       <!-- Orachard -->
       <field name="orchard" subType="string" dbColumn="orchard">
@@ -52,8 +58,8 @@
       </field>
      
       <!-- Worms -->
-      <field name="worms" subType="short" dbColumn="worms"/>
-      
+      <field name="worms" subType="int" dbColumn="worms"/>
+
     </object>  
 
     <!-- Orange -->
@@ -71,25 +77,33 @@
       </attr>
     
       <!-- Fruit Id -->
-      <field name="fruitId" subType="long" dbColumn="FRUIT_ID" isKey="true" />
+      <field name="fruitId" subType="long" dbColumn="FRUIT_ID" />
     
       <!-- Picked Date -->
       <field name="pickedDate" subType="date" dbColumn="picked_dt"/>
-           
+
     </object>
     
     <!-- Basket -->
     <object name="Basket" subType="value" package="container" dbTable="BASKET">
-          
+
+      <attr name="object" subType="string">com.metaobjects.object.value.ValueObject</attr>
+
+      <!-- Primary Identity (new MetaIdentity system) -->
+      <identity name="primary" subType="primary">
+        <attr name="fields" subType="stringarray">id</attr>
+        <attr name="generation" subType="string">increment</attr>
+      </identity>
+
       <!-- Id -->
-      <field name="id" super="produce::id"/>      
-    
+      <field name="id" super="produce::id"/>
+
       <!-- Number of apples -->
       <field name="apples" subType="int" dbColumn="apples"/>
-    
+
       <!-- Number of oranges -->
       <field name="oranges" subType="int" dbColumn="oranges"/>
-           
+
     </object>
     
     <!-- Basket -->

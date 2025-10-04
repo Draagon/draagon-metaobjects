@@ -14,7 +14,7 @@
             <attr name="testAttr" subType="invalidAttrSubtype" value="test"/>
           </child>
           <child>
-            <key name="testKey" subType="invalidKeySubtype"/>
+            <relationship name="testRelationship" subType="invalidRelationshipSubtype"/>
           </child>
         </children>
       </object>

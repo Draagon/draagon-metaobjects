@@ -18,6 +18,7 @@ import com.metaobjects.loader.MetaDataLoader;
 import com.metaobjects.util.MetaDataUtil;
 import com.metaobjects.manager.exp.*;
 import com.metaobjects.object.MetaObject;
+import com.metaobjects.identity.PrimaryIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -405,13 +406,16 @@ public abstract class ObjectManager
 	}
 
 	/**
-	 * Determines whether the MetaField is a key
+	 * Determines whether the MetaField is a primary key using PrimaryIdentity metadata
 	 */
 	public boolean isPrimaryKey( MetaField mf )
 	{
-		try {
-			if ( "true".equals( mf.getMetaAttr( IS_KEY ).getValue())) return true;
-		} catch( MetaDataNotFoundException e ) {}
+		// Use PrimaryIdentity metadata to determine if field is a primary key
+		if (mf.getParent() instanceof MetaObject) {
+			MetaObject metaObject = (MetaObject) mf.getParent();
+			PrimaryIdentity primaryIdentity = metaObject.getPrimaryIdentity();
+			return primaryIdentity != null && primaryIdentity.getMetaFields().contains(mf);
+		}
 		return false;
 	}
 

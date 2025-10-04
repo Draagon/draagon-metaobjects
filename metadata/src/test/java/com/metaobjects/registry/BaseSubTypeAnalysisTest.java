@@ -40,24 +40,20 @@ public class BaseSubTypeAnalysisTest {
             System.out.println("\n✅ EXCELLENT: All type families have base subtypes!");
         }
 
-        // Verify that our new key.base type was added successfully
-        assertTrue("key.base should now be registered", registry.isRegistered("key", "base"));
+        // ✅ MIGRATED: Key types removed - now using MetaRelationship and field attributes
+        // - Foreign keys → AssociationRelationship
+        // - Primary keys → field.isPrimaryKey() attribute
+        // - Secondary keys → field.isSecondaryKey() attribute
 
-        // Verify inheritance is working for key types
-        TypeDefinition primaryKeyDef = registry.getTypeDefinition("key", "primary");
-        assertNotNull("PrimaryKey should be registered", primaryKeyDef);
-        assertTrue("PrimaryKey should inherit from key.base",
-            primaryKeyDef.hasParent() && "base".equals(primaryKeyDef.getParentSubType()));
+        // Verify that relationship types are working instead of key types
+        assertTrue("relationship.base should be registered", registry.isRegistered("relationship", "base"));
 
-        TypeDefinition foreignKeyDef = registry.getTypeDefinition("key", "foreign");
-        assertNotNull("ForeignKey should be registered", foreignKeyDef);
-        assertTrue("ForeignKey should inherit from key.base",
-            foreignKeyDef.hasParent() && "base".equals(foreignKeyDef.getParentSubType()));
-
-        TypeDefinition secondaryKeyDef = registry.getTypeDefinition("key", "secondary");
-        assertNotNull("SecondaryKey should be registered", secondaryKeyDef);
-        assertTrue("SecondaryKey should inherit from key.base",
-            secondaryKeyDef.hasParent() && "base".equals(secondaryKeyDef.getParentSubType()));
+        // Verify inheritance is working for relationship types
+        TypeDefinition associationDef = registry.getTypeDefinition("relationship", "association");
+        if (associationDef != null) {
+            assertTrue("AssociationRelationship should inherit from relationship.base",
+                associationDef.hasParent() && "base".equals(associationDef.getParentSubType()));
+        }
     }
 
     @Test
@@ -93,8 +89,8 @@ public class BaseSubTypeAnalysisTest {
     public void ensureAllCoreBaseTypesPresent() {
         RegistryHealthReport report = registry.validateConsistency();
 
-        // These are the expected core base types
-        String[] expectedBaseTypes = {"field.base", "object.base", "attr.base", "validator.base", "key.base"};
+        // These are the expected core base types after MetaKey to MetaRelationship migration
+        String[] expectedBaseTypes = {"field.base", "object.base", "attr.base", "validator.base", "relationship.base"};
 
         for (String expectedType : expectedBaseTypes) {
             String[] parts = expectedType.split("\\.");

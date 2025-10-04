@@ -49,7 +49,7 @@
                                     <classname>com.metaobjects.generator.mustache.MustacheTemplateGenerator</classname>
                                     <args>
                                         <templatePath>${project.basedir}/src/main/resources/templates/</templatePath>
-                                        <outputDir>target/generated-sources/metaobjects</outputDir>
+                                        <outputDir>${project.basedir}/target/generated-sources/metaobjects</outputDir>
                                         <packagePrefix>com.metaobjects.demo</packagePrefix>
                                         <packagePostfix>domain</packagePostfix>
                                         <targetLanguage>java</targetLanguage>

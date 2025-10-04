@@ -117,18 +117,11 @@
               }
             },
             {
-              "key": {
+              "identity": {
                 "name": "primary",
                 "subType": "primary",
-                "children": [
-                  {
-                    "attr": {
-                      "name": "fields",
-                      "subType": "string",
-                      "value": "id"
-                    }
-                  }
-                ]
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]

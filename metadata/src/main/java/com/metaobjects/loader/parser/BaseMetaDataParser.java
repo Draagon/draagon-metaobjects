@@ -5,9 +5,16 @@ import com.metaobjects.MetaDataException;
 import com.metaobjects.MetaDataNotFoundException;
 import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.attr.StringArrayAttribute;
+import com.metaobjects.field.MetaField;
+import com.metaobjects.identity.MetaIdentity;
 import com.metaobjects.loader.MetaDataLoader;
 import com.metaobjects.registry.MetaDataRegistry;
+import com.metaobjects.relationship.MetaRelationship;
 import com.metaobjects.util.MetaDataUtil;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -642,21 +649,43 @@ public abstract class BaseMetaDataParser {
      * Get the expected Java type for an attribute by consulting the MetaData
      */
     protected Class<?> getExpectedJavaTypeFromMetaData(MetaData md, String attrName) {
+
         // If the MetaData is a MetaField, use its type information
-        if (md instanceof com.metaobjects.field.MetaField) {
-            com.metaobjects.field.MetaField<?> field = (com.metaobjects.field.MetaField<?>) md;
+        if (md instanceof MetaField) {
+            MetaField<?> field = (MetaField<?>) md;
             return field.getExpectedAttributeType(attrName);
         }
 
-        // Handle MetaKey types (PrimaryKey, ForeignKey, SecondaryKey)
-        if ("key".equals(md.getType())) {
-            return getKeyAttributeType(attrName);
+        // Handle MetaAttribute types
+        if (md instanceof MetaAttribute) {
+            MetaAttribute<?> attr = (MetaAttribute<?>) md;
+            return attr.getDataType().getValueClass();
+            //return attr.getExpectedAttributeType(attrName); //getRelationshipAttributeType(attrName);
+        }
+
+        // Handle MetaIdentity types
+        if (md instanceof MetaIdentity) {
+            return getIdentityAttributeType(attrName);
         }
 
         // For other MetaData types (MetaObject, etc.), use basic type mapping
-        return getBasicAttributeType(attrName);
+        return String.class;        
     }
     
+    /**
+     * Attribute type mapping for MetaIdentity types (PrimaryIdentity, SecondaryIdentity)
+     */
+    protected Class<?> getIdentityAttributeType(String attrName) {
+        switch (attrName) {
+            case "fields":
+                // The 'fields' attribute on identity elements should always be StringArray
+                return String[].class; // This will map to stringarray subtype
+            case "generation":
+            default:
+                return String.class;
+        }
+    }
+
     /**
      * Attribute type mapping for MetaKey types (PrimaryKey, ForeignKey, SecondaryKey)
      */
@@ -672,23 +701,7 @@ public abstract class BaseMetaDataParser {
         }
     }
 
-    /**
-     * Basic attribute type mapping for non-field MetaData
-     */
-    protected Class<?> getBasicAttributeType(String attrName) {
-        switch (attrName) {
-            case "hasJpa":
-            case "hasAuditing":
-            case "hasValidation":
-            case "skipJpa":
-            case "isAbstract":
-                return Boolean.class;
-            case "dbTable":
-            case "description":
-            default:
-                return String.class;
-        }
-    }
+
     
     /**
      * Convert a string value to the expected Java type
@@ -708,8 +721,8 @@ public abstract class BaseMetaDataParser {
             } else if (expectedType == Double.class || expectedType == double.class) {
                 return Double.parseDouble(stringValue);
             } else if (expectedType == String[].class) {
-                // String array type - value is already in comma-delimited format from parser
-                return stringValue;
+                // String array type - parse JSON array format like ["id"] or ["basketId", "fruitId"]
+                return parseJsonStringArray(stringValue);
             } else {
                 return stringValue; // String or unknown type
             }
@@ -719,7 +732,53 @@ public abstract class BaseMetaDataParser {
             return stringValue;
         }
     }
-    
+
+    /**
+     * Parse JSON string array format into a comma-delimited string for StringArrayAttribute storage.
+     * Handles both JSON array format ["id"] and escaped JSON format "[\"id\"]"
+     */
+    protected String parseJsonStringArray(String stringValue) {
+        if (stringValue == null || stringValue.trim().isEmpty()) {
+            return stringValue;
+        }
+
+        try {
+            // Try to parse as JSON array first
+            JsonElement element = JsonParser.parseString(stringValue);
+            if (element.isJsonArray()) {
+                JsonArray jsonArray = element.getAsJsonArray();
+                List<String> values = new ArrayList<>();
+
+                for (JsonElement arrayElement : jsonArray) {
+                    if (arrayElement.isJsonPrimitive()) {
+                        values.add(arrayElement.getAsString());
+                    } else {
+                        log.warn("Non-primitive element in JSON array [{}], converting to string", arrayElement);
+                        values.add(arrayElement.toString());
+                    }
+                }
+
+                // Return as comma-delimited string for StringArrayAttribute storage
+                String result = String.join(",", values);
+                log.debug("Parsed JSON array [{}] to comma-delimited string [{}]", stringValue, result);
+                return result;
+            }
+        } catch (JsonSyntaxException e) {
+            log.debug("Failed to parse as JSON array [{}], checking for comma-delimited format: {}",
+                stringValue, e.getMessage());
+        }
+
+        // If not a JSON array, check if it's already a comma-delimited string
+        if (stringValue.contains(",")) {
+            log.debug("Using comma-delimited string as-is: [{}]", stringValue);
+            return stringValue;
+        }
+
+        // If it's a single value, return as-is
+        log.debug("Using single value as-is: [{}]", stringValue);
+        return stringValue;
+    }
+
     /**
      * Determine appropriate attribute subtype from detected value type (legacy method)
      */

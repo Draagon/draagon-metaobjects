@@ -59,11 +59,11 @@ objectManager.setDriverClass("com.metaobjects.manager.db.driver.SQLServerDriver"
 objectManager.setDriverClass("com.metaobjects.manager.db.driver.OracleDriver");
 ```
 
-## PrimaryKey Metadata Requirements
+## MetaIdentity Requirements for Persistence
 
-⚠️ **CRITICAL**: All persistent objects MUST have proper PrimaryKey metadata with auto-increment strategy.
+⚠️ **CRITICAL**: All persistent objects MUST have proper MetaIdentity metadata with generation strategy for database persistence.
 
-### Correct PrimaryKey Pattern
+### Correct MetaIdentity Pattern
 
 ```json title="user-metadata.json"
 {
@@ -92,11 +92,11 @@ objectManager.setDriverClass("com.metaobjects.manager.db.driver.OracleDriver");
               }
             },
             {
-              "key": {
-                "name": "primary",
+              "identity": {
+                "name": "user_pk",
                 "subType": "primary",
-                "@keys": ["id"],
-                "@autoIncrementStrategy": "sequential"
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]
@@ -107,13 +107,14 @@ objectManager.setDriverClass("com.metaobjects.manager.db.driver.OracleDriver");
 }
 ```
 
-### Auto-Increment Strategies
+### Generation Strategies
 
 | Strategy | Description | Use Case |
 |----------|-------------|----------|
-| `"sequential"` | Database auto-increment | Derby IDENTITY, MySQL AUTO_INCREMENT, PostgreSQL SERIAL |
+| `"increment"` | Database auto-increment | Derby IDENTITY, MySQL AUTO_INCREMENT, PostgreSQL SERIAL |
 | `"uuid"` | UUID generation | String primary keys, distributed systems |
-| `"none"` | Manual assignment | Custom ID generation logic |
+| `"assigned"` | Manual assignment | Custom ID generation logic |
+| *(no attribute)* | Natural keys | No automatic generation |
 
 ### Database Overlay Pattern
 
@@ -145,10 +146,10 @@ Separate business logic from database-specific configuration:
               }
             },
             {
-              "key": {
-                "name": "primary",
+              "identity": {
+                "name": "user_pk",
                 "subType": "primary",
-                "@keys": ["id"]
+                "@fields": ["id"]
               }
             }
           ]
@@ -183,9 +184,9 @@ Separate business logic from database-specific configuration:
               }
             },
             {
-              "key": {
-                "name": "primary",
-                "@autoIncrementStrategy": "sequential"
+              "identity": {
+                "name": "user_pk",
+                "@generation": "increment"
               }
             }
           ]
@@ -284,7 +285,7 @@ try {
 
 ## Advanced Features
 
-### Foreign Key Relationships
+### Object Relationships
 
 ```json
 {
@@ -308,19 +309,20 @@ try {
         }
       },
       {
-        "key": {
-          "name": "primary",
+        "identity": {
+          "name": "order_pk",
           "subType": "primary",
-          "@keys": ["id"],
-          "@autoIncrementStrategy": "sequential"
+          "@fields": ["id"],
+          "@generation": "increment"
         }
       },
       {
-        "key": {
-          "name": "userKey",
-          "subType": "foreign",
-          "@keys": ["userId"],
-          "@foreignObjectRef": "myapp::User"
+        "relationship": {
+          "name": "user",
+          "subType": "association",
+          "@targetObject": "myapp::User",
+          "@cardinality": "one",
+          "@sourceFields": ["userId"]
         }
       }
     ]
@@ -492,8 +494,8 @@ objectManager.setQueryCacheEnabled(true);
 ### Common Issues
 
 **"Attempt to modify an identity column"**
-- **Cause**: Missing or incorrect PrimaryKey metadata
-- **Solution**: Ensure `@autoIncrementStrategy: "sequential"` is specified
+- **Cause**: Missing or incorrect MetaIdentity metadata with generation strategy
+- **Solution**: Ensure `@generation: "increment"` is specified on primary identity
 
 **"No MetaData found for object"**
 - **Cause**: `setMetaData()` not called before persistence
@@ -522,16 +524,17 @@ registry.setDebugConstraints(true);
 
 ## Migration Guide
 
-### From Version 5.x to 6.x
+### From Version 6.x to 6.2.x (MetaKey to MetaIdentity Migration)
 
-1. **Update PrimaryKey metadata**: Add `@autoIncrementStrategy` to all primary keys
-2. **Replace @isId attributes**: Use proper PrimaryKey metadata instead
-3. **Update constraint definitions**: Migrate from JSON to provider-based registration
-4. **Test auto-increment**: Verify database ID generation works correctly
+1. **Update metadata format**: Replace `"key"` elements with `"identity"` elements
+2. **Update attributes**: Change `@keys` to `@fields` and `@autoIncrementStrategy` to `@generation`
+3. **Update generation values**: Change `"sequential"` to `"increment"`
+4. **Replace foreign keys**: Use `"relationship"` elements with `"association"` subtype
+5. **Test persistence**: Verify database ID generation and relationship mapping works correctly
 
 ### From Direct JDBC
 
-1. **Create MetaData definitions**: Define objects, fields, and keys in JSON
+1. **Create MetaData definitions**: Define objects, fields, and identities in JSON
 2. **Replace SQL with ObjectManager**: Use CRUD operations instead of direct SQL
 3. **Add MetaData assignment**: Call `setMetaData()` on domain objects
 4. **Configure database validation**: Use `MetaClassDBValidatorService` for schema management

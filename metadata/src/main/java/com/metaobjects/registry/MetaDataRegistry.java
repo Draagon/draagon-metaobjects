@@ -1025,7 +1025,7 @@ public class MetaDataRegistry {
      */
     private void validateCoreTypesPresent(RegistryHealthReport report) {
         String[] expectedCoreTypes = {
-            "field.base", "object.base", "attr.base", "validator.base", "key.base"
+            "field.base", "object.base", "attr.base", "validator.base", "relationship.base"
         };
 
         List<String> missingCoreTypes = new ArrayList<>();

@@ -8,7 +8,7 @@ package com.metaobjects;
 
 import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.key.MetaKey;
+// ✅ MIGRATED: MetaKey import removed - using MetaRelationship instead
 import com.metaobjects.object.MetaObject;
 import com.metaobjects.validator.MetaValidator;
 import com.metaobjects.view.MetaView;
@@ -211,15 +211,9 @@ public class MetaData implements Cloneable, Serializable {
             true                            // Allowed
         ));
 
-        // KEYS under metadata.base
-        registry.addConstraint(new PlacementConstraint(
-            "metadata.base.keys",
-            "metadata.base can contain keys",
-            TYPE_METADATA, SUBTYPE_BASE,    // Parent: metadata.base
-            MetaKey.TYPE_KEY, "*",          // Child: key.*
-            null,                           // No name constraint
-            true                            // Allowed
-        ));
+        // ✅ MIGRATED: MetaKey constraint removed - keys are now handled via:
+        // - MetaIdentity children (for primary and secondary keys)
+        // - MetaRelationship children (for foreign key relationships)
         
         // FUTURE DEFAULT: Any new metadata types must be abstract under metadata.base
         // (Individual new types can override this by adding their own constraints)

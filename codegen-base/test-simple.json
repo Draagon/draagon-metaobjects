@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "package": "test",
+    "children": [
+      {
+        "field": {
+          "name": "id",
+          "subType": "long"
+        }
+      },
+      {
+        "identity": {
+          "name": "primary",
+          "subType": "primary",
+          "@fields": ["id"],
+          "@generation": "increment"
+        }
+      }
+    ]
+  }
+}

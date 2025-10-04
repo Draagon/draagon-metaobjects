@@ -65,7 +65,7 @@
                   {
                     "validator": {
                       "name": "minValue",
-                      "subType": "minValue",
+                      "subType": "numeric",
                       "@min": "0.01"
                     }
                   }
@@ -90,11 +90,11 @@
               }
             },
             {
-              "key": {
+              "identity": {
                 "name": "primary",
                 "subType": "primary",
-                "@keys": ["productId"],
-                "@autoIncrementStrategy": "sequential"
+                "@fields": ["productId"],
+                "@generation": "increment"
               }
             }
           ]

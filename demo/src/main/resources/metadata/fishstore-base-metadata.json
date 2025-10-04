@@ -25,10 +25,11 @@
               }
             },
             {
-              "key": {
+              "identity": {
                 "name": "primary",
                 "subType": "primary",
-                "@keys": ["id"]
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]

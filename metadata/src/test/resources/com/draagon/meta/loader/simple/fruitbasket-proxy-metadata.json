@@ -15,7 +15,7 @@
 
     {"object": {"name": "Basket", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.Basket",
       "children": [
-        {"key": {"name": "primary", "subType": "primary", "@keys": "id"}},
+        {"identity": {"name": "primary", "subType": "primary", "@generation": "increment", "@fields": ["id"]}},
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "numApples", "subType": "int",
@@ -33,17 +33,17 @@
 
     {"object": {"name": "BasketToFruit", "subType": "proxy", "@object": "com.metaobjects.test.proxy.fruitbasket.BasketToFruit",
       "children": [
-        {"key": {"name": "primary", "subType": "primary", "@keys": "basketId,fruitId"}},
-        {"key": {"subType": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
-        {"key": {"subType": "foreign", "name": "fruitKey", "@keys": "fruitId", "@foreignObjectRef": "::Fruit"}},
+        {"identity": {"name": "primary", "subType": "primary", "@generation": "assigned", "@fields": ["basketId", "fruitId"]}},
+        {"relationship": {"name": "basketRef", "subType": "association", "@targetObject": "::Basket", "@cardinality": "many-to-one", "@sourceFields": ["basketId"]}},
+        {"relationship": {"name": "fruitRef", "subType": "association", "@targetObject": "::Fruit", "@cardinality": "many-to-one", "@sourceFields": ["fruitId"]}},
         {"field": {"name": "basketId", "super": "..::common::id"}},
         {"field": {"name": "fruitId", "super": "..::common::id"}}
       ]}},
 
     {"object": {"name": "Fruit", "subType": "proxy", "@isAbstract": true, "@object": "com.metaobjects.test.proxy.fruitbasket.Fruit",
       "children": [
-        {"key": {"name": "primary", "subType": "primary", "@keys": "id"}},
-        {"key": {"subType": "foreign", "name": "basketKey", "@keys": "basketId", "@foreignObjectRef": "::Basket"}},
+        {"identity": {"name": "primary", "subType": "primary", "@generation": "increment", "@fields": ["id"]}},
+        {"relationship": {"name": "basketRef", "subType": "association", "@targetObject": "::Basket", "@cardinality": "many-to-one", "@sourceFields": ["basketId"]}},
         {"field": {"name": "id", "super": "..::common::id"}},
         {"field": {"name": "name", "super": "..::common::name"}},
         {"field": {"name": "basketId", "super": "..::common::id"}},

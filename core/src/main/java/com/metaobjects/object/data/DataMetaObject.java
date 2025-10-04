@@ -6,10 +6,16 @@
  */
 package com.metaobjects.object.data;
 
+import com.metaobjects.attr.MetaAttribute;
 import com.metaobjects.field.MetaField;
+import com.metaobjects.identity.MetaIdentity;
+import com.metaobjects.object.MetaObject;
 import com.metaobjects.object.pojo.PojoMetaObject;
 import com.metaobjects.registry.MetaDataRegistry;
+import com.metaobjects.relationship.MetaRelationship;
 import com.metaobjects.util.DataConverter;
+import com.metaobjects.validator.MetaValidator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +39,13 @@ public class DataMetaObject extends PojoMetaObject
     public static void registerTypes(MetaDataRegistry registry) {
         try {
             registry.registerType(DataMetaObject.class, def -> def
-                .type("object").subType(SUBTYPE_DATA)
+                .type(MetaObject.TYPE_OBJECT).subType(SUBTYPE_DATA)
                 .description("Data-based metadata object with dynamic attribute access")
-                .optionalChild("field", "*")
-                .optionalChild("attr", "*")
-                .optionalChild("validator", "*")
-                .optionalChild("key", "*")
+                .optionalChild(MetaField.TYPE_FIELD, "*")
+                .optionalChild(MetaAttribute.TYPE_ATTR, "*")
+                .optionalChild(MetaValidator.TYPE_VALIDATOR, "*")
+                .optionalChild(MetaIdentity.TYPE_IDENTITY, "*", "*")  // Enable new MetaIdentity system for value objects
+                .optionalChild(MetaRelationship.TYPE_RELATIONSHIP, "*", "*")  // Enable new MetaIdentity system for value objects
             );
             if (log != null) {
                 log.debug("Registered DataMetaObject type with unified registry");

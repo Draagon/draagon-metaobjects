@@ -109,13 +109,35 @@ public class MetaDataNotFoundException extends MetaDataException {
 
     /**
      * Factory method for creating object not found exceptions.
-     * 
+     *
      * @param objectName the name of the object that was not found
      * @param parent the parent MetaData object where the object was expected
      * @return a configured MetaDataNotFoundException
      */
     public static MetaDataNotFoundException forObject(String objectName, MetaData parent) {
         return new MetaDataNotFoundException("object", objectName, parent);
+    }
+
+    /**
+     * Factory method for creating relationship not found exceptions.
+     *
+     * @param relationshipName the name of the relationship that was not found
+     * @param parent the parent MetaData object where the relationship was expected
+     * @return a configured MetaDataNotFoundException
+     */
+    public static MetaDataNotFoundException forRelationship(String relationshipName, MetaData parent) {
+        return new MetaDataNotFoundException("relationship", relationshipName, parent);
+    }
+
+    /**
+     * Factory method for creating identity not found exceptions.
+     *
+     * @param identityName the name of the identity that was not found
+     * @param parent the parent MetaData object where the identity was expected
+     * @return a configured MetaDataNotFoundException
+     */
+    public static MetaDataNotFoundException forIdentity(String identityName, MetaData parent) {
+        return new MetaDataNotFoundException("identity", identityName, parent);
     }
 
     /**

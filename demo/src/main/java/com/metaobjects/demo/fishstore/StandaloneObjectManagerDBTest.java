@@ -2,7 +2,8 @@ package com.metaobjects.demo.fishstore;
 
 import com.metaobjects.demo.fishstore.domain.*;
 import com.metaobjects.field.MetaField;
-import com.metaobjects.key.PrimaryKey;
+import com.metaobjects.identity.MetaIdentity;
+// ✅ MIGRATED: PrimaryKey import removed - using field attributes instead
 import com.metaobjects.loader.file.FileMetaDataLoader;
 import com.metaobjects.loader.file.FileLoaderOptions;
 import com.metaobjects.loader.file.LocalFileMetaDataSources;
@@ -146,19 +147,21 @@ public class StandaloneObjectManagerDBTest {
             MetaObject storeSuperObject = storeMeta.getSuperObject();
             log.info("Store inheritance chain: {}", storeSuperObject != null ? storeSuperObject.getName() : "none");
 
-            // DEBUGGING: Check PrimaryKey metadata
-            log.info("--- Debugging PrimaryKey Metadata ---");
-            log.info("Base MetaObject children: {}", baseMeta.getChildren().size());
-            for (MetaData child : baseMeta.getChildren()) {
-                log.info("  Base child: {} (type: {}, subType: {})", child.getName(), child.getType(), child.getSubType());
-                if ("key".equals(child.getType()) && "primary".equals(child.getSubType())) {
-                    PrimaryKey pk = (PrimaryKey) child;
-                    log.info("    PrimaryKey found! Auto-increment strategy: {}", pk.getAutoIncrementStrategy());
-                    log.info("    PrimaryKey key fields: {}", pk.getKeyFields().size());
-                    for (MetaField field : pk.getKeyFields()) {
-                        log.info("      Key field: {}", field.getName());
-                    }
+            // ✅ MIGRATED: Check primary key fields via field attributes
+            log.info("--- Debugging Primary Identity ---");
+            log.info("Base MetaObject fields: {}", baseMeta.getMetaFields().size());
+
+            // ✅ MIGRATED: Use MetaIdentity approach instead of field-level attributes
+            MetaIdentity primaryIdentity = baseMeta.getPrimaryIdentity();
+            if (primaryIdentity != null) {
+                log.info("  Primary Identity found: {}", primaryIdentity.getName());
+                log.info("    Identity fields: {}", primaryIdentity.getFields());
+                String generation = primaryIdentity.getGeneration();
+                if (generation != null) {
+                    log.info("    Generation strategy: {}", generation);
                 }
+            } else {
+                log.info("  No primary identity found");
             }
         } catch (Exception e) {
             log.error("Failed to load metadata objects with package prefix, trying simple names...");
@@ -191,12 +194,14 @@ public class StandaloneObjectManagerDBTest {
             for (MetaField field : storeMeta.getMetaFields()) {
                 log.info("Field: {} (type: {})", field.getName(), field.getSubType());
 
-                // Check if this field is part of a PrimaryKey
-                for (PrimaryKey primaryKey : storeMeta.getChildren(PrimaryKey.class)) {
-                    if (primaryKey.getKeyFields().contains(field)) {
-                        log.info("  -> Field '{}' is part of PrimaryKey with auto-increment: {}",
-                            field.getName(), primaryKey.getAutoIncrementStrategy());
-                    }
+                // ✅ MIGRATED: Check if this field is part of primary identity
+                if (field.isPartOfPrimaryIdentity()) {
+                    MetaIdentity primaryIdentity = storeMeta.getPrimaryIdentity();
+                    String strategy = primaryIdentity != null && primaryIdentity.getGeneration() != null
+                        ? primaryIdentity.getGeneration()
+                        : "none";
+                    log.info("  -> Field '{}' is part of primary identity with generation: {}",
+                        field.getName(), strategy);
                 }
             }
             log.info("=== END AUTO-INCREMENT DEBUGGING ===");

@@ -1,0 +1,232 @@
+{
+  "metadata": {
+    "package": "examples",
+    "children": [
+      {
+        "object": {
+          "name": "Customer",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "email",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "relationship": {
+                "name": "profile",
+                "subType": "composition",
+                "@targetObject": "CustomerProfile",
+                "@cardinality": "one",
+                "@referencedBy": "profileId",
+                "@description": "One-to-One Composition: Customer owns exactly one profile (dependent lifecycle)"
+              }
+            },
+            {
+              "relationship": {
+                "name": "addresses",
+                "subType": "composition",
+                "@targetObject": "Address",
+                "@cardinality": "many",
+                "@referencedBy": "addressIds",
+                "@description": "One-to-Many Composition: Customer owns multiple addresses (dependent lifecycle)"
+              }
+            },
+            {
+              "relationship": {
+                "name": "preferredStore",
+                "subType": "association",
+                "@targetObject": "Store",
+                "@cardinality": "one",
+                "@referencedBy": "preferredStoreId",
+                "@description": "One-to-One Association: Customer references a preferred store (independent lifecycle)"
+              }
+            },
+            {
+              "relationship": {
+                "name": "favoriteProducts",
+                "subType": "association",
+                "@targetObject": "Product",
+                "@cardinality": "many",
+                "@referencedBy": "favoriteProductIds",
+                "@description": "One-to-Many Association: Customer references multiple favorite products (independent lifecycle)"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "CustomerProfile",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "firstName",
+                "subType": "string",
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "lastName",
+                "subType": "string",
+                "@maxLength": 50
+              }
+            },
+            {
+              "field": {
+                "name": "phoneNumber",
+                "subType": "string",
+                "@maxLength": 20
+              }
+            },
+            {
+              "field": {
+                "name": "birthDate",
+                "subType": "date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Address",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "street",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "city",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "zipCode",
+                "subType": "string",
+                "@maxLength": 20
+              }
+            },
+            {
+              "field": {
+                "name": "type",
+                "subType": "string",
+                "@maxLength": 20
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Store",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 100
+              }
+            },
+            {
+              "field": {
+                "name": "location",
+                "subType": "string",
+                "@maxLength": 255
+              }
+            }
+          ]
+        }
+      },
+      {
+        "object": {
+          "name": "Product",
+          "subType": "pojo",
+          "children": [
+            {
+              "field": {
+                "name": "id",
+                "subType": "long",
+                "@required": true
+              }
+            },
+            {
+              "field": {
+                "name": "name",
+                "subType": "string",
+                "@required": true,
+                "@maxLength": 255
+              }
+            },
+            {
+              "field": {
+                "name": "description",
+                "subType": "string",
+                "@maxLength": 1000
+              }
+            },
+            {
+              "field": {
+                "name": "price",
+                "subType": "decimal",
+                "@required": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

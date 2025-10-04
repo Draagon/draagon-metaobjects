@@ -64,11 +64,11 @@
               }
             },
             {
-              "key": {
+              "identity": {
                 "name": "primary",
                 "subType": "primary",
-                "@keys": ["id"],
-                "@autoIncrementStrategy": "sequential"
+                "@fields": ["id"],
+                "@generation": "increment"
               }
             }
           ]

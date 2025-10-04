@@ -1,5 +1,18 @@
 package com.metaobjects.database;
 
+import com.metaobjects.attr.BooleanAttribute;
+import com.metaobjects.attr.IntAttribute;
+import com.metaobjects.attr.StringAttribute;
+import com.metaobjects.field.DoubleField;
+import com.metaobjects.field.IntegerField;
+import com.metaobjects.field.LongField;
+import com.metaobjects.field.MetaField;
+import com.metaobjects.identity.MetaIdentity;
+import com.metaobjects.identity.PrimaryIdentity;
+import com.metaobjects.identity.SecondaryIdentity;
+import com.metaobjects.object.MetaObject;
+import com.metaobjects.object.pojo.PojoMetaObject;
+import com.metaobjects.object.pojo.PojoObject;
 import com.metaobjects.registry.MetaDataRegistry;
 import com.metaobjects.registry.MetaDataTypeProvider;
 
@@ -27,6 +40,12 @@ public class CoreDBMetaDataProvider implements MetaDataTypeProvider {
     public static final String DB_SCALE = "dbScale";
     public static final String DB_AUTO_INCREMENT = "dbAutoIncrement";
 
+    // Identity-specific database attributes
+    public static final String DB_SEQUENCE_NAME = "dbSequenceName";
+    public static final String DB_INDEX_NAME = "dbIndexName";
+    public static final String DB_TABLESPACE = "dbTablespace";
+
+
     @Override
     public String getProviderId() {
         return "database-extensions";
@@ -34,8 +53,8 @@ public class CoreDBMetaDataProvider implements MetaDataTypeProvider {
 
     @Override
     public String[] getDependencies() {
-        // Depends on field types and object types for extending field.base and object.base
-        return new String[]{"field-types", "object-types"};
+        // Depends on field types, object types, and identity types for extending them
+        return new String[]{"field-types", "object-types", "identity-types"};
     }
 
     @Override
@@ -54,45 +73,50 @@ public class CoreDBMetaDataProvider implements MetaDataTypeProvider {
      */
     public static void registerDatabaseAttributes(MetaDataRegistry registry) {
         // Object-level database attributes
-        registry.findType("object", "base")
-            .optionalAttribute(DB_TABLE, "string")
-            .optionalAttribute(DB_INDEX, "string")
-            .optionalAttribute(DB_UNIQUE, "string");
+        registry.findType(MetaObject.TYPE_OBJECT, MetaObject.SUBTYPE_BASE)
+            .optionalAttribute(DB_TABLE, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_INDEX, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_UNIQUE, StringAttribute.SUBTYPE_STRING);
 
-        registry.findType("object", "pojo")
-            .optionalAttribute(DB_TABLE, "string");
+        registry.findType(MetaObject.TYPE_OBJECT, PojoMetaObject.SUBTYPE_POJO)
+            .optionalAttribute(DB_TABLE, StringAttribute.SUBTYPE_STRING);
 
         // Field-level database attributes
-        registry.findType("field", "base")
-            .optionalAttribute(DB_COLUMN, "string")
-            .optionalAttribute(DB_NULLABLE, "boolean")
-            .optionalAttribute(DB_PRIMARY_KEY, "boolean")
-            .optionalAttribute(DB_FOREIGN_KEY, "string")
-            .optionalAttribute(DB_INDEX, "string")
-            .optionalAttribute(DB_UNIQUE, "boolean")
-            .optionalAttribute(DB_LENGTH, "int")
-            .optionalAttribute(DB_PRECISION, "int")
-            .optionalAttribute(DB_SCALE, "int");
+        registry.findType(MetaField.TYPE_FIELD, MetaField.SUBTYPE_BASE)
+            .optionalAttribute(DB_COLUMN, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_NULLABLE, BooleanAttribute.SUBTYPE_BOOLEAN)
+            .optionalAttribute(DB_FOREIGN_KEY, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_INDEX, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_UNIQUE, BooleanAttribute.SUBTYPE_BOOLEAN)
+            .optionalAttribute(DB_LENGTH, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(DB_PRECISION, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(DB_SCALE, IntAttribute.SUBTYPE_INT);
 
         // String field specific
-        registry.findType("field", "string")
-            .optionalAttribute(DB_COLUMN, "string")
-            .optionalAttribute(DB_LENGTH, "int");
+        registry.findType(MetaField.TYPE_FIELD, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_COLUMN, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_LENGTH, IntAttribute.SUBTYPE_INT);
 
         // Numeric field specific
-        registry.findType("field", "long")
-            .optionalAttribute(DB_COLUMN, "string");
+        registry.findType(MetaField.TYPE_FIELD, LongField.SUBTYPE_LONG)
+            .optionalAttribute(DB_COLUMN, StringAttribute.SUBTYPE_STRING);
 
-        registry.findType("field", "int")
-            .optionalAttribute(DB_COLUMN, "string");
+        registry.findType(MetaField.TYPE_FIELD, IntegerField.SUBTYPE_INT)
+            .optionalAttribute(DB_COLUMN, StringAttribute.SUBTYPE_STRING);
 
-        registry.findType("field", "double")
-            .optionalAttribute(DB_COLUMN, "string")
-            .optionalAttribute(DB_PRECISION, "int")
-            .optionalAttribute(DB_SCALE, "int");
+        registry.findType(MetaField.TYPE_FIELD, DoubleField.SUBTYPE_DOUBLE)
+            .optionalAttribute(DB_COLUMN, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_PRECISION, IntAttribute.SUBTYPE_INT)
+            .optionalAttribute(DB_SCALE, IntAttribute.SUBTYPE_INT);
 
-        // Key-level database attributes
-        registry.findType("key", "primary")
-            .optionalAttribute(DB_AUTO_INCREMENT, "string");
+        // Identity-level database attributes (replaces deprecated key attributes)
+        registry.findType(MetaIdentity.TYPE_IDENTITY, PrimaryIdentity.SUBTYPE_PRIMARY)
+            .optionalAttribute(DB_SEQUENCE_NAME, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_INDEX_NAME, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_TABLESPACE, StringAttribute.SUBTYPE_STRING);
+
+        registry.findType(MetaIdentity.TYPE_IDENTITY, SecondaryIdentity.SUBTYPE_SECONDARY)
+            .optionalAttribute(DB_INDEX_NAME, StringAttribute.SUBTYPE_STRING)
+            .optionalAttribute(DB_TABLESPACE, StringAttribute.SUBTYPE_STRING);
     }
 }

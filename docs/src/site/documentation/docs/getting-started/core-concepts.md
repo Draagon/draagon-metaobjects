@@ -33,11 +33,11 @@ Metadata defines the **structure, rules, and behavior** of your objects. Think o
         }
       },
       {
-        "key": {
-          "name": "primary",
+        "identity": {
+          "name": "user_pk",
           "subType": "primary",
-          "@keys": ["id"],
-          "@autoIncrementStrategy": "sequential"
+          "@fields": ["id"],
+          "@generation": "increment"
         }
       }
     ]
@@ -126,14 +126,16 @@ graph TD
     A --> D[MetaAttribute]
     A --> E[MetaValidator]
     A --> F[MetaView]
-    A --> G[MetaKey]
+    A --> G[MetaIdentity]
+    A --> H[MetaRelationship]
 
-    B --> H[Children: Fields, Keys, Validators]
-    C --> I[Type: string, int, long, etc.]
-    D --> J[Cross-cutting Properties]
-    E --> K[Validation Logic]
-    F --> L[UI Rendering Info]
-    G --> M[Primary, Foreign, Secondary]
+    B --> I[Children: Fields, Identities, Relationships, Validators]
+    C --> J[Type: string, int, long, etc.]
+    D --> K[Cross-cutting Properties]
+    E --> L[Validation Logic]
+    F --> M[UI Rendering Info]
+    G --> N[Primary, Secondary Identities]
+    H --> O[Association, Composition, Aggregation]
 ```
 
 ### :material-package: **MetaData** (Base Class)
@@ -170,6 +172,24 @@ MetaAttribute dbColumn = emailField.getMetaAttr("dbColumn");
 String columnName = dbColumn.getValueAsString();  // "email_address"
 ```
 
+### :material-key: **MetaIdentity** (Object Identity)
+Defines how objects are uniquely identified, replacing the deprecated field-level approach:
+
+```java
+PrimaryIdentity userPk = userMeta.getPrimaryIdentity();
+List<String> identityFields = userPk.getFieldNames();  // ["id"]
+String generation = userPk.getGeneration();  // "increment"
+```
+
+### :material-link: **MetaRelationship** (Object Relationships)
+Represents relationships between objects with clear semantic meaning:
+
+```java
+AssociationRelationship customerRel = orderMeta.getRelationship("customer");
+String targetObject = customerRel.getTargetObject();  // "Customer"
+String cardinality = customerRel.getCardinality();  // "one"
+```
+
 ## Type System Architecture
 
 MetaObjects uses a sophisticated type system:
@@ -187,6 +207,15 @@ Type: "object"
 ├── SubType: "pojo" → PojoMetaObject
 ├── SubType: "proxy" → ProxyMetaObject
 └── SubType: "mapped" → MappedMetaObject
+
+Type: "identity"
+├── SubType: "primary" → PrimaryIdentity
+└── SubType: "secondary" → SecondaryIdentity
+
+Type: "relationship"
+├── SubType: "association" → AssociationRelationship
+├── SubType: "composition" → CompositionRelationship
+└── SubType: "aggregation" → AggregationRelationship
 ```
 
 ### :material-cogs: **Provider-Based Registration**
