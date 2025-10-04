@@ -144,20 +144,13 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                    .asSingle();
             });
 
-            if (log != null) {
-                log.debug("Registered base MetaField type with unified registry");
-            }
+            log.debug("Registered base MetaField type with unified registry");
 
             // Register cross-cutting field constraints using consolidated registry
             registerCrossCuttingFieldConstraints(registry);
 
         } catch (Exception e) {
-            if (log != null) {
-                log.error("Failed to register MetaField type with unified registry", e);
-            } else {
-                System.err.println("Failed to register MetaField type with unified registry: " + e.getMessage());
-                e.printStackTrace();
-            }
+            log.error("Failed to register MetaField type with unified registry", e);
         }
     }
 
@@ -989,17 +982,10 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                 "^[a-zA-Z][a-zA-Z0-9_]*$",  // Identifier pattern
                 false                       // Don't allow null (required)
             ));
-            if (log != null) {
-                log.debug("Registered cross-cutting field constraints using consolidated registry");
-            }
+            log.debug("Registered cross-cutting field constraints using consolidated registry");
 
         } catch (Exception e) {
-            if (log != null) {
-                log.error("Failed to register cross-cutting field constraints", e);
-            } else {
-                System.err.println("Failed to register cross-cutting field constraints: " + e.getMessage());
-                e.printStackTrace();
-            }
+            log.error("Failed to register cross-cutting field constraints", e);
         }
     }
 }

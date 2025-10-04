@@ -19,7 +19,7 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
     
     @Test  
     public void testBasicCommonMetadataLoading() throws Exception {
-        log.info("Testing basic common metadata loading");
+        log.debug("Testing basic common metadata loading");
         
         // Simple test to verify the parser works at all
         SimpleLoader loader = initLoader(Arrays.asList(
@@ -29,12 +29,12 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         assertNotNull("Loader should be created", loader);
         assertTrue("Should load some children", loader.getChildren().size() > 0);
         
-        log.info("✅ Basic common metadata loading successful - {} children loaded", loader.getChildren().size());
+        log.debug("✅ Basic common metadata loading successful - {} children loaded", loader.getChildren().size());
     }
     
     @Test  
     public void testBasicVehicleMetadataLoading() throws Exception {
-        log.info("Testing basic vehicle metadata loading");
+        log.debug("Testing basic vehicle metadata loading");
         
         // Load common first, then vehicle
         SimpleLoader loader = initLoader(Arrays.asList(
@@ -45,12 +45,12 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         assertNotNull("Loader should be created", loader);
         assertTrue("Should load some children", loader.getChildren().size() > 0);
         
-        log.info("✅ Basic vehicle metadata loading successful - {} children loaded", loader.getChildren().size());
+        log.debug("✅ Basic vehicle metadata loading successful - {} children loaded", loader.getChildren().size());
     }
     
     @Test  
     public void testCompleteMetadataLoading() throws Exception {
-        log.info("Testing complete metadata loading with overlay");
+        log.debug("Testing complete metadata loading with overlay");
         
         // Load all three files
         SimpleLoader loader = initLoader(Arrays.asList(
@@ -65,38 +65,38 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         // Try to find some basic objects by name to verify structure
         try {
             assertNotNull("Should find garage object", loader.getMetaObjectByName("acme::garage::Garage"));
-            log.info("✅ Found Garage object");
+            log.debug("✅ Found Garage object");
         } catch (Exception e) {
             log.warn("Could not find Garage object: {}", e.getMessage());
         }
         
         try {
             assertNotNull("Should find vehicle object", loader.getMetaObjectByName("acme::vehicle::Vehicle"));
-            log.info("✅ Found Vehicle object");
+            log.debug("✅ Found Vehicle object");
         } catch (Exception e) {
             log.warn("Could not find Vehicle object: {}", e.getMessage());
         }
         
         try {
             assertNotNull("Should find car object", loader.getMetaObjectByName("acme::vehicle::car::Car"));
-            log.info("✅ Found Car object");
+            log.debug("✅ Found Car object");
         } catch (Exception e) {
             log.warn("Could not find Car object: {}", e.getMessage());
         }
         
         try {
             assertNotNull("Should find porsche object", loader.getMetaObjectByName("acme::vehicle::car::luxury::Porsche"));
-            log.info("✅ Found Porsche object");
+            log.debug("✅ Found Porsche object");
         } catch (Exception e) {
             log.warn("Could not find Porsche object: {}", e.getMessage());
         }
         
-        log.info("✅ Complete metadata loading successful - {} total children loaded", loader.getChildren().size());
+        log.debug("✅ Complete metadata loading successful - {} total children loaded", loader.getChildren().size());
     }
     
     @Test
     public void testArrayOnlyFormat() throws Exception {
-        log.info("Testing array-only format (no 'children' key required)");
+        log.debug("Testing array-only format (no 'children' key required)");
         
         // The metadata files use [...] directly instead of "children": [...]
         // If they load successfully, the array-only format is working
@@ -107,12 +107,12 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         assertNotNull("Array-only format should parse successfully", loader);
         assertTrue("Should load children using array-only format", loader.getChildren().size() > 0);
         
-        log.info("✅ Array-only format test successful");
+        log.debug("✅ Array-only format test successful");
     }
     
     @Test
     public void testInlineAttributeFormat() throws Exception {
-        log.info("Testing inline attribute format (@attribute: 'value')");
+        log.debug("Testing inline attribute format (@attribute: 'value')");
         
         // The metadata files use @attribute: "value" inline format
         // Need to load common metadata first for cross-file references to work
@@ -124,12 +124,12 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         assertNotNull("Inline attribute format should parse successfully", loader);
         assertTrue("Should load children with inline attributes", loader.getChildren().size() > 0);
         
-        log.info("✅ Inline attribute format test successful");
+        log.debug("✅ Inline attribute format test successful");
     }
     
     @Test  
     public void testMinimalCrossFileReference() throws Exception {
-        log.info("Testing minimal cross-file reference");
+        log.debug("Testing minimal cross-file reference");
         
         // Load common first, then concrete
         SimpleLoader loader = initLoader(Arrays.asList(
@@ -140,6 +140,6 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         assertNotNull("Loader should be created", loader);
         assertTrue("Should load some children", loader.getChildren().size() > 0);
         
-        log.info("✅ Minimal cross-file reference successful - {} children loaded", loader.getChildren().size());
+        log.debug("✅ Minimal cross-file reference successful - {} children loaded", loader.getChildren().size());
     }
 }

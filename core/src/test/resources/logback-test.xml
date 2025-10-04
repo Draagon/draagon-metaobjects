@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Test-specific: Reduced verbosity -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- PlantUML generator was particularly noisy -->
+    <logger name="com.metaobjects.generator.direct.plantuml" level="ERROR"/>
+
+    <!-- General test noise reduction -->
+    <logger name="com.metaobjects.registry" level="ERROR"/>
+    <logger name="com.metaobjects.field" level="ERROR"/>
+    <logger name="com.metaobjects.loader" level="WARN"/>
+
+    <!-- Keep warnings for legitimate issues -->
+    <logger name="com.metaobjects.loader.parser" level="WARN"/>
+
+    <!-- Suppress third-party noise -->
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.apache" level="ERROR"/>
+</configuration>

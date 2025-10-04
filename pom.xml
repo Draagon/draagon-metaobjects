@@ -40,15 +40,8 @@
     <module>maven-plugin</module>
     <module>core</module>
     <module>core-spring</module>
-    <module>om</module>
-    <module>omdb</module>
-    <module>omnosql</module>
-    <module>web</module>
-    <module>web-spring</module>
-    <module>demo</module>
     <module>archetype</module>
     <module>examples</module>
-    <!-- module>docs</module -->
   </modules>
   <properties>
     <!-- Maven Properties -->
@@ -89,7 +82,7 @@
     <site.plugin.version>3.8.2</site.plugin.version>
     <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
     <!-- Code Coverage Plugins -->
-    <jacoco.plugin.version>0.8.12</jacoco.plugin.version>
+    <jacoco.plugin.version>0.8.13</jacoco.plugin.version>
     <!-- Maven Packaging Plugins -->
     <jar.plugin.version>3.2.0</jar.plugin.version>
     <war.plugin.version>3.2.3</war.plugin.version>
@@ -154,9 +147,100 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-  <!-- Override vulnerable transitive dependencies -->
+  <!-- Dependency Management for both core and dynamic modules -->
   <dependencyManagement>
     <dependencies>
+      <!-- MetaObjects Core Dependencies -->
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-metadata</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-metadata</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-codegen-base</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-codegen-mustache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-core-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-maven-plugin</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- MetaObjects Dynamic Dependencies -->
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-dynamic-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-dynamic-core</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-om</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-omdb</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-omnosql</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-web</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-web-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.metaobjects</groupId>
+        <artifactId>metaobjects-demo</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- External Dependencies -->
+      <dependency>
+        <groupId>javax</groupId>
+        <artifactId>javaee-api</artifactId>
+        <version>${javaee.api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
       <!-- Security: Override SnakeYAML 1.30 (moderate vulnerabilities) with secure version -->
       <dependency>
         <groupId>org.yaml</groupId>

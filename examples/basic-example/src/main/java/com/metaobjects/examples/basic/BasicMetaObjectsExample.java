@@ -2,7 +2,6 @@ package com.metaobjects.examples.basic;
 
 import com.metaobjects.loader.simple.SimpleLoader;
 import com.metaobjects.object.MetaObject;
-import com.metaobjects.object.value.ValueObject;
 import com.metaobjects.field.MetaField;
 import com.metaobjects.generator.mustache.MustacheTemplateGenerator;
 import com.metaobjects.MetaData;
@@ -12,16 +11,21 @@ import com.metaobjects.validator.LengthValidator;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Basic example demonstrating SIMPLE PATTERN MetaObjects usage without framework integration.
+ * Basic example demonstrating SIMPLE PATTERN MetaObjects CORE usage without framework integration.
  *
  * This example demonstrates the simple pattern for single-loader scenarios:
  * 1. Direct SimpleLoader usage (no registry complexity)
  * 2. MetaDataUtil.findMetaObject*(loader, ...) methods
  * 3. Single-loader metadata operations
- * 4. Basic object creation and validation
+ * 4. Basic object creation and validation using Map
  * 5. Code generation capabilities
+ *
+ * Note: This uses the metaobjects-core project for metadata definitions.
+ * For dynamic object creation (DataObject/ValueObject), see the metaobjects-dynamic project.
  *
  * Use this pattern when you have one MetaDataLoader and don't need multi-loader registry features.
  */
@@ -108,15 +112,15 @@ public class BasicMetaObjectsExample {
             System.out.println("\n4. Creating and validating objects...");
             
             if (userMeta != null) {
-                // Create a user object associated with the metadata
-                ValueObject user = new ValueObject(userMeta);
+                // Create a simple user object as a Map (core example without dynamic objects)
+                Map<String, Object> user = new HashMap<>();
                 user.put("id", 1L);
                 user.put("username", "john_doe");
                 user.put("email", "john@example.com");
                 user.put("createdDate", new java.util.Date());
-                
+
                 System.out.println("   Created user: " + user);
-                
+
                 // Validate using metadata (basic validation)
                 boolean isValid = true;
                 for (MetaField field : userMeta.getMetaFields()) {
@@ -129,10 +133,10 @@ public class BasicMetaObjectsExample {
                     }
                 }
                 System.out.println("   Validation result: " + (isValid ? "VALID" : "INVALID"));
-                
+
                 // 5. Direct metadata manipulation examples
                 System.out.println("\n5. Direct metadata access...");
-                
+
                 MetaField emailField = userMeta.getMetaField("email");
                 Object emailValue = user.get("email");
                 System.out.println("   Email field value: " + emailValue);

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Test-specific: Reduced verbosity -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Specific loggers for test verbosity control -->
+    <logger name="com.metaobjects.registry" level="ERROR"/>
+    <logger name="com.metaobjects.field" level="ERROR"/>
+    <logger name="com.metaobjects.loader.simple" level="WARN"/>
+    <logger name="com.metaobjects.constraint" level="WARN"/>
+
+    <!-- Keep warnings and errors for legitimate issues -->
+    <logger name="com.metaobjects.loader.parser" level="WARN"/>
+
+    <!-- Suppress third-party noise -->
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.apache" level="ERROR"/>
+</configuration>

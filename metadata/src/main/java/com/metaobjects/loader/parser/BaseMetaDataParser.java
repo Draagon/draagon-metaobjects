@@ -715,6 +715,9 @@ public abstract class BaseMetaDataParser {
         switch (attrName) {
             case "isAbstract":
             case "isInterface":
+            case "hasAuditing":
+            case "hasJpa":
+            case "hasValidation":
                 // Boolean attributes on objects
                 return Boolean.class;
             case "implements":
