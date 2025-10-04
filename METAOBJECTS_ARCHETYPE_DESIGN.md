@@ -14,10 +14,10 @@ Based on step-by-step analysis, **Maven Archetype is the superior solution** bec
 
 ## 🏗️ **ARCHETYPE STRUCTURE**
 
-### **New Module: `metaobjects-archetype`**
+### **New Module: `archetype`**
 
 ```
-metaobjects-archetype/
+archetype/
 ├── pom.xml                                    # Archetype build configuration
 └── src/
     └── main/
@@ -70,7 +70,7 @@ metaobjects-archetype/
 
 ### **Phase 1: Archetype Module Creation**
 
-1. **Create new module** `metaobjects-archetype` in main project
+1. **Create new module** `archetype` in main project
 2. **Configure archetype POM** with proper parent and packaging
 3. **Define archetype metadata** with parameter placeholders
 4. **Create template project structure** with working examples
@@ -296,7 +296,7 @@ metaobjects-archetype/
 # 1. Generate new MetaObjects project
 mvn archetype:generate \
   -DarchetypeGroupId=com.metaobjects \
-  -DarchetypeArtifactId=metaobjects-application-archetype \
+  -DarchetypeArtifactId=archetype \
   -DarchetypeVersion=6.2.6 \
   -DgroupId=com.mycompany \
   -DartifactId=my-awesome-app \
@@ -365,7 +365,7 @@ mvn spring-boot:run
 ```bash
 # Quick start - get working project immediately
 mvn archetype:generate -DarchetypeGroupId=com.metaobjects \
-  -DarchetypeArtifactId=metaobjects-application-archetype
+  -DarchetypeArtifactId=archetype
 
 # Claude Code assistance - complete guide available
 # Generated project includes .claude/CLAUDE.md with everything needed
@@ -385,7 +385,7 @@ mvn archetype:generate -DarchetypeGroupId=com.metaobjects \
 ✅ **Maintenance**: Template validated with each framework release
 
 **Next Steps:**
-1. Create `metaobjects-archetype` module
+1. Create `archetype` module
 2. Implement template project with working examples
 3. Test archetype generation process
 4. Publish to Maven Central with v6.2.6 release
