@@ -22,7 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Archetype plugin version -->
-        <maven-archetype-plugin.version>3.2.1</maven-archetype-plugin.version>
+        <maven-archetype-plugin.version>3.3.0</maven-archetype-plugin.version>
     </properties>
 
     <build>
