@@ -51,6 +51,9 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
 
     private T value = null;
     private DataTypes dataType;
+
+    /** Native isArray property - whether this attribute represents an array of values */
+    private boolean isArray = false;
     
     
 
@@ -95,15 +98,51 @@ public class MetaAttribute<T> extends MetaData implements DataTypeAware<T>, Meta
         return dataType;
     }
 
+    // === ARRAY SUPPORT METHODS ===
+
+    /**
+     * Indicates whether this attribute type supports array functionality.
+     * Default implementation returns true - derivative classes can override to restrict.
+     *
+     * @return true if this attribute type can be an array, false otherwise
+     */
+    public boolean supportsArrays() {
+        return true; // Most attribute types support arrays by default
+    }
+
+    /**
+     * Get whether this attribute represents an array of values.
+     *
+     * @return true if this attribute is an array type
+     */
+    public boolean isArray() {
+        return isArray;
+    }
+
+    /**
+     * Set whether this attribute represents an array of values.
+     *
+     * @param isArray true if this attribute should be an array type
+     * @throws UnsupportedOperationException if arrays are not supported by this attribute type
+     */
+    public void setArray(boolean isArray) {
+        if (isArray && !supportsArrays()) {
+            throw new UnsupportedOperationException(
+                "Attribute type " + getSubType() + " does not support arrays");
+        }
+        this.isArray = isArray;
+    }
+
     /**
      * Determines if this attribute holds an array of values.
      * Universal @isArray support pattern - same as MetaField.
      *
+     * @deprecated Use isArray() instead for native property access
      * @return true if this attribute is marked as an array type
      */
+    @Deprecated
     public boolean isArrayType() {
-        return hasMetaAttr(ATTR_IS_ARRAY) &&
-               Boolean.parseBoolean(getMetaAttr(ATTR_IS_ARRAY).getValueAsString());
+        return isArray(); // Delegate to native property
     }
 
     // ========== ENHANCED ATTRIBUTE-SPECIFIC METHODS ==========

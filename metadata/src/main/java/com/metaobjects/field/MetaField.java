@@ -131,9 +131,8 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
                    .ofType(BooleanAttribute.SUBTYPE_BOOLEAN)
                    .asSingle();
 
-                def.optionalAttributeWithConstraints(ATTR_DEFAULT_VALUE)
-                   .ofType(StringAttribute.SUBTYPE_STRING)
-                   .asSingle();
+                // Allow flexible attribute types for defaultValue to support value-based detection
+                def.optionalChild(MetaAttribute.TYPE_ATTR, ATTR_DEFAULT_VALUE);
 
                 def.optionalAttributeWithConstraints(ATTR_DEFAULT_VIEW)
                    .ofType(StringAttribute.SUBTYPE_STRING)
@@ -161,6 +160,9 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
     private int length = -1;
 
     private DataTypes dataType;
+
+    /** Native isArray property - whether this field represents an array of values */
+    private boolean isArray = false;
     
     
 
@@ -366,7 +368,7 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             return String.class;
         }
     }
-    
+
     /**
      * Map attribute subType to Java class for type-safe parsing.
      * This method maps the registry's attribute subType definitions to actual Java classes.
@@ -538,6 +540,41 @@ public abstract class MetaField<T> extends MetaData  implements DataTypeAware<T>
             val = DataConverter.toType(dataType, val);
         }
         return val;
+    }
+
+    // === ARRAY SUPPORT METHODS ===
+
+    /**
+     * Indicates whether this field type supports array functionality.
+     * Default implementation returns true - derivative classes can override to restrict.
+     *
+     * @return true if this field type can be an array, false otherwise
+     */
+    public boolean supportsArrays() {
+        return true; // Most field types support arrays by default
+    }
+
+    /**
+     * Get whether this field represents an array of values.
+     *
+     * @return true if this field is an array type
+     */
+    public boolean isArray() {
+        return isArray;
+    }
+
+    /**
+     * Set whether this field represents an array of values.
+     *
+     * @param isArray true if this field should be an array type
+     * @throws UnsupportedOperationException if arrays are not supported by this field type
+     */
+    public void setArray(boolean isArray) {
+        if (isArray && !supportsArrays()) {
+            throw new UnsupportedOperationException(
+                "Field type " + getSubType() + " does not support arrays");
+        }
+        this.isArray = isArray;
     }
 
     ////////////////////////////////////////////////////

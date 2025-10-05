@@ -1,10 +1,15 @@
 package com.metaobjects.loader.simple;
 
+import com.metaobjects.MetaData;
 import com.metaobjects.MetaDataException;
+import com.metaobjects.attr.MetaAttribute;
+import com.metaobjects.field.MetaField;
+import com.metaobjects.identity.MetaIdentity;
 import com.metaobjects.loader.LoaderOptions;
 import com.metaobjects.loader.MetaDataLoader;
 import com.metaobjects.loader.parser.json.JsonMetaDataParser;
 import com.metaobjects.loader.uri.URIHelper;
+import com.metaobjects.object.MetaObject;
 import com.metaobjects.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,30 +39,16 @@ public class SimpleLoader extends MetaDataLoader
                 .description("Simple JSON-based metadata loader")
                 
                 // LOADER ACCEPTS ALL FIELD TYPES
-                .optionalChild("field", "string")
-                .optionalChild("field", "int")
-                .optionalChild("field", "long")
-                .optionalChild("field", "double")
-                .optionalChild("field", "float")
-                .optionalChild("field", "short")
-                .optionalChild("field", "byte")
-                .optionalChild("field", "boolean")
-                .optionalChild("field", "date")
-                .optionalChild("field", "object")
-                .optionalChild("field", "class")
-                .optionalChild("field", "stringArray")
-                .optionalChild("field", "objectArray")
+                .optionalChild(MetaField.TYPE_FIELD, "*")
                 
                 // LOADER ACCEPTS ALL OBJECT TYPES
-                .optionalChild("object", "base")
-                .optionalChild("object", "pojo")
-                .optionalChild("object", "map")
-                .optionalChild("object", "proxy")
+                .optionalChild(MetaObject.TYPE_OBJECT, "*")
                 
                 // LOADER ACCEPTS ALL ATTRIBUTE TYPES
-                .optionalChild("attr", "string")
-                .optionalChild("attr", "int")
-                .optionalChild("attr", "boolean")
+                .optionalChild(MetaAttribute.TYPE_ATTR, "*")
+
+                // LOADER ACCEPTS ALL IDENTITY TYPES
+                .optionalChild(MetaIdentity.TYPE_IDENTITY, "*")
             );
             
             log.debug("Registered SimpleLoader type with unified registry");
@@ -152,7 +143,7 @@ public class SimpleLoader extends MetaDataLoader
         for( URI sourceURI : sourceURIs) {
             String filename = sourceURI.toString();
             JsonMetaDataParser jsonParser = new JsonMetaDataParser(this, filename);
-            
+
             try (InputStream is = URIHelper.getInputStream(sourceURI)) {
                 jsonParser.loadFromStream(is);
             } catch (IOException e) {

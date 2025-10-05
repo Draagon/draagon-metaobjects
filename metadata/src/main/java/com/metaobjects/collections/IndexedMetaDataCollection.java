@@ -24,8 +24,8 @@ public class IndexedMetaDataCollection {
     // Main storage - preserves insertion order and provides thread safety
     private final CopyOnWriteArrayList<MetaData> children = new CopyOnWriteArrayList<>();
     
-    // Name index for O(1) lookups
-    private final ConcurrentHashMap<String, MetaData> nameIndex = new ConcurrentHashMap<>();
+    // DYNAMIC type-specific name indexes for O(1) lookups (supports future types)
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, MetaData>> typeNamespaces = new ConcurrentHashMap<>();
     
     // Type index for efficient type-based queries
     private final ConcurrentHashMap<String, List<MetaData>> typeIndex = new ConcurrentHashMap<>();
@@ -35,7 +35,7 @@ public class IndexedMetaDataCollection {
     
     /**
      * Add a MetaData child to the collection
-     * 
+     *
      * @param child The child to add
      * @return true if the child was added, false if already exists
      */
@@ -43,33 +43,46 @@ public class IndexedMetaDataCollection {
         if (child == null) {
             throw new IllegalArgumentException("Child cannot be null");
         }
-        
+
         String name = child.getName();
-        
-        // Check if child with same name already exists
-        if (nameIndex.containsKey(name)) {
-            log.debug("Child with name '{}' already exists", name);
+
+        // Get or create the namespace index for this child type
+        ConcurrentHashMap<String, MetaData> typeSpecificIndex =
+            typeNamespaces.computeIfAbsent(child.getType(), k -> new ConcurrentHashMap<>());
+
+        // Check if child with same name already exists IN THE APPROPRIATE NAMESPACE
+        if (typeSpecificIndex.containsKey(name)) {
+            log.debug("Child of type '{}' with name '{}' already exists in namespace", child.getType(), name);
             return false;
         }
-        
+
         // Add to main collection
         boolean added = children.add(child);
-        
+
         if (added) {
-            // Update indices
-            nameIndex.put(name, child);
+            // Update type-specific namespace index
+            typeSpecificIndex.put(name, child);
+
+            // Update other indices
             updateTypeIndex(child, true);
             updateClassIndex(child, true);
-            
-            log.trace("Added child: {} (total: {})", name, children.size());
+
+            log.trace("Added child: {} of type {} (total: {})", name, child.getType(), children.size());
         }
-        
+
         return added;
+    }
+
+    /**
+     * Get the namespace index for a given type - creates if doesn't exist
+     */
+    private ConcurrentHashMap<String, MetaData> getNamespaceIndexForType(String type) {
+        return typeNamespaces.computeIfAbsent(type, k -> new ConcurrentHashMap<>());
     }
     
     /**
      * Remove a MetaData child from the collection
-     * 
+     *
      * @param child The child to remove
      * @return true if the child was removed
      */
@@ -77,38 +90,51 @@ public class IndexedMetaDataCollection {
         if (child == null) {
             return false;
         }
-        
+
         boolean removed = children.remove(child);
-        
+
         if (removed) {
-            // Update indices
-            nameIndex.remove(child.getName());
+            // Remove from type-specific namespace index
+            ConcurrentHashMap<String, MetaData> typeSpecificIndex = typeNamespaces.get(child.getType());
+            if (typeSpecificIndex != null) {
+                typeSpecificIndex.remove(child.getName());
+                // Clean up empty namespace
+                if (typeSpecificIndex.isEmpty()) {
+                    typeNamespaces.remove(child.getType());
+                }
+            }
+
+            // Update other indices
             updateTypeIndex(child, false);
             updateClassIndex(child, false);
-            
-            log.trace("Removed child: {} (total: {})", child.getName(), children.size());
+
+            log.trace("Removed child: {} of type {} (total: {})", child.getName(), child.getType(), children.size());
         }
-        
+
         return removed;
     }
     
     /**
-     * Remove child by name
-     * 
+     * Remove child by name and type
+     *
      * @param name The name of the child to remove
+     * @param type The type namespace to search in
      * @return The removed child, or null if not found
      */
-    public MetaData removeByName(String name) {
-        MetaData child = nameIndex.get(name);
-        if (child != null && remove(child)) {
-            return child;
+    public MetaData removeByNameAndType(String name, String type) {
+        ConcurrentHashMap<String, MetaData> typeSpecificIndex = typeNamespaces.get(type);
+        if (typeSpecificIndex != null) {
+            MetaData child = typeSpecificIndex.get(name);
+            if (child != null && remove(child)) {
+                return child;
+            }
         }
         return null;
     }
     
     /**
-     * Replace an existing child (by name) with a new one
-     * 
+     * Replace an existing child (by name and type) with a new one
+     *
      * @param newChild The new child to replace with
      * @return The previous child, or null if none existed
      */
@@ -116,29 +142,77 @@ public class IndexedMetaDataCollection {
         if (newChild == null) {
             throw new IllegalArgumentException("New child cannot be null");
         }
-        
+
         String name = newChild.getName();
-        MetaData oldChild = nameIndex.get(name);
-        
+        String type = newChild.getType();
+
+        // Look for existing child in the same type namespace
+        ConcurrentHashMap<String, MetaData> typeSpecificIndex = typeNamespaces.get(type);
+        MetaData oldChild = null;
+        if (typeSpecificIndex != null) {
+            oldChild = typeSpecificIndex.get(name);
+        }
+
         if (oldChild != null) {
             // Remove old child
             remove(oldChild);
         }
-        
+
         // Add new child
         add(newChild);
-        
+
         return oldChild;
     }
     
+
     /**
-     * Find child by name - O(1) operation
-     * 
+     * Find child by name and type - O(1) operation using type-specific namespace
+     *
      * @param name The name to search for
+     * @param type The type namespace to search in
      * @return Optional containing the child if found
      */
+    public Optional<MetaData> findByNameAndType(String name, String type) {
+        ConcurrentHashMap<String, MetaData> typeSpecificIndex = getNamespaceIndexForType(type);
+        return Optional.ofNullable(typeSpecificIndex.get(name));
+    }
+
+    /**
+     * Find child by name across ALL type namespaces - O(n) operation where n is number of types
+     * This method searches all type namespaces and returns the first match found.
+     *
+     * @param name The name to search for
+     * @return Optional containing the child if found in any namespace
+     */
     public Optional<MetaData> findByName(String name) {
-        return Optional.ofNullable(nameIndex.get(name));
+        // Search across all type namespaces
+        for (ConcurrentHashMap<String, MetaData> typeNamespace : typeNamespaces.values()) {
+            MetaData found = typeNamespace.get(name);
+            if (found != null) {
+                return Optional.of(found);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Get all supported types (namespaces) in this collection
+     *
+     * @return Set of all type names that have been registered
+     */
+    public Set<String> getSupportedTypes() {
+        return typeNamespaces.keySet();
+    }
+
+    /**
+     * Get all children of a specific type
+     *
+     * @param type The type to get children for
+     * @return Collection of all children of the specified type
+     */
+    public Collection<MetaData> getAllByType(String type) {
+        ConcurrentHashMap<String, MetaData> typeSpecificIndex = typeNamespaces.get(type);
+        return typeSpecificIndex != null ? typeSpecificIndex.values() : Collections.emptyList();
     }
     
     /**
@@ -188,13 +262,15 @@ public class IndexedMetaDataCollection {
     }
     
     /**
-     * Check if a child with the given name exists
-     * 
+     * Check if a child with the given name and type exists
+     *
      * @param name The name to check
-     * @return true if a child with the name exists
+     * @param type The type namespace to check in
+     * @return true if a child with the name exists in the type namespace
      */
-    public boolean containsName(String name) {
-        return nameIndex.containsKey(name);
+    public boolean containsNameAndType(String name, String type) {
+        ConcurrentHashMap<String, MetaData> typeSpecificIndex = typeNamespaces.get(type);
+        return typeSpecificIndex != null && typeSpecificIndex.containsKey(name);
     }
     
     /**
@@ -248,22 +324,29 @@ public class IndexedMetaDataCollection {
      */
     public void clear() {
         children.clear();
-        nameIndex.clear();
+
+        // Clear dynamic type-specific namespace indexes
+        typeNamespaces.clear();
+
+        // Clear other indexes
         typeIndex.clear();
         classIndex.clear();
-        
+
         log.debug("Cleared indexed collection");
     }
     
     /**
      * Get collection statistics for monitoring
-     * 
+     *
      * @return CollectionStats record
      */
     public CollectionStats getStats() {
+        int totalNamespaceEntries = typeNamespaces.values().stream()
+            .mapToInt(Map::size).sum();
+
         return new CollectionStats(
             children.size(),
-            nameIndex.size(),
+            totalNamespaceEntries,
             typeIndex.size(),
             classIndex.size(),
             typeIndex.values().stream().mapToInt(List::size).sum(),
@@ -314,16 +397,22 @@ public class IndexedMetaDataCollection {
      * This can be called if indices become inconsistent
      */
     public void rebuildIndices() {
-        nameIndex.clear();
+        // Clear all indexes
+        typeNamespaces.clear();
         typeIndex.clear();
         classIndex.clear();
-        
+
+        // Rebuild all indexes
         for (MetaData child : children) {
-            nameIndex.put(child.getName(), child);
+            // Update type-specific namespace index
+            ConcurrentHashMap<String, MetaData> typeSpecificIndex = getNamespaceIndexForType(child.getType());
+            typeSpecificIndex.put(child.getName(), child);
+
+            // Update other indexes
             updateTypeIndex(child, true);
             updateClassIndex(child, true);
         }
-        
+
         log.debug("Rebuilt indices for {} children", children.size());
     }
     
@@ -332,14 +421,14 @@ public class IndexedMetaDataCollection {
      */
     public record CollectionStats(
         int totalChildren,
-        int nameIndexSize,
+        int totalNamespaceEntries,
         int typeIndexSize,
         int classIndexSize,
         int totalTypeIndexEntries,
         int totalClassIndexEntries
     ) {
         public boolean isConsistent() {
-            return totalChildren == nameIndexSize;
+            return totalChildren == totalNamespaceEntries;
         }
     }
 }

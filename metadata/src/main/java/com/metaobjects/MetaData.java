@@ -6,7 +6,9 @@
  */
 package com.metaobjects;
 
+import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.attr.MetaAttribute;
+import com.metaobjects.attr.StringAttribute;
 import com.metaobjects.field.MetaField;
 // ✅ MIGRATED: MetaKey import removed - using MetaRelationship instead
 import com.metaobjects.object.MetaObject;
@@ -89,6 +91,9 @@ public class MetaData implements Cloneable, Serializable {
     /** Universal attribute for abstract metadata marker */
     public static final String ATTR_IS_ABSTRACT = "isAbstract";
 
+    /** Universal attribute for description */
+    public static final String ATTR_DESCRIPTION = "description";
+
     /** Standard attribute name for 'name' */
     public static final String ATTR_NAME = "name";
 
@@ -128,24 +133,32 @@ public class MetaData implements Cloneable, Serializable {
      */
     public static void registerTypes(MetaDataRegistry registry) {
         try {
-            
-            MetaDataRegistry.getInstance().registerType(MetaData.class, def -> def
+            // Check if MetaData base type is already registered to prevent duplicates
+            if (registry.hasConstraint("metadata.base.description.placement")) {
+                log.debug("MetaData base type already registered, skipping");
+                return;
+            }
+
+            registry.registerType(MetaData.class, def -> def
                 .type(TYPE_METADATA).subType(SUBTYPE_BASE)
                 .description("Base metadata type for inheritance hierarchy - enforces abstract requirements")
 
+                // COMMON ATTRIBUTES available to all metadata types
+                .optionalAttribute(ATTR_DESCRIPTION, StringAttribute.SUBTYPE_STRING)  // Description attribute for all metadata
+                .optionalAttribute(ATTR_IS_ABSTRACT, BooleanAttribute.SUBTYPE_BOOLEAN)  // Abstract flag for all metadata
+
                 // ROOT LEVEL can contain top-level metadata types
-                .optionalChild("object", "*", "*")      // Any object type
-                .optionalChild("field", "*", "*")       // Any field type (if abstract)
-                .optionalChild("attr", "*", "*")        // Any attribute (if abstract)
-                .optionalChild("validator", "*", "*")   // Any validator (if abstract)
-                .optionalChild("view", "*", "*")        // Any view (if abstract)
-                .optionalChild("key", "*", "*")         // Any key (if abstract)
+                .optionalChild(MetaObject.TYPE_OBJECT, "*", "*")      // Any object type
+                .optionalChild(MetaField.TYPE_FIELD, "*", "*")       // Any field type (if abstract)
+                .optionalChild(MetaAttribute.TYPE_ATTR, "*", "*")        // Any attribute (if abstract)
+                .optionalChild(MetaValidator.TYPE_VALIDATOR, "*", "*")   // Any validator (if abstract)
+                .optionalChild(MetaView.TYPE_VIEW, "*", "*")        // Any view (if abstract)
             );
 
             log.debug("Registered root MetaData type (metadata.base) with unified registry");
             
             // Setup abstract requirements constraints
-            setupRootAbstractConstraints();
+            setupRootAbstractConstraints(registry);
 
         } catch (Exception e) {
             log.error("Failed to register root MetaData type with unified registry", e);
@@ -156,8 +169,7 @@ public class MetaData implements Cloneable, Serializable {
      * Setup abstract requirements constraints for metadata.base children.
      * Future defaults: new metadata types must be abstract under metadata.base.
      */
-    private static void setupRootAbstractConstraints() {
-        MetaDataRegistry registry = MetaDataRegistry.getInstance();
+    private static void setupRootAbstractConstraints(MetaDataRegistry registry) {
 
         // Check if constraints are already registered to prevent duplicates during Maven plugin execution
         if (registry.hasConstraint("metadata.base.objects")) {
@@ -400,12 +412,24 @@ public class MetaData implements Cloneable, Serializable {
     }
 
     /**
-     * Find child by name and type - O(1) operation
+     * Find child by name and type - O(1) operation (legacy method)
      */
+    @Deprecated
     public <T extends MetaData> Optional<T> findChild(String name, Class<T> type) {
         return children.findByName(name)
             .filter(type::isInstance)
             .map(type::cast);
+    }
+
+    /**
+     * TYPE-AWARE NAMESPACE LOOKUP METHODS - Use these to avoid name conflicts
+     */
+
+    /**
+     * Find child by name and MetaData type using type-specific namespace - O(1) operation
+     */
+    public Optional<MetaData> findChildByNameAndType(String name, String metaDataType) {
+        return children.findByNameAndType(name, metaDataType);
     }
 
     /**
@@ -1321,6 +1345,19 @@ public class MetaData implements Cloneable, Serializable {
     @SuppressWarnings("unchecked")
     private final <T extends MetaData> T getChildOfTypeOrClass( String type, String name, Class<T> c, boolean includeParentData, boolean shouldThrow) throws MetaDataNotFoundException {
 
+        // OPTIMIZED: Use type-specific namespace lookup when both type and name are provided
+        if (type != null && name != null) {
+            Optional<MetaData> found = children.findByNameAndType(name, type);
+            if (found.isPresent()) {
+                MetaData d = found.get();
+                // Verify class matches if specified
+                if (c == null || c.isInstance(d)) {
+                    return (T) d;
+                }
+            }
+        }
+
+        // FALLBACK: Linear search for complex queries or when type-specific lookup fails
         for (MetaData d : children.getAll()) {
 
             // Make sure the types match if not null

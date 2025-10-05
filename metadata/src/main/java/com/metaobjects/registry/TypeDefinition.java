@@ -227,23 +227,24 @@ public class TypeDefinition {
      * @return true if this type accepts the specified child
      */
     public boolean acceptsChild(String childType, String childSubType, String childName) {
-        // Check direct named requirement first (overrides inherited)
+        // NAMESPACE SEPARATION SUPPORT: Check direct named requirement for EXACT type match
         ChildRequirement namedReq = childRequirements.get(childName);
-        if (namedReq != null) {
-            return namedReq.matches(childType, childSubType, childName);
+        if (namedReq != null && namedReq.matches(childType, childSubType, childName)) {
+            return true;
         }
 
-        // Check direct wildcard requirements
+        // NAMESPACE SEPARATION SUPPORT: Check direct wildcard requirements
+        // (allows different types with same name via wildcards)
         for (ChildRequirement wildcardReq : wildcardRequirements) {
             if (wildcardReq.matches(childType, childSubType, childName)) {
                 return true;
             }
         }
 
-        // Check inherited named requirement
+        // NAMESPACE SEPARATION SUPPORT: Check inherited named requirement for EXACT type match
         ChildRequirement inheritedNamedReq = inheritedChildRequirements.get(childName);
-        if (inheritedNamedReq != null) {
-            return inheritedNamedReq.matches(childType, childSubType, childName);
+        if (inheritedNamedReq != null && inheritedNamedReq.matches(childType, childSubType, childName)) {
+            return true;
         }
 
         // Check all inherited requirements (both named and wildcard)

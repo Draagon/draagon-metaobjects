@@ -8,7 +8,6 @@ package com.metaobjects.field;
 
 import com.metaobjects.*;
 import com.metaobjects.attr.LongAttribute;
-import com.metaobjects.attr.StringAttribute;
 import com.metaobjects.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +76,7 @@ public class LongField extends PrimitiveField<Long> {
     public static LongField create( String name, Long defaultValue ) {
         LongField f = new LongField( name );
         if ( defaultValue != null ) {
-            f.addMetaAttr(StringAttribute.create( ATTR_DEFAULT_VALUE, defaultValue.toString() ));
+            f.addMetaAttr(LongAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
         }
         return f;
     }

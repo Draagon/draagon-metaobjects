@@ -1,6 +1,6 @@
 {"metadata": {"package": "acme",
   "children": [
-    {"object": {"package": "::garage", "name": "Garage",
+    {"object": {"package": "::garage", "name": "Garage", "override": true,
         "children": [
           {"field": {"name": "premiumLocation", "subType": "boolean", "@default": false}},
           {"field": {"name": "operatingHours", "override": true,
@@ -14,7 +14,7 @@
         ]
       }
     },
-    {"object": {"package": "::vehicle", "name": "Vehicle",
+    {"object": {"package": "::vehicle", "name": "Vehicle", "override": true,
         "children": [
           {"field": {"name": "warranty", "subType": "boolean", "@default": true}},
           {"field": {"name": "inspectionDate", "subType": "date",
@@ -26,7 +26,7 @@
         ]
       }
     },
-    {"object": {"package": "::vehicle::car::luxury", "name": "Porsche",
+    {"object": {"package": "::vehicle::car::luxury", "name": "Porsche", "override": true,
         "children": [
           {"field": {"name": "certifiedPreOwned", "subType": "boolean", "@default": false}},
           {"field": {"name": "specialEdition", "override": true,
@@ -39,7 +39,7 @@
         ]
       }
     },
-    {"object": {"package": "::vehicle::motorcycle", "name": "Motorcycle",
+    {"object": {"package": "::vehicle::motorcycle", "name": "Motorcycle", "override": true,
         "children": [
           {"field": {"name": "customPaint", "subType": "boolean", "@default": false}},
           {"field": {"name": "modifications", "override": true,

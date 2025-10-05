@@ -808,7 +808,7 @@ public class HelperRegistry {
     private Object isArrayField(Object input) {
         if (input instanceof MetaField) {
             MetaField field = (MetaField) input;
-            return field.isArrayType();
+            return field.isArray();
         }
         return false;
     }

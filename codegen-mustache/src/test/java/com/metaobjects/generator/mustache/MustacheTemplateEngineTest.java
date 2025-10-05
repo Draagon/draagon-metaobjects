@@ -186,7 +186,7 @@ public class MustacheTemplateEngineTest {
         assertNotNull("Tags field should exist", tagsField);
 
         // Verify the field is correctly identified as an array type
-        assertTrue("Tags field should be identified as array type", tagsField.isArrayType());
+        assertTrue("Tags field should be identified as array type", tagsField.isArray());
 
         // Test the helper registry functions
         HelperRegistry helperRegistry = engine.getHelperRegistry();

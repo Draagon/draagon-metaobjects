@@ -9,13 +9,10 @@ package com.metaobjects.field;
 import com.metaobjects.*;
 import com.metaobjects.attr.IntAttribute;
 import com.metaobjects.attr.StringAttribute;
-import com.metaobjects.constraint.CustomConstraint;
-import com.metaobjects.constraint.PlacementConstraint;
 // Constraint registration now handled by consolidated MetaDataRegistry
 import com.metaobjects.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static com.metaobjects.field.MetaField.SUBTYPE_BASE;
 
 /**
  * A String Field with unified registry registration and child requirements.
@@ -94,7 +91,6 @@ public class StringField extends PrimitiveField<String> {
             }
         }
     }
-
 
     /**
      * Manually Create a StringField

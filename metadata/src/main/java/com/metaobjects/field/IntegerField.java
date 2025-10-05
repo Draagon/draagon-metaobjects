@@ -8,16 +8,9 @@ package com.metaobjects.field;
 
 import com.metaobjects.*;
 import com.metaobjects.attr.IntAttribute;
-import com.metaobjects.attr.StringAttribute;
-// Constraint registration now handled by consolidated MetaDataRegistry
-import com.metaobjects.constraint.PlacementConstraint;
 import com.metaobjects.registry.MetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.metaobjects.field.MetaField.TYPE_FIELD;
-import static com.metaobjects.field.MetaField.SUBTYPE_BASE;
-import static com.metaobjects.attr.MetaAttribute.TYPE_ATTR;
 
 /**
  * An Integer Field with unified registry registration and child requirements.
@@ -77,7 +70,8 @@ public class IntegerField extends PrimitiveField<Integer> {
     public static IntegerField create( String name, Integer defaultValue ) {
         IntegerField f = new IntegerField( name );
         if ( defaultValue != null ) {
-            f.addMetaAttr(StringAttribute.create( ATTR_DEFAULT_VALUE, defaultValue.toString() ));
+            // Fixed: Use IntAttribute instead of StringAttribute for Integer defaultValue
+            f.addMetaAttr(IntAttribute.create( ATTR_DEFAULT_VALUE, defaultValue ));
         }
         return f;
     }
