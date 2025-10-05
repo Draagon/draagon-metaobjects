@@ -9,6 +9,7 @@ import com.metaobjects.attr.BooleanAttribute;
 import com.metaobjects.loader.MetaDataLoader;
 import com.metaobjects.loader.parser.BaseMetaDataParser;
 import com.metaobjects.loader.parser.MetaDataFileParser;
+import com.metaobjects.object.pojo.PojoMetaObject;
 import com.metaobjects.registry.MetaDataRegistry;
 import com.metaobjects.util.MetaDataUtil;
 import com.google.gson.JsonArray;
@@ -90,15 +91,15 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
             if (metadata.has(ATTR_CHILDREN)) {
                 JsonElement childrenElement = metadata.get(ATTR_CHILDREN);
                 if (childrenElement.isJsonArray()) {
-                    parseMetaData(getLoader(), childrenElement.getAsJsonArray(), true);
+                    parseMetaData(getLoader(), childrenElement.getAsJsonArray(), false);
                 }
             } else {
                 // Check for array-only format - direct array without "children" wrapper
                 for (Map.Entry<String, JsonElement> entry : metadata.entrySet()) {
-                    if (!entry.getKey().equals(ATTR_PACKAGE) && !entry.getKey().equals(ATTR_DEFPACKAGE) 
+                    if (!entry.getKey().equals(ATTR_PACKAGE) && !entry.getKey().equals(ATTR_DEFPACKAGE)
                         && entry.getValue().isJsonArray()) {
                         // Found direct array - this is array-only format
-                        parseMetaData(getLoader(), entry.getValue().getAsJsonArray(), true);
+                        parseMetaData(getLoader(), entry.getValue().getAsJsonArray(), false);
                         break;
                     }
                 }
@@ -114,10 +115,14 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
      * Parse metadata array - new format only
      */
     protected void parseMetaData(MetaData parent, JsonArray children, boolean isRoot) {
+        // FIXED: Don't create implicit objects for top-level fields
+        // Fields should be added directly to the loader with their proper package context
+        // This enables cross-file references like "..::common::id" to work correctly
+
         for (JsonElement child : children) {
             if (child.isJsonObject()) {
                 JsonObject childObj = child.getAsJsonObject();
-                
+
                 // New format: {"field": {"name": "...", "subType": "..."}}
                 String typeName = childObj.keySet().iterator().next();
                 JsonObject el = childObj.getAsJsonObject(typeName);
@@ -188,6 +193,22 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         }
     }
 
+    /**
+     * Check if the children array has field or identity elements that need an implicit object wrapper
+     */
+    protected boolean hasFieldElements(JsonArray children) {
+        for (JsonElement child : children) {
+            if (child.isJsonObject()) {
+                JsonObject childObj = child.getAsJsonObject();
+                for (String key : childObj.keySet()) {
+                    if ("field".equals(key) || "identity".equals(key)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
 
 
@@ -195,23 +216,27 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
 
     /**
      * Parse attributes including inline @-prefixed ones with type casting
+     * Enforces @ prefix requirement for all MetaAttributes in JSON format
      */
     protected void parseAttributes(MetaData md, JsonObject el) {
         el.entrySet().forEach(entry -> {
             String attrName = entry.getKey();
             if (!reservedAttributes.contains(attrName)) {
                 if (attrName.startsWith("@")) {
-                    // Inline attribute with type casting
+                    // Inline attribute with @ prefix - correct format
                     parseInlineAttribute(md, attrName, entry.getValue());
                 } else {
-                    // Regular attribute - check if inline attributes are supported
-                    if (supportsInlineAttributes(md)) {
-                        // Use inline attribute parsing approach for type conversion
-                        parseInlineAttribute(md, "@" + attrName, entry.getValue());
+                    // No @ prefix - this violates JSON inline attribute requirements
+                    if (getLoader().getLoaderOptions().isStrict()) {
+                        throw new MetaDataException("JSON inline attributes must use @ prefix. " +
+                            "Found attribute [" + attrName + "] without @ prefix on [" +
+                            md.getType() + ":" + md.getSubType() + ":" + md.getName() + "] in file [" + getFilename() + "]. " +
+                            "Change to [@" + attrName + "] to fix this issue.");
                     } else {
-                        // Fallback to simple string attribute
-                        String value = entry.getValue().getAsString();
-                        createAttributeOnParent(md, attrName, value);
+                        log.warn("JSON attribute [{}] should use @ prefix: @{} on [{}:{}:{}] in file [{}]",
+                            attrName, attrName, md.getType(), md.getSubType(), md.getName(), getFilename());
+                        // Still try to process it as an attribute
+                        parseInlineAttribute(md, attrName, entry.getValue());
                     }
                 }
             }
@@ -238,7 +263,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
     }
     
     /**
-     * Convert JSON value to string representation, with JSON arrays converted to comma-delimited format
+     * Convert JSON value to string representation, preserving JSON array format for base parser detection
      */
     private String jsonValueToString(JsonElement jsonValue) {
         if (jsonValue.isJsonPrimitive()) {
@@ -250,8 +275,8 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
                 return jsonValue.getAsString();
             }
         } else if (jsonValue.isJsonArray()) {
-            // JSON Array -> convert to comma-delimited format for StringArrayAttribute
-            return convertJsonArrayToCommaDelimited(jsonValue.getAsJsonArray());
+            // Preserve JSON array format for base parser array detection
+            return jsonValue.toString();
         } else {
             // Other complex JSON value -> JSON representation
             return jsonValue.toString();
@@ -340,65 +365,6 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         }
     }
 
-    /**
-     * Create attribute on parent MetaData - improved version from base class
-     */
-    protected void createAttributeOnParent(MetaData parentMetaData, String attrName, String value) {
-
-        String parentType = parentMetaData.getType();
-        String parentSubType = parentMetaData.getSubType();
-
-        // v6.1.0: Use type-aware parsing instead of context registry (unified with inline attribute approach)
-        MetaAttribute attr = null;
-
-        try {
-            // Use MetaField's type-aware information to determine appropriate attribute subtype
-            String subType = getAttributeSubTypeFromMetaData(parentMetaData, attrName);
-            Class<?> expectedType = getExpectedJavaTypeFromMetaData(parentMetaData, attrName);
-
-            // Convert string value to expected type, then back to string for storage
-            Object castedValue = convertStringToExpectedType(value, expectedType);
-            String finalValue = castedValue != null ? castedValue.toString() : null;
-
-            attr = (MetaAttribute) getTypeRegistry().createInstance(
-                MetaAttribute.TYPE_ATTR, subType, attrName);
-
-            if (attr != null) {
-                parentMetaData.addChild(attr);
-
-                // Handle array format for String[].class - use StringAttribute with @isArray=true
-                if (expectedType == String[].class) {
-                    // Set @isArray=true for StringAttribute when expected type is String[]
-                    BooleanAttribute isArrayAttr = BooleanAttribute.create("isArray", true);
-                    attr.addChild(isArrayAttr);
-
-                    if (finalValue.startsWith("[") && finalValue.endsWith("]")) {
-                        // Already in JSON array format - convert to comma-delimited for StringAttribute
-                        String commaDelimited = parseJsonStringArray(finalValue);
-                        attr.setValueAsString(commaDelimited);
-                        log.debug("Auto-created type-aware string array attribute [{}] with @isArray=true from JSON array on parent [{}:{}:{}] in file [{}]",
-                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
-                    } else {
-                        // Single value - set directly on StringAttribute with @isArray=true
-                        attr.setValueAsString(finalValue);
-                        log.debug("Auto-created type-aware string array attribute [{}] with @isArray=true from single value on parent [{}:{}:{}] in file [{}]",
-                                 attrName, parentType, parentSubType, parentMetaData.getName(), getFilename());
-                    }
-                } else {
-                    attr.setValueAsString(finalValue);
-                    log.debug("Auto-created type-aware attribute [{}] with subtype [{}] and expectedType [{}] on parent [{}:{}:{}] in file [{}]",
-                             attrName, subType, expectedType.getSimpleName(), parentType, parentSubType, parentMetaData.getName(), getFilename());
-                }
-            }
-
-        } catch (Exception e) {
-            String errMsg = "Failed to create MetaAttribute [" + attrName + "] on parent record ["
-                    + parentType + ":" + parentSubType + ":" + parentMetaData.getName() + "] in file [" + getFilename() + "]";
-
-            // Log warning (could be made configurable in future)
-            log.warn(errMsg + ": " + e.getMessage());
-        }
-    }
 
     /**
      * Generate next sequential name for auto-naming
@@ -464,46 +430,6 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         return stringValue;
     }
 
-    /**
-     * Parse inline attribute with type casting support
-     */
-    protected void parseInlineAttribute(MetaData md, String attrName, String stringValue) {
-        // Check if inline attributes are supported
-        if (!supportsInlineAttributes(md)) {
-            log.warn("Inline attributes not supported - no attr type default subType registered");
-            return;
-        }
-        
-        // Special handling for keys attribute - should be stringArray
-        if ("keys".equals(attrName) && stringValue != null) {
-            // Split comma-separated values into array
-            String[] keyNames = stringValue.split(",");
-            for (int i = 0; i < keyNames.length; i++) {
-                keyNames[i] = keyNames[i].trim();
-            }
-            
-            // Create StringArrayAttribute instead of StringAttribute
-            try {
-                createStringArrayAttributeOnParent(md, attrName, keyNames);
-                log.debug("Created stringArray attribute [{}] with values [{}] on [{}:{}:{}] in file [{}]", 
-                    attrName, String.join(",", keyNames), md.getType(), md.getSubType(), md.getName(), getFilename());
-                return;
-            } catch (Exception e) {
-                log.warn("Failed to create stringArray attribute [{}] on [{}:{}:{}], falling back to string: {}", 
-                    attrName, md.getType(), md.getSubType(), md.getName(), e.getMessage());
-            }
-        }
-        
-        // Cast string value to appropriate Java type
-        Object castedValue = castStringValueToObject(stringValue);
-        String finalValue = castedValue != null ? castedValue.toString() : null;
-        
-        // Create the attribute using existing infrastructure
-        createAttributeOnParent(md, attrName, finalValue);
-        
-        log.debug("Created inline attribute [{}] with value [{}] on [{}:{}:{}] in file [{}]", 
-            attrName, finalValue, md.getType(), md.getSubType(), md.getName(), getFilename());
-    }
     
     /**
      * Cast JSON value to appropriate Java type based on content pattern - uses common casting logic
@@ -512,7 +438,7 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
         if (jsonValue == null || jsonValue.isJsonNull()) {
             return null;
         }
-        
+
         if (jsonValue.isJsonPrimitive()) {
             if (jsonValue.getAsJsonPrimitive().isBoolean()) {
                 return jsonValue.getAsBoolean();
@@ -523,8 +449,50 @@ public class JsonMetaDataParser extends BaseMetaDataParser implements MetaDataFi
                 return jsonValue.getAsString();
             }
         }
-        
+
         // Default to string representation
         return jsonValue.toString();
     }
+
+    /**
+     * Check if a string value represents a JSON array (starts with [ and ends with ])
+     */
+    protected boolean isJsonArray(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.startsWith("[") && trimmed.endsWith("]");
+    }
+
+    /**
+     * Parse JSON string array and convert to comma-delimited format for StringAttribute storage
+     * Example: '["id"]' -> "id", '["basketId", "fruitId"]' -> "basketId,fruitId"
+     */
+    protected String parseJsonStringArray(String stringValue) {
+        if (stringValue == null || stringValue.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Parse as JSON array: ["id"] or ["basketId", "fruitId"]
+            JsonElement element = JsonParser.parseString(stringValue);
+            if (element.isJsonArray()) {
+                JsonArray jsonArray = element.getAsJsonArray();
+                return convertJsonArrayToCommaDelimited(jsonArray);
+            }
+        } catch (Exception e) {
+            // Backward compatibility: if not valid JSON, treat as literal string
+            log.debug("Could not parse as JSON array, treating as literal string: {}", stringValue);
+        }
+
+        // Fallback for escaped JSON strings: "[\"id\"]" -> "id"
+        if (stringValue.startsWith("[\"") && stringValue.endsWith("\"]")) {
+            return stringValue.substring(2, stringValue.length() - 2);
+        }
+
+        return stringValue; // Return as-is for other cases
+    }
+
 }

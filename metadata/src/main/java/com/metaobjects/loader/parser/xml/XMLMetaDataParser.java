@@ -150,6 +150,12 @@ public class XMLMetaDataParser extends BaseMetaDataParser implements MetaDataFil
             String subTypeName = el.getAttribute(ATTR_SUBTYPE);
             String name = el.getAttribute(ATTR_NAME);
 
+            // Special handling for "children" elements - they're structural containers, not MetaData types
+            if ("children".equals(typeName)) {
+                // Recursively parse the contents of the children element
+                parseMetaData(parent, el, false);
+                continue;
+            }
 
             // Process all types including attr elements for MetaAttribute creation
             String packageName = el.getAttribute(ATTR_PACKAGE);

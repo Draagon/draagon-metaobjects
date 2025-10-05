@@ -1,8 +1,8 @@
 # MetaObjects
 
-MetaObjects is a comprehensive suite of tools for **metadata-driven development**, providing sophisticated control over applications beyond traditional model-driven development techniques. Version 6.3.0+ features a **completely modular architecture** with revolutionary **fluent constraint system** designed for modern software development practices.
+MetaObjects is a comprehensive suite of tools for **metadata-driven development**, providing sophisticated control over applications beyond traditional model-driven development techniques. Version 6.3.1+ features a **completely modular architecture** with revolutionary **fluent constraint system** and **native isArray property** designed for modern software development practices.
 
-## 🚀 **Modern Modular Architecture (v6.3.0+)**
+## 🚀 **Modern Modular Architecture (v6.3.1+)**
 
 MetaObjects has been completely refactored into 19 focused, independent modules that can be used individually or combined as needed:
 
@@ -45,7 +45,7 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core</artifactId>
-    <version>6.3.0-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -54,7 +54,7 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-spring</artifactId>
-    <version>6.3.0-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -63,7 +63,7 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-metadata</artifactId>
-    <version>6.3.0-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -72,7 +72,7 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 <plugin>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>6.3.0-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
     <executions>
         <execution>
             <goals><goal>generate</goal></goals>
