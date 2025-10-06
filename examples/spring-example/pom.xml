@@ -53,6 +53,17 @@
                     <mainClass>com.metaobjects.examples.spring.SpringMetaObjectsExample</mainClass>
                 </configuration>
             </plugin>
+            <!-- Alternative execution method with exec-maven-plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec.plugin.version}</version>
+                <configuration>
+                    <mainClass>com.metaobjects.examples.spring.SpringMetaObjectsExample</mainClass>
+                    <commandlineArgs></commandlineArgs>
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

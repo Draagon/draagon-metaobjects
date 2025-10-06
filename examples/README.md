@@ -51,6 +51,10 @@ cd examples/basic-example && mvn clean compile
 #### **Basic Example**
 ```bash
 cd examples/basic-example
+# Simplified execution (uses configured plugin)
+mvn exec:java
+
+# Or with explicit main class
 mvn compile exec:java -Dexec.mainClass="com.metaobjects.examples.basic.BasicMetaObjectsExample"
 ```
 
@@ -62,7 +66,14 @@ mvn compile exec:java -Dexec.mainClass="com.metaobjects.examples.basic.BasicMeta
 
 #### **Spring Example**
 ```bash
-cd examples/spring-example  
+cd examples/spring-example
+# Run with Spring Boot (recommended)
+mvn spring-boot:run
+
+# Or with simplified exec plugin
+mvn exec:java
+
+# Or with explicit main class
 mvn compile exec:java -Dexec.mainClass="com.metaobjects.examples.spring.SpringMetaObjectsExample"
 ```
 

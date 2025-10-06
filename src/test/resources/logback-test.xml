@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Test-specific: Reduced verbosity for clean test output -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- MetaObjects package-specific logger controls -->
+    <logger name="com.metaobjects.generator.direct.plantuml" level="ERROR"/>
+    <logger name="com.metaobjects.registry" level="ERROR"/>
+    <logger name="com.metaobjects.field" level="ERROR"/>
+    <logger name="com.metaobjects.loader" level="WARN"/>
+    <logger name="com.metaobjects.loader.parser" level="WARN"/>
+    <logger name="com.metaobjects.constraint" level="WARN"/>
+
+    <!-- Third-party library noise suppression -->
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.apache" level="ERROR"/>
+    <logger name="org.eclipse" level="ERROR"/>
+    <logger name="org.osgi" level="ERROR"/>
+    
+    <!-- Maven and build tool noise suppression -->
+    <logger name="org.apache.maven" level="ERROR"/>
+    <logger name="org.codehaus" level="ERROR"/>
+    
+    <!-- Consolidated test logging configuration for all MetaObjects modules -->
+</configuration>
