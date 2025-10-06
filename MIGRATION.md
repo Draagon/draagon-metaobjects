@@ -61,23 +61,15 @@ The v6.2.6+ release represents a **major architectural enhancement** with compre
 </dependency>
 ```
 
-#### **Database Object Management**
+#### **Maven Archetype for New Projects**
 ```xml
 <dependency>
     <groupId>com.metaobjects</groupId>
-    <artifactId>metaobjects-omdb</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <artifactId>archetype</artifactId>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
-
-#### **Complete Feature Set (Web + Spring)**
-```xml
-<dependency>
-    <groupId>com.metaobjects</groupId>
-    <artifactId>metaobjects-web-spring</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
-</dependency>
-```
+*Note: Database object management and web components have been moved to separate projects*
 
 ## 📦 **Migration Scenarios**
 
@@ -145,15 +137,10 @@ private MetaDataLoader loader;
 
 ### **Scenario 4: Web/React Components**
 
-**Before:**
-```typescript
-// React MetaView components
-import { MetaViewRenderer } from './metaviews/MetaViewRenderer';
-```
-
-**After:**
-- **Dependency**: Add `metaobjects-web` or `metaobjects-web-spring`
-- **Code**: **No changes required**
+**Note**: Web components and React MetaView components have been moved to a separate project. 
+For existing users:
+- **Migration**: Contact project maintainers for the new web components repository
+- **Alternative**: Use the core modules with your own web framework integration
 
 ## 🔧 **Build Tool Migration**
 

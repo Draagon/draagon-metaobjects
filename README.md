@@ -4,14 +4,10 @@ MetaObjects is a comprehensive suite of tools for **metadata-driven development*
 
 ## 🚀 **Modern Modular Architecture (v6.3.1+)**
 
-MetaObjects has been completely refactored into 19 focused, independent modules that can be used individually or combined as needed:
+MetaObjects Core has been refactored into **9 focused modules** that provide the foundation for metadata-driven development:
 
 ### **Core Modules**
 - **`metaobjects-metadata`** - Core metadata definitions and revolutionary fluent constraint system
-- **`metaobjects-field`** - Field type definitions with universal @isArray support
-- **`metaobjects-attribute`** - Attribute types and validation patterns
-- **`metaobjects-validator`** - Validation engine and constraint enforcement
-- **`metaobjects-identity`** - Identity management with PrimaryIdentity and SecondaryIdentity
 - **`metaobjects-core`** - File-based metadata loading and core functionality
 
 ### **Code Generation**
@@ -21,22 +17,17 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 - **`metaobjects-maven-plugin`** - Maven integration for build-time code generation
 
 ### **Framework Integration**
-- **`metaobjects-spring`** - Spring Framework integration and auto-configuration
-- **`metaobjects-core-spring`** - Spring-aware core functionality
-- **`metaobjects-web-spring`** - Spring Web integration with REST controllers
+- **`metaobjects-core-spring`** - Spring Framework integration and auto-configuration
 
-### **Object Management**
-- **`metaobjects-om`** - Object Manager for metadata-driven object persistence
-- **`metaobjects-omdb`** - Database Object Manager (SQL databases)
-- **`metaobjects-omnosql`** - NoSQL Object Manager
+### **Project Tools**
+- **`archetype`** - Maven archetype for creating MetaObjects-based projects
+- **`examples`** - Complete working examples demonstrating all usage patterns
 
-### **Web & Demo**
-- **`metaobjects-web`** - React TypeScript components and web utilities
-- **`metaobjects-demo`** - Demo applications with complete examples
-
-### **Examples & Documentation**
-- **`metaobjects-examples`** - Comprehensive usage examples for all scenarios
-- **`metaobjects-docs`** - Complete documentation and guides
+### **Available Separately**
+The following modules have been moved to separate projects for focused development:
+- Object Management (OM, OMDB, OMNOSQL) - Database and NoSQL persistence
+- Web Components - React TypeScript components and web utilities
+- Demo Applications - Full-featured demo applications
 
 ## 📦 **Quick Start**
 
@@ -53,7 +44,7 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 ```xml
 <dependency>
     <groupId>com.metaobjects</groupId>
-    <artifactId>metaobjects-spring</artifactId>
+    <artifactId>metaobjects-core-spring</artifactId>
     <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
@@ -97,10 +88,8 @@ MetaObjects has been completely refactored into 19 focused, independent modules 
 ### **🏗️ Modern Architecture**
 - **Metadata-Driven Development** - Define object structures, validation, and relationships through metadata
 - **Cross-Language Code Generation** - Generate Java, C#, TypeScript from metadata definitions
-- **Framework Integration** - Native support for Spring, OSGi, and web frameworks
+- **Framework Integration** - Native support for Spring, OSGi frameworks
 - **JSON/XML Metadata** - Flexible metadata definition formats with inline attribute support
-- **React MetaView System** - TypeScript components for metadata-driven UIs
-- **Database Integration** - Direct database mapping and persistence with MetaIdentity system
 - **OSGi Compatible** - Full bundle lifecycle support with WeakReference cleanup patterns
 - **Provider-Based Registration** - Clean service discovery with controlled loading order
 
@@ -155,7 +144,7 @@ mvn package         # Package all modules
 ```
 
 ### **Module Dependencies**
-Build order: `metadata → codegen-* → core → *-spring → om → web → demo → examples`
+Build order: `metadata → codegen-* → maven-plugin → core → core-spring → archetype → examples`
 
 ## 🛡️ **2024-2025 Comprehensive Modernization**
 
@@ -187,15 +176,15 @@ Build order: `metadata → codegen-* → core → *-spring → om → web → de
 - **Architecture Compliance**: Read-optimized performance patterns maintained
 
 ### **📊 Quality Metrics**
-- ✅ **All 19 modules**: Clean compilation and packaging
-- ✅ **Security posture**: Zero critical vulnerabilities
-- ✅ **Test coverage**: 1,247+ tests passing across entire framework
-- ✅ **Build performance**: 60%+ improvement with Maven caching
-- ✅ **Professional build output**: Comprehensive logging cleanup for clean, focused builds
-- ✅ **Fluent constraint system**: 115 comprehensive constraints (57 placement + 28 validation + 30 array-specific)
-- ✅ **Type registry**: 34+ properly registered types with provider-based registration
+- ✅ **All 9 core modules**: Clean compilation and packaging
+- ✅ **Security posture**: Zero critical vulnerabilities (CVE-2015-7501 & CVE-2015-6420 eliminated)
+- ✅ **Updated dependencies**: Jackson 2.18.1, Logback 1.5.19, Commons Validator 1.10.0
+- ✅ **Test coverage**: Comprehensive test suite passing across all modules
+- ✅ **Build performance**: Optimized Maven build configuration
+- ✅ **Working examples**: 3 complete example projects (basic, spring, osgi)
+- ✅ **Fluent constraint system**: Advanced constraint definitions with AttributeConstraintBuilder
 - ✅ **Universal @isArray**: Eliminates array subtype explosion while supporting all combinations
-- ✅ **Architecture compliance**: Read-optimized with controlled mutability patterns maintained
+- ✅ **OSGi compatibility**: Full bundle lifecycle support with WeakReference cleanup patterns
 
 **This represents a comprehensive modernization suitable for enterprise production environments while maintaining the sophisticated architectural patterns that make MetaObjects unique.**
 
@@ -214,13 +203,15 @@ See [Migration Guide](MIGRATION.md) for detailed instructions.
 Current Development: **6.3.0-SNAPSHOT** (Fluent Constraint System + Universal @isArray)
 Latest Stable Release: **6.2.5** (Maven Central Publishing Ready)
 
-**Major v6.3.0 Features:**
+**Major v6.3.1 Features:**
 - 🚀 **Revolutionary Fluent Constraint System** with AttributeConstraintBuilder API
 - 🎲 **Universal @isArray Modifier** eliminating array subtype explosion
 - 🔧 **Enhanced ConstraintEnforcer** with attribute-specific validation
-- 📊 **115+ Comprehensive Constraints** across all 19 modules
-- 🏗️ **Provider-Based Registration** with clean service discovery
-- 🧪 **1,247+ Tests Passing** ensuring production-ready quality
+- 📊 **Comprehensive Constraints** with advanced validation patterns
+- 🏢 **Provider-Based Registration** with clean service discovery
+- 🔒 **Security Updates** - All critical vulnerabilities resolved
+- 🏢 **Modular Architecture** - 9 focused, independent modules
+- 📚 **Working Examples** - Complete demonstration projects
 
 Click here for complete [Release Notes](RELEASE_NOTES.md).
 
