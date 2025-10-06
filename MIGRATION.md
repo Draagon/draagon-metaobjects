@@ -4,7 +4,7 @@ This guide helps existing MetaObjects users migrate to the new **metaobjects.com
 
 ## 🎯 **Migration Overview**
 
-The v6.2.6+ release represents a **major architectural enhancement** with comprehensive package refactoring, modular structure, and revolutionary fluent constraint system. The primary changes are package refactoring, modular structure, and enhanced constraint capabilities.
+The v6.3.1+ release represents a **major architectural enhancement** with comprehensive package refactoring, modular structure, and revolutionary fluent constraint system. The primary changes are package refactoring, modular structure, and enhanced constraint capabilities.
 
 ### **What Changed**
 - **Package Structure**: `com.draagon.meta.*` → `com.metaobjects.*`
@@ -31,14 +31,14 @@ The v6.2.6+ release represents a **major architectural enhancement** with compre
 </dependency>
 ```
 
-### **After (v6.2.6+) - Choose Your Modules**
+### **After (v6.3.1+) - Choose Your Modules**
 
 #### **Basic Usage (Core Only)**
 ```xml
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core</artifactId>
-    <version>6.2.6-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -47,7 +47,7 @@ The v6.2.6+ release represents a **major architectural enhancement** with compre
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core-spring</artifactId>
-    <version>6.2.6-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 *Note: Automatically includes `metaobjects-core`*
@@ -57,7 +57,7 @@ The v6.2.6+ release represents a **major architectural enhancement** with compre
 <dependency>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-codegen-mustache</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -129,7 +129,7 @@ private MetaDataLoader loader;
 <plugin>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </plugin>
 ```
 - **Plugin usage**: **Identical**
@@ -151,7 +151,7 @@ For existing users:
 <parent>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </parent>
 ```
 
@@ -160,7 +160,7 @@ For existing users:
 <plugin>
     <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
-    <version>6.2.5-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </plugin>
 ```
 
@@ -173,9 +173,9 @@ implementation 'com.draagon:metaobjects:5.1.0'
 
 #### **After**
 ```gradle
-implementation 'com.metaobjects:metaobjects-core:6.2.5-SNAPSHOT'
+implementation 'com.metaobjects:metaobjects-core:6.3.1-SNAPSHOT'
 // Add additional modules as needed
-implementation 'com.metaobjects:metaobjects-core-spring:6.2.5-SNAPSHOT'
+implementation 'com.metaobjects:metaobjects-core-spring:6.3.1-SNAPSHOT'
 ```
 
 ## 🎁 **Enhanced Features Available**
@@ -249,7 +249,7 @@ OSGi bundle symbolic names have changed to reflect the new module structure:
 **Solution**: Switch to `metaobjects-core-spring` for auto-configuration
 
 #### **Issue: Maven plugin not found**
-**Solution**: Update plugin version to 6.2.5-SNAPSHOT and groupId to com.metaobjects
+**Solution**: Update plugin version to 6.3.1-SNAPSHOT and groupId to com.metaobjects
 
 ## 📞 **Support**
 

@@ -389,7 +389,7 @@ The built-in generators integrate seamlessly with the MetaObjects Maven plugin:
 
 ```xml
 <plugin>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
     <version>6.2.0</version>
     <executions>

@@ -7,9 +7,9 @@ This module provides comprehensive Spring Framework integration for MetaObjects,
 ### **Add Dependency**
 ```xml
 <dependency>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-core-spring</artifactId>
-    <version>6.2.6-SNAPSHOT</version>
+    <version>6.3.1-SNAPSHOT</version>
 </dependency>
 ```
 *Note: Automatically includes `metaobjects-core`*

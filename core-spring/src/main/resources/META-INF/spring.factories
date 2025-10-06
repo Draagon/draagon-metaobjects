@@ -1,3 +1,3 @@
 # MetaObjects Spring Boot Auto-Configuration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.draagon.meta.spring.MetaDataAutoConfiguration
+com.metaobjects.spring.MetaDataAutoConfiguration

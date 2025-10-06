@@ -1,0 +1,5 @@
+{"metadata": {"package": "common",
+  "children": [
+    {"field": {"name": "id", "subType": "long", "@isAbstract": true}}
+  ]
+}}

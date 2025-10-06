@@ -34,8 +34,8 @@ public class RelativePathDebugTest {
 
         // Load the metadata files in a list
         java.util.List<java.net.URI> uris = java.util.Arrays.asList(
-            getClass().getClassLoader().getResource("com/draagon/meta/loader/simple/acme-common-metadata.json").toURI(),
-            getClass().getClassLoader().getResource("com/draagon/meta/loader/simple/acme-vehicle-metadata.json").toURI()
+            getClass().getClassLoader().getResource("com/metaobjects/loader/simple/acme-common-metadata.json").toURI(),
+            getClass().getClassLoader().getResource("com/metaobjects/loader/simple/acme-vehicle-metadata.json").toURI()
         );
         loader.setSourceURIs(uris);
 

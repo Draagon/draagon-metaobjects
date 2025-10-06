@@ -484,7 +484,7 @@ public class MetaDataLoaderAutoConfiguration {
 **Plugin Configuration**:
 ```xml
 <plugin>
-    <groupId>com.draagon</groupId>
+    <groupId>com.metaobjects</groupId>
     <artifactId>metaobjects-maven-plugin</artifactId>
     <configuration>
         <loader>

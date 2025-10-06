@@ -48,7 +48,7 @@ public class HtmlDocumentationGeneratorExample extends GeneratorTestBase {
      * Add this to your pom.xml to generate HTML documentation:
      *
      * <plugin>
-     *     <groupId>com.draagon</groupId>
+     *     <groupId>com.metaobjects</groupId>
      *     <artifactId>metaobjects-maven-plugin</artifactId>
      *     <version>${project.version}</version>
      *     <executions>

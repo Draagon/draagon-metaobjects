@@ -13,7 +13,7 @@ import java.net.URL;
 
 public class URIHelperTests {
 
-    final static String TEST_TYPES_RESOURCE = "com/draagon/meta/loader/simple/acme-common-metadata.json";
+    final static String TEST_TYPES_RESOURCE = "com/metaobjects/loader/simple/acme-common-metadata.json";
     final static String TEST_TYPES_BASEDIR = "./src/test/resources";
     final static String TEST_TYPES_FILE = TEST_TYPES_BASEDIR + "/" + TEST_TYPES_RESOURCE;
 
@@ -42,7 +42,7 @@ public class URIHelperTests {
     @Test
     public void uriValidResourceSourceTest() {
 
-        final String TYPES_RESOURCE = "com/draagon/meta/loader/simple/acme-common-metadata.json";
+        final String TYPES_RESOURCE = "com/metaobjects/loader/simple/acme-common-metadata.json";
 
         validateUriSource(URI_SOURCE_RESOURCE, TYPES_RESOURCE);
 

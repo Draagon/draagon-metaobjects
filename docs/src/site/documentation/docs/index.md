@@ -267,4 +267,4 @@ This documentation covers the **core platform**. For the complete MetaObjects ex
 
 ---
 
-*MetaObjects is actively developed and maintained with comprehensive modernization completed in 2024-2025, including security hardening, Java 17 LTS migration, and complete code quality modernization.*
+*MetaObjects is actively developed and maintained with comprehensive modernization completed in 2024-2025, including security hardening, Java 21 LTS migration, and complete code quality modernization.*

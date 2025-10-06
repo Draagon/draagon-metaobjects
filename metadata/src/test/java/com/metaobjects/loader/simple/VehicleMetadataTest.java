@@ -23,7 +23,7 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         
         // Simple test to verify the parser works at all
         SimpleLoader loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-common-metadata.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-common-metadata.json")
         ));
         
         assertNotNull("Loader should be created", loader);
@@ -38,8 +38,8 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         
         // Load common first, then vehicle
         SimpleLoader loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-common-metadata.json"),
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-vehicle-metadata.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-common-metadata.json"),
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-vehicle-metadata.json")
         ));
         
         assertNotNull("Loader should be created", loader);
@@ -54,9 +54,9 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         
         // Load all three files
         SimpleLoader loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-common-metadata.json"),
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-vehicle-metadata.json"),
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-vehicle-overlay-metadata.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-common-metadata.json"),
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-vehicle-metadata.json"),
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-vehicle-overlay-metadata.json")
         ));
         
         assertNotNull("Loader should be created", loader);
@@ -101,7 +101,7 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         // The metadata files use [...] directly instead of "children": [...]
         // If they load successfully, the array-only format is working
         SimpleLoader loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-common-metadata.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-common-metadata.json")
         ));
         
         assertNotNull("Array-only format should parse successfully", loader);
@@ -117,8 +117,8 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         // The metadata files use @attribute: "value" inline format
         // Need to load common metadata first for cross-file references to work
         SimpleLoader loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-common-metadata.json"),
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/acme-vehicle-metadata.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-common-metadata.json"),
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/acme-vehicle-metadata.json")
         ));
         
         assertNotNull("Inline attribute format should parse successfully", loader);
@@ -133,8 +133,8 @@ public class VehicleMetadataTest extends SimpleLoaderTestBase {
         
         // Load common first, then concrete
         SimpleLoader loader = initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/test-common.json"),
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/test-concrete.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/test-common.json"),
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/test-concrete.json")
         ));
         
         assertNotNull("Loader should be created", loader);

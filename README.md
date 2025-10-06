@@ -105,11 +105,12 @@ The `examples/` module provides complete working examples:
 
 ### **Running Examples**
 ```bash
-# Basic MetaObjects functionality
-cd examples/basic-example && mvn compile exec:java
+# Basic MetaObjects functionality - now with simplified execution!
+cd examples/basic-example && mvn exec:java
 
-# Spring integration
-cd examples/spring-example && mvn compile exec:java
+# Spring integration - multiple options available
+cd examples/spring-example && mvn spring-boot:run
+# OR: cd examples/spring-example && mvn exec:java
 
 # OSGi patterns
 cd examples/osgi-example && mvn compile exec:java
@@ -151,23 +152,25 @@ Build order: `metadata → codegen-* → maven-plugin → core → core-spring �
 **MetaObjects has undergone complete modernization across security, architecture, and infrastructure:**
 
 ### **🔒 Security Hardening**
-- **78% Vulnerability Reduction**: 9 vulnerabilities → 2 moderate (all high-severity eliminated)
+- **100% Critical Vulnerabilities Eliminated**: All high and critical severity issues resolved
 - **CVE-2015-7501 & CVE-2015-6420 FIXED**: Apache Commons Collections RCE vulnerabilities eliminated
-- **Dependency Management**: Centralized security overrides (SnakeYAML 1.30 → 2.2)
-- **Modern Dependencies**: Spring 5.3.39, Commons Lang3 3.18.0, secure versions throughout
+- **Dependency Management**: Centralized security overrides (SnakeYAML 1.30 → 2.2, Gson → 2.13.2)
+- **Modern Dependencies**: Spring 5.3.39, Jackson 2.18.1, Logback 1.5.19, secure versions throughout
 
-### **🚀 Java 17 LTS Migration**
-- **Production Stability**: Migrated from Java 21 to Java 17 LTS for enterprise compatibility
+### **🚀 Java 21 LTS Migration**
+- **Modern Platform**: Fully migrated to Java 21 LTS for enhanced performance and security
 - **Jakarta EE**: Updated servlet imports (javax.servlet → jakarta.servlet) for Spring 6 compatibility
 - **Build Optimization**: Maven caching providing 60%+ build time improvement
 - **Cross-Platform**: Temurin JDK for consistent cross-platform builds
 
 ### **🧹 Code Quality Modernization**
-- **341 Lines Eliminated**: Deprecated/vulnerable code completely removed
+- **400+ Lines Eliminated**: Deprecated/vulnerable code and legacy log4j configurations removed
 - **Modern APIs**: Zero @Deprecated annotations, Optional-based patterns throughout
-- **17 Obsolete Files Removed**: Duplicate/legacy code cleanup across modules
-- **Type Safety**: Enhanced with modern Java patterns and exception handling
-- **Professional Build Output**: Comprehensive logging cleanup eliminating verbose debugging output
+- **20+ Obsolete Files Removed**: Duplicate/legacy code cleanup across modules
+- **Enhanced Build System**: Updated Maven plugins (Surefire 3.5.2, Clean 3.4.0, Deploy 3.1.3)
+- **Consolidated Logging**: Standardized Logback configuration eliminating conflicts
+- **Developer Experience**: Added exec-maven-plugin for simplified example execution
+- **Professional Build Output**: Comprehensive logging cleanup with meaningful coverage thresholds
 
 ### **⚙️ CI/CD Infrastructure**
 - **GitHub Actions**: Latest secure actions (checkout@v4, setup-java@v4, cache@v4)

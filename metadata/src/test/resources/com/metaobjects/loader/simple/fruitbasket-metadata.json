@@ -1,0 +1,54 @@
+﻿{"$schema": "simple-model.schema.json",
+ "metadata": {"package": "simple::fruitbasket",
+  "children": [
+
+    {"field": {"package": "simple::common", "name": "id", "subType": "long", "@isAbstract": true,
+      "children": [
+        {"attr": {"name": "isKey", "subType": "boolean", "value": true}}
+      ]}},
+
+    {"field": {"package": "simple::common", "name": "name", "subType": "string", "@isAbstract": true,
+      "children": [
+        {"validator": {"subType": "required"}},
+        {"validator": {"subType": "length", "@min": 1, "@max": 50}}
+      ]}},
+
+    {"object": {"name": "Basket", "subType": "map", "@object": "com.metaobjects.loader.simple.fruitbasket.Basket",
+      "children": [
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "numApples", "subType": "int",
+          "children": [
+            {"validator": {"subType": "length", "@min": 0, "@max": 10}}
+          ]}},
+        {"field": {"name": "numOranges", "subType": "int",
+          "children": [
+            {"validator": {"subType": "length", "@min": 0, "@max": 10}}
+          ]}},
+        {"field": {"name": "apples", "subType": "object", "@isArray": true, "@objectRef": "::Apple"}},
+        {"field": {"name": "oranges", "subType": "object", "@isArray": true, "@objectRef": "::Orange"}}
+      ]}},
+
+    {"object": {"name": "Fruit", "subType": "map", "@isAbstract": true, "@object": "com.metaobjects.loader.simple.fruitbasket.Fruit",
+      "children": [
+        {"field": {"name": "id", "super": "..::common::id"}},
+        {"field": {"name": "name", "super": "..::common::name"}},
+        {"field": {"name": "length", "subType": "int"}},
+        {"field": {"name": "weight", "subType": "int"}},
+        {"field": {"name": "inBasket", "subType": "boolean"}}
+      ]}},
+
+    {"object": {"name": "Apple", "super": "Fruit", "@object": "com.metaobjects.loader.simple.fruitbasket.Apple",
+      "children": [
+        {"field": {"name": "orchard", "subType": "string"}},
+        {"field": {"name": "worms", "subType": "int"}}
+      ]}},
+
+    {"object": {"name": "Macintosh", "super": "Apple", "@object": "com.metaobjects.loader.simple.fruitbasket.Macintosh"}},
+
+    {"object": {"name": "Orange", "super": "Fruit", "@object": "com.metaobjects.loader.simple.fruitbasket.Orange",
+      "children": [
+        {"field": {"name": "pickedDate", "subType": "date"}}
+      ]}}
+  ]}
+}

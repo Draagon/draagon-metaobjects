@@ -25,7 +25,7 @@ public class PlantUMLTest extends GeneratorTestBase {
     @Before
     public void initLoader() { 
         this.loader = super.initLoader(Arrays.asList(
-            URIHelper.toURI("model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.json")
+            URIHelper.toURI("model:resource:com/metaobjects/loader/simple/fruitbasket-metadata.json")
         ));
     }
 
@@ -34,7 +34,7 @@ public class PlantUMLTest extends GeneratorTestBase {
 
     
     protected String getGeneratedTestSourcesPath() {
-        // TODO:  Get this from Maven
+        // Maven target directory
         return "./target/generated-test-resources";
     }
 

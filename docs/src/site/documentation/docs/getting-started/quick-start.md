@@ -4,7 +4,7 @@ Get up and running with MetaObjects in just a few minutes. This guide will walk 
 
 ## Prerequisites
 
-- **Java 17 LTS** or higher
+- **Java 21 LTS** or higher
 - **Maven 3.9+** (or Gradle with equivalent configuration)
 - Basic knowledge of Java development
 

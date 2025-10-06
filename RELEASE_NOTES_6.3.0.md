@@ -5,7 +5,7 @@
 **Release Date:** October 4th, 2025
 **Maven Central:** Available
 **Modules:** All 19 modules
-**Java Compatibility:** Java 17 LTS
+**Java Compatibility:** Java 21 LTS
 
 ---
 

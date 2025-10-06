@@ -12,7 +12,7 @@ public class SimpleLoaderTest extends SimpleLoaderTestBase {
     public void testLoadSimpleTypes() throws URISyntaxException {
 
         initLoader(Arrays.asList(
-                URIHelper.toURI( "model:resource:com/draagon/meta/loader/simple/fruitbasket-metadata.json" )
+                URIHelper.toURI( "model:resource:com/metaobjects/loader/simple/fruitbasket-metadata.json" )
         ));
     }
 

@@ -37,7 +37,7 @@ public class ProxyObjectTests {
         log.debug("Starting loader initialization");
 
         loader = SimpleLoader.createManual("proxytest", Arrays.asList(
-                "com/draagon/meta/loader/simple/fruitbasket-proxy-metadata.json"
+                "com/metaobjects/loader/simple/fruitbasket-proxy-metadata.json"
         ));
 
         log.debug("Loader created, calling setupData");

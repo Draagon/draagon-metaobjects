@@ -107,7 +107,7 @@
                                 <name>gen-test-resources</name>
                                 <sources>
                                     REMOVED v6.0.0: TypesConfig system removed
-                                    <source>com/draagon/meta/loader/json/metaobjects.types.json</source>
+                                    <source>com/metaobjects/loader/json/metaobjects.types.json</source>
                                     
                                     <source>model:resource:metadata/test/produce/v1/produce-v1.bundle</source>
                                 </sources>

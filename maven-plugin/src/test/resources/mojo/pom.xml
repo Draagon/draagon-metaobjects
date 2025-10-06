@@ -15,7 +15,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.draagon.</groupId>
+                <groupId>com.metaobjects</groupId>
                 <artifactId>metaobjects-maven-plugin</artifactId>
                 <configuration>
                     <!-- Specify the Mojo parameter -->
@@ -24,7 +24,7 @@
                         <name>mojo-test-pom</name>
                         <sourceDir>./src/test/resources</sourceDir>
                         <sources>
-                            <!--source>types:com/draagon/meta/loader/xml/metaobjects.types.xml</source-->
+                            <!--source>types:com/metaobjects/loader/xml/metaobjects.types.xml</source-->
                             <!--source>model:resource:mojo/mojo-test-metadata.xml</source -->
                             <source>mojo/mojo-test-metadata.json</source>
                         </sources>
