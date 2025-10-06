@@ -133,7 +133,7 @@ Each module can be published independently to Maven Central, allowing users to i
 ## 🔧 **Building & Testing**
 
 ### **Build Requirements**
-- Java 17 LTS (Production Ready)
+- Java 21 LTS (Production Ready)
 - Maven 3.9+
 
 ### **Full Build**
